@@ -31,26 +31,32 @@
             </section>
 
             <section class="card">
-                <h2>Upcoming Events</h2>
+                <h2>Regular Schedule (Belgium Time)</h2>
                 <ul class="list">
                     <li>
-                        <h3>Sunday Service</h3>
-                        <p>Every Sunday at 14:30 - Main Hall</p>
+                        <h3>Holy Service with Communion</h3>
+                        <p>Every Sunday at 14:30 (Belgium time)</p>
                     </li>
                     <li>
-                        <h3>Youth Meeting</h3>
-                        <p>2nd and 4th Saturday at 17:00</p>
-                    </li>
-                    <li>
-                        <h3>Prayer and Worship Night</h3>
-                        <p>Thursday at 19:00 - Prayer Room</p>
+                        <h3>Special Prayer</h3>
+                        <p>2nd and 4th Saturday at 17:00 (Belgium time)</p>
                     </li>
                 </ul>
             </section>
 
             <section class="card">
-                <h2>Need details?</h2>
-                <p>For transportation, venue updates, or group sign-up, contact a ministry leader from the Contact tab.</p>
+                <h2>Special Events</h2>
+                <p>Good Friday, Easter, Christmas, New Year, and other special celebrations are loaded from our official events feed.</p>
+                <ul class="list" id="special-events-list">
+                    <li>
+                        <h3>Loading events...</h3>
+                        <p>Please wait while we get the latest updates.</p>
+                    </li>
+                </ul>
+                <p class="page-note">
+                    Source:
+                    <a class="inline-link" href="https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json">events.json</a>
+                </p>
             </section>
         </main>
 
@@ -62,5 +68,75 @@
             <a class="tab" href="contact.html"><span class="tab-icon">CT</span><span class="tab-label">Contact</span></a>
         </nav>
     </div>
+    <script>
+        (function () {
+            var specialEventsList = document.getElementById("special-events-list");
+            var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+
+            function toDisplayDate(dateValue) {
+                if (!dateValue) {
+                    return "Date to be announced";
+                }
+                var date = new Date(dateValue);
+                if (Number.isNaN(date.getTime())) {
+                    return String(dateValue);
+                }
+                return date.toLocaleDateString("en-BE", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                });
+            }
+
+            function renderItems(events) {
+                if (!Array.isArray(events) || events.length === 0) {
+                    specialEventsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>No special events listed yet</h3>" +
+                        "  <p>Please check back soon for updates.</p>" +
+                        "</li>";
+                    return;
+                }
+
+                function escapeHtml(value) {
+                    return String(value)
+                        .replace(/&/g, "&amp;")
+                        .replace(/</g, "&lt;")
+                        .replace(/>/g, "&gt;")
+                        .replace(/"/g, "&quot;")
+                        .replace(/'/g, "&#39;");
+                }
+
+                specialEventsList.innerHTML = events.map(function (eventItem) {
+                    var title = eventItem && eventItem.title ? escapeHtml(eventItem.title) : "Special Event";
+                    var date = escapeHtml(toDisplayDate(eventItem && eventItem.date));
+                    var time = eventItem && eventItem.time ? " at " + escapeHtml(eventItem.time) + " (Belgium time)" : "";
+                    var description = eventItem && eventItem.description ? escapeHtml(eventItem.description) : "";
+                    return "" +
+                        "<li>" +
+                        "  <h3>" + title + "</h3>" +
+                        "  <p>" + date + time + "</p>" +
+                        (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
+                        "</li>";
+                }).join("");
+            }
+
+            fetch(eventsUrl)
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Unable to load events");
+                    }
+                    return response.json();
+                })
+                .then(renderItems)
+                .catch(function () {
+                    specialEventsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>Could not load special events</h3>" +
+                        "  <p>Please open the source link above for the latest list.</p>" +
+                        "</li>";
+                });
+        })();
+    </script>
 </body>
 </html>
