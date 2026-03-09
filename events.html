@@ -31,7 +31,18 @@
             </section>
 
             <section class="card">
-                <h2>Regular Schedule (Belgium Time)</h2>
+                <h2>Upcoming Events (Belgium Time)</h2>
+                <p>Automatically calculated from recurring schedule and special events feed.</p>
+                <ul class="list" id="upcoming-events-list">
+                    <li>
+                        <h3>Loading upcoming events...</h3>
+                        <p>Please wait while we calculate the next dates.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Schedule Rules</h2>
                 <ul class="list">
                     <li>
                         <h3>Holy Service with Communion</h3>
@@ -41,16 +52,9 @@
                         <h3>Special Prayer</h3>
                         <p>2nd and 4th Saturday at 17:00 (Belgium time)</p>
                     </li>
-                </ul>
-            </section>
-
-            <section class="card">
-                <h2>Special Events</h2>
-                <p>Good Friday, Easter, Christmas, New Year, and other special celebrations are loaded from our official events feed.</p>
-                <ul class="list" id="special-events-list">
                     <li>
-                        <h3>Loading events...</h3>
-                        <p>Please wait while we get the latest updates.</p>
+                        <h3>Special Celebrations</h3>
+                        <p>Good Friday, Easter, Christmas, New Year, and other events are loaded from our feed.</p>
                     </li>
                 </ul>
                 <p class="page-note">
@@ -70,56 +74,233 @@
     </div>
     <script>
         (function () {
-            var specialEventsList = document.getElementById("special-events-list");
+            var upcomingEventsList = document.getElementById("upcoming-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+            var brusselsTimeZone = "Europe/Brussels";
 
-            function toDisplayDate(dateValue) {
-                if (!dateValue) {
-                    return "Date to be announced";
-                }
-                var date = new Date(dateValue);
-                if (Number.isNaN(date.getTime())) {
-                    return String(dateValue);
-                }
-                return date.toLocaleDateString("en-BE", {
+            function escapeHtml(value) {
+                return String(value)
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
+            }
+
+            function numberFromPart(parts, type) {
+                var found = parts.find(function (part) {
+                    return part.type === type;
+                });
+                return found ? Number(found.value) : 0;
+            }
+
+            function eventKey(year, month, day, hour, minute) {
+                return (year * 100000000) + (month * 1000000) + (day * 10000) + (hour * 100) + minute;
+            }
+
+            function getNowInBrussels() {
+                var now = new Date();
+                var formatter = new Intl.DateTimeFormat("en-GB", {
+                    timeZone: brusselsTimeZone,
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    hourCycle: "h23"
+                });
+                var parts = formatter.formatToParts(now);
+                var year = numberFromPart(parts, "year");
+                var month = numberFromPart(parts, "month");
+                var day = numberFromPart(parts, "day");
+                var hour = numberFromPart(parts, "hour");
+                var minute = numberFromPart(parts, "minute");
+                return {
+                    year: year,
+                    month: month,
+                    day: day,
+                    hour: hour,
+                    minute: minute,
+                    key: eventKey(year, month, day, hour, minute)
+                };
+            }
+
+            function toDisplayDate(year, month, day) {
+                var dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+                return dateUtc.toLocaleDateString("en-BE", {
+                    timeZone: "UTC",
                     year: "numeric",
                     month: "long",
                     day: "numeric"
                 });
             }
 
-            function renderItems(events) {
+            function pad2(value) {
+                return value < 10 ? "0" + value : String(value);
+            }
+
+            function toDisplayTime(hour, minute) {
+                return pad2(hour) + ":" + pad2(minute);
+            }
+
+            function parseTimeTo24(timeValue) {
+                if (!timeValue) {
+                    return { hour: 23, minute: 59 };
+                }
+
+                var input = String(timeValue).trim();
+                var match = input.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
+                if (!match) {
+                    return { hour: 23, minute: 59 };
+                }
+
+                var hour = Number(match[1]);
+                var minute = Number(match[2]);
+                var meridiem = match[3] ? match[3].toUpperCase() : "";
+
+                if (meridiem === "PM" && hour < 12) {
+                    hour += 12;
+                } else if (meridiem === "AM" && hour === 12) {
+                    hour = 0;
+                }
+
+                if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                    return { hour: 23, minute: 59 };
+                }
+                return { hour: hour, minute: minute };
+            }
+
+            function isSecondOrFourthSaturday(dayOfMonth) {
+                return (dayOfMonth >= 8 && dayOfMonth <= 14) || (dayOfMonth >= 22 && dayOfMonth <= 28);
+            }
+
+            function buildRecurringEvents(nowBrussels) {
+                var recurring = [];
+                var baseUtcDate = Date.UTC(nowBrussels.year, nowBrussels.month - 1, nowBrussels.day);
+
+                function maybePushRecurring(title, description, year, month, day, hour, minute) {
+                    var key = eventKey(year, month, day, hour, minute);
+                    if (key >= nowBrussels.key) {
+                        recurring.push({
+                            title: title,
+                            description: description,
+                            year: year,
+                            month: month,
+                            day: day,
+                            hour: hour,
+                            minute: minute,
+                            type: "Recurring",
+                            key: key
+                        });
+                    }
+                }
+
+                for (var dayOffset = 0; dayOffset <= 210; dayOffset += 1) {
+                    var currentDate = new Date(baseUtcDate + (dayOffset * 24 * 60 * 60 * 1000));
+                    var year = currentDate.getUTCFullYear();
+                    var month = currentDate.getUTCMonth() + 1;
+                    var day = currentDate.getUTCDate();
+                    var dayOfWeek = currentDate.getUTCDay();
+
+                    if (dayOfWeek === 0) {
+                        maybePushRecurring(
+                            "Holy Service with Communion",
+                            "Weekly service",
+                            year,
+                            month,
+                            day,
+                            14,
+                            30
+                        );
+                    }
+
+                    if (dayOfWeek === 6 && isSecondOrFourthSaturday(day)) {
+                        maybePushRecurring(
+                            "Special Prayer",
+                            "2nd and 4th Saturday",
+                            year,
+                            month,
+                            day,
+                            17,
+                            0
+                        );
+                    }
+                }
+
+                return recurring;
+            }
+
+            function parseSpecialEvents(rawEvents, nowBrussels) {
+                if (!Array.isArray(rawEvents)) {
+                    return [];
+                }
+
+                return rawEvents
+                    .map(function (eventItem) {
+                        if (!eventItem || !eventItem.date) {
+                            return null;
+                        }
+
+                        var dateMatch = String(eventItem.date).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                        if (!dateMatch) {
+                            return null;
+                        }
+
+                        var year = Number(dateMatch[1]);
+                        var month = Number(dateMatch[2]);
+                        var day = Number(dateMatch[3]);
+                        var parsedTime = parseTimeTo24(eventItem.time);
+                        var key = eventKey(year, month, day, parsedTime.hour, parsedTime.minute);
+
+                        if (key < nowBrussels.key) {
+                            return null;
+                        }
+
+                        return {
+                            title: eventItem.title || "Special Event",
+                            description: eventItem.description || "",
+                            year: year,
+                            month: month,
+                            day: day,
+                            hour: parsedTime.hour,
+                            minute: parsedTime.minute,
+                            type: "Special",
+                            key: key
+                        };
+                    })
+                    .filter(function (item) {
+                        return Boolean(item);
+                    });
+            }
+
+            function renderUpcoming(events) {
                 if (!Array.isArray(events) || events.length === 0) {
-                    specialEventsList.innerHTML = "" +
+                    upcomingEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>No special events listed yet</h3>" +
-                        "  <p>Please check back soon for updates.</p>" +
+                        "  <h3>No upcoming events found</h3>" +
+                        "  <p>Please check back for new dates.</p>" +
                         "</li>";
                     return;
                 }
 
-                function escapeHtml(value) {
-                    return String(value)
-                        .replace(/&/g, "&amp;")
-                        .replace(/</g, "&lt;")
-                        .replace(/>/g, "&gt;")
-                        .replace(/"/g, "&quot;")
-                        .replace(/'/g, "&#39;");
-                }
-
-                specialEventsList.innerHTML = events.map(function (eventItem) {
-                    var title = eventItem && eventItem.title ? escapeHtml(eventItem.title) : "Special Event";
-                    var date = escapeHtml(toDisplayDate(eventItem && eventItem.date));
-                    var time = eventItem && eventItem.time ? " at " + escapeHtml(eventItem.time) + " (Belgium time)" : "";
-                    var description = eventItem && eventItem.description ? escapeHtml(eventItem.description) : "";
+                upcomingEventsList.innerHTML = events.map(function (eventItem) {
+                    var title = escapeHtml(eventItem.title || "Event");
+                    var date = escapeHtml(toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
+                    var time = escapeHtml(toDisplayTime(eventItem.hour, eventItem.minute));
+                    var typeAndDescription = escapeHtml(
+                        eventItem.type + (eventItem.description ? " - " + eventItem.description : "")
+                    );
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + time + "</p>" +
-                        (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
+                        "  <p>" + date + " at " + time + " (Belgium time)</p>" +
+                        "  <p class=\"page-note\">" + typeAndDescription + "</p>" +
                         "</li>";
                 }).join("");
             }
+
+            var nowBrussels = getNowInBrussels();
+            var recurringEvents = buildRecurringEvents(nowBrussels);
 
             fetch(eventsUrl)
                 .then(function (response) {
@@ -128,12 +309,24 @@
                     }
                     return response.json();
                 })
-                .then(renderItems)
+                .then(function (specialEventsRaw) {
+                    var specialEvents = parseSpecialEvents(specialEventsRaw, nowBrussels);
+                    return recurringEvents.concat(specialEvents);
+                })
                 .catch(function () {
-                    specialEventsList.innerHTML = "" +
+                    return recurringEvents;
+                })
+                .then(function (events) {
+                    return events.sort(function (a, b) {
+                        return a.key - b.key;
+                    }).slice(0, 12);
+                })
+                .then(renderUpcoming)
+                .catch(function () {
+                    upcomingEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>Could not load special events</h3>" +
-                        "  <p>Please open the source link above for the latest list.</p>" +
+                        "  <h3>Could not calculate upcoming events</h3>" +
+                        "  <p>Please refresh and try again.</p>" +
                         "</li>";
                 });
         })();
