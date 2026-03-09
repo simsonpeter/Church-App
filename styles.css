@@ -1,42 +1,207 @@
+:root {
+    --bg: #edf1ff;
+    --surface: #ffffff;
+    --surface-soft: #f7f9ff;
+    --text: #1c2141;
+    --muted: #5f6683;
+    --primary: #3453ff;
+    --primary-soft: #e4e9ff;
+    --line: #dbe1ff;
+    --shadow: 0 18px 45px rgba(33, 54, 141, 0.12);
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    background: radial-gradient(circle at top right, #dce4ff, #eef2ff 45%, #f8f9ff 100%);
+}
+
+.app-shell {
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 22px 18px 110px;
+    position: relative;
+}
+
+.app-header {
+    background: linear-gradient(145deg, #1f2d90, #3453ff);
+    color: #ffffff;
+    padding: 26px 20px;
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+}
+
+.app-header h1 {
+    margin: 6px 0 4px;
+    font-size: 1.55rem;
+    line-height: 1.2;
+}
+
+.app-header p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #dce3ff;
+}
+
+.eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.9;
+}
+
+.app-content {
+    margin-top: 16px;
+    display: grid;
+    gap: 14px;
+}
+
+.card {
+    background: var(--surface);
+    border-radius: 18px;
+    padding: 18px;
+    border: 1px solid var(--line);
+    box-shadow: 0 8px 24px rgba(34, 58, 148, 0.08);
+}
+
+.card h2 {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+}
+
+.card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.45;
+}
+
+.hero-card {
+    background: linear-gradient(160deg, #f7f9ff, #eef2ff);
+}
+
+.meta {
+    margin-top: 10px;
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--primary-soft);
+    color: #2f49d7;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.stat {
+    text-align: center;
+    background: var(--surface-soft);
+    border-radius: 14px;
+    padding: 12px 8px;
+}
+
+.stat strong {
+    display: block;
+    font-size: 1.1rem;
+    margin-bottom: 4px;
+}
+
+.stat span {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.list {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    list-style: none;
+    display: grid;
+    gap: 10px;
 }
 
-header {
-    background-color: #333;
-    color: #fff;
-    padding: 10px 0;
-    text-align: center;
+.list li {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 14px;
 }
 
-nav ul {
-    list-style-type: none;
-    padding: 0;
+.list h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
 }
 
-nav ul li {
-    display: inline;
-    margin: 0 15px;
+.list p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
 }
 
-nav ul li a {
-    color: #fff;
+.inline-link,
+.button-link {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.button-link {
+    margin-top: 12px;
+    display: inline-block;
+    background: var(--primary);
+    color: #ffffff;
+    padding: 10px 14px;
+    border-radius: 12px;
+}
+
+.contact-block a {
+    color: var(--primary);
     text-decoration: none;
 }
 
-main {
-    padding: 20px;
+.tab-nav {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: min(410px, calc(100% - 20px));
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 8px;
+    box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
 }
 
-footer {
-    background-color: #333;
-    color: #fff;
+.tab {
     text-align: center;
-    padding: 10px 0;
-    position: fixed;
-    width: 100%;
-    bottom: 0;
+    text-decoration: none;
+    color: #687097;
+    font-size: 0.78rem;
+    border-radius: 12px;
+    padding: 8px 4px;
+    font-weight: 600;
+}
+
+.tab.active {
+    background: var(--primary-soft);
+    color: #2f49d7;
+}
+
+.page-note {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.82rem;
 }

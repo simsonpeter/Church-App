@@ -3,36 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church App - Events</title>
+    <title>NJC App - Events</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Church Events</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="eyebrow">Events</div>
+            <h1>Church calendar</h1>
+            <p>Stay in sync with services, prayer nights, and fellowship moments.</p>
+        </header>
+
+        <main class="app-content">
+            <section class="card">
+                <h2>Upcoming Events</h2>
+                <ul class="list">
+                    <li>
+                        <h3>Sunday Service</h3>
+                        <p>Every Sunday at 14:30 - Main Hall</p>
+                    </li>
+                    <li>
+                        <h3>Youth Meeting</h3>
+                        <p>2nd and 4th Saturday at 17:00</p>
+                    </li>
+                    <li>
+                        <h3>Prayer and Worship Night</h3>
+                        <p>Thursday at 19:00 - Prayer Room</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Need details?</h2>
+                <p>For transportation, venue updates, or group sign-up, contact a ministry leader from the Contact tab.</p>
+            </section>
+        </main>
+
+        <nav class="tab-nav">
+            <a class="tab" href="index.html">Home</a>
+            <a class="tab" href="about.html">About</a>
+            <a class="tab active" href="events.html">Events</a>
+            <a class="tab" href="sermons.html">Sermons</a>
+            <a class="tab" href="contact.html">Contact</a>
         </nav>
-    </header>
-
-    <main>
-        <section>
-            <h2>Upcoming Events</h2>
-            <ul>
-                <li>Sunday Service - 14:30 </li>
-                <li>2nd, 4th - Saturdays 17:00 </li>
-                
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
-    </footer>
+    </div>
 </body>
 </html>

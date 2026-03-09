@@ -3,32 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJC APP - Home</title>
+    <title>NJC App - Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to NJC Belgium</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="eyebrow">NJC Belgium</div>
+            <h1>Welcome back</h1>
+            <p>Your weekly faith journey in one place.</p>
+        </header>
+
+        <main class="app-content">
+            <section class="card hero-card">
+                <h2>This Week</h2>
+                <p>Sunday service starts at 14:30. Midweek prayer opens Thursday at 19:00.</p>
+                <span class="meta">Live updates enabled</span>
+            </section>
+
+            <section class="stats-grid">
+                <article class="stat">
+                    <strong>3</strong>
+                    <span>Services</span>
+                </article>
+                <article class="stat">
+                    <strong>2</strong>
+                    <span>Prayer Nights</span>
+                </article>
+                <article class="stat">
+                    <strong>5</strong>
+                    <span>Teams</span>
+                </article>
+            </section>
+
+            <section class="card">
+                <h2>Upcoming Events</h2>
+                <ul class="list">
+                    <li>
+                        <h3>Sunday Worship Gathering</h3>
+                        <p>Main Hall, 14:30</p>
+                    </li>
+                    <li>
+                        <h3>Youth Fellowship</h3>
+                        <p>Saturday, 17:00</p>
+                    </li>
+                </ul>
+                <a class="button-link" href="events.html">Open full events</a>
+            </section>
+        </main>
+
+        <nav class="tab-nav">
+            <a class="tab active" href="index.html">Home</a>
+            <a class="tab" href="about.html">About</a>
+            <a class="tab" href="events.html">Events</a>
+            <a class="tab" href="sermons.html">Sermons</a>
+            <a class="tab" href="contact.html">Contact</a>
         </nav>
-    </header>
-
-    <main>
-        <section>
-            <h2>Upcoming Events</h2>
-            <p>Join us for our weekly services and special events.</p>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
-    </footer>
+    </div>
 </body>
 </html>

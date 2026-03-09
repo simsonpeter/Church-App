@@ -3,36 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church App - Sermons</title>
+    <title>NJC App - Sermons</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Sermons</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
+    <div class="app-shell">
+        <header class="app-header">
+            <div class="eyebrow">Sermons</div>
+            <h1>Recent messages</h1>
+            <p>Listen again, take notes, and keep growing during the week.</p>
+        </header>
+
+        <main class="app-content">
+            <section class="card">
+                <h2>Latest Sermons</h2>
+                <ul class="list">
+                    <li>
+                        <h3>Walking by Faith</h3>
+                        <p>Sunday message - Pastor Team</p>
+                    </li>
+                    <li>
+                        <h3>Peace in Every Season</h3>
+                        <p>Midweek encouragement - Guest Speaker</p>
+                    </li>
+                    <li>
+                        <h3>Living with Purpose</h3>
+                        <p>Sunday message - Lead Pastor</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2>Archive</h2>
+                <p>Full audio and video library is available after each service.</p>
+                <p class="page-note">Tip: Ask the media team for previous message links.</p>
+            </section>
+        </main>
+
+        <nav class="tab-nav">
+            <a class="tab" href="index.html">Home</a>
+            <a class="tab" href="about.html">About</a>
+            <a class="tab" href="events.html">Events</a>
+            <a class="tab active" href="sermons.html">Sermons</a>
+            <a class="tab" href="contact.html">Contact</a>
         </nav>
-    </header>
-
-    <main>
-        <section>
-            <h2>Recent Sermons</h2>
-            <ul>
-                <li><a href="#">Sermon Title 1</a></li>
-                <li><a href="#">Sermon Title 2</a></li>
-                <li><a href="#">Sermon Title 3</a></li>
-            </ul>
-        </section>
-    </main>
-
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
-    </footer>
+    </div>
 </body>
 </html>
