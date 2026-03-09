@@ -3,36 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church App - Events</title>
+    <title>NJC Belgium | Events</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Church Events</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark">NJC</span>
+                <div>
+                    <p class="brand-text"><strong>NJC Belgium</strong></p>
+                    <p class="brand-subtext">Faith. Family. Purpose.</p>
+                </div>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a class="active" href="events.html">Events</a></li>
+                    <li><a href="sermons.html">Sermons</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Upcoming Events</h2>
-            <ul>
-                <li>Sunday Service - 14:30 </li>
-                <li>2nd, 4th - Saturdays 17:00 </li>
-                
-            </ul>
+        <section class="page-head">
+            <div class="container">
+                <h1>Upcoming Events</h1>
+                <p>
+                    There is always a place for you at NJC Belgium. Explore worship nights,
+                    discipleship gatherings, and family-focused church events.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container card-grid">
+                <article class="card">
+                    <h3>Sunday Worship Service</h3>
+                    <p><strong>Every Sunday</strong> - 14:30</p>
+                    <p>A celebration service with worship, prayer, and practical Bible teaching.</p>
+                </article>
+                <article class="card">
+                    <h3>Prayer &amp; Fasting Night</h3>
+                    <p><strong>2nd &amp; 4th Saturdays</strong> - 17:00</p>
+                    <p>A focused evening of intercession, Scripture declaration, and community prayer.</p>
+                </article>
+                <article class="card">
+                    <h3>Youth Connect</h3>
+                    <p><strong>Fridays</strong> - 19:30</p>
+                    <p>Worship, mentoring, and fellowship for teenagers and young adults.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container split">
+                <article class="card">
+                    <h2>Monthly Calendar Highlights</h2>
+                    <ul>
+                        <li>First Sunday: Communion Service</li>
+                        <li>Second Saturday: Leadership Training</li>
+                        <li>Third Friday: Family Worship Night</li>
+                        <li>Last Sunday: Community Outreach Focus</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h2>How to Join an Event</h2>
+                    <p>
+                        Most events are open to all visitors. For special sessions and training events,
+                        register through our contact page so our team can welcome you properly.
+                    </p>
+                    <a class="btn btn-primary" href="contact.html">Register Your Interest</a>
+                </article>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p>&copy; 2026 NJC Belgium. All rights reserved.</p>
+            <p>Gather, grow, and go in faith.</p>
+        </div>
     </footer>
 </body>
 </html>

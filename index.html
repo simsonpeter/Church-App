@@ -3,32 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJC APP - Home</title>
+    <title>NJC Belgium | Home</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to NJC Belgium</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark">NJC</span>
+                <div>
+                    <p class="brand-text"><strong>NJC Belgium</strong></p>
+                    <p class="brand-subtext">Faith. Family. Purpose.</p>
+                </div>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul class="nav-links">
+                    <li><a class="active" href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="events.html">Events</a></li>
+                    <li><a href="sermons.html">Sermons</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Upcoming Events</h2>
-            <p>Join us for our weekly services and special events.</p>
+        <section class="hero">
+            <div class="container hero-grid">
+                <div>
+                    <span class="highlight">Welcome Home</span>
+                    <h1>A vibrant church community in the heart of Belgium.</h1>
+                    <p>
+                        Join us in worship, biblical teaching, and meaningful connection.
+                        Whether you are new to faith or looking for a church family, you are welcome at NJC Belgium.
+                    </p>
+                    <div class="cta-row">
+                        <a class="btn btn-primary" href="events.html">Plan Your Visit</a>
+                        <a class="btn btn-ghost" href="sermons.html">Watch Sermons</a>
+                    </div>
+                </div>
+                <aside class="hero-card" aria-label="Service details">
+                    <h2>Sunday Experience</h2>
+                    <p><strong>Worship Service:</strong> Every Sunday at 14:30</p>
+                    <p><strong>Prayer Meeting:</strong> 2nd &amp; 4th Saturdays at 17:00</p>
+                    <p><strong>Location:</strong> Antwerp, Belgium</p>
+                    <a class="btn btn-primary" href="contact.html">Get Directions</a>
+                </aside>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <h2>Grow With Us</h2>
+                <p class="section-intro">Explore the ministries and rhythms that help our church family thrive in faith and mission.</p>
+                <div class="card-grid">
+                    <article class="card">
+                        <h3>Worship &amp; Prayer</h3>
+                        <p>Encounter God through heartfelt worship, intercession, and weekly gatherings rooted in Scripture.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Next Generation</h3>
+                        <p>Kids and youth ministries designed to build strong foundations, friendships, and discipleship.</p>
+                    </article>
+                    <article class="card">
+                        <h3>Community Care</h3>
+                        <p>Practical care and support through counseling, meals, prayer partners, and outreach initiatives.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container split">
+                <article class="card">
+                    <h3>This Week at NJC</h3>
+                    <ul>
+                        <li>Tuesday Bible Study - 19:00</li>
+                        <li>Friday Worship Night - 20:00</li>
+                        <li>Sunday Service - 14:30</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h3>Church Values</h3>
+                    <p>We pursue Christ-centered living through grace, unity, and service.</p>
+                    <ul class="pill-list">
+                        <li>Biblical Teaching</li>
+                        <li>Authentic Worship</li>
+                        <li>Prayerful Living</li>
+                        <li>Compassionate Outreach</li>
+                    </ul>
+                </article>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p>&copy; 2026 NJC Belgium. All rights reserved.</p>
+            <p>Made for our church family and community.</p>
+        </div>
     </footer>
 </body>
 </html>

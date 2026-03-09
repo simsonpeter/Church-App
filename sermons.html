@@ -3,36 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church App - Sermons</title>
+    <title>NJC Belgium | Sermons</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Sermons</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark">NJC</span>
+                <div>
+                    <p class="brand-text"><strong>NJC Belgium</strong></p>
+                    <p class="brand-subtext">Faith. Family. Purpose.</p>
+                </div>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="events.html">Events</a></li>
+                    <li><a class="active" href="sermons.html">Sermons</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Recent Sermons</h2>
-            <ul>
-                <li><a href="#">Sermon Title 1</a></li>
-                <li><a href="#">Sermon Title 2</a></li>
-                <li><a href="#">Sermon Title 3</a></li>
-            </ul>
+        <section class="page-head">
+            <div class="container">
+                <h1>Recent Sermons</h1>
+                <p>
+                    Listen again to life-giving messages from our Sunday gatherings.
+                    Each sermon is rooted in Scripture and practical for daily life.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container card-grid">
+                <article class="card">
+                    <h3>Living by Faith in Uncertain Times</h3>
+                    <p><strong>Speaker:</strong> Pastor Emmanuel</p>
+                    <p><strong>Text:</strong> Hebrews 11:1-6</p>
+                    <a href="#">Watch Sermon</a>
+                </article>
+                <article class="card">
+                    <h3>The Power of Consistent Prayer</h3>
+                    <p><strong>Speaker:</strong> Pastor Ruth</p>
+                    <p><strong>Text:</strong> Luke 18:1-8</p>
+                    <a href="#">Watch Sermon</a>
+                </article>
+                <article class="card">
+                    <h3>Walking in Grace and Truth</h3>
+                    <p><strong>Speaker:</strong> Elder Michael</p>
+                    <p><strong>Text:</strong> John 1:14-17</p>
+                    <a href="#">Watch Sermon</a>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container split">
+                <article class="card">
+                    <h2>Sermon Series</h2>
+                    <ul>
+                        <li>Kingdom Culture</li>
+                        <li>Discipleship Essentials</li>
+                        <li>Families Built on Faith</li>
+                        <li>Prayer That Changes Lives</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h2>Stay Updated</h2>
+                    <p>
+                        New sermons are posted every week. Follow our channels and join in person
+                        to grow with us through worship and biblical teaching.
+                    </p>
+                    <a class="btn btn-primary" href="events.html">Join Next Service</a>
+                </article>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p>&copy; 2026 NJC Belgium. All rights reserved.</p>
+            <p>Weekly messages for your spiritual growth.</p>
+        </div>
     </footer>
 </body>
 </html>
