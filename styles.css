@@ -1,18 +1,18 @@
 :root {
     color-scheme: light dark;
-    --bg-top: #dce4ff;
-    --bg-mid: #eef2ff;
-    --bg-bottom: #f8f9ff;
+    --bg-top: #ffe3e3;
+    --bg-mid: #fff1f1;
+    --bg-bottom: #fff8f8;
     --surface: #ffffff;
-    --surface-soft: #f7f9ff;
+    --surface-soft: #fff7f7;
     --text: #1c2141;
     --muted: #5f6683;
-    --primary: #3453ff;
-    --primary-soft: #e4e9ff;
-    --line: #dbe1ff;
-    --shadow: 0 18px 45px rgba(33, 54, 141, 0.12);
-    --header-start: #1f2d90;
-    --header-end: #3453ff;
+    --primary: #e53935;
+    --primary-soft: #ffe3e2;
+    --line: #f3d0d0;
+    --shadow: 0 18px 45px rgba(116, 30, 30, 0.14);
+    --header-start: #b71c1c;
+    --header-end: #e53935;
 }
 
 * {
@@ -58,7 +58,7 @@ body {
 .app-header p {
     margin: 0;
     font-size: 0.95rem;
-    color: #dce3ff;
+    color: #ffe3e3;
 }
 
 .eyebrow {
@@ -79,7 +79,7 @@ body {
     border-radius: 18px;
     padding: 18px;
     border: 1px solid var(--line);
-    box-shadow: 0 8px 24px rgba(34, 58, 148, 0.08);
+    box-shadow: 0 8px 24px rgba(127, 34, 34, 0.08);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     animation: fade-up 0.45s ease both;
 }
@@ -94,8 +94,8 @@ body {
 
 .card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(34, 58, 148, 0.11);
-    border-color: #c9d4ff;
+    box-shadow: 0 14px 28px rgba(127, 34, 34, 0.12);
+    border-color: #efb9b9;
 }
 
 .card h2 {
@@ -110,7 +110,7 @@ body {
 }
 
 .hero-card {
-    background: linear-gradient(160deg, #f7f9ff, #eef2ff);
+    background: linear-gradient(160deg, #fff7f7, #ffecec);
 }
 
 .meta {
@@ -119,7 +119,7 @@ body {
     padding: 6px 10px;
     border-radius: 999px;
     background: var(--primary-soft);
-    color: #2f49d7;
+    color: #b71c1c;
     font-size: 0.8rem;
     font-weight: 600;
 }
@@ -140,13 +140,13 @@ body {
     display: grid;
     justify-items: center;
     gap: 6px;
-    box-shadow: 0 6px 18px rgba(34, 58, 148, 0.08);
+    box-shadow: 0 6px 18px rgba(127, 34, 34, 0.09);
     transition: transform 0.2s ease, border-color 0.2s ease;
 }
 
 .action-pill:hover {
     transform: translateY(-2px);
-    border-color: #bccbff;
+    border-color: #eea9a9;
 }
 
 .action-icon {
@@ -157,7 +157,7 @@ body {
     place-items: center;
     font-size: 0.7rem;
     font-weight: 700;
-    color: #2f49d7;
+    color: #b71c1c;
     background: var(--primary-soft);
 }
 
@@ -236,7 +236,7 @@ body {
 
 .button-link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 10px 18px rgba(45, 73, 208, 0.28);
+    box-shadow: 0 10px 18px rgba(202, 50, 50, 0.28);
 }
 
 .button-link:active,
@@ -271,7 +271,7 @@ body {
 .tab {
     text-align: center;
     text-decoration: none;
-    color: #687097;
+    color: #7f5c5c;
     font-size: 0.78rem;
     border-radius: 12px;
     padding: 7px 4px 8px;
@@ -288,18 +288,18 @@ body {
     border-radius: 50%;
     display: inline-grid;
     place-items: center;
-    background: #f0f3ff;
+    background: #ffeaea;
     font-size: 0.58rem;
     font-weight: 700;
 }
 
 .tab.active {
     background: var(--primary-soft);
-    color: #2f49d7;
+    color: #b71c1c;
 }
 
 .tab.active .tab-icon {
-    background: #cfd9ff;
+    background: #ffd1d1;
 }
 
 .tab-label {
@@ -315,36 +315,36 @@ body {
 
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-top: #1c2447;
-        --bg-mid: #151b36;
-        --bg-bottom: #12172d;
-        --surface: #1b2344;
-        --surface-soft: #20294e;
-        --text: #eff2ff;
-        --muted: #b7bedf;
-        --primary: #7f97ff;
-        --primary-soft: #2a376f;
-        --line: #313f78;
-        --header-start: #3d56d4;
-        --header-end: #5f78ff;
+        --bg-top: #311313;
+        --bg-mid: #240f0f;
+        --bg-bottom: #1a0b0b;
+        --surface: #2b1515;
+        --surface-soft: #381b1b;
+        --text: #fff2f2;
+        --muted: #e1bcbc;
+        --primary: #ff7f7f;
+        --primary-soft: #5b2525;
+        --line: #6f3232;
+        --header-start: #b71c1c;
+        --header-end: #f44336;
         --shadow: 0 18px 45px rgba(3, 6, 24, 0.45);
     }
 
     .tab-nav {
-        background: rgba(25, 33, 63, 0.93);
+        background: rgba(37, 16, 16, 0.93);
     }
 
     .tab {
-        color: #c7cdee;
+        color: #f2caca;
     }
 
     .tab-icon {
-        background: #2c376b;
-        color: #e6ebff;
+        background: #5f2727;
+        color: #fff1f1;
     }
 
     .hero-card {
-        background: linear-gradient(160deg, #243063, #1d2550);
+        background: linear-gradient(160deg, #4a2020, #391818);
     }
 }
 
