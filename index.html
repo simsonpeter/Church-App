@@ -17,8 +17,13 @@
         <main class="app-content">
             <section class="card hero-card">
                 <h2>This Week</h2>
-                <p>Holy Service with Communion on Sunday 14:30. Special Prayer on 2nd and 4th Saturday 17:00 (Belgium time).</p>
-                <span class="meta">Live updates enabled</span>
+                <ul class="list" id="this-week-events-list">
+                    <li>
+                        <h3>Loading this week events...</h3>
+                        <p>Please wait while we calculate the next dates.</p>
+                    </li>
+                </ul>
+                <a class="button-link" href="events.html">Open full events</a>
             </section>
 
             <section class="quick-actions">
@@ -51,16 +56,6 @@
                 </article>
             </section>
 
-            <section class="card">
-                <h2>Upcoming Events</h2>
-                <ul class="list" id="home-upcoming-events-list">
-                    <li>
-                        <h3>Loading upcoming events...</h3>
-                        <p>Please wait while we calculate the next dates.</p>
-                    </li>
-                </ul>
-                <a class="button-link" href="events.html">Open full events</a>
-            </section>
         </main>
 
         <nav class="tab-nav">
@@ -74,22 +69,29 @@
     <script src="events-engine.js"></script>
     <script>
         (function () {
-            var homeUpcomingEventsList = document.getElementById("home-upcoming-events-list");
+            var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
 
             NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
                 .then(function (result) {
-                    var upcoming = (result.events || []).slice(0, 2);
-                    if (upcoming.length === 0) {
-                        homeUpcomingEventsList.innerHTML = "" +
+                    var allEvents = result.events || [];
+                    var thisWeekCutoff = NjcEvents.getWindowCutoffKey(result.nowBrussels, 7);
+                    var thisWeekEvents = allEvents.filter(function (eventItem) {
+                        return eventItem.key <= thisWeekCutoff;
+                    }).slice(0, 4);
+
+                    var eventsToShow = thisWeekEvents.length > 0 ? thisWeekEvents : allEvents.slice(0, 2);
+
+                    if (eventsToShow.length === 0) {
+                        thisWeekEventsList.innerHTML = "" +
                             "<li>" +
-                            "  <h3>No upcoming events found</h3>" +
+                            "  <h3>No events available right now</h3>" +
                             "  <p>Please check the Events page for updates.</p>" +
                             "</li>";
                         return;
                     }
 
-                    homeUpcomingEventsList.innerHTML = upcoming.map(function (eventItem) {
+                    thisWeekEventsList.innerHTML = eventsToShow.map(function (eventItem) {
                         var title = NjcEvents.escapeHtml(eventItem.title || "Event");
                         var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
                         var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
@@ -101,9 +103,9 @@
                     }).join("");
                 })
                 .catch(function () {
-                    homeUpcomingEventsList.innerHTML = "" +
+                    thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>Could not load upcoming events</h3>" +
+                        "  <h3>Could not load this week events</h3>" +
                         "  <p>Please open the Events tab to refresh.</p>" +
                         "</li>";
                 });
