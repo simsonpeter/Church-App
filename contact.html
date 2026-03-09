@@ -3,33 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Church App - Contact</title>
+    <title>NJC Belgium | Contact</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Contact Us</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="about.html">About Us</a></li>
-                <li><a href="events.html">Events</a></li>
-                <li><a href="sermons.html">Sermons</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="brand">
+                <span class="brand-mark">NJC</span>
+                <div>
+                    <p class="brand-text"><strong>NJC Belgium</strong></p>
+                    <p class="brand-subtext">Faith. Family. Purpose.</p>
+                </div>
+            </div>
+            <nav aria-label="Main navigation">
+                <ul class="nav-links">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="events.html">Events</a></li>
+                    <li><a href="sermons.html">Sermons</a></li>
+                    <li><a class="active" href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
     </header>
 
     <main>
-        <section>
-            <h2>Get in Touch</h2>
-            <p>Email: info@ourchurch.com</p>
-            <p>Phone: (123) 456-7890</p>
+        <section class="page-head">
+            <div class="container">
+                <h1>Contact &amp; Visit Us</h1>
+                <p>
+                    We would love to welcome you. Reach out for prayer, counseling,
+                    event information, or to plan your first visit to NJC Belgium.
+                </p>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container split">
+                <article class="card">
+                    <h2>Get in Touch</h2>
+                    <p><strong>Email:</strong> hello@njcbelgium.org</p>
+                    <p><strong>Phone:</strong> +32 470 000 000</p>
+                    <p><strong>Address:</strong> Antwerp City Center, Belgium</p>
+                    <p><strong>Office Hours:</strong> Tue-Fri, 10:00-17:00</p>
+                </article>
+                <article class="card">
+                    <h2>Send a Message</h2>
+                    <form class="form-grid">
+                        <div>
+                            <label for="name">Full Name</label>
+                            <input id="name" name="name" type="text" placeholder="Your name">
+                        </div>
+                        <div>
+                            <label for="email">Email Address</label>
+                            <input id="email" name="email" type="email" placeholder="you@example.com">
+                        </div>
+                        <div>
+                            <label for="reason">Reason</label>
+                            <select id="reason" name="reason">
+                                <option>General Inquiry</option>
+                                <option>Prayer Request</option>
+                                <option>First Visit</option>
+                                <option>Counseling</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" placeholder="How can we serve you?"></textarea>
+                        </div>
+                        <button class="btn btn-primary" type="submit">Submit Request</button>
+                    </form>
+                </article>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <article class="card">
+                    <h2>Find Us on the Map</h2>
+                    <div class="map-placeholder">
+                        Map preview placeholder<br>
+                        (Embed Google Maps here when ready)
+                    </div>
+                </article>
+            </div>
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Our Church. All rights reserved.</p>
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <p>&copy; 2026 NJC Belgium. All rights reserved.</p>
+            <p>We are here to pray and support you.</p>
+        </div>
     </footer>
 </body>
 </html>
