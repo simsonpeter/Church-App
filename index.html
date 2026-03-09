@@ -15,6 +15,14 @@
         </header>
 
         <main class="app-content">
+            <section class="card verse-card">
+                <h2>Today's Verse</h2>
+                <p class="verse-loading" id="today-verse-loading">Loading today's verse...</p>
+                <blockquote class="verse-quote" id="today-verse-text" hidden></blockquote>
+                <p class="verse-ref" id="today-verse-ref" hidden></p>
+                <p class="page-note" id="today-verse-note" hidden></p>
+            </section>
+
             <section class="card hero-card">
                 <h2>This Week</h2>
                 <ul class="list" id="this-week-events-list">
@@ -68,8 +76,145 @@
     <script src="events-engine.js"></script>
     <script>
         (function () {
+            var todayVerseLoading = document.getElementById("today-verse-loading");
+            var todayVerseText = document.getElementById("today-verse-text");
+            var todayVerseRef = document.getElementById("today-verse-ref");
+            var todayVerseNote = document.getElementById("today-verse-note");
+            var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+            var brusselsTimeZone = "Europe/Brussels";
+            var bookMap = {
+                "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
+                "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
+                "1 King.": "1 Kings", "2 King.": "2 Kings", "1 Chro.": "1 Chronicles", "2 Chro.": "2 Chronicles",
+                "Ezra.": "Ezra", "Neh.": "Nehemiah", "Esth.": "Esther", "Job.": "Job", "Psa.": "Psalms",
+                "Pro.": "Proverbs", "Ecc.": "Ecclesiastes", "Song.": "Song of Solomon", "Isa.": "Isaiah",
+                "Jer.": "Jeremiah", "Lam.": "Lamentations", "Ezek.": "Ezekiel", "Dan.": "Daniel", "Hos.": "Hosea",
+                "Joel.": "Joel", "Amos.": "Amos", "Obad.": "Obadiah", "Jonah.": "Jonah", "Mic.": "Micah",
+                "Nah.": "Nahum", "Hab.": "Habakkuk", "Zep.": "Zephaniah", "Hag.": "Haggai", "Zach.": "Zechariah",
+                "Mal.": "Malachi", "Mat.": "Matthew", "Mar.": "Mark", "Luk.": "Luke", "John.": "John",
+                "Act.": "Acts", "Rom.": "Romans", "1 Cor.": "1 Corinthians", "2 Cor.": "2 Corinthians",
+                "Gal.": "Galatians", "Eph.": "Ephesians", "Phil.": "Philippians", "Col.": "Colossians",
+                "1 Thes.": "1 Thessalonians", "2 Thes.": "2 Thessalonians", "1 Tim.": "1 Timothy", "2 Tim.": "2 Timothy",
+                "Tit.": "Titus", "Phm.": "Philemon", "Heb.": "Hebrews", "Jam.": "James", "1 Pet.": "1 Peter",
+                "2 Pet.": "2 Peter", "1 John.": "1 John", "2 John.": "2 John", "3 John.": "3 John",
+                "Jude.": "Jude", "Rev.": "Revelation"
+            };
+
+            function getBrusselsYmd() {
+                var parts = new Intl.DateTimeFormat("en-GB", {
+                    timeZone: brusselsTimeZone,
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                }).formatToParts(new Date());
+
+                function partValue(type) {
+                    var found = parts.find(function (part) {
+                        return part.type === type;
+                    });
+                    return found ? Number(found.value) : 0;
+                }
+
+                return {
+                    year: partValue("year"),
+                    month: partValue("month"),
+                    day: partValue("day")
+                };
+            }
+
+            function getDayOfYear(ymd) {
+                var yearStart = Date.UTC(ymd.year, 0, 1);
+                var current = Date.UTC(ymd.year, ymd.month - 1, ymd.day);
+                return Math.floor((current - yearStart) / 86400000) + 1;
+            }
+
+            function firstVerseReferenceFromPlanRef(planRef) {
+                var match = String(planRef || "").trim().match(/^(\d+\s+)?([A-Za-z]+)\.(\d+)(?::(\d+))?/);
+                if (!match) {
+                    return null;
+                }
+
+                var prefix = match[1] ? match[1].trim() + " " : "";
+                var shortBook = prefix + match[2] + ".";
+                var fullBook = bookMap[shortBook];
+                if (!fullBook) {
+                    return null;
+                }
+
+                var chapter = Number(match[3]);
+                var verse = match[4] ? Number(match[4]) : 1;
+                return fullBook + " " + chapter + ":" + verse;
+            }
+
+            function showVerseError(message) {
+                todayVerseLoading.textContent = message;
+                todayVerseText.hidden = true;
+                todayVerseRef.hidden = true;
+                todayVerseNote.hidden = true;
+            }
+
+            function loadTodayVerse() {
+                var ymd = getBrusselsYmd();
+                var dayOfYear = getDayOfYear(ymd);
+
+                fetch(readingPlanUrl)
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Could not load reading plan");
+                        }
+                        return response.json();
+                    })
+                    .then(function (planData) {
+                        var readingPlan = planData && Array.isArray(planData.readingPlan) ? planData.readingPlan : [];
+                        var todayPlan = readingPlan[dayOfYear - 1];
+                        var firstRef = todayPlan && Array.isArray(todayPlan.morning) ? todayPlan.morning[0] : null;
+                        if (!firstRef) {
+                            throw new Error("No reading for today");
+                        }
+
+                        var verseQuery = firstVerseReferenceFromPlanRef(firstRef);
+                        if (!verseQuery) {
+                            throw new Error("Could not parse today's verse");
+                        }
+
+                        return fetch("https://bible-api.com/" + encodeURIComponent(verseQuery))
+                            .then(function (response) {
+                                if (!response.ok) {
+                                    throw new Error("Could not load verse text");
+                                }
+                                return response.json();
+                            })
+                            .then(function (verseData) {
+                                var verseText = (verseData && verseData.text ? verseData.text : "").trim();
+                                if (!verseText) {
+                                    throw new Error("Verse text is empty");
+                                }
+
+                                todayVerseLoading.hidden = true;
+                                todayVerseText.hidden = false;
+                                todayVerseRef.hidden = false;
+                                todayVerseNote.hidden = false;
+                                todayVerseText.textContent = "\"" + verseText + "\"";
+                                todayVerseRef.textContent = verseData.reference || verseQuery;
+                                todayVerseNote.textContent = "From Readingplan daily schedule";
+                            })
+                            .catch(function () {
+                                todayVerseLoading.hidden = true;
+                                todayVerseText.hidden = true;
+                                todayVerseRef.hidden = false;
+                                todayVerseNote.hidden = false;
+                                todayVerseRef.textContent = firstRef;
+                                todayVerseNote.textContent = "Today's reading reference";
+                            });
+                    })
+                    .catch(function () {
+                        showVerseError("Could not load today's verse");
+                    });
+            }
+
+            loadTodayVerse();
 
             NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
                 .then(function (result) {

@@ -113,6 +113,30 @@ body {
     background: linear-gradient(160deg, #fff7f7, #ffecec);
 }
 
+.verse-card {
+    background: linear-gradient(160deg, #fffefe, #fff3f3);
+}
+
+.verse-loading {
+    margin: 0;
+    color: var(--muted);
+}
+
+.verse-quote {
+    margin: 0;
+    padding-left: 12px;
+    border-left: 3px solid var(--primary-soft);
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.55;
+}
+
+.verse-ref {
+    margin: 12px 0 0;
+    color: var(--primary);
+    font-weight: 700;
+}
+
 .meta {
     margin-top: 10px;
     display: inline-block;
@@ -351,6 +375,10 @@ button.button-link {
 
     .hero-card {
         background: linear-gradient(160deg, #4a2020, #391818);
+    }
+
+    .verse-card {
+        background: linear-gradient(160deg, #3e1b1b, #301414);
     }
 }
 
