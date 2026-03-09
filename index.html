@@ -17,7 +17,7 @@
         <main class="app-content">
             <section class="card hero-card">
                 <h2>This Week</h2>
-                <p>Sunday service starts at 14:30. Midweek prayer opens Thursday at 19:00.</p>
+                <p>Holy Service with Communion on Sunday 14:30. Special Prayer on 2nd and 4th Saturday 17:00 (Belgium time).</p>
                 <span class="meta">Live updates enabled</span>
             </section>
 
@@ -53,14 +53,10 @@
 
             <section class="card">
                 <h2>Upcoming Events</h2>
-                <ul class="list">
+                <ul class="list" id="home-upcoming-events-list">
                     <li>
-                        <h3>Sunday Worship Gathering</h3>
-                        <p>Main Hall, 14:30</p>
-                    </li>
-                    <li>
-                        <h3>Youth Fellowship</h3>
-                        <p>Saturday, 17:00</p>
+                        <h3>Loading upcoming events...</h3>
+                        <p>Please wait while we calculate the next dates.</p>
                     </li>
                 </ul>
                 <a class="button-link" href="events.html">Open full events</a>
@@ -75,5 +71,43 @@
             <a class="tab" href="contact.html"><span class="tab-icon">CT</span><span class="tab-label">Contact</span></a>
         </nav>
     </div>
+    <script src="events-engine.js"></script>
+    <script>
+        (function () {
+            var homeUpcomingEventsList = document.getElementById("home-upcoming-events-list");
+            var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+
+            NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
+                .then(function (result) {
+                    var upcoming = (result.events || []).slice(0, 2);
+                    if (upcoming.length === 0) {
+                        homeUpcomingEventsList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>No upcoming events found</h3>" +
+                            "  <p>Please check the Events page for updates.</p>" +
+                            "</li>";
+                        return;
+                    }
+
+                    homeUpcomingEventsList.innerHTML = upcoming.map(function (eventItem) {
+                        var title = NjcEvents.escapeHtml(eventItem.title || "Event");
+                        var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
+                        var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                        return "" +
+                            "<li>" +
+                            "  <h3>" + title + "</h3>" +
+                            "  <p>" + date + " at " + time + " (Belgium time)</p>" +
+                            "</li>";
+                    }).join("");
+                })
+                .catch(function () {
+                    homeUpcomingEventsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>Could not load upcoming events</h3>" +
+                        "  <p>Please open the Events tab to refresh.</p>" +
+                        "</li>";
+                });
+        })();
+    </script>
 </body>
 </html>

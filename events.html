@@ -31,7 +31,7 @@
             </section>
 
             <section class="card">
-                <h2>Upcoming Events (Belgium Time)</h2>
+                <h2>Upcoming Events (Next 2 Weeks, Belgium Time)</h2>
                 <p>Automatically calculated from recurring schedule and special events feed.</p>
                 <ul class="list" id="upcoming-events-list">
                     <li>
@@ -39,6 +39,7 @@
                         <p>Please wait while we calculate the next dates.</p>
                     </li>
                 </ul>
+                <button class="button-link" id="show-more-events" type="button" hidden>See more events</button>
             </section>
 
             <section class="card">
@@ -72,208 +73,21 @@
             <a class="tab" href="contact.html"><span class="tab-icon">CT</span><span class="tab-label">Contact</span></a>
         </nav>
     </div>
+    <script src="events-engine.js"></script>
     <script>
         (function () {
             var upcomingEventsList = document.getElementById("upcoming-events-list");
+            var showMoreButton = document.getElementById("show-more-events");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
-            var brusselsTimeZone = "Europe/Brussels";
+            var allEvents = [];
+            var showAll = false;
+            var twoWeekCutoff = null;
 
-            function escapeHtml(value) {
-                return String(value)
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/"/g, "&quot;")
-                    .replace(/'/g, "&#39;");
-            }
-
-            function numberFromPart(parts, type) {
-                var found = parts.find(function (part) {
-                    return part.type === type;
+            function renderUpcoming() {
+                var events = showAll ? allEvents : allEvents.filter(function (eventItem) {
+                    return eventItem.key <= twoWeekCutoff;
                 });
-                return found ? Number(found.value) : 0;
-            }
 
-            function eventKey(year, month, day, hour, minute) {
-                return (year * 100000000) + (month * 1000000) + (day * 10000) + (hour * 100) + minute;
-            }
-
-            function getNowInBrussels() {
-                var now = new Date();
-                var formatter = new Intl.DateTimeFormat("en-GB", {
-                    timeZone: brusselsTimeZone,
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                    hourCycle: "h23"
-                });
-                var parts = formatter.formatToParts(now);
-                var year = numberFromPart(parts, "year");
-                var month = numberFromPart(parts, "month");
-                var day = numberFromPart(parts, "day");
-                var hour = numberFromPart(parts, "hour");
-                var minute = numberFromPart(parts, "minute");
-                return {
-                    year: year,
-                    month: month,
-                    day: day,
-                    hour: hour,
-                    minute: minute,
-                    key: eventKey(year, month, day, hour, minute)
-                };
-            }
-
-            function toDisplayDate(year, month, day) {
-                var dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-                return dateUtc.toLocaleDateString("en-BE", {
-                    timeZone: "UTC",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                });
-            }
-
-            function pad2(value) {
-                return value < 10 ? "0" + value : String(value);
-            }
-
-            function toDisplayTime(hour, minute) {
-                return pad2(hour) + ":" + pad2(minute);
-            }
-
-            function parseTimeTo24(timeValue) {
-                if (!timeValue) {
-                    return { hour: 23, minute: 59 };
-                }
-
-                var input = String(timeValue).trim();
-                var match = input.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
-                if (!match) {
-                    return { hour: 23, minute: 59 };
-                }
-
-                var hour = Number(match[1]);
-                var minute = Number(match[2]);
-                var meridiem = match[3] ? match[3].toUpperCase() : "";
-
-                if (meridiem === "PM" && hour < 12) {
-                    hour += 12;
-                } else if (meridiem === "AM" && hour === 12) {
-                    hour = 0;
-                }
-
-                if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
-                    return { hour: 23, minute: 59 };
-                }
-                return { hour: hour, minute: minute };
-            }
-
-            function isSecondOrFourthSaturday(dayOfMonth) {
-                return (dayOfMonth >= 8 && dayOfMonth <= 14) || (dayOfMonth >= 22 && dayOfMonth <= 28);
-            }
-
-            function buildRecurringEvents(nowBrussels) {
-                var recurring = [];
-                var baseUtcDate = Date.UTC(nowBrussels.year, nowBrussels.month - 1, nowBrussels.day);
-
-                function maybePushRecurring(title, description, year, month, day, hour, minute) {
-                    var key = eventKey(year, month, day, hour, minute);
-                    if (key >= nowBrussels.key) {
-                        recurring.push({
-                            title: title,
-                            description: description,
-                            year: year,
-                            month: month,
-                            day: day,
-                            hour: hour,
-                            minute: minute,
-                            type: "Recurring",
-                            key: key
-                        });
-                    }
-                }
-
-                for (var dayOffset = 0; dayOffset <= 210; dayOffset += 1) {
-                    var currentDate = new Date(baseUtcDate + (dayOffset * 24 * 60 * 60 * 1000));
-                    var year = currentDate.getUTCFullYear();
-                    var month = currentDate.getUTCMonth() + 1;
-                    var day = currentDate.getUTCDate();
-                    var dayOfWeek = currentDate.getUTCDay();
-
-                    if (dayOfWeek === 0) {
-                        maybePushRecurring(
-                            "Holy Service with Communion",
-                            "Weekly service",
-                            year,
-                            month,
-                            day,
-                            14,
-                            30
-                        );
-                    }
-
-                    if (dayOfWeek === 6 && isSecondOrFourthSaturday(day)) {
-                        maybePushRecurring(
-                            "Special Prayer",
-                            "2nd and 4th Saturday",
-                            year,
-                            month,
-                            day,
-                            17,
-                            0
-                        );
-                    }
-                }
-
-                return recurring;
-            }
-
-            function parseSpecialEvents(rawEvents, nowBrussels) {
-                if (!Array.isArray(rawEvents)) {
-                    return [];
-                }
-
-                return rawEvents
-                    .map(function (eventItem) {
-                        if (!eventItem || !eventItem.date) {
-                            return null;
-                        }
-
-                        var dateMatch = String(eventItem.date).trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
-                        if (!dateMatch) {
-                            return null;
-                        }
-
-                        var year = Number(dateMatch[1]);
-                        var month = Number(dateMatch[2]);
-                        var day = Number(dateMatch[3]);
-                        var parsedTime = parseTimeTo24(eventItem.time);
-                        var key = eventKey(year, month, day, parsedTime.hour, parsedTime.minute);
-
-                        if (key < nowBrussels.key) {
-                            return null;
-                        }
-
-                        return {
-                            title: eventItem.title || "Special Event",
-                            description: eventItem.description || "",
-                            year: year,
-                            month: month,
-                            day: day,
-                            hour: parsedTime.hour,
-                            minute: parsedTime.minute,
-                            type: "Special",
-                            key: key
-                        };
-                    })
-                    .filter(function (item) {
-                        return Boolean(item);
-                    });
-            }
-
-            function renderUpcoming(events) {
                 if (!Array.isArray(events) || events.length === 0) {
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
@@ -284,10 +98,10 @@
                 }
 
                 upcomingEventsList.innerHTML = events.map(function (eventItem) {
-                    var title = escapeHtml(eventItem.title || "Event");
-                    var date = escapeHtml(toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
-                    var time = escapeHtml(toDisplayTime(eventItem.hour, eventItem.minute));
-                    var typeAndDescription = escapeHtml(
+                    var title = NjcEvents.escapeHtml(eventItem.title || "Event");
+                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
+                    var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                    var typeAndDescription = NjcEvents.escapeHtml(
                         eventItem.type + (eventItem.description ? " - " + eventItem.description : "")
                     );
                     return "" +
@@ -297,31 +111,21 @@
                         "  <p class=\"page-note\">" + typeAndDescription + "</p>" +
                         "</li>";
                 }).join("");
+
+                showMoreButton.hidden = showAll || allEvents.length <= events.length;
             }
 
-            var nowBrussels = getNowInBrussels();
-            var recurringEvents = buildRecurringEvents(nowBrussels);
+            showMoreButton.addEventListener("click", function () {
+                showAll = true;
+                renderUpcoming();
+            });
 
-            fetch(eventsUrl)
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error("Unable to load events");
-                    }
-                    return response.json();
+            NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 210 })
+                .then(function (result) {
+                    allEvents = result.events || [];
+                    twoWeekCutoff = NjcEvents.getWindowCutoffKey(result.nowBrussels, 14);
+                    renderUpcoming();
                 })
-                .then(function (specialEventsRaw) {
-                    var specialEvents = parseSpecialEvents(specialEventsRaw, nowBrussels);
-                    return recurringEvents.concat(specialEvents);
-                })
-                .catch(function () {
-                    return recurringEvents;
-                })
-                .then(function (events) {
-                    return events.sort(function (a, b) {
-                        return a.key - b.key;
-                    }).slice(0, 12);
-                })
-                .then(renderUpcoming)
                 .catch(function () {
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
