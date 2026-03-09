@@ -83,6 +83,23 @@
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
+            var bookMap = {
+                "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
+                "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
+                "1 King.": "1 Kings", "2 King.": "2 Kings", "1 Chro.": "1 Chronicles", "2 Chro.": "2 Chronicles",
+                "Ezra.": "Ezra", "Neh.": "Nehemiah", "Esth.": "Esther", "Job.": "Job", "Psa.": "Psalms",
+                "Pro.": "Proverbs", "Ecc.": "Ecclesiastes", "Song.": "Song of Songs", "Isa.": "Isaiah",
+                "Jer.": "Jeremiah", "Lam.": "Lamentations", "Ezek.": "Ezekiel", "Dan.": "Daniel", "Hos.": "Hosea",
+                "Joel.": "Joel", "Amos.": "Amos", "Obad.": "Obadiah", "Jonah.": "Jonah", "Mic.": "Micah",
+                "Nah.": "Nahum", "Hab.": "Habakkuk", "Zep.": "Zephaniah", "Hag.": "Haggai", "Zach.": "Zechariah",
+                "Mal.": "Malachi", "Mat.": "Matthew", "Mar.": "Mark", "Luk.": "Luke", "John.": "John",
+                "Act.": "Acts", "Rom.": "Romans", "1 Cor.": "1 Corinthians", "2 Cor.": "2 Corinthians",
+                "Gal.": "Galatians", "Eph.": "Ephesians", "Phil.": "Philippians", "Col.": "Colossians",
+                "1 Thes.": "1 Thessalonians", "2 Thes.": "2 Thessalonians", "1 Tim.": "1 Timothy", "2 Tim.": "2 Timothy",
+                "Tit.": "Titus", "Phm.": "Philemon", "Heb.": "Hebrews", "Jam.": "James", "1 Pet.": "1 Peter",
+                "2 Pet.": "2 Peter", "1 John.": "1 John", "2 John.": "2 John", "3 John.": "3 John",
+                "Jude.": "Jude", "Rev.": "Revelation"
+            };
 
             function getBrusselsYmd() {
                 var parts = new Intl.DateTimeFormat("en-GB", {
@@ -112,8 +129,22 @@
                 return Math.floor((current - yearStart) / 86400000) + 1;
             }
 
+            function toFriendlyReference(ref) {
+                var value = String(ref || "").trim();
+                var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
+                if (!match) {
+                    return value;
+                }
+
+                var prefix = match[1] ? match[1].trim() + " " : "";
+                var shortBook = prefix + match[2] + ".";
+                var tail = match[3].trim();
+                var fullBook = bookMap[shortBook] || shortBook;
+                return fullBook + " " + tail;
+            }
+
             function planLine(title, refs) {
-                var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean) : [];
+                var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(toFriendlyReference) : [];
                 if (cleanRefs.length === 0) {
                     return "";
                 }
