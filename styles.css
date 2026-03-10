@@ -300,6 +300,182 @@ body {
     color: var(--muted);
 }
 
+.sermon-item {
+    padding: 0;
+    overflow: hidden;
+}
+
+.sermon-open-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    padding: 12px 14px;
+    cursor: pointer;
+    font: inherit;
+}
+
+.sermon-open-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.sermon-open-btn h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+}
+
+.sermon-open-btn p {
+    margin: 0;
+}
+
+.sermon-hint {
+    margin-top: 7px !important;
+    color: var(--primary);
+    font-size: 0.82rem !important;
+}
+
+body.sermon-player-open {
+    overflow: hidden;
+}
+
+.sermon-player-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3200;
+    display: grid;
+    align-items: end;
+}
+
+.sermon-player-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(28, 33, 65, 0.5);
+}
+
+.sermon-player-sheet {
+    position: relative;
+    width: min(430px, 100%);
+    margin: 0 auto;
+    border-radius: 22px 22px 0 0;
+    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, #fff8f8, #ffecec);
+    border: 1px solid #efc5c5;
+    box-shadow: 0 -20px 45px rgba(58, 11, 11, 0.26);
+    animation: player-up 0.2s ease both;
+}
+
+.sermon-player-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: #ac3636;
+}
+
+.sermon-player-close {
+    border: 0;
+    background: #ffd9d9;
+    color: #9f2222;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.sermon-player-display {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid #f0c9c9;
+    border-radius: 16px;
+    padding: 14px;
+}
+
+.sermon-player-display h3 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.sermon-player-display p {
+    margin-top: 4px;
+}
+
+.sermon-progress-row {
+    margin-top: 10px;
+}
+
+.sermon-time {
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-align: right;
+}
+
+#player-seek {
+    width: 100%;
+    accent-color: var(--primary);
+}
+
+.ipod-wheel {
+    width: 220px;
+    height: 220px;
+    margin: 14px auto 0;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #fff, #ffe7e7);
+    border: 1px solid #efc9c9;
+    position: relative;
+    box-shadow: inset 0 6px 12px rgba(255, 255, 255, 0.8), 0 10px 18px rgba(129, 36, 36, 0.18);
+}
+
+.wheel-btn {
+    position: absolute;
+    border: 0;
+    background: transparent;
+    color: #9d2c2c;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.wheel-menu {
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.wheel-prev {
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.wheel-next {
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.wheel-play {
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.wheel-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 0;
+    background: linear-gradient(160deg, #f04444, #c82020);
+    color: #fff;
+    box-shadow: 0 10px 20px rgba(138, 24, 24, 0.36);
+    font-size: 1.1rem;
+}
+
 .inline-link,
 .button-link {
     color: var(--primary);
@@ -446,6 +622,25 @@ button.button-link {
     .verse-card {
         background: linear-gradient(160deg, #3e1b1b, #301414);
     }
+
+    .sermon-player-sheet {
+        background: linear-gradient(180deg, #2f1717, #241111);
+        border-color: #6c3434;
+    }
+
+    .sermon-player-display {
+        background: rgba(43, 21, 21, 0.82);
+        border-color: #764040;
+    }
+
+    .ipod-wheel {
+        background: linear-gradient(145deg, #3d1f1f, #2b1515);
+        border-color: #6b3333;
+    }
+
+    .wheel-btn {
+        color: #ffb8b8;
+    }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -520,5 +715,16 @@ button.button-link {
     }
     100% {
         transform: translateX(260%) rotate(18deg);
+    }
+}
+
+@keyframes player-up {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

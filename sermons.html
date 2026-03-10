@@ -57,6 +57,44 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
         </nav>
     </div>
+
+    <div class="sermon-player-overlay" id="sermon-player" hidden>
+        <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player"></button>
+        <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player">
+            <div class="sermon-player-top">
+                <strong>Now Playing</strong>
+                <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="sermon-player-display">
+                <h3 id="player-sermon-title">Sermon title</h3>
+                <p id="player-sermon-subtitle">Subtitle</p>
+                <p class="sermon-meta" id="player-sermon-date">Date</p>
+                <div class="sermon-progress-row">
+                    <input type="range" id="player-seek" min="0" max="100" value="0" step="1" aria-label="Seek position">
+                    <div class="sermon-time" id="player-time">00:00 / 00:00</div>
+                </div>
+            </div>
+            <div class="ipod-wheel" aria-label="Player controls">
+                <button type="button" class="wheel-btn wheel-menu" id="player-wheel-menu">MENU</button>
+                <button type="button" class="wheel-btn wheel-prev" id="player-prev" aria-label="Previous sermon">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button type="button" class="wheel-btn wheel-next" id="player-next" aria-label="Next sermon">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                <button type="button" class="wheel-btn wheel-play" id="player-play" aria-label="Play or pause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <button type="button" class="wheel-center" id="player-center" aria-label="Play or pause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+            <audio id="sermon-audio" preload="metadata"></audio>
+        </section>
+    </div>
+
     <script src="app-shell.js"></script>
     <script>
         (function () {
@@ -66,6 +104,22 @@
             var archiveNote = document.getElementById("sermon-archive-note");
             var allSermons = [];
             var visibleCount = 4;
+            var currentSermonIndex = -1;
+
+            var playerOverlay = document.getElementById("sermon-player");
+            var playerBackdrop = document.getElementById("sermon-player-backdrop");
+            var playerClose = document.getElementById("sermon-player-close");
+            var playerMenu = document.getElementById("player-wheel-menu");
+            var playerPrev = document.getElementById("player-prev");
+            var playerNext = document.getElementById("player-next");
+            var playerPlay = document.getElementById("player-play");
+            var playerCenter = document.getElementById("player-center");
+            var playerTitle = document.getElementById("player-sermon-title");
+            var playerSubtitle = document.getElementById("player-sermon-subtitle");
+            var playerDate = document.getElementById("player-sermon-date");
+            var playerSeek = document.getElementById("player-seek");
+            var playerTime = document.getElementById("player-time");
+            var sermonAudio = document.getElementById("sermon-audio");
 
             function escapeHtml(value) {
                 return String(value)
@@ -121,21 +175,23 @@
                 }
 
                 var visible = allSermons.slice(0, visibleCount);
-                latestSermonsList.innerHTML = visible.map(function (sermon) {
+                latestSermonsList.innerHTML = visible.map(function (sermon, idx) {
                     var title = escapeHtml(sermon.title);
                     var subtitle = sermon.subtitle ? " - " + escapeHtml(sermon.subtitle) : "";
                     var speaker = sermon.speaker ? "Speaker: " + escapeHtml(sermon.speaker) : "";
                     var dateText = toDisplayDate(sermon.dateObj);
-                    var listen = sermon.audioUrl
-                        ? "<p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(sermon.audioUrl) + "\" target=\"_blank\" rel=\"noopener\">Listen Audio</a></p>"
-                        : "";
+                    var hint = sermon.audioUrl
+                        ? "<p class=\"page-note sermon-hint\"><i class=\"fa-solid fa-circle-play\"></i> Tap to play in app</p>"
+                        : "<p class=\"page-note sermon-hint\">Audio not available</p>";
 
                     return "" +
-                        "<li>" +
-                        "  <h3>" + title + "</h3>" +
-                        "  <p>" + dateText + subtitle + "</p>" +
-                        (speaker ? "  <p class=\"sermon-meta\">" + speaker + "</p>" : "") +
-                        listen +
+                        "<li class=\"sermon-item\">" +
+                        "  <button class=\"sermon-open-btn\" type=\"button\" data-sermon-index=\"" + idx + "\"" + (sermon.audioUrl ? "" : " disabled") + ">" +
+                        "    <h3>" + title + "</h3>" +
+                        "    <p>" + dateText + subtitle + "</p>" +
+                        (speaker ? "    <p class=\"sermon-meta\">" + speaker + "</p>" : "") +
+                        "    " + hint +
+                        "  </button>" +
                         "</li>";
                 }).join("");
 
@@ -143,9 +199,137 @@
                 archiveNote.textContent = "Total sermons available: " + allSermons.length + ".";
             }
 
+            function formatTime(seconds) {
+                if (!Number.isFinite(seconds) || seconds < 0) {
+                    return "00:00";
+                }
+                var mins = Math.floor(seconds / 60);
+                var secs = Math.floor(seconds % 60);
+                var paddedSecs = secs < 10 ? "0" + secs : String(secs);
+                return mins + ":" + paddedSecs;
+            }
+
+            function updatePlayerButtonState() {
+                var isPaused = sermonAudio.paused;
+                var playIcon = isPaused ? "fa-play" : "fa-pause";
+                playerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+                playerCenter.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+            }
+
+            function refreshPlayerTime() {
+                var current = sermonAudio.currentTime || 0;
+                var duration = sermonAudio.duration || 0;
+                var percent = duration > 0 ? Math.round((current / duration) * 100) : 0;
+                playerSeek.value = String(percent);
+                playerTime.textContent = formatTime(current) + " / " + formatTime(duration);
+            }
+
+            function openPlayer(index, autoplay) {
+                if (index < 0 || index >= allSermons.length) {
+                    return;
+                }
+                var sermon = allSermons[index];
+                if (!sermon || !sermon.audioUrl) {
+                    return;
+                }
+
+                currentSermonIndex = index;
+                playerTitle.textContent = sermon.title || "Sermon";
+                playerSubtitle.textContent = sermon.subtitle || "";
+                playerDate.textContent = toDisplayDate(sermon.dateObj) + (sermon.speaker ? " - " + sermon.speaker : "");
+                playerOverlay.hidden = false;
+                document.body.classList.add("sermon-player-open");
+
+                if (sermonAudio.src !== sermon.audioUrl) {
+                    sermonAudio.src = sermon.audioUrl;
+                    sermonAudio.load();
+                }
+
+                if (autoplay) {
+                    sermonAudio.play().catch(function () {
+                        return null;
+                    });
+                }
+                updatePlayerButtonState();
+            }
+
+            function closePlayer() {
+                sermonAudio.pause();
+                playerOverlay.hidden = true;
+                document.body.classList.remove("sermon-player-open");
+                updatePlayerButtonState();
+            }
+
+            function playNext(delta) {
+                if (!allSermons.length) {
+                    return;
+                }
+                var nextIndex = currentSermonIndex + delta;
+                if (nextIndex < 0) {
+                    nextIndex = allSermons.length - 1;
+                }
+                if (nextIndex >= allSermons.length) {
+                    nextIndex = 0;
+                }
+                openPlayer(nextIndex, true);
+            }
+
+            function togglePlayPause() {
+                if (!sermonAudio.src && allSermons.length) {
+                    openPlayer(0, true);
+                    return;
+                }
+                if (sermonAudio.paused) {
+                    sermonAudio.play().catch(function () {
+                        return null;
+                    });
+                } else {
+                    sermonAudio.pause();
+                }
+                updatePlayerButtonState();
+            }
+
             showMoreSermonsButton.addEventListener("click", function () {
                 visibleCount += 4;
                 renderSermons();
+            });
+
+            latestSermonsList.addEventListener("click", function (event) {
+                var button = event.target.closest(".sermon-open-btn");
+                if (!button) {
+                    return;
+                }
+                var index = Number(button.getAttribute("data-sermon-index"));
+                if (Number.isNaN(index)) {
+                    return;
+                }
+                openPlayer(index, true);
+            });
+
+            playerSeek.addEventListener("input", function () {
+                var duration = sermonAudio.duration || 0;
+                if (duration <= 0) {
+                    return;
+                }
+                var nextTime = (Number(playerSeek.value) / 100) * duration;
+                sermonAudio.currentTime = nextTime;
+                refreshPlayerTime();
+            });
+
+            playerBackdrop.addEventListener("click", closePlayer);
+            playerClose.addEventListener("click", closePlayer);
+            playerMenu.addEventListener("click", closePlayer);
+            playerPrev.addEventListener("click", function () { playNext(-1); });
+            playerNext.addEventListener("click", function () { playNext(1); });
+            playerPlay.addEventListener("click", togglePlayPause);
+            playerCenter.addEventListener("click", togglePlayPause);
+
+            sermonAudio.addEventListener("timeupdate", refreshPlayerTime);
+            sermonAudio.addEventListener("loadedmetadata", refreshPlayerTime);
+            sermonAudio.addEventListener("play", updatePlayerButtonState);
+            sermonAudio.addEventListener("pause", updatePlayerButtonState);
+            sermonAudio.addEventListener("ended", function () {
+                playNext(1);
             });
 
             fetch(sermonsUrl)
