@@ -2,6 +2,7 @@
     var prefetched = new Set();
     var STATE_KEY = "njc_sermon_player_v1";
     var SPLASH_KEY = "njc_splash_seen_v1";
+    var THEME_KEY = "njc_theme_v1";
 
     function isSameOriginHttp(url) {
         return (url.protocol === "http:" || url.protocol === "https:") && url.origin === window.location.origin;
@@ -265,6 +266,83 @@
         }
     }
 
+    function getStoredTheme() {
+        try {
+            var value = window.localStorage.getItem(THEME_KEY);
+            if (value === "light" || value === "dark") {
+                return value;
+            }
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function getSystemTheme() {
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+
+    function getActiveTheme() {
+        return getStoredTheme() || getSystemTheme();
+    }
+
+    function applyTheme(theme) {
+        document.documentElement.setAttribute("data-theme", theme);
+    }
+
+    function persistTheme(theme) {
+        try {
+            window.localStorage.setItem(THEME_KEY, theme);
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function setToggleIcon(button, theme) {
+        var icon = theme === "dark" ? "fa-sun" : "fa-moon";
+        var label = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+        button.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
+        button.setAttribute("aria-label", label);
+        button.title = label;
+    }
+
+    function setupThemeToggle() {
+        var header = document.querySelector(".app-header");
+        if (!header || document.getElementById("theme-toggle-btn")) {
+            return;
+        }
+
+        var button = document.createElement("button");
+        button.id = "theme-toggle-btn";
+        button.className = "theme-toggle";
+        button.type = "button";
+
+        var activeTheme = getActiveTheme();
+        applyTheme(activeTheme);
+        setToggleIcon(button, activeTheme);
+
+        button.addEventListener("click", function () {
+            var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+            applyTheme(nextTheme);
+            persistTheme(nextTheme);
+            setToggleIcon(button, nextTheme);
+        });
+
+        header.appendChild(button);
+
+        var media = window.matchMedia("(prefers-color-scheme: dark)");
+        if (media && media.addEventListener) {
+            media.addEventListener("change", function () {
+                if (!getStoredTheme()) {
+                    var systemTheme = getSystemTheme();
+                    applyTheme(systemTheme);
+                    setToggleIcon(button, systemTheme);
+                }
+            });
+        }
+    }
+
     function showSplashScreenOnce() {
         try {
             if (window.sessionStorage.getItem(SPLASH_KEY)) {
@@ -304,6 +382,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        setupThemeToggle();
         showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();
