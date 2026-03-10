@@ -82,7 +82,7 @@
             var allUpcomingEvents = [];
             var eventsMeta = null;
             var eventsError = false;
-            var bookMap = {
+            var bookMapEnglish = {
                 "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
                 "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
                 "1 King.": "1 Kings", "2 King.": "2 Kings", "1 Chro.": "1 Chronicles", "2 Chro.": "2 Chronicles",
@@ -99,6 +99,27 @@
                 "2 Pet.": "2 Peter", "1 John.": "1 John", "2 John.": "2 John", "3 John.": "3 John",
                 "Jude.": "Jude", "Rev.": "Revelation"
             };
+            var bookMapTamil = {
+                "Gen.": "ஆதியாகமம்", "Exo.": "யாத்திராகமம்", "Lev.": "லேவியராகமம்", "Num.": "எண்ணாகமம்", "Deu.": "உபாகமம்",
+                "Jos.": "யோசுவா", "Judg.": "நியாயாதிபதிகள்", "Ruth.": "ரூத்து", "1 Sam.": "1 சாமுவேல்", "2 Sam.": "2 சாமுவேல்",
+                "1 King.": "1 இராஜாக்கள்", "2 King.": "2 இராஜாக்கள்", "1 Chro.": "1 நாளாகமம்", "2 Chro.": "2 நாளாகமம்",
+                "Ezra.": "எஸ்றா", "Neh.": "நேகேமியா", "Esth.": "எஸ்தர்", "Job.": "யோபு", "Psa.": "சங்கீதம்",
+                "Pro.": "நீதிமொழிகள்", "Ecc.": "பிரசங்கி", "Song.": "உன்னதப்பாட்டு", "Isa.": "ஏசாயா",
+                "Jer.": "எரேமியா", "Lam.": "புலம்பல்", "Ezek.": "எசேக்கியேல்", "Dan.": "தானியேல்", "Hos.": "ஓசியா",
+                "Joel.": "யோவேல்", "Amos.": "ஆமோஸ்", "Obad.": "ஒபதியா", "Jonah.": "யோனா", "Mic.": "மீகா",
+                "Nah.": "நாகூம்", "Hab.": "ஆபகூக்", "Zep.": "செப்பனியா", "Hag.": "ஆகாய்", "Zach.": "சகரியா",
+                "Mal.": "மல்கியா", "Mat.": "மத்தேயு", "Mar.": "மாற்கு", "Luk.": "லூக்கா", "John.": "யோவான்",
+                "Act.": "அப்போஸ்தலர் செயல்கள்", "Rom.": "ரோமர்", "1 Cor.": "1 கொரிந்தியர்", "2 Cor.": "2 கொரிந்தியர்",
+                "Gal.": "கலாத்தியர்", "Eph.": "எபேசியர்", "Phil.": "பிலிப்பியர்", "Col.": "கொலோசெயர்",
+                "1 Thes.": "1 தெசலோனிக்கேயர்", "2 Thes.": "2 தெசலோனிக்கேயர்", "1 Tim.": "1 தீமோத்தேயு", "2 Tim.": "2 தீமோத்தேயு",
+                "Tit.": "தீத்து", "Phm.": "பிலேமோன்", "Heb.": "எபிரெயர்", "Jam.": "யாக்கோபு", "1 Pet.": "1 பேதுரு",
+                "2 Pet.": "2 பேதுரு", "1 John.": "1 யோவான்", "2 John.": "2 யோவான்", "3 John.": "3 யோவான்",
+                "Jude.": "யூதா", "Rev.": "வெளிப்படுத்தல்"
+            };
+            var englishNameToTamil = Object.keys(bookMapEnglish).reduce(function (acc, key) {
+                acc[bookMapEnglish[key]] = bookMapTamil[key] || bookMapEnglish[key];
+                return acc;
+            }, {});
 
             function T(key, fallback) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -112,6 +133,10 @@
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
+            }
+
+            function isTamilLanguage() {
+                return window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
             }
 
             function localizeEventTitle(title) {
@@ -173,13 +198,25 @@
                 var value = String(ref || "").trim();
                 var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
                 if (!match) {
+                    if (isTamilLanguage()) {
+                        var plainMatch = value.match(/^([1-3]\s+[A-Za-z]+|[A-Za-z][A-Za-z\s]+)\s+(.+)$/);
+                        if (plainMatch) {
+                            var englishBook = plainMatch[1].trim();
+                            var tailRef = plainMatch[2].trim();
+                            var tamilBook = englishNameToTamil[englishBook];
+                            if (tamilBook) {
+                                return tamilBook + " " + tailRef;
+                            }
+                        }
+                    }
                     return value;
                 }
 
                 var prefix = match[1] ? match[1].trim() + " " : "";
                 var shortBook = prefix + match[2] + ".";
                 var tail = match[3].trim();
-                var fullBook = bookMap[shortBook] || shortBook;
+                var selectedMap = isTamilLanguage() ? bookMapTamil : bookMapEnglish;
+                var fullBook = selectedMap[shortBook] || bookMapEnglish[shortBook] || shortBook;
                 return fullBook + " " + tail;
             }
 
