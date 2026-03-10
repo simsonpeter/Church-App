@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Sermons</title>
-    <link rel="stylesheet" href="styles.css?v=20260310d">
+    <link rel="stylesheet" href="styles.css?v=20260310e">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -112,9 +112,10 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260310d"></script>
+    <script src="app-shell.js?v=20260310e"></script>
     <script>
         (function () {
+            var STATE_KEY = "njc_sermon_player_v1";
             var sermonsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
             var latestSermonsList = document.getElementById("latest-sermons-list");
             var showMoreSermonsButton = document.getElementById("show-more-sermons");
@@ -122,6 +123,7 @@
             var allSermons = [];
             var visibleCount = 4;
             var currentSermonIndex = -1;
+            var currentSermon = null;
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -144,6 +146,33 @@
             var miniPlayerTime = document.getElementById("mini-player-time");
             var miniPlayerPlay = document.getElementById("mini-player-play");
             var miniPlayerClose = document.getElementById("mini-player-close");
+
+            function getStoredState() {
+                try {
+                    var raw = window.localStorage.getItem(STATE_KEY);
+                    return raw ? JSON.parse(raw) : null;
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            function setStoredState(state) {
+                try {
+                    window.localStorage.setItem(STATE_KEY, JSON.stringify(state));
+                } catch (err) {
+                    return null;
+                }
+                return null;
+            }
+
+            function clearStoredState() {
+                try {
+                    window.localStorage.removeItem(STATE_KEY);
+                } catch (err) {
+                    return null;
+                }
+                return null;
+            }
 
             function escapeHtml(value) {
                 return String(value)
@@ -241,6 +270,23 @@
                 miniPlayerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
             }
 
+            function persistSermonState(minimized) {
+                if (!currentSermon || !sermonAudio.src) {
+                    return;
+                }
+
+                setStoredState({
+                    audioUrl: sermonAudio.currentSrc || currentSermon.audioUrl,
+                    title: currentSermon.title || "Sermon",
+                    subtitle: currentSermon.subtitle || "",
+                    speaker: currentSermon.speaker || "",
+                    dateText: playerDate.textContent || "",
+                    currentTime: sermonAudio.currentTime || 0,
+                    isPlaying: !sermonAudio.paused,
+                    minimized: Boolean(minimized)
+                });
+            }
+
             function refreshPlayerTime() {
                 var current = sermonAudio.currentTime || 0;
                 var duration = sermonAudio.duration || 0;
@@ -248,6 +294,7 @@
                 playerSeek.value = String(percent);
                 playerTime.textContent = formatTime(current) + " / " + formatTime(duration);
                 miniPlayerTime.textContent = playerTime.textContent;
+                persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             }
 
             function openPlayer(index, autoplay) {
@@ -260,6 +307,7 @@
                 }
 
                 currentSermonIndex = index;
+                currentSermon = sermon;
                 playerTitle.textContent = sermon.title || "Sermon";
                 playerSubtitle.textContent = sermon.subtitle || "";
                 playerDate.textContent = toDisplayDate(sermon.dateObj) + (sermon.speaker ? " - " + sermon.speaker : "");
@@ -279,6 +327,7 @@
                     });
                 }
                 updatePlayerButtonState();
+                persistSermonState(false);
             }
 
             function minimizePlayer() {
@@ -290,6 +339,7 @@
                 document.body.classList.remove("sermon-player-open");
                 refreshPlayerTime();
                 updatePlayerButtonState();
+                persistSermonState(true);
             }
 
             function restorePlayer() {
@@ -308,6 +358,7 @@
                 miniPlayer.hidden = true;
                 document.body.classList.remove("sermon-player-open");
                 updatePlayerButtonState();
+                clearStoredState();
             }
 
             function playNext(delta) {
@@ -380,10 +431,19 @@
 
             sermonAudio.addEventListener("timeupdate", refreshPlayerTime);
             sermonAudio.addEventListener("loadedmetadata", refreshPlayerTime);
-            sermonAudio.addEventListener("play", updatePlayerButtonState);
-            sermonAudio.addEventListener("pause", updatePlayerButtonState);
+            sermonAudio.addEventListener("play", function () {
+                updatePlayerButtonState();
+                persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
+            });
+            sermonAudio.addEventListener("pause", function () {
+                updatePlayerButtonState();
+                persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
+            });
             sermonAudio.addEventListener("ended", function () {
                 playNext(1);
+            });
+            window.addEventListener("beforeunload", function () {
+                persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
 
             fetch(sermonsUrl)
@@ -403,6 +463,36 @@
                             return b.dateKey - a.dateKey;
                         });
                     renderSermons();
+
+                    var storedState = getStoredState();
+                    if (storedState && storedState.audioUrl) {
+                        var restoredIndex = allSermons.findIndex(function (item) {
+                            return item.audioUrl === storedState.audioUrl;
+                        });
+
+                        if (restoredIndex >= 0) {
+                            openPlayer(restoredIndex, false);
+                            if (Number.isFinite(storedState.currentTime) && storedState.currentTime > 0) {
+                                sermonAudio.addEventListener("loadedmetadata", function restoreTimeOnce() {
+                                    try {
+                                        sermonAudio.currentTime = Math.min(storedState.currentTime, sermonAudio.duration || storedState.currentTime);
+                                    } catch (err) {
+                                        return null;
+                                    }
+                                }, { once: true });
+                            }
+
+                            if (storedState.minimized) {
+                                minimizePlayer();
+                            }
+
+                            if (storedState.isPlaying) {
+                                sermonAudio.play().catch(function () {
+                                    updatePlayerButtonState();
+                                });
+                            }
+                        }
+                    }
                 })
                 .catch(function () {
                     latestSermonsList.innerHTML = "" +
