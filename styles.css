@@ -34,12 +34,22 @@ body {
     animation: background-flow 20s ease infinite;
 }
 
+body.is-leaving .app-shell {
+    opacity: 0;
+    transform: translateY(10px) scale(0.995);
+}
+
 .app-shell {
     max-width: 430px;
     min-height: 100vh;
     margin: 0 auto;
     padding: 22px 18px 110px;
     position: relative;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+}
+
+body.page-enter .app-shell {
+    animation: page-enter 0.28s ease both;
 }
 
 .app-header {
@@ -294,6 +304,12 @@ body {
     font-size: 0.9rem;
 }
 
+.sermon-meta {
+    margin-top: 5px;
+    font-size: 0.82rem;
+    color: var(--muted);
+}
+
 .inline-link,
 .button-link {
     color: var(--primary);
@@ -469,6 +485,17 @@ button.button-link {
     to {
         opacity: 1;
         transform: translate(-50%, 0);
+    }
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 }
 
