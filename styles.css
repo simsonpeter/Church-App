@@ -30,6 +30,8 @@ body {
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
     color: var(--text);
     background: radial-gradient(circle at top right, var(--bg-top), var(--bg-mid) 45%, var(--bg-bottom) 100%);
+    background-size: 145% 145%;
+    animation: background-flow 20s ease infinite;
 }
 
 .app-shell {
@@ -46,19 +48,37 @@ body {
     padding: 26px 20px;
     border-radius: 24px;
     box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
     animation: fade-up 0.48s ease both;
+}
+
+.app-header::after {
+    content: "";
+    position: absolute;
+    top: -120%;
+    left: -40%;
+    width: 55%;
+    height: 280%;
+    background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transform: rotate(18deg);
+    animation: shine 7.5s ease-in-out infinite;
 }
 
 .app-header h1 {
     margin: 6px 0 4px;
     font-size: 1.55rem;
     line-height: 1.2;
+    position: relative;
+    z-index: 1;
 }
 
 .app-header p {
     margin: 0;
     font-size: 0.95rem;
     color: #ffe3e3;
+    position: relative;
+    z-index: 1;
 }
 
 .eyebrow {
@@ -66,6 +86,11 @@ body {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0.9;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+    z-index: 1;
 }
 
 .app-content {
@@ -101,6 +126,14 @@ body {
 .card h2 {
     margin: 0 0 10px;
     font-size: 1.05rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.card h2 i {
+    color: var(--primary);
+    font-size: 0.9rem;
 }
 
 .card p {
@@ -163,6 +196,24 @@ body {
     font-weight: 700;
     color: #b71c1c;
     background: var(--primary-soft);
+    transition: transform 0.2s ease;
+    animation: icon-float 3s ease-in-out infinite;
+}
+
+.action-pill:nth-child(2) .action-icon {
+    animation-delay: 0.45s;
+}
+
+.action-pill:nth-child(3) .action-icon {
+    animation-delay: 0.9s;
+}
+
+.action-icon i {
+    font-size: 0.76rem;
+}
+
+.action-pill:hover .action-icon {
+    transform: translateY(-1px) scale(1.1);
 }
 
 .action-label {
@@ -208,6 +259,12 @@ body {
     border: 1px solid var(--line);
     border-radius: 14px;
     padding: 12px 14px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.list li:hover {
+    transform: translateY(-1px);
+    border-color: #ecb0b0;
 }
 
 .list h3 {
@@ -301,6 +358,11 @@ button.button-link {
     background: #ffeaea;
     font-size: 0.58rem;
     font-weight: 700;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.tab-icon i {
+    font-size: 0.72rem;
 }
 
 .tab.active {
@@ -310,6 +372,7 @@ button.button-link {
 
 .tab.active .tab-icon {
     background: #ffd1d1;
+    animation: tab-pulse 1.8s ease-in-out infinite;
 }
 
 .tab-label {
@@ -390,5 +453,49 @@ button.button-link {
     to {
         opacity: 1;
         transform: translate(-50%, 0);
+    }
+}
+
+@keyframes background-flow {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes tab-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes icon-float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-2px);
+    }
+}
+
+@keyframes shine {
+    0% {
+        transform: translateX(-130%) rotate(18deg);
+    }
+    50% {
+        transform: translateX(260%) rotate(18deg);
+    }
+    100% {
+        transform: translateX(260%) rotate(18deg);
     }
 }

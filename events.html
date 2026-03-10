@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Events</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
         <header class="app-header">
-            <div class="eyebrow">Events</div>
+            <div class="eyebrow"><i class="fa-solid fa-calendar-days"></i>Events</div>
             <h1>Church calendar</h1>
             <p>Stay in sync with services, prayer nights, and fellowship moments.</p>
         </header>
@@ -17,21 +18,21 @@
         <main class="app-content">
             <section class="quick-actions">
                 <a class="action-pill" href="index.html">
-                    <span class="action-icon">HM</span>
+                    <span class="action-icon"><i class="fa-solid fa-house"></i></span>
                     <span class="action-label">Dashboard</span>
                 </a>
                 <a class="action-pill" href="contact.html">
-                    <span class="action-icon">CT</span>
+                    <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
                     <span class="action-label">RSVP</span>
                 </a>
                 <a class="action-pill" href="sermons.html">
-                    <span class="action-icon">SR</span>
+                    <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
                     <span class="action-label">Messages</span>
                 </a>
             </section>
 
             <section class="card">
-                <h2>Upcoming Events (Next 2 Weeks, Belgium Time)</h2>
+                <h2><i class="fa-solid fa-clock"></i>Upcoming Events (Next 2 Weeks, Belgium Time)</h2>
                 <p>Automatically calculated from recurring schedule and special events feed.</p>
                 <ul class="list" id="upcoming-events-list">
                     <li>
@@ -43,7 +44,7 @@
             </section>
 
             <section class="card">
-                <h2>Schedule Rules</h2>
+                <h2><i class="fa-solid fa-list-check"></i>Schedule Rules</h2>
                 <ul class="list">
                     <li>
                         <h3>Holy Service with Communion</h3>
@@ -54,7 +55,7 @@
                         <p>2nd and 4th Saturday at 17:00 (Belgium time)</p>
                     </li>
                 </ul>
-                <h3>Upcoming Special Events</h3>
+                <h3><i class="fa-solid fa-star"></i> Upcoming Special Events</h3>
                 <ul class="list" id="upcoming-special-events-list">
                     <li>
                         <h3>Loading special events...</h3>
@@ -65,11 +66,11 @@
         </main>
 
         <nav class="tab-nav">
-            <a class="tab" href="index.html"><span class="tab-icon">HM</span><span class="tab-label">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon">AB</span><span class="tab-label">About</span></a>
-            <a class="tab active" href="events.html"><span class="tab-icon">EV</span><span class="tab-label">Events</span></a>
-            <a class="tab" href="sermons.html"><span class="tab-icon">SR</span><span class="tab-label">Sermons</span></a>
-            <a class="tab" href="contact.html"><span class="tab-icon">CT</span><span class="tab-label">Contact</span></a>
+            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label">Home</span></a>
+            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label">About</span></a>
+            <a class="tab active" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label">Events</span></a>
+            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label">Sermons</span></a>
+            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
         </nav>
     </div>
     <script src="events-engine.js"></script>
