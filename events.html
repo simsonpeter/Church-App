@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Events</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310j">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310j">
-    <link rel="manifest" href="site.webmanifest?v=20260310j">
-    <link rel="stylesheet" href="styles.css?v=20260310j">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310m">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310m">
+    <link rel="manifest" href="site.webmanifest?v=20260310m">
+    <link rel="stylesheet" href="styles.css?v=20260310m">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -76,8 +76,8 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310j"></script>
-    <script src="events-engine.js?v=20260310j"></script>
+    <script src="app-shell.js?v=20260310m"></script>
+    <script src="events-engine.js?v=20260310m"></script>
     <script>
         (function () {
             var upcomingEventsList = document.getElementById("upcoming-events-list");
@@ -100,6 +100,21 @@
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
+            }
+
+            function localizeEventTitle(title) {
+                var raw = String(title || "").trim();
+                var isTamil = window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
+                if (!isTamil) {
+                    return raw;
+                }
+                if (raw === "Holy Service with Communion") {
+                    return T("events.holyServiceTitle", "பரிசுத்த ஆராதனையும் திருவிருந்தும்");
+                }
+                if (raw === "Special Prayer") {
+                    return T("events.specialPrayerTitle", "விசேட ஜெபக்கூடுகை");
+                }
+                return raw;
             }
 
             function translateType(typeValue) {
@@ -127,7 +142,8 @@
                 }
 
                 upcomingEventsList.innerHTML = events.map(function (eventItem) {
-                    var title = NjcEvents.escapeHtml(eventItem.title || T("events.event", "Event"));
+                    var titleText = localizeEventTitle(eventItem.title || T("events.event", "Event"));
+                    var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
                     var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var typeAndDescription = NjcEvents.escapeHtml(
@@ -159,7 +175,8 @@
                 }
 
                 upcomingSpecialEventsList.innerHTML = specialEvents.map(function (eventItem) {
-                    var title = NjcEvents.escapeHtml(eventItem.title || T("events.specialEvent", "Special Event"));
+                    var titleText = localizeEventTitle(eventItem.title || T("events.specialEvent", "Special Event"));
+                    var title = NjcEvents.escapeHtml(titleText || T("events.specialEvent", "Special Event"));
                     var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var description = NjcEvents.escapeHtml(eventItem.description || "");

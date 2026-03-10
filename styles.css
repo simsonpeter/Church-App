@@ -152,6 +152,7 @@ body.splash-active {
     line-height: 1.2;
     position: relative;
     z-index: 1;
+    padding-right: 44px;
 }
 
 .app-header p {
@@ -160,6 +161,7 @@ body.splash-active {
     color: #ffe3e3;
     position: relative;
     z-index: 1;
+    padding-right: 44px;
 }
 
 .header-controls {
@@ -167,6 +169,7 @@ body.splash-active {
     top: 14px;
     right: 14px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     gap: 8px;
     z-index: 3;
@@ -187,17 +190,27 @@ body.splash-active {
 }
 
 .lang-toggle {
+    width: 36px;
     height: 36px;
-    min-width: 48px;
-    padding: 0 10px;
-    border-radius: 999px;
+    padding: 0;
+    border-radius: 50%;
     border: 1px solid rgba(255, 255, 255, 0.45);
     background: rgba(255, 255, 255, 0.2);
     color: #ffffff;
-    font-size: 0.78rem;
+    font-size: 0.66rem;
     font-weight: 700;
     letter-spacing: 0.02em;
+    display: grid;
+    place-items: center;
     backdrop-filter: blur(8px);
+}
+
+.theme-toggle {
+    order: 1;
+}
+
+.lang-toggle {
+    order: 2;
 }
 
 .eyebrow {
@@ -210,6 +223,7 @@ body.splash-active {
     gap: 6px;
     position: relative;
     z-index: 1;
+    padding-right: 44px;
 }
 
 .eyebrow i {

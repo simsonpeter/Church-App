@@ -9,8 +9,8 @@
         "brand.name": "புதிய எருசலேம் சபை",
         "nav.home": "முகப்பு",
         "nav.about": "பற்றி",
-        "nav.events": "நிகழ்வுகள்",
-        "nav.sermons": "பிரசங்கங்கள்",
+        "nav.events": "நிகழ்வு",
+        "nav.sermons": "பிரசங்கம்",
         "nav.contact": "தொடர்பு",
         "toggle.language.toTamil": "தமிழுக்கு மாற்று",
         "toggle.language.toEnglish": "Switch to English",
@@ -20,7 +20,7 @@
         "splash.sub": "பெல்ஜியம்",
         "home.welcomeBack": "வரவேற்கிறோம்",
         "home.tagline": "உங்கள் வாராந்திர விசுவாசப் பயணம் ஒரே இடத்தில்.",
-        "home.bibleReadingTitle": "இன்றைய வேதாகம வாசிப்பு திட்டம்",
+        "home.bibleReadingTitle": "இன்றைய வேத வாசிப்பு",
         "home.readingDatePrefix": "இன்று:",
         "home.morningReading": "காலை வாசிப்பு",
         "home.eveningReading": "மாலை வாசிப்பு",
@@ -37,16 +37,16 @@
         "home.noEventsBody": "புதுப்பிப்புகளுக்கு நிகழ்வுகள் பக்கத்தை பார்க்கவும்.",
         "home.loadEventsErrorTitle": "இந்த வார நிகழ்வுகளை ஏற்ற முடியவில்லை",
         "home.loadEventsErrorBody": "புதுப்பிக்க நிகழ்வுகள் தாவலைத் திறக்கவும்.",
-        "actions.events": "நிகழ்வுகள்",
-        "actions.sermons": "பிரசங்கங்கள்",
+        "actions.events": "நிகழ்வு",
+        "actions.sermons": "பிரசங்கம்",
         "actions.contact": "தொடர்பு",
         "actions.calendar": "காலண்டர்",
         "actions.messages": "செய்திகள்",
         "actions.joinUs": "எங்களுடன் சேருங்கள்",
-        "actions.dashboard": "டாஷ்போர்டு",
+        "actions.dashboard": "முகப்பு",
         "actions.rsvp": "பங்கேற்பு பதிவு",
         "actions.live": "நேரலை",
-        "actions.audio": "ஆடியோ",
+        "actions.audio": "ஒலிக்கோவை",
         "actions.notes": "குறிப்புகள்",
         "actions.email": "மின்னஞ்சல்",
         "actions.call": "அழைப்பு",
@@ -66,16 +66,16 @@
         "about.leadershipTitle": "தலைமை",
         "about.leadershipBody": "எங்கள் மேய்ப்பர்களும் குழுத் தலைவர்களும் வாரம் முழுவதும் ஜெபம், பராமரிப்பு, வழிகாட்டலுக்கு தயாராக உள்ளனர்.",
         "events.eyebrow": "நிகழ்வுகள்",
-        "events.title": "சபை காலண்டர்",
+        "events.title": "நிகழ்வு நாட்காட்டி",
         "events.subtitle": "ஆராதனை, ஜெப இரவுகள், சகோதரத்துவ தருணங்களுடன் இணைந்திருங்கள்.",
         "events.upcomingTitle": "வரவிருக்கும் நிகழ்வுகள்",
         "events.loadingUpcomingTitle": "வரவிருக்கும் நிகழ்வுகள் ஏற்றப்படுகின்றன...",
         "events.loadingUpcomingBody": "அடுத்த தேதிகளை கணக்கிட காத்திருக்கவும்.",
         "events.seeMore": "மேலும் நிகழ்வுகள் காண்க",
         "events.scheduleRules": "அட்டவணை விதிகள்",
-        "events.holyServiceTitle": "பரிசுத்த ஆராதனை மற்றும் பரிசுத்த இராப்போசனம்",
+        "events.holyServiceTitle": "பரிசுத்த ஆராதனையும் திருவிருந்தும்",
         "events.holyServiceTime": "ஒவ்வொரு ஞாயிறும் 14:30 (பெல்ஜியம் நேரம்)",
-        "events.specialPrayerTitle": "சிறப்பு ஜெபம்",
+        "events.specialPrayerTitle": "விசேட ஜெபக்கூடுகை",
         "events.specialPrayerTime": "2வது மற்றும் 4வது சனிக்கிழமை 17:00 (பெல்ஜியம் நேரம்)",
         "events.upcomingSpecialTitle": "வரவிருக்கும் சிறப்பு நிகழ்வுகள்",
         "events.loadingSpecialTitle": "சிறப்பு நிகழ்வுகள் ஏற்றப்படுகின்றன...",
@@ -92,7 +92,7 @@
         "events.specialEvent": "சிறப்பு நிகழ்வு",
         "events.typeRecurring": "மறுமொழி",
         "events.typeSpecial": "சிறப்பு",
-        "sermons.eyebrow": "பிரசங்கங்கள்",
+        "sermons.eyebrow": "பிரசங்கம்",
         "sermons.title": "சமீபத்திய செய்திகள்",
         "sermons.subtitle": "மீண்டும் கேளுங்கள், குறிப்பெடுங்கள், வாரம் முழுவதும் வளருங்கள்.",
         "sermons.latestTitle": "சமீபத்திய பிரசங்கங்கள்",
@@ -180,19 +180,28 @@
 
         scope.querySelectorAll("[data-i18n]").forEach(function (node) {
             var key = node.getAttribute("data-i18n");
-            var fallback = node.getAttribute("data-i18n-fallback") || node.textContent;
+            if (!node.hasAttribute("data-i18n-fallback")) {
+                node.setAttribute("data-i18n-fallback", node.textContent);
+            }
+            var fallback = node.getAttribute("data-i18n-fallback") || "";
             node.textContent = t(key, fallback);
         });
 
         scope.querySelectorAll("[data-i18n-aria-label]").forEach(function (node) {
             var key = node.getAttribute("data-i18n-aria-label");
-            var fallback = node.getAttribute("aria-label") || "";
+            if (!node.hasAttribute("data-i18n-aria-fallback")) {
+                node.setAttribute("data-i18n-aria-fallback", node.getAttribute("aria-label") || "");
+            }
+            var fallback = node.getAttribute("data-i18n-aria-fallback") || "";
             node.setAttribute("aria-label", t(key, fallback));
         });
 
         scope.querySelectorAll("[data-i18n-title]").forEach(function (node) {
             var key = node.getAttribute("data-i18n-title");
-            var fallback = node.getAttribute("title") || "";
+            if (!node.hasAttribute("data-i18n-title-fallback")) {
+                node.setAttribute("data-i18n-title-fallback", node.getAttribute("title") || "");
+            }
+            var fallback = node.getAttribute("data-i18n-title-fallback") || "";
             node.setAttribute("title", t(key, fallback));
         });
     }
@@ -234,7 +243,7 @@
 
     function setLanguageButtonLabel(button) {
         var nextLanguage = activeLanguage === "ta" ? "en" : "ta";
-        button.textContent = activeLanguage === "ta" ? "தமிழ்" : "EN";
+        button.textContent = activeLanguage === "ta" ? "EN" : "TA";
         var label = nextLanguage === "ta"
             ? t("toggle.language.toTamil", "Switch language to Tamil")
             : t("toggle.language.toEnglish", "Switch language to English");
