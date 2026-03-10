@@ -280,7 +280,10 @@
         splash.innerHTML = "" +
             "<div class=\"splash-inner\">" +
             "  <img class=\"splash-logo\" src=\"logo.png\" alt=\"New Jerusalem Church Belgium logo\">" +
-            "  <div class=\"splash-text\">New Jerusalem Church Belgium</div>" +
+            "  <div class=\"splash-text\">" +
+            "    <span class=\"splash-text-main\">New Jerusalem Church</span>" +
+            "    <span class=\"splash-text-sub\">Belgium</span>" +
+            "  </div>" +
             "</div>";
 
         document.body.appendChild(splash);

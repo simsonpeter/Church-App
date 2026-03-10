@@ -60,6 +60,7 @@ body.splash-active {
 .splash-inner {
     text-align: center;
     padding: 20px;
+    max-width: min(92vw, 460px);
 }
 
 .splash-logo {
@@ -70,12 +71,28 @@ body.splash-active {
 }
 
 .splash-text {
-    margin-top: 14px;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #8f1f1f;
-    letter-spacing: 0.01em;
+    margin-top: 16px;
+    font-size: clamp(1.35rem, 5.2vw, 2rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: 0.03em;
+    font-family: "Segoe UI", "Trebuchet MS", Arial, sans-serif;
+    background: linear-gradient(90deg, #9d1616, #e83e3e, #8f1f1f);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 10px rgba(179, 38, 38, 0.2);
     animation: splash-text 1.15s ease both;
+}
+
+.splash-text-main,
+.splash-text-sub {
+    display: inline;
+}
+
+.splash-text-sub {
+    margin-left: 0.35ch;
+    font-weight: 900;
 }
 
 .app-shell {
@@ -756,6 +773,14 @@ button.button-link {
     .mini-player-btn {
         background: #5f2727;
         color: #ffd8d8;
+    }
+}
+
+@media (max-width: 420px) {
+    .splash-text-sub {
+        display: block;
+        margin-left: 0;
+        margin-top: 4px;
     }
 }
 
