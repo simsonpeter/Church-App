@@ -636,14 +636,10 @@
         }
 
         var splash = document.createElement("div");
-        splash.className = "splash-screen";
+        splash.className = "splash-screen startup-static";
         splash.innerHTML = "" +
             "<div class=\"splash-inner\">" +
             "  <img class=\"splash-logo\" src=\"logo.png\" alt=\"New Jerusalem Church Belgium logo\">" +
-            "  <div class=\"splash-text\">" +
-            "    <span class=\"splash-text-main\">" + t("splash.main", "New Jerusalem Church") + "</span>" +
-            "    <span class=\"splash-text-sub\">" + t("splash.sub", "Belgium") + "</span>" +
-            "  </div>" +
             "</div>";
 
         document.body.appendChild(splash);
@@ -660,7 +656,7 @@
             window.setTimeout(function () {
                 splash.remove();
             }, 320);
-        }, 1550);
+        }, 2600);
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -680,6 +676,7 @@
         setLanguage(activeLanguage, false, true);
         setupLanguageToggle();
         setupThemeToggle();
+        showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();
         createGlobalMiniPlayer();

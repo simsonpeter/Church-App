@@ -57,6 +57,18 @@ body.splash-active {
     opacity: 0;
 }
 
+.splash-screen.startup-static .splash-inner::before,
+.splash-screen.startup-static .splash-text {
+    display: none;
+}
+
+.splash-screen.startup-static .splash-logo {
+    width: 124px;
+    height: 124px;
+    filter: none;
+    animation: none;
+}
+
 .splash-inner {
     text-align: center;
     padding: 20px;
