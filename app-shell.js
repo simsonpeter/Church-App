@@ -4,7 +4,13 @@
     var SPLASH_KEY = "njc_splash_seen_v1";
     var THEME_KEY = "njc_theme_v1";
     var LANGUAGE_KEY = "njc_language_v1";
+    var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
+    var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
+    var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
+    var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+    var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var activeLanguage = "en";
+    var notificationIntervalId = null;
     var tamilTranslations = {
         "brand.name": "புதிய எருசலேம் சபை",
         "nav.home": "முகப்பு",
@@ -114,6 +120,20 @@
         "sermons.loadErrorTitle": "பிரசங்கங்களை ஏற்ற முடியவில்லை",
         "sermons.loadErrorBody": "புதுப்பித்து மீண்டும் முயற்சிக்கவும்.",
         "sermons.archiveUnavailable": "பிரசங்க காப்பகம் தற்காலிகமாக கிடைக்கவில்லை.",
+        "sermons.searchPlaceholder": "தலைப்பு, பேச்சாளர், தேதியால் பிரசங்கம் தேடுக",
+        "sermons.searchNoResultsTitle": "பொருந்தும் பிரசங்கம் இல்லை",
+        "sermons.searchNoResultsBody": "மற்றொரு சொல் வைத்து தேடிப் பார்க்கவும்.",
+        "sermons.searchMatches": "{count} முடிவுகள் கிடைத்தன.",
+        "notify.title": "அறிவிப்புகள்",
+        "notify.subtitle": "சேவை நினைவூட்டல் மற்றும் புதிய பிரசங்க அறிவிப்புகளைப் பெறுங்கள்.",
+        "notify.statusOn": "அறிவிப்புகள் செயல்பாட்டில் உள்ளன.",
+        "notify.statusOff": "அறிவிப்புகள் தற்போது அணைக்கப்பட்டுள்ளன.",
+        "notify.statusBlocked": "Browser-ல் அறிவிப்புகள் தடுக்கப்பட்டுள்ளன. Settings-ல் அனுமதி அளிக்கவும்.",
+        "notify.statusUnsupported": "இந்த சாதனத்தில் அறிவிப்புகள் ஆதரிக்கப்படவில்லை.",
+        "notify.enable": "அறிவிப்புகளை இயக்கு",
+        "notify.disable": "அறிவிப்புகளை அணை",
+        "notify.eventSoonTitle": "நிகழ்வு நினைவூட்டல்",
+        "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
         "player.openSermonsPage": "பிரசங்கங்கள் பக்கத்தைத் திற",
         "player.playOrPause": "ஒலிக்க அல்லது நிறுத்த",
         "player.stopAndClose": "நிறுத்தி மூட",
@@ -203,6 +223,15 @@
             }
             var fallback = node.getAttribute("data-i18n-title-fallback") || "";
             node.setAttribute("title", t(key, fallback));
+        });
+
+        scope.querySelectorAll("[data-i18n-placeholder]").forEach(function (node) {
+            var key = node.getAttribute("data-i18n-placeholder");
+            if (!node.hasAttribute("data-i18n-placeholder-fallback")) {
+                node.setAttribute("data-i18n-placeholder-fallback", node.getAttribute("placeholder") || "");
+            }
+            var fallback = node.getAttribute("data-i18n-placeholder-fallback") || "";
+            node.setAttribute("placeholder", t(key, fallback));
         });
     }
 
@@ -353,6 +382,349 @@
                 prefetchFromAnchor(anchor);
             }
         }, { passive: true });
+    }
+
+    function registerServiceWorker() {
+        if (!("serviceWorker" in navigator)) {
+            return;
+        }
+        navigator.serviceWorker.register("service-worker.js").catch(function () {
+            return null;
+        });
+    }
+
+    function notificationsSupported() {
+        return ("Notification" in window) && ("serviceWorker" in navigator);
+    }
+
+    function getNotificationSettings() {
+        try {
+            var raw = window.localStorage.getItem(NOTIFICATION_SETTINGS_KEY);
+            if (!raw) {
+                return { enabled: false, reminderMinutes: 60 };
+            }
+            var parsed = JSON.parse(raw);
+            return {
+                enabled: Boolean(parsed && parsed.enabled),
+                reminderMinutes: (parsed && Number.isFinite(parsed.reminderMinutes) && parsed.reminderMinutes > 0)
+                    ? Number(parsed.reminderMinutes)
+                    : 60
+            };
+        } catch (err) {
+            return { enabled: false, reminderMinutes: 60 };
+        }
+    }
+
+    function setNotificationSettings(settings) {
+        try {
+            window.localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify({
+                enabled: Boolean(settings && settings.enabled),
+                reminderMinutes: (settings && Number.isFinite(settings.reminderMinutes) && settings.reminderMinutes > 0)
+                    ? Number(settings.reminderMinutes)
+                    : 60
+            }));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function getNotificationPermission() {
+        if (!notificationsSupported()) {
+            return "unsupported";
+        }
+        return Notification.permission;
+    }
+
+    function getNotificationStatus() {
+        var supported = notificationsSupported();
+        var permission = getNotificationPermission();
+        var settings = getNotificationSettings();
+        return {
+            supported: supported,
+            permission: permission,
+            enabled: settings.enabled,
+            reminderMinutes: settings.reminderMinutes
+        };
+    }
+
+    function emitNotificationStatus() {
+        document.dispatchEvent(new CustomEvent("njc:notificationstatus", {
+            detail: getNotificationStatus()
+        }));
+    }
+
+    function getNotifiedMap() {
+        try {
+            var raw = window.localStorage.getItem(NOTIFICATION_SENT_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function markAsNotified(key) {
+        var map = getNotifiedMap();
+        map[key] = Date.now();
+        var entries = Object.keys(map).sort(function (a, b) {
+            return map[b] - map[a];
+        }).slice(0, 120);
+        var next = {};
+        entries.forEach(function (entryKey) {
+            next[entryKey] = map[entryKey];
+        });
+        try {
+            window.localStorage.setItem(NOTIFICATION_SENT_KEY, JSON.stringify(next));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function wasNotified(key) {
+        var map = getNotifiedMap();
+        return Boolean(map[key]);
+    }
+
+    function showNotification(options) {
+        var config = options || {};
+        if (!notificationsSupported() || getNotificationPermission() !== "granted") {
+            return Promise.resolve(false);
+        }
+
+        var payload = {
+            body: config.body || "",
+            tag: config.tag || "",
+            icon: "logo.png",
+            badge: "logo.png",
+            data: {
+                url: config.url || "index.html"
+            }
+        };
+
+        return navigator.serviceWorker.getRegistration().then(function (registration) {
+            if (registration && registration.showNotification) {
+                return registration.showNotification(config.title || "NJC", payload).then(function () {
+                    return true;
+                });
+            }
+            var fallback = new Notification(config.title || "NJC", payload);
+            fallback.onclick = function () {
+                window.location.href = payload.data.url;
+            };
+            return true;
+        }).catch(function () {
+            return false;
+        });
+    }
+
+    function diffMinutesFromBrusselsNow(nowBrussels, eventItem) {
+        var nowUtc = Date.UTC(nowBrussels.year, nowBrussels.month - 1, nowBrussels.day, nowBrussels.hour, nowBrussels.minute);
+        var eventUtc = Date.UTC(eventItem.year, eventItem.month - 1, eventItem.day, eventItem.hour, eventItem.minute);
+        return Math.round((eventUtc - nowUtc) / 60000);
+    }
+
+    function checkEventReminder() {
+        if (!window.NjcEvents || typeof window.NjcEvents.mergeUpcomingEvents !== "function") {
+            return Promise.resolve();
+        }
+        var settings = getNotificationSettings();
+        return window.NjcEvents.mergeUpcomingEvents({ eventsUrl: EVENTS_FEED_URL, horizonDays: 2 })
+            .then(function (result) {
+                var nowBrussels = result.nowBrussels;
+                var nextEvent = (result.events || []).find(function (item) {
+                    return item.key >= nowBrussels.key;
+                });
+
+                if (!nextEvent) {
+                    return null;
+                }
+
+                var mins = diffMinutesFromBrusselsNow(nowBrussels, nextEvent);
+                var notifyKey = "event:" + String(nextEvent.key);
+                if (mins < 0 || mins > settings.reminderMinutes || wasNotified(notifyKey)) {
+                    return null;
+                }
+
+                var dateText = window.NjcEvents.toDisplayDate(nextEvent.year, nextEvent.month, nextEvent.day, getLocale());
+                var timeText = window.NjcEvents.toDisplayTime(nextEvent.hour, nextEvent.minute);
+                var title = nextEvent.title || t("events.event", "Event");
+                var body = title + " - " + dateText + " " + t("common.at", "at") + " " + timeText + " (" + t("common.belgiumTime", "Belgium time") + ")";
+
+                return showNotification({
+                    title: t("notify.eventSoonTitle", "Event reminder"),
+                    body: body,
+                    tag: notifyKey,
+                    url: "events.html"
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
+    function checkNewSermonNotification() {
+        return fetch(SERMONS_FEED_URL)
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Unable to load sermons");
+                }
+                return response.json();
+            })
+            .then(function (raw) {
+                var sermons = Array.isArray(raw) ? raw : [];
+                var sorted = sermons
+                    .filter(function (item) { return item && item.title; })
+                    .sort(function (a, b) {
+                        return String(b.date || "").localeCompare(String(a.date || ""));
+                    });
+                var latest = sorted[0];
+                if (!latest) {
+                    return null;
+                }
+
+                var latestKey = String(latest.date || "") + "|" + String(latest.title || "");
+                var previousKey = "";
+                try {
+                    previousKey = window.localStorage.getItem(NOTIFICATION_LAST_SERMON_KEY) || "";
+                } catch (err) {
+                    previousKey = "";
+                }
+
+                if (!previousKey) {
+                    try {
+                        window.localStorage.setItem(NOTIFICATION_LAST_SERMON_KEY, latestKey);
+                    } catch (err) {
+                        return null;
+                    }
+                    return null;
+                }
+
+                if (latestKey === previousKey) {
+                    return null;
+                }
+
+                var notifyKey = "sermon:" + latestKey;
+                if (wasNotified(notifyKey)) {
+                    return null;
+                }
+
+                return showNotification({
+                    title: t("notify.newSermonTitle", "New sermon available"),
+                    body: latest.title || "Latest message is ready to listen",
+                    tag: notifyKey,
+                    url: "sermons.html"
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
+                        try {
+                            window.localStorage.setItem(NOTIFICATION_LAST_SERMON_KEY, latestKey);
+                        } catch (err) {
+                            return null;
+                        }
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
+    function runNotificationChecks() {
+        var status = getNotificationStatus();
+        if (!status.supported || !status.enabled || status.permission !== "granted") {
+            return;
+        }
+        checkEventReminder();
+        checkNewSermonNotification();
+    }
+
+    function startNotificationLoop() {
+        if (notificationIntervalId) {
+            window.clearInterval(notificationIntervalId);
+        }
+        runNotificationChecks();
+        notificationIntervalId = window.setInterval(runNotificationChecks, 5 * 60 * 1000);
+    }
+
+    function stopNotificationLoop() {
+        if (notificationIntervalId) {
+            window.clearInterval(notificationIntervalId);
+            notificationIntervalId = null;
+        }
+    }
+
+    function syncNotificationLoop() {
+        var status = getNotificationStatus();
+        if (status.supported && status.enabled && status.permission === "granted") {
+            startNotificationLoop();
+        } else {
+            stopNotificationLoop();
+        }
+    }
+
+    function requestNotificationPermission() {
+        if (!notificationsSupported()) {
+            return Promise.resolve("unsupported");
+        }
+        if (Notification.permission === "granted") {
+            return Promise.resolve("granted");
+        }
+        if (Notification.permission === "denied") {
+            return Promise.resolve("denied");
+        }
+        return Notification.requestPermission();
+    }
+
+    function toggleNotificationsEnabled() {
+        var status = getNotificationStatus();
+        if (!status.supported) {
+            emitNotificationStatus();
+            return Promise.resolve(getNotificationStatus());
+        }
+
+        if (status.enabled) {
+            setNotificationSettings({ enabled: false, reminderMinutes: status.reminderMinutes });
+            syncNotificationLoop();
+            emitNotificationStatus();
+            return Promise.resolve(getNotificationStatus());
+        }
+
+        return requestNotificationPermission().then(function (permission) {
+            if (permission === "granted") {
+                setNotificationSettings({ enabled: true, reminderMinutes: status.reminderMinutes });
+            } else {
+                setNotificationSettings({ enabled: false, reminderMinutes: status.reminderMinutes });
+            }
+            syncNotificationLoop();
+            emitNotificationStatus();
+            return getNotificationStatus();
+        });
+    }
+
+    function setupNotifications() {
+        window.NjcNotifications = {
+            getStatus: getNotificationStatus,
+            toggleEnabled: toggleNotificationsEnabled,
+            requestPermission: requestNotificationPermission,
+            refreshNow: function () {
+                runNotificationChecks();
+            }
+        };
+        syncNotificationLoop();
+        emitNotificationStatus();
+        document.addEventListener("visibilitychange", function () {
+            if (!document.hidden) {
+                runNotificationChecks();
+            }
+        });
     }
 
     function getStoredState() {
@@ -660,6 +1032,7 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
+        registerServiceWorker();
         activeLanguage = getActiveLanguage();
         window.NjcI18n = {
             t: t,
@@ -676,6 +1049,7 @@
         setLanguage(activeLanguage, false, true);
         setupLanguageToggle();
         setupThemeToggle();
+        setupNotifications();
         showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();

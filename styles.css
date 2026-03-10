@@ -706,6 +706,11 @@ button.button-link {
     font: inherit;
 }
 
+button.button-link:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .button-link:hover {
     transform: translateY(-1px);
     box-shadow: 0 10px 18px rgba(202, 50, 50, 0.28);
@@ -790,6 +795,26 @@ button.button-link {
     margin-top: 4px;
     color: var(--muted);
     font-size: 0.82rem;
+}
+
+.search-row {
+    margin-bottom: 10px;
+}
+
+.search-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
+.search-input:focus {
+    outline: 2px solid rgba(229, 57, 53, 0.3);
+    outline-offset: 1px;
+    border-color: var(--primary);
 }
 
 @media (prefers-color-scheme: dark) {

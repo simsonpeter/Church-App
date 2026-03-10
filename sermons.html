@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Sermons</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310n">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310n">
-    <link rel="manifest" href="site.webmanifest?v=20260310n">
-    <link rel="stylesheet" href="styles.css?v=20260310n">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310p">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310p">
+    <link rel="manifest" href="site.webmanifest?v=20260310p">
+    <link rel="stylesheet" href="styles.css?v=20260310p">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -37,6 +37,15 @@
 
             <section class="card">
                 <h2><i class="fa-solid fa-play-circle"></i><span data-i18n="sermons.latestTitle">Latest Sermons</span></h2>
+                <div class="search-row">
+                    <input
+                        id="sermon-search"
+                        class="search-input"
+                        type="search"
+                        data-i18n-placeholder="sermons.searchPlaceholder"
+                        placeholder="Search sermons by title, speaker, or date">
+                </div>
+                <p class="page-note" id="sermon-search-note" hidden></p>
                 <ul class="list" id="latest-sermons-list">
                     <li>
                         <h3 data-i18n="sermons.loadingTitle">Loading sermons...</h3>
@@ -116,13 +125,16 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260310n"></script>
+    <script src="app-shell.js?v=20260310p"></script>
+    <script src="events-engine.js?v=20260310p"></script>
     <script>
         (function () {
             var STATE_KEY = "njc_sermon_player_v1";
             var sermonsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
             var latestSermonsList = document.getElementById("latest-sermons-list");
             var showMoreSermonsButton = document.getElementById("show-more-sermons");
+            var sermonSearch = document.getElementById("sermon-search");
+            var sermonSearchNote = document.getElementById("sermon-search-note");
             var archiveNote = document.getElementById("sermon-archive-note");
             var allSermons = [];
             var visibleCount = 4;
@@ -130,6 +142,7 @@
             var currentSermon = null;
             var sermonsLoaded = false;
             var sermonsLoadFailed = false;
+            var searchQuery = "";
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -242,10 +255,34 @@
                     "  <p>" + escapeHtml(T("sermons.loadErrorBody", "Please refresh and try again.")) + "</p>" +
                     "</li>";
                 archiveNote.textContent = T("sermons.archiveUnavailable", "Sermon archive is temporarily unavailable.");
+                sermonSearchNote.hidden = true;
                 showMoreSermonsButton.hidden = true;
             }
 
+            function getFilteredSermons() {
+                var query = searchQuery.trim().toLowerCase();
+                var records = allSermons.map(function (item, index) {
+                    return { item: item, index: index };
+                });
+                if (!query) {
+                    return records;
+                }
+                return records.filter(function (record) {
+                    var sermon = record.item;
+                    var searchable = [
+                        sermon.title || "",
+                        sermon.subtitle || "",
+                        sermon.speaker || "",
+                        toDisplayDate(sermon.dateObj)
+                    ].join(" ").toLowerCase();
+                    return searchable.indexOf(query) >= 0;
+                });
+            }
+
             function renderSermons() {
+                var filteredRecords = getFilteredSermons();
+                var hasSearch = searchQuery.trim().length > 0;
+
                 if (!allSermons.length) {
                     latestSermonsList.innerHTML = "" +
                         "<li>" +
@@ -253,12 +290,32 @@
                         "  <p>" + escapeHtml(T("sermons.noSermonsBody", "Please check back soon.")) + "</p>" +
                         "</li>";
                     showMoreSermonsButton.hidden = true;
+                    sermonSearchNote.hidden = true;
                     archiveNote.textContent = T("sermons.archiveEmpty", "No sermon archive available yet.");
                     return;
                 }
 
-                var visible = allSermons.slice(0, visibleCount);
-                latestSermonsList.innerHTML = visible.map(function (sermon, idx) {
+                if (!filteredRecords.length) {
+                    latestSermonsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>" + escapeHtml(T("sermons.searchNoResultsTitle", "No sermons match your search")) + "</h3>" +
+                        "  <p>" + escapeHtml(T("sermons.searchNoResultsBody", "Try another keyword.")) + "</p>" +
+                        "</li>";
+                    showMoreSermonsButton.hidden = true;
+                    sermonSearchNote.hidden = false;
+                    sermonSearchNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found."), 0)
+                        : "0 results found.";
+                    archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+                        ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}."), allSermons.length)
+                        : ("Total sermons available: " + allSermons.length + ".");
+                    return;
+                }
+
+                var visible = hasSearch ? filteredRecords : filteredRecords.slice(0, visibleCount);
+                latestSermonsList.innerHTML = visible.map(function (record) {
+                    var sermon = record.item;
+                    var sermonIndex = record.index;
                     var title = escapeHtml(sermon.title);
                     var subtitle = sermon.subtitle ? " - " + escapeHtml(sermon.subtitle) : "";
                     var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker"));
@@ -270,7 +327,7 @@
 
                     return "" +
                         "<li class=\"sermon-item\">" +
-                        "  <button class=\"sermon-open-btn\" type=\"button\" data-sermon-index=\"" + idx + "\"" + (sermon.audioUrl ? "" : " disabled") + ">" +
+                        "  <button class=\"sermon-open-btn\" type=\"button\" data-sermon-index=\"" + sermonIndex + "\"" + (sermon.audioUrl ? "" : " disabled") + ">" +
                         "    <h3>" + title + "</h3>" +
                         "    <p>" + dateText + subtitle + "</p>" +
                         (speaker ? "    <p class=\"sermon-meta\">" + speaker + "</p>" : "") +
@@ -279,7 +336,13 @@
                         "</li>";
                 }).join("");
 
-                showMoreSermonsButton.hidden = visibleCount >= allSermons.length;
+                showMoreSermonsButton.hidden = hasSearch || visibleCount >= filteredRecords.length;
+                sermonSearchNote.hidden = !hasSearch;
+                if (hasSearch) {
+                    sermonSearchNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found."), filteredRecords.length)
+                        : (filteredRecords.length + " results found.");
+                }
                 archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
                     ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}."), allSermons.length)
                     : ("Total sermons available: " + allSermons.length + ".");
@@ -440,6 +503,12 @@
 
             showMoreSermonsButton.addEventListener("click", function () {
                 visibleCount += 4;
+                renderSermons();
+            });
+
+            sermonSearch.addEventListener("input", function () {
+                searchQuery = sermonSearch.value || "";
+                visibleCount = 4;
                 renderSermons();
             });
 

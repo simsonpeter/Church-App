@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Home</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310n">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310n">
-    <link rel="manifest" href="site.webmanifest?v=20260310n">
-    <link rel="stylesheet" href="styles.css?v=20260310n">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310p">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310p">
+    <link rel="manifest" href="site.webmanifest?v=20260310p">
+    <link rel="stylesheet" href="styles.css?v=20260310p">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -20,6 +20,13 @@
         </header>
 
         <main class="app-content">
+            <section class="card">
+                <h2><i class="fa-solid fa-bell"></i><span data-i18n="notify.title">Notifications</span></h2>
+                <p class="page-note" data-i18n="notify.subtitle">Get service reminders and new sermon alerts.</p>
+                <p class="page-note" id="notification-status-text" data-i18n="notify.statusOff">Notifications are currently off.</p>
+                <button class="button-link" id="notification-toggle-btn" type="button" data-i18n="notify.enable">Enable Notifications</button>
+            </section>
+
             <section class="card verse-card">
                 <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="home.bibleReadingTitle">Today's Bible Reading</span></h2>
                 <p class="page-note" id="today-reading-plan-meta"></p>
@@ -66,12 +73,14 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310n"></script>
-    <script src="events-engine.js?v=20260310n"></script>
+    <script src="app-shell.js?v=20260310p"></script>
+    <script src="events-engine.js?v=20260310p"></script>
     <script>
         (function () {
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
+            var notificationStatusText = document.getElementById("notification-status-text");
+            var notificationToggleButton = document.getElementById("notification-toggle-btn");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
@@ -164,6 +173,41 @@
                     day: "numeric"
                 }).format(dateUtc);
                 todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
+            }
+
+            function renderNotificationState() {
+                if (!window.NjcNotifications || typeof window.NjcNotifications.getStatus !== "function") {
+                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
+                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
+                    notificationToggleButton.disabled = true;
+                    return;
+                }
+
+                var status = window.NjcNotifications.getStatus();
+                if (!status.supported || status.permission === "unsupported") {
+                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
+                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
+                    notificationToggleButton.disabled = true;
+                    return;
+                }
+
+                if (status.permission === "denied") {
+                    notificationStatusText.textContent = T("notify.statusBlocked", "Notifications are blocked in browser settings.");
+                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
+                    notificationToggleButton.disabled = false;
+                    return;
+                }
+
+                if (status.enabled && status.permission === "granted") {
+                    notificationStatusText.textContent = T("notify.statusOn", "Notifications are active.");
+                    notificationToggleButton.textContent = T("notify.disable", "Disable Notifications");
+                    notificationToggleButton.disabled = false;
+                    return;
+                }
+
+                notificationStatusText.textContent = T("notify.statusOff", "Notifications are currently off.");
+                notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
+                notificationToggleButton.disabled = false;
             }
 
             function getBrusselsYmd() {
@@ -346,9 +390,25 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderThisWeekEvents();
+                renderNotificationState();
+            });
+
+            document.addEventListener("njc:notificationstatus", function () {
+                renderNotificationState();
+            });
+
+            notificationToggleButton.addEventListener("click", function () {
+                if (!window.NjcNotifications || typeof window.NjcNotifications.toggleEnabled !== "function") {
+                    renderNotificationState();
+                    return;
+                }
+                window.NjcNotifications.toggleEnabled().then(function () {
+                    renderNotificationState();
+                });
             });
 
             updateReadingPlanMeta();
+            renderNotificationState();
             loadTodayReadingPlan();
             loadThisWeekEvents();
         })();
