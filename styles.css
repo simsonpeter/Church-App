@@ -93,6 +93,22 @@ body {
     z-index: 1;
 }
 
+.eyebrow i {
+    font-size: 0.95rem;
+}
+
+.brand-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+}
+
+.home-header h1 {
+    font-size: 1.25rem;
+    opacity: 0.95;
+}
+
 .app-content {
     margin-top: 16px;
     display: grid;
@@ -133,7 +149,7 @@ body {
 
 .card h2 i {
     color: var(--primary);
-    font-size: 0.9rem;
+    font-size: 1.05rem;
 }
 
 .card p {
@@ -187,8 +203,8 @@ body {
 }
 
 .action-icon {
-    width: 30px;
-    height: 30px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     display: inline-grid;
     place-items: center;
@@ -209,7 +225,7 @@ body {
 }
 
 .action-icon i {
-    font-size: 0.76rem;
+    font-size: 1.05rem;
 }
 
 .action-pill:hover .action-icon {
@@ -350,8 +366,8 @@ button.button-link {
 }
 
 .tab-icon {
-    width: 24px;
-    height: 24px;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     display: inline-grid;
     place-items: center;
@@ -362,7 +378,7 @@ button.button-link {
 }
 
 .tab-icon i {
-    font-size: 0.72rem;
+    font-size: 1rem;
 }
 
 .tab.active {
