@@ -42,10 +42,6 @@ body {
     position: relative;
 }
 
-body.page-enter .app-shell {
-    animation: page-enter 0.28s ease both;
-}
-
 .app-header {
     background: linear-gradient(145deg, var(--header-start), var(--header-end));
     color: #ffffff;
@@ -480,17 +476,6 @@ button.button-link {
     to {
         opacity: 1;
         transform: translate(-50%, 0);
-    }
-}
-
-@keyframes page-enter {
-    from {
-        opacity: 0;
-        transform: translateY(8px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
     }
 }
 

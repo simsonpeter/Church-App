@@ -86,7 +86,6 @@
     }
 
     document.addEventListener("DOMContentLoaded", function () {
-        document.body.classList.add("page-enter");
         setupTabPrefetch();
         setupIntentPrefetch();
     });
