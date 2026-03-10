@@ -450,6 +450,12 @@ body.splash-active {
     overflow: hidden;
 }
 
+.sermon-item-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: stretch;
+}
+
 .sermon-open-btn {
     width: 100%;
     border: 0;
@@ -459,6 +465,19 @@ body.splash-active {
     padding: 12px 14px;
     cursor: pointer;
     font: inherit;
+}
+
+.sermon-favorite-btn {
+    width: 42px;
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: transparent;
+    color: #b14949;
+    cursor: pointer;
+}
+
+.sermon-star {
+    color: #c0781a;
 }
 
 .sermon-open-btn:disabled {
@@ -558,6 +577,20 @@ body.sermon-player-open {
 
 .sermon-progress-row {
     margin-top: 10px;
+}
+
+.player-extra-controls {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.player-extra-controls label {
+    display: grid;
+    gap: 4px;
+    font-size: 0.78rem;
+    color: var(--muted);
 }
 
 .sermon-time {
@@ -819,6 +852,25 @@ button.button-link:disabled {
     font: inherit;
 }
 
+.reading-progress {
+    margin-top: 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.reading-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+
+.reading-check input {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
 .search-row {
     margin-bottom: 10px;
 }
@@ -888,6 +940,17 @@ button.button-link:disabled {
     font-size: 0.75rem;
     font-weight: 700;
     box-shadow: 0 8px 16px rgba(80, 17, 17, 0.35);
+}
+
+.prayer-form {
+    margin-top: 8px;
+    display: grid;
+    gap: 8px;
+}
+
+.prayer-textarea {
+    resize: vertical;
+    min-height: 96px;
 }
 
 @media (prefers-color-scheme: dark) {

@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v2";
-const RUNTIME_CACHE = "njc-runtime-cache-v2";
+const APP_CACHE = "njc-app-cache-v3";
+const RUNTIME_CACHE = "njc-runtime-cache-v3";
 
 const CORE_ASSETS = [
     "./",
@@ -8,11 +8,11 @@ const CORE_ASSETS = [
     "./events.html",
     "./sermons.html",
     "./contact.html",
-    "./styles.css?v=20260310q",
-    "./app-shell.js?v=20260310q",
-    "./events-engine.js?v=20260310q",
-    "./site.webmanifest?v=20260310q",
-    "./logo.png?v=20260310q"
+    "./styles.css?v=20260310r",
+    "./app-shell.js?v=20260310r",
+    "./events-engine.js?v=20260310r",
+    "./site.webmanifest?v=20260310r",
+    "./logo.png?v=20260310r"
 ];
 
 function isCacheableResponse(response) {

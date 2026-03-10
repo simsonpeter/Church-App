@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Contact</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310q">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310q">
-    <link rel="manifest" href="site.webmanifest?v=20260310q">
-    <link rel="stylesheet" href="styles.css?v=20260310q">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310r">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310r">
+    <link rel="manifest" href="site.webmanifest?v=20260310r">
+    <link rel="stylesheet" href="styles.css?v=20260310r">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -42,6 +42,27 @@
             </section>
 
             <section class="card">
+                <h2><i class="fa-solid fa-hands-praying"></i><span data-i18n="contact.prayerTitle">Prayer Request</span></h2>
+                <p class="page-note" data-i18n="contact.prayerSubtitle">Share your prayer request with our team.</p>
+                <form class="prayer-form" id="prayer-request-form">
+                    <input
+                        id="prayer-name"
+                        class="search-input"
+                        type="text"
+                        data-i18n-placeholder="contact.prayerNamePlaceholder"
+                        placeholder="Your name (optional)">
+                    <textarea
+                        id="prayer-message"
+                        class="search-input prayer-textarea"
+                        rows="4"
+                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
+                        placeholder="Write your prayer request"></textarea>
+                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Prayer Request</button>
+                </form>
+                <p class="page-note" id="prayer-form-note" hidden></p>
+            </section>
+
+            <section class="card">
                 <h2><i class="fa-solid fa-clock"></i><span data-i18n="contact.officeHours">Office Hours</span></h2>
                 <ul class="list">
                     <li>
@@ -70,7 +91,51 @@
             <a class="tab active" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310q"></script>
-    <script src="events-engine.js?v=20260310q"></script>
+    <script src="app-shell.js?v=20260310r"></script>
+    <script src="events-engine.js?v=20260310r"></script>
+    <script>
+        (function () {
+            var form = document.getElementById("prayer-request-form");
+            var nameInput = document.getElementById("prayer-name");
+            var messageInput = document.getElementById("prayer-message");
+            var note = document.getElementById("prayer-form-note");
+
+            function T(key, fallback) {
+                if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    return window.NjcI18n.t(key, fallback);
+                }
+                return fallback || key;
+            }
+
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+                var nameValue = (nameInput.value || "").trim();
+                var messageValue = (messageInput.value || "").trim();
+
+                if (!messageValue) {
+                    note.hidden = false;
+                    note.textContent = T("contact.prayerNeedMessage", "Please enter your prayer request.");
+                    return;
+                }
+
+                var subject = "Prayer Request" + (nameValue ? " - " + nameValue : "");
+                var body = (nameValue ? "Name: " + nameValue + "\n\n" : "") + "Prayer request:\n" + messageValue;
+                var mailtoUrl = "mailto:simsonpeter@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
+                window.location.href = mailtoUrl;
+                note.hidden = false;
+                note.textContent = T("contact.prayerMailOpened", "Your email app has been opened.");
+            });
+
+            document.addEventListener("njc:langchange", function () {
+                if (!note.hidden) {
+                    if ((messageInput.value || "").trim()) {
+                        note.textContent = T("contact.prayerMailOpened", "Your email app has been opened.");
+                    } else {
+                        note.textContent = T("contact.prayerNeedMessage", "Please enter your prayer request.");
+                    }
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

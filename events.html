@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Events</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310q">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310q">
-    <link rel="manifest" href="site.webmanifest?v=20260310q">
-    <link rel="stylesheet" href="styles.css?v=20260310q">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310r">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310r">
+    <link rel="manifest" href="site.webmanifest?v=20260310r">
+    <link rel="stylesheet" href="styles.css?v=20260310r">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -76,8 +76,8 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310q"></script>
-    <script src="events-engine.js?v=20260310q"></script>
+    <script src="app-shell.js?v=20260310r"></script>
+    <script src="events-engine.js?v=20260310r"></script>
     <script>
         (function () {
             var upcomingEventsList = document.getElementById("upcoming-events-list");
@@ -100,6 +100,41 @@
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
+            }
+
+            function pad2(value) {
+                return value < 10 ? "0" + value : String(value);
+            }
+
+            function toCalendarDateTime(year, month, day, hour, minute) {
+                return String(year) + pad2(month) + pad2(day) + "T" + pad2(hour) + pad2(minute) + "00";
+            }
+
+            function addMinutesToParts(year, month, day, hour, minute, extraMinutes) {
+                var dt = new Date(Date.UTC(year, month - 1, day, hour, minute + extraMinutes, 0));
+                return {
+                    year: dt.getUTCFullYear(),
+                    month: dt.getUTCMonth() + 1,
+                    day: dt.getUTCDate(),
+                    hour: dt.getUTCHours(),
+                    minute: dt.getUTCMinutes()
+                };
+            }
+
+            function toGoogleCalendarUrl(eventItem) {
+                var end = addMinutesToParts(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute, 90);
+                var dates = toCalendarDateTime(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute) +
+                    "/" +
+                    toCalendarDateTime(end.year, end.month, end.day, end.hour, end.minute);
+                var params = new URLSearchParams({
+                    action: "TEMPLATE",
+                    text: eventItem.title || T("events.event", "Event"),
+                    dates: dates,
+                    ctz: "Europe/Brussels",
+                    details: (eventItem.description || "") + " - NJC Belgium",
+                    location: "New Jerusalem Church Belgium, Ten Eekhovelei 292, 2100 Antwerpen"
+                });
+                return "https://calendar.google.com/calendar/render?" + params.toString();
             }
 
             function localizeEventTitle(title) {
@@ -146,6 +181,7 @@
                     var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
                     var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
                     var typeAndDescription = NjcEvents.escapeHtml(
                         translateType(eventItem.type) + (eventItem.description ? " - " + eventItem.description : "")
                     );
@@ -154,6 +190,7 @@
                         "  <h3>" + title + "</h3>" +
                         "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
                         "  <p class=\"page-note\">" + typeAndDescription + "</p>" +
+                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
                         "</li>";
                 }).join("");
 
@@ -180,12 +217,14 @@
                     var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var description = NjcEvents.escapeHtml(eventItem.description || "");
+                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
 
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
                         "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
                         (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
+                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
                         "</li>";
                 }).join("");
             }

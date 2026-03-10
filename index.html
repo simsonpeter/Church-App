@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Home</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310q">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310q">
-    <link rel="manifest" href="site.webmanifest?v=20260310q">
-    <link rel="stylesheet" href="styles.css?v=20260310q">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310r">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310r">
+    <link rel="manifest" href="site.webmanifest?v=20260310r">
+    <link rel="stylesheet" href="styles.css?v=20260310r">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -44,6 +44,17 @@
                         <p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p>
                     </li>
                 </ul>
+                <div class="reading-progress">
+                    <label class="reading-check">
+                        <input id="reading-morning-done" type="checkbox">
+                        <span data-i18n="home.markMorningDone">Morning reading done</span>
+                    </label>
+                    <label class="reading-check">
+                        <input id="reading-evening-done" type="checkbox">
+                        <span data-i18n="home.markEveningDone">Evening reading done</span>
+                    </label>
+                    <p class="page-note" id="reading-streak-note"></p>
+                </div>
             </section>
 
             <section class="card hero-card">
@@ -81,12 +92,16 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310q"></script>
-    <script src="events-engine.js?v=20260310q"></script>
+    <script src="app-shell.js?v=20260310r"></script>
+    <script src="events-engine.js?v=20260310r"></script>
     <script>
         (function () {
+            var READING_PROGRESS_KEY = "njc_reading_progress_v1";
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
+            var readingMorningDone = document.getElementById("reading-morning-done");
+            var readingEveningDone = document.getElementById("reading-evening-done");
+            var readingStreakNote = document.getElementById("reading-streak-note");
             var notificationStatusText = document.getElementById("notification-status-text");
             var notificationToggleButton = document.getElementById("notification-toggle-btn");
             var notificationReminderSelect = document.getElementById("notification-reminder-select");
@@ -172,6 +187,41 @@
                 return raw;
             }
 
+            function pad2(value) {
+                return value < 10 ? "0" + value : String(value);
+            }
+
+            function toCalendarDateTime(year, month, day, hour, minute) {
+                return String(year) + pad2(month) + pad2(day) + "T" + pad2(hour) + pad2(minute) + "00";
+            }
+
+            function addMinutesToParts(year, month, day, hour, minute, extraMinutes) {
+                var dt = new Date(Date.UTC(year, month - 1, day, hour, minute + extraMinutes, 0));
+                return {
+                    year: dt.getUTCFullYear(),
+                    month: dt.getUTCMonth() + 1,
+                    day: dt.getUTCDate(),
+                    hour: dt.getUTCHours(),
+                    minute: dt.getUTCMinutes()
+                };
+            }
+
+            function toGoogleCalendarUrl(eventItem) {
+                var end = addMinutesToParts(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute, 90);
+                var dates = toCalendarDateTime(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute) +
+                    "/" +
+                    toCalendarDateTime(end.year, end.month, end.day, end.hour, end.minute);
+                var params = new URLSearchParams({
+                    action: "TEMPLATE",
+                    text: eventItem.title || T("events.event", "Event"),
+                    dates: dates,
+                    ctz: "Europe/Brussels",
+                    details: (eventItem.description || "") + " - NJC Belgium",
+                    location: "New Jerusalem Church Belgium, Ten Eekhovelei 292, 2100 Antwerpen"
+                });
+                return "https://calendar.google.com/calendar/render?" + params.toString();
+            }
+
             function updateReadingPlanMeta() {
                 var dateUtc = new Date(Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day, 12, 0, 0));
                 var dateLabel = new Intl.DateTimeFormat(getLocale(), {
@@ -182,6 +232,78 @@
                     day: "numeric"
                 }).format(dateUtc);
                 todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
+            }
+
+            function getTodayKey() {
+                return String(todayYmd.year) + "-" + String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
+            }
+
+            function getProgressMap() {
+                try {
+                    var raw = window.localStorage.getItem(READING_PROGRESS_KEY);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                } catch (err) {
+                    return {};
+                }
+            }
+
+            function saveProgressMap(progressMap) {
+                try {
+                    window.localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(progressMap));
+                } catch (err) {
+                    return null;
+                }
+                return null;
+            }
+
+            function getTodayProgress() {
+                var map = getProgressMap();
+                var todayKey = getTodayKey();
+                var entry = map[todayKey] || {};
+                return {
+                    morning: Boolean(entry.morning),
+                    evening: Boolean(entry.evening)
+                };
+            }
+
+            function setTodayProgress(part, value) {
+                var map = getProgressMap();
+                var todayKey = getTodayKey();
+                var entry = map[todayKey] || {};
+                entry[part] = Boolean(value);
+                map[todayKey] = entry;
+                saveProgressMap(map);
+            }
+
+            function calculateReadingStreak() {
+                var map = getProgressMap();
+                var streak = 0;
+                var startUtc = Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day);
+
+                for (var dayOffset = 0; dayOffset < 400; dayOffset += 1) {
+                    var dateObj = new Date(startUtc - (dayOffset * 86400000));
+                    var key = String(dateObj.getUTCFullYear()) + "-" +
+                        String(dateObj.getUTCMonth() + 1).padStart(2, "0") + "-" +
+                        String(dateObj.getUTCDate()).padStart(2, "0");
+                    var entry = map[key];
+                    if (!entry || !entry.morning || !entry.evening) {
+                        break;
+                    }
+                    streak += 1;
+                }
+
+                return streak;
+            }
+
+            function renderReadingProgress() {
+                var progress = getTodayProgress();
+                readingMorningDone.checked = progress.morning;
+                readingEveningDone.checked = progress.evening;
+                var streak = calculateReadingStreak();
+                readingStreakNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+                    ? window.NjcI18n.formatCount(T("home.readingStreak", "Streak days: {count}"), streak)
+                    : ("Streak days: " + streak);
             }
 
             function renderNotificationState() {
@@ -380,10 +502,12 @@
                     var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
                     var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
                         "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
+                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
                         "</li>";
                 }).join("");
             }
@@ -404,6 +528,7 @@
             document.addEventListener("njc:langchange", function () {
                 updateReadingPlanMeta();
                 renderReadingPlan();
+                renderReadingProgress();
                 renderThisWeekEvents();
                 renderNotificationState();
             });
@@ -430,8 +555,19 @@
                 renderNotificationState();
             });
 
+            readingMorningDone.addEventListener("change", function () {
+                setTodayProgress("morning", readingMorningDone.checked);
+                renderReadingProgress();
+            });
+
+            readingEveningDone.addEventListener("change", function () {
+                setTodayProgress("evening", readingEveningDone.checked);
+                renderReadingProgress();
+            });
+
             updateReadingPlanMeta();
             renderNotificationState();
+            renderReadingProgress();
             loadTodayReadingPlan();
             loadThisWeekEvents();
         })();
