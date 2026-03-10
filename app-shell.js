@@ -6,7 +6,7 @@
     var LANGUAGE_KEY = "njc_language_v1";
     var activeLanguage = "en";
     var tamilTranslations = {
-        "brand.name": "என்ஜேசி பெல்ஜியம்",
+        "brand.name": "புதிய எருசலேம் சபை",
         "nav.home": "முகப்பு",
         "nav.about": "பற்றி",
         "nav.events": "நிகழ்வுகள்",
@@ -16,7 +16,7 @@
         "toggle.language.toEnglish": "Switch to English",
         "toggle.theme.toLight": "ஒளி நிலைக்கு மாற்று",
         "toggle.theme.toDark": "இருள் நிலைக்கு மாற்று",
-        "splash.main": "நியூ ஜெருசலேம் சபை",
+        "splash.main": "புதிய எருசலேம் சபை",
         "splash.sub": "பெல்ஜியம்",
         "home.welcomeBack": "வரவேற்கிறோம்",
         "home.tagline": "உங்கள் வாராந்திர விசுவாசப் பயணம் ஒரே இடத்தில்.",
@@ -134,7 +134,7 @@
         "contact.weekendSupport": "வார இறுதி உதவி",
         "contact.weekendSupportTime": "ஞாயிறு ஆராதனைக்கு முன் மற்றும் பின்",
         "contact.location": "இடம்",
-        "contact.locationName": "நியூ ஜெருசலேம் சபை பெல்ஜியம்",
+        "contact.locationName": "புதிய எருசலேம் சபை பெல்ஜியம்",
         "common.at": "மணிக்கு",
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
         "common.today": "இன்று"
