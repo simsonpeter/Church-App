@@ -85,34 +85,9 @@
         }, { passive: true });
     }
 
-    function setupNavigationTransition() {
-        document.addEventListener("click", function (event) {
-            if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-                return;
-            }
-
-            var anchor = event.target.closest("a[href]");
-            if (!isNavigableAnchor(anchor)) {
-                return;
-            }
-
-            event.preventDefault();
-
-            if (document.body.classList.contains("is-leaving")) {
-                return;
-            }
-
-            document.body.classList.add("is-leaving");
-            window.setTimeout(function () {
-                window.location.href = anchor.href;
-            }, 150);
-        });
-    }
-
     document.addEventListener("DOMContentLoaded", function () {
         document.body.classList.add("page-enter");
         setupTabPrefetch();
         setupIntentPrefetch();
-        setupNavigationTransition();
     });
 })();
