@@ -5,73 +5,73 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Sermons</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310i">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310i">
-    <link rel="manifest" href="site.webmanifest?v=20260310i">
-    <link rel="stylesheet" href="styles.css?v=20260310i">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310j">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310j">
+    <link rel="manifest" href="site.webmanifest?v=20260310j">
+    <link rel="stylesheet" href="styles.css?v=20260310j">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
         <header class="app-header">
-            <div class="eyebrow"><i class="fa-solid fa-microphone-lines"></i>Sermons</div>
-            <h1>Recent messages</h1>
-            <p>Listen again, take notes, and keep growing during the week.</p>
+            <div class="eyebrow"><i class="fa-solid fa-microphone-lines"></i><span data-i18n="sermons.eyebrow">Sermons</span></div>
+            <h1 data-i18n="sermons.title">Recent messages</h1>
+            <p data-i18n="sermons.subtitle">Listen again, take notes, and keep growing during the week.</p>
         </header>
 
         <main class="app-content">
             <section class="quick-actions">
                 <a class="action-pill" href="#">
                     <span class="action-icon"><i class="fa-solid fa-tower-broadcast"></i></span>
-                    <span class="action-label">Live</span>
+                    <span class="action-label" data-i18n="actions.live">Live</span>
                 </a>
                 <a class="action-pill" href="#">
                     <span class="action-icon"><i class="fa-solid fa-headphones"></i></span>
-                    <span class="action-label">Audio</span>
+                    <span class="action-label" data-i18n="actions.audio">Audio</span>
                 </a>
                 <a class="action-pill" href="#">
                     <span class="action-icon"><i class="fa-solid fa-note-sticky"></i></span>
-                    <span class="action-label">Notes</span>
+                    <span class="action-label" data-i18n="actions.notes">Notes</span>
                 </a>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-play-circle"></i>Latest Sermons</h2>
+                <h2><i class="fa-solid fa-play-circle"></i><span data-i18n="sermons.latestTitle">Latest Sermons</span></h2>
                 <ul class="list" id="latest-sermons-list">
                     <li>
-                        <h3>Loading sermons...</h3>
-                        <p>Please wait while we load the latest messages.</p>
+                        <h3 data-i18n="sermons.loadingTitle">Loading sermons...</h3>
+                        <p data-i18n="sermons.loadingBody">Please wait while we load the latest messages.</p>
                     </li>
                 </ul>
-                <button class="button-link" id="show-more-sermons" type="button" hidden>See more sermons</button>
+                <button class="button-link" id="show-more-sermons" type="button" data-i18n="sermons.seeMore" hidden>See more sermons</button>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-box-archive"></i>Archive</h2>
-                <p id="sermon-archive-note">Loading archive summary...</p>
-                <p class="page-note">Tip: Use the latest list to open sermon audio directly.</p>
+                <h2><i class="fa-solid fa-box-archive"></i><span data-i18n="sermons.archiveTitle">Archive</span></h2>
+                <p id="sermon-archive-note" data-i18n="sermons.archiveLoading">Loading archive summary...</p>
+                <p class="page-note" data-i18n="sermons.tip">Tip: Use the latest list to open sermon audio directly.</p>
             </section>
         </main>
 
         <nav class="tab-nav">
-            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label">About</span></a>
-            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label">Events</span></a>
-            <a class="tab active" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label">Sermons</span></a>
-            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
+            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
+            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
+            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
+            <a class="tab active" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
+            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
 
     <div class="sermon-player-overlay" id="sermon-player" hidden>
-        <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player"></button>
-        <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player">
+        <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
+        <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
             <div class="sermon-player-top">
-                <strong>Now Playing</strong>
+                <strong data-i18n="sermons.nowPlaying">Now Playing</strong>
                 <div>
-                    <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player">
+                    <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player" data-i18n-aria-label="player.minimize">
                         <i class="fa-solid fa-window-minimize"></i>
                     </button>
-                    <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player">
+                    <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player" data-i18n-aria-label="player.close">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
@@ -81,22 +81,22 @@
                 <p id="player-sermon-subtitle">Subtitle</p>
                 <p class="sermon-meta" id="player-sermon-date">Date</p>
                 <div class="sermon-progress-row">
-                    <input type="range" id="player-seek" min="0" max="100" value="0" step="1" aria-label="Seek position">
+                    <input type="range" id="player-seek" min="0" max="100" value="0" step="1" aria-label="Seek position" data-i18n-aria-label="player.seekPosition">
                     <div class="sermon-time" id="player-time">00:00 / 00:00</div>
                 </div>
             </div>
-            <div class="ipod-wheel" aria-label="Player controls">
+            <div class="ipod-wheel" aria-label="Player controls" data-i18n-aria-label="player.controls">
                 <button type="button" class="wheel-btn wheel-menu" id="player-wheel-menu">MENU</button>
-                <button type="button" class="wheel-btn wheel-prev" id="player-prev" aria-label="Previous sermon">
+                <button type="button" class="wheel-btn wheel-prev" id="player-prev" aria-label="Previous sermon" data-i18n-aria-label="player.previousSermon">
                     <i class="fa-solid fa-backward-step"></i>
                 </button>
-                <button type="button" class="wheel-btn wheel-next" id="player-next" aria-label="Next sermon">
+                <button type="button" class="wheel-btn wheel-next" id="player-next" aria-label="Next sermon" data-i18n-aria-label="player.nextSermon">
                     <i class="fa-solid fa-forward-step"></i>
                 </button>
-                <button type="button" class="wheel-btn wheel-play" id="player-play" aria-label="Play or pause">
+                <button type="button" class="wheel-btn wheel-play" id="player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
                     <i class="fa-solid fa-play"></i>
                 </button>
-                <button type="button" class="wheel-center" id="player-center" aria-label="Play or pause">
+                <button type="button" class="wheel-center" id="player-center" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
                     <i class="fa-solid fa-play"></i>
                 </button>
             </div>
@@ -104,19 +104,19 @@
         </section>
     </div>
     <div class="mini-sermon-player" id="mini-sermon-player" hidden>
-        <button type="button" class="mini-player-open" id="mini-player-open" aria-label="Open full player">
-            <span class="mini-player-title" id="mini-player-title">Now Playing</span>
+        <button type="button" class="mini-player-open" id="mini-player-open" aria-label="Open full player" data-i18n-aria-label="player.openSermonsPage">
+            <span class="mini-player-title" id="mini-player-title" data-i18n="sermons.nowPlaying">Now Playing</span>
             <span class="mini-player-time" id="mini-player-time">00:00 / 00:00</span>
         </button>
-        <button type="button" class="mini-player-btn" id="mini-player-play" aria-label="Play or pause">
+        <button type="button" class="mini-player-btn" id="mini-player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
             <i class="fa-solid fa-play"></i>
         </button>
-        <button type="button" class="mini-player-btn" id="mini-player-close" aria-label="Stop and close player">
+        <button type="button" class="mini-player-btn" id="mini-player-close" aria-label="Stop and close player" data-i18n-aria-label="player.stopAndClose">
             <i class="fa-solid fa-xmark"></i>
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260310i"></script>
+    <script src="app-shell.js?v=20260310j"></script>
     <script>
         (function () {
             var STATE_KEY = "njc_sermon_player_v1";
@@ -128,6 +128,8 @@
             var visibleCount = 4;
             var currentSermonIndex = -1;
             var currentSermon = null;
+            var sermonsLoaded = false;
+            var sermonsLoadFailed = false;
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -150,6 +152,20 @@
             var miniPlayerTime = document.getElementById("mini-player-time");
             var miniPlayerPlay = document.getElementById("mini-player-play");
             var miniPlayerClose = document.getElementById("mini-player-close");
+
+            function T(key, fallback) {
+                if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    return window.NjcI18n.t(key, fallback);
+                }
+                return fallback || key;
+            }
+
+            function getLocale() {
+                if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    return window.NjcI18n.getLocale();
+                }
+                return "en-BE";
+            }
 
             function getStoredState() {
                 try {
@@ -194,9 +210,9 @@
 
             function toDisplayDate(dateObj) {
                 if (!dateObj) {
-                    return "Date not available";
+                    return T("sermons.dateUnavailable", "Date not available");
                 }
-                return dateObj.toLocaleDateString("en-BE", {
+                return dateObj.toLocaleDateString(getLocale(), {
                     year: "numeric",
                     month: "long",
                     day: "numeric"
@@ -219,15 +235,25 @@
                 };
             }
 
+            function renderLoadError() {
+                latestSermonsList.innerHTML = "" +
+                    "<li>" +
+                    "  <h3>" + escapeHtml(T("sermons.loadErrorTitle", "Could not load sermons")) + "</h3>" +
+                    "  <p>" + escapeHtml(T("sermons.loadErrorBody", "Please refresh and try again.")) + "</p>" +
+                    "</li>";
+                archiveNote.textContent = T("sermons.archiveUnavailable", "Sermon archive is temporarily unavailable.");
+                showMoreSermonsButton.hidden = true;
+            }
+
             function renderSermons() {
                 if (!allSermons.length) {
                     latestSermonsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>No sermons available yet</h3>" +
-                        "  <p>Please check back soon.</p>" +
+                        "  <h3>" + escapeHtml(T("sermons.noSermonsTitle", "No sermons available yet")) + "</h3>" +
+                        "  <p>" + escapeHtml(T("sermons.noSermonsBody", "Please check back soon.")) + "</p>" +
                         "</li>";
                     showMoreSermonsButton.hidden = true;
-                    archiveNote.textContent = "No sermon archive available yet.";
+                    archiveNote.textContent = T("sermons.archiveEmpty", "No sermon archive available yet.");
                     return;
                 }
 
@@ -235,11 +261,12 @@
                 latestSermonsList.innerHTML = visible.map(function (sermon, idx) {
                     var title = escapeHtml(sermon.title);
                     var subtitle = sermon.subtitle ? " - " + escapeHtml(sermon.subtitle) : "";
-                    var speaker = sermon.speaker ? "Speaker: " + escapeHtml(sermon.speaker) : "";
+                    var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker"));
+                    var speaker = sermon.speaker ? speakerPrefix + ": " + escapeHtml(sermon.speaker) : "";
                     var dateText = toDisplayDate(sermon.dateObj);
                     var hint = sermon.audioUrl
-                        ? "<p class=\"page-note sermon-hint\"><i class=\"fa-solid fa-circle-play\"></i> Tap to play in app</p>"
-                        : "<p class=\"page-note sermon-hint\">Audio not available</p>";
+                        ? "<p class=\"page-note sermon-hint\"><i class=\"fa-solid fa-circle-play\"></i> " + escapeHtml(T("sermons.tapToPlayInApp", "Tap to play in app")) + "</p>"
+                        : "<p class=\"page-note sermon-hint\">" + escapeHtml(T("sermons.audioNotAvailable", "Audio not available")) + "</p>";
 
                     return "" +
                         "<li class=\"sermon-item\">" +
@@ -253,7 +280,9 @@
                 }).join("");
 
                 showMoreSermonsButton.hidden = visibleCount >= allSermons.length;
-                archiveNote.textContent = "Total sermons available: " + allSermons.length + ".";
+                archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+                    ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}."), allSermons.length)
+                    : ("Total sermons available: " + allSermons.length + ".");
             }
 
             function formatTime(seconds) {
@@ -281,7 +310,7 @@
 
                 setStoredState({
                     audioUrl: sermonAudio.currentSrc || currentSermon.audioUrl,
-                    title: currentSermon.title || "Sermon",
+                    title: currentSermon.title || T("sermons.eyebrow", "Sermon"),
                     subtitle: currentSermon.subtitle || "",
                     speaker: currentSermon.speaker || "",
                     dateText: playerDate.textContent || "",
@@ -301,6 +330,24 @@
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             }
 
+            function toPlayerDateLine(sermon) {
+                var baseDate = toDisplayDate(sermon.dateObj);
+                if (!sermon.speaker) {
+                    return baseDate;
+                }
+                return baseDate + " - " + T("sermons.speakerPrefix", "Speaker") + ": " + sermon.speaker;
+            }
+
+            function syncPlayerText() {
+                if (!currentSermon) {
+                    return;
+                }
+                playerTitle.textContent = currentSermon.title || T("sermons.eyebrow", "Sermon");
+                playerSubtitle.textContent = currentSermon.subtitle || "";
+                playerDate.textContent = toPlayerDateLine(currentSermon);
+                miniPlayerTitle.textContent = currentSermon.title || T("sermons.nowPlaying", "Now Playing");
+            }
+
             function openPlayer(index, autoplay) {
                 if (index < 0 || index >= allSermons.length) {
                     return;
@@ -312,10 +359,7 @@
 
                 currentSermonIndex = index;
                 currentSermon = sermon;
-                playerTitle.textContent = sermon.title || "Sermon";
-                playerSubtitle.textContent = sermon.subtitle || "";
-                playerDate.textContent = toDisplayDate(sermon.dateObj) + (sermon.speaker ? " - " + sermon.speaker : "");
-                miniPlayerTitle.textContent = sermon.title || "Sermon";
+                syncPlayerText();
                 playerOverlay.hidden = false;
                 miniPlayer.hidden = true;
                 document.body.classList.add("sermon-player-open");
@@ -450,6 +494,19 @@
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
 
+            document.addEventListener("njc:langchange", function () {
+                if (!sermonsLoaded) {
+                    return;
+                }
+                if (sermonsLoadFailed) {
+                    renderLoadError();
+                    return;
+                }
+                renderSermons();
+                syncPlayerText();
+                refreshPlayerTime();
+            });
+
             fetch(sermonsUrl)
                 .then(function (response) {
                     if (!response.ok) {
@@ -466,6 +523,7 @@
                         .sort(function (a, b) {
                             return b.dateKey - a.dateKey;
                         });
+                    sermonsLoaded = true;
                     renderSermons();
 
                     var storedState = getStoredState();
@@ -499,13 +557,9 @@
                     }
                 })
                 .catch(function () {
-                    latestSermonsList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>Could not load sermons</h3>" +
-                        "  <p>Please refresh and try again.</p>" +
-                        "</li>";
-                    archiveNote.textContent = "Sermon archive is temporarily unavailable.";
-                    showMoreSermonsButton.hidden = true;
+                    sermonsLoaded = true;
+                    sermonsLoadFailed = true;
+                    renderLoadError();
                 });
         })();
     </script>

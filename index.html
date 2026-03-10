@@ -5,37 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Home</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310i">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310i">
-    <link rel="manifest" href="site.webmanifest?v=20260310i">
-    <link rel="stylesheet" href="styles.css?v=20260310i">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310j">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310j">
+    <link rel="manifest" href="site.webmanifest?v=20260310j">
+    <link rel="stylesheet" href="styles.css?v=20260310j">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
         <header class="app-header home-header">
-            <div class="eyebrow brand-title"><i class="fa-solid fa-church"></i>NJC Belgium</div>
-            <h1>Welcome back</h1>
-            <p>Your weekly faith journey in one place.</p>
+            <div class="eyebrow brand-title"><i class="fa-solid fa-church"></i><span data-i18n="brand.name">NJC Belgium</span></div>
+            <h1 data-i18n="home.welcomeBack">Welcome back</h1>
+            <p data-i18n="home.tagline">Your weekly faith journey in one place.</p>
         </header>
 
         <main class="app-content">
             <section class="card verse-card">
-                <h2><i class="fa-solid fa-book-bible"></i>Today's Reading Plan</h2>
+                <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="home.bibleReadingTitle">Today's Bible Reading Plan</span></h2>
+                <p class="page-note" id="today-reading-plan-meta"></p>
                 <ul class="list" id="today-reading-plan-list">
                     <li>
-                        <h3>Loading today's reading plan...</h3>
-                        <p>Please wait while we load today's schedule.</p>
+                        <h3 data-i18n="home.loadingReadingTitle">Loading today's reading plan...</h3>
+                        <p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p>
                     </li>
                 </ul>
             </section>
 
             <section class="card hero-card">
-                <h2><i class="fa-solid fa-calendar-week"></i>This Week</h2>
+                <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
                     <li>
-                        <h3>Loading this week events...</h3>
-                        <p>Please wait while we calculate the next dates.</p>
+                        <h3 data-i18n="home.loadingWeekTitle">Loading this week events...</h3>
+                        <p data-i18n="home.loadingWeekBody">Please wait while we calculate the next dates.</p>
                     </li>
                 </ul>
             </section>
@@ -43,37 +44,44 @@
             <section class="quick-actions">
                 <a class="action-pill" href="events.html">
                     <span class="action-icon"><i class="fa-solid fa-calendar-days"></i></span>
-                    <span class="action-label">Events</span>
+                    <span class="action-label" data-i18n="actions.events">Events</span>
                 </a>
                 <a class="action-pill" href="sermons.html">
                     <span class="action-icon"><i class="fa-solid fa-microphone-lines"></i></span>
-                    <span class="action-label">Sermons</span>
+                    <span class="action-label" data-i18n="actions.sermons">Sermons</span>
                 </a>
                 <a class="action-pill" href="contact.html">
                     <span class="action-icon"><i class="fa-solid fa-phone"></i></span>
-                    <span class="action-label">Contact</span>
+                    <span class="action-label" data-i18n="actions.contact">Contact</span>
                 </a>
             </section>
 
         </main>
 
         <nav class="tab-nav">
-            <a class="tab active" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label">About</span></a>
-            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label">Events</span></a>
-            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label">Sermons</span></a>
-            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
+            <a class="tab active" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
+            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
+            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
+            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
+            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310i"></script>
-    <script src="events-engine.js?v=20260310i"></script>
+    <script src="app-shell.js?v=20260310j"></script>
+    <script src="events-engine.js?v=20260310j"></script>
     <script>
         (function () {
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
+            var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
+            var todayYmd = getBrusselsYmd();
+            var todayPlanData = null;
+            var readingPlanError = false;
+            var allUpcomingEvents = [];
+            var eventsMeta = null;
+            var eventsError = false;
             var bookMap = {
                 "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
                 "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
@@ -91,6 +99,32 @@
                 "2 Pet.": "2 Peter", "1 John.": "1 John", "2 John.": "2 John", "3 John.": "3 John",
                 "Jude.": "Jude", "Rev.": "Revelation"
             };
+
+            function T(key, fallback) {
+                if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    return window.NjcI18n.t(key, fallback);
+                }
+                return fallback || key;
+            }
+
+            function getLocale() {
+                if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    return window.NjcI18n.getLocale();
+                }
+                return "en-GB";
+            }
+
+            function updateReadingPlanMeta() {
+                var dateUtc = new Date(Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day, 12, 0, 0));
+                var dateLabel = new Intl.DateTimeFormat(getLocale(), {
+                    timeZone: "UTC",
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                }).format(dateUtc);
+                todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
+            }
 
             function getBrusselsYmd() {
                 var parts = new Intl.DateTimeFormat("en-GB", {
@@ -134,21 +168,49 @@
                 return fullBook + " " + tail;
             }
 
-            function planLine(title, refs) {
+            function planLine(titleKey, titleFallback, refs) {
                 var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(toFriendlyReference) : [];
                 if (cleanRefs.length === 0) {
                     return "";
                 }
                 return "" +
                     "<li>" +
-                    "  <h3>" + NjcEvents.escapeHtml(title) + "</h3>" +
+                    "  <h3>" + NjcEvents.escapeHtml(T(titleKey, titleFallback)) + "</h3>" +
                     "  <p>" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
                     "</li>";
             }
 
+            function renderReadingPlan() {
+                if (readingPlanError) {
+                    todayReadingPlanList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.")) + "</p>" +
+                        "</li>";
+                    return;
+                }
+
+                if (!todayPlanData) {
+                    return;
+                }
+
+                var html = "";
+                html += planLine("home.morningReading", "Morning Reading", todayPlanData.morning);
+                html += planLine("home.eveningReading", "Evening Reading", todayPlanData.evening);
+
+                if (!html) {
+                    html = "" +
+                        "<li>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.")) + "</p>" +
+                        "</li>";
+                }
+
+                todayReadingPlanList.innerHTML = html;
+            }
+
             function loadTodayReadingPlan() {
-                var ymd = getBrusselsYmd();
-                var dayOfYear = getDayOfYear(ymd);
+                var dayOfYear = getDayOfYear(todayYmd);
 
                 fetch(readingPlanUrl)
                     .then(function (response) {
@@ -163,69 +225,79 @@
                         if (!todayPlan) {
                             throw new Error("No plan for today");
                         }
-
-                        var html = "";
-                        html += planLine("Morning Reading", todayPlan.morning);
-                        html += planLine("Evening Reading", todayPlan.evening);
-
-                        if (!html) {
-                            html = "" +
-                                "<li>" +
-                                "  <h3>No reading entries today</h3>" +
-                                "  <p>Please check your Readingplan app.</p>" +
-                                "</li>";
-                        }
-
-                        todayReadingPlanList.innerHTML = html;
+                        todayPlanData = todayPlan;
+                        renderReadingPlan();
                     })
                     .catch(function () {
-                        todayReadingPlanList.innerHTML = "" +
-                            "<li>" +
-                            "  <h3>Could not load today's reading plan</h3>" +
-                            "  <p>Please try again shortly.</p>" +
-                            "</li>";
+                        readingPlanError = true;
+                        renderReadingPlan();
                     });
             }
 
-            loadTodayReadingPlan();
+            function renderThisWeekEvents() {
+                if (eventsError) {
+                    thisWeekEventsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load this week events")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Events tab to refresh.")) + "</p>" +
+                        "</li>";
+                    return;
+                }
 
-            NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
-                .then(function (result) {
-                    var allEvents = result.events || [];
-                    var thisWeekCutoff = NjcEvents.getWindowCutoffKey(result.nowBrussels, 7);
-                    var thisWeekEvents = allEvents.filter(function (eventItem) {
+                if (!eventsMeta) {
+                    return;
+                }
+
+                var thisWeekCutoff = NjcEvents.getWindowCutoffKey(eventsMeta.nowBrussels, 7);
+                var thisWeekEvents = allUpcomingEvents.filter(function (eventItem) {
                         return eventItem.key <= thisWeekCutoff;
                     }).slice(0, 4);
 
-                    var eventsToShow = thisWeekEvents.length > 0 ? thisWeekEvents : allEvents.slice(0, 2);
+                var eventsToShow = thisWeekEvents.length > 0 ? thisWeekEvents : allUpcomingEvents.slice(0, 2);
 
-                    if (eventsToShow.length === 0) {
-                        thisWeekEventsList.innerHTML = "" +
-                            "<li>" +
-                            "  <h3>No events available right now</h3>" +
-                            "  <p>Please check the Events page for updates.</p>" +
-                            "</li>";
-                        return;
-                    }
-
-                    thisWeekEventsList.innerHTML = eventsToShow.map(function (eventItem) {
-                        var title = NjcEvents.escapeHtml(eventItem.title || "Event");
-                        var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
-                        var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
-                        return "" +
-                            "<li>" +
-                            "  <h3>" + title + "</h3>" +
-                            "  <p>" + date + " at " + time + " (Belgium time)</p>" +
-                            "</li>";
-                    }).join("");
-                })
-                .catch(function () {
+                if (eventsToShow.length === 0) {
                     thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>Could not load this week events</h3>" +
-                        "  <p>Please open the Events tab to refresh.</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No events available right now")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Events page for updates.")) + "</p>" +
                         "</li>";
-                });
+                    return;
+                }
+
+                thisWeekEventsList.innerHTML = eventsToShow.map(function (eventItem) {
+                    var title = NjcEvents.escapeHtml(eventItem.title || T("events.event", "Event"));
+                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
+                    var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                    return "" +
+                        "<li>" +
+                        "  <h3>" + title + "</h3>" +
+                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
+                        "</li>";
+                }).join("");
+            }
+
+            function loadThisWeekEvents() {
+                NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
+                    .then(function (result) {
+                        eventsMeta = result;
+                        allUpcomingEvents = result.events || [];
+                        renderThisWeekEvents();
+                    })
+                    .catch(function () {
+                        eventsError = true;
+                        renderThisWeekEvents();
+                    });
+            }
+
+            document.addEventListener("njc:langchange", function () {
+                updateReadingPlanMeta();
+                renderReadingPlan();
+                renderThisWeekEvents();
+            });
+
+            updateReadingPlanMeta();
+            loadTodayReadingPlan();
+            loadThisWeekEvents();
         })();
     </script>
 </body>

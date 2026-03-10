@@ -5,71 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Contact</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310i">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310i">
-    <link rel="manifest" href="site.webmanifest?v=20260310i">
-    <link rel="stylesheet" href="styles.css?v=20260310i">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310j">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310j">
+    <link rel="manifest" href="site.webmanifest?v=20260310j">
+    <link rel="stylesheet" href="styles.css?v=20260310j">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
         <header class="app-header">
-            <div class="eyebrow"><i class="fa-solid fa-phone"></i>Contact</div>
-            <h1>Reach our team</h1>
-            <p>Questions, prayer requests, or support needs - we are available.</p>
+            <div class="eyebrow"><i class="fa-solid fa-phone"></i><span data-i18n="contact.eyebrow">Contact</span></div>
+            <h1 data-i18n="contact.title">Reach our team</h1>
+            <p data-i18n="contact.subtitle">Questions, prayer requests, or support needs - we are available.</p>
         </header>
 
         <main class="app-content">
             <section class="card contact-block">
-                <h2><i class="fa-solid fa-address-book"></i>Get in Touch</h2>
-                <p>Email: <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
-                <p>Phone: <a href="tel:+32483116484">+32 483 11 64 84</a></p>
+                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
+                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
+                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
             </section>
 
             <section class="quick-actions">
                 <a class="action-pill" href="mailto:simsonpeter@gmail.com">
                     <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
-                    <span class="action-label">Email</span>
+                    <span class="action-label" data-i18n="actions.email">Email</span>
                 </a>
                 <a class="action-pill" href="tel:+32483116484">
                     <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
-                    <span class="action-label">Call</span>
+                    <span class="action-label" data-i18n="actions.call">Call</span>
                 </a>
                 <a class="action-pill" href="events.html">
                     <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
-                    <span class="action-label">Visit</span>
+                    <span class="action-label" data-i18n="actions.visit">Visit</span>
                 </a>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-clock"></i>Office Hours</h2>
+                <h2><i class="fa-solid fa-clock"></i><span data-i18n="contact.officeHours">Office Hours</span></h2>
                 <ul class="list">
                     <li>
-                        <h3>Weekdays</h3>
+                        <h3 data-i18n="contact.weekdays">Weekdays</h3>
                         <p>10:00 - 18:00</p>
                     </li>
                     <li>
-                        <h3>Weekend Support</h3>
-                        <p>Before and after Sunday service</p>
+                        <h3 data-i18n="contact.weekendSupport">Weekend Support</h3>
+                        <p data-i18n="contact.weekendSupportTime">Before and after Sunday service</p>
                     </li>
                 </ul>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-location-dot"></i>Location</h2>
-                <p>New Jerusalem Church Belgium</p>
+                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
+                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
                 <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
             </section>
         </main>
 
         <nav class="tab-nav">
-            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label">About</span></a>
-            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label">Events</span></a>
-            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label">Sermons</span></a>
-            <a class="tab active" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
+            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
+            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
+            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
+            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
+            <a class="tab active" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310i"></script>
+    <script src="app-shell.js?v=20260310j"></script>
 </body>
 </html>

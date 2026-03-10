@@ -49,9 +49,9 @@
         };
     }
 
-    function toDisplayDate(year, month, day) {
+    function toDisplayDate(year, month, day, locale) {
         var dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-        return dateUtc.toLocaleDateString("en-BE", {
+        return dateUtc.toLocaleDateString(locale || "en-BE", {
             timeZone: "UTC",
             year: "numeric",
             month: "long",

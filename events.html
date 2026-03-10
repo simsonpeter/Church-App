@@ -5,79 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Events</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310i">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310i">
-    <link rel="manifest" href="site.webmanifest?v=20260310i">
-    <link rel="stylesheet" href="styles.css?v=20260310i">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310j">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310j">
+    <link rel="manifest" href="site.webmanifest?v=20260310j">
+    <link rel="stylesheet" href="styles.css?v=20260310j">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
         <header class="app-header">
-            <div class="eyebrow"><i class="fa-solid fa-calendar-days"></i>Events</div>
-            <h1>Church calendar</h1>
-            <p>Stay in sync with services, prayer nights, and fellowship moments.</p>
+            <div class="eyebrow"><i class="fa-solid fa-calendar-days"></i><span data-i18n="events.eyebrow">Events</span></div>
+            <h1 data-i18n="events.title">Church calendar</h1>
+            <p data-i18n="events.subtitle">Stay in sync with services, prayer nights, and fellowship moments.</p>
         </header>
 
         <main class="app-content">
             <section class="quick-actions">
                 <a class="action-pill" href="index.html">
                     <span class="action-icon"><i class="fa-solid fa-house"></i></span>
-                    <span class="action-label">Dashboard</span>
+                    <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
                 </a>
                 <a class="action-pill" href="contact.html">
                     <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
-                    <span class="action-label">RSVP</span>
+                    <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
                 </a>
                 <a class="action-pill" href="sermons.html">
                     <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
-                    <span class="action-label">Messages</span>
+                    <span class="action-label" data-i18n="actions.messages">Messages</span>
                 </a>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-clock"></i>Upcoming Events</h2>
+                <h2><i class="fa-solid fa-clock"></i><span data-i18n="events.upcomingTitle">Upcoming Events</span></h2>
                 <ul class="list" id="upcoming-events-list">
                     <li>
-                        <h3>Loading upcoming events...</h3>
-                        <p>Please wait while we calculate the next dates.</p>
+                        <h3 data-i18n="events.loadingUpcomingTitle">Loading upcoming events...</h3>
+                        <p data-i18n="events.loadingUpcomingBody">Please wait while we calculate the next dates.</p>
                     </li>
                 </ul>
-                <button class="button-link" id="show-more-events" type="button" hidden>See more events</button>
+                <button class="button-link" id="show-more-events" type="button" data-i18n="events.seeMore" hidden>See more events</button>
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-list-check"></i>Schedule Rules</h2>
+                <h2><i class="fa-solid fa-list-check"></i><span data-i18n="events.scheduleRules">Schedule Rules</span></h2>
                 <ul class="list">
                     <li>
-                        <h3>Holy Service with Communion</h3>
-                        <p>Every Sunday at 14:30 (Belgium time)</p>
+                        <h3 data-i18n="events.holyServiceTitle">Holy Service with Communion</h3>
+                        <p data-i18n="events.holyServiceTime">Every Sunday at 14:30 (Belgium time)</p>
                     </li>
                     <li>
-                        <h3>Special Prayer</h3>
-                        <p>2nd and 4th Saturday at 17:00 (Belgium time)</p>
+                        <h3 data-i18n="events.specialPrayerTitle">Special Prayer</h3>
+                        <p data-i18n="events.specialPrayerTime">2nd and 4th Saturday at 17:00 (Belgium time)</p>
                     </li>
                 </ul>
-                <h3><i class="fa-solid fa-star"></i> Upcoming Special Events</h3>
+                <h3><i class="fa-solid fa-star"></i> <span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h3>
                 <ul class="list" id="upcoming-special-events-list">
                     <li>
-                        <h3>Loading special events...</h3>
-                        <p>Please wait while we load upcoming special events.</p>
+                        <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
+                        <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
                     </li>
                 </ul>
             </section>
         </main>
 
         <nav class="tab-nav">
-            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label">About</span></a>
-            <a class="tab active" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label">Events</span></a>
-            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label">Sermons</span></a>
-            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label">Contact</span></a>
+            <a class="tab" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
+            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
+            <a class="tab active" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
+            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
+            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310i"></script>
-    <script src="events-engine.js?v=20260310i"></script>
+    <script src="app-shell.js?v=20260310j"></script>
+    <script src="events-engine.js?v=20260310j"></script>
     <script>
         (function () {
             var upcomingEventsList = document.getElementById("upcoming-events-list");
@@ -88,6 +88,30 @@
             var showAll = false;
             var twoWeekCutoff = null;
 
+            function T(key, fallback) {
+                if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    return window.NjcI18n.t(key, fallback);
+                }
+                return fallback || key;
+            }
+
+            function getLocale() {
+                if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    return window.NjcI18n.getLocale();
+                }
+                return "en-GB";
+            }
+
+            function translateType(typeValue) {
+                if (typeValue === "Recurring") {
+                    return T("events.typeRecurring", "Recurring");
+                }
+                if (typeValue === "Special") {
+                    return T("events.typeSpecial", "Special");
+                }
+                return typeValue || "";
+            }
+
             function renderUpcoming() {
                 var events = showAll ? allEvents : allEvents.filter(function (eventItem) {
                     return eventItem.key <= twoWeekCutoff;
@@ -96,23 +120,23 @@
                 if (!Array.isArray(events) || events.length === 0) {
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>No upcoming events found</h3>" +
-                        "  <p>Please check back for new dates.</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.noUpcomingTitle", "No upcoming events found")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("events.noUpcomingBody", "Please check back for new dates.")) + "</p>" +
                         "</li>";
                     return;
                 }
 
                 upcomingEventsList.innerHTML = events.map(function (eventItem) {
-                    var title = NjcEvents.escapeHtml(eventItem.title || "Event");
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
+                    var title = NjcEvents.escapeHtml(eventItem.title || T("events.event", "Event"));
+                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var typeAndDescription = NjcEvents.escapeHtml(
-                        eventItem.type + (eventItem.description ? " - " + eventItem.description : "")
+                        translateType(eventItem.type) + (eventItem.description ? " - " + eventItem.description : "")
                     );
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " at " + time + " (Belgium time)</p>" +
+                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
                         "  <p class=\"page-note\">" + typeAndDescription + "</p>" +
                         "</li>";
                 }).join("");
@@ -128,22 +152,22 @@
                 if (specialEvents.length === 0) {
                     upcomingSpecialEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>No upcoming special events</h3>" +
-                        "  <p>We will show them here once dates are announced.</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.noSpecialTitle", "No upcoming special events")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("events.noSpecialBody", "We will show them here once dates are announced.")) + "</p>" +
                         "</li>";
                     return;
                 }
 
                 upcomingSpecialEventsList.innerHTML = specialEvents.map(function (eventItem) {
-                    var title = NjcEvents.escapeHtml(eventItem.title || "Special Event");
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day));
+                    var title = NjcEvents.escapeHtml(eventItem.title || T("events.specialEvent", "Special Event"));
+                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var description = NjcEvents.escapeHtml(eventItem.description || "");
 
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " at " + time + " (Belgium time)</p>" +
+                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
                         (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
                         "</li>";
                 }).join("");
@@ -152,6 +176,14 @@
             showMoreButton.addEventListener("click", function () {
                 showAll = true;
                 renderUpcoming();
+            });
+
+            document.addEventListener("njc:langchange", function () {
+                if (twoWeekCutoff === null && allEvents.length === 0) {
+                    return;
+                }
+                renderUpcoming();
+                renderUpcomingSpecial();
             });
 
             NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 210 })
@@ -164,13 +196,13 @@
                 .catch(function () {
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>Could not calculate upcoming events</h3>" +
-                        "  <p>Please refresh and try again.</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming events")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorBody", "Please refresh and try again.")) + "</p>" +
                         "</li>";
                     upcomingSpecialEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>Could not load special events</h3>" +
-                        "  <p>Please refresh and try again.</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorTitle", "Could not load special events")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorBody", "Please refresh and try again.")) + "</p>" +
                         "</li>";
                 });
         })();

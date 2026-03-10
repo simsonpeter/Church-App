@@ -160,10 +160,18 @@ body.splash-active {
     z-index: 1;
 }
 
-.theme-toggle {
+.header-controls {
     position: absolute;
     top: 14px;
     right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 3;
+}
+
+.theme-toggle {
+    position: static;
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -173,6 +181,20 @@ body.splash-active {
     display: grid;
     place-items: center;
     z-index: 3;
+    backdrop-filter: blur(8px);
+}
+
+.lang-toggle {
+    height: 36px;
+    min-width: 48px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
     backdrop-filter: blur(8px);
 }
 
