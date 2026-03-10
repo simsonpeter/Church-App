@@ -590,7 +590,7 @@
                     title: t("notify.eventSoonTitle", "Event reminder"),
                     body: body,
                     tag: notifyKey,
-                    url: "events.html"
+                    url: "index.html#events"
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
@@ -653,7 +653,7 @@
                     title: t("notify.newSermonTitle", "New sermon available"),
                     body: latest.title || "Latest message is ready to listen",
                     tag: notifyKey,
-                    url: "sermons.html"
+                    url: "index.html#sermons"
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
@@ -846,7 +846,7 @@
             return;
         }
 
-        if (window.location.pathname.endsWith("/sermons.html")) {
+        if (window.location.pathname.endsWith("/sermons.html") || document.getElementById("sermon-audio")) {
             return;
         }
 
@@ -947,7 +947,7 @@
         });
 
         openButton.addEventListener("click", function () {
-            window.location.href = "sermons.html";
+            window.location.href = "#sermons";
         });
 
         playButton.addEventListener("click", function () {

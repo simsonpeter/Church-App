@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJC App - Home</title>
+    <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310r">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310r">
-    <link rel="manifest" href="site.webmanifest?v=20260310r">
-    <link rel="stylesheet" href="styles.css?v=20260310r">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310s">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310s">
+    <link rel="manifest" href="site.webmanifest?v=20260310s">
+    <link rel="stylesheet" href="styles.css?v=20260310s">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="app-shell">
-        <header class="app-header home-header">
-            <div class="eyebrow brand-title"><i class="fa-solid fa-church"></i><span data-i18n="brand.name">NJC Belgium</span></div>
-            <h1 data-i18n="home.welcomeBack">Welcome back</h1>
-            <p data-i18n="home.tagline">Your weekly faith journey in one place.</p>
+        <header class="app-header home-header" id="spa-header">
+            <div class="eyebrow brand-title" id="spa-header-eyebrow"><i id="spa-header-icon" class="fa-solid fa-church"></i><span id="spa-header-eyebrow-text">NJC Belgium</span></div>
+            <h1 id="spa-header-title">Welcome back</h1>
+            <p id="spa-header-subtitle">Your weekly faith journey in one place.</p>
         </header>
 
-        <main class="app-content">
-            <section class="card">
+        <section class="page-view active" data-route="home">
+            <main class="app-content">
+<section class="card">
                 <h2><i class="fa-solid fa-bell"></i><span data-i18n="notify.title">Notifications</span></h2>
                 <p class="page-note" data-i18n="notify.subtitle">Get service reminders and new sermon alerts.</p>
                 <div class="notify-controls-row">
@@ -68,509 +69,334 @@
             </section>
 
             <section class="quick-actions">
-                <a class="action-pill" href="events.html">
+                <a class="action-pill" href="#events">
                     <span class="action-icon"><i class="fa-solid fa-calendar-days"></i></span>
                     <span class="action-label" data-i18n="actions.events">Events</span>
                 </a>
-                <a class="action-pill" href="sermons.html">
+                <a class="action-pill" href="#sermons">
                     <span class="action-icon"><i class="fa-solid fa-microphone-lines"></i></span>
                     <span class="action-label" data-i18n="actions.sermons">Sermons</span>
                 </a>
-                <a class="action-pill" href="contact.html">
+                <a class="action-pill" href="#contact">
                     <span class="action-icon"><i class="fa-solid fa-phone"></i></span>
                     <span class="action-label" data-i18n="actions.contact">Contact</span>
                 </a>
             </section>
+            </main>
+        </section>
 
-        </main>
+        <section class="page-view" data-route="about">
+            <main class="app-content">
+<section class="card">
+                <h2><i class="fa-solid fa-bullseye"></i><span data-i18n="about.missionTitle">Our Mission</span></h2>
+                <p data-i18n="about.missionBody">We exist to share hope, build disciples, and serve families in Belgium with love and consistency.</p>
+            </section>
+
+            <section class="quick-actions">
+                <a class="action-pill" href="#events">
+                    <span class="action-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                    <span class="action-label" data-i18n="actions.calendar">Calendar</span>
+                </a>
+                <a class="action-pill" href="#sermons">
+                    <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
+                    <span class="action-label" data-i18n="actions.messages">Messages</span>
+                </a>
+                <a class="action-pill" href="#contact">
+                    <span class="action-icon"><i class="fa-solid fa-handshake-angle"></i></span>
+                    <span class="action-label" data-i18n="actions.joinUs">Join Us</span>
+                </a>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-heart"></i><span data-i18n="about.valuesTitle">Core Values</span></h2>
+                <ul class="list">
+                    <li>
+                        <h3 data-i18n="about.valueWorship">Worship</h3>
+                        <p data-i18n="about.valueWorshipBody">We honor God with heartfelt praise and prayer.</p>
+                    </li>
+                    <li>
+                        <h3 data-i18n="about.valueCommunity">Community</h3>
+                        <p data-i18n="about.valueCommunityBody">We support one another through every season.</p>
+                    </li>
+                    <li>
+                        <h3 data-i18n="about.valueService">Service</h3>
+                        <p data-i18n="about.valueServiceBody">We serve with compassion inside and outside church walls.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-people-group"></i><span data-i18n="about.leadershipTitle">Leadership</span></h2>
+                <p data-i18n="about.leadershipBody">Our pastors and team leaders are available for prayer, care, and guidance throughout the week.</p>
+            </section>
+            </main>
+        </section>
+
+        <section class="page-view" data-route="events">
+            <main class="app-content">
+<section class="quick-actions">
+                <a class="action-pill" href="#home">
+                    <span class="action-icon"><i class="fa-solid fa-house"></i></span>
+                    <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
+                </a>
+                <a class="action-pill" href="#contact">
+                    <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
+                    <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
+                </a>
+                <a class="action-pill" href="#sermons">
+                    <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
+                    <span class="action-label" data-i18n="actions.messages">Messages</span>
+                </a>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-clock"></i><span data-i18n="events.upcomingTitle">Upcoming Events</span></h2>
+                <ul class="list" id="upcoming-events-list">
+                    <li>
+                        <h3 data-i18n="events.loadingUpcomingTitle">Loading upcoming events...</h3>
+                        <p data-i18n="events.loadingUpcomingBody">Please wait while we calculate the next dates.</p>
+                    </li>
+                </ul>
+                <button class="button-link" id="show-more-events" type="button" data-i18n="events.seeMore" hidden>See more events</button>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-list-check"></i><span data-i18n="events.scheduleRules">Schedule Rules</span></h2>
+                <ul class="list">
+                    <li>
+                        <h3 data-i18n="events.holyServiceTitle">Holy Service with Communion</h3>
+                        <p data-i18n="events.holyServiceTime">Every Sunday at 14:30 (Belgium time)</p>
+                    </li>
+                    <li>
+                        <h3 data-i18n="events.specialPrayerTitle">Special Prayer</h3>
+                        <p data-i18n="events.specialPrayerTime">2nd and 4th Saturday at 17:00 (Belgium time)</p>
+                    </li>
+                </ul>
+                <h3><i class="fa-solid fa-star"></i> <span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h3>
+                <ul class="list" id="upcoming-special-events-list">
+                    <li>
+                        <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
+                        <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
+                    </li>
+                </ul>
+            </section>
+            </main>
+        </section>
+
+        <section class="page-view" data-route="sermons">
+            <main class="app-content">
+<section class="quick-actions">
+                <a class="action-pill" href="#">
+                    <span class="action-icon"><i class="fa-solid fa-tower-broadcast"></i></span>
+                    <span class="action-label" data-i18n="actions.live">Live</span>
+                </a>
+                <a class="action-pill" href="#">
+                    <span class="action-icon"><i class="fa-solid fa-headphones"></i></span>
+                    <span class="action-label" data-i18n="actions.audio">Audio</span>
+                </a>
+                <a class="action-pill" href="#">
+                    <span class="action-icon"><i class="fa-solid fa-note-sticky"></i></span>
+                    <span class="action-label" data-i18n="actions.notes">Notes</span>
+                </a>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-play-circle"></i><span data-i18n="sermons.latestTitle">Latest Sermons</span></h2>
+                <div class="search-row">
+                    <input
+                        id="sermon-search"
+                        class="search-input"
+                        type="search"
+                        data-i18n-placeholder="sermons.searchPlaceholder"
+                        placeholder="Search sermons by title, speaker, or date">
+                </div>
+                <div class="filter-chip-groups">
+                    <div class="chip-group">
+                        <p class="chip-group-title" data-i18n="sermons.filterSpeaker">Speaker</p>
+                        <div class="filter-chips" id="sermon-speaker-chips"></div>
+                    </div>
+                    <div class="chip-group">
+                        <p class="chip-group-title" data-i18n="sermons.filterMonth">Month</p>
+                        <div class="filter-chips" id="sermon-month-chips"></div>
+                    </div>
+                    <div class="chip-group">
+                        <p class="chip-group-title" data-i18n="sermons.filterSaved">Saved</p>
+                        <div class="filter-chips" id="sermon-saved-chips"></div>
+                    </div>
+                </div>
+                <p class="page-note" id="sermon-search-note" hidden></p>
+                <ul class="list" id="latest-sermons-list">
+                    <li>
+                        <h3 data-i18n="sermons.loadingTitle">Loading sermons...</h3>
+                        <p data-i18n="sermons.loadingBody">Please wait while we load the latest messages.</p>
+                    </li>
+                </ul>
+                <button class="button-link" id="show-more-sermons" type="button" data-i18n="sermons.seeMore" hidden>See more sermons</button>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-box-archive"></i><span data-i18n="sermons.archiveTitle">Archive</span></h2>
+                <p id="sermon-archive-note" data-i18n="sermons.archiveLoading">Loading archive summary...</p>
+                <p class="page-note" data-i18n="sermons.tip">Tip: Use the latest list to open sermon audio directly.</p>
+            </section>
+            </main>
+        </section>
+
+        <section class="page-view" data-route="contact">
+            <main class="app-content">
+<section class="card contact-block">
+                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
+                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
+                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
+            </section>
+
+            <section class="quick-actions">
+                <a class="action-pill" href="mailto:simsonpeter@gmail.com">
+                    <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
+                    <span class="action-label" data-i18n="actions.email">Email</span>
+                </a>
+                <a class="action-pill" href="tel:+32483116484">
+                    <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
+                    <span class="action-label" data-i18n="actions.call">Call</span>
+                </a>
+                <a class="action-pill" href="#events">
+                    <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
+                    <span class="action-label" data-i18n="actions.visit">Visit</span>
+                </a>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-hands-praying"></i><span data-i18n="contact.prayerTitle">Prayer Request</span></h2>
+                <p class="page-note" data-i18n="contact.prayerSubtitle">Share your prayer request with our team.</p>
+                <form class="prayer-form" id="prayer-request-form">
+                    <input
+                        id="prayer-name"
+                        class="search-input"
+                        type="text"
+                        data-i18n-placeholder="contact.prayerNamePlaceholder"
+                        placeholder="Your name (optional)">
+                    <textarea
+                        id="prayer-message"
+                        class="search-input prayer-textarea"
+                        rows="4"
+                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
+                        placeholder="Write your prayer request"></textarea>
+                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Prayer Request</button>
+                </form>
+                <p class="page-note" id="prayer-form-note" hidden></p>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-clock"></i><span data-i18n="contact.officeHours">Office Hours</span></h2>
+                <ul class="list">
+                    <li>
+                        <h3 data-i18n="contact.weekdays">Weekdays</h3>
+                        <p>10:00 - 18:00</p>
+                    </li>
+                    <li>
+                        <h3 data-i18n="contact.weekendSupport">Weekend Support</h3>
+                        <p data-i18n="contact.weekendSupportTime">Before and after Sunday service</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
+                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
+                <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
+            </section>
+            </main>
+        </section>
 
         <nav class="tab-nav">
-            <a class="tab active" href="index.html"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
-            <a class="tab" href="about.html"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
-            <a class="tab" href="events.html"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
-            <a class="tab" href="sermons.html"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
-            <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
+            <a class="tab active" data-route="home" href="#home"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
+            <a class="tab" data-route="about" href="#about"><span class="tab-icon"><i class="fa-solid fa-circle-info"></i></span><span class="tab-label" data-i18n="nav.about">About</span></a>
+            <a class="tab" data-route="events" href="#events"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
+            <a class="tab" data-route="sermons" href="#sermons"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
+            <a class="tab" data-route="contact" href="#contact"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310r"></script>
-    <script src="events-engine.js?v=20260310r"></script>
-    <script>
-        (function () {
-            var READING_PROGRESS_KEY = "njc_reading_progress_v1";
-            var todayReadingPlanList = document.getElementById("today-reading-plan-list");
-            var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
-            var readingMorningDone = document.getElementById("reading-morning-done");
-            var readingEveningDone = document.getElementById("reading-evening-done");
-            var readingStreakNote = document.getElementById("reading-streak-note");
-            var notificationStatusText = document.getElementById("notification-status-text");
-            var notificationToggleButton = document.getElementById("notification-toggle-btn");
-            var notificationReminderSelect = document.getElementById("notification-reminder-select");
-            var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
-            var thisWeekEventsList = document.getElementById("this-week-events-list");
-            var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
-            var brusselsTimeZone = "Europe/Brussels";
-            var todayYmd = getBrusselsYmd();
-            var todayPlanData = null;
-            var readingPlanError = false;
-            var allUpcomingEvents = [];
-            var eventsMeta = null;
-            var eventsError = false;
-            var bookMapEnglish = {
-                "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
-                "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
-                "1 King.": "1 Kings", "2 King.": "2 Kings", "1 Chro.": "1 Chronicles", "2 Chro.": "2 Chronicles",
-                "Ezra.": "Ezra", "Neh.": "Nehemiah", "Esth.": "Esther", "Job.": "Job", "Psa.": "Psalms",
-                "Pro.": "Proverbs", "Ecc.": "Ecclesiastes", "Song.": "Song of Songs", "Isa.": "Isaiah",
-                "Jer.": "Jeremiah", "Lam.": "Lamentations", "Ezek.": "Ezekiel", "Dan.": "Daniel", "Hos.": "Hosea",
-                "Joel.": "Joel", "Amos.": "Amos", "Obad.": "Obadiah", "Jonah.": "Jonah", "Mic.": "Micah",
-                "Nah.": "Nahum", "Hab.": "Habakkuk", "Zep.": "Zephaniah", "Hag.": "Haggai", "Zach.": "Zechariah",
-                "Mal.": "Malachi", "Mat.": "Matthew", "Mar.": "Mark", "Luk.": "Luke", "John.": "John",
-                "Act.": "Acts", "Rom.": "Romans", "1 Cor.": "1 Corinthians", "2 Cor.": "2 Corinthians",
-                "Gal.": "Galatians", "Eph.": "Ephesians", "Phil.": "Philippians", "Col.": "Colossians",
-                "1 Thes.": "1 Thessalonians", "2 Thes.": "2 Thessalonians", "1 Tim.": "1 Timothy", "2 Tim.": "2 Timothy",
-                "Tit.": "Titus", "Phm.": "Philemon", "Heb.": "Hebrews", "Jam.": "James", "1 Pet.": "1 Peter",
-                "2 Pet.": "2 Peter", "1 John.": "1 John", "2 John.": "2 John", "3 John.": "3 John",
-                "Jude.": "Jude", "Rev.": "Revelation"
-            };
-            var bookMapTamil = {
-                "Gen.": "ஆதியாகமம்", "Exo.": "யாத்திராகமம்", "Lev.": "லேவியராகமம்", "Num.": "எண்ணாகமம்", "Deu.": "உபாகமம்",
-                "Jos.": "யோசுவா", "Judg.": "நியாயாதிபதிகள்", "Ruth.": "ரூத்து", "1 Sam.": "1 சாமுவேல்", "2 Sam.": "2 சாமுவேல்",
-                "1 King.": "1 இராஜாக்கள்", "2 King.": "2 இராஜாக்கள்", "1 Chro.": "1 நாளாகமம்", "2 Chro.": "2 நாளாகமம்",
-                "Ezra.": "எஸ்றா", "Neh.": "நேகேமியா", "Esth.": "எஸ்தர்", "Job.": "யோபு", "Psa.": "சங்கீதம்",
-                "Pro.": "நீதிமொழிகள்", "Ecc.": "பிரசங்கி", "Song.": "உன்னதப்பாட்டு", "Isa.": "ஏசாயா",
-                "Jer.": "எரேமியா", "Lam.": "புலம்பல்", "Ezek.": "எசேக்கியேல்", "Dan.": "தானியேல்", "Hos.": "ஓசியா",
-                "Joel.": "யோவேல்", "Amos.": "ஆமோஸ்", "Obad.": "ஒபதியா", "Jonah.": "யோனா", "Mic.": "மீகா",
-                "Nah.": "நாகூம்", "Hab.": "ஆபகூக்", "Zep.": "செப்பனியா", "Hag.": "ஆகாய்", "Zach.": "சகரியா",
-                "Mal.": "மல்கியா", "Mat.": "மத்தேயு", "Mar.": "மாற்கு", "Luk.": "லூக்கா", "John.": "யோவான்",
-                "Act.": "அப்போஸ்தலர் செயல்கள்", "Rom.": "ரோமர்", "1 Cor.": "1 கொரிந்தியர்", "2 Cor.": "2 கொரிந்தியர்",
-                "Gal.": "கலாத்தியர்", "Eph.": "எபேசியர்", "Phil.": "பிலிப்பியர்", "Col.": "கொலோசெயர்",
-                "1 Thes.": "1 தெசலோனிக்கேயர்", "2 Thes.": "2 தெசலோனிக்கேயர்", "1 Tim.": "1 தீமோத்தேயு", "2 Tim.": "2 தீமோத்தேயு",
-                "Tit.": "தீத்து", "Phm.": "பிலேமோன்", "Heb.": "எபிரெயர்", "Jam.": "யாக்கோபு", "1 Pet.": "1 பேதுரு",
-                "2 Pet.": "2 பேதுரு", "1 John.": "1 யோவான்", "2 John.": "2 யோவான்", "3 John.": "3 யோவான்",
-                "Jude.": "யூதா", "Rev.": "வெளிப்படுத்தல்"
-            };
-            var englishNameToTamil = Object.keys(bookMapEnglish).reduce(function (acc, key) {
-                acc[bookMapEnglish[key]] = bookMapTamil[key] || bookMapEnglish[key];
-                return acc;
-            }, {});
 
-            function T(key, fallback) {
-                if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
-                    return window.NjcI18n.t(key, fallback);
-                }
-                return fallback || key;
-            }
+<div class="sermon-player-overlay" id="sermon-player" hidden>
+        <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
+        <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
+            <div class="sermon-player-top">
+                <strong data-i18n="sermons.nowPlaying">Now Playing</strong>
+                <div>
+                    <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player" data-i18n-aria-label="player.minimize">
+                        <i class="fa-solid fa-window-minimize"></i>
+                    </button>
+                    <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player" data-i18n-aria-label="player.close">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="sermon-player-display">
+                <h3 id="player-sermon-title">Sermon title</h3>
+                <p id="player-sermon-subtitle">Subtitle</p>
+                <p class="sermon-meta" id="player-sermon-date">Date</p>
+                <div class="sermon-progress-row">
+                    <input type="range" id="player-seek" min="0" max="100" value="0" step="1" aria-label="Seek position" data-i18n-aria-label="player.seekPosition">
+                    <div class="sermon-time" id="player-time">00:00 / 00:00</div>
+                </div>
+                <div class="player-extra-controls">
+                    <label>
+                        <span data-i18n="sermons.speed">Speed</span>
+                        <select id="player-speed" class="notify-select">
+                            <option value="1">1x</option>
+                            <option value="1.25">1.25x</option>
+                            <option value="1.5">1.5x</option>
+                        </select>
+                    </label>
+                    <label>
+                        <span data-i18n="sermons.sleepTimer">Sleep</span>
+                        <select id="player-sleep" class="notify-select">
+                            <option value="0" data-i18n="sermons.sleepOff">No sleep</option>
+                            <option value="15" data-i18n="sermons.sleep15">15 min</option>
+                            <option value="30" data-i18n="sermons.sleep30">30 min</option>
+                            <option value="45" data-i18n="sermons.sleep45">45 min</option>
+                        </select>
+                    </label>
+                </div>
+                <p class="page-note" id="player-sleep-note"></p>
+            </div>
+            <div class="ipod-wheel" aria-label="Player controls" data-i18n-aria-label="player.controls">
+                <button type="button" class="wheel-btn wheel-menu" id="player-wheel-menu">MENU</button>
+                <button type="button" class="wheel-btn wheel-prev" id="player-prev" aria-label="Previous sermon" data-i18n-aria-label="player.previousSermon">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+                <button type="button" class="wheel-btn wheel-next" id="player-next" aria-label="Next sermon" data-i18n-aria-label="player.nextSermon">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                <button type="button" class="wheel-btn wheel-play" id="player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+                <button type="button" class="wheel-center" id="player-center" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+            <audio id="sermon-audio" preload="metadata"></audio>
+        </section>
+    </div>
+    <div class="mini-sermon-player" id="mini-sermon-player" hidden>
+        <button type="button" class="mini-player-open" id="mini-player-open" aria-label="Open full player" data-i18n-aria-label="player.openSermonsPage">
+            <span class="mini-player-title" id="mini-player-title" data-i18n="sermons.nowPlaying">Now Playing</span>
+            <span class="mini-player-time" id="mini-player-time">00:00 / 00:00</span>
+        </button>
+        <button type="button" class="mini-player-btn" id="mini-player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
+            <i class="fa-solid fa-play"></i>
+        </button>
+        <button type="button" class="mini-player-btn" id="mini-player-close" aria-label="Stop and close player" data-i18n-aria-label="player.stopAndClose">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
 
-            function getLocale() {
-                if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
-                    return window.NjcI18n.getLocale();
-                }
-                return "en-GB";
-            }
-
-            function isTamilLanguage() {
-                return window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
-            }
-
-            function localizeEventTitle(title) {
-                var raw = String(title || "").trim();
-                var isTamil = window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
-                if (!isTamil) {
-                    return raw;
-                }
-                if (raw === "Holy Service with Communion") {
-                    return T("events.holyServiceTitle", "பரிசுத்த ஆராதனையும் திருவிருந்தும்");
-                }
-                if (raw === "Special Prayer") {
-                    return T("events.specialPrayerTitle", "விசேட ஜெபக்கூடுகை");
-                }
-                return raw;
-            }
-
-            function pad2(value) {
-                return value < 10 ? "0" + value : String(value);
-            }
-
-            function toCalendarDateTime(year, month, day, hour, minute) {
-                return String(year) + pad2(month) + pad2(day) + "T" + pad2(hour) + pad2(minute) + "00";
-            }
-
-            function addMinutesToParts(year, month, day, hour, minute, extraMinutes) {
-                var dt = new Date(Date.UTC(year, month - 1, day, hour, minute + extraMinutes, 0));
-                return {
-                    year: dt.getUTCFullYear(),
-                    month: dt.getUTCMonth() + 1,
-                    day: dt.getUTCDate(),
-                    hour: dt.getUTCHours(),
-                    minute: dt.getUTCMinutes()
-                };
-            }
-
-            function toGoogleCalendarUrl(eventItem) {
-                var end = addMinutesToParts(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute, 90);
-                var dates = toCalendarDateTime(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute) +
-                    "/" +
-                    toCalendarDateTime(end.year, end.month, end.day, end.hour, end.minute);
-                var params = new URLSearchParams({
-                    action: "TEMPLATE",
-                    text: eventItem.title || T("events.event", "Event"),
-                    dates: dates,
-                    ctz: "Europe/Brussels",
-                    details: (eventItem.description || "") + " - NJC Belgium",
-                    location: "New Jerusalem Church Belgium, Ten Eekhovelei 292, 2100 Antwerpen"
-                });
-                return "https://calendar.google.com/calendar/render?" + params.toString();
-            }
-
-            function updateReadingPlanMeta() {
-                var dateUtc = new Date(Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day, 12, 0, 0));
-                var dateLabel = new Intl.DateTimeFormat(getLocale(), {
-                    timeZone: "UTC",
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric"
-                }).format(dateUtc);
-                todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
-            }
-
-            function getTodayKey() {
-                return String(todayYmd.year) + "-" + String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
-            }
-
-            function getProgressMap() {
-                try {
-                    var raw = window.localStorage.getItem(READING_PROGRESS_KEY);
-                    var parsed = raw ? JSON.parse(raw) : {};
-                    return parsed && typeof parsed === "object" ? parsed : {};
-                } catch (err) {
-                    return {};
-                }
-            }
-
-            function saveProgressMap(progressMap) {
-                try {
-                    window.localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(progressMap));
-                } catch (err) {
-                    return null;
-                }
-                return null;
-            }
-
-            function getTodayProgress() {
-                var map = getProgressMap();
-                var todayKey = getTodayKey();
-                var entry = map[todayKey] || {};
-                return {
-                    morning: Boolean(entry.morning),
-                    evening: Boolean(entry.evening)
-                };
-            }
-
-            function setTodayProgress(part, value) {
-                var map = getProgressMap();
-                var todayKey = getTodayKey();
-                var entry = map[todayKey] || {};
-                entry[part] = Boolean(value);
-                map[todayKey] = entry;
-                saveProgressMap(map);
-            }
-
-            function calculateReadingStreak() {
-                var map = getProgressMap();
-                var streak = 0;
-                var startUtc = Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day);
-
-                for (var dayOffset = 0; dayOffset < 400; dayOffset += 1) {
-                    var dateObj = new Date(startUtc - (dayOffset * 86400000));
-                    var key = String(dateObj.getUTCFullYear()) + "-" +
-                        String(dateObj.getUTCMonth() + 1).padStart(2, "0") + "-" +
-                        String(dateObj.getUTCDate()).padStart(2, "0");
-                    var entry = map[key];
-                    if (!entry || !entry.morning || !entry.evening) {
-                        break;
-                    }
-                    streak += 1;
-                }
-
-                return streak;
-            }
-
-            function renderReadingProgress() {
-                var progress = getTodayProgress();
-                readingMorningDone.checked = progress.morning;
-                readingEveningDone.checked = progress.evening;
-                var streak = calculateReadingStreak();
-                readingStreakNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
-                    ? window.NjcI18n.formatCount(T("home.readingStreak", "Streak days: {count}"), streak)
-                    : ("Streak days: " + streak);
-            }
-
-            function renderNotificationState() {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.getStatus !== "function") {
-                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = true;
-                    notificationReminderSelect.disabled = true;
-                    return;
-                }
-
-                var status = window.NjcNotifications.getStatus();
-                notificationReminderSelect.value = String(status.reminderMinutes || 60);
-                if (!status.supported || status.permission === "unsupported") {
-                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = true;
-                    notificationReminderSelect.disabled = true;
-                    return;
-                }
-
-                if (status.permission === "denied") {
-                    notificationStatusText.textContent = T("notify.statusBlocked", "Notifications are blocked in browser settings.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = false;
-                    notificationReminderSelect.disabled = false;
-                    return;
-                }
-
-                if (status.enabled && status.permission === "granted") {
-                    notificationStatusText.textContent = T("notify.statusOn", "Notifications are active.");
-                    notificationToggleButton.textContent = T("notify.disable", "Disable Notifications");
-                    notificationToggleButton.disabled = false;
-                    notificationReminderSelect.disabled = false;
-                    return;
-                }
-
-                notificationStatusText.textContent = T("notify.statusOff", "Notifications are currently off.");
-                notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                notificationToggleButton.disabled = false;
-                notificationReminderSelect.disabled = false;
-            }
-
-            function getBrusselsYmd() {
-                var parts = new Intl.DateTimeFormat("en-GB", {
-                    timeZone: brusselsTimeZone,
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit"
-                }).formatToParts(new Date());
-
-                function partValue(type) {
-                    var found = parts.find(function (part) {
-                        return part.type === type;
-                    });
-                    return found ? Number(found.value) : 0;
-                }
-
-                return {
-                    year: partValue("year"),
-                    month: partValue("month"),
-                    day: partValue("day")
-                };
-            }
-
-            function getDayOfYear(ymd) {
-                var yearStart = Date.UTC(ymd.year, 0, 1);
-                var current = Date.UTC(ymd.year, ymd.month - 1, ymd.day);
-                return Math.floor((current - yearStart) / 86400000) + 1;
-            }
-
-            function toFriendlyReference(ref) {
-                var value = String(ref || "").trim();
-                var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
-                if (!match) {
-                    if (isTamilLanguage()) {
-                        var plainMatch = value.match(/^([1-3]\s+[A-Za-z]+|[A-Za-z][A-Za-z\s]+)\s+(.+)$/);
-                        if (plainMatch) {
-                            var englishBook = plainMatch[1].trim();
-                            var tailRef = plainMatch[2].trim();
-                            var tamilBook = englishNameToTamil[englishBook];
-                            if (tamilBook) {
-                                return tamilBook + " " + tailRef;
-                            }
-                        }
-                    }
-                    return value;
-                }
-
-                var prefix = match[1] ? match[1].trim() + " " : "";
-                var shortBook = prefix + match[2] + ".";
-                var tail = match[3].trim();
-                var selectedMap = isTamilLanguage() ? bookMapTamil : bookMapEnglish;
-                var fullBook = selectedMap[shortBook] || bookMapEnglish[shortBook] || shortBook;
-                return fullBook + " " + tail;
-            }
-
-            function planLine(titleKey, titleFallback, refs) {
-                var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(toFriendlyReference) : [];
-                if (cleanRefs.length === 0) {
-                    return "";
-                }
-                return "" +
-                    "<li>" +
-                    "  <h3>" + NjcEvents.escapeHtml(T(titleKey, titleFallback)) + "</h3>" +
-                    "  <p>" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
-                    "</li>";
-            }
-
-            function renderReadingPlan() {
-                if (readingPlanError) {
-                    todayReadingPlanList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.")) + "</p>" +
-                        "</li>";
-                    return;
-                }
-
-                if (!todayPlanData) {
-                    return;
-                }
-
-                var html = "";
-                html += planLine("home.morningReading", "Morning Reading", todayPlanData.morning);
-                html += planLine("home.eveningReading", "Evening Reading", todayPlanData.evening);
-
-                if (!html) {
-                    html = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.")) + "</p>" +
-                        "</li>";
-                }
-
-                todayReadingPlanList.innerHTML = html;
-            }
-
-            function loadTodayReadingPlan() {
-                var dayOfYear = getDayOfYear(todayYmd);
-
-                fetch(readingPlanUrl)
-                    .then(function (response) {
-                        if (!response.ok) {
-                            throw new Error("Could not load reading plan");
-                        }
-                        return response.json();
-                    })
-                    .then(function (planData) {
-                        var readingPlan = planData && Array.isArray(planData.readingPlan) ? planData.readingPlan : [];
-                        var todayPlan = readingPlan[dayOfYear - 1];
-                        if (!todayPlan) {
-                            throw new Error("No plan for today");
-                        }
-                        todayPlanData = todayPlan;
-                        renderReadingPlan();
-                    })
-                    .catch(function () {
-                        readingPlanError = true;
-                        renderReadingPlan();
-                    });
-            }
-
-            function renderThisWeekEvents() {
-                if (eventsError) {
-                    thisWeekEventsList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load this week events")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Events tab to refresh.")) + "</p>" +
-                        "</li>";
-                    return;
-                }
-
-                if (!eventsMeta) {
-                    return;
-                }
-
-                var thisWeekCutoff = NjcEvents.getWindowCutoffKey(eventsMeta.nowBrussels, 7);
-                var thisWeekEvents = allUpcomingEvents.filter(function (eventItem) {
-                        return eventItem.key <= thisWeekCutoff;
-                    }).slice(0, 4);
-
-                var eventsToShow = thisWeekEvents.length > 0 ? thisWeekEvents : allUpcomingEvents.slice(0, 2);
-
-                if (eventsToShow.length === 0) {
-                    thisWeekEventsList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No events available right now")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Events page for updates.")) + "</p>" +
-                        "</li>";
-                    return;
-                }
-
-                thisWeekEventsList.innerHTML = eventsToShow.map(function (eventItem) {
-                    var titleText = localizeEventTitle(eventItem.title || T("events.event", "Event"));
-                    var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
-                    var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
-                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
-                    return "" +
-                        "<li>" +
-                        "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
-                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
-                        "</li>";
-                }).join("");
-            }
-
-            function loadThisWeekEvents() {
-                NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
-                    .then(function (result) {
-                        eventsMeta = result;
-                        allUpcomingEvents = result.events || [];
-                        renderThisWeekEvents();
-                    })
-                    .catch(function () {
-                        eventsError = true;
-                        renderThisWeekEvents();
-                    });
-            }
-
-            document.addEventListener("njc:langchange", function () {
-                updateReadingPlanMeta();
-                renderReadingPlan();
-                renderReadingProgress();
-                renderThisWeekEvents();
-                renderNotificationState();
-            });
-
-            document.addEventListener("njc:notificationstatus", function () {
-                renderNotificationState();
-            });
-
-            notificationToggleButton.addEventListener("click", function () {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.toggleEnabled !== "function") {
-                    renderNotificationState();
-                    return;
-                }
-                window.NjcNotifications.toggleEnabled().then(function () {
-                    renderNotificationState();
-                });
-            });
-
-            notificationReminderSelect.addEventListener("change", function () {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.setReminderMinutes !== "function") {
-                    return;
-                }
-                window.NjcNotifications.setReminderMinutes(Number(notificationReminderSelect.value));
-                renderNotificationState();
-            });
-
-            readingMorningDone.addEventListener("change", function () {
-                setTodayProgress("morning", readingMorningDone.checked);
-                renderReadingProgress();
-            });
-
-            readingEveningDone.addEventListener("change", function () {
-                setTodayProgress("evening", readingEveningDone.checked);
-                renderReadingProgress();
-            });
-
-            updateReadingPlanMeta();
-            renderNotificationState();
-            renderReadingProgress();
-            loadTodayReadingPlan();
-            loadThisWeekEvents();
-        })();
-    </script>
+    <script src="app-shell.js?v=20260310s"></script>
+    <script src="events-engine.js?v=20260310s"></script>
+    <script src="home-page.js?v=20260310s"></script>
+    <script src="events-page.js?v=20260310s"></script>
+    <script src="sermons-page.js?v=20260310s"></script>
+    <script src="contact-page.js?v=20260310s"></script>
+    <script src="spa-router.js?v=20260310s"></script>
 </body>
 </html>
