@@ -680,7 +680,6 @@
         setLanguage(activeLanguage, false, true);
         setupLanguageToggle();
         setupThemeToggle();
-        showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();
         createGlobalMiniPlayer();
