@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Sermons</title>
-    <link rel="stylesheet" href="styles.css?v=20260310b">
+    <link rel="stylesheet" href="styles.css?v=20260310d">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -63,9 +63,14 @@
         <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player">
             <div class="sermon-player-top">
                 <strong>Now Playing</strong>
-                <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div>
+                    <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player">
+                        <i class="fa-solid fa-window-minimize"></i>
+                    </button>
+                    <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
             <div class="sermon-player-display">
                 <h3 id="player-sermon-title">Sermon title</h3>
@@ -94,8 +99,20 @@
             <audio id="sermon-audio" preload="metadata"></audio>
         </section>
     </div>
+    <div class="mini-sermon-player" id="mini-sermon-player" hidden>
+        <button type="button" class="mini-player-open" id="mini-player-open" aria-label="Open full player">
+            <span class="mini-player-title" id="mini-player-title">Now Playing</span>
+            <span class="mini-player-time" id="mini-player-time">00:00 / 00:00</span>
+        </button>
+        <button type="button" class="mini-player-btn" id="mini-player-play" aria-label="Play or pause">
+            <i class="fa-solid fa-play"></i>
+        </button>
+        <button type="button" class="mini-player-btn" id="mini-player-close" aria-label="Stop and close player">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
 
-    <script src="app-shell.js?v=20260310b"></script>
+    <script src="app-shell.js?v=20260310d"></script>
     <script>
         (function () {
             var sermonsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
@@ -109,6 +126,7 @@
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
             var playerClose = document.getElementById("sermon-player-close");
+            var playerMinimize = document.getElementById("sermon-player-minimize");
             var playerMenu = document.getElementById("player-wheel-menu");
             var playerPrev = document.getElementById("player-prev");
             var playerNext = document.getElementById("player-next");
@@ -120,6 +138,12 @@
             var playerSeek = document.getElementById("player-seek");
             var playerTime = document.getElementById("player-time");
             var sermonAudio = document.getElementById("sermon-audio");
+            var miniPlayer = document.getElementById("mini-sermon-player");
+            var miniPlayerOpen = document.getElementById("mini-player-open");
+            var miniPlayerTitle = document.getElementById("mini-player-title");
+            var miniPlayerTime = document.getElementById("mini-player-time");
+            var miniPlayerPlay = document.getElementById("mini-player-play");
+            var miniPlayerClose = document.getElementById("mini-player-close");
 
             function escapeHtml(value) {
                 return String(value)
@@ -214,6 +238,7 @@
                 var playIcon = isPaused ? "fa-play" : "fa-pause";
                 playerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
                 playerCenter.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+                miniPlayerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
             }
 
             function refreshPlayerTime() {
@@ -222,6 +247,7 @@
                 var percent = duration > 0 ? Math.round((current / duration) * 100) : 0;
                 playerSeek.value = String(percent);
                 playerTime.textContent = formatTime(current) + " / " + formatTime(duration);
+                miniPlayerTime.textContent = playerTime.textContent;
             }
 
             function openPlayer(index, autoplay) {
@@ -237,7 +263,9 @@
                 playerTitle.textContent = sermon.title || "Sermon";
                 playerSubtitle.textContent = sermon.subtitle || "";
                 playerDate.textContent = toDisplayDate(sermon.dateObj) + (sermon.speaker ? " - " + sermon.speaker : "");
+                miniPlayerTitle.textContent = sermon.title || "Sermon";
                 playerOverlay.hidden = false;
+                miniPlayer.hidden = true;
                 document.body.classList.add("sermon-player-open");
 
                 if (sermonAudio.src !== sermon.audioUrl) {
@@ -253,9 +281,31 @@
                 updatePlayerButtonState();
             }
 
+            function minimizePlayer() {
+                if (playerOverlay.hidden) {
+                    return;
+                }
+                playerOverlay.hidden = true;
+                miniPlayer.hidden = false;
+                document.body.classList.remove("sermon-player-open");
+                refreshPlayerTime();
+                updatePlayerButtonState();
+            }
+
+            function restorePlayer() {
+                if (miniPlayer.hidden && !playerOverlay.hidden) {
+                    return;
+                }
+                playerOverlay.hidden = false;
+                miniPlayer.hidden = true;
+                document.body.classList.add("sermon-player-open");
+                refreshPlayerTime();
+            }
+
             function closePlayer() {
                 sermonAudio.pause();
                 playerOverlay.hidden = true;
+                miniPlayer.hidden = true;
                 document.body.classList.remove("sermon-player-open");
                 updatePlayerButtonState();
             }
@@ -318,11 +368,15 @@
 
             playerBackdrop.addEventListener("click", closePlayer);
             playerClose.addEventListener("click", closePlayer);
+            playerMinimize.addEventListener("click", minimizePlayer);
             playerMenu.addEventListener("click", closePlayer);
             playerPrev.addEventListener("click", function () { playNext(-1); });
             playerNext.addEventListener("click", function () { playNext(1); });
             playerPlay.addEventListener("click", togglePlayPause);
             playerCenter.addEventListener("click", togglePlayPause);
+            miniPlayerOpen.addEventListener("click", restorePlayer);
+            miniPlayerPlay.addEventListener("click", togglePlayPause);
+            miniPlayerClose.addEventListener("click", closePlayer);
 
             sermonAudio.addEventListener("timeupdate", refreshPlayerTime);
             sermonAudio.addEventListener("loadedmetadata", refreshPlayerTime);

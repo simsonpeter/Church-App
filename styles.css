@@ -381,6 +381,11 @@ body.sermon-player-open {
     color: #ac3636;
 }
 
+.sermon-player-top > div {
+    display: inline-flex;
+    gap: 8px;
+}
+
 .sermon-player-close {
     border: 0;
     background: #ffd9d9;
@@ -480,6 +485,57 @@ body.sermon-player-open {
     color: #fff;
     box-shadow: 0 10px 20px rgba(138, 24, 24, 0.36);
     font-size: 1.1rem;
+}
+
+.mini-sermon-player {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 86px);
+    width: min(410px, calc(100% - 20px));
+    z-index: 2500;
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid #efc7c7;
+    background: rgba(255, 245, 245, 0.97);
+    box-shadow: 0 10px 22px rgba(93, 18, 18, 0.24);
+}
+
+.mini-sermon-player[hidden] {
+    display: none !important;
+}
+
+.mini-player-open {
+    border: 0;
+    background: transparent;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    display: grid;
+    gap: 2px;
+}
+
+.mini-player-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.mini-player-time {
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.mini-player-btn {
+    border: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #ffd8d8;
+    color: #8f2020;
 }
 
 .inline-link,
@@ -646,6 +702,16 @@ button.button-link {
 
     .wheel-btn {
         color: #ffb8b8;
+    }
+
+    .mini-sermon-player {
+        background: rgba(40, 17, 17, 0.96);
+        border-color: #6b3333;
+    }
+
+    .mini-player-btn {
+        background: #5f2727;
+        color: #ffd8d8;
     }
 }
 
