@@ -34,6 +34,50 @@ body {
     animation: background-flow 20s ease infinite;
 }
 
+body.splash-active {
+    overflow: hidden;
+}
+
+.splash-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 6000;
+    background: #ffffff;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.splash-screen.show {
+    opacity: 1;
+}
+
+.splash-screen.hide {
+    opacity: 0;
+}
+
+.splash-inner {
+    text-align: center;
+    padding: 20px;
+}
+
+.splash-logo {
+    width: 128px;
+    height: 128px;
+    object-fit: contain;
+    animation: splash-pop 0.8s ease both;
+}
+
+.splash-text {
+    margin-top: 14px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #8f1f1f;
+    letter-spacing: 0.01em;
+    animation: splash-text 1.15s ease both;
+}
+
 .app-shell {
     max-width: 430px;
     min-height: 100vh;
@@ -798,5 +842,29 @@ button.button-link {
     to {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@keyframes splash-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.88);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes splash-text {
+    from {
+        opacity: 0;
+        transform: translateY(9px);
+        letter-spacing: 0.08em;
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        letter-spacing: 0.01em;
     }
 }

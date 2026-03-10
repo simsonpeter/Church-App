@@ -1,6 +1,7 @@
 (function () {
     var prefetched = new Set();
     var STATE_KEY = "njc_sermon_player_v1";
+    var SPLASH_KEY = "njc_splash_seen_v1";
 
     function isSameOriginHttp(url) {
         return (url.protocol === "http:" || url.protocol === "https:") && url.origin === window.location.origin;
@@ -264,7 +265,43 @@
         }
     }
 
+    function showSplashScreenOnce() {
+        try {
+            if (window.sessionStorage.getItem(SPLASH_KEY)) {
+                return;
+            }
+            window.sessionStorage.setItem(SPLASH_KEY, "1");
+        } catch (err) {
+            return;
+        }
+
+        var splash = document.createElement("div");
+        splash.className = "splash-screen";
+        splash.innerHTML = "" +
+            "<div class=\"splash-inner\">" +
+            "  <img class=\"splash-logo\" src=\"logo.png\" alt=\"New Jerusalem Church Belgium logo\">" +
+            "  <div class=\"splash-text\">New Jerusalem Church Belgium</div>" +
+            "</div>";
+
+        document.body.appendChild(splash);
+        document.body.classList.add("splash-active");
+
+        requestAnimationFrame(function () {
+            splash.classList.add("show");
+        });
+
+        window.setTimeout(function () {
+            splash.classList.remove("show");
+            splash.classList.add("hide");
+            document.body.classList.remove("splash-active");
+            window.setTimeout(function () {
+                splash.remove();
+            }, 320);
+        }, 1550);
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
+        showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();
         createGlobalMiniPlayer();
