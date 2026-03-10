@@ -797,6 +797,28 @@ button.button-link:disabled {
     font-size: 0.82rem;
 }
 
+.notify-controls-row {
+    margin-top: 8px;
+    display: grid;
+    gap: 6px;
+}
+
+.notify-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.notify-select {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font: inherit;
+}
+
 .search-row {
     margin-bottom: 10px;
 }
@@ -815,6 +837,57 @@ button.button-link:disabled {
     outline: 2px solid rgba(229, 57, 53, 0.3);
     outline-offset: 1px;
     border-color: var(--primary);
+}
+
+.filter-chip-groups {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.chip-group-title {
+    margin: 0 0 6px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.filter-chip {
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font: inherit;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+
+.filter-chip.active {
+    background: var(--primary-soft);
+    border-color: #e7aaaa;
+    color: #a61f1f;
+}
+
+.offline-badge {
+    position: fixed;
+    top: max(8px, env(safe-area-inset-top));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5000;
+    background: #a61f1f;
+    color: #ffffff;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    box-shadow: 0 8px 16px rgba(80, 17, 17, 0.35);
 }
 
 @media (prefers-color-scheme: dark) {

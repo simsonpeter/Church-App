@@ -132,8 +132,16 @@
         "notify.statusUnsupported": "இந்த சாதனத்தில் அறிவிப்புகள் ஆதரிக்கப்படவில்லை.",
         "notify.enable": "அறிவிப்புகளை இயக்கு",
         "notify.disable": "அறிவிப்புகளை அணை",
+        "notify.reminderLabel": "நினைவூட்டல் நேரம்",
+        "notify.reminder15": "15 நிமிடம் முன்",
+        "notify.reminder30": "30 நிமிடம் முன்",
+        "notify.reminder60": "60 நிமிடம் முன்",
         "notify.eventSoonTitle": "நிகழ்வு நினைவூட்டல்",
         "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
+        "sermons.filterSpeaker": "பேச்சாளர்",
+        "sermons.filterMonth": "மாதம்",
+        "sermons.filterAll": "அனைத்தும்",
+        "offline.active": "ஆஃப்லைன் முறை செயல்பாட்டில் உள்ளது",
         "player.openSermonsPage": "பிரசங்கங்கள் பக்கத்தைத் திற",
         "player.playOrPause": "ஒலிக்க அல்லது நிறுத்த",
         "player.stopAndClose": "நிறுத்தி மூட",
@@ -397,6 +405,14 @@
         return ("Notification" in window) && ("serviceWorker" in navigator);
     }
 
+    function normalizeReminderMinutes(value) {
+        var num = Number(value);
+        if (num === 15 || num === 30 || num === 60) {
+            return num;
+        }
+        return 60;
+    }
+
     function getNotificationSettings() {
         try {
             var raw = window.localStorage.getItem(NOTIFICATION_SETTINGS_KEY);
@@ -406,9 +422,7 @@
             var parsed = JSON.parse(raw);
             return {
                 enabled: Boolean(parsed && parsed.enabled),
-                reminderMinutes: (parsed && Number.isFinite(parsed.reminderMinutes) && parsed.reminderMinutes > 0)
-                    ? Number(parsed.reminderMinutes)
-                    : 60
+                reminderMinutes: normalizeReminderMinutes(parsed && parsed.reminderMinutes)
             };
         } catch (err) {
             return { enabled: false, reminderMinutes: 60 };
@@ -419,9 +433,7 @@
         try {
             window.localStorage.setItem(NOTIFICATION_SETTINGS_KEY, JSON.stringify({
                 enabled: Boolean(settings && settings.enabled),
-                reminderMinutes: (settings && Number.isFinite(settings.reminderMinutes) && settings.reminderMinutes > 0)
-                    ? Number(settings.reminderMinutes)
-                    : 60
+                reminderMinutes: normalizeReminderMinutes(settings && settings.reminderMinutes)
             }));
         } catch (err) {
             return null;
@@ -709,10 +721,23 @@
         });
     }
 
+    function setNotificationReminderMinutes(minutes) {
+        var status = getNotificationStatus();
+        var nextMinutes = normalizeReminderMinutes(minutes);
+        setNotificationSettings({
+            enabled: status.enabled,
+            reminderMinutes: nextMinutes
+        });
+        emitNotificationStatus();
+        runNotificationChecks();
+        return getNotificationStatus();
+    }
+
     function setupNotifications() {
         window.NjcNotifications = {
             getStatus: getNotificationStatus,
             toggleEnabled: toggleNotificationsEnabled,
+            setReminderMinutes: setNotificationReminderMinutes,
             requestPermission: requestNotificationPermission,
             refreshNow: function () {
                 runNotificationChecks();
@@ -724,6 +749,30 @@
             if (!document.hidden) {
                 runNotificationChecks();
             }
+        });
+    }
+
+    function setupOfflineBadge() {
+        var existing = document.getElementById("offline-badge");
+        if (existing) {
+            existing.remove();
+        }
+
+        var badge = document.createElement("div");
+        badge.id = "offline-badge";
+        badge.className = "offline-badge";
+        badge.textContent = t("offline.active", "Offline mode active");
+        badge.hidden = navigator.onLine;
+        document.body.appendChild(badge);
+
+        function refresh() {
+            badge.hidden = navigator.onLine;
+        }
+
+        window.addEventListener("online", refresh);
+        window.addEventListener("offline", refresh);
+        document.addEventListener("njc:langchange", function () {
+            badge.textContent = t("offline.active", "Offline mode active");
         });
     }
 
@@ -1050,6 +1099,7 @@
         setupLanguageToggle();
         setupThemeToggle();
         setupNotifications();
+        setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();
         setupIntentPrefetch();

@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Sermons</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310p">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310p">
-    <link rel="manifest" href="site.webmanifest?v=20260310p">
-    <link rel="stylesheet" href="styles.css?v=20260310p">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310q">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310q">
+    <link rel="manifest" href="site.webmanifest?v=20260310q">
+    <link rel="stylesheet" href="styles.css?v=20260310q">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -44,6 +44,16 @@
                         type="search"
                         data-i18n-placeholder="sermons.searchPlaceholder"
                         placeholder="Search sermons by title, speaker, or date">
+                </div>
+                <div class="filter-chip-groups">
+                    <div class="chip-group">
+                        <p class="chip-group-title" data-i18n="sermons.filterSpeaker">Speaker</p>
+                        <div class="filter-chips" id="sermon-speaker-chips"></div>
+                    </div>
+                    <div class="chip-group">
+                        <p class="chip-group-title" data-i18n="sermons.filterMonth">Month</p>
+                        <div class="filter-chips" id="sermon-month-chips"></div>
+                    </div>
                 </div>
                 <p class="page-note" id="sermon-search-note" hidden></p>
                 <ul class="list" id="latest-sermons-list">
@@ -125,8 +135,8 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260310p"></script>
-    <script src="events-engine.js?v=20260310p"></script>
+    <script src="app-shell.js?v=20260310q"></script>
+    <script src="events-engine.js?v=20260310q"></script>
     <script>
         (function () {
             var STATE_KEY = "njc_sermon_player_v1";
@@ -135,6 +145,8 @@
             var showMoreSermonsButton = document.getElementById("show-more-sermons");
             var sermonSearch = document.getElementById("sermon-search");
             var sermonSearchNote = document.getElementById("sermon-search-note");
+            var sermonSpeakerChips = document.getElementById("sermon-speaker-chips");
+            var sermonMonthChips = document.getElementById("sermon-month-chips");
             var archiveNote = document.getElementById("sermon-archive-note");
             var allSermons = [];
             var visibleCount = 4;
@@ -143,6 +155,8 @@
             var sermonsLoaded = false;
             var sermonsLoadFailed = false;
             var searchQuery = "";
+            var selectedSpeaker = "";
+            var selectedMonth = "";
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -244,7 +258,10 @@
                     speaker: item.speaker || "",
                     audioUrl: item.audioUrl || "",
                     dateObj: dateObj,
-                    dateKey: dateObj ? dateObj.getTime() : -1
+                    dateKey: dateObj ? dateObj.getTime() : -1,
+                    monthKey: dateObj
+                        ? (String(dateObj.getFullYear()) + "-" + String(dateObj.getMonth() + 1).padStart(2, "0"))
+                        : ""
                 };
             }
 
@@ -259,16 +276,101 @@
                 showMoreSermonsButton.hidden = true;
             }
 
+            function toMonthLabel(monthKey) {
+                if (!monthKey) {
+                    return "";
+                }
+                var parts = monthKey.split("-");
+                if (parts.length !== 2) {
+                    return monthKey;
+                }
+                var year = Number(parts[0]);
+                var month = Number(parts[1]);
+                if (!Number.isFinite(year) || !Number.isFinite(month)) {
+                    return monthKey;
+                }
+                var dateObj = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
+                return new Intl.DateTimeFormat(getLocale(), {
+                    timeZone: "UTC",
+                    month: "long",
+                    year: "numeric"
+                }).format(dateObj);
+            }
+
+            function buildFilterChips() {
+                var allLabel = T("sermons.filterAll", "All");
+                var uniqueSpeakers = [];
+                var seenSpeakers = {};
+                allSermons.forEach(function (sermon) {
+                    var speaker = String(sermon.speaker || "").trim();
+                    if (!speaker || seenSpeakers[speaker]) {
+                        return;
+                    }
+                    seenSpeakers[speaker] = true;
+                    uniqueSpeakers.push(speaker);
+                });
+
+                var uniqueMonths = [];
+                var seenMonths = {};
+                allSermons.forEach(function (sermon) {
+                    var monthKey = sermon.monthKey || "";
+                    if (!monthKey || seenMonths[monthKey]) {
+                        return;
+                    }
+                    seenMonths[monthKey] = true;
+                    uniqueMonths.push(monthKey);
+                });
+                uniqueMonths.sort().reverse();
+
+                sermonSpeakerChips.innerHTML = "";
+                var allSpeakerButton = document.createElement("button");
+                allSpeakerButton.type = "button";
+                allSpeakerButton.className = "filter-chip" + (selectedSpeaker ? "" : " active");
+                allSpeakerButton.setAttribute("data-speaker", "");
+                allSpeakerButton.textContent = allLabel;
+                sermonSpeakerChips.appendChild(allSpeakerButton);
+                uniqueSpeakers.forEach(function (speaker) {
+                    var button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "filter-chip" + (selectedSpeaker === speaker ? " active" : "");
+                    button.setAttribute("data-speaker", speaker);
+                    button.textContent = speaker;
+                    sermonSpeakerChips.appendChild(button);
+                });
+
+                sermonMonthChips.innerHTML = "";
+                var allMonthButton = document.createElement("button");
+                allMonthButton.type = "button";
+                allMonthButton.className = "filter-chip" + (selectedMonth ? "" : " active");
+                allMonthButton.setAttribute("data-month", "");
+                allMonthButton.textContent = allLabel;
+                sermonMonthChips.appendChild(allMonthButton);
+                uniqueMonths.forEach(function (monthKey) {
+                    var button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "filter-chip" + (selectedMonth === monthKey ? " active" : "");
+                    button.setAttribute("data-month", monthKey);
+                    button.textContent = toMonthLabel(monthKey);
+                    sermonMonthChips.appendChild(button);
+                });
+            }
+
             function getFilteredSermons() {
                 var query = searchQuery.trim().toLowerCase();
                 var records = allSermons.map(function (item, index) {
                     return { item: item, index: index };
                 });
-                if (!query) {
-                    return records;
-                }
                 return records.filter(function (record) {
                     var sermon = record.item;
+                    if (selectedSpeaker && sermon.speaker !== selectedSpeaker) {
+                        return false;
+                    }
+                    if (selectedMonth && sermon.monthKey !== selectedMonth) {
+                        return false;
+                    }
+                    if (!query) {
+                        return true;
+                    }
                     var searchable = [
                         sermon.title || "",
                         sermon.subtitle || "",
@@ -280,8 +382,10 @@
             }
 
             function renderSermons() {
+                buildFilterChips();
                 var filteredRecords = getFilteredSermons();
                 var hasSearch = searchQuery.trim().length > 0;
+                var hasFilters = Boolean(selectedSpeaker || selectedMonth);
 
                 if (!allSermons.length) {
                     latestSermonsList.innerHTML = "" +
@@ -312,7 +416,7 @@
                     return;
                 }
 
-                var visible = hasSearch ? filteredRecords : filteredRecords.slice(0, visibleCount);
+                var visible = (hasSearch || hasFilters) ? filteredRecords : filteredRecords.slice(0, visibleCount);
                 latestSermonsList.innerHTML = visible.map(function (record) {
                     var sermon = record.item;
                     var sermonIndex = record.index;
@@ -336,9 +440,9 @@
                         "</li>";
                 }).join("");
 
-                showMoreSermonsButton.hidden = hasSearch || visibleCount >= filteredRecords.length;
-                sermonSearchNote.hidden = !hasSearch;
-                if (hasSearch) {
+                showMoreSermonsButton.hidden = hasSearch || hasFilters || visibleCount >= filteredRecords.length;
+                sermonSearchNote.hidden = !(hasSearch || hasFilters);
+                if (hasSearch || hasFilters) {
                     sermonSearchNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
                         ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found."), filteredRecords.length)
                         : (filteredRecords.length + " results found.");
@@ -508,6 +612,26 @@
 
             sermonSearch.addEventListener("input", function () {
                 searchQuery = sermonSearch.value || "";
+                visibleCount = 4;
+                renderSermons();
+            });
+
+            sermonSpeakerChips.addEventListener("click", function (event) {
+                var button = event.target.closest("button[data-speaker]");
+                if (!button) {
+                    return;
+                }
+                selectedSpeaker = button.getAttribute("data-speaker") || "";
+                visibleCount = 4;
+                renderSermons();
+            });
+
+            sermonMonthChips.addEventListener("click", function (event) {
+                var button = event.target.closest("button[data-month]");
+                if (!button) {
+                    return;
+                }
+                selectedMonth = button.getAttribute("data-month") || "";
                 visibleCount = 4;
                 renderSermons();
             });

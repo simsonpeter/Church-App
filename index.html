@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App - Home</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260310p">
-    <link rel="apple-touch-icon" href="logo.png?v=20260310p">
-    <link rel="manifest" href="site.webmanifest?v=20260310p">
-    <link rel="stylesheet" href="styles.css?v=20260310p">
+    <link rel="icon" type="image/png" href="logo.png?v=20260310q">
+    <link rel="apple-touch-icon" href="logo.png?v=20260310q">
+    <link rel="manifest" href="site.webmanifest?v=20260310q">
+    <link rel="stylesheet" href="styles.css?v=20260310q">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -23,6 +23,14 @@
             <section class="card">
                 <h2><i class="fa-solid fa-bell"></i><span data-i18n="notify.title">Notifications</span></h2>
                 <p class="page-note" data-i18n="notify.subtitle">Get service reminders and new sermon alerts.</p>
+                <div class="notify-controls-row">
+                    <label class="notify-label" for="notification-reminder-select" data-i18n="notify.reminderLabel">Reminder time</label>
+                    <select id="notification-reminder-select" class="notify-select">
+                        <option value="15" data-i18n="notify.reminder15">15 min before</option>
+                        <option value="30" data-i18n="notify.reminder30">30 min before</option>
+                        <option value="60" data-i18n="notify.reminder60">60 min before</option>
+                    </select>
+                </div>
                 <p class="page-note" id="notification-status-text" data-i18n="notify.statusOff">Notifications are currently off.</p>
                 <button class="button-link" id="notification-toggle-btn" type="button" data-i18n="notify.enable">Enable Notifications</button>
             </section>
@@ -73,14 +81,15 @@
             <a class="tab" href="contact.html"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
         </nav>
     </div>
-    <script src="app-shell.js?v=20260310p"></script>
-    <script src="events-engine.js?v=20260310p"></script>
+    <script src="app-shell.js?v=20260310q"></script>
+    <script src="events-engine.js?v=20260310q"></script>
     <script>
         (function () {
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
             var notificationStatusText = document.getElementById("notification-status-text");
             var notificationToggleButton = document.getElementById("notification-toggle-btn");
+            var notificationReminderSelect = document.getElementById("notification-reminder-select");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
@@ -180,14 +189,17 @@
                     notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
                     notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
                     notificationToggleButton.disabled = true;
+                    notificationReminderSelect.disabled = true;
                     return;
                 }
 
                 var status = window.NjcNotifications.getStatus();
+                notificationReminderSelect.value = String(status.reminderMinutes || 60);
                 if (!status.supported || status.permission === "unsupported") {
                     notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
                     notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
                     notificationToggleButton.disabled = true;
+                    notificationReminderSelect.disabled = true;
                     return;
                 }
 
@@ -195,6 +207,7 @@
                     notificationStatusText.textContent = T("notify.statusBlocked", "Notifications are blocked in browser settings.");
                     notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
                     notificationToggleButton.disabled = false;
+                    notificationReminderSelect.disabled = false;
                     return;
                 }
 
@@ -202,12 +215,14 @@
                     notificationStatusText.textContent = T("notify.statusOn", "Notifications are active.");
                     notificationToggleButton.textContent = T("notify.disable", "Disable Notifications");
                     notificationToggleButton.disabled = false;
+                    notificationReminderSelect.disabled = false;
                     return;
                 }
 
                 notificationStatusText.textContent = T("notify.statusOff", "Notifications are currently off.");
                 notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
                 notificationToggleButton.disabled = false;
+                notificationReminderSelect.disabled = false;
             }
 
             function getBrusselsYmd() {
@@ -405,6 +420,14 @@
                 window.NjcNotifications.toggleEnabled().then(function () {
                     renderNotificationState();
                 });
+            });
+
+            notificationReminderSelect.addEventListener("change", function () {
+                if (!window.NjcNotifications || typeof window.NjcNotifications.setReminderMinutes !== "function") {
+                    return;
+                }
+                window.NjcNotifications.setReminderMinutes(Number(notificationReminderSelect.value));
+                renderNotificationState();
             });
 
             updateReadingPlanMeta();
