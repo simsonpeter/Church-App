@@ -348,6 +348,10 @@ body.sermon-player-open {
     align-items: end;
 }
 
+.sermon-player-overlay[hidden] {
+    display: none !important;
+}
+
 .sermon-player-backdrop {
     position: absolute;
     inset: 0;
@@ -365,6 +369,8 @@ body.sermon-player-open {
     border: 1px solid #efc5c5;
     box-shadow: 0 -20px 45px rgba(58, 11, 11, 0.26);
     animation: player-up 0.2s ease both;
+    max-height: calc(100vh - 10px);
+    overflow-y: auto;
 }
 
 .sermon-player-top {
