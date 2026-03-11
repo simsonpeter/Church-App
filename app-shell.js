@@ -30,6 +30,7 @@
         "home.readingDatePrefix": "இன்று:",
         "home.markMorningDone": "காலை வாசிப்பு முடிந்தது",
         "home.markEveningDone": "மாலை வாசிப்பு முடிந்தது",
+        "home.readTooltipDone": "வாசிப்பு முடிந்தது",
         "home.readingStreak": "தொடர் நாட்கள்: {count}",
         "home.morningReading": "காலை வாசிப்பு",
         "home.eveningReading": "மாலை வாசிப்பு",

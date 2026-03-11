@@ -927,23 +927,18 @@ button.button-link:disabled {
     font-size: 0.78rem;
 }
 
-.reading-progress {
-    margin-top: 10px;
-    display: grid;
-    gap: 6px;
-}
-
-.reading-check {
+.reading-item-title {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.85rem;
 }
 
-.reading-check input {
-    width: 16px;
-    height: 16px;
+.reading-inline-tick {
+    width: 15px;
+    height: 15px;
+    margin: 0;
     accent-color: var(--primary);
+    flex: 0 0 auto;
 }
 
 .search-row {
