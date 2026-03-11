@@ -840,7 +840,7 @@
                 return;
             }
             var rect = button.getBoundingClientRect();
-            var desiredWidth = Math.min(280, window.innerWidth - 24);
+            var desiredWidth = Math.min(236, window.innerWidth - 24);
             var left = rect.right - desiredWidth;
             if (left < 12) {
                 left = 12;
@@ -866,7 +866,7 @@
             if (closeTimerId) {
                 window.clearTimeout(closeTimerId);
             }
-            closeTimerId = window.setTimeout(closePanel, 900);
+            closeTimerId = window.setTimeout(closePanel, 650);
         }
 
         function renderPanel() {
