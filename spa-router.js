@@ -9,14 +9,14 @@
             subtitleKey: "home.tagline",
             subtitleText: "Your weekly faith journey in one place."
         },
-        about: {
-            icon: "fa-circle-info",
-            eyebrowKey: "about.eyebrow",
-            eyebrowText: "About",
-            titleKey: "about.title",
-            titleText: "Who we are",
-            subtitleKey: "about.subtitle",
-            subtitleText: "A faith-centered community growing together in Christ."
+        prayer: {
+            icon: "fa-hands-praying",
+            eyebrowKey: "prayer.eyebrow",
+            eyebrowText: "Prayer",
+            titleKey: "prayer.title",
+            titleText: "Prayer Wall",
+            subtitleKey: "prayer.subtitle",
+            subtitleText: "Share requests and pray together as one church family."
         },
         events: {
             icon: "fa-calendar-days",
@@ -56,6 +56,9 @@
 
     function getRouteFromHash() {
         var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        if (raw === "about") {
+            return "prayer";
+        }
         return routes[raw] ? raw : "home";
     }
 
