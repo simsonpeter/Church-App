@@ -225,12 +225,29 @@ body.splash-active {
     backdrop-filter: blur(8px);
 }
 
+.notify-toggle {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    backdrop-filter: blur(8px);
+}
+
 .theme-toggle {
     order: 1;
 }
 
 .lang-toggle {
     order: 2;
+}
+
+.notify-toggle {
+    order: 3;
 }
 
 .eyebrow {
@@ -858,6 +875,40 @@ button.button-link:disabled {
     border-radius: 12px;
     padding: 10px 12px;
     font: inherit;
+}
+
+.notification-popover {
+    position: fixed;
+    z-index: 3500;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 14px 28px rgba(40, 12, 12, 0.28);
+    padding: 12px;
+}
+
+.notification-popover[hidden] {
+    display: none;
+}
+
+.notification-popover-title {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.notification-popover-status {
+    margin-top: 6px;
+}
+
+.notification-popover .notify-controls-row {
+    margin-top: 10px;
+}
+
+.notification-popover-toggle {
+    width: 100%;
+    margin-top: 10px;
 }
 
 .reading-progress {

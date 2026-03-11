@@ -140,6 +140,7 @@
         "sermons.favoriteAdd": "பிடித்ததில் சேர்",
         "sermons.favoriteRemove": "பிடித்ததில் இருந்து நீக்கு",
         "notify.title": "அறிவிப்புகள்",
+        "notify.quickOpen": "அறிவிப்பு அமைப்புகள்",
         "notify.subtitle": "சேவை நினைவூட்டல் மற்றும் புதிய பிரசங்க அறிவிப்புகளைப் பெறுங்கள்.",
         "notify.statusOn": "அறிவிப்புகள் செயல்பாட்டில் உள்ளன.",
         "notify.statusOff": "அறிவிப்புகள் தற்போது அணைக்கப்பட்டுள்ளன.",
@@ -774,6 +775,223 @@
         });
     }
 
+    function setupNotificationQuickButton() {
+        var header = document.querySelector(".app-header");
+        if (!header || document.getElementById("notification-quick-btn")) {
+            return;
+        }
+
+        var controls = ensureHeaderControls(header);
+        var button = document.createElement("button");
+        button.id = "notification-quick-btn";
+        button.className = "notify-toggle";
+        button.type = "button";
+        button.innerHTML = "<i class=\"fa-solid fa-bell\"></i>";
+        controls.appendChild(button);
+
+        var panel = document.createElement("div");
+        panel.id = "notification-quick-panel";
+        panel.className = "notification-popover";
+        panel.hidden = true;
+
+        var title = document.createElement("p");
+        title.className = "notification-popover-title";
+
+        var statusText = document.createElement("p");
+        statusText.className = "page-note notification-popover-status";
+
+        var controlsRow = document.createElement("div");
+        controlsRow.className = "notify-controls-row";
+
+        var label = document.createElement("label");
+        label.className = "notify-label";
+        label.setAttribute("for", "notification-quick-reminder");
+        controlsRow.appendChild(label);
+
+        var reminderSelect = document.createElement("select");
+        reminderSelect.id = "notification-quick-reminder";
+        reminderSelect.className = "notify-select";
+        reminderSelect.innerHTML = "" +
+            "<option value=\"15\"></option>" +
+            "<option value=\"30\"></option>" +
+            "<option value=\"60\"></option>";
+        controlsRow.appendChild(reminderSelect);
+
+        var toggleButton = document.createElement("button");
+        toggleButton.type = "button";
+        toggleButton.className = "button-link notification-popover-toggle";
+
+        panel.appendChild(title);
+        panel.appendChild(statusText);
+        panel.appendChild(controlsRow);
+        panel.appendChild(toggleButton);
+        document.body.appendChild(panel);
+
+        var closeTimerId = null;
+
+        function setButtonLabel() {
+            var labelText = t("notify.quickOpen", "Notification settings");
+            button.setAttribute("aria-label", labelText);
+            button.title = labelText;
+        }
+
+        function positionPanel() {
+            if (panel.hidden) {
+                return;
+            }
+            var rect = button.getBoundingClientRect();
+            var desiredWidth = Math.min(280, window.innerWidth - 24);
+            var left = rect.right - desiredWidth;
+            if (left < 12) {
+                left = 12;
+            }
+            if (left + desiredWidth > window.innerWidth - 12) {
+                left = window.innerWidth - desiredWidth - 12;
+            }
+            panel.style.width = desiredWidth + "px";
+            panel.style.top = (rect.bottom + 8) + "px";
+            panel.style.left = left + "px";
+        }
+
+        function closePanel() {
+            panel.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+            if (closeTimerId) {
+                window.clearTimeout(closeTimerId);
+                closeTimerId = null;
+            }
+        }
+
+        function queueAutoClose() {
+            if (closeTimerId) {
+                window.clearTimeout(closeTimerId);
+            }
+            closeTimerId = window.setTimeout(closePanel, 900);
+        }
+
+        function renderPanel() {
+            title.textContent = t("notify.title", "Notifications");
+            label.textContent = t("notify.reminderLabel", "Reminder time");
+            reminderSelect.options[0].textContent = t("notify.reminder15", "15 min before");
+            reminderSelect.options[1].textContent = t("notify.reminder30", "30 min before");
+            reminderSelect.options[2].textContent = t("notify.reminder60", "60 min before");
+
+            if (!window.NjcNotifications || typeof window.NjcNotifications.getStatus !== "function") {
+                statusText.textContent = t("notify.statusUnsupported", "Notifications are not supported on this device.");
+                toggleButton.textContent = t("notify.enable", "Enable Notifications");
+                toggleButton.disabled = true;
+                reminderSelect.disabled = true;
+                return;
+            }
+
+            var status = window.NjcNotifications.getStatus();
+            reminderSelect.value = String(status.reminderMinutes || 60);
+            reminderSelect.disabled = false;
+            toggleButton.disabled = false;
+
+            if (!status.supported || status.permission === "unsupported") {
+                statusText.textContent = t("notify.statusUnsupported", "Notifications are not supported on this device.");
+                toggleButton.textContent = t("notify.enable", "Enable Notifications");
+                toggleButton.disabled = true;
+                reminderSelect.disabled = true;
+                return;
+            }
+
+            if (status.permission === "denied") {
+                statusText.textContent = t("notify.statusBlocked", "Notifications are blocked in browser settings.");
+                toggleButton.textContent = t("notify.enable", "Enable Notifications");
+                return;
+            }
+
+            if (status.enabled && status.permission === "granted") {
+                statusText.textContent = t("notify.statusOn", "Notifications are active.");
+                toggleButton.textContent = t("notify.disable", "Disable Notifications");
+                return;
+            }
+
+            statusText.textContent = t("notify.statusOff", "Notifications are currently off.");
+            toggleButton.textContent = t("notify.enable", "Enable Notifications");
+        }
+
+        function togglePanel(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            if (panel.hidden) {
+                renderPanel();
+                panel.hidden = false;
+                button.setAttribute("aria-expanded", "true");
+                positionPanel();
+            } else {
+                closePanel();
+            }
+        }
+
+        setButtonLabel();
+        button.setAttribute("aria-haspopup", "dialog");
+        button.setAttribute("aria-expanded", "false");
+
+        button.addEventListener("click", togglePanel);
+        panel.addEventListener("click", function (event) {
+            event.stopPropagation();
+        });
+
+        toggleButton.addEventListener("click", function () {
+            if (!window.NjcNotifications || typeof window.NjcNotifications.toggleEnabled !== "function") {
+                renderPanel();
+                return;
+            }
+            window.NjcNotifications.toggleEnabled().then(function () {
+                renderPanel();
+                queueAutoClose();
+            });
+        });
+
+        reminderSelect.addEventListener("change", function () {
+            if (!window.NjcNotifications || typeof window.NjcNotifications.setReminderMinutes !== "function") {
+                return;
+            }
+            window.NjcNotifications.setReminderMinutes(Number(reminderSelect.value));
+            renderPanel();
+            queueAutoClose();
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
+                closePanel();
+            }
+        });
+
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closePanel();
+            }
+        });
+
+        window.addEventListener("resize", function () {
+            positionPanel();
+        });
+
+        window.addEventListener("scroll", function () {
+            if (!panel.hidden) {
+                closePanel();
+            }
+        }, true);
+
+        window.addEventListener("hashchange", function () {
+            closePanel();
+        });
+
+        document.addEventListener("njc:notificationstatus", function () {
+            renderPanel();
+        });
+
+        document.addEventListener("njc:langchange", function () {
+            setButtonLabel();
+            renderPanel();
+        });
+    }
+
     function setupOfflineBadge() {
         var existing = document.getElementById("offline-badge");
         if (existing) {
@@ -1121,6 +1339,7 @@
         setupLanguageToggle();
         setupThemeToggle();
         setupNotifications();
+        setupNotificationQuickButton();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();

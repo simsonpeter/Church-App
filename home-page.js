@@ -5,9 +5,6 @@
             var readingMorningDone = document.getElementById("reading-morning-done");
             var readingEveningDone = document.getElementById("reading-evening-done");
             var readingStreakNote = document.getElementById("reading-streak-note");
-            var notificationStatusText = document.getElementById("notification-status-text");
-            var notificationToggleButton = document.getElementById("notification-toggle-btn");
-            var notificationReminderSelect = document.getElementById("notification-reminder-select");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
@@ -209,47 +206,6 @@
                     : ("Streak days: " + streak);
             }
 
-            function renderNotificationState() {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.getStatus !== "function") {
-                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = true;
-                    notificationReminderSelect.disabled = true;
-                    return;
-                }
-
-                var status = window.NjcNotifications.getStatus();
-                notificationReminderSelect.value = String(status.reminderMinutes || 60);
-                if (!status.supported || status.permission === "unsupported") {
-                    notificationStatusText.textContent = T("notify.statusUnsupported", "Notifications are not supported on this device.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = true;
-                    notificationReminderSelect.disabled = true;
-                    return;
-                }
-
-                if (status.permission === "denied") {
-                    notificationStatusText.textContent = T("notify.statusBlocked", "Notifications are blocked in browser settings.");
-                    notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                    notificationToggleButton.disabled = false;
-                    notificationReminderSelect.disabled = false;
-                    return;
-                }
-
-                if (status.enabled && status.permission === "granted") {
-                    notificationStatusText.textContent = T("notify.statusOn", "Notifications are active.");
-                    notificationToggleButton.textContent = T("notify.disable", "Disable Notifications");
-                    notificationToggleButton.disabled = false;
-                    notificationReminderSelect.disabled = false;
-                    return;
-                }
-
-                notificationStatusText.textContent = T("notify.statusOff", "Notifications are currently off.");
-                notificationToggleButton.textContent = T("notify.enable", "Enable Notifications");
-                notificationToggleButton.disabled = false;
-                notificationReminderSelect.disabled = false;
-            }
-
             function getBrusselsYmd() {
                 var parts = new Intl.DateTimeFormat("en-GB", {
                     timeZone: brusselsTimeZone,
@@ -433,29 +389,6 @@
                 renderReadingPlan();
                 renderReadingProgress();
                 renderThisWeekEvents();
-                renderNotificationState();
-            });
-
-            document.addEventListener("njc:notificationstatus", function () {
-                renderNotificationState();
-            });
-
-            notificationToggleButton.addEventListener("click", function () {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.toggleEnabled !== "function") {
-                    renderNotificationState();
-                    return;
-                }
-                window.NjcNotifications.toggleEnabled().then(function () {
-                    renderNotificationState();
-                });
-            });
-
-            notificationReminderSelect.addEventListener("change", function () {
-                if (!window.NjcNotifications || typeof window.NjcNotifications.setReminderMinutes !== "function") {
-                    return;
-                }
-                window.NjcNotifications.setReminderMinutes(Number(notificationReminderSelect.value));
-                renderNotificationState();
             });
 
             readingMorningDone.addEventListener("change", function () {
@@ -469,7 +402,6 @@
             });
 
             updateReadingPlanMeta();
-            renderNotificationState();
             renderReadingProgress();
             loadTodayReadingPlan();
             loadThisWeekEvents();
