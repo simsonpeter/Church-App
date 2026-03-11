@@ -846,7 +846,7 @@
             return;
         }
 
-        if (window.location.pathname.endsWith("/sermons.html") || document.getElementById("sermon-audio")) {
+        if (document.getElementById("sermon-audio")) {
             return;
         }
 
