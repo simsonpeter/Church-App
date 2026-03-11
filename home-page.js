@@ -1,8 +1,15 @@
 (function () {
             var READING_PROGRESS_KEY = "njc_reading_progress_v1";
+            var DAILY_VERSE_LANGUAGE_KEY = "njc_daily_verse_language_v1";
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
+            var dailyVerseText = document.getElementById("daily-verse-text");
+            var dailyVerseReference = document.getElementById("daily-verse-reference");
+            var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
+            var announcementsList = document.getElementById("home-announcements-list");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
+            var announcementsUrl = "./announcements.json";
+            var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
@@ -10,8 +17,11 @@
             var todayPlanData = null;
             var readingPlanError = false;
             var allUpcomingEvents = [];
+            var allAnnouncements = [];
+            var announcementsError = false;
             var eventsMeta = null;
             var eventsError = false;
+            var verseLanguage = getStoredVerseLanguage();
             var bookMapEnglish = {
                 "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
                 "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
@@ -50,6 +60,20 @@
                 acc[bookMapEnglish[key]] = bookMapTamil[key] || bookMapEnglish[key];
                 return acc;
             }, {});
+            var dailyVersePool = [
+                { reference: "Psalm 23:1", textEn: "The Lord is my shepherd; I shall not want.", textTa: "கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; எனக்கு குறைவாயிருக்காது." },
+                { reference: "Proverbs 3:5", textEn: "Trust in the Lord with all your heart and lean not on your own understanding.", textTa: "உன் முழு இருதயத்தோடும் கர்த்தர்மேல் நம்பிக்கையாயிரு; உன் புத்தியின்மேல் சாய்ந்திருக்காதே." },
+                { reference: "Isaiah 41:10", textEn: "Do not fear, for I am with you; do not be dismayed, for I am your God.", textTa: "பயப்படாதே, நான் உன்னோடிருக்கிறேன்; கலங்காதே, நான் உன் தேவன்." },
+                { reference: "Matthew 11:28", textEn: "Come to me, all you who are weary and burdened, and I will give you rest.", textTa: "சுமைப்பட்டு உழைக்கிறவர்களே, நீங்கள் எல்லாரும் என்னிடத்தில் வாருங்கள்; நான் உங்களுக்கு இளைப்பாறுதலை அளிப்பேன்." },
+                { reference: "John 14:27", textEn: "Peace I leave with you; my peace I give you.", textTa: "சமாதானத்தை உங்களிடத்தில் விட்டு செல்கிறேன்; என் சமாதானத்தையே உங்களுக்கு அளிக்கிறேன்." },
+                { reference: "Romans 8:28", textEn: "In all things God works for the good of those who love him.", textTa: "தேவனை நேசிக்கிறவர்களுக்கு சகலமும் நன்மைக்கே ஏதுவாயிருக்கிறது." },
+                { reference: "2 Corinthians 5:7", textEn: "For we live by faith, not by sight.", textTa: "நாம் காண்பதினால் அல்ல, விசுவாசத்தினாலே நடக்கிறோம்." },
+                { reference: "Philippians 4:6", textEn: "Do not be anxious about anything, but in every situation, by prayer and petition, present your requests to God.", textTa: "எதற்கும் கவலைப்படாதீர்கள்; எல்லாவற்றிலும் ஜெபத்தினாலும் வேண்டுதலினாலும் உங்கள் கோரிக்கைகளை தேவனுக்குத் தெரியப்படுத்துங்கள்." },
+                { reference: "Philippians 4:13", textEn: "I can do all this through him who gives me strength.", textTa: "எனக்கு பலம் அளிக்கும் கிறிஸ்துவினாலே எல்லாவற்றையும் செய்ய முடியும்." },
+                { reference: "Hebrews 13:8", textEn: "Jesus Christ is the same yesterday and today and forever.", textTa: "இயேசு கிறிஸ்து நேற்று இன்று என்றும் அதேவரே." },
+                { reference: "1 Peter 5:7", textEn: "Cast all your anxiety on him because he cares for you.", textTa: "உங்கள் கவலைகளையெல்லாம் அவர்மேல் போடுங்கள்; அவர் உங்களைப் பற்றிக் கவலைப்படுகிறார்." },
+                { reference: "1 John 4:19", textEn: "We love because he first loved us.", textTa: "அவர் முன்பாக நம்மை நேசித்ததால் நாம் நேசிக்கிறோம்." }
+            ];
 
             function T(key, fallback) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -67,6 +91,27 @@
 
             function isTamilLanguage() {
                 return window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
+            }
+
+            function getStoredVerseLanguage() {
+                try {
+                    var saved = window.localStorage.getItem(DAILY_VERSE_LANGUAGE_KEY);
+                    if (saved === "en" || saved === "ta") {
+                        return saved;
+                    }
+                } catch (err) {
+                    return "en";
+                }
+                return "en";
+            }
+
+            function saveVerseLanguage(language) {
+                try {
+                    window.localStorage.setItem(DAILY_VERSE_LANGUAGE_KEY, language);
+                } catch (err) {
+                    return null;
+                }
+                return null;
             }
 
             function localizeEventTitle(title) {
@@ -129,6 +174,36 @@
                     day: "numeric"
                 }).format(dateUtc);
                 todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
+            }
+
+            function setDailyVerseToggleLabel() {
+                if (!dailyVerseLanguageToggle) {
+                    return;
+                }
+                var nextLanguage = verseLanguage === "ta" ? "en" : "ta";
+                var label = nextLanguage === "ta"
+                    ? T("home.dailyVerseToggleToTamil", "Switch verse to Tamil")
+                    : T("home.dailyVerseToggleToEnglish", "Switch verse to English");
+                dailyVerseLanguageToggle.textContent = nextLanguage.toUpperCase();
+                dailyVerseLanguageToggle.setAttribute("aria-label", label);
+                dailyVerseLanguageToggle.title = label;
+            }
+
+            function renderDailyVerse() {
+                if (!dailyVerseText || !dailyVerseReference) {
+                    return;
+                }
+                if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
+                    dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.");
+                    dailyVerseReference.textContent = "";
+                    return;
+                }
+                var verseIndex = (getDayOfYear(todayYmd) - 1) % dailyVersePool.length;
+                var verseItem = dailyVersePool[verseIndex];
+                var showTamil = verseLanguage === "ta";
+                dailyVerseText.textContent = showTamil ? (verseItem.textTa || verseItem.textEn) : verseItem.textEn;
+                dailyVerseReference.textContent = verseItem.reference || "";
+                setDailyVerseToggleLabel();
             }
 
             function getTodayKey() {
@@ -199,6 +274,137 @@
                 var yearStart = Date.UTC(ymd.year, 0, 1);
                 var current = Date.UTC(ymd.year, ymd.month - 1, ymd.day);
                 return Math.floor((current - yearStart) / 86400000) + 1;
+            }
+
+            function toYmdKey(value) {
+                var raw = String(value || "").trim();
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+                    return "";
+                }
+                return raw;
+            }
+
+            function formatYmdForLocale(ymdKey) {
+                if (!ymdKey) {
+                    return "";
+                }
+                var parts = ymdKey.split("-");
+                var year = Number(parts[0]);
+                var month = Number(parts[1]);
+                var day = Number(parts[2]);
+                if (!year || !month || !day) {
+                    return "";
+                }
+                var dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+                return new Intl.DateTimeFormat(getLocale(), {
+                    timeZone: "UTC",
+                    weekday: "short",
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric"
+                }).format(dateUtc);
+            }
+
+            function normalizeAnnouncement(item, index) {
+                var source = item && typeof item === "object" ? item : {};
+                var title = String(source.title || "").trim();
+                var body = String(source.body || "").trim();
+                return {
+                    id: String(source.id || ("announcement-" + index)),
+                    title: title,
+                    titleTa: String(source.titleTa || "").trim(),
+                    body: body,
+                    bodyTa: String(source.bodyTa || "").trim(),
+                    date: toYmdKey(source.date),
+                    expires: toYmdKey(source.expires),
+                    urgent: Boolean(source.urgent),
+                    link: String(source.link || "").trim()
+                };
+            }
+
+            function renderAnnouncements() {
+                if (!announcementsList) {
+                    return;
+                }
+
+                if (announcementsError) {
+                    announcementsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorBody", "Please try again shortly.")) + "</p>" +
+                        "</li>";
+                    return;
+                }
+
+                var todayKey = getTodayKey();
+                var visibleItems = allAnnouncements
+                    .filter(function (item) {
+                        return !item.expires || item.expires >= todayKey;
+                    })
+                    .sort(function (a, b) {
+                        if (a.urgent !== b.urgent) {
+                            return a.urgent ? -1 : 1;
+                        }
+                        return (b.date || "").localeCompare(a.date || "");
+                    })
+                    .slice(0, 5);
+
+                if (visibleItems.length === 0) {
+                    announcementsList.innerHTML = "" +
+                        "<li>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noAnnouncementsBody", "Check back later for updates.")) + "</p>" +
+                        "</li>";
+                    return;
+                }
+
+                announcementsList.innerHTML = visibleItems.map(function (item) {
+                    var titleText = isTamilLanguage() && item.titleTa ? item.titleTa : item.title;
+                    var bodyText = isTamilLanguage() && item.bodyTa ? item.bodyTa : item.body;
+                    var dateText = formatYmdForLocale(item.date);
+                    var urgentBadge = item.urgent
+                        ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent")) + "</span>")
+                        : "";
+                    var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
+                    var linkLine = item.link
+                        ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more")) + "</a></p>")
+                        : "";
+                    return "" +
+                        "<li>" +
+                        "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements")) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                        metaLine +
+                        linkLine +
+                        "</li>";
+                }).join("");
+            }
+
+            function loadAnnouncements() {
+                function fetchJson(url) {
+                    return fetch(url).then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Failed to load " + url);
+                        }
+                        return response.json();
+                    });
+                }
+
+                fetchJson(announcementsUrl)
+                    .catch(function () {
+                        return fetchJson(announcementsFallbackUrl);
+                    })
+                    .then(function (data) {
+                        var items = data && Array.isArray(data.items) ? data.items : [];
+                        allAnnouncements = items.map(normalizeAnnouncement).filter(function (item) {
+                            return item.title || item.body;
+                        });
+                        announcementsError = false;
+                        renderAnnouncements();
+                    })
+                    .catch(function () {
+                        announcementsError = true;
+                        renderAnnouncements();
+                    });
             }
 
             function toFriendlyReference(ref) {
@@ -375,6 +581,8 @@
             document.addEventListener("njc:langchange", function () {
                 updateReadingPlanMeta();
                 renderReadingPlan();
+                renderDailyVerse();
+                renderAnnouncements();
                 renderThisWeekEvents();
             });
 
@@ -393,7 +601,17 @@
                 target.setAttribute("aria-label", tooltip);
             });
 
+            if (dailyVerseLanguageToggle) {
+                dailyVerseLanguageToggle.addEventListener("click", function () {
+                    verseLanguage = verseLanguage === "ta" ? "en" : "ta";
+                    saveVerseLanguage(verseLanguage);
+                    renderDailyVerse();
+                });
+            }
+
             updateReadingPlanMeta();
+            renderDailyVerse();
             loadTodayReadingPlan();
+            loadAnnouncements();
             loadThisWeekEvents();
         })();

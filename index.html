@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311c">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311c">
-    <link rel="manifest" href="site.webmanifest?v=20260311c">
-    <link rel="stylesheet" href="styles.css?v=20260311c">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311d">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311d">
+    <link rel="manifest" href="site.webmanifest?v=20260311d">
+    <link rel="stylesheet" href="styles.css?v=20260311d">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -28,6 +28,26 @@
                     <li>
                         <h3 data-i18n="home.loadingReadingTitle">Loading today's reading plan...</h3>
                         <p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <div class="daily-verse-top">
+                    <h2><i class="fa-solid fa-quote-left"></i><span data-i18n="home.dailyVerseTitle">Daily Verse</span></h2>
+                    <button id="daily-verse-language-toggle" class="mini-toggle" type="button" aria-label="Toggle daily verse language">TA</button>
+                </div>
+                <p id="daily-verse-text" class="daily-verse-text">Loading daily verse...</p>
+                <p id="daily-verse-reference" class="page-note"></p>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
+                <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
+                <ul class="list" id="home-announcements-list">
+                    <li>
+                        <h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3>
+                        <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
                     </li>
                 </ul>
             </section>
@@ -261,6 +281,37 @@
             </section>
 
             <section class="card">
+                <h2><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
+                <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray.</p>
+                <form class="prayer-form" id="prayer-wall-form">
+                    <input
+                        id="prayer-wall-name"
+                        class="search-input"
+                        type="text"
+                        data-i18n-placeholder="contact.prayerWallNamePlaceholder"
+                        placeholder="Name (optional)">
+                    <textarea
+                        id="prayer-wall-message"
+                        class="search-input prayer-textarea"
+                        rows="3"
+                        data-i18n-placeholder="contact.prayerWallMessagePlaceholder"
+                        placeholder="Write prayer request"></textarea>
+                    <label class="prayer-wall-anon">
+                        <input id="prayer-wall-anonymous" type="checkbox">
+                        <span data-i18n="contact.prayerWallAnonymousLabel">Post as anonymous</span>
+                    </label>
+                    <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
+                </form>
+                <p class="page-note" id="prayer-wall-note" hidden></p>
+                <ul class="list prayer-wall-list" id="prayer-wall-list">
+                    <li>
+                        <h3 data-i18n="contact.prayerWallLoadingTitle">Loading prayer wall...</h3>
+                        <p data-i18n="contact.prayerWallLoadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
                 <h2><i class="fa-solid fa-clock"></i><span data-i18n="contact.officeHours">Office Hours</span></h2>
                 <ul class="list">
                     <li>
@@ -365,12 +416,12 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311c"></script>
-    <script src="events-engine.js?v=20260311c"></script>
-    <script src="home-page.js?v=20260311c"></script>
-    <script src="events-page.js?v=20260311c"></script>
-    <script src="sermons-page.js?v=20260311c"></script>
-    <script src="contact-page.js?v=20260311c"></script>
-    <script src="spa-router.js?v=20260311c"></script>
+    <script src="app-shell.js?v=20260311d"></script>
+    <script src="events-engine.js?v=20260311d"></script>
+    <script src="home-page.js?v=20260311d"></script>
+    <script src="events-page.js?v=20260311d"></script>
+    <script src="sermons-page.js?v=20260311d"></script>
+    <script src="contact-page.js?v=20260311d"></script>
+    <script src="spa-router.js?v=20260311d"></script>
 </body>
 </html>
