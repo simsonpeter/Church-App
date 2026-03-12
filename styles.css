@@ -1087,7 +1087,15 @@ button.button-link:disabled {
     gap: 10px;
 }
 
-.prayer-prayed-btn {
+.prayer-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.prayer-action-btn {
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--text);
@@ -1095,6 +1103,11 @@ button.button-link:disabled {
     padding: 5px 10px;
     font-size: 0.74rem;
     font-weight: 600;
+}
+
+.prayer-action-danger {
+    color: #b71c1c;
+    border-color: #e0aaaa;
 }
 
 .prayer-textarea {
