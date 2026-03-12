@@ -172,7 +172,7 @@ body.splash-active {
     line-height: 1.2;
     position: relative;
     z-index: 1;
-    padding-right: 44px;
+    padding-right: 0;
 }
 
 .app-header p {
@@ -181,7 +181,7 @@ body.splash-active {
     color: #ffe3e3;
     position: relative;
     z-index: 1;
-    padding-right: 44px;
+    padding-right: 0;
 }
 
 .header-controls {
@@ -260,7 +260,7 @@ body.splash-active {
     gap: 6px;
     position: relative;
     z-index: 1;
-    padding-right: 44px;
+    padding-right: 0;
 }
 
 .eyebrow i {
@@ -968,6 +968,99 @@ button.button-link:disabled {
     border-radius: 10px;
     padding: 8px 10px;
     font-size: 0.78rem;
+}
+
+.settings-fab {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 78px);
+    width: 48px;
+    height: 48px;
+    border: 1px solid #de9e9e;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #f05050, #bf2222);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 10px 24px rgba(127, 34, 34, 0.34);
+    z-index: 2200;
+}
+
+.settings-fab i {
+    font-size: 1rem;
+}
+
+.settings-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: rgba(20, 8, 8, 0.35);
+    z-index: 2180;
+}
+
+.settings-sheet {
+    position: fixed;
+    right: 12px;
+    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 136px);
+    width: min(250px, calc(100% - 24px));
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface);
+    box-shadow: 0 18px 34px rgba(35, 10, 10, 0.3);
+    padding: 12px;
+    z-index: 2190;
+}
+
+.settings-sheet[hidden],
+.settings-sheet-backdrop[hidden] {
+    display: none;
+}
+
+.settings-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.settings-sheet-title {
+    font-size: 0.82rem;
+}
+
+.settings-sheet-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+}
+
+.settings-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.settings-controls .theme-toggle,
+.settings-controls .lang-toggle,
+.settings-controls .notify-toggle {
+    position: static;
+    order: 0;
+    width: 42px;
+    height: 42px;
+    border-color: var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    backdrop-filter: none;
+}
+
+.settings-controls .lang-toggle {
+    font-size: 0.7rem;
 }
 
 .reading-item-title {

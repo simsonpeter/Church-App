@@ -230,7 +230,10 @@
         "contact.prayerWallLoadErrorBody": "இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
         "common.at": "மணிக்கு",
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
-        "common.today": "இன்று"
+        "common.today": "இன்று",
+        "settings.open": "அமைப்புகளை திற",
+        "settings.title": "விரைவு அமைப்புகள்",
+        "settings.close": "மூடு"
     };
 
     function isSameOriginHttp(url) {
@@ -1034,6 +1037,133 @@
         });
     }
 
+    function setupFloatingSettingsFab() {
+        if (document.getElementById("settings-fab")) {
+            return;
+        }
+
+        var languageButton = document.getElementById("language-toggle-btn");
+        var themeButton = document.getElementById("theme-toggle-btn");
+        var notifyButton = document.getElementById("notification-quick-btn");
+        if (!languageButton && !themeButton && !notifyButton) {
+            return;
+        }
+
+        var fab = document.createElement("button");
+        fab.id = "settings-fab";
+        fab.className = "settings-fab";
+        fab.type = "button";
+        fab.innerHTML = "<i class=\"fa-solid fa-sliders\"></i>";
+
+        var backdrop = document.createElement("button");
+        backdrop.id = "settings-sheet-backdrop";
+        backdrop.className = "settings-sheet-backdrop";
+        backdrop.type = "button";
+        backdrop.hidden = true;
+        backdrop.setAttribute("aria-hidden", "true");
+
+        var sheet = document.createElement("section");
+        sheet.id = "settings-sheet";
+        sheet.className = "settings-sheet";
+        sheet.hidden = true;
+        sheet.setAttribute("role", "dialog");
+        sheet.setAttribute("aria-modal", "true");
+
+        var sheetHeader = document.createElement("div");
+        sheetHeader.className = "settings-sheet-header";
+
+        var sheetTitle = document.createElement("strong");
+        sheetTitle.className = "settings-sheet-title";
+
+        var closeButton = document.createElement("button");
+        closeButton.type = "button";
+        closeButton.className = "settings-sheet-close";
+        closeButton.innerHTML = "<i class=\"fa-solid fa-xmark\"></i>";
+
+        sheetHeader.appendChild(sheetTitle);
+        sheetHeader.appendChild(closeButton);
+
+        var controls = document.createElement("div");
+        controls.className = "settings-controls";
+        if (themeButton) {
+            controls.appendChild(themeButton);
+        }
+        if (languageButton) {
+            controls.appendChild(languageButton);
+        }
+        if (notifyButton) {
+            controls.appendChild(notifyButton);
+        }
+
+        sheet.appendChild(sheetHeader);
+        sheet.appendChild(controls);
+        document.body.appendChild(backdrop);
+        document.body.appendChild(sheet);
+        document.body.appendChild(fab);
+
+        var headerControls = document.querySelector(".app-header .header-controls");
+        if (headerControls && headerControls.children.length === 0) {
+            headerControls.remove();
+        }
+
+        function setSettingsLabels() {
+            var openLabel = t("settings.open", "Open settings");
+            var titleText = t("settings.title", "Quick settings");
+            var closeLabel = t("settings.close", "Close");
+            fab.setAttribute("aria-label", openLabel);
+            fab.title = openLabel;
+            sheetTitle.textContent = titleText;
+            closeButton.setAttribute("aria-label", closeLabel);
+            closeButton.title = closeLabel;
+        }
+
+        function closeNotificationPanelIfOpen() {
+            var panel = document.getElementById("notification-quick-panel");
+            if (panel) {
+                panel.hidden = true;
+            }
+            if (notifyButton) {
+                notifyButton.setAttribute("aria-expanded", "false");
+            }
+        }
+
+        function openSheet() {
+            sheet.hidden = false;
+            backdrop.hidden = false;
+            fab.setAttribute("aria-expanded", "true");
+        }
+
+        function closeSheet() {
+            sheet.hidden = true;
+            backdrop.hidden = true;
+            fab.setAttribute("aria-expanded", "false");
+            closeNotificationPanelIfOpen();
+        }
+
+        setSettingsLabels();
+        fab.setAttribute("aria-haspopup", "dialog");
+        fab.setAttribute("aria-expanded", "false");
+
+        fab.addEventListener("click", function () {
+            if (sheet.hidden) {
+                openSheet();
+            } else {
+                closeSheet();
+            }
+        });
+        closeButton.addEventListener("click", closeSheet);
+        backdrop.addEventListener("click", closeSheet);
+        window.addEventListener("hashchange", closeSheet);
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !sheet.hidden) {
+                closeSheet();
+            }
+        });
+        document.addEventListener("njc:langchange", function () {
+            setSettingsLabels();
+        });
+    }
+
     function setupOfflineBadge() {
         var existing = document.getElementById("offline-badge");
         if (existing) {
@@ -1382,6 +1512,7 @@
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();
+        setupFloatingSettingsFab();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();
