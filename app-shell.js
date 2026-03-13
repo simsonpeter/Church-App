@@ -31,6 +31,8 @@
         "home.dailyVerseTitle": "இன்றைய வேத வசனம்",
         "home.dailyVerseToggleToTamil": "வசனத்தை தமிழில் காண்",
         "home.dailyVerseToggleToEnglish": "Show verse in English",
+        "home.dailyVerseVersionEnglish": "KJV",
+        "home.dailyVerseVersionTamil": "BSI (பழைய)",
         "home.dailyVerseEmptyBody": "இன்றைய வசனம் கிடைக்கவில்லை.",
         "home.announcementsTitle": "அறிவிப்புகள்",
         "home.announcementsSubtitle": "இந்த வாரத்தின் சமீபத்திய புதுப்பிப்புகள்.",

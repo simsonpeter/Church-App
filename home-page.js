@@ -8,6 +8,8 @@
             var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
             var announcementsList = document.getElementById("home-announcements-list");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
+            var kjvBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/englishbible.json";
+            var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
@@ -22,6 +24,9 @@
             var eventsMeta = null;
             var eventsError = false;
             var verseLanguage = getStoredVerseLanguage();
+            var dailyVerseRenderToken = 0;
+            var kjvBiblePromise = null;
+            var tamilBiblePromise = null;
             var bookMapEnglish = {
                 "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
                 "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
@@ -60,6 +65,30 @@
                 acc[bookMapEnglish[key]] = bookMapTamil[key] || bookMapEnglish[key];
                 return acc;
             }, {});
+            var bibleBookOrder = [
+                "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy",
+                "Joshua", "Judges", "Ruth", "1 Samuel", "2 Samuel",
+                "1 Kings", "2 Kings", "1 Chronicles", "2 Chronicles", "Ezra",
+                "Nehemiah", "Esther", "Job", "Psalms", "Proverbs",
+                "Ecclesiastes", "Song of Songs", "Isaiah", "Jeremiah", "Lamentations",
+                "Ezekiel", "Daniel", "Hosea", "Joel", "Amos",
+                "Obadiah", "Jonah", "Micah", "Nahum", "Habakkuk",
+                "Zephaniah", "Haggai", "Zechariah", "Malachi", "Matthew",
+                "Mark", "Luke", "John", "Acts", "Romans",
+                "1 Corinthians", "2 Corinthians", "Galatians", "Ephesians", "Philippians",
+                "Colossians", "1 Thessalonians", "2 Thessalonians", "1 Timothy", "2 Timothy",
+                "Titus", "Philemon", "Hebrews", "James", "1 Peter",
+                "2 Peter", "1 John", "2 John", "3 John", "Jude",
+                "Revelation"
+            ];
+            var bibleBookIndexMap = bibleBookOrder.reduce(function (acc, name, index) {
+                acc[name.toLowerCase()] = index;
+                return acc;
+            }, {
+                "psalm": 18,
+                "psalms": 18,
+                "song of solomon": 21
+            });
             var dailyVersePool = [
                 { reference: "Psalm 23:1", textEn: "The Lord is my shepherd; I shall not want.", textTa: "கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; எனக்கு குறைவாயிருக்காது." },
                 { reference: "Proverbs 3:5", textEn: "Trust in the Lord with all your heart and lean not on your own understanding.", textTa: "உன் முழு இருதயத்தோடும் கர்த்தர்மேல் நம்பிக்கையாயிரு; உன் புத்தியின்மேல் சாய்ந்திருக்காதே." },
@@ -189,6 +218,86 @@
                 dailyVerseLanguageToggle.title = label;
             }
 
+            function getVerseVersionLabel(showTamil) {
+                return showTamil
+                    ? T("home.dailyVerseVersionTamil", "BSI (Old)")
+                    : T("home.dailyVerseVersionEnglish", "KJV");
+            }
+
+            function parseSingleVerseReference(reference) {
+                var text = String(reference || "").trim();
+                var match = text.match(/^(.+?)\s+(\d+):(\d+)$/);
+                if (!match) {
+                    return null;
+                }
+                var rawBookName = match[1].trim().replace(/\s+/g, " ").toLowerCase();
+                var chapterNumber = Number(match[2]);
+                var verseNumber = Number(match[3]);
+                if (!chapterNumber || !verseNumber) {
+                    return null;
+                }
+                var bookIndex = bibleBookIndexMap[rawBookName];
+                if (!Number.isInteger(bookIndex)) {
+                    return null;
+                }
+                return {
+                    bookIndex: bookIndex,
+                    chapterIndex: chapterNumber - 1,
+                    verseIndex: verseNumber - 1
+                };
+            }
+
+            function extractVerseTextFromBible(bibleData, reference) {
+                var pointer = parseSingleVerseReference(reference);
+                if (!pointer || !bibleData || !Array.isArray(bibleData.Book)) {
+                    return "";
+                }
+                var book = bibleData.Book[pointer.bookIndex];
+                var chapterList = book && Array.isArray(book.Chapter) ? book.Chapter : null;
+                var chapter = chapterList ? chapterList[pointer.chapterIndex] : null;
+                var verseList = chapter && Array.isArray(chapter.Verse) ? chapter.Verse : null;
+                var verse = verseList ? verseList[pointer.verseIndex] : null;
+                return verse && typeof verse.Verse === "string" ? verse.Verse.trim() : "";
+            }
+
+            function loadBibleData(languageKey) {
+                var targetUrl = languageKey === "ta" ? tamilBsiOldBibleUrl : kjvBibleUrl;
+                var targetPromise = languageKey === "ta" ? tamilBiblePromise : kjvBiblePromise;
+                if (!targetPromise) {
+                    targetPromise = fetch(targetUrl)
+                        .then(function (response) {
+                            if (!response.ok) {
+                                throw new Error("Unable to load bible data");
+                            }
+                            return response.json();
+                        })
+                        .then(function (payload) {
+                            if (!payload || !Array.isArray(payload.Book)) {
+                                throw new Error("Invalid bible structure");
+                            }
+                            return payload;
+                        })
+                        .catch(function () {
+                            return null;
+                        });
+                    if (languageKey === "ta") {
+                        tamilBiblePromise = targetPromise;
+                    } else {
+                        kjvBiblePromise = targetPromise;
+                    }
+                }
+                return targetPromise;
+            }
+
+            function resolveDailyVerseText(reference, languageKey) {
+                return loadBibleData(languageKey).then(function (bibleData) {
+                    if (!bibleData) {
+                        return "";
+                    }
+                    return extractVerseTextFromBible(bibleData, reference);
+                });
+            }
+
             function renderDailyVerse() {
                 if (!dailyVerseText || !dailyVerseReference) {
                     return;
@@ -198,12 +307,23 @@
                     dailyVerseReference.textContent = "";
                     return;
                 }
+                dailyVerseRenderToken += 1;
+                var renderToken = dailyVerseRenderToken;
                 var verseIndex = (getDayOfYear(todayYmd) - 1) % dailyVersePool.length;
                 var verseItem = dailyVersePool[verseIndex];
                 var showTamil = verseLanguage === "ta";
+                var languageKey = showTamil ? "ta" : "en";
                 dailyVerseText.textContent = showTamil ? (verseItem.textTa || verseItem.textEn) : verseItem.textEn;
-                dailyVerseReference.textContent = verseItem.reference || "";
+                dailyVerseReference.textContent = (verseItem.reference || "") + " • " + getVerseVersionLabel(showTamil);
                 setDailyVerseToggleLabel();
+                resolveDailyVerseText(verseItem.reference, languageKey).then(function (text) {
+                    if (renderToken !== dailyVerseRenderToken) {
+                        return;
+                    }
+                    if (text) {
+                        dailyVerseText.textContent = text;
+                    }
+                });
             }
 
             function getTodayKey() {
