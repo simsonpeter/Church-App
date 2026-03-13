@@ -330,7 +330,7 @@
                         ? ("<span class=\"prayer-list-urgent-badge\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i>" + escapeHtml(urgentText) + "</span>")
                         : "";
                     var urgentRibbon = entry.urgent
-                        ? ("<div class=\"prayer-list-urgent-ribbon\"><i class=\"fa-solid fa-triangle-exclamation\" aria-hidden=\"true\"></i>" + escapeHtml(urgentRibbonText) + "</div>")
+                        ? ("<span class=\"prayer-list-corner-ribbon\">" + escapeHtml(urgentRibbonText) + "</span>")
                         : "";
                     return "" +
                         "<li class=\"" + itemClass + "\">" +
