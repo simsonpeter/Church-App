@@ -1,19 +1,19 @@
-const APP_CACHE = "njc-app-cache-v18";
-const RUNTIME_CACHE = "njc-runtime-cache-v18";
+const APP_CACHE = "njc-app-cache-v19";
+const RUNTIME_CACHE = "njc-runtime-cache-v19";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260311m",
-    "./app-shell.js?v=20260311m",
-    "./events-engine.js?v=20260311m",
-    "./home-page.js?v=20260311m",
-    "./events-page.js?v=20260311m",
-    "./sermons-page.js?v=20260311m",
-    "./contact-page.js?v=20260311m",
-    "./spa-router.js?v=20260311m",
-    "./site.webmanifest?v=20260311m",
-    "./logo.png?v=20260311m",
+    "./styles.css?v=20260311n",
+    "./app-shell.js?v=20260311n",
+    "./events-engine.js?v=20260311n",
+    "./home-page.js?v=20260311n",
+    "./events-page.js?v=20260311n",
+    "./sermons-page.js?v=20260311n",
+    "./contact-page.js?v=20260311n",
+    "./spa-router.js?v=20260311n",
+    "./site.webmanifest?v=20260311n",
+    "./logo.png?v=20260311n",
     "./announcements.json"
 ];
 

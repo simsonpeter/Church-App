@@ -6,8 +6,8 @@
             eyebrowText: "NJC Belgium",
             titleKey: "home.welcomeBack",
             titleText: "Welcome back",
-            subtitleKey: "home.tagline",
-            subtitleText: "Your weekly faith journey in one place."
+            subtitleKey: "",
+            subtitleText: ""
         },
         prayer: {
             icon: "fa-hands-praying",
@@ -15,8 +15,8 @@
             eyebrowText: "Prayer",
             titleKey: "prayer.title",
             titleText: "Prayer Wall",
-            subtitleKey: "prayer.subtitle",
-            subtitleText: "Share requests and pray together as one church family."
+            subtitleKey: "",
+            subtitleText: ""
         },
         events: {
             icon: "fa-calendar-days",
@@ -24,8 +24,8 @@
             eyebrowText: "Events",
             titleKey: "events.title",
             titleText: "Church calendar",
-            subtitleKey: "events.subtitle",
-            subtitleText: "Stay in sync with services, prayer nights, and fellowship moments."
+            subtitleKey: "",
+            subtitleText: ""
         },
         sermons: {
             icon: "fa-microphone-lines",
@@ -33,8 +33,8 @@
             eyebrowText: "Sermons",
             titleKey: "sermons.title",
             titleText: "Recent messages",
-            subtitleKey: "sermons.subtitle",
-            subtitleText: "Listen again, take notes, and keep growing during the week."
+            subtitleKey: "",
+            subtitleText: ""
         },
         contact: {
             icon: "fa-phone",
@@ -42,8 +42,8 @@
             eyebrowText: "Contact",
             titleKey: "contact.title",
             titleText: "Reach our team",
-            subtitleKey: "contact.subtitle",
-            subtitleText: "Questions, prayer requests, or support needs - we are available."
+            subtitleKey: "",
+            subtitleText: ""
         }
     };
 
@@ -87,7 +87,9 @@
             icon.className = "fa-solid " + config.icon;
             eyebrowText.textContent = T(config.eyebrowKey, config.eyebrowText);
             title.textContent = T(config.titleKey, config.titleText);
-            subtitle.textContent = T(config.subtitleKey, config.subtitleText);
+            var subtitleValue = config.subtitleKey ? T(config.subtitleKey, config.subtitleText) : (config.subtitleText || "");
+            subtitle.textContent = subtitleValue;
+            subtitle.hidden = !subtitleValue;
         }
 
         if (window.location.hash.replace(/^#/, "") !== current) {
