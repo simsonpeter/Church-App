@@ -637,7 +637,7 @@
                 return T("home.readTooltipPending", "Mark as read");
             }
 
-            function planLine(titleKey, titleFallback, refs, part, progress) {
+            function planBlock(titleKey, titleFallback, refs, part, progress) {
                 var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(toFriendlyReference) : [];
                 if (cleanRefs.length === 0) {
                     return "";
@@ -650,10 +650,10 @@
                     ? ("<input class=\"reading-inline-tick\" type=\"checkbox\" data-reading-part=\"" + partKey + "\"" + checkedAttr + " title=\"" + tooltip + "\" aria-label=\"" + tooltip + "\">")
                     : "";
                 return "" +
-                    "<li>" +
+                    "<div class=\"reading-compact-item\">" +
                     "  <h3 class=\"reading-item-title\">" + tick + NjcEvents.escapeHtml(T(titleKey, titleFallback)) + "</h3>" +
-                    "  <p>" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
-                    "</li>";
+                    "  <p class=\"reading-compact-ref\">" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
+                    "</div>";
             }
 
             function renderReadingPlan() {
@@ -671,19 +671,20 @@
                 }
 
                 var progress = getTodayProgress();
-                var html = "";
-                html += planLine("home.morningReading", "Morning Reading", todayPlanData.morning, "morning", progress);
-                html += planLine("home.eveningReading", "Evening Reading", todayPlanData.evening, "evening", progress);
+                var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress);
+                var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress);
+                var compactHtml = morningBlock + eveningBlock;
 
-                if (!html) {
-                    html = "" +
+                if (!compactHtml) {
+                    todayReadingPlanList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today")) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.")) + "</p>" +
                         "</li>";
+                    return;
                 }
 
-                todayReadingPlanList.innerHTML = html;
+                todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
             }
 
             function loadTodayReadingPlan() {
