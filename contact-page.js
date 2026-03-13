@@ -324,12 +324,17 @@
                         previewText = previewText.slice(0, 117).trim() + "...";
                     }
                     var urgentText = T("contact.prayerWallUrgentBadge", "Urgent");
+                    var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER");
                     var itemClass = entry.urgent ? "prayer-list-item prayer-list-item-urgent" : "prayer-list-item";
                     var urgentBadge = entry.urgent
                         ? ("<span class=\"prayer-list-urgent-badge\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i>" + escapeHtml(urgentText) + "</span>")
                         : "";
+                    var urgentRibbon = entry.urgent
+                        ? ("<div class=\"prayer-list-urgent-ribbon\"><i class=\"fa-solid fa-triangle-exclamation\" aria-hidden=\"true\"></i>" + escapeHtml(urgentRibbonText) + "</div>")
+                        : "";
                     return "" +
                         "<li class=\"" + itemClass + "\">" +
+                        "  " + urgentRibbon +
                         "  <button type=\"button\" class=\"prayer-list-open-btn\" data-prayer-open-id=\"" + escapeHtml(entry.id || "") + "\">" +
                         "    <div class=\"prayer-list-top\">" +
                         "      <h3 class=\"prayer-list-name\">" + escapeHtml(safeName) + "</h3>" +

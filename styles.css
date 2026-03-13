@@ -1280,12 +1280,46 @@ button.button-link:disabled {
     border-radius: 14px;
     border: 1px solid var(--line);
     background: var(--surface);
+    position: relative;
 }
 
 .prayer-list-item-urgent {
-    border-color: rgba(255, 91, 91, 0.65);
-    box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.28), 0 8px 18px rgba(213, 41, 41, 0.18);
+    border-color: rgba(225, 38, 38, 0.82);
+    box-shadow: 0 0 0 1px rgba(225, 38, 38, 0.36), 0 10px 20px rgba(201, 35, 35, 0.26);
     animation: urgent-card-pulse 2.2s ease-in-out infinite;
+}
+
+.prayer-list-item-urgent::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: linear-gradient(180deg, #d71616, #ff4848);
+    box-shadow: 1px 0 8px rgba(177, 24, 24, 0.42);
+    z-index: 1;
+}
+
+.prayer-list-urgent-ribbon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    padding: 4px 10px;
+    font-size: 0.66rem;
+    letter-spacing: 0.06em;
+    font-weight: 800;
+    color: #ffffff;
+    background: linear-gradient(145deg, #b80f0f, #f33333);
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.42);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.prayer-list-urgent-ribbon i {
+    font-size: 0.62rem;
 }
 
 .prayer-list-open-btn {
@@ -1299,6 +1333,10 @@ button.button-link:disabled {
     gap: 6px;
     font: inherit;
     cursor: pointer;
+}
+
+.prayer-list-item-urgent .prayer-list-open-btn {
+    padding-left: 16px;
 }
 
 .prayer-list-open-btn:disabled {
@@ -1350,7 +1388,7 @@ button.button-link:disabled {
 }
 
 .prayer-list-item-urgent .prayer-list-name {
-    color: #bf2424;
+    color: #b20f0f;
 }
 
 .prayer-list-urgent-badge {

@@ -221,6 +221,7 @@
         "contact.prayerWallAnonymousLabel": "அடையாளமில்லாமல் பகிர்",
         "contact.prayerWallUrgentLabel": "அவசர வேண்டுதல்",
         "contact.prayerWallUrgentBadge": "அவசரம்",
+        "contact.prayerWallUrgentRibbon": "அவசர ஜெபம்",
         "contact.prayerWallPost": "ஜெப சுவரில் பகிர்",
         "contact.prayerWallLoadingTitle": "ஜெப சுவர் ஏற்றப்படுகிறது...",
         "contact.prayerWallLoadingBody": "தயவுசெய்து காத்திருக்கவும்.",
