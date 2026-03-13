@@ -21,6 +21,9 @@
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
+            var announcementCarouselItems = [];
+            var announcementCarouselIndex = 0;
+            var announcementCarouselTimerId = null;
             var eventsMeta = null;
             var eventsError = false;
             var verseLanguage = getStoredVerseLanguage();
@@ -442,12 +445,91 @@
                 };
             }
 
+            function stopAnnouncementsCarousel() {
+                if (announcementCarouselTimerId) {
+                    window.clearInterval(announcementCarouselTimerId);
+                    announcementCarouselTimerId = null;
+                }
+            }
+
+            function nextAnnouncementIndex(step) {
+                var total = announcementCarouselItems.length;
+                if (total <= 1) {
+                    return 0;
+                }
+                var next = announcementCarouselIndex + step;
+                if (next < 0) {
+                    return total - 1;
+                }
+                if (next >= total) {
+                    return 0;
+                }
+                return next;
+            }
+
+            function renderAnnouncementCarouselFrame() {
+                if (!announcementsList) {
+                    return;
+                }
+                if (!announcementCarouselItems.length) {
+                    return;
+                }
+
+                var item = announcementCarouselItems[announcementCarouselIndex];
+                var titleText = isTamilLanguage() && item.titleTa ? item.titleTa : item.title;
+                var bodyText = isTamilLanguage() && item.bodyTa ? item.bodyTa : item.body;
+                var dateText = formatYmdForLocale(item.date);
+                var urgentBadge = item.urgent
+                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent")) + "</span>")
+                    : "";
+                var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
+                var linkLine = item.link
+                    ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more")) + "</a></p>")
+                    : "";
+
+                var controls = "";
+                if (announcementCarouselItems.length > 1) {
+                    var dots = announcementCarouselItems.map(function (_, index) {
+                        var activeClass = index === announcementCarouselIndex ? " active" : "";
+                        return "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-announcement-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementDot", "Announcement")) + " " + String(index + 1) + "\"></button>";
+                    }).join("");
+                    controls = "" +
+                        "<div class=\"announcement-carousel-controls\">" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementPrev", "Previous announcement")) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
+                        "  <div class=\"announcement-dots\">" + dots + "</div>" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementNext", "Next announcement")) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
+                        "</div>";
+                }
+
+                announcementsList.innerHTML = "" +
+                    "<li class=\"announcement-carousel-item\">" +
+                    "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements")) + "</h3>" +
+                    "  <p>" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    metaLine +
+                    linkLine +
+                    controls +
+                    "</li>";
+            }
+
+            function startAnnouncementsCarousel() {
+                stopAnnouncementsCarousel();
+                if (announcementCarouselItems.length <= 1) {
+                    return;
+                }
+                announcementCarouselTimerId = window.setInterval(function () {
+                    announcementCarouselIndex = nextAnnouncementIndex(1);
+                    renderAnnouncementCarouselFrame();
+                }, 5000);
+            }
+
             function renderAnnouncements() {
                 if (!announcementsList) {
                     return;
                 }
 
                 if (announcementsError) {
+                    announcementCarouselItems = [];
+                    stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements")) + "</h3>" +
@@ -470,6 +552,8 @@
                     .slice(0, 5);
 
                 if (visibleItems.length === 0) {
+                    announcementCarouselItems = [];
+                    stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now")) + "</h3>" +
@@ -478,25 +562,12 @@
                     return;
                 }
 
-                announcementsList.innerHTML = visibleItems.map(function (item) {
-                    var titleText = isTamilLanguage() && item.titleTa ? item.titleTa : item.title;
-                    var bodyText = isTamilLanguage() && item.bodyTa ? item.bodyTa : item.body;
-                    var dateText = formatYmdForLocale(item.date);
-                    var urgentBadge = item.urgent
-                        ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent")) + "</span>")
-                        : "";
-                    var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
-                    var linkLine = item.link
-                        ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more")) + "</a></p>")
-                        : "";
-                    return "" +
-                        "<li>" +
-                        "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
-                        metaLine +
-                        linkLine +
-                        "</li>";
-                }).join("");
+                announcementCarouselItems = visibleItems;
+                if (announcementCarouselIndex >= announcementCarouselItems.length) {
+                    announcementCarouselIndex = 0;
+                }
+                renderAnnouncementCarouselFrame();
+                startAnnouncementsCarousel();
             }
 
             function loadAnnouncements() {
@@ -720,6 +791,36 @@
                 target.title = tooltip;
                 target.setAttribute("aria-label", tooltip);
             });
+
+            if (announcementsList) {
+                announcementsList.addEventListener("click", function (event) {
+                    var actionButton = event.target.closest("button[data-announcement-action]");
+                    if (actionButton) {
+                        var action = actionButton.getAttribute("data-announcement-action");
+                        if (action === "prev") {
+                            announcementCarouselIndex = nextAnnouncementIndex(-1);
+                            renderAnnouncementCarouselFrame();
+                            startAnnouncementsCarousel();
+                        } else if (action === "next") {
+                            announcementCarouselIndex = nextAnnouncementIndex(1);
+                            renderAnnouncementCarouselFrame();
+                            startAnnouncementsCarousel();
+                        }
+                        return;
+                    }
+                    var dotButton = event.target.closest("button[data-announcement-index]");
+                    if (!dotButton) {
+                        return;
+                    }
+                    var nextIndex = Number(dotButton.getAttribute("data-announcement-index"));
+                    if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= announcementCarouselItems.length) {
+                        return;
+                    }
+                    announcementCarouselIndex = nextIndex;
+                    renderAnnouncementCarouselFrame();
+                    startAnnouncementsCarousel();
+                });
+            }
 
             if (dailyVerseLanguageToggle) {
                 dailyVerseLanguageToggle.addEventListener("click", function () {
