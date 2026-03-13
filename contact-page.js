@@ -217,9 +217,9 @@
                         ? ("<span class=\"prayer-urgent-badge\">" + escapeHtml(T("contact.prayerWallUrgentBadge", "Urgent")) + "</span>")
                         : "";
                     return "" +
-                        "<li>" +
-                        "  <h3>" + urgentBadge + escapeHtml(safeName) + "</h3>" +
-                        "  <p>" + escapeHtml(entry.message || "") + "</p>" +
+                        "<li class=\"prayer-request-card\">" +
+                        "  <h3 class=\"prayer-request-title\">" + escapeHtml(safeName) + urgentBadge + "</h3>" +
+                        "  <p class=\"prayer-request-message\">" + escapeHtml(entry.message || "") + "</p>" +
                         "  <div class=\"prayer-meta-row\">" +
                         "    <span class=\"page-note\">" + escapeHtml(dateText) + "</span>" +
                         "    <div class=\"prayer-action-row\">" +

@@ -1274,21 +1274,48 @@ button.button-link:disabled {
     margin-top: 10px;
 }
 
+.prayer-request-card {
+    padding: 0 !important;
+    overflow: hidden;
+    border-radius: 14px;
+}
+
+.prayer-request-title {
+    margin: 0 !important;
+    padding: 10px 12px;
+    font-size: 0.9rem !important;
+    color: #ffffff;
+    background: linear-gradient(145deg, #d52929, #f04a4a);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.prayer-request-message {
+    margin: 0 !important;
+    padding: 10px 12px 2px;
+    color: var(--text) !important;
+    line-height: 1.45;
+}
+
 .prayer-urgent-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 8px;
+    margin-right: 0;
     border-radius: 999px;
     padding: 2px 8px;
     font-size: 0.66rem;
     font-weight: 700;
     color: #ffffff;
-    background: #c62828;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.45);
 }
 
 .prayer-meta-row {
     margin-top: 8px;
+    padding: 0 12px 12px;
     display: flex;
     align-items: center;
     justify-content: space-between;
