@@ -6,6 +6,10 @@
             var allEvents = [];
             var showAll = false;
             var twoWeekCutoff = null;
+            var specialCarouselEvents = [];
+            var specialCarouselIndex = 0;
+            var specialCarouselTimerId = null;
+            var SPECIAL_CAROUSEL_INTERVAL_MS = 5200;
 
             function T(key, fallback) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -81,6 +85,12 @@
                 return typeValue || "";
             }
 
+            function formatEventDateLine(eventItem) {
+                var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
+                var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
+                return date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")";
+            }
+
             function renderUpcoming() {
                 var events = showAll ? allEvents : allEvents.filter(function (eventItem) {
                     return eventItem.key <= twoWeekCutoff;
@@ -98,8 +108,6 @@
                 upcomingEventsList.innerHTML = events.map(function (eventItem) {
                     var titleText = localizeEventTitle(eventItem.title || T("events.event", "Event"));
                     var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
-                    var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
                     var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
                     var typeAndDescription = NjcEvents.escapeHtml(
                         translateType(eventItem.type) + (eventItem.description ? " - " + eventItem.description : "")
@@ -107,7 +115,7 @@
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
+                        "  <p>" + formatEventDateLine(eventItem) + "</p>" +
                         "  <p class=\"page-note\">" + typeAndDescription + "</p>" +
                         "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
                         "</li>";
@@ -116,12 +124,69 @@
                 showMoreButton.hidden = showAll || allEvents.length <= events.length;
             }
 
+            function stopSpecialCarousel() {
+                if (specialCarouselTimerId !== null) {
+                    window.clearInterval(specialCarouselTimerId);
+                    specialCarouselTimerId = null;
+                }
+            }
+
+            function nextSpecialIndex(step) {
+                if (!specialCarouselEvents.length) {
+                    return 0;
+                }
+                return (specialCarouselIndex + step + specialCarouselEvents.length) % specialCarouselEvents.length;
+            }
+
+            function renderSpecialCarouselFrame() {
+                if (!upcomingSpecialEventsList || !specialCarouselEvents.length) {
+                    return;
+                }
+                var eventItem = specialCarouselEvents[specialCarouselIndex];
+                var titleText = localizeEventTitle(eventItem.title || T("events.specialEvent", "Special Event"));
+                var title = NjcEvents.escapeHtml(titleText || T("events.specialEvent", "Special Event"));
+                var description = NjcEvents.escapeHtml(eventItem.description || "");
+                var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
+                var dots = specialCarouselEvents.map(function (_item, index) {
+                    var activeClass = index === specialCarouselIndex ? " active" : "";
+                    return "" +
+                        "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-special-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("events.specialDot", "Special event")) + " " + String(index + 1) + "\"></button>";
+                }).join("");
+
+                upcomingSpecialEventsList.innerHTML = "" +
+                    "<li class=\"announcement-carousel-item\">" +
+                    "  <h3>" + title + "</h3>" +
+                    "  <p>" + formatEventDateLine(eventItem) + "</p>" +
+                    (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
+                    "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
+                    "  <div class=\"announcement-carousel-controls\">" +
+                    "      <button type=\"button\" class=\"announcement-nav-btn\" data-special-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("events.specialPrev", "Previous special event")) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
+                    "      <div class=\"announcement-dots\">" + dots + "</div>" +
+                    "      <button type=\"button\" class=\"announcement-nav-btn\" data-special-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("events.specialNext", "Next special event")) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
+                    "  </div>" +
+                    "</li>";
+            }
+
+            function startSpecialCarousel() {
+                stopSpecialCarousel();
+                if (specialCarouselEvents.length <= 1) {
+                    return;
+                }
+                specialCarouselTimerId = window.setInterval(function () {
+                    specialCarouselIndex = nextSpecialIndex(1);
+                    renderSpecialCarouselFrame();
+                }, SPECIAL_CAROUSEL_INTERVAL_MS);
+            }
+
             function renderUpcomingSpecial() {
                 var specialEvents = allEvents.filter(function (eventItem) {
                     return eventItem.type === "Special";
                 });
 
                 if (specialEvents.length === 0) {
+                    specialCarouselEvents = [];
+                    specialCarouselIndex = 0;
+                    stopSpecialCarousel();
                     upcomingSpecialEventsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("events.noSpecialTitle", "No upcoming special events")) + "</h3>" +
@@ -130,28 +195,53 @@
                     return;
                 }
 
-                upcomingSpecialEventsList.innerHTML = specialEvents.map(function (eventItem) {
-                    var titleText = localizeEventTitle(eventItem.title || T("events.specialEvent", "Special Event"));
-                    var title = NjcEvents.escapeHtml(titleText || T("events.specialEvent", "Special Event"));
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
-                    var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
-                    var description = NjcEvents.escapeHtml(eventItem.description || "");
-                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
-
-                    return "" +
-                        "<li>" +
-                        "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
-                        (description ? "  <p class=\"page-note\">" + description + "</p>" : "") +
-                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
-                        "</li>";
-                }).join("");
+                specialCarouselEvents = specialEvents.slice();
+                if (specialCarouselIndex >= specialCarouselEvents.length) {
+                    specialCarouselIndex = 0;
+                }
+                renderSpecialCarouselFrame();
+                startSpecialCarousel();
             }
 
             showMoreButton.addEventListener("click", function () {
                 showAll = true;
                 renderUpcoming();
             });
+
+            if (upcomingSpecialEventsList) {
+                upcomingSpecialEventsList.addEventListener("click", function (event) {
+                    var actionButton = event.target.closest("button[data-special-action]");
+                    if (actionButton) {
+                        var action = actionButton.getAttribute("data-special-action");
+                        if (action === "prev") {
+                            specialCarouselIndex = nextSpecialIndex(-1);
+                        } else if (action === "next") {
+                            specialCarouselIndex = nextSpecialIndex(1);
+                        }
+                        renderSpecialCarouselFrame();
+                        startSpecialCarousel();
+                        return;
+                    }
+                    var dotButton = event.target.closest("button[data-special-index]");
+                    if (!dotButton) {
+                        return;
+                    }
+                    var nextIndex = Number(dotButton.getAttribute("data-special-index"));
+                    if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= specialCarouselEvents.length) {
+                        return;
+                    }
+                    specialCarouselIndex = nextIndex;
+                    renderSpecialCarouselFrame();
+                    startSpecialCarousel();
+                });
+
+                upcomingSpecialEventsList.addEventListener("mouseenter", function () {
+                    stopSpecialCarousel();
+                });
+                upcomingSpecialEventsList.addEventListener("mouseleave", function () {
+                    startSpecialCarousel();
+                });
+            }
 
             document.addEventListener("njc:langchange", function () {
                 if (twoWeekCutoff === null && allEvents.length === 0) {
@@ -169,6 +259,7 @@
                     renderUpcomingSpecial();
                 })
                 .catch(function () {
+                    stopSpecialCarousel();
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming events")) + "</h3>" +

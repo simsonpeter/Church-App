@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311s">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311s">
-    <link rel="manifest" href="site.webmanifest?v=20260311s">
-    <link rel="stylesheet" href="styles.css?v=20260311s">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311t">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311t">
+    <link rel="manifest" href="site.webmanifest?v=20260311t">
+    <link rel="stylesheet" href="styles.css?v=20260311t">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -140,6 +140,16 @@
             </section>
 
             <section class="card">
+                <h2><i class="fa-solid fa-star"></i><span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h2>
+                <ul class="list" id="upcoming-special-events-list">
+                    <li>
+                        <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
+                        <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
                 <h2><i class="fa-solid fa-clock"></i><span data-i18n="events.upcomingTitle">Upcoming Events</span></h2>
                 <ul class="list" id="upcoming-events-list">
                     <li>
@@ -148,27 +158,6 @@
                     </li>
                 </ul>
                 <button class="button-link" id="show-more-events" type="button" data-i18n="events.seeMore" hidden>See more events</button>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-list-check"></i><span data-i18n="events.scheduleRules">Schedule Rules</span></h2>
-                <ul class="list">
-                    <li>
-                        <h3 data-i18n="events.holyServiceTitle">Holy Service with Communion</h3>
-                        <p data-i18n="events.holyServiceTime">Every Sunday at 14:30 (Belgium time)</p>
-                    </li>
-                    <li>
-                        <h3 data-i18n="events.specialPrayerTitle">Special Prayer</h3>
-                        <p data-i18n="events.specialPrayerTime">2nd and 4th Saturday at 17:00 (Belgium time)</p>
-                    </li>
-                </ul>
-                <h3><i class="fa-solid fa-star"></i> <span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h3>
-                <ul class="list" id="upcoming-special-events-list">
-                    <li>
-                        <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
-                        <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
-                    </li>
-                </ul>
             </section>
             </main>
         </section>
@@ -409,12 +398,12 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311s"></script>
-    <script src="events-engine.js?v=20260311s"></script>
-    <script src="home-page.js?v=20260311s"></script>
-    <script src="events-page.js?v=20260311s"></script>
-    <script src="sermons-page.js?v=20260311s"></script>
-    <script src="contact-page.js?v=20260311s"></script>
-    <script src="spa-router.js?v=20260311s"></script>
+    <script src="app-shell.js?v=20260311t"></script>
+    <script src="events-engine.js?v=20260311t"></script>
+    <script src="home-page.js?v=20260311t"></script>
+    <script src="events-page.js?v=20260311t"></script>
+    <script src="sermons-page.js?v=20260311t"></script>
+    <script src="contact-page.js?v=20260311t"></script>
+    <script src="spa-router.js?v=20260311t"></script>
 </body>
 </html>
