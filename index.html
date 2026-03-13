@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311h">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311h">
-    <link rel="manifest" href="site.webmanifest?v=20260311h">
-    <link rel="stylesheet" href="styles.css?v=20260311h">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311i">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311i">
+    <link rel="manifest" href="site.webmanifest?v=20260311i">
+    <link rel="stylesheet" href="styles.css?v=20260311i">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -84,7 +84,8 @@
             <section class="card">
                 <h2><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
                 <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray.</p>
-                <form class="prayer-form" id="prayer-wall-form">
+                <button class="button-link prayer-wall-open-btn" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallOpen">Post a Prayer</button>
+                <form class="prayer-form" id="prayer-wall-form" hidden>
                     <input
                         id="prayer-wall-name"
                         class="search-input"
@@ -101,7 +102,14 @@
                         <input id="prayer-wall-anonymous" type="checkbox">
                         <span data-i18n="contact.prayerWallAnonymousLabel">Post as anonymous</span>
                     </label>
-                    <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
+                    <label class="prayer-wall-anon">
+                        <input id="prayer-wall-urgent" type="checkbox">
+                        <span data-i18n="contact.prayerWallUrgentLabel">Mark as urgent</span>
+                    </label>
+                    <div class="prayer-form-actions">
+                        <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
+                        <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
+                    </div>
                 </form>
                 <p class="page-note" id="prayer-wall-note" hidden></p>
                 <ul class="list prayer-wall-list" id="prayer-wall-list">
@@ -373,12 +381,12 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311h"></script>
-    <script src="events-engine.js?v=20260311h"></script>
-    <script src="home-page.js?v=20260311h"></script>
-    <script src="events-page.js?v=20260311h"></script>
-    <script src="sermons-page.js?v=20260311h"></script>
-    <script src="contact-page.js?v=20260311h"></script>
-    <script src="spa-router.js?v=20260311h"></script>
+    <script src="app-shell.js?v=20260311i"></script>
+    <script src="events-engine.js?v=20260311i"></script>
+    <script src="home-page.js?v=20260311i"></script>
+    <script src="events-page.js?v=20260311i"></script>
+    <script src="sermons-page.js?v=20260311i"></script>
+    <script src="contact-page.js?v=20260311i"></script>
+    <script src="spa-router.js?v=20260311i"></script>
 </body>
 </html>

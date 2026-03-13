@@ -7,6 +7,9 @@
             var prayerWallName = document.getElementById("prayer-wall-name");
             var prayerWallMessage = document.getElementById("prayer-wall-message");
             var prayerWallAnonymous = document.getElementById("prayer-wall-anonymous");
+            var prayerWallUrgent = document.getElementById("prayer-wall-urgent");
+            var prayerWallOpenButton = document.getElementById("prayer-wall-open-btn");
+            var prayerWallCancelButton = document.getElementById("prayer-wall-cancel-btn");
             var prayerWallNote = document.getElementById("prayer-wall-note");
             var prayerWallList = document.getElementById("prayer-wall-list");
             var prayerWallSubmit = prayerWallForm ? prayerWallForm.querySelector("button[type=\"submit\"]") : null;
@@ -67,16 +70,42 @@
                     name: String(source.name || "").trim(),
                     message: String(source.message || "").trim(),
                     anonymous: Boolean(source.anonymous),
+                    urgent: Boolean(source.urgent),
                     prayed: Math.max(0, Number(source.prayed || 0) || 0),
                     createdAt: source.createdAt ? String(source.createdAt) : new Date().toISOString(),
                     updatedAt: source.updatedAt ? String(source.updatedAt) : ""
                 };
             }
 
+            function openPrayerComposer() {
+                if (!prayerWallForm || !prayerWallOpenButton) {
+                    return;
+                }
+                prayerWallForm.hidden = false;
+                prayerWallOpenButton.hidden = true;
+                if (prayerWallName) {
+                    prayerWallName.focus();
+                }
+            }
+
+            function closePrayerComposer() {
+                if (!prayerWallForm || !prayerWallOpenButton) {
+                    return;
+                }
+                prayerWallForm.hidden = true;
+                prayerWallOpenButton.hidden = false;
+            }
+
             function setPrayerWallBusy(isBusy) {
                 prayerWallBusy = Boolean(isBusy);
                 if (prayerWallSubmit) {
                     prayerWallSubmit.disabled = prayerWallBusy;
+                }
+                if (prayerWallOpenButton) {
+                    prayerWallOpenButton.disabled = prayerWallBusy;
+                }
+                if (prayerWallCancelButton) {
+                    prayerWallCancelButton.disabled = prayerWallBusy;
                 }
                 if (prayerWallList) {
                     prayerWallList.querySelectorAll("button[data-prayer-id]").forEach(function (button) {
@@ -161,7 +190,14 @@
                     return;
                 }
 
-                var entries = prayerWallEntries.slice(0, 25);
+                var entries = prayerWallEntries.slice().sort(function (a, b) {
+                    if (Boolean(a.urgent) !== Boolean(b.urgent)) {
+                        return a.urgent ? -1 : 1;
+                    }
+                    var aTime = a.updatedAt || a.createdAt || "";
+                    var bTime = b.updatedAt || b.createdAt || "";
+                    return bTime.localeCompare(aTime);
+                }).slice(0, 25);
                 if (entries.length === 0) {
                     prayerWallList.innerHTML = "" +
                         "<li>" +
@@ -177,9 +213,12 @@
                         : (entry.name || T("contact.prayerWallNameAnonymous", "Anonymous"));
                     var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
                     var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "");
+                    var urgentBadge = entry.urgent
+                        ? ("<span class=\"prayer-urgent-badge\">" + escapeHtml(T("contact.prayerWallUrgentBadge", "Urgent")) + "</span>")
+                        : "";
                     return "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(safeName) + "</h3>" +
+                        "  <h3>" + urgentBadge + escapeHtml(safeName) + "</h3>" +
                         "  <p>" + escapeHtml(entry.message || "") + "</p>" +
                         "  <div class=\"prayer-meta-row\">" +
                         "    <span class=\"page-note\">" + escapeHtml(dateText) + "</span>" +
@@ -241,6 +280,7 @@
                     var nameValue = (prayerWallName.value || "").trim();
                     var messageValue = (prayerWallMessage.value || "").trim();
                     var anonymousValue = Boolean(prayerWallAnonymous.checked);
+                    var urgentValue = Boolean(prayerWallUrgent && prayerWallUrgent.checked);
 
                     if (!messageValue) {
                         showPrayerWallNote("needMessage", "contact.prayerWallNeedMessage", "Please write your prayer request.");
@@ -255,6 +295,7 @@
                             name: nameValue,
                             message: messageValue,
                             anonymous: anonymousValue,
+                            urgent: urgentValue,
                             prayed: 0,
                             createdAt: new Date().toISOString(),
                             updatedAt: ""
@@ -263,6 +304,10 @@
                         prayerWallMessage.value = "";
                         prayerWallName.value = "";
                         prayerWallAnonymous.checked = false;
+                        if (prayerWallUrgent) {
+                            prayerWallUrgent.checked = false;
+                        }
+                        closePrayerComposer();
                         showPrayerWallNote("posted", "contact.prayerWallPosted", "Prayer request added to wall.");
                         prayerWallError = false;
                         prayerWallLoading = false;
@@ -275,6 +320,18 @@
                     } finally {
                         setPrayerWallBusy(false);
                     }
+                });
+            }
+
+            if (prayerWallOpenButton) {
+                prayerWallOpenButton.addEventListener("click", function () {
+                    openPrayerComposer();
+                });
+            }
+
+            if (prayerWallCancelButton) {
+                prayerWallCancelButton.addEventListener("click", function () {
+                    closePrayerComposer();
                 });
             }
 

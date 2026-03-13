@@ -1158,6 +1158,27 @@ button.button-link:disabled {
     gap: 8px;
 }
 
+.prayer-wall-open-btn {
+    margin-top: 10px;
+    width: 100%;
+    display: block;
+    text-align: center;
+    padding: 12px 14px;
+    font-size: 0.9rem;
+}
+
+.prayer-form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.button-secondary {
+    background: var(--surface-soft);
+    color: var(--text);
+    border: 1px solid var(--line);
+}
+
 .prayer-wall-anon {
     display: inline-flex;
     align-items: center;
@@ -1174,6 +1195,19 @@ button.button-link:disabled {
 
 .prayer-wall-list {
     margin-top: 10px;
+}
+
+.prayer-urgent-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: #c62828;
 }
 
 .prayer-meta-row {
