@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311q">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311q">
-    <link rel="manifest" href="site.webmanifest?v=20260311q">
-    <link rel="stylesheet" href="styles.css?v=20260311q">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311r">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311r">
+    <link rel="manifest" href="site.webmanifest?v=20260311r">
+    <link rel="stylesheet" href="styles.css?v=20260311r">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -307,6 +307,34 @@
         </nav>
     </div>
 
+<div class="prayer-detail-overlay" id="prayer-detail-overlay" hidden>
+        <button class="prayer-detail-backdrop" id="prayer-detail-backdrop" aria-label="Close prayer details" data-i18n-aria-label="contact.prayerWallCloseDetails"></button>
+        <section class="prayer-detail-sheet" role="dialog" aria-modal="true" aria-label="Prayer details" data-i18n-aria-label="contact.prayerWallDetailsTitle">
+            <div class="prayer-detail-top">
+                <strong data-i18n="contact.prayerWallDetailsTitle">Prayer details</strong>
+                <button type="button" id="prayer-detail-close" class="prayer-detail-close" aria-label="Close prayer details" data-i18n-aria-label="contact.prayerWallCloseDetails">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="prayer-detail-body">
+                <div class="prayer-detail-title-row">
+                    <h3 id="prayer-detail-name">Anonymous</h3>
+                    <span class="prayer-detail-urgent-badge" id="prayer-detail-urgent" hidden>
+                        <i class="fa-solid fa-bolt" aria-hidden="true"></i>
+                        <span data-i18n="contact.prayerWallUrgentBadge">Urgent</span>
+                    </span>
+                </div>
+                <p class="prayer-detail-message" id="prayer-detail-message"></p>
+                <p class="page-note" id="prayer-detail-date"></p>
+            </div>
+            <div class="prayer-detail-actions">
+                <button type="button" class="prayer-action-btn" id="prayer-detail-pray" data-prayer-id="" data-prayer-action="pray">Prayed (0)</button>
+                <button type="button" class="prayer-action-btn" id="prayer-detail-edit" data-prayer-id="" data-prayer-action="edit" data-i18n="contact.prayerWallEdit">Edit</button>
+                <button type="button" class="prayer-action-btn prayer-action-danger" id="prayer-detail-delete" data-prayer-id="" data-prayer-action="delete" data-i18n="contact.prayerWallDelete">Delete</button>
+            </div>
+        </section>
+    </div>
+
 <div class="sermon-player-overlay" id="sermon-player" hidden>
         <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
         <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
@@ -381,12 +409,12 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311q"></script>
-    <script src="events-engine.js?v=20260311q"></script>
-    <script src="home-page.js?v=20260311q"></script>
-    <script src="events-page.js?v=20260311q"></script>
-    <script src="sermons-page.js?v=20260311q"></script>
-    <script src="contact-page.js?v=20260311q"></script>
-    <script src="spa-router.js?v=20260311q"></script>
+    <script src="app-shell.js?v=20260311r"></script>
+    <script src="events-engine.js?v=20260311r"></script>
+    <script src="home-page.js?v=20260311r"></script>
+    <script src="events-page.js?v=20260311r"></script>
+    <script src="sermons-page.js?v=20260311r"></script>
+    <script src="contact-page.js?v=20260311r"></script>
+    <script src="spa-router.js?v=20260311r"></script>
 </body>
 </html>

@@ -1274,45 +1274,86 @@ button.button-link:disabled {
     margin-top: 10px;
 }
 
-.prayer-request-card {
+.prayer-list-item {
     padding: 0 !important;
     overflow: hidden;
     border-radius: 14px;
-    position: relative;
-    border: 1px solid rgba(213, 41, 41, 0.16);
+    border: 1px solid var(--line);
     background: var(--surface);
 }
 
-.prayer-request-card-urgent {
+.prayer-list-item-urgent {
     border-color: rgba(255, 91, 91, 0.65);
     box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.28), 0 8px 18px rgba(213, 41, 41, 0.18);
     animation: urgent-card-pulse 2.2s ease-in-out infinite;
 }
 
-.prayer-request-title {
-    margin: 0 !important;
-    padding: 10px 12px;
-    font-size: 0.9rem !important;
-    color: #ffffff;
-    background: linear-gradient(145deg, #d52929, #f04a4a);
+.prayer-list-open-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    padding: 11px 12px;
+    display: grid;
+    gap: 6px;
+    font: inherit;
+    cursor: pointer;
+}
+
+.prayer-list-open-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
+
+.prayer-list-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
 }
 
-.prayer-request-message {
-    margin: 0 !important;
-    padding: 10px 12px 2px;
-    color: var(--text) !important;
-    line-height: 1.45;
+.prayer-list-name {
+    margin: 0;
+    font-size: 0.92rem;
+    color: var(--text);
 }
 
-.prayer-urgent-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: 2;
+.prayer-list-preview {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.prayer-list-meta {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 8px;
+}
+
+.prayer-list-prayed {
+    justify-self: end;
+    font-size: 0.75rem;
+    color: var(--muted);
+}
+
+.prayer-list-chevron {
+    color: #b56f6f;
+    font-size: 0.74rem;
+}
+
+.prayer-list-item-urgent .prayer-list-name {
+    color: #bf2424;
+}
+
+.prayer-list-urgent-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -1328,12 +1369,119 @@ button.button-link:disabled {
     animation: urgent-badge-beat 1.2s ease-in-out infinite;
 }
 
-.prayer-urgent-badge i {
+.prayer-list-urgent-badge i {
     font-size: 0.58rem;
 }
 
-.prayer-request-card-urgent .prayer-request-title {
-    padding-right: 88px;
+body.prayer-detail-open {
+    overflow: hidden;
+}
+
+.prayer-detail-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3300;
+    display: grid;
+    align-items: end;
+}
+
+.prayer-detail-overlay[hidden] {
+    display: none !important;
+}
+
+.prayer-detail-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    background: rgba(21, 7, 7, 0.56);
+}
+
+.prayer-detail-sheet {
+    position: relative;
+    width: min(430px, 100%);
+    margin: 0 auto;
+    border-radius: 22px 22px 0 0;
+    padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border: 1px solid var(--line);
+    box-shadow: 0 -20px 45px rgba(58, 11, 11, 0.28);
+    animation: player-up 0.2s ease both;
+    max-height: calc(100vh - 10px);
+    overflow-y: auto;
+}
+
+.prayer-detail-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    color: var(--primary);
+}
+
+.prayer-detail-close {
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--surface-soft);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+}
+
+.prayer-detail-body {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-soft);
+    padding: 12px;
+}
+
+.prayer-detail-body h3 {
+    margin: 0;
+    font-size: 0.98rem;
+}
+
+.prayer-detail-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.prayer-detail-message {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.prayer-detail-urgent-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(145deg, #ff7a18, #ff3c3c);
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 4px 12px rgba(185, 22, 22, 0.35);
+}
+
+.prayer-detail-actions {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+}
+
+@media (max-width: 360px) {
+    .prayer-detail-actions {
+        grid-template-columns: 1fr;
+    }
 }
 
 @keyframes urgent-badge-beat {
@@ -1357,27 +1505,10 @@ button.button-link:disabled {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .prayer-request-card-urgent,
-    .prayer-urgent-badge {
+    .prayer-list-item-urgent,
+    .prayer-list-urgent-badge {
         animation: none;
     }
-}
-
-.prayer-meta-row {
-    margin-top: 8px;
-    padding: 0 12px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-}
-
-.prayer-action-row {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    flex-wrap: wrap;
 }
 
 .prayer-action-btn {

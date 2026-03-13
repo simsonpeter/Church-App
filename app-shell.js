@@ -232,6 +232,8 @@
         "contact.prayerWallPrayed": "ஜெபித்தேன் ({count})",
         "contact.prayerWallEdit": "திருத்து",
         "contact.prayerWallDelete": "நீக்கு",
+        "contact.prayerWallDetailsTitle": "ஜெப வேண்டுதல் விவரம்",
+        "contact.prayerWallCloseDetails": "விவரத்தை மூடு",
         "contact.prayerWallEditPrompt": "ஜெப வேண்டுதலை திருத்துங்கள்",
         "contact.prayerWallDeleteConfirm": "இந்த ஜெப வேண்டுதலை நீக்கவா?",
         "contact.prayerWallUpdated": "ஜெப வேண்டுதல் புதுப்பிக்கப்பட்டது.",
