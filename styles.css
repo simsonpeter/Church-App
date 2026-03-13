@@ -1278,6 +1278,15 @@ button.button-link:disabled {
     padding: 0 !important;
     overflow: hidden;
     border-radius: 14px;
+    position: relative;
+    border: 1px solid rgba(213, 41, 41, 0.16);
+    background: var(--surface);
+}
+
+.prayer-request-card-urgent {
+    border-color: rgba(255, 91, 91, 0.65);
+    box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.28), 0 8px 18px rgba(213, 41, 41, 0.18);
+    animation: urgent-card-pulse 2.2s ease-in-out infinite;
 }
 
 .prayer-request-title {
@@ -1300,17 +1309,58 @@ button.button-link:disabled {
 }
 
 .prayer-urgent-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-right: 0;
+    gap: 5px;
     border-radius: 999px;
-    padding: 2px 8px;
-    font-size: 0.66rem;
+    padding: 3px 9px;
+    font-size: 0.65rem;
     font-weight: 700;
     color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
+    background: linear-gradient(145deg, #ff7a18, #ff3c3c);
     border: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 4px 12px rgba(185, 22, 22, 0.4);
+    animation: urgent-badge-beat 1.2s ease-in-out infinite;
+}
+
+.prayer-urgent-badge i {
+    font-size: 0.58rem;
+}
+
+.prayer-request-card-urgent .prayer-request-title {
+    padding-right: 88px;
+}
+
+@keyframes urgent-badge-beat {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.08);
+    }
+}
+
+@keyframes urgent-card-pulse {
+    0%,
+    100% {
+        box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.2), 0 8px 18px rgba(213, 41, 41, 0.14);
+    }
+    50% {
+        box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.44), 0 12px 24px rgba(213, 41, 41, 0.24);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .prayer-request-card-urgent,
+    .prayer-urgent-badge {
+        animation: none;
+    }
 }
 
 .prayer-meta-row {

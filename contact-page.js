@@ -213,12 +213,15 @@
                         : (entry.name || T("contact.prayerWallNameAnonymous", "Anonymous"));
                     var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
                     var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "");
+                    var urgentText = T("contact.prayerWallUrgentBadge", "Urgent");
+                    var cardClass = entry.urgent ? "prayer-request-card prayer-request-card-urgent" : "prayer-request-card";
                     var urgentBadge = entry.urgent
-                        ? ("<span class=\"prayer-urgent-badge\">" + escapeHtml(T("contact.prayerWallUrgentBadge", "Urgent")) + "</span>")
+                        ? ("<span class=\"prayer-urgent-badge\" title=\"" + escapeHtml(urgentText) + "\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i>" + escapeHtml(urgentText) + "</span>")
                         : "";
                     return "" +
-                        "<li class=\"prayer-request-card\">" +
-                        "  <h3 class=\"prayer-request-title\">" + escapeHtml(safeName) + urgentBadge + "</h3>" +
+                        "<li class=\"" + cardClass + "\">" +
+                        "  " + urgentBadge +
+                        "  <h3 class=\"prayer-request-title\">" + escapeHtml(safeName) + "</h3>" +
                         "  <p class=\"prayer-request-message\">" + escapeHtml(entry.message || "") + "</p>" +
                         "  <div class=\"prayer-meta-row\">" +
                         "    <span class=\"page-note\">" + escapeHtml(dateText) + "</span>" +
