@@ -583,22 +583,47 @@ body.splash-active {
     background: transparent;
     color: inherit;
     text-align: left;
-    padding: 12px 14px;
+    padding: 11px 12px;
     cursor: pointer;
     font: inherit;
 }
 
-.sermon-favorite-btn {
-    width: 42px;
-    border: 0;
-    border-left: 1px solid var(--line);
-    background: transparent;
-    color: #b14949;
-    cursor: pointer;
+.sermon-open-top {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    align-items: center;
+    gap: 10px;
 }
 
-.sermon-star {
-    color: #c0781a;
+.sermon-speaker-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.71rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    color: #a52424;
+    background: linear-gradient(145deg, #ffe6e6, #ffd2d2);
+    border: 1px solid #efb0b0;
+    box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.72);
+}
+
+.sermon-open-main {
+    min-width: 0;
+}
+
+.sermon-open-main h3 {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sermon-open-main p {
+    margin: 0;
 }
 
 .sermon-open-btn:disabled {
@@ -606,13 +631,30 @@ body.splash-active {
     opacity: 0.6;
 }
 
-.sermon-open-btn h3 {
-    margin: 0 0 4px;
-    font-size: 0.95rem;
+.sermon-item-actions {
+    display: grid;
+    grid-template-columns: 42px 42px;
 }
 
-.sermon-open-btn p {
-    margin: 0;
+.sermon-play-btn,
+.sermon-favorite-btn {
+    border: 0;
+    border-left: 1px solid var(--line);
+    background: transparent;
+    cursor: pointer;
+}
+
+.sermon-play-btn {
+    color: #a53131;
+}
+
+.sermon-favorite-btn {
+    color: #b14949;
+}
+
+.sermon-play-btn:disabled {
+    color: #cba7a7;
+    cursor: not-allowed;
 }
 
 .sermon-hint {
@@ -1160,6 +1202,10 @@ button.button-link:disabled {
 
 .search-row {
     margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
 }
 
 .search-input {
@@ -1176,6 +1222,12 @@ button.button-link:disabled {
     outline: 2px solid rgba(229, 57, 53, 0.3);
     outline-offset: 1px;
     border-color: var(--primary);
+}
+
+.sermon-search-btn {
+    min-width: 78px;
+    padding: 10px 12px;
+    white-space: nowrap;
 }
 
 .filter-chip-groups {
