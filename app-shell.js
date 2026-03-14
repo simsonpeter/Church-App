@@ -185,6 +185,7 @@
         "songbook.openLyrics": "பாடல்வரிகள் திற",
         "songbook.closeLyrics": "பாடல்வரிகள் மூடு",
         "songbook.noLyrics": "பாடல்வரிகள் இல்லை",
+        "songbook.closeView": "மூடி பட்டியலுக்கு திரும்பு",
         "notify.title": "அறிவிப்புகள்",
         "notify.quickOpen": "அறிவிப்பு அமைப்புகள்",
         "notify.subtitle": "சேவை நினைவூட்டல் மற்றும் புதிய பிரசங்க அறிவிப்புகளைப் பெறுங்கள்.",

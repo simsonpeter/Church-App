@@ -1,13 +1,18 @@
 (function () {
     var songbookList = document.getElementById("songbook-list");
     var songbookSearch = document.getElementById("songbook-search");
+    var songbookFullscreen = document.getElementById("songbook-fullscreen");
+    var songbookFullscreenClose = document.getElementById("songbook-fullscreen-close");
+    var songbookFullscreenTitle = document.getElementById("songbook-fullscreen-title");
+    var songbookFullscreenAuthor = document.getElementById("songbook-fullscreen-author");
+    var songbookFullscreenLyrics = document.getElementById("songbook-fullscreen-lyrics");
     var FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1/projects/songbook-add54/databases/(default)/documents/lyrics";
     var SONGBOOK_FALLBACK_URL = "https://raw.githubusercontent.com/simsonpeter/njcsongbook/main/songs.json";
     var FIRESTORE_PAGE_SIZE = 300;
     var FIRESTORE_MAX_PAGES = 25;
     var songs = [];
     var loadFailed = false;
-    var expandedSongId = "";
+    var activeSongId = "";
     var searchQuery = "";
 
     function T(key, fallback) {
@@ -15,6 +20,13 @@
             return window.NjcI18n.t(key, fallback);
         }
         return fallback || key;
+    }
+
+    function getLocale() {
+        if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+            return window.NjcI18n.getLocale();
+        }
+        return "en-GB";
     }
 
     function escapeHtml(value) {
@@ -143,10 +155,10 @@
 
     function getFilteredSongs() {
         var query = searchQuery.trim().toLowerCase();
-        if (!query) {
-            return songs.slice();
-        }
-        return songs.filter(function (song) {
+        var filtered = songs.filter(function (song) {
+            if (!query) {
+                return true;
+            }
             var searchable = [
                 song.title || "",
                 song.author || "",
@@ -154,6 +166,42 @@
             ].join(" ").toLowerCase();
             return searchable.indexOf(query) >= 0;
         });
+        return filtered.sort(function (a, b) {
+            return String(a.title || "").localeCompare(String(b.title || ""), getLocale(), {
+                sensitivity: "base",
+                numeric: true
+            });
+        });
+    }
+
+    function closeSongFullscreen() {
+        if (!songbookFullscreen) {
+            return;
+        }
+        activeSongId = "";
+        songbookFullscreen.hidden = true;
+        document.body.classList.remove("songbook-fullscreen-open");
+    }
+
+    function openSongFullscreen(song) {
+        if (!songbookFullscreen || !song) {
+            return;
+        }
+        activeSongId = song.id;
+        var authorPrefix = T("songbook.authorPrefix", "Author");
+        if (songbookFullscreenTitle) {
+            songbookFullscreenTitle.textContent = song.title || "-";
+        }
+        if (songbookFullscreenAuthor) {
+            songbookFullscreenAuthor.textContent = song.author
+                ? (authorPrefix + ": " + song.author)
+                : "";
+        }
+        if (songbookFullscreenLyrics) {
+            songbookFullscreenLyrics.textContent = song.lyrics || T("songbook.noLyrics", "Lyrics not available");
+        }
+        songbookFullscreen.hidden = false;
+        document.body.classList.add("songbook-fullscreen-open");
     }
 
     function renderSongbook() {
@@ -189,26 +237,21 @@
             return;
         }
 
-        var authorPrefix = T("songbook.authorPrefix", "Author");
         songbookList.innerHTML = filtered.map(function (song) {
-            var isOpen = expandedSongId === song.id;
-            var toggleLabel = isOpen
-                ? T("songbook.closeLyrics", "Close lyrics")
-                : T("songbook.openLyrics", "Open lyrics");
-            var lyricsValue = song.lyrics || T("songbook.noLyrics", "Lyrics not available");
+            var authorPrefix = T("songbook.authorPrefix", "Author");
             return "" +
                 "<li class=\"songbook-item\">" +
-                "  <h3>" + escapeHtml(song.title) + "</h3>" +
-                (song.author ? "  <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
-                "  <button class=\"button-link songbook-toggle-btn\" type=\"button\" data-song-id=\"" + escapeHtml(song.id) + "\">" + escapeHtml(toggleLabel) + "</button>" +
-                (isOpen ? "  <pre class=\"songbook-lyrics\">" + escapeHtml(lyricsValue) + "</pre>" : "") +
+                "  <button type=\"button\" class=\"songbook-open-btn\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
+                "      <h3>" + escapeHtml(song.title) + "</h3>" +
+                (song.author ? "      <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
+                "  </button>" +
                 "</li>";
         }).join("");
     }
 
     if (songbookList) {
         songbookList.addEventListener("click", function (event) {
-            var button = event.target.closest("button[data-song-id]");
+            var button = event.target.closest("button.songbook-open-btn[data-song-id]");
             if (!button) {
                 return;
             }
@@ -216,21 +259,57 @@
             if (!songId) {
                 return;
             }
-            expandedSongId = expandedSongId === songId ? "" : songId;
-            renderSongbook();
+            var targetSong = songs.find(function (song) {
+                return song.id === songId;
+            });
+            if (!targetSong) {
+                return;
+            }
+            openSongFullscreen(targetSong);
         });
     }
 
     if (songbookSearch) {
         songbookSearch.addEventListener("input", function () {
             searchQuery = songbookSearch.value || "";
-            expandedSongId = "";
             renderSongbook();
         });
     }
 
+    if (songbookFullscreenClose) {
+        songbookFullscreenClose.addEventListener("click", function () {
+            closeSongFullscreen();
+        });
+    }
+
+    if (songbookFullscreen) {
+        songbookFullscreen.addEventListener("click", function (event) {
+            if (event.target === songbookFullscreen) {
+                closeSongFullscreen();
+            }
+        });
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && songbookFullscreen && !songbookFullscreen.hidden) {
+            closeSongFullscreen();
+        }
+    });
+
+    window.addEventListener("hashchange", function () {
+        if ((window.location.hash || "").toLowerCase() !== "#songbook") {
+            closeSongFullscreen();
+        }
+    });
+
     document.addEventListener("njc:langchange", function () {
         renderSongbook();
+        if (activeSongId) {
+            var activeSong = songs.find(function (song) { return song.id === activeSongId; });
+            if (activeSong) {
+                openSongFullscreen(activeSong);
+            }
+        }
     });
 
     fetchFirestoreSongs()

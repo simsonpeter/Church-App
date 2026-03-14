@@ -989,16 +989,25 @@ button.button-link:disabled {
     gap: 8px;
 }
 
+.songbook-open-btn {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+    padding: 0;
+    cursor: pointer;
+}
+
+.songbook-open-btn h3 {
+    margin: 0;
+}
+
 .songbook-author {
     margin: 0;
     color: var(--muted);
     font-size: 0.84rem;
-}
-
-.songbook-toggle-btn {
-    justify-self: start;
-    padding: 7px 10px;
-    font-size: 0.78rem;
 }
 
 .songbook-lyrics {
@@ -1013,6 +1022,46 @@ button.button-link:disabled {
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
     font-size: 0.8rem;
     line-height: 1.45;
+}
+
+body.songbook-fullscreen-open {
+    overflow: hidden;
+}
+
+.songbook-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 3300;
+    background: var(--bg);
+    display: grid;
+    grid-template-rows: auto 1fr;
+}
+
+.songbook-fullscreen[hidden] {
+    display: none !important;
+}
+
+.songbook-fullscreen-top {
+    padding: 12px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+}
+
+.songbook-fullscreen-close {
+    width: auto;
+    min-height: 36px;
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 0.82rem;
+}
+
+.songbook-fullscreen-body {
+    padding: 16px 14px 120px;
+    overflow: auto;
+}
+
+.songbook-fullscreen-body h2 {
+    margin: 0 0 6px;
 }
 
 .tab-nav {
