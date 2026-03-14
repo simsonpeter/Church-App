@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311aa">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311aa">
-    <link rel="manifest" href="site.webmanifest?v=20260311aa">
-    <link rel="stylesheet" href="styles.css?v=20260311aa">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311ab">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311ab">
+    <link rel="manifest" href="site.webmanifest?v=20260311ab">
+    <link rel="stylesheet" href="styles.css?v=20260311ab">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -246,8 +246,8 @@
             </section>
 
             <section class="card">
-                <h2><i class="fa-solid fa-hands-praying"></i><span data-i18n="contact.prayerTitle">Prayer Request</span></h2>
-                <p class="page-note" data-i18n="contact.prayerSubtitle">Share your prayer request with our team.</p>
+                <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
+                <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
                 <form class="prayer-form" id="prayer-request-form">
                     <input
                         id="prayer-name"
@@ -260,31 +260,26 @@
                         class="search-input prayer-textarea"
                         rows="4"
                         data-i18n-placeholder="contact.prayerMessagePlaceholder"
-                        placeholder="Write your prayer request"></textarea>
-                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Prayer Request</button>
+                        placeholder="Write your message"></textarea>
+                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
                 </form>
                 <p class="page-note" id="prayer-form-note" hidden></p>
             </section>
 
-            <section class="card">
-                <h2><i class="fa-solid fa-clock"></i><span data-i18n="contact.officeHours">Office Hours</span></h2>
-                <ul class="list">
-                    <li>
-                        <h3 data-i18n="contact.weekdays">Weekdays</h3>
-                        <p>10:00 - 18:00</p>
-                    </li>
-                    <li>
-                        <h3 data-i18n="contact.weekendSupport">Weekend Support</h3>
-                        <p data-i18n="contact.weekendSupportTime">Before and after Sunday service</p>
-                    </li>
-                </ul>
-            </section>
-
-            <section class="card">
+            <a class="card location-map-card" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
                 <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
                 <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
                 <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
-            </section>
+                <div class="location-map-frame-wrap" aria-hidden="true">
+                    <iframe
+                        class="location-map-frame"
+                        title="Map to New Jerusalem Church Belgium"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+                </div>
+                <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
+            </a>
             </main>
         </section>
 
@@ -399,12 +394,12 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311aa"></script>
-    <script src="events-engine.js?v=20260311aa"></script>
-    <script src="home-page.js?v=20260311aa"></script>
-    <script src="events-page.js?v=20260311aa"></script>
-    <script src="sermons-page.js?v=20260311aa"></script>
-    <script src="contact-page.js?v=20260311aa"></script>
-    <script src="spa-router.js?v=20260311aa"></script>
+    <script src="app-shell.js?v=20260311ab"></script>
+    <script src="events-engine.js?v=20260311ab"></script>
+    <script src="home-page.js?v=20260311ab"></script>
+    <script src="events-page.js?v=20260311ab"></script>
+    <script src="sermons-page.js?v=20260311ab"></script>
+    <script src="contact-page.js?v=20260311ab"></script>
+    <script src="spa-router.js?v=20260311ab"></script>
 </body>
 </html>

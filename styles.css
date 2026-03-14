@@ -949,6 +949,41 @@ button.button-link:disabled {
     text-decoration: none;
 }
 
+.location-map-card {
+    display: block;
+    color: inherit;
+    text-decoration: none;
+}
+
+.location-map-card:hover {
+    transform: translateY(-1px);
+}
+
+.location-map-frame-wrap {
+    margin-top: 8px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface-soft);
+}
+
+.location-map-frame {
+    width: 100%;
+    height: 160px;
+    border: 0;
+    display: block;
+    pointer-events: none;
+}
+
+.location-map-cta {
+    margin-top: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--primary);
+    font-weight: 600;
+}
+
 .tab-nav {
     position: fixed;
     left: 50%;

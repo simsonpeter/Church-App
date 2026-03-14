@@ -448,12 +448,12 @@
 
                     if (!messageValue) {
                         note.hidden = false;
-                        note.textContent = T("contact.prayerNeedMessage", "Please enter your prayer request.");
+                        note.textContent = T("contact.prayerNeedMessage", "Please enter your message.");
                         return;
                     }
 
-                    var subject = "Prayer Request" + (nameValue ? " - " + nameValue : "");
-                    var body = (nameValue ? "Name: " + nameValue + "\n\n" : "") + "Prayer request:\n" + messageValue;
+                    var subject = "Contact Message" + (nameValue ? " - " + nameValue : "");
+                    var body = (nameValue ? "Name: " + nameValue + "\n\n" : "") + "Message:\n" + messageValue;
                     var mailtoUrl = "mailto:simsonpeter@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
                     window.location.href = mailtoUrl;
                     note.hidden = false;
@@ -588,7 +588,7 @@
                     if ((messageInput.value || "").trim()) {
                         note.textContent = T("contact.prayerMailOpened", "Your email app has been opened.");
                     } else {
-                        note.textContent = T("contact.prayerNeedMessage", "Please enter your prayer request.");
+                        note.textContent = T("contact.prayerNeedMessage", "Please enter your message.");
                     }
                 }
                 if (prayerWallNote && !prayerWallNote.hidden) {
