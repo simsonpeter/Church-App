@@ -449,6 +449,53 @@ body.splash-active {
     gap: 10px;
 }
 
+.more-hub-card {
+    background: linear-gradient(160deg, var(--surface-soft), var(--surface));
+}
+
+.more-module-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.more-module-link {
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 8px;
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    box-shadow: 0 6px 18px rgba(127, 34, 34, 0.09);
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.more-module-link:hover {
+    transform: translateY(-2px);
+    border-color: #eea9a9;
+}
+
+.more-module-link.active {
+    background: var(--primary-soft);
+    border-color: #e8adad;
+    box-shadow: 0 8px 18px rgba(180, 42, 42, 0.15);
+}
+
+.more-module-group {
+    display: grid;
+    gap: 14px;
+    scroll-margin-top: 130px;
+}
+
+.more-module-group.active .card:first-child {
+    border-color: #e9a9a9;
+    box-shadow: 0 10px 24px rgba(165, 34, 34, 0.13);
+}
+
 .action-pill {
     text-decoration: none;
     color: var(--text);
@@ -1100,7 +1147,7 @@ body.songbook-fullscreen-open .offline-badge {
     transform: translateX(-50%);
     width: min(410px, calc(100% - 20px));
     display: grid;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);

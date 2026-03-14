@@ -16,7 +16,9 @@
             titleKey: "prayer.title",
             titleText: "Prayer Wall",
             subtitleKey: "",
-            subtitleText: ""
+            subtitleText: "",
+            viewRoute: "more",
+            moreModule: "prayer"
         },
         events: {
             icon: "fa-calendar-days",
@@ -25,7 +27,9 @@
             titleKey: "events.title",
             titleText: "Church calendar",
             subtitleKey: "",
-            subtitleText: ""
+            subtitleText: "",
+            viewRoute: "more",
+            moreModule: "events"
         },
         sermons: {
             icon: "fa-microphone-lines",
@@ -52,6 +56,17 @@
             titleKey: "contact.title",
             titleText: "Reach our team",
             subtitleKey: "",
+            subtitleText: "",
+            viewRoute: "more",
+            moreModule: "contact"
+        },
+        more: {
+            icon: "fa-ellipsis",
+            eyebrowKey: "more.eyebrow",
+            eyebrowText: "More",
+            titleKey: "more.title",
+            titleText: "More",
+            subtitleKey: "",
             subtitleText: ""
         }
     };
@@ -74,13 +89,22 @@
     function setActiveRoute(route) {
         var current = routes[route] ? route : "home";
         var config = routes[current];
+        var viewRoute = config.viewRoute || current;
 
         document.querySelectorAll(".page-view").forEach(function (view) {
-            view.classList.toggle("active", view.getAttribute("data-route") === current);
+            view.classList.toggle("active", view.getAttribute("data-route") === viewRoute);
         });
 
         document.querySelectorAll(".tab-nav .tab").forEach(function (tab) {
-            tab.classList.toggle("active", tab.getAttribute("data-route") === current);
+            tab.classList.toggle("active", tab.getAttribute("data-route") === viewRoute);
+        });
+
+        var activeMoreModule = config.moreModule || "";
+        document.querySelectorAll("[data-more-module]").forEach(function (section) {
+            section.classList.toggle("active", section.getAttribute("data-more-module") === activeMoreModule);
+        });
+        document.querySelectorAll("[data-more-route]").forEach(function (button) {
+            button.classList.toggle("active", button.getAttribute("data-more-route") === current);
         });
 
         var header = document.getElementById("spa-header");
@@ -101,11 +125,18 @@
             subtitle.hidden = !subtitleValue;
         }
 
-        if (window.location.hash.replace(/^#/, "") !== current) {
+        if (!routes[(window.location.hash || "").replace(/^#/, "").trim().toLowerCase()]) {
             window.history.replaceState(null, "", "#" + current);
         }
 
         window.setTimeout(function () {
+            if (config.moreModule) {
+                var target = document.querySelector("[data-more-module=\"" + config.moreModule + "\"]");
+                if (target && typeof target.scrollIntoView === "function") {
+                    target.scrollIntoView({ block: "start" });
+                    return;
+                }
+            }
             window.scrollTo(0, 0);
         }, 0);
     }

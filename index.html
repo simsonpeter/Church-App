@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311ag">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311ag">
-    <link rel="manifest" href="site.webmanifest?v=20260311ag">
-    <link rel="stylesheet" href="styles.css?v=20260311ag">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311ah">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311ah">
+    <link rel="manifest" href="site.webmanifest?v=20260311ah">
+    <link rel="stylesheet" href="styles.css?v=20260311ah">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -79,89 +79,6 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="prayer">
-            <main class="app-content">
-            <section class="card">
-                <h2><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
-                <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray.</p>
-                <button class="button-link prayer-wall-open-btn" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallOpen">Post a Prayer</button>
-                <form class="prayer-form" id="prayer-wall-form" hidden>
-                    <input
-                        id="prayer-wall-name"
-                        class="search-input"
-                        type="text"
-                        data-i18n-placeholder="contact.prayerWallNamePlaceholder"
-                        placeholder="Name (optional)">
-                    <textarea
-                        id="prayer-wall-message"
-                        class="search-input prayer-textarea"
-                        rows="3"
-                        data-i18n-placeholder="contact.prayerWallMessagePlaceholder"
-                        placeholder="Write prayer request"></textarea>
-                    <label class="prayer-wall-anon">
-                        <input id="prayer-wall-anonymous" type="checkbox">
-                        <span data-i18n="contact.prayerWallAnonymousLabel">Post as anonymous</span>
-                    </label>
-                    <label class="prayer-wall-anon">
-                        <input id="prayer-wall-urgent" type="checkbox">
-                        <span data-i18n="contact.prayerWallUrgentLabel">Mark as urgent</span>
-                    </label>
-                    <div class="prayer-form-actions">
-                        <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
-                        <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
-                    </div>
-                </form>
-                <p class="page-note" id="prayer-wall-note" hidden></p>
-                <ul class="list prayer-wall-list" id="prayer-wall-list">
-                    <li>
-                        <h3 data-i18n="contact.prayerWallLoadingTitle">Loading prayer wall...</h3>
-                        <p data-i18n="contact.prayerWallLoadingBody">Please wait.</p>
-                    </li>
-                </ul>
-            </section>
-            </main>
-        </section>
-
-        <section class="page-view" data-route="events">
-            <main class="app-content">
-<section class="quick-actions">
-                <a class="action-pill" href="#home">
-                    <span class="action-icon"><i class="fa-solid fa-house"></i></span>
-                    <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
-                </a>
-                <a class="action-pill" href="#contact">
-                    <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
-                    <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
-                </a>
-                <a class="action-pill" href="#sermons">
-                    <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
-                    <span class="action-label" data-i18n="actions.messages">Messages</span>
-                </a>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-star"></i><span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h2>
-                <ul class="list" id="upcoming-special-events-list">
-                    <li>
-                        <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
-                        <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
-                    </li>
-                </ul>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-clock"></i><span data-i18n="events.upcomingTitle">Upcoming Events</span></h2>
-                <ul class="list" id="upcoming-events-list">
-                    <li>
-                        <h3 data-i18n="events.loadingUpcomingTitle">Loading upcoming events...</h3>
-                        <p data-i18n="events.loadingUpcomingBody">Please wait while we calculate the next dates.</p>
-                    </li>
-                </ul>
-                <button class="button-link" id="show-more-events" type="button" data-i18n="events.seeMore" hidden>See more events</button>
-            </section>
-            </main>
-        </section>
-
         <section class="page-view" data-route="sermons">
             <main class="app-content">
 <section class="quick-actions">
@@ -222,64 +139,164 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="contact">
+        <section class="page-view" data-route="more">
             <main class="app-content">
-<section class="card contact-block">
-                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
-                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
-                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
-            </section>
-
-            <section class="quick-actions">
-                <a class="action-pill" href="mailto:simsonpeter@gmail.com">
-                    <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
-                    <span class="action-label" data-i18n="actions.email">Email</span>
-                </a>
-                <a class="action-pill" href="tel:+32483116484">
-                    <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
-                    <span class="action-label" data-i18n="actions.call">Call</span>
-                </a>
-                <a class="action-pill" href="#events">
-                    <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
-                    <span class="action-label" data-i18n="actions.visit">Visit</span>
-                </a>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
-                <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
-                <form class="prayer-form" id="prayer-request-form">
-                    <input
-                        id="prayer-name"
-                        class="search-input"
-                        type="text"
-                        data-i18n-placeholder="contact.prayerNamePlaceholder"
-                        placeholder="Your name (optional)">
-                    <textarea
-                        id="prayer-message"
-                        class="search-input prayer-textarea"
-                        rows="4"
-                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
-                        placeholder="Write your message"></textarea>
-                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
-                </form>
-                <p class="page-note" id="prayer-form-note" hidden></p>
-            </section>
-
-            <a class="card location-map-card" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
-                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
-                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
-                <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
-                <div class="location-map-frame-wrap" aria-hidden="true">
-                    <iframe
-                        class="location-map-frame"
-                        title="Map to New Jerusalem Church Belgium"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+            <section class="card more-hub-card">
+                <h2><i class="fa-solid fa-compass"></i><span data-i18n="more.quickAccessTitle">Quick Access</span></h2>
+                <p class="page-note" data-i18n="more.quickAccessSubtitle">Open Prayer, Events, and Contact from one place.</p>
+                <div class="more-module-grid">
+                    <a class="more-module-link" href="#prayer" data-more-route="prayer">
+                        <span class="action-icon"><i class="fa-solid fa-hands-praying"></i></span>
+                        <span class="action-label" data-i18n="nav.prayer">Prayer</span>
+                    </a>
+                    <a class="more-module-link" href="#events" data-more-route="events">
+                        <span class="action-icon"><i class="fa-solid fa-calendar-days"></i></span>
+                        <span class="action-label" data-i18n="nav.events">Events</span>
+                    </a>
+                    <a class="more-module-link" href="#contact" data-more-route="contact">
+                        <span class="action-icon"><i class="fa-solid fa-phone"></i></span>
+                        <span class="action-label" data-i18n="nav.contact">Contact</span>
+                    </a>
                 </div>
-                <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
-            </a>
+            </section>
+
+            <section class="more-module-group" id="more-module-prayer" data-more-module="prayer">
+                <section class="card">
+                    <h2><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
+                    <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray.</p>
+                    <button class="button-link prayer-wall-open-btn" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallOpen">Post a Prayer</button>
+                    <form class="prayer-form" id="prayer-wall-form" hidden>
+                        <input
+                            id="prayer-wall-name"
+                            class="search-input"
+                            type="text"
+                            data-i18n-placeholder="contact.prayerWallNamePlaceholder"
+                            placeholder="Name (optional)">
+                        <textarea
+                            id="prayer-wall-message"
+                            class="search-input prayer-textarea"
+                            rows="3"
+                            data-i18n-placeholder="contact.prayerWallMessagePlaceholder"
+                            placeholder="Write prayer request"></textarea>
+                        <label class="prayer-wall-anon">
+                            <input id="prayer-wall-anonymous" type="checkbox">
+                            <span data-i18n="contact.prayerWallAnonymousLabel">Post as anonymous</span>
+                        </label>
+                        <label class="prayer-wall-anon">
+                            <input id="prayer-wall-urgent" type="checkbox">
+                            <span data-i18n="contact.prayerWallUrgentLabel">Mark as urgent</span>
+                        </label>
+                        <div class="prayer-form-actions">
+                            <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
+                            <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
+                        </div>
+                    </form>
+                    <p class="page-note" id="prayer-wall-note" hidden></p>
+                    <ul class="list prayer-wall-list" id="prayer-wall-list">
+                        <li>
+                            <h3 data-i18n="contact.prayerWallLoadingTitle">Loading prayer wall...</h3>
+                            <p data-i18n="contact.prayerWallLoadingBody">Please wait.</p>
+                        </li>
+                    </ul>
+                </section>
+            </section>
+
+            <section class="more-module-group" id="more-module-events" data-more-module="events">
+                <section class="quick-actions">
+                    <a class="action-pill" href="#home">
+                        <span class="action-icon"><i class="fa-solid fa-house"></i></span>
+                        <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
+                    </a>
+                    <a class="action-pill" href="#contact">
+                        <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
+                        <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
+                    </a>
+                    <a class="action-pill" href="#sermons">
+                        <span class="action-icon"><i class="fa-solid fa-book-open"></i></span>
+                        <span class="action-label" data-i18n="actions.messages">Messages</span>
+                    </a>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fa-solid fa-star"></i><span data-i18n="events.upcomingSpecialTitle">Upcoming Special Events</span></h2>
+                    <ul class="list" id="upcoming-special-events-list">
+                        <li>
+                            <h3 data-i18n="events.loadingSpecialTitle">Loading special events...</h3>
+                            <p data-i18n="events.loadingSpecialBody">Please wait while we load upcoming special events.</p>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fa-solid fa-clock"></i><span data-i18n="events.upcomingTitle">Upcoming Events</span></h2>
+                    <ul class="list" id="upcoming-events-list">
+                        <li>
+                            <h3 data-i18n="events.loadingUpcomingTitle">Loading upcoming events...</h3>
+                            <p data-i18n="events.loadingUpcomingBody">Please wait while we calculate the next dates.</p>
+                        </li>
+                    </ul>
+                    <button class="button-link" id="show-more-events" type="button" data-i18n="events.seeMore" hidden>See more events</button>
+                </section>
+            </section>
+
+            <section class="more-module-group" id="more-module-contact" data-more-module="contact">
+                <section class="card contact-block">
+                    <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
+                    <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
+                    <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
+                </section>
+
+                <section class="quick-actions">
+                    <a class="action-pill" href="mailto:simsonpeter@gmail.com">
+                        <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
+                        <span class="action-label" data-i18n="actions.email">Email</span>
+                    </a>
+                    <a class="action-pill" href="tel:+32483116484">
+                        <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
+                        <span class="action-label" data-i18n="actions.call">Call</span>
+                    </a>
+                    <a class="action-pill" href="#events">
+                        <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
+                        <span class="action-label" data-i18n="actions.visit">Visit</span>
+                    </a>
+                </section>
+
+                <section class="card">
+                    <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
+                    <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
+                    <form class="prayer-form" id="prayer-request-form">
+                        <input
+                            id="prayer-name"
+                            class="search-input"
+                            type="text"
+                            data-i18n-placeholder="contact.prayerNamePlaceholder"
+                            placeholder="Your name (optional)">
+                        <textarea
+                            id="prayer-message"
+                            class="search-input prayer-textarea"
+                            rows="4"
+                            data-i18n-placeholder="contact.prayerMessagePlaceholder"
+                            placeholder="Write your message"></textarea>
+                        <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
+                    </form>
+                    <p class="page-note" id="prayer-form-note" hidden></p>
+                </section>
+
+                <a class="card location-map-card" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
+                    <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
+                    <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
+                    <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
+                    <div class="location-map-frame-wrap" aria-hidden="true">
+                        <iframe
+                            class="location-map-frame"
+                            title="Map to New Jerusalem Church Belgium"
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+                    </div>
+                    <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
+                </a>
+            </section>
             </main>
         </section>
 
@@ -307,11 +324,9 @@
 
         <nav class="tab-nav">
             <a class="tab active" data-route="home" href="#home"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
-            <a class="tab" data-route="prayer" href="#prayer"><span class="tab-icon"><i class="fa-solid fa-hands-praying"></i></span><span class="tab-label" data-i18n="nav.prayer">Prayer</span></a>
-            <a class="tab" data-route="events" href="#events"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
             <a class="tab" data-route="sermons" href="#sermons"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
             <a class="tab" data-route="songbook" href="#songbook"><span class="tab-icon"><i class="fa-solid fa-music"></i></span><span class="tab-label" data-i18n="nav.songbook">Songs</span></a>
-            <a class="tab" data-route="contact" href="#contact"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
+            <a class="tab" data-route="more" href="#more"><span class="tab-icon"><i class="fa-solid fa-ellipsis"></i></span><span class="tab-label" data-i18n="nav.more">More</span></a>
         </nav>
     </div>
 
@@ -433,13 +448,13 @@
         </button>
     </div>
 
-    <script src="app-shell.js?v=20260311ag"></script>
-    <script src="events-engine.js?v=20260311ag"></script>
-    <script src="home-page.js?v=20260311ag"></script>
-    <script src="events-page.js?v=20260311ag"></script>
-    <script src="sermons-page.js?v=20260311ag"></script>
-    <script src="songbook-page.js?v=20260311ag"></script>
-    <script src="contact-page.js?v=20260311ag"></script>
-    <script src="spa-router.js?v=20260311ag"></script>
+    <script src="app-shell.js?v=20260311ah"></script>
+    <script src="events-engine.js?v=20260311ah"></script>
+    <script src="home-page.js?v=20260311ah"></script>
+    <script src="events-page.js?v=20260311ah"></script>
+    <script src="sermons-page.js?v=20260311ah"></script>
+    <script src="songbook-page.js?v=20260311ah"></script>
+    <script src="contact-page.js?v=20260311ah"></script>
+    <script src="spa-router.js?v=20260311ah"></script>
 </body>
 </html>
