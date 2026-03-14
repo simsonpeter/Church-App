@@ -575,7 +575,7 @@ body.splash-active {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: stretch;
-    min-height: 108px;
+    min-height: 118px;
 }
 
 .sermon-open-btn {
@@ -617,46 +617,54 @@ body.splash-active {
     gap: 2px;
 }
 
-.sermon-title {
-    margin: 0 0 4px;
-    font-size: 0.95rem;
-}
-
-.sermon-title-track {
+.sermon-marquee-track {
     display: block;
     max-width: 100%;
     overflow: hidden;
     white-space: nowrap;
 }
 
-.sermon-title-text {
+.sermon-marquee-text {
     display: inline-block;
     white-space: nowrap;
     vertical-align: top;
 }
 
-.sermon-title-track.marquee .sermon-title-text {
-    padding-right: 22px;
-    animation: sermon-title-marquee 7.8s linear infinite;
+.sermon-marquee-track.marquee .sermon-marquee-text {
+    padding-right: 20px;
+    animation: sermon-line-marquee 8s linear infinite;
 }
 
-.sermon-title-track.marquee .sermon-title-text::after {
-    content: "   •   " attr(data-title);
+.sermon-marquee-track.marquee .sermon-marquee-text::after {
+    content: "   •   " attr(data-marquee-text);
 }
 
-.sermon-title-track:not(.marquee) .sermon-title-text {
+.sermon-marquee-track:not(.marquee) .sermon-marquee-text {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-.sermon-open-main p {
+.sermon-line {
     margin: 0;
+    line-height: 1.25;
+}
+
+.sermon-line-tamil {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.sermon-line-english {
     font-size: 0.86rem;
-    line-height: 1.28;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    color: var(--text);
+}
+
+.sermon-line-speaker,
+.sermon-line-date {
+    font-size: 0.8rem;
+    color: var(--muted);
 }
 
 .sermon-open-btn:disabled {
@@ -693,7 +701,7 @@ body.splash-active {
     cursor: not-allowed;
 }
 
-@keyframes sermon-title-marquee {
+@keyframes sermon-line-marquee {
     0% {
         transform: translateX(0);
     }

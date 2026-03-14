@@ -343,13 +343,13 @@
                 });
             }
 
-            function applySermonTitleMarquee() {
+            function applySermonTextMarquee() {
                 if (!latestSermonsList) {
                     return;
                 }
-                latestSermonsList.querySelectorAll(".sermon-title-track").forEach(function (track) {
+                latestSermonsList.querySelectorAll(".sermon-marquee-track").forEach(function (track) {
                     track.classList.remove("marquee");
-                    var textNode = track.querySelector(".sermon-title-text");
+                    var textNode = track.querySelector(".sermon-marquee-text");
                     if (!textNode) {
                         return;
                     }
@@ -409,11 +409,14 @@
                 latestSermonsList.innerHTML = visible.map(function (record) {
                     var sermon = record.item;
                     var sermonIndex = record.index;
-                    var title = escapeHtml(sermon.title);
+                    var tamilTitle = String(sermon.title || "").trim() || "-";
+                    var englishTitle = String(sermon.subtitle || "").trim() || tamilTitle;
+                    var title = escapeHtml(tamilTitle);
+                    var englishLine = escapeHtml(englishTitle);
                     var isFavorite = isFavoriteSermon(sermon);
-                    var subtitle = sermon.subtitle ? " - " + escapeHtml(sermon.subtitle) : "";
                     var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker"));
-                    var speaker = sermon.speaker ? speakerPrefix + ": " + escapeHtml(sermon.speaker) : "";
+                    var speakerName = String(sermon.speaker || "").trim() || "-";
+                    var speakerLine = speakerPrefix + ": " + escapeHtml(speakerName);
                     var avatarText = escapeHtml(getSpeakerAvatarText(sermon.speaker));
                     var dateText = toDisplayDate(sermon.dateObj);
                     var playAriaLabel = escapeHtml(T("sermons.playInApp", "Play in app"));
@@ -428,9 +431,10 @@
                         "      <div class=\"sermon-open-top\">" +
                         "          <span class=\"sermon-speaker-avatar\" aria-hidden=\"true\">" + avatarText + "</span>" +
                         "          <div class=\"sermon-open-main\">" +
-                        "              <h3 class=\"sermon-title\"><span class=\"sermon-title-track\"><span class=\"sermon-title-text\" data-title=\"" + title + "\">" + title + "</span></span></h3>" +
-                        "              <p>" + dateText + subtitle + "</p>" +
-                        (speaker ? "              <p class=\"sermon-meta\">" + speaker + "</p>" : "") +
+                        "              <h3 class=\"sermon-line sermon-line-tamil\"><span class=\"sermon-marquee-track\"><span class=\"sermon-marquee-text\" data-marquee-text=\"" + title + "\">" + title + "</span></span></h3>" +
+                        "              <p class=\"sermon-line sermon-line-english\"><span class=\"sermon-marquee-track\"><span class=\"sermon-marquee-text\" data-marquee-text=\"" + englishLine + "\">" + englishLine + "</span></span></p>" +
+                        "              <p class=\"sermon-line sermon-line-speaker\"><span class=\"sermon-marquee-track\"><span class=\"sermon-marquee-text\" data-marquee-text=\"" + speakerLine + "\">" + speakerLine + "</span></span></p>" +
+                        "              <p class=\"sermon-line sermon-line-date\"><span class=\"sermon-marquee-track\"><span class=\"sermon-marquee-text\" data-marquee-text=\"" + escapeHtml(dateText) + "\">" + escapeHtml(dateText) + "</span></span></p>" +
                         "          </div>" +
                         "      </div>" +
                         "    </button>" +
@@ -445,7 +449,7 @@
                         "  </div>" +
                         "</li>";
                 }).join("");
-                window.requestAnimationFrame(applySermonTitleMarquee);
+                window.requestAnimationFrame(applySermonTextMarquee);
 
                 showMoreSermonsButton.hidden = hasActiveSearch || hasFilters || visibleCount >= filteredRecords.length;
                 sermonSearchNote.hidden = !(hasActiveSearch || hasFilters);
@@ -802,7 +806,7 @@
                 if (!sermonsLoaded || sermonsLoadFailed) {
                     return;
                 }
-                applySermonTitleMarquee();
+                applySermonTextMarquee();
             });
             window.addEventListener("beforeunload", function () {
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
