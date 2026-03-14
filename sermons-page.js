@@ -425,16 +425,11 @@
                     var englishTitle = String(sermon.subtitle || "").trim() || tamilTitle;
                     var title = escapeHtml(tamilTitle);
                     var englishLine = escapeHtml(englishTitle);
-                    var isFavorite = isFavoriteSermon(sermon);
                     var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker"));
                     var speakerName = String(sermon.speaker || "").trim() || "-";
                     var speakerLine = speakerPrefix + ": " + escapeHtml(speakerName);
                     var avatarText = escapeHtml(getSpeakerAvatarText(sermon.speaker));
                     var dateText = toDisplayDate(sermon.dateObj);
-                    var playAriaLabel = escapeHtml(T("sermons.playInApp", "Play in app"));
-                    var favoriteAriaLabel = escapeHtml(
-                        isFavorite ? T("sermons.favoriteRemove", "Remove favorite") : T("sermons.favoriteAdd", "Add favorite")
-                    );
 
                     return "" +
                         "<li class=\"sermon-item\">" +
@@ -450,14 +445,6 @@
                         "          </div>" +
                         "      </div>" +
                         "    </button>" +
-                        "    <div class=\"sermon-item-actions\">" +
-                        "      <button class=\"sermon-play-btn\" type=\"button\" data-sermon-index=\"" + sermonIndex + "\" aria-label=\"" + playAriaLabel + "\"" + (sermon.audioUrl ? "" : " disabled") + ">" +
-                        "          <i class=\"fa-solid fa-play\"></i>" +
-                        "      </button>" +
-                        "      <button class=\"sermon-favorite-btn\" type=\"button\" data-sermon-index=\"" + sermonIndex + "\" aria-label=\"" + favoriteAriaLabel + "\">" +
-                        "          <i class=\"fa-" + (isFavorite ? "solid" : "regular") + " fa-star\"></i>" +
-                        "      </button>" +
-                        "    </div>" +
                         "  </div>" +
                         "</li>";
                 }).join("");
@@ -748,26 +735,6 @@
             });
 
             latestSermonsList.addEventListener("click", function (event) {
-                var favoriteButton = event.target.closest(".sermon-favorite-btn");
-                if (favoriteButton) {
-                    var favoriteIndex = Number(favoriteButton.getAttribute("data-sermon-index"));
-                    if (!Number.isNaN(favoriteIndex) && allSermons[favoriteIndex]) {
-                        toggleFavoriteSermon(allSermons[favoriteIndex]);
-                        renderSermons();
-                    }
-                    return;
-                }
-
-                var playButton = event.target.closest(".sermon-play-btn");
-                if (playButton) {
-                    var playIndex = Number(playButton.getAttribute("data-sermon-index"));
-                    if (Number.isNaN(playIndex)) {
-                        return;
-                    }
-                    openPlayer(playIndex, true);
-                    return;
-                }
-
                 var button = event.target.closest(".sermon-open-btn");
                 if (!button) {
                     return;

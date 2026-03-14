@@ -573,7 +573,7 @@ body.splash-active {
 
 .sermon-item-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 54px;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
     min-height: 120px;
 }
@@ -584,7 +584,7 @@ body.splash-active {
     background: transparent;
     color: inherit;
     text-align: left;
-    padding: 11px 14px 11px 12px;
+    padding: 11px 12px;
     cursor: pointer;
     font: inherit;
 }
@@ -615,7 +615,6 @@ body.splash-active {
     min-width: 0;
     display: grid;
     gap: 2px;
-    padding-right: 4px;
 }
 
 .sermon-marquee-track {
@@ -673,41 +672,6 @@ body.splash-active {
 .sermon-open-btn:disabled {
     cursor: not-allowed;
     opacity: 0.6;
-}
-
-.sermon-item-actions {
-    display: grid;
-    width: 54px;
-    grid-template-rows: 1fr 1fr;
-    border-left: 1px solid var(--line);
-    background: var(--surface);
-}
-
-.sermon-play-btn,
-.sermon-favorite-btn {
-    border: 0;
-    background: transparent;
-    cursor: pointer;
-    width: 54px;
-    height: 100%;
-}
-
-.sermon-play-btn i,
-.sermon-favorite-btn i {
-    font-size: 0.88rem;
-}
-
-.sermon-play-btn {
-    color: #a53131;
-}
-
-.sermon-favorite-btn {
-    color: #b14949;
-}
-
-.sermon-play-btn:disabled {
-    color: #cba7a7;
-    cursor: not-allowed;
 }
 
 @keyframes sermon-line-marquee {
