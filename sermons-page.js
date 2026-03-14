@@ -343,6 +343,22 @@
                 });
             }
 
+            function applySermonTitleMarquee() {
+                if (!latestSermonsList) {
+                    return;
+                }
+                latestSermonsList.querySelectorAll(".sermon-title-track").forEach(function (track) {
+                    track.classList.remove("marquee");
+                    var textNode = track.querySelector(".sermon-title-text");
+                    if (!textNode) {
+                        return;
+                    }
+                    if (textNode.scrollWidth > track.clientWidth + 4) {
+                        track.classList.add("marquee");
+                    }
+                });
+            }
+
             function renderSermons() {
                 var filteredRecords = getFilteredSermons();
                 var hasSearch = searchQuery.trim().length > 0;
@@ -412,7 +428,7 @@
                         "      <div class=\"sermon-open-top\">" +
                         "          <span class=\"sermon-speaker-avatar\" aria-hidden=\"true\">" + avatarText + "</span>" +
                         "          <div class=\"sermon-open-main\">" +
-                        "              <h3>" + title + "</h3>" +
+                        "              <h3 class=\"sermon-title\"><span class=\"sermon-title-track\"><span class=\"sermon-title-text\" data-title=\"" + title + "\">" + title + "</span></span></h3>" +
                         "              <p>" + dateText + subtitle + "</p>" +
                         (speaker ? "              <p class=\"sermon-meta\">" + speaker + "</p>" : "") +
                         "          </div>" +
@@ -429,6 +445,7 @@
                         "  </div>" +
                         "</li>";
                 }).join("");
+                window.requestAnimationFrame(applySermonTitleMarquee);
 
                 showMoreSermonsButton.hidden = hasActiveSearch || hasFilters || visibleCount >= filteredRecords.length;
                 sermonSearchNote.hidden = !(hasActiveSearch || hasFilters);
@@ -780,6 +797,12 @@
             });
             sermonAudio.addEventListener("ended", function () {
                 playNext(1);
+            });
+            window.addEventListener("resize", function () {
+                if (!sermonsLoaded || sermonsLoadFailed) {
+                    return;
+                }
+                applySermonTitleMarquee();
             });
             window.addEventListener("beforeunload", function () {
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
