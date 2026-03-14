@@ -1028,13 +1028,25 @@ body.songbook-fullscreen-open {
     overflow: hidden;
 }
 
+body.songbook-fullscreen-open .tab-nav,
+body.songbook-fullscreen-open .mini-player,
+body.songbook-fullscreen-open .offline-badge {
+    display: none !important;
+}
+
 .songbook-fullscreen {
     position: fixed;
-    inset: 0;
-    z-index: 3300;
-    background: var(--bg);
-    display: grid;
-    grid-template-rows: auto 1fr;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 5200;
+    background: var(--bg-bottom);
+    display: flex;
+    flex-direction: column;
 }
 
 .songbook-fullscreen[hidden] {
@@ -1042,22 +1054,39 @@ body.songbook-fullscreen-open {
 }
 
 .songbook-fullscreen-top {
-    padding: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: calc(10px + env(safe-area-inset-top)) 12px 10px;
     border-bottom: 1px solid var(--line);
     background: var(--surface);
 }
 
 .songbook-fullscreen-close {
-    width: auto;
+    border: 0;
+    background: transparent;
+    color: var(--primary);
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     min-height: 36px;
-    text-align: left;
-    padding: 10px 12px;
-    font-size: 0.82rem;
+    padding: 2px 0;
 }
 
 .songbook-fullscreen-body {
-    padding: 16px 14px 120px;
+    flex: 1 1 auto;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 14px calc(24px + env(safe-area-inset-bottom));
+}
+
+.songbook-fullscreen-inner {
+    width: min(430px, 100%);
+    margin: 0 auto;
 }
 
 .songbook-fullscreen-body h2 {
