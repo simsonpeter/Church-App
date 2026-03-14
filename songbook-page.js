@@ -1,7 +1,10 @@
 (function () {
     var songbookList = document.getElementById("songbook-list");
     var songbookSearch = document.getElementById("songbook-search");
-    var SONGBOOK_URL = "https://raw.githubusercontent.com/simsonpeter/njcsongbook/main/songs.json";
+    var FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1/projects/songbook-add54/databases/(default)/documents/lyrics";
+    var SONGBOOK_FALLBACK_URL = "https://raw.githubusercontent.com/simsonpeter/njcsongbook/main/songs.json";
+    var FIRESTORE_PAGE_SIZE = 300;
+    var FIRESTORE_MAX_PAGES = 25;
     var songs = [];
     var loadFailed = false;
     var expandedSongId = "";
@@ -39,6 +42,42 @@
         };
     }
 
+    function getFirestoreString(fields, keys) {
+        if (!fields || typeof fields !== "object") {
+            return "";
+        }
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            var field = fields[key];
+            if (field && typeof field.stringValue === "string") {
+                var value = String(field.stringValue || "").trim();
+                if (value) {
+                    return value;
+                }
+            }
+        }
+        return "";
+    }
+
+    function normalizeFirestoreSong(doc, index) {
+        var source = doc && typeof doc === "object" ? doc : {};
+        var fields = source.fields && typeof source.fields === "object" ? source.fields : {};
+        var title = getFirestoreString(fields, ["songTitle", "title", "displayName", "name"]);
+        if (!title) {
+            return null;
+        }
+        var lyrics = getFirestoreString(fields, ["lyricsText", "lyrics", "content", "body", "text"]);
+        var author = getFirestoreString(fields, ["author", "composer", "writer"]);
+        var docName = String(source.name || "");
+        var id = docName.split("/").pop() || ("song-" + index);
+        return normalizeSong({
+            id: id,
+            title: title,
+            author: author,
+            lyrics: lyrics
+        }, index);
+    }
+
     function getSongsPayload(payload) {
         if (Array.isArray(payload)) {
             return payload;
@@ -47,6 +86,59 @@
             return payload.songs;
         }
         return [];
+    }
+
+    function buildFirestoreUrl(pageToken) {
+        var params = new URLSearchParams({
+            pageSize: String(FIRESTORE_PAGE_SIZE)
+        });
+        if (pageToken) {
+            params.set("pageToken", pageToken);
+        }
+        return FIRESTORE_BASE_URL + "?" + params.toString();
+    }
+
+    function fetchFirestoreSongs() {
+        var allDocuments = [];
+        function fetchPage(pageToken, pageCount) {
+            if (pageCount >= FIRESTORE_MAX_PAGES) {
+                return Promise.resolve(allDocuments);
+            }
+            return fetch(buildFirestoreUrl(pageToken), { cache: "no-store" })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Firestore fetch failed");
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    var docs = payload && Array.isArray(payload.documents) ? payload.documents : [];
+                    allDocuments = allDocuments.concat(docs);
+                    var token = payload && payload.nextPageToken ? String(payload.nextPageToken) : "";
+                    if (!token) {
+                        return allDocuments;
+                    }
+                    return fetchPage(token, pageCount + 1);
+                });
+        }
+        return fetchPage("", 0).then(function (docs) {
+            return docs.map(normalizeFirestoreSong).filter(function (song) { return Boolean(song); });
+        });
+    }
+
+    function fetchFallbackSongs() {
+        return fetch(SONGBOOK_FALLBACK_URL, { cache: "no-store" })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Fallback fetch failed");
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                return getSongsPayload(payload)
+                    .map(normalizeSong)
+                    .filter(function (song) { return Boolean(song); });
+            });
     }
 
     function getFilteredSongs() {
@@ -141,19 +233,18 @@
         renderSongbook();
     });
 
-    fetch(SONGBOOK_URL, { cache: "no-store" })
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("Failed to load songbook");
-            }
-            return response.json();
-        })
-        .then(function (payload) {
-            songs = getSongsPayload(payload)
-                .map(normalizeSong)
-                .filter(function (song) { return Boolean(song); });
+    fetchFirestoreSongs()
+        .then(function (firestoreSongs) {
+            songs = firestoreSongs;
             loadFailed = false;
             renderSongbook();
+        })
+        .catch(function () {
+            return fetchFallbackSongs().then(function (fallbackSongs) {
+                songs = fallbackSongs;
+                loadFailed = false;
+                renderSongbook();
+            });
         })
         .catch(function () {
             loadFailed = true;
