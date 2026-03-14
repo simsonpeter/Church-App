@@ -18,8 +18,10 @@
         "nav.prayer": "ஜெபம்",
         "nav.events": "நிகழ்வு",
         "nav.sermons": "பிரசங்கம்",
-        "nav.songbook": "பாடல்கள்",
+        "nav.songbook": "பாடல் தொகுப்பு",
         "nav.contact": "தொடர்பு",
+        "menu.open": "பட்டியலை திற",
+        "menu.songbook": "பாடல் தொகுப்பு",
         "toggle.language.toTamil": "தமிழுக்கு மாற்று",
         "toggle.language.toEnglish": "Switch to English",
         "toggle.theme.toLight": "ஒளி நிலைக்கு மாற்று",
@@ -1073,6 +1075,125 @@
         });
     }
 
+    function setupHeaderHamburgerMenu() {
+        var header = document.querySelector(".app-header");
+        if (!header || document.getElementById("header-menu-btn")) {
+            return;
+        }
+
+        var controls = ensureHeaderControls(header);
+        var button = document.createElement("button");
+        button.id = "header-menu-btn";
+        button.className = "menu-toggle";
+        button.type = "button";
+        button.innerHTML = "<i class=\"fa-solid fa-bars\"></i>";
+        controls.appendChild(button);
+
+        var panel = document.createElement("div");
+        panel.id = "header-menu-panel";
+        panel.className = "header-menu-popover";
+        panel.hidden = true;
+
+        var songbookLink = document.createElement("a");
+        songbookLink.className = "header-menu-link";
+        songbookLink.href = "#songbook";
+        songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
+        panel.appendChild(songbookLink);
+        document.body.appendChild(panel);
+
+        function getCurrentRoute() {
+            return (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        }
+
+        function setLabels() {
+            var openLabel = t("menu.open", "Open menu");
+            var songbookLabel = t("menu.songbook", "Songbook");
+            button.setAttribute("aria-label", openLabel);
+            button.title = openLabel;
+            var labelNode = songbookLink.querySelector("span");
+            if (labelNode) {
+                labelNode.textContent = songbookLabel;
+            }
+            var isSongbook = getCurrentRoute() === "songbook";
+            songbookLink.classList.toggle("active", isSongbook);
+        }
+
+        function positionPanel() {
+            if (panel.hidden) {
+                return;
+            }
+            var rect = button.getBoundingClientRect();
+            var desiredWidth = Math.min(190, window.innerWidth - 24);
+            var left = rect.right - desiredWidth;
+            if (left < 12) {
+                left = 12;
+            }
+            if (left + desiredWidth > window.innerWidth - 12) {
+                left = window.innerWidth - desiredWidth - 12;
+            }
+            panel.style.width = desiredWidth + "px";
+            panel.style.top = (rect.bottom + 8) + "px";
+            panel.style.left = left + "px";
+        }
+
+        function closePanel() {
+            panel.hidden = true;
+            button.setAttribute("aria-expanded", "false");
+        }
+
+        function togglePanel(event) {
+            if (event) {
+                event.stopPropagation();
+            }
+            if (panel.hidden) {
+                setLabels();
+                panel.hidden = false;
+                button.setAttribute("aria-expanded", "true");
+                positionPanel();
+            } else {
+                closePanel();
+            }
+        }
+
+        setLabels();
+        button.setAttribute("aria-haspopup", "menu");
+        button.setAttribute("aria-expanded", "false");
+
+        button.addEventListener("click", togglePanel);
+        panel.addEventListener("click", function (event) {
+            event.stopPropagation();
+            var link = event.target.closest("a[href]");
+            if (link) {
+                closePanel();
+            }
+        });
+
+        document.addEventListener("click", function (event) {
+            if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
+                closePanel();
+            }
+        });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape") {
+                closePanel();
+            }
+        });
+        window.addEventListener("resize", positionPanel);
+        window.addEventListener("scroll", function () {
+            if (!panel.hidden) {
+                closePanel();
+            }
+        }, true);
+        window.addEventListener("hashchange", function () {
+            closePanel();
+            setLabels();
+        });
+        document.addEventListener("njc:langchange", function () {
+            setLabels();
+            positionPanel();
+        });
+    }
+
     function setupFloatingSettingsFab() {
         if (document.getElementById("settings-fab")) {
             return;
@@ -1566,6 +1687,7 @@
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();
+        setupHeaderHamburgerMenu();
         setupFloatingSettingsFab();
         setupOfflineBadge();
         showSplashScreenOnce();
