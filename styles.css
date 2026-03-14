@@ -624,6 +624,7 @@ body.splash-active {
     max-width: 100%;
     overflow: hidden;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .sermon-marquee-text {
@@ -642,9 +643,8 @@ body.splash-active {
 }
 
 .sermon-marquee-track:not(.marquee) .sermon-marquee-text {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    text-overflow: clip;
 }
 
 .sermon-line {
