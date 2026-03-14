@@ -22,6 +22,7 @@
         "nav.contact": "தொடர்பு",
         "menu.open": "பட்டியலை திற",
         "menu.songbook": "பாடல் தொகுப்பு",
+        "menu.settings": "அமைப்புகள்",
         "toggle.language.toTamil": "தமிழுக்கு மாற்று",
         "toggle.language.toEnglish": "Switch to English",
         "toggle.theme.toLight": "ஒளி நிலைக்கு மாற்று",
@@ -1099,6 +1100,12 @@
         songbookLink.href = "#songbook";
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         panel.appendChild(songbookLink);
+
+        var settingsButton = document.createElement("button");
+        settingsButton.type = "button";
+        settingsButton.className = "header-menu-link header-menu-action";
+        settingsButton.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
+        panel.appendChild(settingsButton);
         document.body.appendChild(panel);
 
         function getCurrentRoute() {
@@ -1108,11 +1115,16 @@
         function setLabels() {
             var openLabel = t("menu.open", "Open menu");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var settingsLabel = t("menu.settings", "Settings");
             button.setAttribute("aria-label", openLabel);
             button.title = openLabel;
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
+            }
+            var settingsNode = settingsButton.querySelector("span");
+            if (settingsNode) {
+                settingsNode.textContent = settingsLabel;
             }
             var isSongbook = getCurrentRoute() === "songbook";
             songbookLink.classList.toggle("active", isSongbook);
@@ -1167,6 +1179,13 @@
                 closePanel();
             }
         });
+        settingsButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            closePanel();
+            if (window.NjcSettingsSheet && typeof window.NjcSettingsSheet.open === "function") {
+                window.NjcSettingsSheet.open();
+            }
+        });
 
         document.addEventListener("click", function (event) {
             if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
@@ -1194,8 +1213,8 @@
         });
     }
 
-    function setupFloatingSettingsFab() {
-        if (document.getElementById("settings-fab")) {
+    function setupSettingsSheet() {
+        if (document.getElementById("settings-sheet")) {
             return;
         }
 
@@ -1205,12 +1224,6 @@
         if (!languageButton && !themeButton && !notifyButton) {
             return;
         }
-
-        var fab = document.createElement("button");
-        fab.id = "settings-fab";
-        fab.className = "settings-fab";
-        fab.type = "button";
-        fab.innerHTML = "<i class=\"fa-solid fa-sliders\"></i>";
 
         var backdrop = document.createElement("button");
         backdrop.id = "settings-sheet-backdrop";
@@ -1256,7 +1269,6 @@
         sheet.appendChild(controls);
         document.body.appendChild(backdrop);
         document.body.appendChild(sheet);
-        document.body.appendChild(fab);
 
         var headerControls = document.querySelector(".app-header .header-controls");
         if (headerControls && headerControls.children.length === 0) {
@@ -1264,11 +1276,8 @@
         }
 
         function setSettingsLabels() {
-            var openLabel = t("settings.open", "Open settings");
             var titleText = t("settings.title", "Quick settings");
             var closeLabel = t("settings.close", "Close");
-            fab.setAttribute("aria-label", openLabel);
-            fab.title = openLabel;
             sheetTitle.textContent = titleText;
             closeButton.setAttribute("aria-label", closeLabel);
             closeButton.title = closeLabel;
@@ -1287,27 +1296,15 @@
         function openSheet() {
             sheet.hidden = false;
             backdrop.hidden = false;
-            fab.setAttribute("aria-expanded", "true");
         }
 
         function closeSheet() {
             sheet.hidden = true;
             backdrop.hidden = true;
-            fab.setAttribute("aria-expanded", "false");
             closeNotificationPanelIfOpen();
         }
 
         setSettingsLabels();
-        fab.setAttribute("aria-haspopup", "dialog");
-        fab.setAttribute("aria-expanded", "false");
-
-        fab.addEventListener("click", function () {
-            if (sheet.hidden) {
-                openSheet();
-            } else {
-                closeSheet();
-            }
-        });
         closeButton.addEventListener("click", closeSheet);
         backdrop.addEventListener("click", closeSheet);
         window.addEventListener("hashchange", closeSheet);
@@ -1319,6 +1316,11 @@
         document.addEventListener("njc:langchange", function () {
             setSettingsLabels();
         });
+
+        window.NjcSettingsSheet = {
+            open: openSheet,
+            close: closeSheet
+        };
     }
 
     function setupOfflineBadge() {
@@ -1687,8 +1689,8 @@
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();
+        setupSettingsSheet();
         setupHeaderHamburgerMenu();
-        setupFloatingSettingsFab();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();

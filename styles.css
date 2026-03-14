@@ -1154,6 +1154,14 @@ body.songbook-fullscreen-open .offline-badge {
     font-weight: 600;
 }
 
+.header-menu-action {
+    border: 0;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
 .header-menu-link:hover {
     background: var(--surface-soft);
 }
@@ -1286,45 +1294,26 @@ body.songbook-fullscreen-open .offline-badge {
     font-size: 0.78rem;
 }
 
-.settings-fab {
-    position: fixed;
-    right: max(14px, env(safe-area-inset-right));
-    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 78px);
-    width: 48px;
-    height: 48px;
-    border: 1px solid #de9e9e;
-    border-radius: 50%;
-    background: linear-gradient(145deg, #f05050, #bf2222);
-    color: #ffffff;
-    display: grid;
-    place-items: center;
-    box-shadow: 0 10px 24px rgba(127, 34, 34, 0.34);
-    z-index: 2200;
-}
-
-.settings-fab i {
-    font-size: 1rem;
-}
-
 .settings-sheet-backdrop {
     position: fixed;
     inset: 0;
     border: 0;
     background: rgba(20, 8, 8, 0.35);
-    z-index: 2180;
+    z-index: 3640;
 }
 
 .settings-sheet {
     position: fixed;
-    right: 12px;
-    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 136px);
-    width: min(250px, calc(100% - 24px));
+    left: 50%;
+    top: max(88px, calc(env(safe-area-inset-top) + 58px));
+    transform: translateX(-50%);
+    width: min(280px, calc(100% - 24px));
     border: 1px solid var(--line);
     border-radius: 14px;
     background: var(--surface);
     box-shadow: 0 18px 34px rgba(35, 10, 10, 0.3);
     padding: 12px;
-    z-index: 2190;
+    z-index: 3650;
 }
 
 .settings-sheet[hidden],
