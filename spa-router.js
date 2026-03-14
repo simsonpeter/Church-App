@@ -36,6 +36,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        songbook: {
+            icon: "fa-music",
+            eyebrowKey: "songbook.eyebrow",
+            eyebrowText: "Songbook",
+            titleKey: "songbook.title",
+            titleText: "NJC Songbook",
+            subtitleKey: "",
+            subtitleText: ""
+        },
         contact: {
             icon: "fa-phone",
             eyebrowKey: "contact.eyebrow",

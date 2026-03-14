@@ -984,6 +984,37 @@ button.button-link:disabled {
     font-weight: 600;
 }
 
+.songbook-item {
+    display: grid;
+    gap: 8px;
+}
+
+.songbook-author {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.songbook-toggle-btn {
+    justify-self: start;
+    padding: 7px 10px;
+    font-size: 0.78rem;
+}
+
+.songbook-lyrics {
+    margin: 0;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
 .tab-nav {
     position: fixed;
     left: 50%;
@@ -991,7 +1022,7 @@ button.button-link:disabled {
     transform: translateX(-50%);
     width: min(410px, calc(100% - 20px));
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 8px;
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(10px);
