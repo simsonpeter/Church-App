@@ -1136,8 +1136,8 @@ body.songbook-fullscreen-open .offline-badge {
     border-left: 1px solid var(--line);
     border-radius: 0;
     box-shadow: -14px 0 28px rgba(40, 12, 12, 0.28);
-    padding: calc(12px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));
-    width: min(320px, 88vw);
+    padding: calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
+    width: min(380px, 94vw);
     overflow-y: auto;
     display: grid;
     align-content: start;
@@ -1169,17 +1169,18 @@ body.header-menu-open {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 2px 2px 8px;
+    padding: 2px 2px 10px;
 }
 
 .header-menu-title {
-    font-size: 0.92rem;
+    font-size: 1.04rem;
+    font-weight: 700;
 }
 
 .header-menu-close {
-    width: 30px;
-    height: 30px;
-    border-radius: 9px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
     border: 1px solid var(--line);
     background: var(--surface-soft);
     color: var(--text);
@@ -1189,21 +1190,27 @@ body.header-menu-open {
 
 .header-menu-tabs {
     display: grid;
-    gap: 4px;
-    margin-bottom: 4px;
+    gap: 6px;
+    margin-bottom: 6px;
 }
 
 .header-menu-link {
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
-    border-radius: 10px;
-    padding: 9px 10px;
+    gap: 11px;
+    border-radius: 12px;
+    padding: 12px 14px;
     color: var(--text);
     text-decoration: none;
-    font-size: 0.84rem;
-    font-weight: 600;
+    font-size: 1rem;
+    font-weight: 650;
+}
+
+.header-menu-link i {
+    font-size: 1.02rem;
+    width: 18px;
+    text-align: center;
 }
 
 .header-menu-action {
