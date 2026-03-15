@@ -1128,17 +1128,63 @@ body.songbook-fullscreen-open .offline-badge {
 
 .header-menu-popover {
     position: fixed;
-    z-index: 3600;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3610;
     background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    box-shadow: 0 14px 28px rgba(40, 12, 12, 0.28);
-    padding: 8px;
-    min-width: 170px;
+    border-left: 1px solid var(--line);
+    border-radius: 0;
+    box-shadow: -14px 0 28px rgba(40, 12, 12, 0.28);
+    padding: calc(12px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));
+    width: min(320px, 88vw);
+    overflow-y: auto;
+    display: grid;
+    align-content: start;
+    gap: 6px;
 }
 
 .header-menu-popover[hidden] {
     display: none;
+}
+
+.header-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    border: 0;
+    background: rgba(18, 8, 8, 0.42);
+    z-index: 3605;
+}
+
+.header-menu-backdrop[hidden] {
+    display: none;
+}
+
+body.header-menu-open {
+    overflow: hidden;
+}
+
+.header-menu-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 2px 2px 8px;
+}
+
+.header-menu-title {
+    font-size: 0.92rem;
+}
+
+.header-menu-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    display: grid;
+    place-items: center;
 }
 
 .header-menu-link {

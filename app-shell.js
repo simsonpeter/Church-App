@@ -24,6 +24,8 @@
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.contact": "தொடர்பு",
         "menu.open": "பட்டியலை திற",
+        "menu.title": "பட்டியல்",
+        "menu.close": "பட்டியலை மூடு",
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.settings": "அமைப்புகள்",
         "menu.login": "உள்நுழை / பதிவு",
@@ -1351,6 +1353,28 @@
         panel.id = "header-menu-panel";
         panel.className = "header-menu-popover";
         panel.hidden = true;
+        panel.setAttribute("role", "dialog");
+        panel.setAttribute("aria-modal", "true");
+
+        var backdrop = document.createElement("button");
+        backdrop.id = "header-menu-backdrop";
+        backdrop.className = "header-menu-backdrop";
+        backdrop.type = "button";
+        backdrop.hidden = true;
+        backdrop.setAttribute("aria-hidden", "true");
+        document.body.appendChild(backdrop);
+
+        var panelTop = document.createElement("div");
+        panelTop.className = "header-menu-top";
+        var panelTitle = document.createElement("strong");
+        panelTitle.className = "header-menu-title";
+        var panelClose = document.createElement("button");
+        panelClose.type = "button";
+        panelClose.className = "header-menu-close";
+        panelClose.innerHTML = "<i class=\"fa-solid fa-xmark\"></i>";
+        panelTop.appendChild(panelTitle);
+        panelTop.appendChild(panelClose);
+        panel.appendChild(panelTop);
 
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
@@ -1480,6 +1504,8 @@
 
         function setLabels() {
             var openLabel = t("menu.open", "Open menu");
+            var titleText = t("menu.title", "Menu");
+            var closeText = t("menu.close", "Close menu");
             var songbookLabel = t("menu.songbook", "Songbook");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
@@ -1489,6 +1515,9 @@
             var authIconClass = isLoggedIn ? "fa-right-from-bracket" : "fa-right-to-bracket";
             button.setAttribute("aria-label", openLabel);
             button.title = openLabel;
+            panelTitle.textContent = titleText;
+            panelClose.setAttribute("aria-label", closeText);
+            panelClose.title = closeText;
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
@@ -1511,21 +1540,7 @@
         }
 
         function positionPanel() {
-            if (panel.hidden) {
-                return;
-            }
-            var rect = button.getBoundingClientRect();
-            var desiredWidth = Math.min(190, window.innerWidth - 24);
-            var left = rect.right - desiredWidth;
-            if (left < 12) {
-                left = 12;
-            }
-            if (left + desiredWidth > window.innerWidth - 12) {
-                left = window.innerWidth - desiredWidth - 12;
-            }
-            panel.style.width = desiredWidth + "px";
-            panel.style.top = (rect.bottom + 8) + "px";
-            panel.style.left = left + "px";
+            return;
         }
 
         function positionNotificationCenter() {
@@ -1549,6 +1564,8 @@
 
         function closePanel() {
             panel.hidden = true;
+            backdrop.hidden = true;
+            document.body.classList.remove("header-menu-open");
             button.setAttribute("aria-expanded", "false");
         }
 
@@ -1564,6 +1581,8 @@
             if (panel.hidden) {
                 setLabels();
                 panel.hidden = false;
+                backdrop.hidden = false;
+                document.body.classList.add("header-menu-open");
                 button.setAttribute("aria-expanded", "true");
                 positionPanel();
             } else {
@@ -1573,12 +1592,19 @@
         }
 
         setLabels();
-        button.setAttribute("aria-haspopup", "menu");
+        button.setAttribute("aria-haspopup", "dialog");
         button.setAttribute("aria-expanded", "false");
         notificationsButton.setAttribute("aria-haspopup", "dialog");
         notificationsButton.setAttribute("aria-expanded", "false");
 
         button.addEventListener("click", togglePanel);
+        panelClose.addEventListener("click", function (event) {
+            event.stopPropagation();
+            closePanel();
+        });
+        backdrop.addEventListener("click", function () {
+            closePanel();
+        });
         panel.addEventListener("click", function (event) {
             event.stopPropagation();
             var link = event.target.closest("a[href]");
