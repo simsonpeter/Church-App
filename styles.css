@@ -1662,6 +1662,66 @@ body.auth-modal-open {
     color: var(--muted);
 }
 
+.reading-progress-wrap {
+    margin: 8px 0 10px;
+    display: grid;
+    gap: 6px;
+}
+
+.reading-progress-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+
+.reading-progress-track {
+    width: 100%;
+    height: 9px;
+    border-radius: 999px;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+
+.reading-progress-fill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #b71c1c, #ef5350);
+    transition: width 0.25s ease;
+}
+
+.reading-unread-toggle {
+    margin-top: 2px;
+    font-size: 0.76rem;
+    padding: 7px 10px;
+    width: fit-content;
+}
+
+.reading-unread-list {
+    margin-top: 8px;
+}
+
+.reading-unread-item {
+    display: grid;
+    gap: 6px;
+}
+
+.reading-unread-line {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    font-size: 0.8rem;
+}
+
+.reading-unread-line input {
+    margin-top: 2px;
+    accent-color: var(--primary);
+}
+
 .search-row {
     margin-bottom: 10px;
     display: grid;

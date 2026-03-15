@@ -3,6 +3,14 @@
             var DAILY_VERSE_LANGUAGE_KEY = "njc_daily_verse_language_v1";
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
+            var readingProgressTitle = document.getElementById("reading-progress-title");
+            var readingProgressPercent = document.getElementById("reading-progress-percent");
+            var readingProgressTrack = document.getElementById("reading-progress-track");
+            var readingProgressFill = document.getElementById("reading-progress-fill");
+            var readingProgressSummary = document.getElementById("reading-progress-summary");
+            var readingProgressRemaining = document.getElementById("reading-progress-remaining");
+            var readingUnreadToggle = document.getElementById("reading-unread-toggle");
+            var readingUnreadList = document.getElementById("reading-unread-list");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
@@ -17,7 +25,9 @@
             var brusselsTimeZone = "Europe/Brussels";
             var todayYmd = getBrusselsYmd();
             var todayPlanData = null;
+            var fullReadingPlan = [];
             var readingPlanError = false;
+            var unreadListOpen = false;
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
@@ -112,6 +122,14 @@
                     return window.NjcI18n.t(key, fallback);
                 }
                 return fallback || key;
+            }
+
+            function formatCount(template, count) {
+                var pattern = String(template || "");
+                if (window.NjcI18n && typeof window.NjcI18n.formatCount === "function") {
+                    return window.NjcI18n.formatCount(pattern, count);
+                }
+                return pattern.replace("{count}", String(count));
             }
 
             function getLocale() {
@@ -356,9 +374,12 @@
             }
 
             function getTodayProgress() {
+                return getProgressForDate(getTodayKey());
+            }
+
+            function getProgressForDate(dateKey) {
                 var map = getProgressMap();
-                var todayKey = getTodayKey();
-                var entry = map[todayKey] || {};
+                var entry = map[String(dateKey || "")] || {};
                 return {
                     morning: Boolean(entry.morning),
                     evening: Boolean(entry.evening)
@@ -366,11 +387,18 @@
             }
 
             function setTodayProgress(part, value) {
+                setProgressForDate(getTodayKey(), part, value);
+            }
+
+            function setProgressForDate(dateKey, part, value) {
                 var map = getProgressMap();
-                var todayKey = getTodayKey();
-                var entry = map[todayKey] || {};
+                var targetKey = String(dateKey || "");
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(targetKey)) {
+                    return;
+                }
+                var entry = map[targetKey] || {};
                 entry[part] = Boolean(value);
-                map[todayKey] = entry;
+                map[targetKey] = entry;
                 saveProgressMap(map);
             }
 
@@ -400,6 +428,17 @@
                 var yearStart = Date.UTC(ymd.year, 0, 1);
                 var current = Date.UTC(ymd.year, ymd.month - 1, ymd.day);
                 return Math.floor((current - yearStart) / 86400000) + 1;
+            }
+
+            function toYmdKeyFromDayNumber(year, dayNumber) {
+                if (!year || !dayNumber) {
+                    return "";
+                }
+                var dateUtc = new Date(Date.UTC(year, 0, dayNumber));
+                var y = dateUtc.getUTCFullYear();
+                var m = dateUtc.getUTCMonth() + 1;
+                var d = dateUtc.getUTCDate();
+                return String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
             }
 
             function toYmdKey(value) {
@@ -659,6 +698,161 @@
                     "</div>";
             }
 
+            function getRefsForPart(dayPlan, part) {
+                var value = dayPlan && Array.isArray(dayPlan[part]) ? dayPlan[part] : [];
+                return value.filter(function (ref) {
+                    return String(ref || "").trim().length > 0;
+                });
+            }
+
+            function isPlanDayComplete(dayPlan, progress) {
+                var morningRefs = getRefsForPart(dayPlan, "morning");
+                var eveningRefs = getRefsForPart(dayPlan, "evening");
+                var morningDone = morningRefs.length === 0 || Boolean(progress && progress.morning);
+                var eveningDone = eveningRefs.length === 0 || Boolean(progress && progress.evening);
+                return morningDone && eveningDone;
+            }
+
+            function buildReadingProgressData() {
+                if (!Array.isArray(fullReadingPlan) || fullReadingPlan.length === 0) {
+                    return null;
+                }
+                var progressMap = getProgressMap();
+                var todayDayNumber = getDayOfYear(todayYmd);
+                var totalDays = fullReadingPlan.length;
+                var completedDays = 0;
+                var unreadBacklog = [];
+                for (var index = 0; index < fullReadingPlan.length; index += 1) {
+                    var dayPlan = fullReadingPlan[index] || {};
+                    var dayNumber = index + 1;
+                    var ymdKey = toYmdKeyFromDayNumber(todayYmd.year, dayNumber);
+                    var progress = progressMap[ymdKey] || {};
+                    var morningRefs = getRefsForPart(dayPlan, "morning");
+                    var eveningRefs = getRefsForPart(dayPlan, "evening");
+                    var morningMissing = morningRefs.length > 0 && !Boolean(progress.morning);
+                    var eveningMissing = eveningRefs.length > 0 && !Boolean(progress.evening);
+                    if (isPlanDayComplete(dayPlan, progress)) {
+                        completedDays += 1;
+                    } else if (dayNumber <= todayDayNumber && (morningMissing || eveningMissing)) {
+                        unreadBacklog.push({
+                            dateKey: ymdKey,
+                            dayNumber: dayNumber,
+                            morningMissing: morningMissing,
+                            eveningMissing: eveningMissing,
+                            morningRefs: morningRefs,
+                            eveningRefs: eveningRefs
+                        });
+                    }
+                }
+                var percentComplete = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+                if (percentComplete < 0) {
+                    percentComplete = 0;
+                }
+                if (percentComplete > 100) {
+                    percentComplete = 100;
+                }
+                var remainingDays = Math.max(0, totalDays - completedDays);
+                var percentRemaining = Math.max(0, 100 - percentComplete);
+                return {
+                    totalDays: totalDays,
+                    completedDays: completedDays,
+                    remainingDays: remainingDays,
+                    percentComplete: percentComplete,
+                    percentRemaining: percentRemaining,
+                    unreadBacklog: unreadBacklog
+                };
+            }
+
+            function renderUnreadBacklog(items) {
+                if (!readingUnreadList) {
+                    return;
+                }
+                if (!unreadListOpen) {
+                    readingUnreadList.hidden = true;
+                    readingUnreadList.innerHTML = "";
+                    return;
+                }
+                var entries = Array.isArray(items) ? items : [];
+                readingUnreadList.hidden = false;
+                if (!entries.length) {
+                    readingUnreadList.innerHTML = "" +
+                        "<li>" +
+                        "  <p class=\"page-note\">" + NjcEvents.escapeHtml(T("home.unreadDaysEmpty", "No missed readings so far.")) + "</p>" +
+                        "</li>";
+                    return;
+                }
+                var morningLabel = T("home.morningShort", "Morning");
+                var eveningLabel = T("home.eveningShort", "Evening");
+                readingUnreadList.innerHTML = entries.map(function (item) {
+                    var dateLabel = formatYmdForLocale(item.dateKey);
+                    var lines = [];
+                    if (item.morningMissing) {
+                        lines.push(
+                            "<label class=\"reading-unread-line\">" +
+                            "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"morning\">" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(morningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.morningRefs.map(toFriendlyReference).join(", ")) + "</span>" +
+                            "</label>"
+                        );
+                    }
+                    if (item.eveningMissing) {
+                        lines.push(
+                            "<label class=\"reading-unread-line\">" +
+                            "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"evening\">" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(eveningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.eveningRefs.map(toFriendlyReference).join(", ")) + "</span>" +
+                            "</label>"
+                        );
+                    }
+                    return "" +
+                        "<li class=\"reading-unread-item\">" +
+                        "  <h3>" + NjcEvents.escapeHtml(dateLabel || item.dateKey) + "</h3>" +
+                        "  " + lines.join("") +
+                        "</li>";
+                }).join("");
+            }
+
+            function renderReadingProgress() {
+                if (!readingProgressTitle || !readingProgressPercent || !readingProgressSummary || !readingProgressRemaining || !readingProgressFill || !readingUnreadToggle) {
+                    return;
+                }
+                readingProgressTitle.textContent = T("home.readingProgressTitle", "Reading progress");
+                var progress = buildReadingProgressData();
+                if (!progress) {
+                    readingProgressPercent.textContent = "0%";
+                    readingProgressFill.style.width = "0%";
+                    if (readingProgressTrack) {
+                        readingProgressTrack.setAttribute("aria-valuenow", "0");
+                    }
+                    readingProgressSummary.textContent = "";
+                    readingProgressRemaining.textContent = "";
+                    readingUnreadToggle.textContent = T("home.unreadDaysShow", "Unread days (0)").replace("{count}", "0");
+                    readingUnreadToggle.disabled = true;
+                    renderUnreadBacklog([]);
+                    return;
+                }
+
+                var summaryTemplate = T("home.readingProgressSummary", "{done}/{total} days completed");
+                readingProgressSummary.textContent = summaryTemplate
+                    .replace("{done}", String(progress.completedDays))
+                    .replace("{total}", String(progress.totalDays));
+                readingProgressPercent.textContent = String(progress.percentComplete) + "%";
+                readingProgressFill.style.width = String(progress.percentComplete) + "%";
+                if (readingProgressTrack) {
+                    readingProgressTrack.setAttribute("aria-valuenow", String(progress.percentComplete));
+                }
+                var remainingDaysText = formatCount(T("home.readingRemainingDays", "{count} days to go"), progress.remainingDays);
+                var remainingPercentText = formatCount(T("home.readingRemainingPercent", "{count}% remaining"), progress.percentRemaining);
+                readingProgressRemaining.textContent = remainingDaysText + " • " + remainingPercentText;
+
+                var unreadCount = progress.unreadBacklog.length;
+                if (unreadListOpen) {
+                    readingUnreadToggle.textContent = T("home.unreadDaysHide", "Hide unread list");
+                } else {
+                    readingUnreadToggle.textContent = formatCount(T("home.unreadDaysShow", "Unread days ({count})"), unreadCount);
+                }
+                readingUnreadToggle.disabled = false;
+                renderUnreadBacklog(progress.unreadBacklog);
+            }
+
             function renderReadingPlan() {
                 if (readingPlanError) {
                     todayReadingPlanList.innerHTML = "" +
@@ -666,10 +860,12 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan")) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.")) + "</p>" +
                         "</li>";
+                    renderReadingProgress();
                     return;
                 }
 
                 if (!todayPlanData) {
+                    renderReadingProgress();
                     return;
                 }
 
@@ -684,10 +880,12 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today")) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.")) + "</p>" +
                         "</li>";
+                    renderReadingProgress();
                     return;
                 }
 
                 todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
+                renderReadingProgress();
             }
 
             function loadTodayReadingPlan() {
@@ -702,6 +900,7 @@
                     })
                     .then(function (planData) {
                         var readingPlan = planData && Array.isArray(planData.readingPlan) ? planData.readingPlan : [];
+                        fullReadingPlan = readingPlan;
                         var todayPlan = readingPlan[dayOfYear - 1];
                         if (!todayPlan) {
                             throw new Error("No plan for today");
@@ -710,6 +909,7 @@
                         renderReadingPlan();
                     })
                     .catch(function () {
+                        fullReadingPlan = [];
                         readingPlanError = true;
                         renderReadingPlan();
                     });
@@ -785,6 +985,13 @@
                 renderReadingPlan();
             });
 
+            if (readingUnreadToggle) {
+                readingUnreadToggle.addEventListener("click", function () {
+                    unreadListOpen = !unreadListOpen;
+                    renderReadingProgress();
+                });
+            }
+
             todayReadingPlanList.addEventListener("change", function (event) {
                 var target = event.target;
                 if (!target || target.tagName !== "INPUT") {
@@ -794,11 +1001,33 @@
                 if (part !== "morning" && part !== "evening") {
                     return;
                 }
-                setTodayProgress(part, target.checked);
+                var dateKey = target.getAttribute("data-reading-date");
+                if (dateKey) {
+                    setProgressForDate(dateKey, part, target.checked);
+                } else {
+                    setTodayProgress(part, target.checked);
+                }
                 var tooltip = getReadTooltip(part, target.checked);
                 target.title = tooltip;
                 target.setAttribute("aria-label", tooltip);
+                renderReadingProgress();
             });
+
+            if (readingUnreadList) {
+                readingUnreadList.addEventListener("change", function (event) {
+                    var target = event.target;
+                    if (!target || target.tagName !== "INPUT") {
+                        return;
+                    }
+                    var part = target.getAttribute("data-reading-part");
+                    var dateKey = target.getAttribute("data-reading-date");
+                    if ((part !== "morning" && part !== "evening") || !dateKey) {
+                        return;
+                    }
+                    setProgressForDate(dateKey, part, target.checked);
+                    renderReadingPlan();
+                });
+            }
 
             if (announcementsList) {
                 announcementsList.addEventListener("click", function (event) {
@@ -839,6 +1068,7 @@
             }
 
             updateReadingPlanMeta();
+            renderReadingProgress();
             renderDailyVerse();
             loadTodayReadingPlan();
             loadAnnouncements();

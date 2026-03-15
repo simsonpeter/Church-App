@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311as">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311as">
-    <link rel="manifest" href="site.webmanifest?v=20260311as">
-    <link rel="stylesheet" href="styles.css?v=20260311as">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311at">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311at">
+    <link rel="manifest" href="site.webmanifest?v=20260311at">
+    <link rel="stylesheet" href="styles.css?v=20260311at">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -39,12 +39,25 @@
             <section class="card verse-card">
                 <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="home.bibleReadingTitle">Today's Bible Reading</span></h2>
                 <p class="page-note" id="today-reading-plan-meta"></p>
+                <div class="reading-progress-wrap">
+                    <div class="reading-progress-head">
+                        <strong id="reading-progress-title">Reading progress</strong>
+                        <span id="reading-progress-percent">0%</span>
+                    </div>
+                    <div class="reading-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="reading-progress-track">
+                        <span class="reading-progress-fill" id="reading-progress-fill"></span>
+                    </div>
+                    <p class="page-note" id="reading-progress-summary"></p>
+                    <p class="page-note" id="reading-progress-remaining"></p>
+                    <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
+                </div>
                 <ul class="list" id="today-reading-plan-list">
                     <li>
                         <h3 data-i18n="home.loadingReadingTitle">Loading today's reading plan...</h3>
                         <p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p>
                     </li>
                 </ul>
+                <ul class="list reading-unread-list" id="reading-unread-list" hidden></ul>
             </section>
 
             <section class="card">
@@ -436,14 +449,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311as"></script>
-    <script src="app-shell.js?v=20260311as"></script>
-    <script src="events-engine.js?v=20260311as"></script>
-    <script src="home-page.js?v=20260311as"></script>
-    <script src="events-page.js?v=20260311as"></script>
-    <script src="sermons-page.js?v=20260311as"></script>
-    <script src="songbook-page.js?v=20260311as"></script>
-    <script src="contact-page.js?v=20260311as"></script>
-    <script src="spa-router.js?v=20260311as"></script>
+    <script src="user-auth.js?v=20260311at"></script>
+    <script src="app-shell.js?v=20260311at"></script>
+    <script src="events-engine.js?v=20260311at"></script>
+    <script src="home-page.js?v=20260311at"></script>
+    <script src="events-page.js?v=20260311at"></script>
+    <script src="sermons-page.js?v=20260311at"></script>
+    <script src="songbook-page.js?v=20260311at"></script>
+    <script src="contact-page.js?v=20260311at"></script>
+    <script src="spa-router.js?v=20260311at"></script>
 </body>
 </html>
