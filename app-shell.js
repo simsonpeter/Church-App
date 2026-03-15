@@ -1319,16 +1319,16 @@
         button.innerHTML = "<i class=\"fa-solid fa-bars\"></i>";
         controls.appendChild(button);
 
+        var notificationsButton = document.createElement("button");
+        notificationsButton.type = "button";
+        notificationsButton.className = "notify-toggle header-notification-toggle";
+        notificationsButton.innerHTML = "<i class=\"fa-solid fa-bell\"></i><em class=\"header-menu-unread\" hidden>0</em>";
+        controls.appendChild(notificationsButton);
+
         var panel = document.createElement("div");
         panel.id = "header-menu-panel";
         panel.className = "header-menu-popover";
         panel.hidden = true;
-
-        var notificationsButton = document.createElement("button");
-        notificationsButton.type = "button";
-        notificationsButton.className = "header-menu-link header-menu-action header-menu-link-notifications";
-        notificationsButton.innerHTML = "<i class=\"fa-solid fa-bell\"></i><span></span><em class=\"header-menu-unread\" hidden>0</em>";
-        panel.appendChild(notificationsButton);
 
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
@@ -1395,15 +1395,18 @@
             }
             var api = getInAppApi();
             var unreadCount = api && typeof api.getUnreadCount === "function" ? Number(api.getUnreadCount() || 0) : 0;
+            var notificationLabel = t("notify.menuInbox", "Notifications");
             if (unreadCount > 0) {
                 unreadBadge.hidden = false;
                 unreadBadge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
-                unreadBadge.setAttribute("aria-label", String(unreadCount) + " " + t("notify.unread", "unread"));
+                notificationsButton.setAttribute("aria-label", notificationLabel + ": " + String(unreadCount) + " " + t("notify.unread", "unread"));
+                notificationsButton.title = notificationLabel;
                 return;
             }
             unreadBadge.hidden = true;
             unreadBadge.textContent = "0";
-            unreadBadge.removeAttribute("aria-label");
+            notificationsButton.setAttribute("aria-label", notificationLabel);
+            notificationsButton.title = notificationLabel;
         }
 
         function renderNotificationCenter() {
@@ -1446,7 +1449,6 @@
 
         function setLabels() {
             var openLabel = t("menu.open", "Open menu");
-            var notificationLabel = t("notify.menuInbox", "Notifications");
             var songbookLabel = t("menu.songbook", "Songbook");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
@@ -1459,10 +1461,6 @@
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
-            }
-            var notificationNode = notificationsButton.querySelector("span");
-            if (notificationNode) {
-                notificationNode.textContent = notificationLabel;
             }
             var settingsNode = settingsButton.querySelector("span");
             if (settingsNode) {
@@ -1503,7 +1501,8 @@
             if (notificationCenter.hidden) {
                 return;
             }
-            var rect = button.getBoundingClientRect();
+            var anchor = notificationsButton || button;
+            var rect = anchor.getBoundingClientRect();
             var desiredWidth = Math.min(320, window.innerWidth - 20);
             var left = rect.right - desiredWidth;
             if (left < 10) {
@@ -1623,10 +1622,10 @@
         });
 
         document.addEventListener("click", function (event) {
-            if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
+            if (!panel.hidden && !panel.contains(event.target) && !button.contains(event.target)) {
                 closePanel();
             }
-            if (!notificationCenter.hidden && !notificationCenter.contains(event.target) && event.target !== notificationsButton) {
+            if (!notificationCenter.hidden && !notificationCenter.contains(event.target) && !notificationsButton.contains(event.target)) {
                 closeNotificationCenter();
             }
         });
