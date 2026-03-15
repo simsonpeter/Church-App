@@ -25,6 +25,7 @@
     var passwordInput = null;
     var submitButton = null;
     var switchModeButton = null;
+    var forgotPasswordButton = null;
     var statusText = null;
     var closeButton = null;
     var authMode = "login";
@@ -166,6 +167,7 @@
             "    <input id=\"auth-email\" class=\"search-input\" type=\"email\" autocomplete=\"email\" placeholder=\"Email\" required>" +
             "    <input id=\"auth-password\" class=\"search-input\" type=\"password\" autocomplete=\"current-password\" minlength=\"6\" placeholder=\"Password\" required>" +
             "    <button id=\"auth-submit\" class=\"button-link\" type=\"submit\">Login</button>" +
+            "    <button id=\"auth-forgot-password\" class=\"button-link button-secondary auth-forgot-btn\" type=\"button\">Forgot password?</button>" +
             "    <button id=\"auth-switch-mode\" class=\"button-link button-secondary\" type=\"button\">Create account</button>" +
             "    <p id=\"auth-status\" class=\"page-note\" hidden></p>" +
             "  </form>" +
@@ -176,6 +178,7 @@
         emailInput = document.getElementById("auth-email");
         passwordInput = document.getElementById("auth-password");
         submitButton = document.getElementById("auth-submit");
+        forgotPasswordButton = document.getElementById("auth-forgot-password");
         switchModeButton = document.getElementById("auth-switch-mode");
         statusText = document.getElementById("auth-status");
         closeButton = document.getElementById("auth-modal-close");
@@ -207,6 +210,10 @@
                 switchModeButton.textContent = isRegister
                     ? T("auth.switchToLogin", "Have an account? Login")
                     : T("auth.switchToRegister", "New user? Register");
+            }
+            if (forgotPasswordButton) {
+                forgotPasswordButton.textContent = T("auth.forgotPassword", "Forgot password?");
+                forgotPasswordButton.hidden = isRegister;
             }
             if (emailInput) {
                 emailInput.placeholder = T("auth.email", "Email");
@@ -256,6 +263,9 @@
             }
             submitButton.disabled = true;
             switchModeButton.disabled = true;
+            if (forgotPasswordButton) {
+                forgotPasswordButton.disabled = true;
+            }
             setStatus(T("auth.working", "Please wait..."), "working");
             try {
                 if (authMode === "register") {
@@ -282,6 +292,38 @@
             } finally {
                 submitButton.disabled = false;
                 switchModeButton.disabled = false;
+                if (forgotPasswordButton) {
+                    forgotPasswordButton.disabled = false;
+                }
+            }
+        }
+
+        async function onForgotPassword() {
+            if (!auth) {
+                setStatus(T("auth.unavailable", "Login is unavailable right now."), "error");
+                return;
+            }
+            var email = emailInput ? String(emailInput.value || "").trim() : "";
+            if (!email) {
+                setStatus(T("auth.resetNeedEmail", "Enter your email first to reset password."), "error");
+                return;
+            }
+            forgotPasswordButton.disabled = true;
+            setStatus(T("auth.working", "Please wait..."), "working");
+            try {
+                await auth.sendPasswordResetEmail(email);
+                setStatus(T("auth.resetSent", "Password reset email sent. Please check your inbox."), "ok");
+            } catch (err) {
+                var code = err && err.code ? String(err.code) : "";
+                var message = T("auth.resetFailed", "Could not send reset email. Please try again.");
+                if (code === "auth/invalid-email") {
+                    message = T("auth.invalidEmail", "Please enter a valid email.");
+                } else if (code === "auth/user-not-found") {
+                    message = T("auth.invalidCredentials", "Invalid email or password.");
+                }
+                setStatus(message, "error");
+            } finally {
+                forgotPasswordButton.disabled = false;
             }
         }
 
@@ -292,6 +334,9 @@
             switchModeButton.addEventListener("click", function () {
                 setMode(authMode === "register" ? "login" : "register");
             });
+        }
+        if (forgotPasswordButton) {
+            forgotPasswordButton.addEventListener("click", onForgotPassword);
         }
         if (closeButton) {
             closeButton.addEventListener("click", closeModal);

@@ -1228,6 +1228,10 @@ body.auth-modal-open {
     gap: 8px;
 }
 
+.auth-forgot-btn {
+    margin-top: 0;
+}
+
 .tab {
     text-align: center;
     text-decoration: none;
