@@ -1171,6 +1171,60 @@ body.songbook-fullscreen-open .offline-badge {
     color: #a61f1f;
 }
 
+body.auth-entry-open {
+    overflow: hidden;
+}
+
+body.auth-entry-open .app-shell,
+body.auth-entry-open .tab-nav,
+body.auth-entry-open .mini-player {
+    pointer-events: none;
+}
+
+.auth-entry-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 3655;
+    display: grid;
+    place-items: center;
+    background: radial-gradient(circle at 20% 15%, rgba(255, 255, 255, 0.4), rgba(248, 177, 177, 0.3) 36%, rgba(130, 31, 31, 0.44));
+    padding: 12px;
+}
+
+.auth-entry-overlay[hidden] {
+    display: none !important;
+}
+
+.auth-entry-card {
+    width: min(360px, 100%);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    box-shadow: 0 24px 50px rgba(24, 8, 8, 0.34);
+    padding: 16px 14px 14px;
+    text-align: center;
+}
+
+.auth-entry-logo {
+    width: 68px;
+    height: 68px;
+    object-fit: contain;
+    display: block;
+    margin: 0 auto 10px;
+    filter: drop-shadow(0 8px 14px rgba(165, 26, 26, 0.25));
+}
+
+.auth-entry-card h2 {
+    margin: 0;
+    font-size: 1.08rem;
+}
+
+.auth-entry-actions {
+    margin-top: 12px;
+    display: grid;
+    gap: 8px;
+}
+
 body.auth-modal-open {
     overflow: hidden;
 }

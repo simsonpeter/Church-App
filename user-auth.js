@@ -8,6 +8,7 @@
     };
     var READING_PROGRESS_KEY = "njc_reading_progress_v1";
     var SERMON_FAVORITES_KEY = "njc_sermon_favorites_v1";
+    var ENTRY_PREFERENCE_KEY = "njc_auth_entry_preference_v1";
     var USER_STATE_COLLECTION = "app";
     var USER_STATE_DOC = "state";
 
@@ -29,6 +30,13 @@
     var statusText = null;
     var closeButton = null;
     var authMode = "login";
+    var entryOverlay = null;
+    var entryLoginButton = null;
+    var entryRegisterButton = null;
+    var entryGuestButton = null;
+    var entryTitle = null;
+    var entrySubtitle = null;
+    var entryShowTimerId = null;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -61,6 +69,29 @@
             return null;
         }
         return null;
+    }
+
+    function getEntryPreference() {
+        try {
+            var value = window.localStorage.getItem(ENTRY_PREFERENCE_KEY);
+            if (value === "guest" || value === "account") {
+                return value;
+            }
+        } catch (err) {
+            return "";
+        }
+        return "";
+    }
+
+    function setEntryPreference(value) {
+        if (value !== "guest" && value !== "account") {
+            return;
+        }
+        try {
+            window.localStorage.setItem(ENTRY_PREFERENCE_KEY, value);
+        } catch (err) {
+            return;
+        }
     }
 
     function emitAuthState() {
@@ -146,6 +177,110 @@
         } catch (err) {
             return;
         }
+    }
+
+    function hideEntryOverlay() {
+        if (entryShowTimerId) {
+            window.clearTimeout(entryShowTimerId);
+            entryShowTimerId = null;
+        }
+        if (entryOverlay) {
+            entryOverlay.hidden = true;
+        }
+        document.body.classList.remove("auth-entry-open");
+    }
+
+    function showEntryOverlayWhenReady() {
+        if (!entryOverlay) {
+            return;
+        }
+        if (!document.body.classList.contains("splash-active")) {
+            entryOverlay.hidden = false;
+            document.body.classList.add("auth-entry-open");
+            return;
+        }
+        if (entryShowTimerId) {
+            window.clearTimeout(entryShowTimerId);
+        }
+        entryShowTimerId = window.setTimeout(showEntryOverlayWhenReady, 180);
+    }
+
+    function updateEntryOverlayTexts() {
+        if (entryTitle) {
+            entryTitle.textContent = T("auth.entryTitle", "Welcome");
+        }
+        if (entrySubtitle) {
+            entrySubtitle.textContent = T("auth.entrySubtitle", "Sign in or continue without login.");
+        }
+        if (entryLoginButton) {
+            entryLoginButton.textContent = T("auth.loginAction", "Login");
+        }
+        if (entryRegisterButton) {
+            entryRegisterButton.textContent = T("auth.registerAction", "Create account");
+        }
+        if (entryGuestButton) {
+            entryGuestButton.textContent = T("auth.continueGuest", "Continue without login");
+        }
+    }
+
+    function ensureEntryOverlay() {
+        if (entryOverlay) {
+            return;
+        }
+        entryOverlay = document.createElement("div");
+        entryOverlay.id = "auth-entry-overlay";
+        entryOverlay.className = "auth-entry-overlay";
+        entryOverlay.hidden = true;
+        entryOverlay.innerHTML = "" +
+            "<section class=\"auth-entry-card\" role=\"dialog\" aria-modal=\"true\">" +
+            "  <img class=\"auth-entry-logo\" src=\"logo.png\" alt=\"NJC logo\">" +
+            "  <h2 id=\"auth-entry-title\">Welcome</h2>" +
+            "  <p class=\"page-note\" id=\"auth-entry-subtitle\">Sign in or continue without login.</p>" +
+            "  <div class=\"auth-entry-actions\">" +
+            "    <button type=\"button\" class=\"button-link\" id=\"auth-entry-login\">Login</button>" +
+            "    <button type=\"button\" class=\"button-link button-secondary\" id=\"auth-entry-register\">Create account</button>" +
+            "    <button type=\"button\" class=\"button-link button-secondary\" id=\"auth-entry-guest\">Continue without login</button>" +
+            "  </div>" +
+            "</section>";
+        document.body.appendChild(entryOverlay);
+
+        entryLoginButton = document.getElementById("auth-entry-login");
+        entryRegisterButton = document.getElementById("auth-entry-register");
+        entryGuestButton = document.getElementById("auth-entry-guest");
+        entryTitle = document.getElementById("auth-entry-title");
+        entrySubtitle = document.getElementById("auth-entry-subtitle");
+
+        if (entryLoginButton) {
+            entryLoginButton.addEventListener("click", function () {
+                openAuthModal("login");
+            });
+        }
+        if (entryRegisterButton) {
+            entryRegisterButton.addEventListener("click", function () {
+                openAuthModal("register");
+            });
+        }
+        if (entryGuestButton) {
+            entryGuestButton.addEventListener("click", function () {
+                setEntryPreference("guest");
+                hideEntryOverlay();
+            });
+        }
+        updateEntryOverlayTexts();
+    }
+
+    function updateEntryOverlayVisibility() {
+        ensureEntryOverlay();
+        if (user && user.uid) {
+            setEntryPreference("account");
+            hideEntryOverlay();
+            return;
+        }
+        if (getEntryPreference()) {
+            hideEntryOverlay();
+            return;
+        }
+        showEntryOverlayWhenReady();
     }
 
     function ensureModal() {
@@ -351,6 +486,7 @@
         });
         document.addEventListener("njc:langchange", function () {
             setMode(authMode);
+            updateEntryOverlayTexts();
         });
 
         window.NjcAuthModal = {
@@ -384,7 +520,9 @@
         }
         initialized = true;
         ensureModal();
+        ensureEntryOverlay();
         if (!initFirebase()) {
+            updateEntryOverlayVisibility();
             emitAuthState();
             return;
         }
@@ -395,10 +533,20 @@
             if (user) {
                 pullCloudToLocalOrBootstrap();
             }
+            updateEntryOverlayVisibility();
         });
 
         document.addEventListener("njc:progress-updated", queueSyncLocalToCloud);
         document.addEventListener("njc:favorites-updated", queueSyncLocalToCloud);
+        window.addEventListener("hashchange", function () {
+            if (modalOverlay && !modalOverlay.hidden) {
+                return;
+            }
+            updateEntryOverlayVisibility();
+        });
+        window.setTimeout(function () {
+            updateEntryOverlayVisibility();
+        }, 900);
     }
 
     function openAuthModal(mode) {
