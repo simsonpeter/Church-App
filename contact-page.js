@@ -26,11 +26,15 @@
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
             var MAX_ENTRIES = 100;
+            var PRAYER_TRANSLATION_CACHE_KEY = "njc_prayer_translation_cache_v1";
             var prayerWallEntries = [];
             var prayerWallLoading = true;
             var prayerWallError = false;
             var prayerWallBusy = false;
             var activePrayerDetailId = "";
+            var prayerTranslationCache = loadPrayerTranslationCache();
+            var prayerTranslationPending = {};
+            var prayerTranslationSaveTimerId = null;
 
             function T(key, fallback) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -60,6 +64,198 @@
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
+            }
+
+            function getLanguage() {
+                if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
+                    return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+                }
+                return "en";
+            }
+
+            function loadPrayerTranslationCache() {
+                try {
+                    var raw = window.localStorage.getItem(PRAYER_TRANSLATION_CACHE_KEY);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                } catch (err) {
+                    return {};
+                }
+            }
+
+            function savePrayerTranslationCacheSoon() {
+                if (prayerTranslationSaveTimerId) {
+                    window.clearTimeout(prayerTranslationSaveTimerId);
+                }
+                prayerTranslationSaveTimerId = window.setTimeout(function () {
+                    prayerTranslationSaveTimerId = null;
+                    try {
+                        window.localStorage.setItem(PRAYER_TRANSLATION_CACHE_KEY, JSON.stringify(prayerTranslationCache));
+                    } catch (err) {
+                        return;
+                    }
+                }, 120);
+            }
+
+            function hasTamilCharacters(text) {
+                return /[\u0B80-\u0BFF]/.test(String(text || ""));
+            }
+
+            function hasLatinCharacters(text) {
+                return /[A-Za-z]/.test(String(text || ""));
+            }
+
+            function shouldTranslatePrayerMessage(text, targetLanguage) {
+                if (!text) {
+                    return false;
+                }
+                if (targetLanguage === "ta") {
+                    return hasLatinCharacters(text);
+                }
+                return hasTamilCharacters(text);
+            }
+
+            function buildPrayerTranslationKey(text, targetLanguage) {
+                return String(targetLanguage || "en") + "::" + String(text || "");
+            }
+
+            function extractGoogleTranslatedText(payload) {
+                if (!Array.isArray(payload) || !Array.isArray(payload[0])) {
+                    return "";
+                }
+                var chunks = payload[0].map(function (part) {
+                    return Array.isArray(part) ? String(part[0] || "") : "";
+                }).filter(Boolean);
+                return chunks.join("").trim();
+            }
+
+            async function fetchPrayerTranslationGoogle(text, targetLanguage) {
+                var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" +
+                    encodeURIComponent(targetLanguage) +
+                    "&dt=t&q=" + encodeURIComponent(text);
+                var response = await fetch(url, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error("Translate request failed");
+                }
+                var payload = await response.json();
+                var translated = extractGoogleTranslatedText(payload);
+                if (!translated) {
+                    throw new Error("Empty translate result");
+                }
+                return translated;
+            }
+
+            async function fetchPrayerTranslationMyMemory(text, targetLanguage) {
+                var url = "https://api.mymemory.translated.net/get?q=" +
+                    encodeURIComponent(text) +
+                    "&langpair=auto|" + encodeURIComponent(targetLanguage);
+                var response = await fetch(url, { cache: "no-store" });
+                if (!response.ok) {
+                    throw new Error("Fallback translate failed");
+                }
+                var payload = await response.json();
+                var translated = payload && payload.responseData ? String(payload.responseData.translatedText || "").trim() : "";
+                if (!translated) {
+                    throw new Error("Empty fallback translate result");
+                }
+                return translated;
+            }
+
+            async function requestPrayerTranslation(text, targetLanguage) {
+                try {
+                    return await fetchPrayerTranslationGoogle(text, targetLanguage);
+                } catch (firstError) {
+                    try {
+                        return await fetchPrayerTranslationMyMemory(text, targetLanguage);
+                    } catch (secondError) {
+                        return text;
+                    }
+                }
+            }
+
+            function getTranslatedPrayerMessage(text) {
+                var original = String(text || "").trim();
+                var targetLanguage = getLanguage();
+                if (!original || original.length > 700 || !shouldTranslatePrayerMessage(original, targetLanguage)) {
+                    return Promise.resolve(original);
+                }
+                var cacheKey = buildPrayerTranslationKey(original, targetLanguage);
+                if (Object.prototype.hasOwnProperty.call(prayerTranslationCache, cacheKey)) {
+                    return Promise.resolve(String(prayerTranslationCache[cacheKey] || original));
+                }
+                if (prayerTranslationPending[cacheKey]) {
+                    return prayerTranslationPending[cacheKey];
+                }
+
+                prayerTranslationPending[cacheKey] = requestPrayerTranslation(original, targetLanguage)
+                    .then(function (translated) {
+                        var finalText = String(translated || "").trim() || original;
+                        prayerTranslationCache[cacheKey] = finalText;
+                        savePrayerTranslationCacheSoon();
+                        delete prayerTranslationPending[cacheKey];
+                        return finalText;
+                    })
+                    .catch(function () {
+                        delete prayerTranslationPending[cacheKey];
+                        return original;
+                    });
+                return prayerTranslationPending[cacheKey];
+            }
+
+            function toPreviewText(text) {
+                var previewText = String(text || "");
+                if (previewText.length > 120) {
+                    previewText = previewText.slice(0, 117).trim() + "...";
+                }
+                return previewText;
+            }
+
+            function getPrayerPreviewNode(prayerId) {
+                if (!prayerWallList) {
+                    return null;
+                }
+                var targetId = String(prayerId || "");
+                var buttons = prayerWallList.querySelectorAll("button[data-prayer-open-id]");
+                for (var index = 0; index < buttons.length; index += 1) {
+                    var candidate = buttons[index];
+                    if ((candidate.getAttribute("data-prayer-open-id") || "") === targetId) {
+                        return candidate.querySelector(".prayer-list-preview");
+                    }
+                }
+                return null;
+            }
+
+            function applyPrayerDetailTranslation(entry) {
+                if (!entry || !prayerDetailMessage) {
+                    return;
+                }
+                var prayerId = String(entry.id || "");
+                var languageAtRequest = getLanguage();
+                getTranslatedPrayerMessage(entry.message || "").then(function (translated) {
+                    if (!prayerDetailMessage || activePrayerDetailId !== prayerId || languageAtRequest !== getLanguage()) {
+                        return;
+                    }
+                    prayerDetailMessage.textContent = translated || entry.message || "";
+                });
+            }
+
+            function applyPrayerListTranslations(entries) {
+                var languageAtRequest = getLanguage();
+                entries.forEach(function (entry) {
+                    var prayerId = String(entry.id || "");
+                    getTranslatedPrayerMessage(entry.message || "").then(function (translated) {
+                        if (languageAtRequest !== getLanguage()) {
+                            return;
+                        }
+                        var previewNode = getPrayerPreviewNode(prayerId);
+                        if (previewNode) {
+                            previewNode.textContent = toPreviewText(translated);
+                        }
+                        if (activePrayerDetailId === prayerId && prayerDetailMessage && prayerDetailOverlay && !prayerDetailOverlay.hidden) {
+                            prayerDetailMessage.textContent = translated || entry.message || "";
+                        }
+                    });
+                });
             }
 
             function formatLocalDate(isoText) {
@@ -167,6 +363,7 @@
                 if (prayerDetailMessage) {
                     prayerDetailMessage.textContent = entry.message || "";
                 }
+                applyPrayerDetailTranslation(entry);
                 if (prayerDetailDate) {
                     prayerDetailDate.textContent = formatLocalDate(entry.updatedAt || entry.createdAt || "");
                 }
@@ -319,10 +516,7 @@
                         : (entry.name || T("contact.prayerWallNameAnonymous", "Anonymous"));
                     var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
                     var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "");
-                    var previewText = String(entry.message || "");
-                    if (previewText.length > 120) {
-                        previewText = previewText.slice(0, 117).trim() + "...";
-                    }
+                    var previewText = toPreviewText(entry.message || "");
                     var urgentText = T("contact.prayerWallUrgentBadge", "Urgent");
                     var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER");
                     var itemClass = entry.urgent ? "prayer-list-item prayer-list-item-urgent" : "prayer-list-item";
@@ -350,6 +544,7 @@
                         "</li>";
                 }).join("");
 
+                applyPrayerListTranslations(entries);
                 renderPrayerDetail();
             }
 
