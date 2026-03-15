@@ -26,6 +26,7 @@
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
             var MAX_ENTRIES = 100;
+            var ADMIN_EMAIL = "simsonpeter@gmail.com";
             var PRAYER_TRANSLATION_CACHE_KEY = "njc_prayer_translation_cache_v1";
             var prayerWallEntries = [];
             var prayerWallLoading = true;
@@ -71,6 +72,56 @@
                     return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
                 }
                 return "en";
+            }
+
+            function normalizeEmail(email) {
+                return String(email || "").trim().toLowerCase();
+            }
+
+            function getCurrentUser() {
+                if (window.NjcAuth && typeof window.NjcAuth.getUser === "function") {
+                    return window.NjcAuth.getUser();
+                }
+                return null;
+            }
+
+            function deriveNameFromUser(user) {
+                var email = normalizeEmail(user && user.email);
+                if (!email || email.indexOf("@") === -1) {
+                    return "";
+                }
+                return email.split("@")[0].replace(/[._-]+/g, " ").trim();
+            }
+
+            function getPrayerDisplayName(entry) {
+                if (entry.anonymous) {
+                    return T("contact.prayerWallNameAnonymous", "Anonymous");
+                }
+                var name = String(entry.name || "").trim();
+                if (name) {
+                    return name;
+                }
+                var email = normalizeEmail(entry.createdByEmail);
+                if (email && email.indexOf("@") > 0) {
+                    return email.split("@")[0].replace(/[._-]+/g, " ").trim();
+                }
+                return T("contact.prayerWallNameAnonymous", "Anonymous");
+            }
+
+            function canManagePrayerEntry(entry) {
+                var activeUser = getCurrentUser();
+                if (!activeUser) {
+                    return false;
+                }
+                var currentEmail = normalizeEmail(activeUser.email);
+                if (currentEmail && currentEmail === normalizeEmail(ADMIN_EMAIL)) {
+                    return true;
+                }
+                var currentUid = String(activeUser.uid || "").trim();
+                if (!currentUid) {
+                    return false;
+                }
+                return currentUid === String(entry && entry.createdByUid || "").trim();
             }
 
             function loadPrayerTranslationCache() {
@@ -343,7 +394,9 @@
                     urgent: Boolean(source.urgent),
                     prayed: Math.max(0, Number(source.prayed || 0) || 0),
                     createdAt: source.createdAt ? String(source.createdAt) : new Date().toISOString(),
-                    updatedAt: source.updatedAt ? String(source.updatedAt) : ""
+                    updatedAt: source.updatedAt ? String(source.updatedAt) : "",
+                    createdByUid: String(source.createdByUid || "").trim(),
+                    createdByEmail: normalizeEmail(source.createdByEmail)
                 };
             }
 
@@ -416,9 +469,7 @@
                     closePrayerDetail();
                     return;
                 }
-                var safeName = entry.anonymous
-                    ? T("contact.prayerWallNameAnonymous", "Anonymous")
-                    : (entry.name || T("contact.prayerWallNameAnonymous", "Anonymous"));
+                var safeName = getPrayerDisplayName(entry);
                 var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
                 if (prayerDetailName) {
                     prayerDetailName.textContent = safeName;
@@ -441,6 +492,15 @@
                 }
                 if (prayerDetailPrayButton) {
                     prayerDetailPrayButton.textContent = prayedLabel;
+                }
+                var canManage = canManagePrayerEntry(entry);
+                if (prayerDetailEditButton) {
+                    prayerDetailEditButton.hidden = !canManage;
+                    prayerDetailEditButton.disabled = !canManage || prayerWallBusy;
+                }
+                if (prayerDetailDeleteButton) {
+                    prayerDetailDeleteButton.hidden = !canManage;
+                    prayerDetailDeleteButton.disabled = !canManage || prayerWallBusy;
                 }
                 setDetailActionPrayerId(entry.id || "");
             }
@@ -479,6 +539,10 @@
                 }
                 if (prayerDetailOverlay) {
                     prayerDetailOverlay.querySelectorAll("button[data-prayer-id][data-prayer-action]").forEach(function (button) {
+                        var action = button.getAttribute("data-prayer-action") || "";
+                        if (action !== "pray" && button.hidden) {
+                            return;
+                        }
                         button.disabled = prayerWallBusy;
                     });
                 }
@@ -574,9 +638,7 @@
                 }
 
                 prayerWallList.innerHTML = entries.map(function (entry) {
-                    var safeName = entry.anonymous
-                        ? T("contact.prayerWallNameAnonymous", "Anonymous")
-                        : (entry.name || T("contact.prayerWallNameAnonymous", "Anonymous"));
+                    var safeName = getPrayerDisplayName(entry);
                     var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
                     var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "");
                     var previewText = toPreviewText(entry.message || "");
@@ -624,6 +686,14 @@
                     });
                     if (!targetEntry) {
                         throw new Error("Entry not found");
+                    }
+                    if ((action === "edit" || action === "delete") && !canManagePrayerEntry(targetEntry)) {
+                        showPrayerWallNote(
+                            "manageDenied",
+                            "contact.prayerWallManageDenied",
+                            "Only admin or the user who posted can edit/delete."
+                        );
+                        return;
                     }
 
                     if (action === "pray") {
@@ -731,6 +801,12 @@
                     var messageValue = (prayerWallMessage.value || "").trim();
                     var anonymousValue = Boolean(prayerWallAnonymous.checked);
                     var urgentValue = Boolean(prayerWallUrgent && prayerWallUrgent.checked);
+                    var activeUser = getCurrentUser();
+                    var ownerUid = String(activeUser && activeUser.uid || "").trim();
+                    var ownerEmail = normalizeEmail(activeUser && activeUser.email);
+                    if (!anonymousValue && !nameValue) {
+                        nameValue = deriveNameFromUser(activeUser);
+                    }
 
                     if (!messageValue) {
                         showPrayerWallNote("needMessage", "contact.prayerWallNeedMessage", "Please write your prayer request.");
@@ -748,7 +824,9 @@
                             urgent: urgentValue,
                             prayed: 0,
                             createdAt: new Date().toISOString(),
-                            updatedAt: ""
+                            updatedAt: "",
+                            createdByUid: ownerUid,
+                            createdByEmail: ownerEmail
                         });
                         await savePrayerWallEntries(latestEntries);
                         prayerWallMessage.value = "";
@@ -858,6 +936,8 @@
                         prayerWallNote.textContent = T("contact.prayerWallUpdated", "Prayer request updated.");
                     } else if (state === "deleted") {
                         prayerWallNote.textContent = T("contact.prayerWallDeleted", "Prayer request deleted.");
+                    } else if (state === "manageDenied") {
+                        prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can edit/delete.");
                     } else if (state === "syncError") {
                         prayerWallNote.textContent = T("contact.prayerWallSyncError", "Could not sync prayer wall. Please try again.");
                     } else {
@@ -865,5 +945,9 @@
                     }
                 }
                 renderPrayerWall();
+            });
+            document.addEventListener("njc:authchange", function () {
+                renderPrayerWall();
+                renderPrayerDetail();
             });
         })();

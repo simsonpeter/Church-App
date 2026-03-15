@@ -301,6 +301,7 @@
         "contact.prayerWallDeleteConfirm": "இந்த ஜெப வேண்டுதலை நீக்கவா?",
         "contact.prayerWallUpdated": "ஜெப வேண்டுதல் புதுப்பிக்கப்பட்டது.",
         "contact.prayerWallDeleted": "ஜெப வேண்டுதல் நீக்கப்பட்டது.",
+        "contact.prayerWallManageDenied": "நிர்வாகி அல்லது பதிவிட்டவர் மட்டும் திருத்த / நீக்க முடியும்.",
         "contact.prayerWallTranslated": "மொழிபெயர்க்கப்பட்டது",
         "contact.prayerWallSyncError": "ஜெப சுவரை ஒத்திசைக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.prayerWallLoadErrorTitle": "ஜெப சுவரை ஏற்ற முடியவில்லை",
