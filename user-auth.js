@@ -1,0 +1,402 @@
+(function () {
+    var FIREBASE_CONFIG = {
+        apiKey: "AIzaSyBw_fYOgz0WTrCNMdi8el0DPi3JfAxTr3E",
+        authDomain: "songbook-add54.firebaseapp.com",
+        projectId: "songbook-add54",
+        appId: "1:633087058549:web:a9a9a28836b059b6008e3c",
+        measurementId: "G-EKMD30J3GS"
+    };
+    var READING_PROGRESS_KEY = "njc_reading_progress_v1";
+    var SERMON_FAVORITES_KEY = "njc_sermon_favorites_v1";
+    var USER_STATE_COLLECTION = "app";
+    var USER_STATE_DOC = "state";
+
+    var auth = null;
+    var db = null;
+    var user = null;
+    var initialized = false;
+    var listeners = [];
+    var saveTimerId = null;
+    var syncInFlight = false;
+
+    var modalOverlay = null;
+    var modeText = null;
+    var emailInput = null;
+    var passwordInput = null;
+    var submitButton = null;
+    var switchModeButton = null;
+    var statusText = null;
+    var closeButton = null;
+    var authMode = "login";
+
+    function T(key, fallback) {
+        if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+            return window.NjcI18n.t(key, fallback);
+        }
+        return fallback || key;
+    }
+
+    function safeParseObject(raw) {
+        try {
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function getLocalObject(key) {
+        try {
+            return safeParseObject(window.localStorage.getItem(key));
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function setLocalObject(key, value) {
+        try {
+            window.localStorage.setItem(key, JSON.stringify(value && typeof value === "object" ? value : {}));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function emitAuthState() {
+        var state = user ? { uid: user.uid, email: user.email || "" } : null;
+        listeners.forEach(function (listener) {
+            try {
+                listener(state);
+            } catch (err) {
+                return null;
+            }
+            return null;
+        });
+        document.dispatchEvent(new CustomEvent("njc:authchange", {
+            detail: { user: state }
+        }));
+    }
+
+    function currentUserStateDoc() {
+        if (!db || !user || !user.uid) {
+            return null;
+        }
+        return db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_STATE_DOC);
+    }
+
+    function buildLocalPayload() {
+        return {
+            readingProgress: getLocalObject(READING_PROGRESS_KEY),
+            sermonFavorites: getLocalObject(SERMON_FAVORITES_KEY),
+            updatedAt: Date.now()
+        };
+    }
+
+    async function syncLocalToCloud() {
+        var doc = currentUserStateDoc();
+        if (!doc || syncInFlight) {
+            return;
+        }
+        syncInFlight = true;
+        try {
+            var payload = buildLocalPayload();
+            await doc.set(payload, { merge: true });
+        } catch (err) {
+            return;
+        } finally {
+            syncInFlight = false;
+        }
+    }
+
+    function queueSyncLocalToCloud() {
+        if (!user || !db) {
+            return;
+        }
+        if (saveTimerId) {
+            window.clearTimeout(saveTimerId);
+        }
+        saveTimerId = window.setTimeout(function () {
+            saveTimerId = null;
+            syncLocalToCloud();
+        }, 450);
+    }
+
+    async function pullCloudToLocalOrBootstrap() {
+        var doc = currentUserStateDoc();
+        if (!doc) {
+            return;
+        }
+        try {
+            var snapshot = await doc.get();
+            if (!snapshot.exists) {
+                await syncLocalToCloud();
+                return;
+            }
+            var data = snapshot.data() || {};
+            if (data.readingProgress && typeof data.readingProgress === "object") {
+                setLocalObject(READING_PROGRESS_KEY, data.readingProgress);
+            }
+            if (data.sermonFavorites && typeof data.sermonFavorites === "object") {
+                setLocalObject(SERMON_FAVORITES_KEY, data.sermonFavorites);
+            }
+            document.dispatchEvent(new CustomEvent("njc:userdata-updated", {
+                detail: { source: "cloud" }
+            }));
+        } catch (err) {
+            return;
+        }
+    }
+
+    function ensureModal() {
+        if (modalOverlay) {
+            return;
+        }
+        modalOverlay = document.createElement("div");
+        modalOverlay.id = "auth-modal-overlay";
+        modalOverlay.className = "auth-modal-overlay";
+        modalOverlay.hidden = true;
+        modalOverlay.innerHTML = "" +
+            "<button type=\"button\" class=\"auth-modal-backdrop\" id=\"auth-modal-backdrop\" aria-label=\"Close\"></button>" +
+            "<section class=\"auth-modal-card\" role=\"dialog\" aria-modal=\"true\">" +
+            "  <div class=\"auth-modal-top\">" +
+            "    <strong id=\"auth-modal-mode\">Login</strong>" +
+            "    <button type=\"button\" class=\"auth-modal-close\" id=\"auth-modal-close\" aria-label=\"Close\"><i class=\"fa-solid fa-xmark\"></i></button>" +
+            "  </div>" +
+            "  <form id=\"auth-modal-form\" class=\"auth-modal-form\">" +
+            "    <input id=\"auth-email\" class=\"search-input\" type=\"email\" autocomplete=\"email\" placeholder=\"Email\" required>" +
+            "    <input id=\"auth-password\" class=\"search-input\" type=\"password\" autocomplete=\"current-password\" minlength=\"6\" placeholder=\"Password\" required>" +
+            "    <button id=\"auth-submit\" class=\"button-link\" type=\"submit\">Login</button>" +
+            "    <button id=\"auth-switch-mode\" class=\"button-link button-secondary\" type=\"button\">Create account</button>" +
+            "    <p id=\"auth-status\" class=\"page-note\" hidden></p>" +
+            "  </form>" +
+            "</section>";
+        document.body.appendChild(modalOverlay);
+
+        modeText = document.getElementById("auth-modal-mode");
+        emailInput = document.getElementById("auth-email");
+        passwordInput = document.getElementById("auth-password");
+        submitButton = document.getElementById("auth-submit");
+        switchModeButton = document.getElementById("auth-switch-mode");
+        statusText = document.getElementById("auth-status");
+        closeButton = document.getElementById("auth-modal-close");
+        var backdrop = document.getElementById("auth-modal-backdrop");
+        var form = document.getElementById("auth-modal-form");
+
+        function closeModal() {
+            if (!modalOverlay) {
+                return;
+            }
+            modalOverlay.hidden = true;
+            document.body.classList.remove("auth-modal-open");
+            if (statusText) {
+                statusText.hidden = true;
+                statusText.textContent = "";
+            }
+        }
+
+        function setMode(mode) {
+            authMode = mode === "register" ? "register" : "login";
+            var isRegister = authMode === "register";
+            if (modeText) {
+                modeText.textContent = isRegister ? T("auth.registerTitle", "Create account") : T("auth.loginTitle", "Login");
+            }
+            if (submitButton) {
+                submitButton.textContent = isRegister ? T("auth.registerAction", "Create account") : T("auth.loginAction", "Login");
+            }
+            if (switchModeButton) {
+                switchModeButton.textContent = isRegister
+                    ? T("auth.switchToLogin", "Have an account? Login")
+                    : T("auth.switchToRegister", "New user? Register");
+            }
+            if (emailInput) {
+                emailInput.placeholder = T("auth.email", "Email");
+            }
+            if (passwordInput) {
+                passwordInput.placeholder = T("auth.password", "Password (min 6)");
+            }
+            if (closeButton) {
+                var closeLabel = T("settings.close", "Close");
+                closeButton.setAttribute("aria-label", closeLabel);
+                closeButton.title = closeLabel;
+            }
+        }
+
+        function openModal(mode) {
+            if (!modalOverlay) {
+                return;
+            }
+            setMode(mode || "login");
+            modalOverlay.hidden = false;
+            document.body.classList.add("auth-modal-open");
+            if (emailInput) {
+                emailInput.focus();
+            }
+        }
+
+        function setStatus(message, state) {
+            if (!statusText) {
+                return;
+            }
+            statusText.hidden = !message;
+            statusText.textContent = message || "";
+            statusText.dataset.state = state || "";
+        }
+
+        async function onSubmit(event) {
+            event.preventDefault();
+            if (!auth) {
+                setStatus(T("auth.unavailable", "Login is unavailable right now."), "error");
+                return;
+            }
+            var email = emailInput ? String(emailInput.value || "").trim() : "";
+            var password = passwordInput ? String(passwordInput.value || "") : "";
+            if (!email || !password) {
+                setStatus(T("auth.needCredentials", "Please enter email and password."), "error");
+                return;
+            }
+            submitButton.disabled = true;
+            switchModeButton.disabled = true;
+            setStatus(T("auth.working", "Please wait..."), "working");
+            try {
+                if (authMode === "register") {
+                    await auth.createUserWithEmailAndPassword(email, password);
+                    setStatus(T("auth.registered", "Account created successfully."), "ok");
+                } else {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    setStatus(T("auth.loggedIn", "Logged in successfully."), "ok");
+                }
+                window.setTimeout(closeModal, 320);
+            } catch (err) {
+                var code = err && err.code ? String(err.code) : "";
+                var message = T("auth.failed", "Login failed. Please try again.");
+                if (code === "auth/email-already-in-use") {
+                    message = T("auth.emailInUse", "Email already in use.");
+                } else if (code === "auth/user-not-found" || code === "auth/wrong-password" || code === "auth/invalid-credential") {
+                    message = T("auth.invalidCredentials", "Invalid email or password.");
+                } else if (code === "auth/weak-password") {
+                    message = T("auth.weakPassword", "Password must be at least 6 characters.");
+                } else if (code === "auth/invalid-email") {
+                    message = T("auth.invalidEmail", "Please enter a valid email.");
+                }
+                setStatus(message, "error");
+            } finally {
+                submitButton.disabled = false;
+                switchModeButton.disabled = false;
+            }
+        }
+
+        if (form) {
+            form.addEventListener("submit", onSubmit);
+        }
+        if (switchModeButton) {
+            switchModeButton.addEventListener("click", function () {
+                setMode(authMode === "register" ? "login" : "register");
+            });
+        }
+        if (closeButton) {
+            closeButton.addEventListener("click", closeModal);
+        }
+        if (backdrop) {
+            backdrop.addEventListener("click", closeModal);
+        }
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && modalOverlay && !modalOverlay.hidden) {
+                closeModal();
+            }
+        });
+        document.addEventListener("njc:langchange", function () {
+            setMode(authMode);
+        });
+
+        window.NjcAuthModal = {
+            open: openModal,
+            close: closeModal
+        };
+    }
+
+    function initFirebase() {
+        if (auth && db) {
+            return true;
+        }
+        if (!window.firebase || typeof window.firebase.initializeApp !== "function") {
+            return false;
+        }
+        try {
+            if (!window.firebase.apps || !window.firebase.apps.length) {
+                window.firebase.initializeApp(FIREBASE_CONFIG);
+            }
+            auth = window.firebase.auth();
+            db = window.firebase.firestore();
+            return true;
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function init() {
+        if (initialized) {
+            return;
+        }
+        initialized = true;
+        ensureModal();
+        if (!initFirebase()) {
+            emitAuthState();
+            return;
+        }
+
+        auth.onAuthStateChanged(function (nextUser) {
+            user = nextUser || null;
+            emitAuthState();
+            if (user) {
+                pullCloudToLocalOrBootstrap();
+            }
+        });
+
+        document.addEventListener("njc:progress-updated", queueSyncLocalToCloud);
+        document.addEventListener("njc:favorites-updated", queueSyncLocalToCloud);
+    }
+
+    function openAuthModal(mode) {
+        if (!window.NjcAuthModal || typeof window.NjcAuthModal.open !== "function") {
+            ensureModal();
+        }
+        if (window.NjcAuthModal && typeof window.NjcAuthModal.open === "function") {
+            window.NjcAuthModal.open(mode || "login");
+        }
+    }
+
+    function signOut() {
+        if (!auth) {
+            return Promise.resolve();
+        }
+        return auth.signOut().catch(function () {
+            return null;
+        });
+    }
+
+    function onStateChange(listener) {
+        if (typeof listener !== "function") {
+            return function () { return null; };
+        }
+        listeners.push(listener);
+        listener(user ? { uid: user.uid, email: user.email || "" } : null);
+        return function () {
+            listeners = listeners.filter(function (item) {
+                return item !== listener;
+            });
+        };
+    }
+
+    function getUser() {
+        return user ? { uid: user.uid, email: user.email || "" } : null;
+    }
+
+    window.NjcAuth = {
+        init: init,
+        openAuthModal: openAuthModal,
+        signOut: signOut,
+        onStateChange: onStateChange,
+        getUser: getUser,
+        queueSync: queueSyncLocalToCloud
+    };
+})();

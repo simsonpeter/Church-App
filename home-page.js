@@ -346,6 +346,9 @@
             function saveProgressMap(progressMap) {
                 try {
                     window.localStorage.setItem(READING_PROGRESS_KEY, JSON.stringify(progressMap));
+                    document.dispatchEvent(new CustomEvent("njc:progress-updated", {
+                        detail: { progressMap: progressMap || {} }
+                    }));
                 } catch (err) {
                     return null;
                 }
@@ -776,6 +779,10 @@
                 renderDailyVerse();
                 renderAnnouncements();
                 renderThisWeekEvents();
+            });
+
+            document.addEventListener("njc:userdata-updated", function () {
+                renderReadingPlan();
             });
 
             todayReadingPlanList.addEventListener("change", function (event) {

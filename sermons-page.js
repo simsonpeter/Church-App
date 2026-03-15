@@ -105,6 +105,9 @@
             function saveFavoritesMap(map) {
                 try {
                     window.localStorage.setItem(FAVORITES_KEY, JSON.stringify(map));
+                    document.dispatchEvent(new CustomEvent("njc:favorites-updated", {
+                        detail: { favoritesMap: map || {} }
+                    }));
                 } catch (err) {
                     return null;
                 }
@@ -803,6 +806,13 @@
                 syncPlayerText();
                 refreshPlayerTime();
                 setSleepNote(Number(playerSleep.value));
+            });
+
+            document.addEventListener("njc:userdata-updated", function () {
+                if (!sermonsLoaded || sermonsLoadFailed) {
+                    return;
+                }
+                renderSermons();
             });
 
             fetch(sermonsUrl)

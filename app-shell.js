@@ -23,6 +23,26 @@
         "menu.open": "பட்டியலை திற",
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.settings": "அமைப்புகள்",
+        "menu.login": "உள்நுழை / பதிவு",
+        "menu.logout": "வெளியேறு",
+        "auth.loginTitle": "உள்நுழை",
+        "auth.registerTitle": "கணக்கு உருவாக்கு",
+        "auth.loginAction": "உள்நுழை",
+        "auth.registerAction": "கணக்கு உருவாக்கு",
+        "auth.switchToRegister": "புதிய பயனர்? பதிவு செய்யவும்",
+        "auth.switchToLogin": "ஏற்கனவே கணக்கா? உள்நுழையவும்",
+        "auth.email": "மின்னஞ்சல்",
+        "auth.password": "கடவுச்சொல் (குறைந்தது 6)",
+        "auth.unavailable": "உள்நுழைவு இப்போது கிடைக்கவில்லை.",
+        "auth.needCredentials": "மின்னஞ்சல் மற்றும் கடவுச்சொல்லை உள்ளிடவும்.",
+        "auth.working": "காத்திருக்கவும்...",
+        "auth.registered": "கணக்கு வெற்றிகரமாக உருவாக்கப்பட்டது.",
+        "auth.loggedIn": "வெற்றிகரமாக உள்நுழைந்தீர்கள்.",
+        "auth.failed": "உள்நுழைவு தோல்வி. மீண்டும் முயற்சிக்கவும்.",
+        "auth.emailInUse": "இந்த மின்னஞ்சல் ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.",
+        "auth.invalidCredentials": "மின்னஞ்சல் அல்லது கடவுச்சொல் தவறு.",
+        "auth.weakPassword": "கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்.",
+        "auth.invalidEmail": "சரியான மின்னஞ்சலை உள்ளிடவும்.",
         "toggle.language.toTamil": "தமிழுக்கு மாற்று",
         "toggle.language.toEnglish": "Switch to English",
         "toggle.theme.toLight": "ஒளி நிலைக்கு மாற்று",
@@ -1106,6 +1126,12 @@
         settingsButton.className = "header-menu-link header-menu-action";
         settingsButton.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
         panel.appendChild(settingsButton);
+
+        var authButton = document.createElement("button");
+        authButton.type = "button";
+        authButton.className = "header-menu-link header-menu-action";
+        authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
+        panel.appendChild(authButton);
         document.body.appendChild(panel);
 
         function getCurrentRoute() {
@@ -1116,6 +1142,11 @@
             var openLabel = t("menu.open", "Open menu");
             var songbookLabel = t("menu.songbook", "Songbook");
             var settingsLabel = t("menu.settings", "Settings");
+            var authApi = window.NjcAuth;
+            var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
+            var isLoggedIn = Boolean(activeUser && activeUser.uid);
+            var authLabel = isLoggedIn ? t("menu.logout", "Logout") : t("menu.login", "Login / Register");
+            var authIconClass = isLoggedIn ? "fa-right-from-bracket" : "fa-right-to-bracket";
             button.setAttribute("aria-label", openLabel);
             button.title = openLabel;
             var labelNode = songbookLink.querySelector("span");
@@ -1125,6 +1156,14 @@
             var settingsNode = settingsButton.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
+            }
+            var authNode = authButton.querySelector("span");
+            if (authNode) {
+                authNode.textContent = authLabel;
+            }
+            var authIcon = authButton.querySelector("i");
+            if (authIcon) {
+                authIcon.className = "fa-solid " + authIconClass;
             }
             var isSongbook = getCurrentRoute() === "songbook";
             songbookLink.classList.toggle("active", isSongbook);
@@ -1186,6 +1225,21 @@
                 window.NjcSettingsSheet.open();
             }
         });
+        authButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            closePanel();
+            if (!window.NjcAuth) {
+                return;
+            }
+            var activeUser = typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+            if (activeUser && activeUser.uid && typeof window.NjcAuth.signOut === "function") {
+                window.NjcAuth.signOut();
+                return;
+            }
+            if (typeof window.NjcAuth.openAuthModal === "function") {
+                window.NjcAuth.openAuthModal("login");
+            }
+        });
 
         document.addEventListener("click", function (event) {
             if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
@@ -1208,6 +1262,10 @@
             setLabels();
         });
         document.addEventListener("njc:langchange", function () {
+            setLabels();
+            positionPanel();
+        });
+        document.addEventListener("njc:authchange", function () {
             setLabels();
             positionPanel();
         });
@@ -1685,6 +1743,9 @@
             formatCount: translateCountText
         };
         setLanguage(activeLanguage, false, true);
+        if (window.NjcAuth && typeof window.NjcAuth.init === "function") {
+            window.NjcAuth.init();
+        }
         setupLanguageToggle();
         setupThemeToggle();
         setupNotifications();
