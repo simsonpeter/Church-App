@@ -9,7 +9,7 @@
       "bodyTa": "மாலை 5 மணிக்கு ஆரம்பமாகும்.",
       "date": "2026-03-28",
       "expires": "2026-03-28",
-      "urgent": true,
+      "urgent": false,
       "link": "#events"
     }
     
