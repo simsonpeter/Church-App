@@ -225,17 +225,72 @@
                 return null;
             }
 
+            function getPrayerPreviewTranslatedNode(prayerId) {
+                if (!prayerWallList) {
+                    return null;
+                }
+                var targetId = String(prayerId || "");
+                var buttons = prayerWallList.querySelectorAll("button[data-prayer-open-id]");
+                for (var index = 0; index < buttons.length; index += 1) {
+                    var candidate = buttons[index];
+                    if ((candidate.getAttribute("data-prayer-open-id") || "") === targetId) {
+                        return candidate.querySelector(".prayer-list-translated-note");
+                    }
+                }
+                return null;
+            }
+
+            function ensurePrayerDetailTranslatedNode() {
+                if (!prayerDetailMessage || !prayerDetailMessage.parentNode) {
+                    return null;
+                }
+                var existing = document.getElementById("prayer-detail-translated-note");
+                if (existing) {
+                    return existing;
+                }
+                var note = document.createElement("p");
+                note.id = "prayer-detail-translated-note";
+                note.className = "prayer-detail-translated-note";
+                note.hidden = true;
+                prayerDetailMessage.insertAdjacentElement("afterend", note);
+                return note;
+            }
+
+            function isTranslatedResult(original, translated, targetLanguage) {
+                var source = String(original || "").trim();
+                var result = String(translated || "").trim();
+                if (!source || !result) {
+                    return false;
+                }
+                if (!shouldTranslatePrayerMessage(source, targetLanguage)) {
+                    return false;
+                }
+                return source.toLowerCase() !== result.toLowerCase();
+            }
+
             function applyPrayerDetailTranslation(entry) {
                 if (!entry || !prayerDetailMessage) {
                     return;
                 }
                 var prayerId = String(entry.id || "");
                 var languageAtRequest = getLanguage();
+                var translatedNote = ensurePrayerDetailTranslatedNode();
+                if (translatedNote) {
+                    translatedNote.hidden = true;
+                    translatedNote.textContent = "";
+                }
                 getTranslatedPrayerMessage(entry.message || "").then(function (translated) {
                     if (!prayerDetailMessage || activePrayerDetailId !== prayerId || languageAtRequest !== getLanguage()) {
                         return;
                     }
                     prayerDetailMessage.textContent = translated || entry.message || "";
+                    if (translatedNote) {
+                        var isTranslated = isTranslatedResult(entry.message || "", translated, languageAtRequest);
+                        translatedNote.hidden = !isTranslated;
+                        translatedNote.textContent = isTranslated
+                            ? T("contact.prayerWallTranslated", "Translated")
+                            : "";
+                    }
                 });
             }
 
@@ -250,6 +305,14 @@
                         var previewNode = getPrayerPreviewNode(prayerId);
                         if (previewNode) {
                             previewNode.textContent = toPreviewText(translated);
+                        }
+                        var translatedNode = getPrayerPreviewTranslatedNode(prayerId);
+                        if (translatedNode) {
+                            var isTranslated = isTranslatedResult(entry.message || "", translated, languageAtRequest);
+                            translatedNode.hidden = !isTranslated;
+                            translatedNode.textContent = isTranslated
+                                ? T("contact.prayerWallTranslated", "Translated")
+                                : "";
                         }
                         if (activePrayerDetailId === prayerId && prayerDetailMessage && prayerDetailOverlay && !prayerDetailOverlay.hidden) {
                             prayerDetailMessage.textContent = translated || entry.message || "";
@@ -535,6 +598,7 @@
                         "      " + urgentBadge +
                         "    </div>" +
                         "    <p class=\"prayer-list-preview\">" + escapeHtml(previewText) + "</p>" +
+                        "    <p class=\"prayer-list-translated-note\" hidden></p>" +
                         "    <div class=\"prayer-list-meta\">" +
                         "      <span class=\"page-note\">" + escapeHtml(dateText) + "</span>" +
                         "      <span class=\"prayer-list-prayed\">" + escapeHtml(prayedLabel) + "</span>" +

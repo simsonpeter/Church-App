@@ -1216,11 +1216,23 @@ body.songbook-fullscreen-open .offline-badge {
     margin-bottom: 8px;
 }
 
+.notification-center-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .notification-center-title {
     font-size: 0.86rem;
 }
 
 .notification-center-mark-all {
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+}
+
+.notification-center-clear-read {
     padding: 6px 8px;
     border-radius: 10px;
     font-size: 0.72rem;
@@ -1876,6 +1888,14 @@ body.auth-modal-open {
     overflow: hidden;
 }
 
+.prayer-list-translated-note {
+    margin: 0;
+    font-size: 0.7rem;
+    color: #a61f1f;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
 .prayer-list-meta {
     display: grid;
     grid-template-columns: auto 1fr auto;
@@ -1999,6 +2019,13 @@ body.prayer-detail-open {
     color: var(--text);
     line-height: 1.5;
     white-space: pre-wrap;
+}
+
+.prayer-detail-translated-note {
+    margin: 6px 0 0;
+    font-size: 0.72rem;
+    color: #a61f1f;
+    font-weight: 700;
 }
 
 .prayer-detail-urgent-badge {

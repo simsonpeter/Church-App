@@ -240,6 +240,7 @@
         "notify.noneTitle": "புதிய அறிவிப்புகள் இல்லை",
         "notify.noneBody": "புதிய செய்திகள் வந்தால் இங்கே தெரியும்.",
         "notify.markAllRead": "அனைத்தையும் படித்ததாக குறி",
+        "notify.clearRead": "படித்தவற்றை நீக்கு",
         "sermons.filterSpeaker": "பேச்சாளர்",
         "sermons.filterMonth": "மாதம்",
         "sermons.filterAll": "அனைத்தும்",
@@ -300,6 +301,7 @@
         "contact.prayerWallDeleteConfirm": "இந்த ஜெப வேண்டுதலை நீக்கவா?",
         "contact.prayerWallUpdated": "ஜெப வேண்டுதல் புதுப்பிக்கப்பட்டது.",
         "contact.prayerWallDeleted": "ஜெப வேண்டுதல் நீக்கப்பட்டது.",
+        "contact.prayerWallTranslated": "மொழிபெயர்க்கப்பட்டது",
         "contact.prayerWallSyncError": "ஜெப சுவரை ஒத்திசைக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.prayerWallLoadErrorTitle": "ஜெப சுவரை ஏற்ற முடியவில்லை",
         "contact.prayerWallLoadErrorBody": "இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
@@ -735,6 +737,16 @@
         }
     }
 
+    function clearReadInAppNotifications() {
+        var current = getInAppNotificationItems();
+        var next = current.filter(function (item) {
+            return !item.read;
+        });
+        if (next.length !== current.length) {
+            saveInAppNotificationItems(next);
+        }
+    }
+
     function showNotification(options) {
         var config = options || {};
         if (!notificationsSupported() || getNotificationPermission() !== "granted") {
@@ -1076,7 +1088,8 @@
             getItems: getInAppNotificationItems,
             getUnreadCount: getInAppUnreadCount,
             markRead: markInAppNotificationRead,
-            markAllRead: markAllInAppNotificationsRead
+            markAllRead: markAllInAppNotificationsRead,
+            clearRead: clearReadInAppNotifications
         };
         syncNotificationLoop();
         emitNotificationStatus();
@@ -1356,12 +1369,16 @@
         notificationCenter.innerHTML = "" +
             "<div class=\"notification-center-top\">" +
             "  <strong class=\"notification-center-title\"></strong>" +
-            "  <button type=\"button\" class=\"button-link notification-center-mark-all\"></button>" +
+            "  <div class=\"notification-center-actions\">" +
+            "    <button type=\"button\" class=\"button-link notification-center-mark-all\"></button>" +
+            "    <button type=\"button\" class=\"button-link button-secondary notification-center-clear-read\"></button>" +
+            "  </div>" +
             "</div>" +
             "<div class=\"notification-center-list\"></div>";
         document.body.appendChild(notificationCenter);
         var notificationCenterTitle = notificationCenter.querySelector(".notification-center-title");
         var notificationCenterMarkAll = notificationCenter.querySelector(".notification-center-mark-all");
+        var notificationCenterClearRead = notificationCenter.querySelector(".notification-center-clear-read");
         var notificationCenterList = notificationCenter.querySelector(".notification-center-list");
         var unreadBadge = notificationsButton.querySelector(".header-menu-unread");
 
@@ -1410,11 +1427,12 @@
         }
 
         function renderNotificationCenter() {
-            if (!notificationCenterTitle || !notificationCenterMarkAll || !notificationCenterList) {
+            if (!notificationCenterTitle || !notificationCenterMarkAll || !notificationCenterClearRead || !notificationCenterList) {
                 return;
             }
             notificationCenterTitle.textContent = t("notify.menuInbox", "Notifications");
             notificationCenterMarkAll.textContent = t("notify.markAllRead", "Mark all read");
+            notificationCenterClearRead.textContent = t("notify.clearRead", "Clear read");
             var api = getInAppApi();
             var items = api ? api.getItems() : [];
             if (!Array.isArray(items) || items.length === 0) {
@@ -1424,11 +1442,15 @@
                     "  <p class=\"page-note\">" + escapeHtml(t("notify.noneBody", "New updates will appear here.")) + "</p>" +
                     "</article>";
                 notificationCenterMarkAll.disabled = true;
+                notificationCenterClearRead.disabled = true;
                 renderNotificationBadge();
                 return;
             }
 
-            notificationCenterMarkAll.disabled = false;
+            var unreadCount = items.filter(function (item) { return !item.read; }).length;
+            var readCount = items.length - unreadCount;
+            notificationCenterMarkAll.disabled = unreadCount === 0;
+            notificationCenterClearRead.disabled = readCount === 0;
             var html = items.slice(0, 20).map(function (item) {
                 var route = String(item.url || "#home");
                 var iconClass = item.kind === "prayer" ? "fa-hands-praying" : "fa-podcast";
@@ -1592,6 +1614,16 @@
                 var api = getInAppApi();
                 if (api && typeof api.markAllRead === "function") {
                     api.markAllRead();
+                }
+                renderNotificationCenter();
+            });
+        }
+        if (notificationCenterClearRead) {
+            notificationCenterClearRead.addEventListener("click", function (event) {
+                event.stopPropagation();
+                var api = getInAppApi();
+                if (api && typeof api.clearRead === "function") {
+                    api.clearRead();
                 }
                 renderNotificationCenter();
             });
