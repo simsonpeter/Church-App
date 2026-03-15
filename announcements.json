@@ -1,60 +1,17 @@
 {
-  "updatedAt": "2026-03-09",
+  "updatedAt": "2026-03-28",
   "items": [
     {
-      "id": "fasting-prayer-mar13",
-      "title": "Special Fasting Prayer this Friday",
-      "titleTa": "இந்த வெள்ளிக்கிழமை விசேட உபவாச ஜெபம்",
-      "body": "Join us at 19:30 for a focused prayer night for families and youth.",
-      "bodyTa": "குடும்பங்களுக்கும் இளைஞர்களுக்கும் 19:30க்கு ஒருமித்த ஜெப இரவுக்கு சேருங்கள்.",
-      "date": "2026-03-13",
-      "expires": "2026-03-14",
+      "id": "kids-school-mar28",
+      "title": "Kids Bible School",
+      "titleTa": "சிறுவர் வேதாகமப் பள்ளி",
+      "body": "Join us at 17:00",
+      "bodyTa": "மாலை 5 மணிக்கு ஆரம்பமாகும்.",
+      "date": "2026-03-28",
+      "expires": "2026-03-28",
       "urgent": true,
       "link": "#events"
-    },
-    {
-      "id": "youth-fellowship-mar20",
-      "title": "Youth Fellowship Evening",
-      "titleTa": "இளைஞர் ஐக்கியச் சந்திப்பு",
-      "body": "Youth gathering starts at 18:30 with worship, testimony, and games.",
-      "bodyTa": "18:30க்கு ஸ்தோத்திரம், சாட்சி, மற்றும் ஐக்கிய நிகழ்ச்சியுடன் இளைஞர் சந்திப்பு தொடங்கும்.",
-      "date": "2026-03-20",
-      "expires": "2026-03-21",
-      "urgent": false,
-      "link": "#events"
-    },
-    {
-      "id": "outreach-mar27",
-      "title": "Community Outreach Saturday",
-      "titleTa": "சமூக சேவை சனிக்கிழமை",
-      "body": "Volunteers meet at church at 10:00 before visiting nearby families.",
-      "bodyTa": "அருகிலுள்ள குடும்பங்களைச் சந்திக்கும் முன் 10:00க்கு சபையில் தன்னார்வலர்கள் கூடுவார்கள்.",
-      "date": "2026-03-27",
-      "expires": "2026-03-28",
-      "urgent": false,
-      "link": "#contact"
-    },
-    {
-      "id": "worship-practice-apr02",
-      "title": "Worship Team Practice",
-      "titleTa": "ஸ்தோத்திரக் குழு பயிற்சி",
-      "body": "All worship team members are requested to come by 19:00.",
-      "bodyTa": "எல்லா ஸ்தோத்திரக் குழு உறுப்பினர்களும் 19:00க்கு வருமாறு கேட்டுக்கொள்கிறோம்.",
-      "date": "2026-04-02",
-      "expires": "2026-04-03",
-      "urgent": false,
-      "link": "#events"
-    },
-    {
-      "id": "expired-item-sample",
-      "title": "Old update example",
-      "titleTa": "பழைய அறிவிப்பு உதாரணம்",
-      "body": "This should auto-hide because it is expired.",
-      "bodyTa": "இது காலாவதியானதால் தானாக மறையும்.",
-      "date": "2026-02-20",
-      "expires": "2026-02-22",
-      "urgent": false,
-      "link": "#home"
     }
+    
   ]
 }
