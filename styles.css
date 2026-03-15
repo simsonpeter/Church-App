@@ -1187,6 +1187,12 @@ body.header-menu-open {
     place-items: center;
 }
 
+.header-menu-tabs {
+    display: grid;
+    gap: 4px;
+    margin-bottom: 4px;
+}
+
 .header-menu-link {
     width: 100%;
     display: flex;

@@ -1376,6 +1376,10 @@
         panelTop.appendChild(panelClose);
         panel.appendChild(panelTop);
 
+        var tabLinksContainer = document.createElement("nav");
+        tabLinksContainer.className = "header-menu-tabs";
+        panel.appendChild(tabLinksContainer);
+
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
         songbookLink.href = "#songbook";
@@ -1417,6 +1421,31 @@
 
         function getCurrentRoute() {
             return (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        }
+
+        function buildTabLinksInMenu() {
+            if (!tabLinksContainer) {
+                return;
+            }
+            var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
+            tabLinksContainer.innerHTML = "";
+            tabAnchors.forEach(function (anchor) {
+                var href = anchor.getAttribute("href") || "";
+                if (!href || href.charAt(0) !== "#") {
+                    return;
+                }
+                var route = (anchor.getAttribute("data-route") || "").trim().toLowerCase();
+                var labelNode = anchor.querySelector(".tab-label");
+                var iconNode = anchor.querySelector(".tab-icon i");
+                var iconClass = iconNode ? iconNode.className : "fa-solid fa-circle";
+                var labelText = labelNode ? labelNode.textContent : route;
+                var link = document.createElement("a");
+                link.className = "header-menu-link header-menu-tab-link";
+                link.href = href;
+                link.setAttribute("data-route", route);
+                link.innerHTML = "<i class=\"" + iconClass + "\"></i><span>" + escapeHtml(labelText || "") + "</span>";
+                tabLinksContainer.appendChild(link);
+            });
         }
 
         function getInAppApi() {
@@ -1534,6 +1563,12 @@
             if (authIcon) {
                 authIcon.className = "fa-solid " + authIconClass;
             }
+            buildTabLinksInMenu();
+            var currentRoute = getCurrentRoute();
+            tabLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
+                var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
+                link.classList.toggle("active", Boolean(route) && route === currentRoute);
+            });
             var isSongbook = getCurrentRoute() === "songbook";
             songbookLink.classList.toggle("active", isSongbook);
             renderNotificationCenter();
