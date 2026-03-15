@@ -1171,6 +1171,132 @@ body.songbook-fullscreen-open .offline-badge {
     color: #a61f1f;
 }
 
+.header-menu-link-notifications {
+    position: relative;
+}
+
+.header-menu-link-notifications > span {
+    flex: 1;
+}
+
+.header-menu-unread {
+    min-width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    background: #c61c1c;
+    color: #fff;
+    font-size: 0.66rem;
+    line-height: 18px;
+    text-align: center;
+    padding: 0 5px;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.notification-center-panel {
+    position: fixed;
+    z-index: 3620;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: 0 16px 30px rgba(40, 12, 12, 0.3);
+    padding: 10px;
+    max-height: min(66vh, 460px);
+    overflow: auto;
+}
+
+.notification-center-panel[hidden] {
+    display: none;
+}
+
+.notification-center-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.notification-center-title {
+    font-size: 0.86rem;
+}
+
+.notification-center-mark-all {
+    padding: 6px 8px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+}
+
+.notification-center-list {
+    display: grid;
+    gap: 6px;
+}
+
+.notification-center-item {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    border-radius: 12px;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 26px minmax(0, 1fr);
+    gap: 8px;
+    text-align: left;
+    color: var(--text);
+}
+
+.notification-center-item.unread {
+    border-color: rgba(198, 28, 28, 0.35);
+    background: rgba(198, 28, 28, 0.08);
+}
+
+.notification-center-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: #ffdede;
+    color: #a61f1f;
+    display: grid;
+    place-items: center;
+    font-size: 0.78rem;
+}
+
+.notification-center-copy {
+    min-width: 0;
+    display: grid;
+    gap: 2px;
+}
+
+.notification-center-item-title {
+    font-size: 0.8rem;
+    line-height: 1.2;
+}
+
+.notification-center-item-body {
+    font-size: 0.75rem;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-center-item-time {
+    font-size: 0.69rem;
+    color: var(--muted);
+}
+
+.notification-center-empty {
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+.notification-center-empty-title {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
 body.auth-entry-open {
     overflow: hidden;
 }

@@ -7,8 +7,11 @@
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
+    var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
+    var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
+    var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var activeLanguage = "en";
     var notificationIntervalId = null;
     var tamilTranslations = {
@@ -231,6 +234,12 @@
         "notify.reminder60": "60 நிமிடம் முன்",
         "notify.eventSoonTitle": "நிகழ்வு நினைவூட்டல்",
         "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
+        "notify.newPrayerTitle": "புதிய ஜெப வேண்டுதல் வந்துள்ளது",
+        "notify.menuInbox": "அறிவிப்புகள்",
+        "notify.unread": "படிக்காதவை",
+        "notify.noneTitle": "புதிய அறிவிப்புகள் இல்லை",
+        "notify.noneBody": "புதிய செய்திகள் வந்தால் இங்கே தெரியும்.",
+        "notify.markAllRead": "அனைத்தையும் படித்ததாக குறி",
         "sermons.filterSpeaker": "பேச்சாளர்",
         "sermons.filterMonth": "மாதம்",
         "sermons.filterAll": "அனைத்தும்",
@@ -331,6 +340,15 @@
             return tamilTranslations[key];
         }
         return fallback || key;
+    }
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
     function translateCountText(template, count) {
@@ -633,6 +651,90 @@
         return Boolean(map[key]);
     }
 
+    function getInAppNotificationItems() {
+        try {
+            var raw = window.localStorage.getItem(INAPP_NOTIFICATION_KEY);
+            var parsed = raw ? JSON.parse(raw) : [];
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (err) {
+            return [];
+        }
+    }
+
+    function saveInAppNotificationItems(items) {
+        var normalized = Array.isArray(items) ? items.filter(Boolean) : [];
+        normalized = normalized.sort(function (a, b) {
+            return Number(b.createdAt || 0) - Number(a.createdAt || 0);
+        }).slice(0, 80);
+        try {
+            window.localStorage.setItem(INAPP_NOTIFICATION_KEY, JSON.stringify(normalized));
+        } catch (err) {
+            return null;
+        }
+        document.dispatchEvent(new CustomEvent("njc:inapp-notifications-updated", {
+            detail: {
+                unreadCount: normalized.filter(function (item) { return !item.read; }).length
+            }
+        }));
+        return null;
+    }
+
+    function getInAppUnreadCount() {
+        return getInAppNotificationItems().filter(function (item) {
+            return !item.read;
+        }).length;
+    }
+
+    function addInAppNotification(item) {
+        var source = item && typeof item === "object" ? item : {};
+        var id = String(source.id || "").trim();
+        if (!id) {
+            return;
+        }
+        var current = getInAppNotificationItems();
+        if (current.some(function (entry) { return entry.id === id; })) {
+            return;
+        }
+        current.unshift({
+            id: id,
+            title: String(source.title || "").trim(),
+            body: String(source.body || "").trim(),
+            url: String(source.url || "#home").trim() || "#home",
+            kind: String(source.kind || "generic"),
+            createdAt: Number(source.createdAt || Date.now()),
+            read: false
+        });
+        saveInAppNotificationItems(current);
+    }
+
+    function markInAppNotificationRead(id) {
+        var current = getInAppNotificationItems();
+        var changed = false;
+        current.forEach(function (item) {
+            if (item.id === id && !item.read) {
+                item.read = true;
+                changed = true;
+            }
+        });
+        if (changed) {
+            saveInAppNotificationItems(current);
+        }
+    }
+
+    function markAllInAppNotificationsRead() {
+        var current = getInAppNotificationItems();
+        var changed = false;
+        current.forEach(function (item) {
+            if (!item.read) {
+                item.read = true;
+                changed = true;
+            }
+        });
+        if (changed) {
+            saveInAppNotificationItems(current);
+        }
+    }
+
     function showNotification(options) {
         var config = options || {};
         if (!notificationsSupported() || getNotificationPermission() !== "granted") {
@@ -715,7 +817,7 @@
             });
     }
 
-    function checkNewSermonNotification() {
+    function checkNewSermonNotification(status) {
         return fetch(SERMONS_FEED_URL)
             .then(function (response) {
                 if (!response.ok) {
@@ -757,10 +859,25 @@
                 }
 
                 var notifyKey = "sermon:" + latestKey;
-                if (wasNotified(notifyKey)) {
+                addInAppNotification({
+                    id: notifyKey,
+                    kind: "sermon",
+                    title: t("notify.newSermonTitle", "New sermon available"),
+                    body: latest.title || "Latest message is ready to listen",
+                    url: "#sermons",
+                    createdAt: Date.now()
+                });
+
+                try {
+                    window.localStorage.setItem(NOTIFICATION_LAST_SERMON_KEY, latestKey);
+                } catch (err) {
                     return null;
                 }
 
+                var canPush = Boolean(status && status.enabled && status.supported && status.permission === "granted");
+                if (!canPush || wasNotified(notifyKey)) {
+                    return null;
+                }
                 return showNotification({
                     title: t("notify.newSermonTitle", "New sermon available"),
                     body: latest.title || "Latest message is ready to listen",
@@ -769,11 +886,94 @@
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
-                        try {
-                            window.localStorage.setItem(NOTIFICATION_LAST_SERMON_KEY, latestKey);
-                        } catch (err) {
-                            return null;
-                        }
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
+    function checkNewPrayerNotification(status) {
+        return fetch(PRAYER_WALL_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Unable to load prayer wall");
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                if (!entries.length) {
+                    return null;
+                }
+                var sorted = entries.slice().sort(function (a, b) {
+                    var aTime = String((a && (a.updatedAt || a.createdAt)) || "");
+                    var bTime = String((b && (b.updatedAt || b.createdAt)) || "");
+                    return bTime.localeCompare(aTime);
+                });
+                var latest = sorted[0] || {};
+                var latestTime = String(latest.updatedAt || latest.createdAt || "").trim();
+                var latestMessage = String(latest.message || "").trim();
+                if (!latestTime || !latestMessage) {
+                    return null;
+                }
+
+                var latestKey = latestTime + "|" + latestMessage.slice(0, 80);
+                var previousKey = "";
+                try {
+                    previousKey = window.localStorage.getItem(NOTIFICATION_LAST_PRAYER_KEY) || "";
+                } catch (err) {
+                    previousKey = "";
+                }
+
+                if (!previousKey) {
+                    try {
+                        window.localStorage.setItem(NOTIFICATION_LAST_PRAYER_KEY, latestKey);
+                    } catch (err) {
+                        return null;
+                    }
+                    return null;
+                }
+
+                if (latestKey === previousKey) {
+                    return null;
+                }
+
+                var author = latest.anonymous
+                    ? t("contact.prayerWallNameAnonymous", "Anonymous")
+                    : String(latest.name || "").trim() || t("contact.prayerWallNameAnonymous", "Anonymous");
+                var bodyText = author + ": " + latestMessage;
+                var notifyKey = "prayer:" + latestKey;
+
+                addInAppNotification({
+                    id: notifyKey,
+                    kind: "prayer",
+                    title: t("notify.newPrayerTitle", "New prayer request posted"),
+                    body: bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText,
+                    url: "#prayer",
+                    createdAt: Date.now()
+                });
+
+                try {
+                    window.localStorage.setItem(NOTIFICATION_LAST_PRAYER_KEY, latestKey);
+                } catch (err) {
+                    return null;
+                }
+
+                var canPush = Boolean(status && status.enabled && status.supported && status.permission === "granted");
+                if (!canPush || wasNotified(notifyKey)) {
+                    return null;
+                }
+                return showNotification({
+                    title: t("notify.newPrayerTitle", "New prayer request posted"),
+                    body: bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText,
+                    tag: notifyKey,
+                    url: "index.html#prayer"
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
                     }
                     return null;
                 });
@@ -785,11 +985,11 @@
 
     function runNotificationChecks() {
         var status = getNotificationStatus();
-        if (!status.supported || !status.enabled || status.permission !== "granted") {
-            return;
+        if (status.supported && status.enabled && status.permission === "granted") {
+            checkEventReminder();
         }
-        checkEventReminder();
-        checkNewSermonNotification();
+        checkNewSermonNotification(status);
+        checkNewPrayerNotification(status);
     }
 
     function startNotificationLoop() {
@@ -808,12 +1008,7 @@
     }
 
     function syncNotificationLoop() {
-        var status = getNotificationStatus();
-        if (status.supported && status.enabled && status.permission === "granted") {
-            startNotificationLoop();
-        } else {
-            stopNotificationLoop();
-        }
+        startNotificationLoop();
     }
 
     function requestNotificationPermission() {
@@ -877,8 +1072,15 @@
                 runNotificationChecks();
             }
         };
+        window.NjcInAppNotifications = {
+            getItems: getInAppNotificationItems,
+            getUnreadCount: getInAppUnreadCount,
+            markRead: markInAppNotificationRead,
+            markAllRead: markAllInAppNotificationsRead
+        };
         syncNotificationLoop();
         emitNotificationStatus();
+        saveInAppNotificationItems(getInAppNotificationItems());
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
                 runNotificationChecks();
@@ -1122,6 +1324,12 @@
         panel.className = "header-menu-popover";
         panel.hidden = true;
 
+        var notificationsButton = document.createElement("button");
+        notificationsButton.type = "button";
+        notificationsButton.className = "header-menu-link header-menu-action header-menu-link-notifications";
+        notificationsButton.innerHTML = "<i class=\"fa-solid fa-bell\"></i><span></span><em class=\"header-menu-unread\" hidden>0</em>";
+        panel.appendChild(notificationsButton);
+
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
         songbookLink.href = "#songbook";
@@ -1141,12 +1349,104 @@
         panel.appendChild(authButton);
         document.body.appendChild(panel);
 
+        var notificationCenter = document.createElement("section");
+        notificationCenter.id = "header-notification-center";
+        notificationCenter.className = "notification-center-panel";
+        notificationCenter.hidden = true;
+        notificationCenter.innerHTML = "" +
+            "<div class=\"notification-center-top\">" +
+            "  <strong class=\"notification-center-title\"></strong>" +
+            "  <button type=\"button\" class=\"button-link notification-center-mark-all\"></button>" +
+            "</div>" +
+            "<div class=\"notification-center-list\"></div>";
+        document.body.appendChild(notificationCenter);
+        var notificationCenterTitle = notificationCenter.querySelector(".notification-center-title");
+        var notificationCenterMarkAll = notificationCenter.querySelector(".notification-center-mark-all");
+        var notificationCenterList = notificationCenter.querySelector(".notification-center-list");
+        var unreadBadge = notificationsButton.querySelector(".header-menu-unread");
+
         function getCurrentRoute() {
             return (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         }
 
+        function getInAppApi() {
+            return window.NjcInAppNotifications && typeof window.NjcInAppNotifications.getItems === "function"
+                ? window.NjcInAppNotifications
+                : null;
+        }
+
+        function formatNotificationTime(timestamp) {
+            var date = new Date(Number(timestamp || 0));
+            if (isNaN(date.getTime())) {
+                return "";
+            }
+            var locale = getLocale();
+            return new Intl.DateTimeFormat(locale, {
+                day: "numeric",
+                month: "short",
+                hour: "2-digit",
+                minute: "2-digit"
+            }).format(date);
+        }
+
+        function renderNotificationBadge() {
+            if (!unreadBadge) {
+                return;
+            }
+            var api = getInAppApi();
+            var unreadCount = api && typeof api.getUnreadCount === "function" ? Number(api.getUnreadCount() || 0) : 0;
+            if (unreadCount > 0) {
+                unreadBadge.hidden = false;
+                unreadBadge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+                unreadBadge.setAttribute("aria-label", String(unreadCount) + " " + t("notify.unread", "unread"));
+                return;
+            }
+            unreadBadge.hidden = true;
+            unreadBadge.textContent = "0";
+            unreadBadge.removeAttribute("aria-label");
+        }
+
+        function renderNotificationCenter() {
+            if (!notificationCenterTitle || !notificationCenterMarkAll || !notificationCenterList) {
+                return;
+            }
+            notificationCenterTitle.textContent = t("notify.menuInbox", "Notifications");
+            notificationCenterMarkAll.textContent = t("notify.markAllRead", "Mark all read");
+            var api = getInAppApi();
+            var items = api ? api.getItems() : [];
+            if (!Array.isArray(items) || items.length === 0) {
+                notificationCenterList.innerHTML = "" +
+                    "<article class=\"notification-center-empty\">" +
+                    "  <p class=\"notification-center-empty-title\">" + escapeHtml(t("notify.noneTitle", "No new notifications")) + "</p>" +
+                    "  <p class=\"page-note\">" + escapeHtml(t("notify.noneBody", "New updates will appear here.")) + "</p>" +
+                    "</article>";
+                notificationCenterMarkAll.disabled = true;
+                renderNotificationBadge();
+                return;
+            }
+
+            notificationCenterMarkAll.disabled = false;
+            var html = items.slice(0, 20).map(function (item) {
+                var route = String(item.url || "#home");
+                var iconClass = item.kind === "prayer" ? "fa-hands-praying" : "fa-podcast";
+                var readClass = item.read ? "notification-center-item" : "notification-center-item unread";
+                return "" +
+                    "<button type=\"button\" class=\"" + readClass + "\" data-notification-id=\"" + escapeHtml(item.id || "") + "\" data-notification-url=\"" + escapeHtml(route) + "\">" +
+                    "  <span class=\"notification-center-icon\"><i class=\"fa-solid " + iconClass + "\"></i></span>" +
+                    "  <span class=\"notification-center-copy\">" +
+                    "    <strong class=\"notification-center-item-title\">" + escapeHtml(item.title || "") + "</strong>" +
+                    "    <span class=\"notification-center-item-body\">" + escapeHtml(item.body || "") + "</span>" +
+                    "    <span class=\"notification-center-item-time\">" + escapeHtml(formatNotificationTime(item.createdAt)) + "</span>" +
+                    "  </span>" +
+                    "</button>";
+            }).join("");
+            notificationCenterList.innerHTML = html;
+            renderNotificationBadge();
+        }
+
         function setLabels() {
             var openLabel = t("menu.open", "Open menu");
+            var notificationLabel = t("notify.menuInbox", "Notifications");
             var songbookLabel = t("menu.songbook", "Songbook");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
@@ -1159,6 +1459,10 @@
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
+            }
+            var notificationNode = notificationsButton.querySelector("span");
+            if (notificationNode) {
+                notificationNode.textContent = notificationLabel;
             }
             var settingsNode = settingsButton.querySelector("span");
             if (settingsNode) {
@@ -1174,6 +1478,7 @@
             }
             var isSongbook = getCurrentRoute() === "songbook";
             songbookLink.classList.toggle("active", isSongbook);
+            renderNotificationCenter();
         }
 
         function positionPanel() {
@@ -1194,9 +1499,32 @@
             panel.style.left = left + "px";
         }
 
+        function positionNotificationCenter() {
+            if (notificationCenter.hidden) {
+                return;
+            }
+            var rect = button.getBoundingClientRect();
+            var desiredWidth = Math.min(320, window.innerWidth - 20);
+            var left = rect.right - desiredWidth;
+            if (left < 10) {
+                left = 10;
+            }
+            if (left + desiredWidth > window.innerWidth - 10) {
+                left = window.innerWidth - desiredWidth - 10;
+            }
+            notificationCenter.style.width = desiredWidth + "px";
+            notificationCenter.style.left = left + "px";
+            notificationCenter.style.top = (rect.bottom + 8) + "px";
+        }
+
         function closePanel() {
             panel.hidden = true;
             button.setAttribute("aria-expanded", "false");
+        }
+
+        function closeNotificationCenter() {
+            notificationCenter.hidden = true;
+            notificationsButton.setAttribute("aria-expanded", "false");
         }
 
         function togglePanel(event) {
@@ -1211,11 +1539,14 @@
             } else {
                 closePanel();
             }
+            closeNotificationCenter();
         }
 
         setLabels();
         button.setAttribute("aria-haspopup", "menu");
         button.setAttribute("aria-expanded", "false");
+        notificationsButton.setAttribute("aria-haspopup", "dialog");
+        notificationsButton.setAttribute("aria-expanded", "false");
 
         button.addEventListener("click", togglePanel);
         panel.addEventListener("click", function (event) {
@@ -1225,9 +1556,51 @@
                 closePanel();
             }
         });
+        notificationsButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            closePanel();
+            renderNotificationCenter();
+            if (notificationCenter.hidden) {
+                notificationCenter.hidden = false;
+                notificationsButton.setAttribute("aria-expanded", "true");
+                positionNotificationCenter();
+            } else {
+                closeNotificationCenter();
+            }
+        });
+        notificationCenter.addEventListener("click", function (event) {
+            event.stopPropagation();
+            var itemButton = event.target.closest("button[data-notification-id]");
+            if (!itemButton) {
+                return;
+            }
+            var notificationId = itemButton.getAttribute("data-notification-id") || "";
+            var route = itemButton.getAttribute("data-notification-url") || "#home";
+            var api = getInAppApi();
+            if (api && typeof api.markRead === "function") {
+                api.markRead(notificationId);
+            }
+            closeNotificationCenter();
+            if (route.charAt(0) === "#") {
+                window.location.hash = route;
+            } else {
+                window.location.href = route;
+            }
+        });
+        if (notificationCenterMarkAll) {
+            notificationCenterMarkAll.addEventListener("click", function (event) {
+                event.stopPropagation();
+                var api = getInAppApi();
+                if (api && typeof api.markAllRead === "function") {
+                    api.markAllRead();
+                }
+                renderNotificationCenter();
+            });
+        }
         settingsButton.addEventListener("click", function (event) {
             event.stopPropagation();
             closePanel();
+            closeNotificationCenter();
             if (window.NjcSettingsSheet && typeof window.NjcSettingsSheet.open === "function") {
                 window.NjcSettingsSheet.open();
             }
@@ -1235,6 +1608,7 @@
         authButton.addEventListener("click", function (event) {
             event.stopPropagation();
             closePanel();
+            closeNotificationCenter();
             if (!window.NjcAuth) {
                 return;
             }
@@ -1252,29 +1626,45 @@
             if (!panel.hidden && !panel.contains(event.target) && event.target !== button) {
                 closePanel();
             }
+            if (!notificationCenter.hidden && !notificationCenter.contains(event.target) && event.target !== notificationsButton) {
+                closeNotificationCenter();
+            }
         });
         document.addEventListener("keydown", function (event) {
             if (event.key === "Escape") {
                 closePanel();
+                closeNotificationCenter();
             }
         });
-        window.addEventListener("resize", positionPanel);
+        window.addEventListener("resize", function () {
+            positionPanel();
+            positionNotificationCenter();
+        });
         window.addEventListener("scroll", function () {
             if (!panel.hidden) {
                 closePanel();
             }
+            if (!notificationCenter.hidden) {
+                closeNotificationCenter();
+            }
         }, true);
         window.addEventListener("hashchange", function () {
             closePanel();
+            closeNotificationCenter();
             setLabels();
         });
         document.addEventListener("njc:langchange", function () {
             setLabels();
             positionPanel();
+            positionNotificationCenter();
         });
         document.addEventListener("njc:authchange", function () {
             setLabels();
             positionPanel();
+            positionNotificationCenter();
+        });
+        document.addEventListener("njc:inapp-notifications-updated", function () {
+            renderNotificationCenter();
         });
     }
 
