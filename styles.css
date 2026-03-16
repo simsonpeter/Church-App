@@ -1018,6 +1018,14 @@ button.button-link:disabled {
     padding: 8px 10px;
     font-size: 0.76rem;
     font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.songbook-tab i {
+    font-size: 0.78rem;
 }
 
 .songbook-tab.active {
