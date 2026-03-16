@@ -323,6 +323,17 @@
         "settings.eyebrow": "அமைப்புகள்",
         "settings.title": "அமைப்புகள்",
         "settings.info": "செயலி அமைப்புகள் மற்றும் விருப்பங்கள்.",
+        "settings.theme": "தீம்",
+        "settings.themeLight": "ஒளி நிலை",
+        "settings.themeDark": "இருள் நிலை",
+        "settings.language": "மொழி",
+        "settings.languageEnglish": "ஆங்கிலம்",
+        "settings.languageTamil": "தமிழ்",
+        "settings.notifications": "அறிவிப்புகள்",
+        "settings.notificationsOn": "இயக்கத்தில்",
+        "settings.notificationsOff": "நிறுத்தப்பட்டுள்ளது",
+        "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
+        "settings.notificationsUnsupported": "ஆதரவு இல்லை",
         "settings.close": "மூடு"
     };
 
@@ -1778,21 +1789,113 @@
             return;
         }
 
+        function getThemeStateLabel() {
+            var isDark = (document.documentElement.getAttribute("data-theme") || "light") === "dark";
+            return isDark
+                ? t("settings.themeDark", "Dark mode")
+                : t("settings.themeLight", "Light mode");
+        }
+
+        function getLanguageStateLabel() {
+            return activeLanguage === "ta"
+                ? t("settings.languageTamil", "Tamil")
+                : t("settings.languageEnglish", "English");
+        }
+
+        function getNotificationsStateLabel() {
+            if (!window.NjcNotifications || typeof window.NjcNotifications.getStatus !== "function") {
+                return t("settings.notificationsUnsupported", "Not supported");
+            }
+            var status = window.NjcNotifications.getStatus();
+            if (!status || !status.supported || status.permission === "unsupported") {
+                return t("settings.notificationsUnsupported", "Not supported");
+            }
+            if (status.permission === "denied") {
+                return t("settings.notificationsBlocked", "Blocked");
+            }
+            return status.enabled
+                ? t("settings.notificationsOn", "On")
+                : t("settings.notificationsOff", "Off");
+        }
+
+        function createSettingsItem(button, titleKey, titleFallback, getStateLabel) {
+            if (!button) {
+                return null;
+            }
+            var item = document.createElement("div");
+            item.className = "settings-control-item";
+            var copy = document.createElement("div");
+            copy.className = "settings-control-copy";
+            var title = document.createElement("strong");
+            title.className = "settings-control-title";
+            var state = document.createElement("span");
+            state.className = "settings-control-state";
+            copy.appendChild(title);
+            copy.appendChild(state);
+            item.appendChild(button);
+            item.appendChild(copy);
+
+            function refresh() {
+                title.textContent = t(titleKey, titleFallback);
+                var stateValue = typeof getStateLabel === "function" ? getStateLabel() : "";
+                state.textContent = stateValue;
+                state.hidden = !stateValue;
+            }
+
+            item.addEventListener("click", function (event) {
+                if (event.target === button || button.contains(event.target)) {
+                    return;
+                }
+                button.click();
+            });
+
+            return {
+                node: item,
+                refresh: refresh
+            };
+        }
+
         controls.innerHTML = "";
+        var items = [];
         if (themeButton) {
-            controls.appendChild(themeButton);
+            var themeItem = createSettingsItem(themeButton, "settings.theme", "Theme", getThemeStateLabel);
+            if (themeItem) {
+                controls.appendChild(themeItem.node);
+                items.push(themeItem);
+            }
         }
         if (languageButton) {
-            controls.appendChild(languageButton);
+            var languageItem = createSettingsItem(languageButton, "settings.language", "Language", getLanguageStateLabel);
+            if (languageItem) {
+                controls.appendChild(languageItem.node);
+                items.push(languageItem);
+            }
         }
         if (notifyButton) {
-            controls.appendChild(notifyButton);
+            var notifyItem = createSettingsItem(notifyButton, "settings.notifications", "Notifications", getNotificationsStateLabel);
+            if (notifyItem) {
+                controls.appendChild(notifyItem.node);
+                items.push(notifyItem);
+            }
         }
+
+        function refreshSettingsItems() {
+            items.forEach(function (item) {
+                if (item && typeof item.refresh === "function") {
+                    item.refresh();
+                }
+            });
+        }
+        refreshSettingsItems();
 
         var headerControls = document.querySelector(".app-header .header-controls");
         if (headerControls && headerControls.children.length === 0) {
             headerControls.remove();
         }
+
+        document.addEventListener("njc:langchange", refreshSettingsItems);
+        document.addEventListener("njc:notificationstatus", refreshSettingsItems);
+        document.addEventListener("njc:inapp-notifications-updated", refreshSettingsItems);
     }
 
     function setupOfflineBadge() {

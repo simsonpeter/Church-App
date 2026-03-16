@@ -1606,15 +1606,38 @@ body.auth-modal-open {
 }
 
 .settings-controls {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 12px;
-    flex-wrap: wrap;
+    display: grid;
+    gap: 10px;
 }
 
 .settings-card .page-note {
     margin-bottom: 12px;
+}
+
+.settings-control-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: var(--surface-soft);
+    cursor: pointer;
+}
+
+.settings-control-copy {
+    display: grid;
+    gap: 2px;
+}
+
+.settings-control-title {
+    font-size: 0.92rem;
+    line-height: 1.2;
+}
+
+.settings-control-state {
+    font-size: 0.78rem;
+    color: var(--muted);
 }
 
 .settings-controls .theme-toggle,
