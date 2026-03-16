@@ -40,6 +40,17 @@
         return "en-GB";
     }
 
+    function getLanguage() {
+        if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
+            return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+        }
+        return "en";
+    }
+
+    function preferRomanized() {
+        return getLanguage() === "en";
+    }
+
     function getCurrentUser() {
         if (window.NjcAuth && typeof window.NjcAuth.getUser === "function") {
             return window.NjcAuth.getUser();
@@ -157,11 +168,15 @@
         }
         var author = String(source.author || "").trim();
         var lyrics = String(source.lyrics || "").trim();
+        var titleRomanized = String(source.titleRomanized || "").trim();
+        var lyricsRomanized = String(source.lyricsRomanized || "").trim();
         return {
             id: String(source.id || ("song-" + index)),
             title: title,
+            titleRomanized: titleRomanized,
             author: author,
-            lyrics: lyrics
+            lyrics: lyrics,
+            lyricsRomanized: lyricsRomanized
         };
     }
 
@@ -179,9 +194,31 @@
         return normalizeSong({
             id: id,
             title: title,
+            titleRomanized: getFirestoreString(fields, ["songTitleRomanized", "titleRomanized"]),
             author: author,
-            lyrics: lyrics
+            lyrics: lyrics,
+            lyricsRomanized: getFirestoreString(fields, ["lyricsTextRomanized", "lyricsRomanized"])
         }, index);
+    }
+
+    function getSongDisplayTitle(song) {
+        if (!song) {
+            return "";
+        }
+        if (preferRomanized() && String(song.titleRomanized || "").trim()) {
+            return String(song.titleRomanized || "").trim();
+        }
+        return String(song.title || "").trim();
+    }
+
+    function getSongDisplayLyrics(song) {
+        if (!song) {
+            return "";
+        }
+        if (preferRomanized() && String(song.lyricsRomanized || "").trim()) {
+            return String(song.lyricsRomanized || "").trim();
+        }
+        return String(song.lyrics || "").trim();
     }
 
     function normalizeServiceSongDoc(doc, index) {
@@ -445,8 +482,10 @@
             }
             var searchable = [
                 song.title || "",
+                song.titleRomanized || "",
                 song.author || "",
-                song.lyrics || ""
+                song.lyrics || "",
+                song.lyricsRomanized || ""
             ].join(" ").toLowerCase();
             return searchable.indexOf(query) >= 0;
         });
@@ -476,8 +515,10 @@
         }
         activeSongId = song.id;
         var authorPrefix = T("songbook.authorPrefix", "Author");
+        var displayTitle = getSongDisplayTitle(song) || song.title || "-";
+        var displayLyrics = getSongDisplayLyrics(song) || T("songbook.noLyrics", "Lyrics not available");
         if (songbookFullscreenTitle) {
-            songbookFullscreenTitle.textContent = song.title || "-";
+            songbookFullscreenTitle.textContent = displayTitle;
         }
         if (songbookFullscreenAuthor) {
             songbookFullscreenAuthor.textContent = song.author
@@ -485,7 +526,7 @@
                 : "";
         }
         if (songbookFullscreenLyrics) {
-            songbookFullscreenLyrics.textContent = song.lyrics || T("songbook.noLyrics", "Lyrics not available");
+            songbookFullscreenLyrics.textContent = displayLyrics;
         }
         songbookFullscreen.hidden = false;
         document.body.classList.add("songbook-fullscreen-open");
@@ -588,7 +629,7 @@
                 "<li class=\"songbook-item\">" +
                 "  <div class=\"songbook-item-row\">" +
                 "    <button type=\"button\" class=\"songbook-open-btn\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
-                "        <h3 class=\"songbook-title-line\">" + orderPrefix + "<span>" + escapeHtml(song.title) + "</span></h3>" +
+                "        <h3 class=\"songbook-title-line\">" + orderPrefix + "<span>" + escapeHtml(getSongDisplayTitle(song) || song.title) + "</span></h3>" +
                 (song.author ? "        <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
                 "    </button>" +
                 actionsHtml +
