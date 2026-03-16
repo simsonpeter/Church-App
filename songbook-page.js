@@ -582,7 +582,7 @@
                 ? ("<span class=\"songbook-service-order\">" + String(song.serviceOrder) + ".</span>")
                 : "";
             var actionButtons = [];
-            if (activeSongbookTab !== "service" && isAdmin) {
+            if (activeSongbookTab === "service" && isAdmin) {
                 actionButtons.push(
                     "<button type=\"button\" class=\"" + serviceClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"service\" title=\"" + escapeHtml(serviceLabel) + "\" aria-label=\"" + escapeHtml(serviceLabel) + "\"><i class=\"fa-solid fa-church\"></i></button>"
                 );
