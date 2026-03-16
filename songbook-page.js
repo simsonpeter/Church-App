@@ -8,18 +8,23 @@
     var songbookFullscreenAuthor = document.getElementById("songbook-fullscreen-author");
     var songbookFullscreenLyrics = document.getElementById("songbook-fullscreen-lyrics");
     var FIRESTORE_BASE_URL = "https://firestore.googleapis.com/v1/projects/songbook-add54/databases/(default)/documents/lyrics";
+    var FIRESTORE_SERVICE_URL = "https://firestore.googleapis.com/v1/projects/songbook-add54/databases/(default)/documents/serviceSongs";
     var SONGBOOK_FALLBACK_URL = "https://raw.githubusercontent.com/simsonpeter/njcsongbook/main/songs.json";
     var SONGBOOK_FAVORITES_KEY = "njc_songbook_favorites_v1";
-    var SONGBOOK_SERVICE_KEY = "njc_songbook_service_v1";
     var FIRESTORE_PAGE_SIZE = 300;
     var FIRESTORE_MAX_PAGES = 25;
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var songs = [];
+    var visibleSongs = [];
+    var serviceSongs = [];
     var loadFailed = false;
+    var serviceLoadFailed = false;
+    var serviceLoading = true;
+    var serviceBusy = false;
     var activeSongId = "";
     var searchQuery = "";
     var activeSongbookTab = "songs";
     var favoriteMap = getStoredFlagMap(SONGBOOK_FAVORITES_KEY);
-    var serviceMap = getStoredFlagMap(SONGBOOK_SERVICE_KEY);
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -33,6 +38,27 @@
             return window.NjcI18n.getLocale();
         }
         return "en-GB";
+    }
+
+    function getCurrentUser() {
+        if (window.NjcAuth && typeof window.NjcAuth.getUser === "function") {
+            return window.NjcAuth.getUser();
+        }
+        return null;
+    }
+
+    function normalizeEmail(value) {
+        return String(value || "").trim().toLowerCase();
+    }
+
+    function isAdminUser() {
+        var user = getCurrentUser();
+        return normalizeEmail(user && user.email) === ADMIN_EMAIL;
+    }
+
+    function getCurrentUserUid() {
+        var user = getCurrentUser();
+        return String(user && user.uid || "").trim();
     }
 
     function escapeHtml(value) {
@@ -66,63 +92,21 @@
         return null;
     }
 
-    function isMarked(map, songId) {
-        return Boolean(map && map[songId]);
+    function isFavorite(songId) {
+        return Boolean(favoriteMap && favoriteMap[songId]);
     }
 
-    function setMarked(map, key, songId, marked) {
-        if (!map) {
-            return;
-        }
-        if (marked) {
-            map[songId] = true;
-        } else {
-            delete map[songId];
-        }
-        saveFlagMap(key, map);
-    }
-
-    function toggleSongFlag(action, songId) {
+    function toggleFavorite(songId) {
         if (!songId) {
             return;
         }
-        if (action === "favorite") {
-            var nextFavorite = !isMarked(favoriteMap, songId);
-            setMarked(favoriteMap, SONGBOOK_FAVORITES_KEY, songId, nextFavorite);
-        } else if (action === "service") {
-            var nextService = !isMarked(serviceMap, songId);
-            setMarked(serviceMap, SONGBOOK_SERVICE_KEY, songId, nextService);
+        if (isFavorite(songId)) {
+            delete favoriteMap[songId];
+        } else {
+            favoriteMap[songId] = true;
         }
+        saveFlagMap(SONGBOOK_FAVORITES_KEY, favoriteMap);
         renderSongbook();
-    }
-
-    function setActiveSongbookTab(tab) {
-        activeSongbookTab = (tab === "service" || tab === "favorite") ? tab : "songs";
-        if (songbookTabs && songbookTabs.length) {
-            songbookTabs.forEach(function (tabButton) {
-                var buttonTab = String(tabButton.getAttribute("data-songbook-tab") || "").trim().toLowerCase();
-                var isActive = buttonTab === activeSongbookTab;
-                tabButton.classList.toggle("active", isActive);
-                tabButton.setAttribute("aria-selected", isActive ? "true" : "false");
-            });
-        }
-        renderSongbook();
-    }
-
-    function normalizeSong(item, index) {
-        var source = item && typeof item === "object" ? item : {};
-        var title = String(source.title || "").trim();
-        if (!title) {
-            return null;
-        }
-        var author = String(source.author || "").trim();
-        var lyrics = String(source.lyrics || "").trim();
-        return {
-            id: String(source.id || ("song-" + index)),
-            title: title,
-            author: author,
-            lyrics: lyrics
-        };
     }
 
     function getFirestoreString(fields, keys) {
@@ -142,6 +126,45 @@
         return "";
     }
 
+    function getFirestoreInteger(fields, keys) {
+        if (!fields || typeof fields !== "object") {
+            return 0;
+        }
+        for (var i = 0; i < keys.length; i += 1) {
+            var key = keys[i];
+            var field = fields[key];
+            if (field && typeof field.integerValue !== "undefined") {
+                var intValue = Number(field.integerValue);
+                if (Number.isFinite(intValue)) {
+                    return intValue;
+                }
+            }
+            if (field && typeof field.doubleValue !== "undefined") {
+                var doubleValue = Number(field.doubleValue);
+                if (Number.isFinite(doubleValue)) {
+                    return doubleValue;
+                }
+            }
+        }
+        return 0;
+    }
+
+    function normalizeSong(item, index) {
+        var source = item && typeof item === "object" ? item : {};
+        var title = String(source.title || "").trim();
+        if (!title) {
+            return null;
+        }
+        var author = String(source.author || "").trim();
+        var lyrics = String(source.lyrics || "").trim();
+        return {
+            id: String(source.id || ("song-" + index)),
+            title: title,
+            author: author,
+            lyrics: lyrics
+        };
+    }
+
     function normalizeFirestoreSong(doc, index) {
         var source = doc && typeof doc === "object" ? doc : {};
         var fields = source.fields && typeof source.fields === "object" ? source.fields : {};
@@ -150,7 +173,7 @@
             return null;
         }
         var lyrics = getFirestoreString(fields, ["lyricsText", "lyrics", "content", "body", "text"]);
-        var author = getFirestoreString(fields, ["author", "composer", "writer"]);
+        var author = getFirestoreString(fields, ["author", "composer", "writer", "singer", "lyricist"]);
         var docName = String(source.name || "");
         var id = docName.split("/").pop() || ("song-" + index);
         return normalizeSong({
@@ -159,6 +182,19 @@
             author: author,
             lyrics: lyrics
         }, index);
+    }
+
+    function normalizeServiceSongDoc(doc, index) {
+        var source = doc && typeof doc === "object" ? doc : {};
+        var fields = source.fields && typeof source.fields === "object" ? source.fields : {};
+        var docName = String(source.name || "");
+        var id = docName.split("/").pop() || ("service-song-" + index);
+        var order = getFirestoreInteger(fields, ["order"]);
+        return {
+            id: id,
+            order: order,
+            songTitle: getFirestoreString(fields, ["songTitle", "title"])
+        };
     }
 
     function getSongsPayload(payload) {
@@ -181,6 +217,16 @@
         return FIRESTORE_BASE_URL + "?" + params.toString();
     }
 
+    function buildServiceUrl(pageToken) {
+        var params = new URLSearchParams({
+            pageSize: "300"
+        });
+        if (pageToken) {
+            params.set("pageToken", pageToken);
+        }
+        return FIRESTORE_SERVICE_URL + "?" + params.toString();
+    }
+
     function fetchFirestoreSongs() {
         var allDocuments = [];
         function fetchPage(pageToken, pageCount) {
@@ -190,7 +236,7 @@
             return fetch(buildFirestoreUrl(pageToken), { cache: "no-store" })
                 .then(function (response) {
                     if (!response.ok) {
-                        throw new Error("Firestore fetch failed");
+                        throw new Error("Firestore songs fetch failed");
                     }
                     return response.json();
                 })
@@ -205,7 +251,36 @@
                 });
         }
         return fetchPage("", 0).then(function (docs) {
-            return docs.map(normalizeFirestoreSong).filter(function (song) { return Boolean(song); });
+            return docs.map(normalizeFirestoreSong).filter(function (song) {
+                return Boolean(song);
+            });
+        });
+    }
+
+    function fetchServiceSongs() {
+        var allDocuments = [];
+        function fetchPage(pageToken) {
+            return fetch(buildServiceUrl(pageToken), { cache: "no-store" })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("Service songs fetch failed");
+                    }
+                    return response.json();
+                })
+                .then(function (payload) {
+                    var docs = payload && Array.isArray(payload.documents) ? payload.documents : [];
+                    allDocuments = allDocuments.concat(docs);
+                    var token = payload && payload.nextPageToken ? String(payload.nextPageToken) : "";
+                    if (!token) {
+                        return allDocuments;
+                    }
+                    return fetchPage(token);
+                });
+        }
+        return fetchPage("").then(function (docs) {
+            return docs.map(normalizeServiceSongDoc).filter(function (entry) {
+                return Boolean(entry && entry.id);
+            });
         });
     }
 
@@ -218,21 +293,144 @@
                 return response.json();
             })
             .then(function (payload) {
-                return getSongsPayload(payload)
-                    .map(normalizeSong)
-                    .filter(function (song) { return Boolean(song); });
+                return getSongsPayload(payload).map(normalizeSong).filter(function (song) {
+                    return Boolean(song);
+                });
+            });
+    }
+
+    function sortServiceSongs(list) {
+        return (Array.isArray(list) ? list.slice() : []).sort(function (a, b) {
+            var orderA = Number(a && a.order);
+            var orderB = Number(b && b.order);
+            if (orderA !== orderB) {
+                return orderA - orderB;
+            }
+            return String(a && a.songTitle || "").localeCompare(String(b && b.songTitle || ""), getLocale(), {
+                sensitivity: "base",
+                numeric: true
+            });
+        });
+    }
+
+    function isInService(songId) {
+        return serviceSongs.some(function (entry) {
+            return entry.id === songId;
+        });
+    }
+
+    function serviceDocUrl(songId) {
+        return FIRESTORE_SERVICE_URL + "/" + encodeURIComponent(songId);
+    }
+
+    function patchServiceSong(songId, data) {
+        return fetch(serviceDocUrl(songId), {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                fields: data
+            })
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("Failed to patch service song");
+            }
+            return response.json();
+        });
+    }
+
+    function addSongToService(songId) {
+        if (!isAdminUser()) {
+            return Promise.resolve();
+        }
+        if (!songId || isInService(songId)) {
+            return Promise.resolve();
+        }
+        var song = songs.find(function (item) {
+            return item.id === songId;
+        });
+        if (!song) {
+            return Promise.resolve();
+        }
+        var nextOrder = sortServiceSongs(serviceSongs).length;
+        return patchServiceSong(songId, {
+            songTitle: { stringValue: String(song.title || "").trim() },
+            order: { integerValue: String(nextOrder) },
+            addedBy: { stringValue: getCurrentUserUid() || "" },
+            addedAt: { timestampValue: new Date().toISOString() }
+        }).then(function () {
+            return null;
+        });
+    }
+
+    function removeSongFromService(songId) {
+        if (!isAdminUser()) {
+            return Promise.resolve();
+        }
+        if (!songId) {
+            return Promise.resolve();
+        }
+        return fetch(serviceDocUrl(songId), { method: "DELETE" })
+            .then(function (response) {
+                if (response.status !== 404 && !response.ok) {
+                    throw new Error("Failed to remove service song");
+                }
+                var remaining = sortServiceSongs(serviceSongs).filter(function (entry) {
+                    return entry.id !== songId;
+                });
+                return Promise.all(remaining.map(function (entry, index) {
+                    return patchServiceSong(entry.id, {
+                        songTitle: { stringValue: String(entry.songTitle || "").trim() },
+                        order: { integerValue: String(index) }
+                    });
+                }));
+            })
+            .then(function () {
+                return null;
+            });
+    }
+
+    function toggleServiceSong(songId) {
+        if (!isAdminUser() || !songId || serviceBusy) {
+            return Promise.resolve();
+        }
+        serviceBusy = true;
+        var action = isInService(songId) ? removeSongFromService(songId) : addSongToService(songId);
+        return action
+            .then(function () {
+                return loadServiceSongs(true);
+            })
+            .finally(function () {
+                serviceBusy = false;
             });
     }
 
     function getSongsForActiveTab() {
         if (activeSongbookTab === "service") {
-            return songs.filter(function (song) {
-                return isMarked(serviceMap, song.id);
+            return sortServiceSongs(serviceSongs).map(function (entry, index) {
+                var sourceSong = songs.find(function (song) {
+                    return song.id === entry.id;
+                });
+                var fallbackTitle = String(entry.songTitle || "").trim() || T("songbook.unknownSong", "Unknown song");
+                var normalized = sourceSong || normalizeSong({
+                    id: entry.id,
+                    title: fallbackTitle,
+                    author: "",
+                    lyrics: ""
+                }, index);
+                return {
+                    id: normalized.id,
+                    title: normalized.title,
+                    author: normalized.author,
+                    lyrics: normalized.lyrics,
+                    serviceOrder: index + 1
+                };
             });
         }
         if (activeSongbookTab === "favorite") {
             return songs.filter(function (song) {
-                return isMarked(favoriteMap, song.id);
+                return isFavorite(song.id);
             });
         }
         return songs.slice();
@@ -252,6 +450,9 @@
             ].join(" ").toLowerCase();
             return searchable.indexOf(query) >= 0;
         });
+        if (activeSongbookTab === "service") {
+            return filtered;
+        }
         return filtered.sort(function (a, b) {
             return String(a.title || "").localeCompare(String(b.title || ""), getLocale(), {
                 sensitivity: "base",
@@ -301,15 +502,37 @@
                 "  <h3>" + escapeHtml(T("songbook.loadErrorTitle", "Could not load songbook")) + "</h3>" +
                 "  <p>" + escapeHtml(T("songbook.loadErrorBody", "Please check your connection and try again.")) + "</p>" +
                 "</li>";
+            visibleSongs = [];
             return;
         }
 
-        if (!songs.length) {
+        if (activeSongbookTab === "service" && serviceLoading) {
+            songbookList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("songbook.serviceLoadingTitle", "Loading service songs...")) + "</h3>" +
+                "  <p>" + escapeHtml(T("songbook.serviceLoadingBody", "Please wait while we load this week's service list.")) + "</p>" +
+                "</li>";
+            visibleSongs = [];
+            return;
+        }
+
+        if (activeSongbookTab === "service" && serviceLoadFailed) {
+            songbookList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("songbook.loadErrorTitle", "Could not load songbook")) + "</h3>" +
+                "  <p>" + escapeHtml(T("songbook.loadErrorBody", "Please check your connection and try again.")) + "</p>" +
+                "</li>";
+            visibleSongs = [];
+            return;
+        }
+
+        if (!songs.length && activeSongbookTab !== "service") {
             songbookList.innerHTML = "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(T("songbook.emptyTitle", "No songs yet")) + "</h3>" +
                 "  <p>" + escapeHtml(T("songbook.emptyBody", "Please try again later.")) + "</p>" +
                 "</li>";
+            visibleSongs = [];
             return;
         }
 
@@ -318,9 +541,10 @@
             if (activeSongbookTab === "service" && !searchQuery.trim()) {
                 songbookList.innerHTML = "" +
                     "<li>" +
-                    "  <h3>" + escapeHtml(T("songbook.serviceEmptyTitle", "No service songs yet")) + "</h3>" +
-                    "  <p>" + escapeHtml(T("songbook.serviceEmptyBody", "Tap the church icon on any song to add it here.")) + "</p>" +
+                    "  <h3>" + escapeHtml(T("songbook.serviceEmptyTitle", "No service songs")) + "</h3>" +
+                    "  <p>" + escapeHtml(T("songbook.serviceEmptyBody", "Admin will add songs for the upcoming service.")) + "</p>" +
                     "</li>";
+                visibleSongs = [];
                 return;
             }
             if (activeSongbookTab === "favorite" && !searchQuery.trim()) {
@@ -329,6 +553,7 @@
                     "  <h3>" + escapeHtml(T("songbook.favoriteEmptyTitle", "No favorite songs yet")) + "</h3>" +
                     "  <p>" + escapeHtml(T("songbook.favoriteEmptyBody", "Tap the star icon on any song to save favorites.")) + "</p>" +
                     "</li>";
+                visibleSongs = [];
                 return;
             }
             songbookList.innerHTML = "" +
@@ -336,33 +561,100 @@
                 "  <h3>" + escapeHtml(T("songbook.emptyTitle", "No songs yet")) + "</h3>" +
                 "  <p>" + escapeHtml(T("songbook.emptyBody", "Please try again later.")) + "</p>" +
                 "</li>";
+            visibleSongs = [];
             return;
         }
 
+        visibleSongs = filtered.slice();
+        var isAdmin = isAdminUser();
         songbookList.innerHTML = filtered.map(function (song) {
             var authorPrefix = T("songbook.authorPrefix", "Author");
-            var serviceLabel = isMarked(serviceMap, song.id)
+            var inService = isInService(song.id);
+            var serviceLabel = inService
                 ? T("songbook.removeService", "Remove from service")
                 : T("songbook.addService", "Add to service");
-            var favoriteLabel = isMarked(favoriteMap, song.id)
+            var favoriteLabel = isFavorite(song.id)
                 ? T("songbook.removeFavorite", "Remove favorite")
                 : T("songbook.addFavorite", "Add favorite");
-            var serviceClass = isMarked(serviceMap, song.id) ? "songbook-action-btn active" : "songbook-action-btn";
-            var favoriteClass = isMarked(favoriteMap, song.id) ? "songbook-action-btn active" : "songbook-action-btn";
+            var serviceClass = inService ? "songbook-action-btn active" : "songbook-action-btn";
+            var favoriteClass = isFavorite(song.id) ? "songbook-action-btn active" : "songbook-action-btn";
+            var orderPrefix = (activeSongbookTab === "service" && song.serviceOrder)
+                ? ("<span class=\"songbook-service-order\">" + String(song.serviceOrder) + ".</span>")
+                : "";
+            var actionButtons = [];
+            if (activeSongbookTab !== "service" && isAdmin) {
+                actionButtons.push(
+                    "<button type=\"button\" class=\"" + serviceClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"service\" title=\"" + escapeHtml(serviceLabel) + "\" aria-label=\"" + escapeHtml(serviceLabel) + "\"><i class=\"fa-solid fa-church\"></i></button>"
+                );
+            }
+            if (activeSongbookTab !== "service") {
+                actionButtons.push(
+                    "<button type=\"button\" class=\"" + favoriteClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"favorite\" title=\"" + escapeHtml(favoriteLabel) + "\" aria-label=\"" + escapeHtml(favoriteLabel) + "\"><i class=\"fa-solid fa-star\"></i></button>"
+                );
+            }
+            var actionsHtml = actionButtons.length
+                ? ("<div class=\"songbook-item-actions\">" + actionButtons.join("") + "</div>")
+                : "";
             return "" +
                 "<li class=\"songbook-item\">" +
                 "  <div class=\"songbook-item-row\">" +
                 "    <button type=\"button\" class=\"songbook-open-btn\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
-                "        <h3>" + escapeHtml(song.title) + "</h3>" +
+                "        <h3 class=\"songbook-title-line\">" + orderPrefix + "<span>" + escapeHtml(song.title) + "</span></h3>" +
                 (song.author ? "        <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
                 "    </button>" +
-                "    <div class=\"songbook-item-actions\">" +
-                "      <button type=\"button\" class=\"" + serviceClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"service\" title=\"" + escapeHtml(serviceLabel) + "\" aria-label=\"" + escapeHtml(serviceLabel) + "\"><i class=\"fa-solid fa-church\"></i></button>" +
-                "      <button type=\"button\" class=\"" + favoriteClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"favorite\" title=\"" + escapeHtml(favoriteLabel) + "\" aria-label=\"" + escapeHtml(favoriteLabel) + "\"><i class=\"fa-solid fa-star\"></i></button>" +
-                "    </div>" +
+                actionsHtml +
                 "  </div>" +
                 "</li>";
         }).join("");
+    }
+
+    function setActiveSongbookTab(tab) {
+        activeSongbookTab = (tab === "service" || tab === "favorite") ? tab : "songs";
+        if (songbookTabs && songbookTabs.length) {
+            songbookTabs.forEach(function (tabButton) {
+                var buttonTab = String(tabButton.getAttribute("data-songbook-tab") || "").trim().toLowerCase();
+                var isActive = buttonTab === activeSongbookTab;
+                tabButton.classList.toggle("active", isActive);
+                tabButton.setAttribute("aria-selected", isActive ? "true" : "false");
+            });
+        }
+        renderSongbook();
+    }
+
+    function loadServiceSongs(forceRender) {
+        serviceLoading = true;
+        if (activeSongbookTab === "service") {
+            renderSongbook();
+        }
+        return fetchServiceSongs()
+            .then(function (entries) {
+                serviceSongs = entries;
+                serviceLoadFailed = false;
+            })
+            .catch(function () {
+                serviceSongs = [];
+                serviceLoadFailed = true;
+            })
+            .finally(function () {
+                serviceLoading = false;
+                if (forceRender || activeSongbookTab === "service") {
+                    renderSongbook();
+                }
+            });
+    }
+
+    function toggleSongFlag(action, songId) {
+        if (!songId) {
+            return Promise.resolve();
+        }
+        if (action === "favorite") {
+            toggleFavorite(songId);
+            return Promise.resolve();
+        }
+        if (action === "service") {
+            return toggleServiceSong(songId);
+        }
+        return Promise.resolve();
     }
 
     if (songbookList) {
@@ -371,7 +663,9 @@
             if (actionButton) {
                 var actionSongId = actionButton.getAttribute("data-song-id") || "";
                 var action = actionButton.getAttribute("data-song-action") || "";
-                toggleSongFlag(action, actionSongId);
+                toggleSongFlag(action, actionSongId).catch(function () {
+                    return null;
+                });
                 return;
             }
             var button = event.target.closest("button.songbook-open-btn[data-song-id]");
@@ -382,7 +676,9 @@
             if (!songId) {
                 return;
             }
-            var targetSong = songs.find(function (song) {
+            var targetSong = visibleSongs.find(function (song) {
+                return song.id === songId;
+            }) || songs.find(function (song) {
                 return song.id === songId;
             });
             if (!targetSong) {
@@ -436,11 +732,19 @@
     document.addEventListener("njc:langchange", function () {
         setActiveSongbookTab(activeSongbookTab);
         if (activeSongId) {
-            var activeSong = songs.find(function (song) { return song.id === activeSongId; });
+            var activeSong = visibleSongs.find(function (song) {
+                return song.id === activeSongId;
+            }) || songs.find(function (song) {
+                return song.id === activeSongId;
+            });
             if (activeSong) {
                 openSongFullscreen(activeSong);
             }
         }
+    });
+
+    document.addEventListener("njc:authchange", function () {
+        renderSongbook();
     });
 
     fetchFirestoreSongs()
@@ -460,4 +764,7 @@
             loadFailed = true;
             renderSongbook();
         });
+
+    loadServiceSongs(false);
+    setActiveSongbookTab("songs");
 })();
