@@ -1,21 +1,21 @@
-const APP_CACHE = "njc-app-cache-v54";
-const RUNTIME_CACHE = "njc-runtime-cache-v54";
+const APP_CACHE = "njc-app-cache-v55";
+const RUNTIME_CACHE = "njc-runtime-cache-v55";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260311ax",
-    "./user-auth.js?v=20260311ax",
-    "./app-shell.js?v=20260311ax",
-    "./events-engine.js?v=20260311ax",
-    "./home-page.js?v=20260311ax",
-    "./events-page.js?v=20260311ax",
-    "./sermons-page.js?v=20260311ax",
-    "./songbook-page.js?v=20260311ax",
-    "./contact-page.js?v=20260311ax",
-    "./spa-router.js?v=20260311ax",
-    "./site.webmanifest?v=20260311ax",
-    "./logo.png?v=20260311ax",
+    "./styles.css?v=20260311ay",
+    "./user-auth.js?v=20260311ay",
+    "./app-shell.js?v=20260311ay",
+    "./events-engine.js?v=20260311ay",
+    "./home-page.js?v=20260311ay",
+    "./events-page.js?v=20260311ay",
+    "./sermons-page.js?v=20260311ay",
+    "./songbook-page.js?v=20260311ay",
+    "./contact-page.js?v=20260311ay",
+    "./spa-router.js?v=20260311ay",
+    "./site.webmanifest?v=20260311ay",
+    "./logo.png?v=20260311ay",
     "./announcements.json"
 ];
 
@@ -104,15 +104,29 @@ self.addEventListener("fetch", function (event) {
 
 self.addEventListener("notificationclick", function (event) {
     event.notification.close();
+    const scopeBaseUrl = (self.registration && self.registration.scope)
+        ? self.registration.scope
+        : self.location.href;
     const targetUrl = (event.notification && event.notification.data && event.notification.data.url)
-        ? new URL(event.notification.data.url, self.location.origin).href
-        : new URL("./index.html", self.location.origin).href;
+        ? new URL(event.notification.data.url, scopeBaseUrl).href
+        : new URL("./index.html", scopeBaseUrl).href;
 
     event.waitUntil(
         self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (clientsArr) {
+            const normalizedScope = new URL(scopeBaseUrl).href;
             for (let i = 0; i < clientsArr.length; i += 1) {
                 if (clientsArr[i].url === targetUrl && "focus" in clientsArr[i]) {
                     return clientsArr[i].focus();
+                }
+                if (clientsArr[i].url.indexOf(normalizedScope) === 0) {
+                    if ("navigate" in clientsArr[i]) {
+                        return clientsArr[i].navigate(targetUrl).then(function () {
+                            return clientsArr[i].focus();
+                        });
+                    }
+                    if ("focus" in clientsArr[i]) {
+                        return clientsArr[i].focus();
+                    }
                 }
             }
             if (self.clients.openWindow) {

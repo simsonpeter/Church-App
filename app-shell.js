@@ -827,7 +827,7 @@
                     title: t("notify.eventSoonTitle", "Event reminder"),
                     body: body,
                     tag: notifyKey,
-                    url: "index.html#events"
+                    url: "#events"
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
@@ -905,7 +905,7 @@
                     title: t("notify.newSermonTitle", "New sermon available"),
                     body: latest.title || "Latest message is ready to listen",
                     tag: notifyKey,
-                    url: "index.html#sermons"
+                    url: "#sermons"
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
@@ -993,7 +993,7 @@
                     title: t("notify.newPrayerTitle", "New prayer request posted"),
                     body: bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText,
                     tag: notifyKey,
-                    url: "index.html#prayer"
+                    url: "#prayer"
                 }).then(function (sent) {
                     if (sent) {
                         markAsNotified(notifyKey);
