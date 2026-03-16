@@ -53,6 +53,15 @@
             titleText: "Reach our team",
             subtitleKey: "",
             subtitleText: ""
+        },
+        settings: {
+            icon: "fa-sliders",
+            eyebrowKey: "settings.eyebrow",
+            eyebrowText: "Settings",
+            titleKey: "settings.title",
+            titleText: "Settings",
+            subtitleKey: "",
+            subtitleText: ""
         }
     };
 

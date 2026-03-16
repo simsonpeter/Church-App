@@ -320,7 +320,9 @@
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
         "common.today": "இன்று",
         "settings.open": "அமைப்புகளை திற",
-        "settings.title": "விரைவு அமைப்புகள்",
+        "settings.eyebrow": "அமைப்புகள்",
+        "settings.title": "அமைப்புகள்",
+        "settings.info": "செயலி அமைப்புகள் மற்றும் விருப்பங்கள்.",
         "settings.close": "மூடு"
     };
 
@@ -1386,11 +1388,11 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         panel.appendChild(songbookLink);
 
-        var settingsButton = document.createElement("button");
-        settingsButton.type = "button";
-        settingsButton.className = "header-menu-link header-menu-action";
-        settingsButton.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
-        panel.appendChild(settingsButton);
+        var settingsLink = document.createElement("a");
+        settingsLink.className = "header-menu-link";
+        settingsLink.href = "#settings";
+        settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
+        panel.appendChild(settingsLink);
 
         var authButton = document.createElement("button");
         authButton.type = "button";
@@ -1551,7 +1553,7 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
-            var settingsNode = settingsButton.querySelector("span");
+            var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
             }
@@ -1570,7 +1572,9 @@
                 link.classList.toggle("active", Boolean(route) && route === currentRoute);
             });
             var isSongbook = getCurrentRoute() === "songbook";
+            var isSettings = getCurrentRoute() === "settings";
             songbookLink.classList.toggle("active", isSongbook);
+            settingsLink.classList.toggle("active", isSettings);
             renderNotificationCenter();
         }
 
@@ -1698,14 +1702,6 @@
                 renderNotificationCenter();
             });
         }
-        settingsButton.addEventListener("click", function (event) {
-            event.stopPropagation();
-            closePanel();
-            closeNotificationCenter();
-            if (window.NjcSettingsSheet && typeof window.NjcSettingsSheet.open === "function") {
-                window.NjcSettingsSheet.open();
-            }
-        });
         authButton.addEventListener("click", function (event) {
             event.stopPropagation();
             closePanel();
@@ -1769,8 +1765,9 @@
         });
     }
 
-    function setupSettingsSheet() {
-        if (document.getElementById("settings-sheet")) {
+    function setupSettingsPage() {
+        var controls = document.getElementById("settings-card-controls");
+        if (!controls) {
             return;
         }
 
@@ -1781,36 +1778,7 @@
             return;
         }
 
-        var backdrop = document.createElement("button");
-        backdrop.id = "settings-sheet-backdrop";
-        backdrop.className = "settings-sheet-backdrop";
-        backdrop.type = "button";
-        backdrop.hidden = true;
-        backdrop.setAttribute("aria-hidden", "true");
-
-        var sheet = document.createElement("section");
-        sheet.id = "settings-sheet";
-        sheet.className = "settings-sheet";
-        sheet.hidden = true;
-        sheet.setAttribute("role", "dialog");
-        sheet.setAttribute("aria-modal", "true");
-
-        var sheetHeader = document.createElement("div");
-        sheetHeader.className = "settings-sheet-header";
-
-        var sheetTitle = document.createElement("strong");
-        sheetTitle.className = "settings-sheet-title";
-
-        var closeButton = document.createElement("button");
-        closeButton.type = "button";
-        closeButton.className = "settings-sheet-close";
-        closeButton.innerHTML = "<i class=\"fa-solid fa-xmark\"></i>";
-
-        sheetHeader.appendChild(sheetTitle);
-        sheetHeader.appendChild(closeButton);
-
-        var controls = document.createElement("div");
-        controls.className = "settings-controls";
+        controls.innerHTML = "";
         if (themeButton) {
             controls.appendChild(themeButton);
         }
@@ -1821,62 +1789,10 @@
             controls.appendChild(notifyButton);
         }
 
-        sheet.appendChild(sheetHeader);
-        sheet.appendChild(controls);
-        document.body.appendChild(backdrop);
-        document.body.appendChild(sheet);
-
         var headerControls = document.querySelector(".app-header .header-controls");
         if (headerControls && headerControls.children.length === 0) {
             headerControls.remove();
         }
-
-        function setSettingsLabels() {
-            var titleText = t("settings.title", "Quick settings");
-            var closeLabel = t("settings.close", "Close");
-            sheetTitle.textContent = titleText;
-            closeButton.setAttribute("aria-label", closeLabel);
-            closeButton.title = closeLabel;
-        }
-
-        function closeNotificationPanelIfOpen() {
-            var panel = document.getElementById("notification-quick-panel");
-            if (panel) {
-                panel.hidden = true;
-            }
-            if (notifyButton) {
-                notifyButton.setAttribute("aria-expanded", "false");
-            }
-        }
-
-        function openSheet() {
-            sheet.hidden = false;
-            backdrop.hidden = false;
-        }
-
-        function closeSheet() {
-            sheet.hidden = true;
-            backdrop.hidden = true;
-            closeNotificationPanelIfOpen();
-        }
-
-        setSettingsLabels();
-        closeButton.addEventListener("click", closeSheet);
-        backdrop.addEventListener("click", closeSheet);
-        window.addEventListener("hashchange", closeSheet);
-        document.addEventListener("keydown", function (event) {
-            if (event.key === "Escape" && !sheet.hidden) {
-                closeSheet();
-            }
-        });
-        document.addEventListener("njc:langchange", function () {
-            setSettingsLabels();
-        });
-
-        window.NjcSettingsSheet = {
-            open: openSheet,
-            close: closeSheet
-        };
     }
 
     function setupOfflineBadge() {
@@ -2248,7 +2164,7 @@
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();
-        setupSettingsSheet();
+        setupSettingsPage();
         setupHeaderHamburgerMenu();
         setupOfflineBadge();
         showSplashScreenOnce();
