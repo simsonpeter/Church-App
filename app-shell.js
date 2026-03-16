@@ -8,10 +8,12 @@
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
     var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
+    var NOTIFICATION_LAST_MAILBOX_KEY = "njc_notification_last_mailbox_v1";
     var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
+    var CONTACT_FORM_FEED_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var activeLanguage = "en";
     var notificationIntervalId = null;
@@ -250,7 +252,7 @@
         "songbook.closeView": "மூடி பட்டியலுக்கு திரும்பு",
         "notify.title": "அறிவிப்புகள்",
         "notify.quickOpen": "அறிவிப்பு அமைப்புகள்",
-        "notify.subtitle": "சேவை நினைவூட்டல் மற்றும் புதிய பிரசங்க அறிவிப்புகளைப் பெறுங்கள்.",
+        "notify.subtitle": "சேவை நினைவூட்டல், புதிய பிரசங்கம், ஜெப வேண்டுதல் மற்றும் செய்திகள் பற்றிய அறிவிப்புகளைப் பெறுங்கள்.",
         "notify.statusOn": "அறிவிப்புகள் செயல்பாட்டில் உள்ளன.",
         "notify.statusOff": "அறிவிப்புகள் தற்போது அணைக்கப்பட்டுள்ளன.",
         "notify.statusBlocked": "Browser-ல் அறிவிப்புகள் தடுக்கப்பட்டுள்ளன. Settings-ல் அனுமதி அளிக்கவும்.",
@@ -264,6 +266,7 @@
         "notify.eventSoonTitle": "நிகழ்வு நினைவூட்டல்",
         "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
         "notify.newPrayerTitle": "புதிய ஜெப வேண்டுதல் வந்துள்ளது",
+        "notify.newMailboxTitle": "புதிய செய்தி வந்துள்ளது",
         "notify.menuInbox": "அறிவிப்புகள்",
         "notify.unread": "படிக்காதவை",
         "notify.noneTitle": "புதிய அறிவிப்புகள் இல்லை",
@@ -357,6 +360,13 @@
         "mailbox.loadErrorTitle": "செய்திகளை ஏற்ற முடியவில்லை",
         "mailbox.loadErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
         "mailbox.from": "அனுப்பியவர்",
+        "mailbox.markAllRead": "அனைத்தையும் படித்ததாக குறி",
+        "mailbox.clearRead": "படித்தவற்றை நீக்கு",
+        "mailbox.markRead": "படித்ததாக குறி",
+        "mailbox.markUnread": "படிக்காததாக குறி",
+        "mailbox.read": "படித்தது",
+        "mailbox.unread": "படிக்காதது",
+        "mailbox.noReadToClear": "நீக்க படித்த செய்திகள் இல்லை.",
         "common.at": "மணிக்கு",
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
         "common.today": "இன்று",
@@ -844,6 +854,15 @@
         });
     }
 
+    function isAdminUser() {
+        if (!window.NjcAuth || typeof window.NjcAuth.getUser !== "function") {
+            return false;
+        }
+        var activeUser = window.NjcAuth.getUser();
+        var email = String(activeUser && activeUser.email || "").trim().toLowerCase();
+        return email === ADMIN_EMAIL;
+    }
+
     function diffMinutesFromBrusselsNow(nowBrussels, eventItem) {
         var nowUtc = Date.UTC(nowBrussels.year, nowBrussels.month - 1, nowBrussels.day, nowBrussels.hour, nowBrussels.minute);
         var eventUtc = Date.UTC(eventItem.year, eventItem.month - 1, eventItem.day, eventItem.hour, eventItem.minute);
@@ -1060,6 +1079,97 @@
             });
     }
 
+    function checkNewMailboxNotification(status) {
+        if (!isAdminUser()) {
+            return Promise.resolve(null);
+        }
+        return fetch(CONTACT_FORM_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (response) {
+                if (response.status === 404) {
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error("Unable to load contact messages");
+                }
+                return response.json().then(function (payload) {
+                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                });
+            })
+            .then(function (entries) {
+                if (!entries.length) {
+                    return null;
+                }
+                var sorted = entries.slice().sort(function (a, b) {
+                    var aTime = String((a && (a.updatedAt || a.createdAt)) || "");
+                    var bTime = String((b && (b.updatedAt || b.createdAt)) || "");
+                    return bTime.localeCompare(aTime);
+                });
+                var latest = sorted[0] || {};
+                var latestTime = String(latest.updatedAt || latest.createdAt || "").trim();
+                var latestMessage = String(latest.message || "").trim();
+                if (!latestTime || !latestMessage) {
+                    return null;
+                }
+
+                var latestKey = latestTime + "|" + latestMessage.slice(0, 80);
+                var previousKey = "";
+                try {
+                    previousKey = window.localStorage.getItem(NOTIFICATION_LAST_MAILBOX_KEY) || "";
+                } catch (err) {
+                    previousKey = "";
+                }
+                if (!previousKey) {
+                    try {
+                        window.localStorage.setItem(NOTIFICATION_LAST_MAILBOX_KEY, latestKey);
+                    } catch (err) {
+                        return null;
+                    }
+                    return null;
+                }
+                if (latestKey === previousKey) {
+                    return null;
+                }
+
+                var sender = String(latest.name || "").trim() || String(latest.createdByEmail || "").trim() || "Anonymous";
+                var bodyText = sender + ": " + latestMessage;
+                var compactBody = bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText;
+                var notifyKey = "mailbox:" + latestKey;
+                addInAppNotification({
+                    id: notifyKey,
+                    kind: "mailbox",
+                    title: t("notify.newMailboxTitle", "New message received"),
+                    body: compactBody,
+                    url: "#mailbox",
+                    createdAt: Date.now()
+                });
+
+                try {
+                    window.localStorage.setItem(NOTIFICATION_LAST_MAILBOX_KEY, latestKey);
+                } catch (err) {
+                    return null;
+                }
+
+                var canPush = Boolean(status && status.enabled && status.supported && status.permission === "granted");
+                if (!canPush || wasNotified(notifyKey)) {
+                    return null;
+                }
+                return showNotification({
+                    title: t("notify.newMailboxTitle", "New message received"),
+                    body: compactBody,
+                    tag: notifyKey,
+                    url: "#mailbox"
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
     function runNotificationChecks() {
         var status = getNotificationStatus();
         if (status.supported && status.enabled && status.permission === "granted") {
@@ -1067,6 +1177,7 @@
         }
         checkNewSermonNotification(status);
         checkNewPrayerNotification(status);
+        checkNewMailboxNotification(status);
     }
 
     function startNotificationLoop() {
@@ -1163,6 +1274,9 @@
             if (!document.hidden) {
                 runNotificationChecks();
             }
+        });
+        document.addEventListener("njc:authchange", function () {
+            runNotificationChecks();
         });
     }
 
@@ -1576,7 +1690,12 @@
             notificationCenterClearRead.disabled = readCount === 0;
             var html = items.slice(0, 20).map(function (item) {
                 var route = String(item.url || "#home");
-                var iconClass = item.kind === "prayer" ? "fa-hands-praying" : "fa-podcast";
+                var iconClass = "fa-podcast";
+                if (item.kind === "prayer") {
+                    iconClass = "fa-hands-praying";
+                } else if (item.kind === "mailbox") {
+                    iconClass = "fa-envelope";
+                }
                 var readClass = item.read ? "notification-center-item" : "notification-center-item unread";
                 return "" +
                     "<button type=\"button\" class=\"" + readClass + "\" data-notification-id=\"" + escapeHtml(item.id || "") + "\" data-notification-url=\"" + escapeHtml(route) + "\">" +

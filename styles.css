@@ -1771,15 +1771,34 @@ body.auth-modal-open {
     margin-bottom: 10px;
 }
 
+.admin-mailbox-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.admin-mailbox-note {
+    margin: 0 0 10px;
+}
+
 .mailbox-message-item {
     background: var(--surface-soft);
     border: 1px solid var(--line);
     border-radius: 12px;
 }
 
+.mailbox-message-item.is-unread {
+    border-color: var(--primary-soft);
+}
+
+.mailbox-message-item.is-read {
+    opacity: 0.9;
+}
+
 .mailbox-message-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     gap: 8px;
 }
@@ -1787,6 +1806,17 @@ body.auth-modal-open {
 .mailbox-message-name {
     margin: 0;
     font-size: 0.92rem;
+}
+
+.mailbox-message-state {
+    font-size: 0.7rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.mailbox-message-date {
+    margin: 4px 0 0;
 }
 
 .mailbox-message-email {
@@ -1799,6 +1829,14 @@ body.auth-modal-open {
     margin: 8px 0 0;
     white-space: pre-wrap;
     line-height: 1.45;
+}
+
+.mailbox-message-actions {
+    margin-top: 8px;
+}
+
+.mailbox-toggle-read {
+    font-size: 0.76rem;
 }
 
 .reading-item-title {

@@ -1,10 +1,18 @@
 (function () {
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var CONTACT_FORM_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
+    var CONTACT_MAX_ENTRIES = 250;
+    var MAILBOX_READ_MAP_KEY = "njc_mailbox_read_map_v1";
     var list = document.getElementById("admin-mailbox-list");
     var refreshButton = document.getElementById("admin-mailbox-refresh");
+    var actionRow = null;
+    var markAllReadButton = null;
+    var clearReadButton = null;
+    var actionNote = null;
     var cachedEntries = [];
     var loading = false;
+    var saving = false;
+    var readMap = getStoredReadMap();
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -66,10 +74,158 @@
         refreshButton.textContent = T("mailbox.refresh", "Refresh");
     }
 
+    function getStoredReadMap() {
+        try {
+            var raw = window.localStorage.getItem(MAILBOX_READ_MAP_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function saveReadMap() {
+        var source = readMap && typeof readMap === "object" ? readMap : {};
+        var entries = Object.keys(source).filter(function (key) {
+            return source[key];
+        }).map(function (key) {
+            return { key: key, time: Number(source[key]) || Date.now() };
+        }).sort(function (a, b) {
+            return b.time - a.time;
+        }).slice(0, 800);
+        var compact = {};
+        entries.forEach(function (item) {
+            compact[item.key] = item.time;
+        });
+        readMap = compact;
+        try {
+            window.localStorage.setItem(MAILBOX_READ_MAP_KEY, JSON.stringify(compact));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function getEntryId(entry) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var explicitId = String(source.id || source._id || "").trim();
+        if (explicitId) {
+            return explicitId;
+        }
+        var created = String(source.createdAt || source.updatedAt || "").trim();
+        var email = normalizeEmail(source.createdByEmail || "");
+        var name = normalizeEmail(source.name || "");
+        var message = String(source.message || "").trim().slice(0, 160);
+        return [created, email, name, message].join("|");
+    }
+
+    function isEntryRead(entryId) {
+        return Boolean(readMap[String(entryId || "")]);
+    }
+
+    function setEntryRead(entryId, value) {
+        var key = String(entryId || "");
+        if (!key) {
+            return;
+        }
+        if (value) {
+            readMap[key] = Date.now();
+        } else {
+            delete readMap[key];
+        }
+        saveReadMap();
+    }
+
+    function pruneReadMapByEntries(entries) {
+        var activeIds = {};
+        (Array.isArray(entries) ? entries : []).forEach(function (entry) {
+            var id = getEntryId(entry);
+            if (id) {
+                activeIds[id] = true;
+            }
+        });
+        Object.keys(readMap).forEach(function (key) {
+            if (!activeIds[key]) {
+                delete readMap[key];
+            }
+        });
+        saveReadMap();
+    }
+
+    function getReadCounts(entries) {
+        var source = Array.isArray(entries) ? entries : [];
+        var read = 0;
+        source.forEach(function (entry) {
+            if (isEntryRead(getEntryId(entry))) {
+                read += 1;
+            }
+        });
+        return {
+            read: read,
+            unread: Math.max(0, source.length - read)
+        };
+    }
+
+    function setActionBusyState() {
+        if (!markAllReadButton || !clearReadButton) {
+            return;
+        }
+        var counts = getReadCounts(cachedEntries);
+        markAllReadButton.disabled = loading || saving || counts.unread === 0;
+        clearReadButton.disabled = loading || saving || counts.read === 0;
+    }
+
+    function setActionLabels() {
+        if (!markAllReadButton || !clearReadButton) {
+            return;
+        }
+        markAllReadButton.textContent = T("mailbox.markAllRead", "Mark all read");
+        clearReadButton.textContent = T("mailbox.clearRead", "Clear read");
+    }
+
+    function showActionNote(key, fallback, state) {
+        if (!actionNote) {
+            return;
+        }
+        if (!key) {
+            actionNote.hidden = true;
+            actionNote.textContent = "";
+            actionNote.dataset.state = "";
+            return;
+        }
+        actionNote.hidden = false;
+        actionNote.dataset.state = state || "info";
+        actionNote.textContent = T(key, fallback);
+    }
+
+    function setupActionRow() {
+        if (!refreshButton || actionRow) {
+            return;
+        }
+        actionRow = document.createElement("div");
+        actionRow.className = "admin-mailbox-actions";
+        markAllReadButton = document.createElement("button");
+        markAllReadButton.type = "button";
+        markAllReadButton.className = "button-link";
+        clearReadButton = document.createElement("button");
+        clearReadButton.type = "button";
+        clearReadButton.className = "button-link button-secondary";
+        actionNote = document.createElement("p");
+        actionNote.className = "page-note admin-mailbox-note";
+        actionNote.hidden = true;
+        actionRow.appendChild(markAllReadButton);
+        actionRow.appendChild(clearReadButton);
+        refreshButton.insertAdjacentElement("afterend", actionRow);
+        actionRow.insertAdjacentElement("afterend", actionNote);
+        setActionLabels();
+        setActionBusyState();
+    }
+
     function renderLoading() {
         if (!list) {
             return;
         }
+        setActionBusyState();
         list.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("mailbox.loadingTitle", "Loading messages...")) + "</h3>" +
@@ -81,6 +237,7 @@
         if (!list) {
             return;
         }
+        setActionBusyState();
         list.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("mailbox.accessDenied", "This mailbox is admin only.")) + "</h3>" +
@@ -91,6 +248,7 @@
         if (!list) {
             return;
         }
+        setActionBusyState();
         list.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("mailbox.loadErrorTitle", "Could not load messages")) + "</h3>" +
@@ -108,6 +266,7 @@
             var bTime = String(b && b.createdAt || "");
             return bTime.localeCompare(aTime);
         });
+        setActionBusyState();
         if (!source.length) {
             list.innerHTML = "" +
                 "<li>" +
@@ -118,19 +277,31 @@
         }
 
         var fromLabel = T("mailbox.from", "From");
+        var readLabel = T("mailbox.read", "Read");
+        var unreadLabel = T("mailbox.unread", "Unread");
+        var markReadLabel = T("mailbox.markRead", "Mark read");
+        var markUnreadLabel = T("mailbox.markUnread", "Mark unread");
         list.innerHTML = source.slice(0, 100).map(function (entry) {
             var safeName = String(entry && entry.name || "").trim() || "Anonymous";
             var safeEmail = String(entry && entry.createdByEmail || "").trim();
             var safeMessage = String(entry && entry.message || "").trim();
             var safeDate = formatDate(entry && entry.createdAt);
+            var entryId = getEntryId(entry);
+            var read = isEntryRead(entryId);
+            var toggleLabel = read ? markUnreadLabel : markReadLabel;
+            var stateLabel = read ? readLabel : unreadLabel;
             return "" +
-                "<li class=\"mailbox-message-item\">" +
+                "<li class=\"mailbox-message-item" + (read ? " is-read" : " is-unread") + "\">" +
                 "  <div class=\"mailbox-message-head\">" +
                 "    <h3 class=\"mailbox-message-name\">" + escapeHtml(safeName) + "</h3>" +
-                "    <span class=\"page-note\">" + escapeHtml(safeDate) + "</span>" +
+                "    <span class=\"mailbox-message-state\">" + escapeHtml(stateLabel) + "</span>" +
                 "  </div>" +
+                "  <p class=\"page-note mailbox-message-date\">" + escapeHtml(safeDate) + "</p>" +
                 "  <p class=\"mailbox-message-email\"><strong>" + escapeHtml(fromLabel) + ":</strong> " + escapeHtml(safeEmail || "-") + "</p>" +
                 "  <p class=\"mailbox-message-body\">" + escapeHtml(safeMessage || "-") + "</p>" +
+                "  <div class=\"mailbox-message-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary mailbox-toggle-read\" data-mailbox-id=\"" + escapeHtml(entryId) + "\" data-mailbox-read=\"" + (read ? "1" : "0") + "\">" + escapeHtml(toggleLabel) + "</button>" +
+                "  </div>" +
                 "</li>";
         }).join("");
     }
@@ -149,6 +320,62 @@
         });
     }
 
+    function saveMessages(entries) {
+        var payload = {
+            entries: (Array.isArray(entries) ? entries : []).slice(0, CONTACT_MAX_ENTRIES)
+        };
+        return fetch(CONTACT_FORM_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("Mailbox save failed");
+            }
+            return true;
+        });
+    }
+
+    function markAllReadInMailbox() {
+        if (!cachedEntries.length) {
+            return;
+        }
+        cachedEntries.forEach(function (entry) {
+            setEntryRead(getEntryId(entry), true);
+        });
+        showActionNote("", "", "");
+        renderEntries(cachedEntries);
+    }
+
+    function clearReadInMailbox() {
+        if (saving || loading) {
+            return;
+        }
+        var counts = getReadCounts(cachedEntries);
+        if (counts.read === 0) {
+            showActionNote("mailbox.noReadToClear", "No read messages to clear.", "info");
+            return;
+        }
+        saving = true;
+        showActionNote("", "", "");
+        setActionBusyState();
+        var nextEntries = cachedEntries.filter(function (entry) {
+            return !isEntryRead(getEntryId(entry));
+        });
+        saveMessages(nextEntries).then(function () {
+            cachedEntries = nextEntries;
+            pruneReadMapByEntries(cachedEntries);
+            renderEntries(cachedEntries);
+        }).catch(function () {
+            renderError();
+        }).finally(function () {
+            saving = false;
+            setActionBusyState();
+        });
+    }
+
     function loadMailbox(forceRefresh) {
         if (!list || currentRoute() !== "mailbox") {
             return;
@@ -161,30 +388,64 @@
             return;
         }
         if (!forceRefresh && cachedEntries.length) {
+            showActionNote("", "", "");
             renderEntries(cachedEntries);
             return;
         }
 
         loading = true;
+        showActionNote("", "", "");
+        setActionBusyState();
         renderLoading();
         fetchMessages().then(function (entries) {
             cachedEntries = Array.isArray(entries) ? entries : [];
+            pruneReadMapByEntries(cachedEntries);
             renderEntries(cachedEntries);
         }).catch(function () {
             renderError();
         }).finally(function () {
             loading = false;
+            setActionBusyState();
         });
     }
+
+    setupActionRow();
 
     if (refreshButton) {
         refreshButton.addEventListener("click", function () {
             loadMailbox(true);
         });
     }
+    if (markAllReadButton) {
+        markAllReadButton.addEventListener("click", function () {
+            markAllReadInMailbox();
+        });
+    }
+    if (clearReadButton) {
+        clearReadButton.addEventListener("click", function () {
+            clearReadInMailbox();
+        });
+    }
+    if (list) {
+        list.addEventListener("click", function (event) {
+            var button = event.target.closest(".mailbox-toggle-read");
+            if (!button) {
+                return;
+            }
+            var entryId = String(button.getAttribute("data-mailbox-id") || "").trim();
+            if (!entryId) {
+                return;
+            }
+            var wasRead = button.getAttribute("data-mailbox-read") === "1";
+            setEntryRead(entryId, !wasRead);
+            showActionNote("", "", "");
+            renderEntries(cachedEntries);
+        });
+    }
 
     document.addEventListener("njc:langchange", function () {
         setRefreshLabel();
+        setActionLabels();
         if (currentRoute() === "mailbox") {
             if (!isAdminUser()) {
                 renderDenied();
@@ -215,6 +476,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         setRefreshLabel();
+        setActionLabels();
+        setActionBusyState();
         loadMailbox(false);
     });
 })();
