@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311ba">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311ba">
-    <link rel="manifest" href="site.webmanifest?v=20260311ba">
-    <link rel="stylesheet" href="styles.css?v=20260311ba">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311bb">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311bb">
+    <link rel="manifest" href="site.webmanifest?v=20260311bb">
+    <link rel="stylesheet" href="styles.css?v=20260311bb">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -126,6 +126,24 @@
                     </div>
                 </form>
                 <p class="page-note" id="prayer-wall-note" hidden></p>
+                <div class="prayer-wall-tabs" role="tablist" aria-label="Prayer wall categories">
+                    <button
+                        type="button"
+                        class="prayer-wall-tab active"
+                        id="prayer-wall-tab-urgent"
+                        data-prayer-tab="urgent"
+                        role="tab"
+                        aria-selected="true"
+                        data-i18n="contact.prayerWallTabUrgent">Urgent</button>
+                    <button
+                        type="button"
+                        class="prayer-wall-tab"
+                        id="prayer-wall-tab-other"
+                        data-prayer-tab="other"
+                        role="tab"
+                        aria-selected="false"
+                        data-i18n="contact.prayerWallTabOther">Other Prayers</button>
+                </div>
                 <ul class="list prayer-wall-list" id="prayer-wall-list">
                     <li>
                         <h3 data-i18n="contact.prayerWallLoadingTitle">Loading prayer wall...</h3>
@@ -376,6 +394,8 @@
             </div>
             <div class="prayer-detail-actions">
                 <button type="button" class="prayer-action-btn" id="prayer-detail-pray" data-prayer-id="" data-prayer-action="pray">Prayed (0)</button>
+                <button type="button" class="prayer-action-btn" id="prayer-detail-answered" data-prayer-id="" data-prayer-action="answer">Answered (0)</button>
+                <button type="button" class="prayer-action-btn" id="prayer-detail-thank" data-prayer-id="" data-prayer-action="thank">Thank You (0)</button>
                 <button type="button" class="prayer-action-btn" id="prayer-detail-edit" data-prayer-id="" data-prayer-action="edit" data-i18n="contact.prayerWallEdit">Edit</button>
                 <button type="button" class="prayer-action-btn prayer-action-danger" id="prayer-detail-delete" data-prayer-id="" data-prayer-action="delete" data-i18n="contact.prayerWallDelete">Delete</button>
             </div>
@@ -459,14 +479,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311ba"></script>
-    <script src="app-shell.js?v=20260311ba"></script>
-    <script src="events-engine.js?v=20260311ba"></script>
-    <script src="home-page.js?v=20260311ba"></script>
-    <script src="events-page.js?v=20260311ba"></script>
-    <script src="sermons-page.js?v=20260311ba"></script>
-    <script src="songbook-page.js?v=20260311ba"></script>
-    <script src="contact-page.js?v=20260311ba"></script>
-    <script src="spa-router.js?v=20260311ba"></script>
+    <script src="user-auth.js?v=20260311bb"></script>
+    <script src="app-shell.js?v=20260311bb"></script>
+    <script src="events-engine.js?v=20260311bb"></script>
+    <script src="home-page.js?v=20260311bb"></script>
+    <script src="events-page.js?v=20260311bb"></script>
+    <script src="sermons-page.js?v=20260311bb"></script>
+    <script src="songbook-page.js?v=20260311bb"></script>
+    <script src="contact-page.js?v=20260311bb"></script>
+    <script src="spa-router.js?v=20260311bb"></script>
 </body>
 </html>

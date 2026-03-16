@@ -1855,6 +1855,29 @@ body.auth-modal-open {
     font-size: 0.9rem;
 }
 
+.prayer-wall-tabs {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.prayer-wall-tab {
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+}
+
+.prayer-wall-tab.active {
+    background: var(--primary-soft);
+    border-color: rgba(198, 31, 31, 0.38);
+    color: #a61f1f;
+}
+
 .prayer-form-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1958,6 +1981,18 @@ body.auth-modal-open {
 .prayer-list-open-btn:disabled {
     cursor: not-allowed;
     opacity: 0.62;
+}
+
+.prayer-list-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+    padding: 0 12px 11px;
+}
+
+.prayer-list-item-urgent .prayer-list-actions {
+    padding-left: 16px;
+    padding-right: 16px;
 }
 
 .prayer-list-top {
@@ -2143,7 +2178,7 @@ body.prayer-detail-open {
 .prayer-detail-actions {
     margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 7px;
 }
 

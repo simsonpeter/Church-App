@@ -11,6 +11,7 @@
             var prayerWallOpenButton = document.getElementById("prayer-wall-open-btn");
             var prayerWallCancelButton = document.getElementById("prayer-wall-cancel-btn");
             var prayerWallNote = document.getElementById("prayer-wall-note");
+            var prayerWallTabs = document.querySelectorAll("button[data-prayer-tab]");
             var prayerWallList = document.getElementById("prayer-wall-list");
             var prayerWallSubmit = prayerWallForm ? prayerWallForm.querySelector("button[type=\"submit\"]") : null;
             var prayerDetailOverlay = document.getElementById("prayer-detail-overlay");
@@ -21,6 +22,8 @@
             var prayerDetailDate = document.getElementById("prayer-detail-date");
             var prayerDetailUrgentBadge = document.getElementById("prayer-detail-urgent");
             var prayerDetailPrayButton = document.getElementById("prayer-detail-pray");
+            var prayerDetailAnsweredButton = document.getElementById("prayer-detail-answered");
+            var prayerDetailThankButton = document.getElementById("prayer-detail-thank");
             var prayerDetailEditButton = document.getElementById("prayer-detail-edit");
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
 
@@ -33,6 +36,7 @@
             var prayerWallError = false;
             var prayerWallBusy = false;
             var activePrayerDetailId = "";
+            var activePrayerTab = "urgent";
             var prayerTranslationCache = loadPrayerTranslationCache();
             var prayerTranslationPending = {};
             var prayerTranslationSaveTimerId = null;
@@ -393,11 +397,38 @@
                     anonymous: Boolean(source.anonymous),
                     urgent: Boolean(source.urgent),
                     prayed: Math.max(0, Number(source.prayed || 0) || 0),
+                    answered: Math.max(0, Number(source.answered || 0) || 0),
+                    thanked: Math.max(0, Number(source.thanked || 0) || 0),
                     createdAt: source.createdAt ? String(source.createdAt) : new Date().toISOString(),
                     updatedAt: source.updatedAt ? String(source.updatedAt) : "",
                     createdByUid: String(source.createdByUid || "").trim(),
                     createdByEmail: normalizeEmail(source.createdByEmail)
                 };
+            }
+
+            function getPrayerEntriesForActiveTab(entries) {
+                var source = Array.isArray(entries) ? entries : [];
+                if (activePrayerTab === "other") {
+                    return source.filter(function (entry) {
+                        return !entry.urgent;
+                    });
+                }
+                return source.filter(function (entry) {
+                    return entry.urgent;
+                });
+            }
+
+            function setActivePrayerTab(tab) {
+                activePrayerTab = tab === "other" ? "other" : "urgent";
+                if (prayerWallTabs && prayerWallTabs.length) {
+                    prayerWallTabs.forEach(function (tabButton) {
+                        var tabValue = (tabButton.getAttribute("data-prayer-tab") || "").toLowerCase();
+                        var selected = tabValue === activePrayerTab;
+                        tabButton.classList.toggle("active", selected);
+                        tabButton.setAttribute("aria-selected", selected ? "true" : "false");
+                    });
+                }
+                renderPrayerWall();
             }
 
             function openPrayerComposer() {
@@ -433,6 +464,12 @@
             function setDetailActionPrayerId(prayerId) {
                 if (prayerDetailPrayButton) {
                     prayerDetailPrayButton.setAttribute("data-prayer-id", prayerId || "");
+                }
+                if (prayerDetailAnsweredButton) {
+                    prayerDetailAnsweredButton.setAttribute("data-prayer-id", prayerId || "");
+                }
+                if (prayerDetailThankButton) {
+                    prayerDetailThankButton.setAttribute("data-prayer-id", prayerId || "");
                 }
                 if (prayerDetailEditButton) {
                     prayerDetailEditButton.setAttribute("data-prayer-id", prayerId || "");
@@ -471,6 +508,8 @@
                 }
                 var safeName = getPrayerDisplayName(entry);
                 var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
+                var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})"), Number(entry.answered || 0));
+                var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})"), Number(entry.thanked || 0));
                 if (prayerDetailName) {
                     prayerDetailName.textContent = safeName;
                 }
@@ -492,6 +531,12 @@
                 }
                 if (prayerDetailPrayButton) {
                     prayerDetailPrayButton.textContent = prayedLabel;
+                }
+                if (prayerDetailAnsweredButton) {
+                    prayerDetailAnsweredButton.textContent = answeredLabel;
+                }
+                if (prayerDetailThankButton) {
+                    prayerDetailThankButton.textContent = thankLabel;
                 }
                 var canManage = canManagePrayerEntry(entry);
                 if (prayerDetailEditButton) {
@@ -534,6 +579,9 @@
                 }
                 if (prayerWallList) {
                     prayerWallList.querySelectorAll("button[data-prayer-open-id]").forEach(function (button) {
+                        button.disabled = prayerWallBusy;
+                    });
+                    prayerWallList.querySelectorAll("button[data-prayer-id][data-prayer-action]").forEach(function (button) {
                         button.disabled = prayerWallBusy;
                     });
                 }
@@ -626,13 +674,20 @@
                     return;
                 }
 
-                var entries = getSortedPrayerEntries(prayerWallEntries).slice(0, 25);
+                var sortedEntries = getSortedPrayerEntries(prayerWallEntries).slice(0, 40);
+                var entries = getPrayerEntriesForActiveTab(sortedEntries).slice(0, 25);
                 if (entries.length === 0) {
                     closePrayerDetail();
+                    var noEntryTitle = activePrayerTab === "other"
+                        ? T("contact.prayerWallNoOtherTitle", "No other prayers yet")
+                        : T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now");
+                    var noEntryBody = activePrayerTab === "other"
+                        ? T("contact.prayerWallNoOtherBody", "Other prayer requests will appear here.")
+                        : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.");
                     prayerWallList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(T("contact.prayerWallNoEntriesTitle", "No prayer requests yet")) + "</h3>" +
-                        "  <p>" + escapeHtml(T("contact.prayerWallNoEntriesBody", "Be the first to share a request.")) + "</p>" +
+                        "  <h3>" + escapeHtml(noEntryTitle) + "</h3>" +
+                        "  <p>" + escapeHtml(noEntryBody) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -644,6 +699,8 @@
                     var previewText = toPreviewText(entry.message || "");
                     var urgentText = T("contact.prayerWallUrgentBadge", "Urgent");
                     var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER");
+                    var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})"), Number(entry.answered || 0));
+                    var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})"), Number(entry.thanked || 0));
                     var itemClass = entry.urgent ? "prayer-list-item prayer-list-item-urgent" : "prayer-list-item";
                     var urgentBadge = entry.urgent
                         ? ("<span class=\"prayer-list-urgent-badge\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i>" + escapeHtml(urgentText) + "</span>")
@@ -667,6 +724,10 @@
                         "      <span class=\"prayer-list-chevron\" aria-hidden=\"true\"><i class=\"fa-solid fa-chevron-right\"></i></span>" +
                         "    </div>" +
                         "  </button>" +
+                        "  <div class=\"prayer-list-actions\">" +
+                        "    <button type=\"button\" class=\"prayer-action-btn\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"answer\">" + escapeHtml(answeredLabel) + "</button>" +
+                        "    <button type=\"button\" class=\"prayer-action-btn\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"thank\">" + escapeHtml(thankLabel) + "</button>" +
+                        "  </div>" +
                         "</li>";
                 }).join("");
 
@@ -698,6 +759,14 @@
 
                     if (action === "pray") {
                         targetEntry.prayed = Number(targetEntry.prayed || 0) + 1;
+                        targetEntry.updatedAt = new Date().toISOString();
+                        await savePrayerWallEntries(latestEntries);
+                    } else if (action === "answer") {
+                        targetEntry.answered = Number(targetEntry.answered || 0) + 1;
+                        targetEntry.updatedAt = new Date().toISOString();
+                        await savePrayerWallEntries(latestEntries);
+                    } else if (action === "thank") {
+                        targetEntry.thanked = Number(targetEntry.thanked || 0) + 1;
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
                     } else if (action === "edit") {
@@ -823,6 +892,8 @@
                             anonymous: anonymousValue,
                             urgent: urgentValue,
                             prayed: 0,
+                            answered: 0,
+                            thanked: 0,
                             createdAt: new Date().toISOString(),
                             updatedAt: "",
                             createdByUid: ownerUid,
@@ -865,6 +936,13 @@
 
             if (prayerWallList) {
                 prayerWallList.addEventListener("click", function (event) {
+                    var actionButton = event.target.closest("button[data-prayer-id][data-prayer-action]");
+                    if (actionButton && !prayerWallBusy) {
+                        var targetPrayerId = actionButton.getAttribute("data-prayer-id");
+                        var targetAction = actionButton.getAttribute("data-prayer-action");
+                        runPrayerWallAction(targetPrayerId, targetAction);
+                        return;
+                    }
                     var openButton = event.target.closest("button[data-prayer-open-id]");
                     if (!openButton || prayerWallBusy) {
                         return;
@@ -872,6 +950,15 @@
                     var prayerId = openButton.getAttribute("data-prayer-open-id");
                     openPrayerDetail(prayerId);
                 });
+            }
+
+            if (prayerWallTabs && prayerWallTabs.length) {
+                prayerWallTabs.forEach(function (tabButton) {
+                    tabButton.addEventListener("click", function () {
+                        setActivePrayerTab((tabButton.getAttribute("data-prayer-tab") || "").toLowerCase());
+                    });
+                });
+                setActivePrayerTab("urgent");
             }
 
             if (prayerDetailOverlay) {
