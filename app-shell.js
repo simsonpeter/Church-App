@@ -6,6 +6,7 @@
     var LANGUAGE_KEY = "njc_language_v1";
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
+    var CARD_LANGUAGE_MAP_KEY = "njc_card_language_map_v1";
     var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
     var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
     var NOTIFICATION_LAST_MAILBOX_KEY = "njc_notification_last_mailbox_v1";
@@ -61,6 +62,10 @@
         "auth.invalidEmail": "சரியான மின்னஞ்சலை உள்ளிடவும்.",
         "toggle.language.toTamil": "தமிழுக்கு மாற்று",
         "toggle.language.toEnglish": "Switch to English",
+        "card.languageLabel": "அட்டை மொழி",
+        "card.languageApp": "செயலி",
+        "card.languageEnglish": "ஆங்கிலம்",
+        "card.languageTamil": "தமிழ்",
         "toggle.theme.toLight": "ஒளி நிலைக்கு மாற்று",
         "toggle.theme.toDark": "இருள் நிலைக்கு மாற்று",
         "splash.main": "புதிய எருசலேம் சபை",
@@ -412,11 +417,15 @@
         return activeLanguage === "ta" ? "ta-IN" : "en-GB";
     }
 
-    function t(key, fallback) {
-        if (activeLanguage === "ta" && Object.prototype.hasOwnProperty.call(tamilTranslations, key)) {
+    function translateWithLanguage(language, key, fallback) {
+        if (language === "ta" && Object.prototype.hasOwnProperty.call(tamilTranslations, key)) {
             return tamilTranslations[key];
         }
         return fallback || key;
+    }
+
+    function t(key, fallback) {
+        return translateWithLanguage(activeLanguage, key, fallback);
     }
 
     function escapeHtml(value) {
@@ -432,8 +441,9 @@
         return String(template).replace("{count}", String(count));
     }
 
-    function applyTranslations(root) {
+    function applyTranslations(root, forcedLanguage) {
         var scope = root || document;
+        var language = forcedLanguage === "ta" ? "ta" : (forcedLanguage === "en" ? "en" : activeLanguage);
 
         scope.querySelectorAll("[data-i18n]").forEach(function (node) {
             var key = node.getAttribute("data-i18n");
@@ -441,7 +451,7 @@
                 node.setAttribute("data-i18n-fallback", node.textContent);
             }
             var fallback = node.getAttribute("data-i18n-fallback") || "";
-            node.textContent = t(key, fallback);
+            node.textContent = translateWithLanguage(language, key, fallback);
         });
 
         scope.querySelectorAll("[data-i18n-aria-label]").forEach(function (node) {
@@ -450,7 +460,7 @@
                 node.setAttribute("data-i18n-aria-fallback", node.getAttribute("aria-label") || "");
             }
             var fallback = node.getAttribute("data-i18n-aria-fallback") || "";
-            node.setAttribute("aria-label", t(key, fallback));
+            node.setAttribute("aria-label", translateWithLanguage(language, key, fallback));
         });
 
         scope.querySelectorAll("[data-i18n-title]").forEach(function (node) {
@@ -459,7 +469,7 @@
                 node.setAttribute("data-i18n-title-fallback", node.getAttribute("title") || "");
             }
             var fallback = node.getAttribute("data-i18n-title-fallback") || "";
-            node.setAttribute("title", t(key, fallback));
+            node.setAttribute("title", translateWithLanguage(language, key, fallback));
         });
 
         scope.querySelectorAll("[data-i18n-placeholder]").forEach(function (node) {
@@ -468,7 +478,7 @@
                 node.setAttribute("data-i18n-placeholder-fallback", node.getAttribute("placeholder") || "");
             }
             var fallback = node.getAttribute("data-i18n-placeholder-fallback") || "";
-            node.setAttribute("placeholder", t(key, fallback));
+            node.setAttribute("placeholder", translateWithLanguage(language, key, fallback));
         });
     }
 
@@ -539,6 +549,180 @@
         });
 
         ensureHeaderControls(header).appendChild(button);
+    }
+
+    function getStoredCardLanguageMap() {
+        try {
+            var raw = window.localStorage.getItem(CARD_LANGUAGE_MAP_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function normalizeCardLanguageChoice(choice) {
+        if (choice === "en" || choice === "ta") {
+            return choice;
+        }
+        return "app";
+    }
+
+    function saveCardLanguageMap(map) {
+        var source = map && typeof map === "object" ? map : {};
+        var keys = Object.keys(source).slice(0, 120);
+        var next = {};
+        keys.forEach(function (key) {
+            var normalized = normalizeCardLanguageChoice(source[key]);
+            if (normalized === "en" || normalized === "ta") {
+                next[key] = normalized;
+            }
+        });
+        try {
+            window.localStorage.setItem(CARD_LANGUAGE_MAP_KEY, JSON.stringify(next));
+        } catch (err) {
+            return null;
+        }
+        return next;
+    }
+
+    function getCardLanguageChoice(cardId, languageMap) {
+        if (!cardId) {
+            return "app";
+        }
+        var map = languageMap && typeof languageMap === "object" ? languageMap : getStoredCardLanguageMap();
+        return normalizeCardLanguageChoice(map[cardId]);
+    }
+
+    function getCardEffectiveLanguage(cardId, languageMap) {
+        var choice = getCardLanguageChoice(cardId, languageMap);
+        return choice === "app" ? activeLanguage : choice;
+    }
+
+    function getCardLanguageButtonLabel(choice) {
+        if (choice === "ta") {
+            return t("card.languageTamil", "Tamil");
+        }
+        if (choice === "en") {
+            return t("card.languageEnglish", "English");
+        }
+        return t("card.languageApp", "App");
+    }
+
+    function setupCardLanguageSwitchers() {
+        var cards = Array.prototype.slice.call(document.querySelectorAll(".page-view .card"));
+        if (!cards.length) {
+            return;
+        }
+        var cardLanguageMap = getStoredCardLanguageMap();
+
+        function getCardId(card, index) {
+            var existing = String(card.getAttribute("data-card-lang-id") || "").trim();
+            if (existing) {
+                return existing;
+            }
+            var route = "global";
+            var pageView = card.closest(".page-view");
+            if (pageView) {
+                route = String(pageView.getAttribute("data-route") || "global").trim().toLowerCase() || "global";
+            }
+            var generated = "card-" + route + "-" + String(index + 1);
+            card.setAttribute("data-card-lang-id", generated);
+            return generated;
+        }
+
+        function refreshCardSwitcherUi(switcher, choice) {
+            if (!switcher) {
+                return;
+            }
+            var buttons = switcher.querySelectorAll(".card-lang-btn");
+            buttons.forEach(function (button) {
+                var buttonChoice = String(button.getAttribute("data-card-lang") || "app");
+                var isActive = buttonChoice === choice;
+                button.classList.toggle("active", isActive);
+                button.setAttribute("aria-pressed", isActive ? "true" : "false");
+                button.title = getCardLanguageButtonLabel(buttonChoice);
+            });
+        }
+
+        function applyCardLanguage(card) {
+            if (!card) {
+                return;
+            }
+            var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
+            if (!cardId) {
+                return;
+            }
+            var choice = getCardLanguageChoice(cardId, cardLanguageMap);
+            var effectiveLanguage = getCardEffectiveLanguage(cardId, cardLanguageMap);
+            applyTranslations(card, effectiveLanguage);
+            var switcher = card.querySelector(".card-lang-switch");
+            refreshCardSwitcherUi(switcher, choice);
+        }
+
+        function buildCardSwitcher(card, index) {
+            if (!card || card.tagName === "A") {
+                return;
+            }
+            var cardId = getCardId(card, index);
+            if (card.querySelector(".card-lang-switch")) {
+                applyCardLanguage(card);
+                return;
+            }
+            var wrap = document.createElement("div");
+            wrap.className = "card-lang-switch";
+            wrap.setAttribute("data-card-lang-id", cardId);
+            wrap.setAttribute("role", "group");
+            wrap.setAttribute("aria-label", t("card.languageLabel", "Card language"));
+            wrap.innerHTML = "" +
+                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"app\">APP</button>" +
+                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"en\">EN</button>" +
+                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"ta\">TA</button>";
+
+            wrap.addEventListener("click", function (event) {
+                var button = event.target.closest(".card-lang-btn");
+                if (!button) {
+                    return;
+                }
+                var nextChoice = normalizeCardLanguageChoice(button.getAttribute("data-card-lang"));
+                if (nextChoice === "app") {
+                    delete cardLanguageMap[cardId];
+                } else {
+                    cardLanguageMap[cardId] = nextChoice;
+                }
+                cardLanguageMap = saveCardLanguageMap(cardLanguageMap) || cardLanguageMap;
+                applyCardLanguage(card);
+            });
+
+            card.classList.add("card-has-lang-switch");
+            var firstChild = card.firstElementChild;
+            if (firstChild && (firstChild.tagName === "H2" || firstChild.classList.contains("daily-verse-top"))) {
+                firstChild.insertAdjacentElement("afterend", wrap);
+            } else {
+                card.insertAdjacentElement("afterbegin", wrap);
+            }
+            applyCardLanguage(card);
+        }
+
+        function refreshAllCardLanguages() {
+            cards.forEach(function (card) {
+                applyCardLanguage(card);
+            });
+        }
+
+        cards.forEach(function (card, index) {
+            buildCardSwitcher(card, index);
+        });
+        refreshAllCardLanguages();
+        document.addEventListener("njc:langchange", function () {
+            cards.forEach(function (card) {
+                var switcher = card.querySelector(".card-lang-switch");
+                if (switcher) {
+                    switcher.setAttribute("aria-label", t("card.languageLabel", "Card language"));
+                }
+            });
+            refreshAllCardLanguages();
+        });
     }
 
     function isNavigableAnchor(anchor) {
@@ -2445,6 +2629,7 @@
         setupNotificationQuickButton();
         setupSettingsPage();
         setupHeaderHamburgerMenu();
+        setupCardLanguageSwitchers();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();
