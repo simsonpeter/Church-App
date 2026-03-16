@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bd">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bd">
-    <link rel="manifest" href="site.webmanifest?v=20260311bd">
-    <link rel="stylesheet" href="styles.css?v=20260311bd">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311be">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311be">
+    <link rel="manifest" href="site.webmanifest?v=20260311be">
+    <link rel="stylesheet" href="styles.css?v=20260311be">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -319,6 +319,29 @@
             <main class="app-content">
             <section class="card">
                 <h2><i class="fa-solid fa-music"></i><span data-i18n="songbook.title">NJC Songbook</span></h2>
+                <div class="songbook-tabs" role="tablist" aria-label="Songbook categories">
+                    <button
+                        type="button"
+                        class="songbook-tab active"
+                        data-songbook-tab="songs"
+                        role="tab"
+                        aria-selected="true"
+                        data-i18n="songbook.tabSongs">Songs</button>
+                    <button
+                        type="button"
+                        class="songbook-tab"
+                        data-songbook-tab="service"
+                        role="tab"
+                        aria-selected="false"
+                        data-i18n="songbook.tabService">Service</button>
+                    <button
+                        type="button"
+                        class="songbook-tab"
+                        data-songbook-tab="favorite"
+                        role="tab"
+                        aria-selected="false"
+                        data-i18n="songbook.tabFavorite">Favorite</button>
+                </div>
                 <div class="search-row">
                     <input
                         id="songbook-search"
@@ -495,15 +518,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bd"></script>
-    <script src="app-shell.js?v=20260311bd"></script>
-    <script src="events-engine.js?v=20260311bd"></script>
-    <script src="home-page.js?v=20260311bd"></script>
-    <script src="events-page.js?v=20260311bd"></script>
-    <script src="sermons-page.js?v=20260311bd"></script>
-    <script src="songbook-page.js?v=20260311bd"></script>
-    <script src="contact-page.js?v=20260311bd"></script>
-    <script src="admin-mailbox-page.js?v=20260311bd"></script>
-    <script src="spa-router.js?v=20260311bd"></script>
+    <script src="user-auth.js?v=20260311be"></script>
+    <script src="app-shell.js?v=20260311be"></script>
+    <script src="events-engine.js?v=20260311be"></script>
+    <script src="home-page.js?v=20260311be"></script>
+    <script src="events-page.js?v=20260311be"></script>
+    <script src="sermons-page.js?v=20260311be"></script>
+    <script src="songbook-page.js?v=20260311be"></script>
+    <script src="contact-page.js?v=20260311be"></script>
+    <script src="admin-mailbox-page.js?v=20260311be"></script>
+    <script src="spa-router.js?v=20260311be"></script>
 </body>
 </html>

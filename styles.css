@@ -1003,6 +1003,36 @@ button.button-link:disabled {
     gap: 8px;
 }
 
+.songbook-tabs {
+    margin-bottom: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.songbook-tab {
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 8px 10px;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.songbook-tab.active {
+    background: var(--primary-soft);
+    border-color: rgba(198, 31, 31, 0.38);
+    color: #a61f1f;
+}
+
+.songbook-item-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px;
+}
+
 .songbook-open-btn {
     width: 100%;
     border: 0;
@@ -1012,6 +1042,29 @@ button.button-link:disabled {
     font: inherit;
     padding: 0;
     cursor: pointer;
+}
+
+.songbook-item-actions {
+    display: grid;
+    gap: 6px;
+}
+
+.songbook-action-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--muted);
+    display: grid;
+    place-items: center;
+    font-size: 0.8rem;
+}
+
+.songbook-action-btn.active {
+    color: #a61f1f;
+    border-color: rgba(198, 31, 31, 0.45);
+    background: rgba(198, 31, 31, 0.12);
 }
 
 .songbook-open-btn h3 {
