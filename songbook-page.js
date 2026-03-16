@@ -566,27 +566,16 @@
         }
 
         visibleSongs = filtered.slice();
-        var isAdmin = isAdminUser();
         songbookList.innerHTML = filtered.map(function (song) {
             var authorPrefix = T("songbook.authorPrefix", "Author");
-            var inService = isInService(song.id);
-            var serviceLabel = inService
-                ? T("songbook.removeService", "Remove from service")
-                : T("songbook.addService", "Add to service");
             var favoriteLabel = isFavorite(song.id)
                 ? T("songbook.removeFavorite", "Remove favorite")
                 : T("songbook.addFavorite", "Add favorite");
-            var serviceClass = inService ? "songbook-action-btn active" : "songbook-action-btn";
             var favoriteClass = isFavorite(song.id) ? "songbook-action-btn active" : "songbook-action-btn";
             var orderPrefix = (activeSongbookTab === "service" && song.serviceOrder)
                 ? ("<span class=\"songbook-service-order\">" + String(song.serviceOrder) + ".</span>")
                 : "";
             var actionButtons = [];
-            if (activeSongbookTab === "service" && isAdmin) {
-                actionButtons.push(
-                    "<button type=\"button\" class=\"" + serviceClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"service\" title=\"" + escapeHtml(serviceLabel) + "\" aria-label=\"" + escapeHtml(serviceLabel) + "\"><i class=\"fa-solid fa-church\"></i></button>"
-                );
-            }
             if (activeSongbookTab !== "service") {
                 actionButtons.push(
                     "<button type=\"button\" class=\"" + favoriteClass + "\" data-song-id=\"" + escapeHtml(song.id) + "\" data-song-action=\"favorite\" title=\"" + escapeHtml(favoriteLabel) + "\" aria-label=\"" + escapeHtml(favoriteLabel) + "\"><i class=\"fa-solid fa-star\"></i></button>"
