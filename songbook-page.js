@@ -2,6 +2,7 @@
     var songbookList = document.getElementById("songbook-list");
     var songbookSearch = document.getElementById("songbook-search");
     var songbookTabs = document.querySelectorAll("button[data-songbook-tab]");
+    var songbookScriptButtons = document.querySelectorAll("button[data-songbook-script]");
     var songbookFullscreen = document.getElementById("songbook-fullscreen");
     var songbookFullscreenClose = document.getElementById("songbook-fullscreen-close");
     var songbookFullscreenTitle = document.getElementById("songbook-fullscreen-title");
@@ -11,6 +12,7 @@
     var FIRESTORE_SERVICE_URL = "https://firestore.googleapis.com/v1/projects/songbook-add54/databases/(default)/documents/serviceSongs";
     var SONGBOOK_FALLBACK_URL = "https://raw.githubusercontent.com/simsonpeter/njcsongbook/main/songs.json";
     var SONGBOOK_FAVORITES_KEY = "njc_songbook_favorites_v1";
+    var SONGBOOK_SCRIPT_KEY = "njc_songbook_script_mode_v1";
     var FIRESTORE_PAGE_SIZE = 300;
     var FIRESTORE_MAX_PAGES = 25;
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
@@ -25,6 +27,7 @@
     var searchQuery = "";
     var activeSongbookTab = "songs";
     var favoriteMap = getStoredFlagMap(SONGBOOK_FAVORITES_KEY);
+    var scriptMode = getStoredScriptMode();
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -47,8 +50,80 @@
         return "en";
     }
 
+    function getStoredScriptMode() {
+        try {
+            var raw = String(window.localStorage.getItem(SONGBOOK_SCRIPT_KEY) || "").trim().toLowerCase();
+            if (raw === "tamil" || raw === "romanized") {
+                return raw;
+            }
+        } catch (err) {
+            return "";
+        }
+        return "";
+    }
+
+    function saveStoredScriptMode(mode) {
+        try {
+            if (!mode) {
+                window.localStorage.removeItem(SONGBOOK_SCRIPT_KEY);
+                return;
+            }
+            window.localStorage.setItem(SONGBOOK_SCRIPT_KEY, mode);
+        } catch (err) {
+            return;
+        }
+    }
+
+    function getEffectiveScriptMode() {
+        if (scriptMode === "tamil" || scriptMode === "romanized") {
+            return scriptMode;
+        }
+        return getLanguage() === "en" ? "romanized" : "tamil";
+    }
+
     function preferRomanized() {
-        return getLanguage() === "en";
+        return getEffectiveScriptMode() === "romanized";
+    }
+
+    function updateScriptSwitcherUI() {
+        var activeMode = getEffectiveScriptMode();
+        if (!songbookScriptButtons || !songbookScriptButtons.length) {
+            return;
+        }
+        songbookScriptButtons.forEach(function (button) {
+            var mode = String(button.getAttribute("data-songbook-script") || "").trim().toLowerCase();
+            var isActive = mode === activeMode;
+            button.classList.toggle("active", isActive);
+            button.setAttribute("aria-pressed", isActive ? "true" : "false");
+        });
+    }
+
+    function reopenActiveSongIfOpen() {
+        if (!activeSongId) {
+            return;
+        }
+        var activeSong = visibleSongs.find(function (song) {
+            return song.id === activeSongId;
+        }) || songs.find(function (song) {
+            return song.id === activeSongId;
+        });
+        if (activeSong) {
+            openSongFullscreen(activeSong);
+        }
+    }
+
+    function setSongbookScriptMode(mode, persist) {
+        var normalized = String(mode || "").trim().toLowerCase();
+        if (normalized !== "tamil" && normalized !== "romanized") {
+            normalized = "";
+        }
+        scriptMode = normalized;
+        if (persist) {
+            saveStoredScriptMode(normalized);
+        }
+        updateScriptSwitcherUI();
+        renderSongbook();
+        reopenActiveSongIfOpen();
     }
 
     function getCurrentUser() {
@@ -459,8 +534,10 @@
                 return {
                     id: normalized.id,
                     title: normalized.title,
+                    titleRomanized: normalized.titleRomanized,
                     author: normalized.author,
                     lyrics: normalized.lyrics,
+                    lyricsRomanized: normalized.lyricsRomanized,
                     serviceOrder: index + 1
                 };
             });
@@ -733,6 +810,15 @@
         });
     }
 
+    if (songbookScriptButtons && songbookScriptButtons.length) {
+        songbookScriptButtons.forEach(function (button) {
+            button.addEventListener("click", function () {
+                var targetMode = button.getAttribute("data-songbook-script");
+                setSongbookScriptMode(targetMode, true);
+            });
+        });
+    }
+
     if (songbookFullscreenClose) {
         songbookFullscreenClose.addEventListener("click", function () {
             closeSongFullscreen();
@@ -760,17 +846,11 @@
     });
 
     document.addEventListener("njc:langchange", function () {
-        setActiveSongbookTab(activeSongbookTab);
-        if (activeSongId) {
-            var activeSong = visibleSongs.find(function (song) {
-                return song.id === activeSongId;
-            }) || songs.find(function (song) {
-                return song.id === activeSongId;
-            });
-            if (activeSong) {
-                openSongFullscreen(activeSong);
-            }
+        if (!scriptMode) {
+            updateScriptSwitcherUI();
         }
+        setActiveSongbookTab(activeSongbookTab);
+        reopenActiveSongIfOpen();
     });
 
     document.addEventListener("njc:authchange", function () {
@@ -796,5 +876,6 @@
         });
 
     loadServiceSongs(false);
+    updateScriptSwitcherUI();
     setActiveSongbookTab("songs");
 })();

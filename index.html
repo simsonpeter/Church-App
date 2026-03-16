@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bi">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bi">
-    <link rel="manifest" href="site.webmanifest?v=20260311bi">
-    <link rel="stylesheet" href="styles.css?v=20260311bi">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311bj">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311bj">
+    <link rel="manifest" href="site.webmanifest?v=20260311bj">
+    <link rel="stylesheet" href="styles.css?v=20260311bj">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -348,6 +348,25 @@
                         <span data-i18n="songbook.tabFavorite">Favorite</span>
                     </button>
                 </div>
+                <div class="songbook-script-switch" role="group" aria-label="Songbook script">
+                    <span class="songbook-script-label" data-i18n="songbook.scriptLabel">Script</span>
+                    <div class="songbook-script-buttons">
+                        <button
+                            type="button"
+                            class="songbook-script-btn"
+                            data-songbook-script="tamil"
+                            aria-pressed="false">
+                            <span data-i18n="songbook.scriptTamil">Tamil</span>
+                        </button>
+                        <button
+                            type="button"
+                            class="songbook-script-btn"
+                            data-songbook-script="romanized"
+                            aria-pressed="true">
+                            <span data-i18n="songbook.scriptRomanized">Romanized</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="search-row">
                     <input
                         id="songbook-search"
@@ -524,15 +543,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bi"></script>
-    <script src="app-shell.js?v=20260311bi"></script>
-    <script src="events-engine.js?v=20260311bi"></script>
-    <script src="home-page.js?v=20260311bi"></script>
-    <script src="events-page.js?v=20260311bi"></script>
-    <script src="sermons-page.js?v=20260311bi"></script>
-    <script src="songbook-page.js?v=20260311bi"></script>
-    <script src="contact-page.js?v=20260311bi"></script>
-    <script src="admin-mailbox-page.js?v=20260311bi"></script>
-    <script src="spa-router.js?v=20260311bi"></script>
+    <script src="user-auth.js?v=20260311bj"></script>
+    <script src="app-shell.js?v=20260311bj"></script>
+    <script src="events-engine.js?v=20260311bj"></script>
+    <script src="home-page.js?v=20260311bj"></script>
+    <script src="events-page.js?v=20260311bj"></script>
+    <script src="sermons-page.js?v=20260311bj"></script>
+    <script src="songbook-page.js?v=20260311bj"></script>
+    <script src="contact-page.js?v=20260311bj"></script>
+    <script src="admin-mailbox-page.js?v=20260311bj"></script>
+    <script src="spa-router.js?v=20260311bj"></script>
 </body>
 </html>

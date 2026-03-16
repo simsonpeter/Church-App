@@ -1010,6 +1010,42 @@ button.button-link:disabled {
     gap: 8px;
 }
 
+.songbook-script-switch {
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.songbook-script-label {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 600;
+}
+
+.songbook-script-buttons {
+    display: inline-grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+}
+
+.songbook-script-btn {
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.songbook-script-btn.active {
+    background: var(--primary-soft);
+    border-color: rgba(198, 31, 31, 0.38);
+    color: #a61f1f;
+}
+
 .songbook-tab {
     border: 1px solid var(--line);
     background: var(--surface-soft);
