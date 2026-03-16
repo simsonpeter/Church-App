@@ -12,6 +12,7 @@
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var activeLanguage = "en";
     var notificationIntervalId = null;
     var tamilTranslations = {
@@ -27,6 +28,7 @@
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
         "menu.songbook": "பாடல் தொகுப்பு",
+        "menu.mailbox": "அஞ்சல் பெட்டி",
         "menu.settings": "அமைப்புகள்",
         "menu.login": "உள்நுழை / பதிவு",
         "menu.logout": "வெளியேறு",
@@ -326,6 +328,18 @@
         "contact.prayerWallSyncError": "ஜெப சுவரை ஒத்திசைக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.prayerWallLoadErrorTitle": "ஜெப சுவரை ஏற்ற முடியவில்லை",
         "contact.prayerWallLoadErrorBody": "இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+        "mailbox.eyebrow": "அஞ்சல் பெட்டி",
+        "mailbox.title": "நிர்வாக அஞ்சல் பெட்டி",
+        "mailbox.info": "Share with Us படிவத்தில் வரும் செய்திகள் இங்கே.",
+        "mailbox.refresh": "புதுப்பி",
+        "mailbox.loadingTitle": "செய்திகள் ஏற்றப்படுகிறது...",
+        "mailbox.loadingBody": "தயவுசெய்து காத்திருக்கவும்.",
+        "mailbox.emptyTitle": "செய்திகள் இல்லை",
+        "mailbox.emptyBody": "புதிய செய்திகள் வந்தால் இங்கே தெரியும்.",
+        "mailbox.accessDenied": "இந்த அஞ்சல் பெட்டி நிர்வாகிக்கு மட்டும்.",
+        "mailbox.loadErrorTitle": "செய்திகளை ஏற்ற முடியவில்லை",
+        "mailbox.loadErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+        "mailbox.from": "அனுப்பியவர்",
         "common.at": "மணிக்கு",
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
         "common.today": "இன்று",
@@ -1409,6 +1423,13 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         panel.appendChild(songbookLink);
 
+        var mailboxLink = document.createElement("a");
+        mailboxLink.className = "header-menu-link";
+        mailboxLink.href = "#mailbox";
+        mailboxLink.innerHTML = "<i class=\"fa-solid fa-inbox\"></i><span></span>";
+        mailboxLink.hidden = true;
+        panel.appendChild(mailboxLink);
+
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
         settingsLink.href = "#settings";
@@ -1559,10 +1580,12 @@
             var titleText = t("menu.title", "Menu");
             var closeText = t("menu.close", "Close menu");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var mailboxLabel = t("menu.mailbox", "Mailbox");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var isLoggedIn = Boolean(activeUser && activeUser.uid);
+            var isAdmin = String(activeUser && activeUser.email || "").trim().toLowerCase() === ADMIN_EMAIL;
             var authLabel = isLoggedIn ? t("menu.logout", "Logout") : t("menu.login", "Login / Register");
             var authIconClass = isLoggedIn ? "fa-right-from-bracket" : "fa-right-to-bracket";
             button.setAttribute("aria-label", openLabel);
@@ -1574,6 +1597,11 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var mailboxNode = mailboxLink.querySelector("span");
+            if (mailboxNode) {
+                mailboxNode.textContent = mailboxLabel;
+            }
+            mailboxLink.hidden = !isAdmin;
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -1593,8 +1621,10 @@
                 link.classList.toggle("active", Boolean(route) && route === currentRoute);
             });
             var isSongbook = getCurrentRoute() === "songbook";
+            var isMailbox = getCurrentRoute() === "mailbox";
             var isSettings = getCurrentRoute() === "settings";
             songbookLink.classList.toggle("active", isSongbook);
+            mailboxLink.classList.toggle("active", isMailbox);
             settingsLink.classList.toggle("active", isSettings);
             renderNotificationCenter();
         }

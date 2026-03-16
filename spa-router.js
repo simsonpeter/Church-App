@@ -1,4 +1,5 @@
 (function () {
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var routes = {
         home: {
             icon: "fa-church",
@@ -62,6 +63,15 @@
             titleText: "Settings",
             subtitleKey: "",
             subtitleText: ""
+        },
+        mailbox: {
+            icon: "fa-inbox",
+            eyebrowKey: "mailbox.eyebrow",
+            eyebrowText: "Mailbox",
+            titleKey: "mailbox.title",
+            titleText: "Admin Mailbox",
+            subtitleKey: "",
+            subtitleText: ""
         }
     };
 
@@ -72,10 +82,22 @@
         return fallback || key;
     }
 
+    function isAdminUser() {
+        if (!window.NjcAuth || typeof window.NjcAuth.getUser !== "function") {
+            return false;
+        }
+        var activeUser = window.NjcAuth.getUser();
+        var email = String(activeUser && activeUser.email || "").trim().toLowerCase();
+        return email === ADMIN_EMAIL;
+    }
+
     function getRouteFromHash() {
         var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (raw === "about") {
             return "prayer";
+        }
+        if (raw === "mailbox" && !isAdminUser()) {
+            return "home";
         }
         return routes[raw] ? raw : "home";
     }
@@ -129,4 +151,5 @@
 
     window.addEventListener("hashchange", onRouteChange);
     document.addEventListener("njc:langchange", onRouteChange);
+    document.addEventListener("njc:authchange", onRouteChange);
 })();

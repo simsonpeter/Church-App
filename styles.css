@@ -1657,6 +1657,40 @@ body.auth-modal-open {
     font-size: 0.7rem;
 }
 
+#admin-mailbox-refresh {
+    margin-bottom: 10px;
+}
+
+.mailbox-message-item {
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.mailbox-message-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.mailbox-message-name {
+    margin: 0;
+    font-size: 0.92rem;
+}
+
+.mailbox-message-email {
+    margin: 6px 0 0;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.mailbox-message-body {
+    margin: 8px 0 0;
+    white-space: pre-wrap;
+    line-height: 1.45;
+}
+
 .reading-item-title {
     display: flex;
     align-items: center;

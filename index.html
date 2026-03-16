@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bc">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bc">
-    <link rel="manifest" href="site.webmanifest?v=20260311bc">
-    <link rel="stylesheet" href="styles.css?v=20260311bc">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311bd">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311bd">
+    <link rel="manifest" href="site.webmanifest?v=20260311bd">
+    <link rel="stylesheet" href="styles.css?v=20260311bd">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -347,6 +347,22 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="mailbox">
+            <main class="app-content">
+            <section class="card">
+                <h2><i class="fa-solid fa-inbox"></i><span data-i18n="mailbox.title">Admin Mailbox</span></h2>
+                <p class="page-note" data-i18n="mailbox.info">Messages from Share with Us form appear here.</p>
+                <button class="button-link button-secondary" id="admin-mailbox-refresh" type="button" data-i18n="mailbox.refresh">Refresh</button>
+                <ul class="list" id="admin-mailbox-list">
+                    <li>
+                        <h3 data-i18n="mailbox.loadingTitle">Loading messages...</h3>
+                        <p data-i18n="mailbox.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+            </main>
+        </section>
+
         <nav class="tab-nav">
             <a class="tab active" data-route="home" href="#home"><span class="tab-icon"><i class="fa-solid fa-house"></i></span><span class="tab-label" data-i18n="nav.home">Home</span></a>
             <a class="tab" data-route="prayer" href="#prayer"><span class="tab-icon"><i class="fa-solid fa-hands-praying"></i></span><span class="tab-label" data-i18n="nav.prayer">Prayer</span></a>
@@ -479,14 +495,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bc"></script>
-    <script src="app-shell.js?v=20260311bc"></script>
-    <script src="events-engine.js?v=20260311bc"></script>
-    <script src="home-page.js?v=20260311bc"></script>
-    <script src="events-page.js?v=20260311bc"></script>
-    <script src="sermons-page.js?v=20260311bc"></script>
-    <script src="songbook-page.js?v=20260311bc"></script>
-    <script src="contact-page.js?v=20260311bc"></script>
-    <script src="spa-router.js?v=20260311bc"></script>
+    <script src="user-auth.js?v=20260311bd"></script>
+    <script src="app-shell.js?v=20260311bd"></script>
+    <script src="events-engine.js?v=20260311bd"></script>
+    <script src="home-page.js?v=20260311bd"></script>
+    <script src="events-page.js?v=20260311bd"></script>
+    <script src="sermons-page.js?v=20260311bd"></script>
+    <script src="songbook-page.js?v=20260311bd"></script>
+    <script src="contact-page.js?v=20260311bd"></script>
+    <script src="admin-mailbox-page.js?v=20260311bd"></script>
+    <script src="spa-router.js?v=20260311bd"></script>
 </body>
 </html>
