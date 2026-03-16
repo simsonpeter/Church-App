@@ -565,7 +565,7 @@
         if (choice === "en" || choice === "ta") {
             return choice;
         }
-        return "app";
+        return "";
     }
 
     function saveCardLanguageMap(map) {
@@ -588,15 +588,15 @@
 
     function getCardLanguageChoice(cardId, languageMap) {
         if (!cardId) {
-            return "app";
+            return activeLanguage;
         }
         var map = languageMap && typeof languageMap === "object" ? languageMap : getStoredCardLanguageMap();
-        return normalizeCardLanguageChoice(map[cardId]);
+        var stored = normalizeCardLanguageChoice(map[cardId]);
+        return stored || activeLanguage;
     }
 
     function getCardEffectiveLanguage(cardId, languageMap) {
-        var choice = getCardLanguageChoice(cardId, languageMap);
-        return choice === "app" ? activeLanguage : choice;
+        return getCardLanguageChoice(cardId, languageMap);
     }
 
     function getCardLanguageButtonLabel(choice) {
@@ -606,7 +606,7 @@
         if (choice === "en") {
             return t("card.languageEnglish", "English");
         }
-        return t("card.languageApp", "App");
+        return t("card.languageTamil", "Tamil");
     }
 
     function setupCardLanguageSwitchers() {
@@ -675,7 +675,6 @@
             wrap.setAttribute("role", "group");
             wrap.setAttribute("aria-label", t("card.languageLabel", "Card language"));
             wrap.innerHTML = "" +
-                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"app\">APP</button>" +
                 "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"en\">EN</button>" +
                 "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"ta\">TA</button>";
 
@@ -685,11 +684,10 @@
                     return;
                 }
                 var nextChoice = normalizeCardLanguageChoice(button.getAttribute("data-card-lang"));
-                if (nextChoice === "app") {
-                    delete cardLanguageMap[cardId];
-                } else {
-                    cardLanguageMap[cardId] = nextChoice;
+                if (!nextChoice) {
+                    return;
                 }
+                cardLanguageMap[cardId] = nextChoice;
                 cardLanguageMap = saveCardLanguageMap(cardLanguageMap) || cardLanguageMap;
                 applyCardLanguage(card);
             });
