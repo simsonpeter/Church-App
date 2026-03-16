@@ -12,6 +12,8 @@
             var sermonMonthChips = document.getElementById("sermon-month-chips");
             var sermonSavedChips = document.getElementById("sermon-saved-chips");
             var archiveNote = document.getElementById("sermon-archive-note");
+            var latestSermonsCard = latestSermonsList ? latestSermonsList.closest(".card") : null;
+            var archiveCard = archiveNote ? archiveNote.closest(".card") : null;
             var allSermons = [];
             var visibleCount = 4;
             var currentSermonIndex = -1;
@@ -51,15 +53,21 @@
             var sleepTimerId = null;
             var marqueeRefreshTimerId = null;
 
-            function T(key, fallback) {
+            function T(key, fallback, sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    if (sourceElement && typeof window.NjcI18n.tForElement === "function") {
+                        return window.NjcI18n.tForElement(sourceElement, key, fallback);
+                    }
                     return window.NjcI18n.t(key, fallback);
                 }
                 return fallback || key;
             }
 
-            function getLocale() {
+            function getLocale(sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    if (sourceElement && typeof window.NjcI18n.getLocaleForElement === "function") {
+                        return window.NjcI18n.getLocaleForElement(sourceElement);
+                    }
                     return window.NjcI18n.getLocale();
                 }
                 return "en-BE";
@@ -163,11 +171,11 @@
                 return Number.isNaN(date.getTime()) ? null : date;
             }
 
-            function toDisplayDate(dateObj) {
+            function toDisplayDate(dateObj, sourceElement) {
                 if (!dateObj) {
-                    return T("sermons.dateUnavailable", "Date not available");
+                    return T("sermons.dateUnavailable", "Date not available", sourceElement);
                 }
-                return dateObj.toLocaleDateString(getLocale(), {
+                return dateObj.toLocaleDateString(getLocale(sourceElement), {
                     year: "numeric",
                     month: "long",
                     day: "numeric"
@@ -211,10 +219,10 @@
             function renderLoadError() {
                 latestSermonsList.innerHTML = "" +
                     "<li>" +
-                    "  <h3>" + escapeHtml(T("sermons.loadErrorTitle", "Could not load sermons")) + "</h3>" +
-                    "  <p>" + escapeHtml(T("sermons.loadErrorBody", "Please refresh and try again.")) + "</p>" +
+                    "  <h3>" + escapeHtml(T("sermons.loadErrorTitle", "Could not load sermons", latestSermonsCard)) + "</h3>" +
+                    "  <p>" + escapeHtml(T("sermons.loadErrorBody", "Please refresh and try again.", latestSermonsCard)) + "</p>" +
                     "</li>";
-                archiveNote.textContent = T("sermons.archiveUnavailable", "Sermon archive is temporarily unavailable.");
+                archiveNote.textContent = T("sermons.archiveUnavailable", "Sermon archive is temporarily unavailable.", archiveCard);
                 sermonSearchNote.hidden = true;
                 showMoreSermonsButton.hidden = true;
                 if (sermonFilterGroups) {
@@ -236,7 +244,7 @@
                     return monthKey;
                 }
                 var dateObj = new Date(Date.UTC(year, month - 1, 1, 12, 0, 0));
-                return new Intl.DateTimeFormat(getLocale(), {
+                return new Intl.DateTimeFormat(getLocale(latestSermonsCard), {
                     timeZone: "UTC",
                     month: "long",
                     year: "numeric"
@@ -244,7 +252,7 @@
             }
 
             function buildFilterChips() {
-                var allLabel = T("sermons.filterAll", "All");
+                var allLabel = T("sermons.filterAll", "All", latestSermonsCard);
                 var uniqueSpeakers = [];
                 var seenSpeakers = {};
                 allSermons.forEach(function (sermon) {
@@ -268,7 +276,7 @@
                 });
                 uniqueMonths.sort().reverse();
 
-                var savedOnlyLabel = T("sermons.savedOnly", "Saved only");
+                var savedOnlyLabel = T("sermons.savedOnly", "Saved only", latestSermonsCard);
 
                 sermonSpeakerChips.innerHTML = "";
                 var allSpeakerButton = document.createElement("button");
@@ -341,7 +349,7 @@
                         sermon.title || "",
                         sermon.subtitle || "",
                         sermon.speaker || "",
-                        toDisplayDate(sermon.dateObj)
+                        toDisplayDate(sermon.dateObj, latestSermonsCard)
                     ].join(" ").toLowerCase();
                     return searchable.indexOf(query) >= 0;
                 });
@@ -391,12 +399,12 @@
                 if (!allSermons.length) {
                     latestSermonsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(T("sermons.noSermonsTitle", "No sermons available yet")) + "</h3>" +
-                        "  <p>" + escapeHtml(T("sermons.noSermonsBody", "Please check back soon.")) + "</p>" +
+                        "  <h3>" + escapeHtml(T("sermons.noSermonsTitle", "No sermons available yet", latestSermonsCard)) + "</h3>" +
+                        "  <p>" + escapeHtml(T("sermons.noSermonsBody", "Please check back soon.", latestSermonsCard)) + "</p>" +
                         "</li>";
                     showMoreSermonsButton.hidden = true;
                     sermonSearchNote.hidden = true;
-                    archiveNote.textContent = T("sermons.archiveEmpty", "No sermon archive available yet.");
+                    archiveNote.textContent = T("sermons.archiveEmpty", "No sermon archive available yet.", archiveCard);
                     if (sermonFilterGroups) {
                         sermonFilterGroups.hidden = true;
                     }
@@ -406,16 +414,16 @@
                 if (!filteredRecords.length) {
                     latestSermonsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(T("sermons.searchNoResultsTitle", "No sermons match your search")) + "</h3>" +
-                        "  <p>" + escapeHtml(T("sermons.searchNoResultsBody", "Try another keyword.")) + "</p>" +
+                        "  <h3>" + escapeHtml(T("sermons.searchNoResultsTitle", "No sermons match your search", latestSermonsCard)) + "</h3>" +
+                        "  <p>" + escapeHtml(T("sermons.searchNoResultsBody", "Try another keyword.", latestSermonsCard)) + "</p>" +
                         "</li>";
                     showMoreSermonsButton.hidden = true;
                     sermonSearchNote.hidden = false;
                     sermonSearchNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
-                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found."), 0)
+                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found.", latestSermonsCard), 0)
                         : "0 results found.";
                     archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
-                        ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}."), allSermons.length)
+                        ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}.", archiveCard), allSermons.length)
                         : ("Total sermons available: " + allSermons.length + ".");
                     return;
                 }
@@ -428,11 +436,11 @@
                     var englishTitle = String(sermon.subtitle || "").trim() || tamilTitle;
                     var title = escapeHtml(tamilTitle);
                     var englishLine = escapeHtml(englishTitle);
-                    var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker"));
+                    var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker", latestSermonsCard));
                     var speakerName = String(sermon.speaker || "").trim() || "-";
                     var speakerLine = speakerPrefix + ": " + escapeHtml(speakerName);
                     var avatarText = escapeHtml(getSpeakerAvatarText(sermon.speaker));
-                    var dateText = toDisplayDate(sermon.dateObj);
+                    var dateText = toDisplayDate(sermon.dateObj, latestSermonsCard);
 
                     return "" +
                         "<li class=\"sermon-item\">" +
@@ -457,11 +465,11 @@
                 sermonSearchNote.hidden = !(hasActiveSearch || hasFilters);
                 if (hasActiveSearch || hasFilters) {
                     sermonSearchNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
-                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found."), filteredRecords.length)
+                        ? window.NjcI18n.formatCount(T("sermons.searchMatches", "{count} results found.", latestSermonsCard), filteredRecords.length)
                         : (filteredRecords.length + " results found.");
                 }
                 archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
-                    ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}."), allSermons.length)
+                    ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}.", archiveCard), allSermons.length)
                     : ("Total sermons available: " + allSermons.length + ".");
             }
 
@@ -806,6 +814,13 @@
                 syncPlayerText();
                 refreshPlayerTime();
                 setSleepNote(Number(playerSleep.value));
+            });
+
+            document.addEventListener("njc:cardlangchange", function () {
+                if (!sermonsLoaded || sermonsLoadFailed) {
+                    return;
+                }
+                renderSermons();
             });
 
             document.addEventListener("njc:userdata-updated", function () {

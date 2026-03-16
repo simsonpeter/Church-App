@@ -1,6 +1,7 @@
 (function () {
     var songbookList = document.getElementById("songbook-list");
     var songbookSearch = document.getElementById("songbook-search");
+    var songbookCard = songbookList ? songbookList.closest(".card") : null;
     var songbookTabs = document.querySelectorAll("button[data-songbook-tab]");
     var songbookScriptButtons = document.querySelectorAll("button[data-songbook-script]");
     var songbookFullscreen = document.getElementById("songbook-fullscreen");
@@ -31,6 +32,9 @@
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+            if (songbookCard && typeof window.NjcI18n.tForElement === "function") {
+                return window.NjcI18n.tForElement(songbookCard, key, fallback);
+            }
             return window.NjcI18n.t(key, fallback);
         }
         return fallback || key;
@@ -38,6 +42,9 @@
 
     function getLocale() {
         if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+            if (songbookCard && typeof window.NjcI18n.getLocaleForElement === "function") {
+                return window.NjcI18n.getLocaleForElement(songbookCard);
+            }
             return window.NjcI18n.getLocale();
         }
         return "en-GB";
@@ -846,6 +853,14 @@
     });
 
     document.addEventListener("njc:langchange", function () {
+        if (!scriptMode) {
+            updateScriptSwitcherUI();
+        }
+        setActiveSongbookTab(activeSongbookTab);
+        reopenActiveSongIfOpen();
+    });
+
+    document.addEventListener("njc:cardlangchange", function () {
         if (!scriptMode) {
             updateScriptSwitcherUI();
         }

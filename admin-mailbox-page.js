@@ -5,6 +5,7 @@
     var MAILBOX_READ_MAP_KEY = "njc_mailbox_read_map_v1";
     var list = document.getElementById("admin-mailbox-list");
     var refreshButton = document.getElementById("admin-mailbox-refresh");
+    var mailboxCard = list ? list.closest(".card") : null;
     var actionRow = null;
     var markAllReadButton = null;
     var clearReadButton = null;
@@ -16,6 +17,9 @@
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+            if (mailboxCard && typeof window.NjcI18n.tForElement === "function") {
+                return window.NjcI18n.tForElement(mailboxCard, key, fallback);
+            }
             return window.NjcI18n.t(key, fallback);
         }
         return fallback || key;
@@ -23,6 +27,9 @@
 
     function getLocale() {
         if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+            if (mailboxCard && typeof window.NjcI18n.getLocaleForElement === "function") {
+                return window.NjcI18n.getLocaleForElement(mailboxCard);
+            }
             return window.NjcI18n.getLocale();
         }
         return "en-GB";
@@ -444,6 +451,22 @@
     }
 
     document.addEventListener("njc:langchange", function () {
+        setRefreshLabel();
+        setActionLabels();
+        if (currentRoute() === "mailbox") {
+            if (!isAdminUser()) {
+                renderDenied();
+                return;
+            }
+            if (cachedEntries.length) {
+                renderEntries(cachedEntries);
+                return;
+            }
+            loadMailbox(false);
+        }
+    });
+
+    document.addEventListener("njc:cardlangchange", function () {
         setRefreshLabel();
         setActionLabels();
         if (currentRoute() === "mailbox") {

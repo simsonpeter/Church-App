@@ -21,6 +21,10 @@
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
+            var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
+            var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
+            var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
+            var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
             var todayYmd = getBrusselsYmd();
@@ -117,8 +121,11 @@
                 { reference: "1 John 4:19", textEn: "We love because he first loved us.", textTa: "அவர் முன்பாக நம்மை நேசித்ததால் நாம் நேசிக்கிறோம்." }
             ];
 
-            function T(key, fallback) {
+            function T(key, fallback, sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    if (sourceElement && typeof window.NjcI18n.tForElement === "function") {
+                        return window.NjcI18n.tForElement(sourceElement, key, fallback);
+                    }
                     return window.NjcI18n.t(key, fallback);
                 }
                 return fallback || key;
@@ -132,15 +139,24 @@
                 return pattern.replace("{count}", String(count));
             }
 
-            function getLocale() {
+            function getLocale(sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    if (sourceElement && typeof window.NjcI18n.getLocaleForElement === "function") {
+                        return window.NjcI18n.getLocaleForElement(sourceElement);
+                    }
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
             }
 
-            function isTamilLanguage() {
-                return window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
+            function isTamilLanguage(sourceElement) {
+                if (!window.NjcI18n) {
+                    return false;
+                }
+                if (sourceElement && typeof window.NjcI18n.getLanguageForElement === "function") {
+                    return window.NjcI18n.getLanguageForElement(sourceElement) === "ta";
+                }
+                return typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
             }
 
             function getStoredVerseLanguage() {
@@ -164,17 +180,17 @@
                 return null;
             }
 
-            function localizeEventTitle(title) {
+            function localizeEventTitle(title, sourceElement) {
                 var raw = String(title || "").trim();
-                var isTamil = window.NjcI18n && typeof window.NjcI18n.getLanguage === "function" && window.NjcI18n.getLanguage() === "ta";
+                var isTamil = isTamilLanguage(sourceElement);
                 if (!isTamil) {
                     return raw;
                 }
                 if (raw === "Holy Service with Communion") {
-                    return T("events.holyServiceTitle", "பரிசுத்த ஆராதனையும் திருவிருந்தும்");
+                    return T("events.holyServiceTitle", "பரிசுத்த ஆராதனையும் திருவிருந்தும்", sourceElement);
                 }
                 if (raw === "Special Prayer") {
-                    return T("events.specialPrayerTitle", "விசேட ஜெபக்கூடுகை");
+                    return T("events.specialPrayerTitle", "விசேட ஜெபக்கூடுகை", sourceElement);
                 }
                 return raw;
             }
@@ -198,14 +214,14 @@
                 };
             }
 
-            function toGoogleCalendarUrl(eventItem) {
+            function toGoogleCalendarUrl(eventItem, sourceElement) {
                 var end = addMinutesToParts(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute, 90);
                 var dates = toCalendarDateTime(eventItem.year, eventItem.month, eventItem.day, eventItem.hour, eventItem.minute) +
                     "/" +
                     toCalendarDateTime(end.year, end.month, end.day, end.hour, end.minute);
                 var params = new URLSearchParams({
                     action: "TEMPLATE",
-                    text: eventItem.title || T("events.event", "Event"),
+                    text: eventItem.title || T("events.event", "Event", sourceElement),
                     dates: dates,
                     ctz: "Europe/Brussels",
                     details: (eventItem.description || "") + " - NJC Belgium",
@@ -216,14 +232,14 @@
 
             function updateReadingPlanMeta() {
                 var dateUtc = new Date(Date.UTC(todayYmd.year, todayYmd.month - 1, todayYmd.day, 12, 0, 0));
-                var dateLabel = new Intl.DateTimeFormat(getLocale(), {
+                var dateLabel = new Intl.DateTimeFormat(getLocale(readingCard), {
                     timeZone: "UTC",
                     weekday: "long",
                     year: "numeric",
                     month: "long",
                     day: "numeric"
                 }).format(dateUtc);
-                todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:") + " " + dateLabel;
+                todayReadingPlanMeta.textContent = T("home.readingDatePrefix", "Today:", readingCard) + " " + dateLabel;
             }
 
             function setDailyVerseToggleLabel() {
@@ -232,8 +248,8 @@
                 }
                 var nextLanguage = verseLanguage === "ta" ? "en" : "ta";
                 var label = nextLanguage === "ta"
-                    ? T("home.dailyVerseToggleToTamil", "Switch verse to Tamil")
-                    : T("home.dailyVerseToggleToEnglish", "Switch verse to English");
+                    ? T("home.dailyVerseToggleToTamil", "Switch verse to Tamil", verseCard)
+                    : T("home.dailyVerseToggleToEnglish", "Switch verse to English", verseCard);
                 dailyVerseLanguageToggle.textContent = nextLanguage.toUpperCase();
                 dailyVerseLanguageToggle.setAttribute("aria-label", label);
                 dailyVerseLanguageToggle.title = label;
@@ -241,8 +257,8 @@
 
             function getVerseVersionLabel(showTamil) {
                 return showTamil
-                    ? T("home.dailyVerseVersionTamil", "BSI (Old)")
-                    : T("home.dailyVerseVersionEnglish", "KJV");
+                    ? T("home.dailyVerseVersionTamil", "BSI (Old)", verseCard)
+                    : T("home.dailyVerseVersionEnglish", "KJV", verseCard);
             }
 
             function parseSingleVerseReference(reference) {
@@ -324,7 +340,7 @@
                     return;
                 }
                 if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
-                    dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.");
+                    dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
                     dailyVerseReference.textContent = "";
                     return;
                 }
@@ -449,7 +465,7 @@
                 return raw;
             }
 
-            function formatYmdForLocale(ymdKey) {
+            function formatYmdForLocale(ymdKey, sourceElement) {
                 if (!ymdKey) {
                     return "";
                 }
@@ -461,7 +477,7 @@
                     return "";
                 }
                 var dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-                return new Intl.DateTimeFormat(getLocale(), {
+                return new Intl.DateTimeFormat(getLocale(sourceElement), {
                     timeZone: "UTC",
                     weekday: "short",
                     year: "numeric",
@@ -518,34 +534,34 @@
                 }
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
-                var titleText = isTamilLanguage() && item.titleTa ? item.titleTa : item.title;
-                var bodyText = isTamilLanguage() && item.bodyTa ? item.bodyTa : item.body;
-                var dateText = formatYmdForLocale(item.date);
+                var titleText = isTamilLanguage(announcementsCard) && item.titleTa ? item.titleTa : item.title;
+                var bodyText = isTamilLanguage(announcementsCard) && item.bodyTa ? item.bodyTa : item.body;
+                var dateText = formatYmdForLocale(item.date, announcementsCard);
                 var urgentBadge = item.urgent
-                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent")) + "</span>")
+                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
                 var linkLine = item.link
-                    ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more")) + "</a></p>")
+                    ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
 
                 var controls = "";
                 if (announcementCarouselItems.length > 1) {
                     var dots = announcementCarouselItems.map(function (_, index) {
                         var activeClass = index === announcementCarouselIndex ? " active" : "";
-                        return "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-announcement-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementDot", "Announcement")) + " " + String(index + 1) + "\"></button>";
+                        return "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-announcement-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementDot", "Announcement", announcementsCard)) + " " + String(index + 1) + "\"></button>";
                     }).join("");
                     controls = "" +
                         "<div class=\"announcement-carousel-controls\">" +
-                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementPrev", "Previous announcement")) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementPrev", "Previous announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
                         "  <div class=\"announcement-dots\">" + dots + "</div>" +
-                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementNext", "Next announcement")) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementNext", "Next announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
                         "</div>";
                 }
 
                 announcementsList.innerHTML = "" +
                     "<li class=\"announcement-carousel-item\">" +
-                    "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements")) + "</h3>" +
+                    "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
                     "  <p>" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
                     metaLine +
                     linkLine +
@@ -574,8 +590,8 @@
                     stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorBody", "Please try again shortly.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorBody", "Please try again shortly.", announcementsCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -598,8 +614,8 @@
                     stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noAnnouncementsBody", "Check back later for updates.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noAnnouncementsBody", "Check back later for updates.", announcementsCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -640,11 +656,11 @@
                     });
             }
 
-            function toFriendlyReference(ref) {
+            function toFriendlyReference(ref, sourceElement) {
                 var value = String(ref || "").trim();
                 var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
                 if (!match) {
-                    if (isTamilLanguage()) {
+                    if (isTamilLanguage(sourceElement)) {
                         var plainMatch = value.match(/^([1-3]\s+[A-Za-z]+|[A-Za-z][A-Za-z\s]+)\s+(.+)$/);
                         if (plainMatch) {
                             var englishBook = plainMatch[1].trim();
@@ -661,39 +677,41 @@
                 var prefix = match[1] ? match[1].trim() + " " : "";
                 var shortBook = prefix + match[2] + ".";
                 var tail = match[3].trim();
-                var selectedMap = isTamilLanguage() ? bookMapTamil : bookMapEnglish;
+                var selectedMap = isTamilLanguage(sourceElement) ? bookMapTamil : bookMapEnglish;
                 var fullBook = selectedMap[shortBook] || bookMapEnglish[shortBook] || shortBook;
                 return fullBook + " " + tail;
             }
 
-            function getReadTooltip(part, isDone) {
+            function getReadTooltip(part, isDone, sourceElement) {
                 if (isDone) {
-                    return T("home.readTooltipDone", "Marked as read");
+                    return T("home.readTooltipDone", "Marked as read", sourceElement);
                 }
                 if (part === "morning") {
-                    return T("home.markMorningDone", "Morning reading done");
+                    return T("home.markMorningDone", "Morning reading done", sourceElement);
                 }
                 if (part === "evening") {
-                    return T("home.markEveningDone", "Evening reading done");
+                    return T("home.markEveningDone", "Evening reading done", sourceElement);
                 }
-                return T("home.readTooltipPending", "Mark as read");
+                return T("home.readTooltipPending", "Mark as read", sourceElement);
             }
 
-            function planBlock(titleKey, titleFallback, refs, part, progress) {
-                var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(toFriendlyReference) : [];
+            function planBlock(titleKey, titleFallback, refs, part, progress, sourceElement) {
+                var cleanRefs = Array.isArray(refs) ? refs.filter(Boolean).map(function (ref) {
+                    return toFriendlyReference(ref, sourceElement);
+                }) : [];
                 if (cleanRefs.length === 0) {
                     return "";
                 }
                 var partKey = (part === "morning" || part === "evening") ? part : "";
                 var checked = partKey ? Boolean(progress && progress[partKey]) : false;
                 var checkedAttr = checked ? " checked" : "";
-                var tooltip = NjcEvents.escapeHtml(getReadTooltip(partKey, checked));
+                var tooltip = NjcEvents.escapeHtml(getReadTooltip(partKey, checked, sourceElement));
                 var tick = partKey
                     ? ("<input class=\"reading-inline-tick\" type=\"checkbox\" data-reading-part=\"" + partKey + "\"" + checkedAttr + " title=\"" + tooltip + "\" aria-label=\"" + tooltip + "\">")
                     : "";
                 return "" +
                     "<div class=\"reading-compact-item\">" +
-                    "  <h3 class=\"reading-item-title\">" + tick + NjcEvents.escapeHtml(T(titleKey, titleFallback)) + "</h3>" +
+                    "  <h3 class=\"reading-item-title\">" + tick + NjcEvents.escapeHtml(T(titleKey, titleFallback, sourceElement)) + "</h3>" +
                     "  <p class=\"reading-compact-ref\">" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
                     "</div>";
             }
@@ -777,20 +795,20 @@
                 if (!entries.length) {
                     readingUnreadList.innerHTML = "" +
                         "<li>" +
-                        "  <p class=\"page-note\">" + NjcEvents.escapeHtml(T("home.unreadDaysEmpty", "No missed readings so far.")) + "</p>" +
+                        "  <p class=\"page-note\">" + NjcEvents.escapeHtml(T("home.unreadDaysEmpty", "No missed readings so far.", readingCard)) + "</p>" +
                         "</li>";
                     return;
                 }
-                var morningLabel = T("home.morningShort", "Morning");
-                var eveningLabel = T("home.eveningShort", "Evening");
+                var morningLabel = T("home.morningShort", "Morning", readingCard);
+                var eveningLabel = T("home.eveningShort", "Evening", readingCard);
                 readingUnreadList.innerHTML = entries.map(function (item) {
-                    var dateLabel = formatYmdForLocale(item.dateKey);
+                    var dateLabel = formatYmdForLocale(item.dateKey, readingCard);
                     var lines = [];
                     if (item.morningMissing) {
                         lines.push(
                             "<label class=\"reading-unread-line\">" +
                             "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"morning\">" +
-                            "  <span><strong>" + NjcEvents.escapeHtml(morningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.morningRefs.map(toFriendlyReference).join(", ")) + "</span>" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(morningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.morningRefs.map(function (ref) { return toFriendlyReference(ref, readingCard); }).join(", ")) + "</span>" +
                             "</label>"
                         );
                     }
@@ -798,7 +816,7 @@
                         lines.push(
                             "<label class=\"reading-unread-line\">" +
                             "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"evening\">" +
-                            "  <span><strong>" + NjcEvents.escapeHtml(eveningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.eveningRefs.map(toFriendlyReference).join(", ")) + "</span>" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(eveningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.eveningRefs.map(function (ref) { return toFriendlyReference(ref, readingCard); }).join(", ")) + "</span>" +
                             "</label>"
                         );
                     }
@@ -814,7 +832,7 @@
                 if (!readingProgressTitle || !readingProgressPercent || !readingProgressSummary || !readingProgressRemaining || !readingProgressFill || !readingUnreadToggle) {
                     return;
                 }
-                readingProgressTitle.textContent = T("home.readingProgressTitle", "Reading progress");
+                readingProgressTitle.textContent = T("home.readingProgressTitle", "Reading progress", readingCard);
                 var progress = buildReadingProgressData();
                 if (!progress) {
                     readingProgressPercent.textContent = "0%";
@@ -824,13 +842,13 @@
                     }
                     readingProgressSummary.textContent = "";
                     readingProgressRemaining.textContent = "";
-                    readingUnreadToggle.textContent = T("home.unreadDaysShow", "Unread days (0)").replace("{count}", "0");
+                    readingUnreadToggle.textContent = T("home.unreadDaysShow", "Unread days (0)", readingCard).replace("{count}", "0");
                     readingUnreadToggle.disabled = true;
                     renderUnreadBacklog([]);
                     return;
                 }
 
-                var summaryTemplate = T("home.readingProgressSummary", "{done}/{total} days completed");
+                var summaryTemplate = T("home.readingProgressSummary", "{done}/{total} days completed", readingCard);
                 readingProgressSummary.textContent = summaryTemplate
                     .replace("{done}", String(progress.completedDays))
                     .replace("{total}", String(progress.totalDays));
@@ -839,15 +857,15 @@
                 if (readingProgressTrack) {
                     readingProgressTrack.setAttribute("aria-valuenow", String(progress.percentComplete));
                 }
-                var remainingDaysText = formatCount(T("home.readingRemainingDays", "{count} days to go"), progress.remainingDays);
-                var remainingPercentText = formatCount(T("home.readingRemainingPercent", "{count}% remaining"), progress.percentRemaining);
+                var remainingDaysText = formatCount(T("home.readingRemainingDays", "{count} days to go", readingCard), progress.remainingDays);
+                var remainingPercentText = formatCount(T("home.readingRemainingPercent", "{count}% remaining", readingCard), progress.percentRemaining);
                 readingProgressRemaining.textContent = remainingDaysText + " • " + remainingPercentText;
 
                 var unreadCount = progress.unreadBacklog.length;
                 if (unreadListOpen) {
-                    readingUnreadToggle.textContent = T("home.unreadDaysHide", "Hide unread list");
+                    readingUnreadToggle.textContent = T("home.unreadDaysHide", "Hide unread list", readingCard);
                 } else {
-                    readingUnreadToggle.textContent = formatCount(T("home.unreadDaysShow", "Unread days ({count})"), unreadCount);
+                    readingUnreadToggle.textContent = formatCount(T("home.unreadDaysShow", "Unread days ({count})", readingCard), unreadCount);
                 }
                 readingUnreadToggle.disabled = false;
                 renderUnreadBacklog(progress.unreadBacklog);
@@ -857,8 +875,8 @@
                 if (readingPlanError) {
                     todayReadingPlanList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan", readingCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.", readingCard)) + "</p>" +
                         "</li>";
                     renderReadingProgress();
                     return;
@@ -870,15 +888,15 @@
                 }
 
                 var progress = getTodayProgress();
-                var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress);
-                var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress);
+                var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
+                var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
                 var compactHtml = morningBlock + eveningBlock;
 
                 if (!compactHtml) {
                     todayReadingPlanList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today", readingCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.", readingCard)) + "</p>" +
                         "</li>";
                     renderReadingProgress();
                     return;
@@ -919,8 +937,8 @@
                 if (eventsError) {
                     thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load this week events")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Events tab to refresh.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load this week events", thisWeekCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Events tab to refresh.", thisWeekCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -939,23 +957,23 @@
                 if (eventsToShow.length === 0) {
                     thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No events available right now")) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Events page for updates.")) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No events available right now", thisWeekCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Events page for updates.", thisWeekCard)) + "</p>" +
                         "</li>";
                     return;
                 }
 
                 thisWeekEventsList.innerHTML = eventsToShow.map(function (eventItem) {
-                    var titleText = localizeEventTitle(eventItem.title || T("events.event", "Event"));
-                    var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event"));
-                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale()));
+                    var titleText = localizeEventTitle(eventItem.title || T("events.event", "Event", thisWeekCard), thisWeekCard);
+                    var title = NjcEvents.escapeHtml(titleText || T("events.event", "Event", thisWeekCard));
+                    var date = NjcEvents.escapeHtml(NjcEvents.toDisplayDate(eventItem.year, eventItem.month, eventItem.day, getLocale(thisWeekCard)));
                     var time = NjcEvents.escapeHtml(NjcEvents.toDisplayTime(eventItem.hour, eventItem.minute));
-                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem));
+                    var calendarUrl = NjcEvents.escapeHtml(toGoogleCalendarUrl(eventItem, thisWeekCard));
                     return "" +
                         "<li>" +
                         "  <h3>" + title + "</h3>" +
-                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at")) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time")) + ")</p>" +
-                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar")) + "</a></p>" +
+                        "  <p>" + date + " " + NjcEvents.escapeHtml(T("common.at", "at", thisWeekCard)) + " " + time + " (" + NjcEvents.escapeHtml(T("common.belgiumTime", "Belgium time", thisWeekCard)) + ")</p>" +
+                        "  <p><a class=\"inline-link\" href=\"" + calendarUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + NjcEvents.escapeHtml(T("events.addToCalendar", "Add to calendar", thisWeekCard)) + "</a></p>" +
                         "</li>";
                 }).join("");
             }
@@ -977,6 +995,13 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderDailyVerse();
+                renderAnnouncements();
+                renderThisWeekEvents();
+            });
+
+            document.addEventListener("njc:cardlangchange", function () {
+                updateReadingPlanMeta();
+                renderReadingPlan();
                 renderAnnouncements();
                 renderThisWeekEvents();
             });
@@ -1007,7 +1032,7 @@
                 } else {
                     setTodayProgress(part, target.checked);
                 }
-                var tooltip = getReadTooltip(part, target.checked);
+                var tooltip = getReadTooltip(part, target.checked, readingCard);
                 target.title = tooltip;
                 target.setAttribute("aria-label", tooltip);
                 renderReadingProgress();

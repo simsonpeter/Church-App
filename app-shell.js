@@ -417,6 +417,10 @@
         return activeLanguage === "ta" ? "ta-IN" : "en-GB";
     }
 
+    function getLocaleFromLanguage(language) {
+        return language === "ta" ? "ta-IN" : "en-GB";
+    }
+
     function translateWithLanguage(language, key, fallback) {
         if (language === "ta" && Object.prototype.hasOwnProperty.call(tamilTranslations, key)) {
             return tamilTranslations[key];
@@ -599,6 +603,26 @@
         return getCardLanguageChoice(cardId, languageMap);
     }
 
+    function getLanguageForElement(element) {
+        if (!element || typeof element.closest !== "function") {
+            return activeLanguage;
+        }
+        var card = element.closest(".card");
+        if (!card) {
+            return activeLanguage;
+        }
+        var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
+        return getCardLanguageChoice(cardId);
+    }
+
+    function getLocaleForElement(element) {
+        return getLocaleFromLanguage(getLanguageForElement(element));
+    }
+
+    function tForElement(element, key, fallback) {
+        return translateWithLanguage(getLanguageForElement(element), key, fallback);
+    }
+
     function setupCardLanguageSwitchers() {
         var cards = Array.prototype.slice.call(document.querySelectorAll(".page-view .card"));
         if (!cards.length) {
@@ -673,6 +697,12 @@
                 cardLanguageMap[cardId] = nextChoice;
                 cardLanguageMap = saveCardLanguageMap(cardLanguageMap) || cardLanguageMap;
                 applyCardLanguage(card);
+                document.dispatchEvent(new CustomEvent("njc:cardlangchange", {
+                    detail: {
+                        cardId: cardId,
+                        language: nextChoice
+                    }
+                }));
             });
 
             card.classList.add("card-has-lang-switch");
@@ -2597,10 +2627,13 @@
         activeLanguage = getActiveLanguage();
         window.NjcI18n = {
             t: t,
+            tForElement: tForElement,
             getLanguage: function () {
                 return activeLanguage;
             },
+            getLanguageForElement: getLanguageForElement,
             getLocale: getLocale,
+            getLocaleForElement: getLocaleForElement,
             setLanguage: function (language) {
                 setLanguage(language, true, true);
             },
