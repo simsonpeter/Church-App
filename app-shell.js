@@ -283,6 +283,8 @@
         "contact.sendPrayer": "செய்தியை அனுப்பு",
         "contact.prayerNeedMessage": "தயவுசெய்து உங்கள் செய்தியை எழுதுங்கள்.",
         "contact.prayerMailOpened": "உங்கள் மின்னஞ்சல் செயலி திறக்கப்பட்டது.",
+        "contact.messageSent": "உங்கள் செய்தி செயலிக்குள் அனுப்பப்பட்டது.",
+        "contact.messageSendError": "செய்தியை இப்போது அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.openMap": "Google Maps-ல் திற",
         "contact.prayerWallTitle": "ஜெப சுவர்",
         "contact.prayerWallSubtitle": "சபை குடும்பம் ஜெபிக்க உங்கள் வேண்டுதலை பகிருங்கள்.",

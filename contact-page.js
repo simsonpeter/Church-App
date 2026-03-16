@@ -3,6 +3,7 @@
             var nameInput = document.getElementById("prayer-name");
             var messageInput = document.getElementById("prayer-message");
             var note = document.getElementById("prayer-form-note");
+            var contactFormSubmit = form ? form.querySelector("button[type=\"submit\"]") : null;
             var prayerWallForm = document.getElementById("prayer-wall-form");
             var prayerWallName = document.getElementById("prayer-wall-name");
             var prayerWallMessage = document.getElementById("prayer-wall-message");
@@ -28,13 +29,16 @@
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
+            var CONTACT_FORM_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
             var MAX_ENTRIES = 100;
+            var CONTACT_MAX_ENTRIES = 200;
             var ADMIN_EMAIL = "simsonpeter@gmail.com";
             var PRAYER_TRANSLATION_CACHE_KEY = "njc_prayer_translation_cache_v1";
             var prayerWallEntries = [];
             var prayerWallLoading = true;
             var prayerWallError = false;
             var prayerWallBusy = false;
+            var contactFormBusy = false;
             var activePrayerDetailId = "";
             var activePrayerTab = "urgent";
             var prayerTranslationCache = loadPrayerTranslationCache();
@@ -605,6 +609,62 @@
                 prayerWallNote.textContent = T(key, fallback);
             }
 
+            function showContactNote(state, key, fallback) {
+                if (!note) {
+                    return;
+                }
+                note.hidden = false;
+                note.dataset.state = state || "";
+                note.textContent = T(key, fallback);
+            }
+
+            function setContactFormBusy(isBusy) {
+                contactFormBusy = Boolean(isBusy);
+                if (contactFormSubmit) {
+                    contactFormSubmit.disabled = contactFormBusy;
+                }
+            }
+
+            async function fetchContactMessages() {
+                var response = await fetch(CONTACT_FORM_URL + "?ts=" + String(Date.now()), {
+                    cache: "no-store"
+                });
+                if (response.status === 404) {
+                    var createResponse = await fetch(CONTACT_FORM_URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ entries: [] })
+                    });
+                    if (!createResponse.ok) {
+                        throw new Error("Could not initialize contact messages");
+                    }
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error("Could not load contact messages");
+                }
+                var payload = await response.json();
+                return payload && Array.isArray(payload.entries) ? payload.entries : [];
+            }
+
+            async function saveContactMessages(entries) {
+                var payload = {
+                    entries: entries.slice(0, CONTACT_MAX_ENTRIES)
+                };
+                var response = await fetch(CONTACT_FORM_URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if (!response.ok) {
+                    throw new Error("Could not save contact message");
+                }
+            }
+
             async function fetchPrayerWallEntries() {
                 var response = await fetch(PRAYER_WALL_URL + "?ts=" + String(Date.now()), {
                     cache: "no-store"
@@ -839,23 +899,45 @@
             }
 
             if (form) {
-                form.addEventListener("submit", function (event) {
+                form.addEventListener("submit", async function (event) {
                     event.preventDefault();
+                    if (contactFormBusy) {
+                        return;
+                    }
                     var nameValue = (nameInput.value || "").trim();
                     var messageValue = (messageInput.value || "").trim();
+                    var activeUser = getCurrentUser();
+                    var ownerUid = String(activeUser && activeUser.uid || "").trim();
+                    var ownerEmail = normalizeEmail(activeUser && activeUser.email);
+                    if (!nameValue) {
+                        nameValue = deriveNameFromUser(activeUser);
+                    }
 
                     if (!messageValue) {
-                        note.hidden = false;
-                        note.textContent = T("contact.prayerNeedMessage", "Please enter your message.");
+                        showContactNote("needMessage", "contact.prayerNeedMessage", "Please enter your message.");
                         return;
                     }
 
-                    var subject = "Contact Message" + (nameValue ? " - " + nameValue : "");
-                    var body = (nameValue ? "Name: " + nameValue + "\n\n" : "") + "Message:\n" + messageValue;
-                    var mailtoUrl = "mailto:simsonpeter@gmail.com?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-                    window.location.href = mailtoUrl;
-                    note.hidden = false;
-                    note.textContent = T("contact.prayerMailOpened", "Your email app has been opened.");
+                    setContactFormBusy(true);
+                    try {
+                        var latestMessages = await fetchContactMessages();
+                        latestMessages.unshift({
+                            id: String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000)),
+                            name: nameValue,
+                            message: messageValue,
+                            createdAt: new Date().toISOString(),
+                            createdByUid: ownerUid,
+                            createdByEmail: ownerEmail
+                        });
+                        await saveContactMessages(latestMessages);
+                        messageInput.value = "";
+                        nameInput.value = "";
+                        showContactNote("sent", "contact.messageSent", "Your message was sent in the app.");
+                    } catch (err) {
+                        showContactNote("sendError", "contact.messageSendError", "Could not send your message now. Please try again.");
+                    } finally {
+                        setContactFormBusy(false);
+                    }
                 });
             }
 
@@ -1009,8 +1091,11 @@
 
             document.addEventListener("njc:langchange", function () {
                 if (note && !note.hidden) {
-                    if ((messageInput.value || "").trim()) {
-                        note.textContent = T("contact.prayerMailOpened", "Your email app has been opened.");
+                    var contactState = note.dataset.state || "";
+                    if (contactState === "sent") {
+                        note.textContent = T("contact.messageSent", "Your message was sent in the app.");
+                    } else if (contactState === "sendError") {
+                        note.textContent = T("contact.messageSendError", "Could not send your message now. Please try again.");
                     } else {
                         note.textContent = T("contact.prayerNeedMessage", "Please enter your message.");
                     }
