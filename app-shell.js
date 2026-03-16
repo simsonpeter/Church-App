@@ -599,16 +599,6 @@
         return getCardLanguageChoice(cardId, languageMap);
     }
 
-    function getCardLanguageButtonLabel(choice) {
-        if (choice === "ta") {
-            return t("card.languageTamil", "Tamil");
-        }
-        if (choice === "en") {
-            return t("card.languageEnglish", "English");
-        }
-        return t("card.languageTamil", "Tamil");
-    }
-
     function setupCardLanguageSwitchers() {
         var cards = Array.prototype.slice.call(document.querySelectorAll(".page-view .card"));
         if (!cards.length) {
@@ -631,18 +621,17 @@
             return generated;
         }
 
-        function refreshCardSwitcherUi(switcher, choice) {
-            if (!switcher) {
+        function refreshCardToggleUi(button, choice) {
+            if (!button) {
                 return;
             }
-            var buttons = switcher.querySelectorAll(".card-lang-btn");
-            buttons.forEach(function (button) {
-                var buttonChoice = String(button.getAttribute("data-card-lang") || "app");
-                var isActive = buttonChoice === choice;
-                button.classList.toggle("active", isActive);
-                button.setAttribute("aria-pressed", isActive ? "true" : "false");
-                button.title = getCardLanguageButtonLabel(buttonChoice);
-            });
+            var nextLanguage = choice === "ta" ? "en" : "ta";
+            button.textContent = nextLanguage.toUpperCase();
+            var label = nextLanguage === "ta"
+                ? t("toggle.language.toTamil", "Switch language to Tamil")
+                : t("toggle.language.toEnglish", "Switch language to English");
+            button.setAttribute("aria-label", label);
+            button.title = label;
         }
 
         function applyCardLanguage(card) {
@@ -656,48 +645,48 @@
             var choice = getCardLanguageChoice(cardId, cardLanguageMap);
             var effectiveLanguage = getCardEffectiveLanguage(cardId, cardLanguageMap);
             applyTranslations(card, effectiveLanguage);
-            var switcher = card.querySelector(".card-lang-switch");
-            refreshCardSwitcherUi(switcher, choice);
+            var toggle = card.querySelector(".card-lang-toggle");
+            refreshCardToggleUi(toggle, choice);
         }
 
         function buildCardSwitcher(card, index) {
             if (!card || card.tagName === "A") {
                 return;
             }
-            var cardId = getCardId(card, index);
-            if (card.querySelector(".card-lang-switch")) {
+            if (card.querySelector("#daily-verse-language-toggle")) {
                 applyCardLanguage(card);
                 return;
             }
-            var wrap = document.createElement("div");
-            wrap.className = "card-lang-switch";
-            wrap.setAttribute("data-card-lang-id", cardId);
-            wrap.setAttribute("role", "group");
-            wrap.setAttribute("aria-label", t("card.languageLabel", "Card language"));
-            wrap.innerHTML = "" +
-                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"en\">EN</button>" +
-                "<button type=\"button\" class=\"card-lang-btn\" data-card-lang=\"ta\">TA</button>";
-
-            wrap.addEventListener("click", function (event) {
-                var button = event.target.closest(".card-lang-btn");
-                if (!button) {
-                    return;
-                }
-                var nextChoice = normalizeCardLanguageChoice(button.getAttribute("data-card-lang"));
-                if (!nextChoice) {
-                    return;
-                }
+            var cardId = getCardId(card, index);
+            if (card.querySelector(".card-lang-toggle")) {
+                applyCardLanguage(card);
+                return;
+            }
+            var toggle = document.createElement("button");
+            toggle.type = "button";
+            toggle.className = "mini-toggle card-lang-toggle";
+            toggle.setAttribute("data-card-lang-id", cardId);
+            toggle.setAttribute("aria-pressed", "false");
+            toggle.addEventListener("click", function () {
+                var current = getCardLanguageChoice(cardId, cardLanguageMap);
+                var nextChoice = current === "ta" ? "en" : "ta";
                 cardLanguageMap[cardId] = nextChoice;
                 cardLanguageMap = saveCardLanguageMap(cardLanguageMap) || cardLanguageMap;
                 applyCardLanguage(card);
             });
 
             card.classList.add("card-has-lang-switch");
-            var firstChild = card.firstElementChild;
-            if (firstChild && (firstChild.tagName === "H2" || firstChild.classList.contains("daily-verse-top"))) {
-                firstChild.insertAdjacentElement("afterend", wrap);
+            var titleNode = card.firstElementChild && card.firstElementChild.tagName === "H2"
+                ? card.firstElementChild
+                : null;
+            if (titleNode) {
+                var topRow = document.createElement("div");
+                topRow.className = "card-lang-top";
+                titleNode.insertAdjacentElement("beforebegin", topRow);
+                topRow.appendChild(titleNode);
+                topRow.appendChild(toggle);
             } else {
-                card.insertAdjacentElement("afterbegin", wrap);
+                card.insertAdjacentElement("afterbegin", toggle);
             }
             applyCardLanguage(card);
         }
@@ -714,9 +703,10 @@
         refreshAllCardLanguages();
         document.addEventListener("njc:langchange", function () {
             cards.forEach(function (card) {
-                var switcher = card.querySelector(".card-lang-switch");
-                if (switcher) {
-                    switcher.setAttribute("aria-label", t("card.languageLabel", "Card language"));
+                var toggle = card.querySelector(".card-lang-toggle");
+                if (toggle) {
+                    var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
+                    refreshCardToggleUi(toggle, getCardLanguageChoice(cardId, cardLanguageMap));
                 }
             });
             refreshAllCardLanguages();

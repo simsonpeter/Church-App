@@ -350,34 +350,21 @@ body.splash-active {
     line-height: 1.45;
 }
 
-.card-lang-switch {
-    display: inline-flex;
+.card-lang-top {
+    display: flex;
     align-items: center;
-    gap: 3px;
-    padding: 2px;
-    border-radius: 999px;
-    border: 1px solid var(--line);
-    background: var(--surface-soft);
-    margin: 0 0 10px auto;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
-.card-lang-btn {
-    border: 0;
-    border-radius: 999px;
-    min-width: 34px;
-    height: 24px;
-    padding: 0 8px;
-    background: transparent;
-    color: var(--muted);
-    font-size: 0.67rem;
-    font-weight: 800;
-    letter-spacing: 0.03em;
-    cursor: pointer;
+.card-lang-top > h2 {
+    margin: 0;
+    min-width: 0;
 }
 
-.card-lang-btn.active {
-    background: var(--primary);
-    color: #fff;
+.card-lang-toggle {
+    flex: 0 0 auto;
 }
 
 .daily-verse-top {
