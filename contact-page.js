@@ -15,6 +15,8 @@
             var prayerWallTabs = document.querySelectorAll("button[data-prayer-tab]");
             var prayerWallList = document.getElementById("prayer-wall-list");
             var prayerWallSubmit = prayerWallForm ? prayerWallForm.querySelector("button[type=\"submit\"]") : null;
+            var prayerCard = prayerWallList ? prayerWallList.closest(".card") : null;
+            var contactCard = form ? form.closest(".card") : null;
             var prayerDetailOverlay = document.getElementById("prayer-detail-overlay");
             var prayerDetailBackdrop = document.getElementById("prayer-detail-backdrop");
             var prayerDetailCloseButton = document.getElementById("prayer-detail-close");
@@ -45,8 +47,11 @@
             var prayerTranslationPending = {};
             var prayerTranslationSaveTimerId = null;
 
-            function T(key, fallback) {
+            function T(key, fallback, sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+                    if (sourceElement && typeof window.NjcI18n.tForElement === "function") {
+                        return window.NjcI18n.tForElement(sourceElement, key, fallback);
+                    }
                     return window.NjcI18n.t(key, fallback);
                 }
                 return fallback || key;
@@ -68,16 +73,24 @@
                     .replace(/'/g, "&#39;");
             }
 
-            function getLocale() {
+            function getLocale(sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
+                    if (sourceElement && typeof window.NjcI18n.getLocaleForElement === "function") {
+                        return window.NjcI18n.getLocaleForElement(sourceElement);
+                    }
                     return window.NjcI18n.getLocale();
                 }
                 return "en-GB";
             }
 
-            function getLanguage() {
-                if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
-                    return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+            function getLanguage(sourceElement) {
+                if (window.NjcI18n) {
+                    if (sourceElement && typeof window.NjcI18n.getLanguageForElement === "function") {
+                        return window.NjcI18n.getLanguageForElement(sourceElement) === "ta" ? "ta" : "en";
+                    }
+                    if (typeof window.NjcI18n.getLanguage === "function") {
+                        return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+                    }
                 }
                 return "en";
             }
@@ -101,9 +114,9 @@
                 return email.split("@")[0].replace(/[._-]+/g, " ").trim();
             }
 
-            function getPrayerDisplayName(entry) {
+            function getPrayerDisplayName(entry, sourceElement) {
                 if (entry.anonymous) {
-                    return T("contact.prayerWallNameAnonymous", "Anonymous");
+                    return T("contact.prayerWallNameAnonymous", "Anonymous", sourceElement);
                 }
                 var name = String(entry.name || "").trim();
                 if (name) {
@@ -113,7 +126,7 @@
                 if (email && email.indexOf("@") > 0) {
                     return email.split("@")[0].replace(/[._-]+/g, " ").trim();
                 }
-                return T("contact.prayerWallNameAnonymous", "Anonymous");
+                return T("contact.prayerWallNameAnonymous", "Anonymous", sourceElement);
             }
 
             function canManagePrayerEntry(entry) {
@@ -232,9 +245,9 @@
                 }
             }
 
-            function getTranslatedPrayerMessage(text) {
+            function getTranslatedPrayerMessage(text, sourceElement) {
                 var original = String(text || "").trim();
-                var targetLanguage = getLanguage();
+                var targetLanguage = getLanguage(sourceElement);
                 if (!original || original.length > 700 || !shouldTranslatePrayerMessage(original, targetLanguage)) {
                     return Promise.resolve(original);
                 }
@@ -332,14 +345,14 @@
                     return;
                 }
                 var prayerId = String(entry.id || "");
-                var languageAtRequest = getLanguage();
+                var languageAtRequest = getLanguage(prayerCard);
                 var translatedNote = ensurePrayerDetailTranslatedNode();
                 if (translatedNote) {
                     translatedNote.hidden = true;
                     translatedNote.textContent = "";
                 }
-                getTranslatedPrayerMessage(entry.message || "").then(function (translated) {
-                    if (!prayerDetailMessage || activePrayerDetailId !== prayerId || languageAtRequest !== getLanguage()) {
+                getTranslatedPrayerMessage(entry.message || "", prayerCard).then(function (translated) {
+                    if (!prayerDetailMessage || activePrayerDetailId !== prayerId || languageAtRequest !== getLanguage(prayerCard)) {
                         return;
                     }
                     prayerDetailMessage.textContent = translated || entry.message || "";
@@ -347,18 +360,18 @@
                         var isTranslated = isTranslatedResult(entry.message || "", translated, languageAtRequest);
                         translatedNote.hidden = !isTranslated;
                         translatedNote.textContent = isTranslated
-                            ? T("contact.prayerWallTranslated", "Translated")
+                            ? T("contact.prayerWallTranslated", "Translated", prayerCard)
                             : "";
                     }
                 });
             }
 
             function applyPrayerListTranslations(entries) {
-                var languageAtRequest = getLanguage();
+                var languageAtRequest = getLanguage(prayerCard);
                 entries.forEach(function (entry) {
                     var prayerId = String(entry.id || "");
-                    getTranslatedPrayerMessage(entry.message || "").then(function (translated) {
-                        if (languageAtRequest !== getLanguage()) {
+                    getTranslatedPrayerMessage(entry.message || "", prayerCard).then(function (translated) {
+                        if (languageAtRequest !== getLanguage(prayerCard)) {
                             return;
                         }
                         var previewNode = getPrayerPreviewNode(prayerId);
@@ -370,7 +383,7 @@
                             var isTranslated = isTranslatedResult(entry.message || "", translated, languageAtRequest);
                             translatedNode.hidden = !isTranslated;
                             translatedNode.textContent = isTranslated
-                                ? T("contact.prayerWallTranslated", "Translated")
+                                ? T("contact.prayerWallTranslated", "Translated", prayerCard)
                                 : "";
                         }
                         if (activePrayerDetailId === prayerId && prayerDetailMessage && prayerDetailOverlay && !prayerDetailOverlay.hidden) {
@@ -380,12 +393,12 @@
                 });
             }
 
-            function formatLocalDate(isoText) {
+            function formatLocalDate(isoText, sourceElement) {
                 var date = new Date(isoText);
                 if (Number.isNaN(date.getTime())) {
                     return "";
                 }
-                return new Intl.DateTimeFormat(getLocale(), {
+                return new Intl.DateTimeFormat(getLocale(sourceElement), {
                     year: "numeric",
                     month: "short",
                     day: "numeric"
@@ -510,10 +523,10 @@
                     closePrayerDetail();
                     return;
                 }
-                var safeName = getPrayerDisplayName(entry);
-                var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
-                var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})"), Number(entry.answered || 0));
-                var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})"), Number(entry.thanked || 0));
+                var safeName = getPrayerDisplayName(entry, prayerCard);
+                var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})", prayerCard), Number(entry.prayed || 0));
+                var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})", prayerCard), Number(entry.answered || 0));
+                var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})", prayerCard), Number(entry.thanked || 0));
                 if (prayerDetailName) {
                     prayerDetailName.textContent = safeName;
                 }
@@ -522,11 +535,11 @@
                 }
                 applyPrayerDetailTranslation(entry);
                 if (prayerDetailDate) {
-                    prayerDetailDate.textContent = formatLocalDate(entry.updatedAt || entry.createdAt || "");
+                    prayerDetailDate.textContent = formatLocalDate(entry.updatedAt || entry.createdAt || "", prayerCard);
                 }
                 if (prayerDetailUrgentBadge) {
                     prayerDetailUrgentBadge.hidden = !entry.urgent;
-                    var urgentLabelText = T("contact.prayerWallUrgentBadge", "Urgent");
+                    var urgentLabelText = T("contact.prayerWallUrgentBadge", "Urgent", prayerCard);
                     prayerDetailUrgentBadge.setAttribute("title", urgentLabelText);
                     var urgentLabelNode = prayerDetailUrgentBadge.querySelector("span");
                     if (urgentLabelNode) {
@@ -606,7 +619,7 @@
                 }
                 prayerWallNote.hidden = false;
                 prayerWallNote.dataset.state = state || "";
-                prayerWallNote.textContent = T(key, fallback);
+                prayerWallNote.textContent = T(key, fallback, prayerCard);
             }
 
             function showContactNote(state, key, fallback) {
@@ -615,7 +628,7 @@
                 }
                 note.hidden = false;
                 note.dataset.state = state || "";
-                note.textContent = T(key, fallback);
+                note.textContent = T(key, fallback, contactCard);
             }
 
             function setContactFormBusy(isBusy) {
@@ -718,8 +731,8 @@
                     closePrayerDetail();
                     prayerWallList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(T("contact.prayerWallLoadingTitle", "Loading prayer wall...")) + "</h3>" +
-                        "  <p>" + escapeHtml(T("contact.prayerWallLoadingBody", "Please wait.")) + "</p>" +
+                        "  <h3>" + escapeHtml(T("contact.prayerWallLoadingTitle", "Loading prayer wall...", prayerCard)) + "</h3>" +
+                        "  <p>" + escapeHtml(T("contact.prayerWallLoadingBody", "Please wait.", prayerCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -728,8 +741,8 @@
                     closePrayerDetail();
                     prayerWallList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + escapeHtml(T("contact.prayerWallLoadErrorTitle", "Could not load prayer wall")) + "</h3>" +
-                        "  <p>" + escapeHtml(T("contact.prayerWallLoadErrorBody", "Please check your connection and try again.")) + "</p>" +
+                        "  <h3>" + escapeHtml(T("contact.prayerWallLoadErrorTitle", "Could not load prayer wall", prayerCard)) + "</h3>" +
+                        "  <p>" + escapeHtml(T("contact.prayerWallLoadErrorBody", "Please check your connection and try again.", prayerCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -739,11 +752,11 @@
                 if (entries.length === 0) {
                     closePrayerDetail();
                     var noEntryTitle = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherTitle", "No other prayers yet")
-                        : T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now");
+                        ? T("contact.prayerWallNoOtherTitle", "No other prayers yet", prayerCard)
+                        : T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now", prayerCard);
                     var noEntryBody = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherBody", "Other prayer requests will appear here.")
-                        : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.");
+                        ? T("contact.prayerWallNoOtherBody", "Other prayer requests will appear here.", prayerCard)
+                        : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
                     prayerWallList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + escapeHtml(noEntryTitle) + "</h3>" +
@@ -753,14 +766,14 @@
                 }
 
                 prayerWallList.innerHTML = entries.map(function (entry) {
-                    var safeName = getPrayerDisplayName(entry);
-                    var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})"), Number(entry.prayed || 0));
-                    var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "");
+                    var safeName = getPrayerDisplayName(entry, prayerCard);
+                    var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})", prayerCard), Number(entry.prayed || 0));
+                    var dateText = formatLocalDate(entry.updatedAt || entry.createdAt || "", prayerCard);
                     var previewText = toPreviewText(entry.message || "");
-                    var urgentText = T("contact.prayerWallUrgentBadge", "Urgent");
-                    var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER");
-                    var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})"), Number(entry.answered || 0));
-                    var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})"), Number(entry.thanked || 0));
+                    var urgentText = T("contact.prayerWallUrgentBadge", "Urgent", prayerCard);
+                    var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER", prayerCard);
+                    var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})", prayerCard), Number(entry.answered || 0));
+                    var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})", prayerCard), Number(entry.thanked || 0));
                     var itemClass = entry.urgent ? "prayer-list-item prayer-list-item-urgent" : "prayer-list-item";
                     var urgentBadge = entry.urgent
                         ? ("<span class=\"prayer-list-urgent-badge\"><i class=\"fa-solid fa-bolt\" aria-hidden=\"true\"></i>" + escapeHtml(urgentText) + "</span>")
@@ -831,7 +844,7 @@
                         await savePrayerWallEntries(latestEntries);
                     } else if (action === "edit") {
                         var nextMessage = window.prompt(
-                            T("contact.prayerWallEditPrompt", "Edit prayer request"),
+                            T("contact.prayerWallEditPrompt", "Edit prayer request", prayerCard),
                             targetEntry.message || ""
                         );
                         if (nextMessage === null) {
@@ -848,7 +861,7 @@
                         showPrayerWallNote("updated", "contact.prayerWallUpdated", "Prayer request updated.");
                     } else if (action === "delete") {
                         var shouldDelete = window.confirm(
-                            T("contact.prayerWallDeleteConfirm", "Delete this prayer request?")
+                            T("contact.prayerWallDeleteConfirm", "Delete this prayer request?", prayerCard)
                         );
                         if (!shouldDelete) {
                             return;
@@ -1093,30 +1106,34 @@
                 if (note && !note.hidden) {
                     var contactState = note.dataset.state || "";
                     if (contactState === "sent") {
-                        note.textContent = T("contact.messageSent", "Your message was sent in the app.");
+                        note.textContent = T("contact.messageSent", "Your message was sent in the app.", contactCard);
                     } else if (contactState === "sendError") {
-                        note.textContent = T("contact.messageSendError", "Could not send your message now. Please try again.");
+                        note.textContent = T("contact.messageSendError", "Could not send your message now. Please try again.", contactCard);
                     } else {
-                        note.textContent = T("contact.prayerNeedMessage", "Please enter your message.");
+                        note.textContent = T("contact.prayerNeedMessage", "Please enter your message.", contactCard);
                     }
                 }
                 if (prayerWallNote && !prayerWallNote.hidden) {
                     var state = prayerWallNote.dataset.state || "";
                     if (state === "posted") {
-                        prayerWallNote.textContent = T("contact.prayerWallPosted", "Prayer request added to wall.");
+                        prayerWallNote.textContent = T("contact.prayerWallPosted", "Prayer request added to wall.", prayerCard);
                     } else if (state === "updated") {
-                        prayerWallNote.textContent = T("contact.prayerWallUpdated", "Prayer request updated.");
+                        prayerWallNote.textContent = T("contact.prayerWallUpdated", "Prayer request updated.", prayerCard);
                     } else if (state === "deleted") {
-                        prayerWallNote.textContent = T("contact.prayerWallDeleted", "Prayer request deleted.");
+                        prayerWallNote.textContent = T("contact.prayerWallDeleted", "Prayer request deleted.", prayerCard);
                     } else if (state === "manageDenied") {
-                        prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can edit/delete.");
+                        prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can edit/delete.", prayerCard);
                     } else if (state === "syncError") {
-                        prayerWallNote.textContent = T("contact.prayerWallSyncError", "Could not sync prayer wall. Please try again.");
+                        prayerWallNote.textContent = T("contact.prayerWallSyncError", "Could not sync prayer wall. Please try again.", prayerCard);
                     } else {
-                        prayerWallNote.textContent = T("contact.prayerWallNeedMessage", "Please write your prayer request.");
+                        prayerWallNote.textContent = T("contact.prayerWallNeedMessage", "Please write your prayer request.", prayerCard);
                     }
                 }
                 renderPrayerWall();
+            });
+            document.addEventListener("njc:cardlangchange", function () {
+                renderPrayerWall();
+                renderPrayerDetail();
             });
             document.addEventListener("njc:authchange", function () {
                 renderPrayerWall();
