@@ -267,7 +267,21 @@
         nextChapterButton.disabled = !(hasNextInBook || hasNextBook);
     }
 
-    function renderVerses(data) {
+    function resetChapterViewPosition() {
+        if (verseList) {
+            verseList.scrollTop = 0;
+            verseList.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
+                node.classList.remove("highlight");
+            });
+        }
+        if (verseInput) {
+            verseInput.value = "1";
+        }
+    }
+
+    function renderVerses(data, options) {
+        var config = options && typeof options === "object" ? options : {};
+        var resetPosition = Boolean(config.resetPosition);
         var language = normalizeLanguage(state.language);
         var location = clampLocation(data, getCurrentLangState());
         state[language] = { book: location.book, chapter: location.chapter };
@@ -287,6 +301,9 @@
                 "<li>" +
                 "  <p>" + escapeHtml(T("bible.noData", "No verses available for this chapter.")) + "</p>" +
                 "</li>";
+            if (resetPosition) {
+                resetChapterViewPosition();
+            }
             return;
         }
 
@@ -301,13 +318,16 @@
                 "  <p class=\"bible-verse-text\">" + escapeHtml(text) + "</p>" +
                 "</li>";
         }).join("");
+        if (resetPosition) {
+            resetChapterViewPosition();
+        }
     }
 
     function renderBible() {
         setLanguageButtons();
         renderLoading();
         loadBible(state.language).then(function (data) {
-            renderVerses(data);
+            renderVerses(data, { resetPosition: true });
         }).catch(function () {
             renderLoadError();
         });
@@ -345,7 +365,7 @@
                 }
             }
             state[language] = clampLocation(data, location);
-            renderVerses(data);
+            renderVerses(data, { resetPosition: true });
         }).catch(function () {
             renderLoadError();
         });
@@ -383,7 +403,7 @@
             location.book = normalizeNumber(bookSelect.value, location.book);
             location.chapter = 0;
             state[language] = clampLocation(data, location);
-            renderVerses(data);
+            renderVerses(data, { resetPosition: true });
         }).catch(function () {
             renderLoadError();
         });
@@ -394,7 +414,7 @@
             var location = clampLocation(data, getCurrentLangState());
             location.chapter = normalizeNumber(chapterSelect.value, location.chapter);
             state[language] = clampLocation(data, location);
-            renderVerses(data);
+            renderVerses(data, { resetPosition: true });
         }).catch(function () {
             renderLoadError();
         });
