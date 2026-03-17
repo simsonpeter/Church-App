@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bz">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bz">
-    <link rel="manifest" href="site.webmanifest?v=20260311bz">
-    <link rel="stylesheet" href="styles.css?v=20260311bz">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311ca">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311ca">
+    <link rel="manifest" href="site.webmanifest?v=20260311ca">
+    <link rel="stylesheet" href="styles.css?v=20260311ca">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -460,8 +460,9 @@
                         <input id="profile-phone" class="search-input" type="tel" autocomplete="tel" placeholder="+32 483 11 64 84">
                     </label>
                     <label class="profile-field">
-                        <span data-i18n="profile.photo">Photo URL (optional)</span>
-                        <input id="profile-photo-url" class="search-input" type="url" autocomplete="photo" placeholder="https://...">
+                        <span data-i18n="profile.photo">Photo (optional)</span>
+                        <input id="profile-photo-file" class="search-input" type="file" accept="image/*">
+                        <small class="page-note" data-i18n="profile.photoHelp">Choose a photo from your device.</small>
                     </label>
                     <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
                 </form>
@@ -618,17 +619,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bz"></script>
-    <script src="app-shell.js?v=20260311bz"></script>
-    <script src="events-engine.js?v=20260311bz"></script>
-    <script src="home-page.js?v=20260311bz"></script>
-    <script src="events-page.js?v=20260311bz"></script>
-    <script src="sermons-page.js?v=20260311bz"></script>
-    <script src="bible-page.js?v=20260311bz"></script>
-    <script src="songbook-page.js?v=20260311bz"></script>
-    <script src="contact-page.js?v=20260311bz"></script>
-    <script src="admin-mailbox-page.js?v=20260311bz"></script>
-    <script src="profile-page.js?v=20260311bz"></script>
-    <script src="spa-router.js?v=20260311bz"></script>
+    <script src="user-auth.js?v=20260311ca"></script>
+    <script src="app-shell.js?v=20260311ca"></script>
+    <script src="events-engine.js?v=20260311ca"></script>
+    <script src="home-page.js?v=20260311ca"></script>
+    <script src="events-page.js?v=20260311ca"></script>
+    <script src="sermons-page.js?v=20260311ca"></script>
+    <script src="bible-page.js?v=20260311ca"></script>
+    <script src="songbook-page.js?v=20260311ca"></script>
+    <script src="contact-page.js?v=20260311ca"></script>
+    <script src="admin-mailbox-page.js?v=20260311ca"></script>
+    <script src="profile-page.js?v=20260311ca"></script>
+    <script src="spa-router.js?v=20260311ca"></script>
 </body>
 </html>

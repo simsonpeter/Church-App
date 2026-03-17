@@ -135,9 +135,16 @@
         if (!value) {
             return "";
         }
-        var firstToken = value.split(/\s+/).filter(Boolean)[0] || "";
+        var firstToken = value
+            .replace(/[|,/\\]+/g, " ")
+            .split(/[\s._-]+/)
+            .filter(Boolean)[0] || "";
         if (!firstToken) {
             return "";
+        }
+        var camelMatch = firstToken.match(/^([A-Z][a-z]+|[a-z]+)/);
+        if (camelMatch && camelMatch[1] && camelMatch[1].length < firstToken.length) {
+            firstToken = camelMatch[1];
         }
         return firstToken.charAt(0).toUpperCase() + firstToken.slice(1);
     }
@@ -159,7 +166,8 @@
         }
         var activeUser = window.NjcAuth.getUser();
         var profile = getProfileForUser(activeUser);
-        var firstName = pickFirstName(profile && profile.fullName)
+        var firstName = pickFirstName(profile && profile.firstName)
+            || pickFirstName(profile && profile.fullName)
             || pickFirstName(activeUser && activeUser.displayName)
             || pickFirstNameFromEmail(activeUser && activeUser.email);
         return firstName ? (baseText + " " + firstName) : baseText;

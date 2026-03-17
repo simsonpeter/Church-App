@@ -6,7 +6,7 @@
     var fullNameInput = document.getElementById("profile-full-name");
     var dobInput = document.getElementById("profile-dob");
     var phoneInput = document.getElementById("profile-phone");
-    var photoInput = document.getElementById("profile-photo-url");
+    var photoFileInput = document.getElementById("profile-photo-file");
     var saveButton = document.getElementById("profile-save-btn");
     var note = document.getElementById("profile-note");
     var avatarImage = document.getElementById("profile-avatar-image");
@@ -15,6 +15,12 @@
     var busy = false;
     var noteState = "";
     var currentUid = "";
+    var savedPhotoDataUrl = "";
+    var selectedPhotoDataUrl = "";
+    var MAX_UPLOAD_FILE_BYTES = 5 * 1024 * 1024;
+    var MAX_PHOTO_SIDE = 720;
+    var PHOTO_QUALITY = 0.82;
+    var MAX_DATA_URL_LENGTH = 900000;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && profileCard) {
@@ -105,7 +111,7 @@
 
     function setFormEnabled(enabled) {
         var disabled = !enabled;
-        [fullNameInput, dobInput, phoneInput, photoInput].forEach(function (node) {
+        [fullNameInput, dobInput, phoneInput, photoFileInput].forEach(function (node) {
             if (node) {
                 node.disabled = disabled;
             }
@@ -132,9 +138,74 @@
             fullName: String(fullNameInput && fullNameInput.value || "").trim(),
             dob: String(dobInput && dobInput.value || "").trim(),
             phone: String(phoneInput && phoneInput.value || "").trim(),
-            photoUrl: String(photoInput && photoInput.value || "").trim(),
+            photoUrl: String(selectedPhotoDataUrl || savedPhotoDataUrl || "").trim(),
             updatedAt: Date.now()
         };
+    }
+
+    function fileToDataUrl(file) {
+        return new Promise(function (resolve, reject) {
+            if (!file) {
+                reject(new Error("Missing file"));
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function () {
+                resolve(String(reader.result || ""));
+            };
+            reader.onerror = function () {
+                reject(new Error("File read failed"));
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function loadImage(dataUrl) {
+        return new Promise(function (resolve, reject) {
+            var image = new Image();
+            image.onload = function () {
+                resolve(image);
+            };
+            image.onerror = function () {
+                reject(new Error("Image decode failed"));
+            };
+            image.src = dataUrl;
+        });
+    }
+
+    async function createPhotoDataUrl(file) {
+        if (!file || String(file.type || "").indexOf("image/") !== 0) {
+            throw new Error("not_image");
+        }
+        if (Number(file.size || 0) > MAX_UPLOAD_FILE_BYTES) {
+            throw new Error("too_large_file");
+        }
+        var sourceDataUrl = await fileToDataUrl(file);
+        var image = await loadImage(sourceDataUrl);
+        var sourceWidth = Number(image.naturalWidth || image.width || 0);
+        var sourceHeight = Number(image.naturalHeight || image.height || 0);
+        if (!sourceWidth || !sourceHeight) {
+            throw new Error("invalid_dimensions");
+        }
+        var scale = Math.min(1, MAX_PHOTO_SIDE / Math.max(sourceWidth, sourceHeight));
+        var width = Math.max(1, Math.round(sourceWidth * scale));
+        var height = Math.max(1, Math.round(sourceHeight * scale));
+        var canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        var context = canvas.getContext("2d");
+        if (!context) {
+            return sourceDataUrl;
+        }
+        context.drawImage(image, 0, 0, width, height);
+        var compressed = canvas.toDataURL("image/jpeg", PHOTO_QUALITY);
+        if (compressed.length > MAX_DATA_URL_LENGTH) {
+            compressed = canvas.toDataURL("image/jpeg", 0.68);
+        }
+        if (compressed.length > MAX_DATA_URL_LENGTH) {
+            throw new Error("too_large_data");
+        }
+        return compressed;
     }
 
     function renderAvatar(profile, user) {
@@ -168,8 +239,10 @@
         if (phoneInput) {
             phoneInput.value = String(profile.phone || "");
         }
-        if (photoInput) {
-            photoInput.value = String(profile.photoUrl || "");
+        savedPhotoDataUrl = String(profile.photoUrl || "");
+        selectedPhotoDataUrl = "";
+        if (photoFileInput) {
+            photoFileInput.value = "";
         }
     }
 
@@ -257,6 +330,11 @@
         var map = getProfileMap();
         map[uid] = profile;
         saveProfileMap(map);
+        savedPhotoDataUrl = String(profile.photoUrl || "");
+        selectedPhotoDataUrl = "";
+        if (photoFileInput) {
+            photoFileInput.value = "";
+        }
         renderAvatar(profile, user);
         notifyProfileUpdated(uid, profile);
 
@@ -287,15 +365,40 @@
             note.textContent = T("profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
         } else if (noteState === "authRequired") {
             note.textContent = T("profile.loginRequired", "Please login to manage your profile.");
+        } else if (noteState === "photoReadError") {
+            note.textContent = T("profile.photoReadError", "Could not load photo. Please try again.");
+        } else if (noteState === "photoTooLarge") {
+            note.textContent = T("profile.photoTooLarge", "Photo is too large. Please choose a smaller file.");
         }
     }
 
     if (form) {
         form.addEventListener("submit", saveProfile);
     }
-    if (photoInput) {
-        photoInput.addEventListener("input", function () {
-            renderAvatar(getCurrentFormProfile(), getCurrentUser());
+    if (photoFileInput) {
+        photoFileInput.addEventListener("change", async function () {
+            var file = photoFileInput.files && photoFileInput.files[0] ? photoFileInput.files[0] : null;
+            if (!file) {
+                selectedPhotoDataUrl = "";
+                renderAvatar(getCurrentFormProfile(), getCurrentUser());
+                return;
+            }
+            setBusy(true);
+            try {
+                selectedPhotoDataUrl = await createPhotoDataUrl(file);
+                renderAvatar(getCurrentFormProfile(), getCurrentUser());
+                setNote("", "", "");
+            } catch (err) {
+                selectedPhotoDataUrl = "";
+                renderAvatar(getCurrentFormProfile(), getCurrentUser());
+                if (String(err && err.message || "").indexOf("too_large") >= 0) {
+                    setNote("photoTooLarge", "profile.photoTooLarge", "Photo is too large. Please choose a smaller file.");
+                } else {
+                    setNote("photoReadError", "profile.photoReadError", "Could not load photo. Please try again.");
+                }
+            } finally {
+                setBusy(false);
+            }
         });
     }
 
