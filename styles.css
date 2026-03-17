@@ -1268,7 +1268,7 @@ body.songbook-fullscreen-open .offline-badge {
     overflow-y: auto;
     display: grid;
     align-content: start;
-    gap: 6px;
+    gap: 10px;
 }
 
 .header-menu-popover[hidden] {
@@ -1376,10 +1376,15 @@ body.header-menu-open {
 
 .header-menu-card {
     border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--surface-soft);
-    padding: 6px;
-    margin-bottom: 4px;
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--surface-soft), var(--surface));
+    box-shadow: 0 8px 18px rgba(40, 12, 12, 0.12);
+    padding: 8px;
+    margin: 0 0 10px;
+}
+
+.header-menu-card:last-of-type {
+    margin-bottom: 2px;
 }
 
 .header-menu-link {
