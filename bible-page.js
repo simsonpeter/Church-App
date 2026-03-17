@@ -78,6 +78,13 @@
     var streamQueue = [];
     var streamQueueIndex = 0;
     var streamErrorCount = 0;
+    var miniBiblePlayer = null;
+    var miniBibleOpenButton = null;
+    var miniBibleTitleNode = null;
+    var miniBibleInfoNode = null;
+    var miniBiblePlayButton = null;
+    var miniBibleCloseButton = null;
+    var sermonMiniObserver = null;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && bibleCard) {
@@ -451,6 +458,118 @@
         });
     }
 
+    function isBiblePlaybackVisible() {
+        return speechState.mode !== "none" || speechState.active || speechState.paused;
+    }
+
+    function getMiniBibleInfoText() {
+        var activeLanguage = normalizeLanguage(currentSpeechContext.language);
+        var location = currentSpeechContext.location || { book: 0, chapter: 0 };
+        var chapterNumber = Number(location.chapter || 0) + 1;
+        var bookTitle = getBookName(activeLanguage, Number(location.book || 0));
+        var verseLabel = T("bible.verse", "Verse");
+        return bookTitle + " " + String(chapterNumber) + " • " + verseLabel + " " + String(currentSpeechStartVerse) + "+";
+    }
+
+    function ensureMiniBiblePlayer() {
+        if (miniBiblePlayer && miniBibleOpenButton && miniBiblePlayButton && miniBibleCloseButton) {
+            return;
+        }
+        miniBiblePlayer = document.getElementById("mini-bible-player");
+        if (!miniBiblePlayer) {
+            miniBiblePlayer = document.createElement("div");
+            miniBiblePlayer.id = "mini-bible-player";
+            miniBiblePlayer.className = "mini-sermon-player mini-bible-player";
+            miniBiblePlayer.hidden = true;
+            miniBiblePlayer.innerHTML = "" +
+                "<button type=\"button\" class=\"mini-player-open\" aria-label=\"Open Bible page\">" +
+                "  <span class=\"mini-player-title\"></span>" +
+                "  <span class=\"mini-player-time\"></span>" +
+                "</button>" +
+                "<button type=\"button\" class=\"mini-player-btn\" aria-label=\"Play or pause audio bible\"><i class=\"fa-solid fa-play\"></i></button>" +
+                "<button type=\"button\" class=\"mini-player-btn\" aria-label=\"Stop audio bible\"><i class=\"fa-solid fa-xmark\"></i></button>";
+            document.body.appendChild(miniBiblePlayer);
+        }
+
+        miniBibleOpenButton = miniBiblePlayer.querySelector(".mini-player-open");
+        miniBibleTitleNode = miniBiblePlayer.querySelector(".mini-player-title");
+        miniBibleInfoNode = miniBiblePlayer.querySelector(".mini-player-time");
+        var miniButtons = miniBiblePlayer.querySelectorAll(".mini-player-btn");
+        miniBiblePlayButton = miniButtons[0] || null;
+        miniBibleCloseButton = miniButtons[1] || null;
+
+        if (miniBibleOpenButton && !miniBibleOpenButton.dataset.bound) {
+            miniBibleOpenButton.dataset.bound = "1";
+            miniBibleOpenButton.addEventListener("click", function () {
+                window.location.hash = "#bible";
+            });
+        }
+        if (miniBiblePlayButton && !miniBiblePlayButton.dataset.bound) {
+            miniBiblePlayButton.dataset.bound = "1";
+            miniBiblePlayButton.addEventListener("click", function () {
+                toggleSpeechPlayback();
+            });
+        }
+        if (miniBibleCloseButton && !miniBibleCloseButton.dataset.bound) {
+            miniBibleCloseButton.dataset.bound = "1";
+            miniBibleCloseButton.addEventListener("click", function () {
+                stopSpeechPlayback();
+            });
+        }
+    }
+
+    function refreshMiniBiblePlayer() {
+        ensureMiniBiblePlayer();
+        if (!miniBiblePlayer || !miniBibleOpenButton || !miniBibleTitleNode || !miniBibleInfoNode || !miniBiblePlayButton || !miniBibleCloseButton) {
+            return;
+        }
+        var visible = isBiblePlaybackVisible();
+        miniBiblePlayer.hidden = !visible;
+        if (!visible) {
+            return;
+        }
+        var sermonMini = document.getElementById("mini-sermon-player");
+        var sermonVisible = Boolean(sermonMini && !sermonMini.hidden);
+        miniBiblePlayer.style.bottom = sermonVisible
+            ? "calc(max(12px, env(safe-area-inset-bottom)) + 146px)"
+            : "calc(max(12px, env(safe-area-inset-bottom)) + 86px)";
+        miniBibleTitleNode.textContent = T("bible.title", "Bible Reader");
+        miniBibleInfoNode.textContent = getMiniBibleInfoText();
+
+        var isPlaying = speechState.active && !speechState.paused;
+        var playIcon = isPlaying ? "fa-pause" : "fa-play";
+        miniBiblePlayButton.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+
+        var openLabel = T("player.openBiblePage", "Open Bible page");
+        miniBibleOpenButton.setAttribute("aria-label", openLabel);
+        miniBibleOpenButton.title = openLabel;
+        var playLabel = isPlaying
+            ? T("bible.ttsPause", "Pause audio bible")
+            : (speechState.paused ? T("bible.ttsResume", "Resume audio bible") : T("bible.ttsPlay", "Start audio bible"));
+        miniBiblePlayButton.setAttribute("aria-label", playLabel);
+        miniBiblePlayButton.title = playLabel;
+        var stopLabel = T("bible.ttsStop", "Stop audio bible");
+        miniBibleCloseButton.setAttribute("aria-label", stopLabel);
+        miniBibleCloseButton.title = stopLabel;
+    }
+
+    function setupSermonMiniObserver() {
+        if (sermonMiniObserver || typeof MutationObserver === "undefined") {
+            return;
+        }
+        var sermonMini = document.getElementById("mini-sermon-player");
+        if (!sermonMini) {
+            return;
+        }
+        sermonMiniObserver = new MutationObserver(function () {
+            refreshMiniBiblePlayer();
+        });
+        sermonMiniObserver.observe(sermonMini, {
+            attributes: true,
+            attributeFilter: ["hidden", "style", "class"]
+        });
+    }
+
     function getSelectedVerseStart(maxVerses) {
         var max = Math.max(1, Number(maxVerses || 1));
         var chosen = Number(verseInput && verseInput.value);
@@ -549,6 +668,7 @@
         ttsStopButton.title = stopLabel;
         ttsStopButton.setAttribute("aria-label", stopLabel);
         ttsStopButton.disabled = !speechState.active && !speechState.paused;
+        refreshMiniBiblePlayer();
     }
 
     function stopSpeechPlayback() {
@@ -1174,8 +1294,10 @@
     }
     setupStreamAudio();
     setupMediaSessionHandlers();
+    setupSermonMiniObserver();
 
     setFullScreenMode(false);
     updateTtsControls();
+    refreshMiniBiblePlayer();
     renderBible();
 })();

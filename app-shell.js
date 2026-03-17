@@ -311,6 +311,7 @@
         "sermons.filterAll": "அனைத்தும்",
         "offline.active": "ஆஃப்லைன் முறை செயல்பாட்டில் உள்ளது",
         "player.openSermonsPage": "பிரசங்கங்கள் பக்கத்தைத் திற",
+        "player.openBiblePage": "வேதாகம பக்கத்தைத் திற",
         "player.playOrPause": "ஒலிக்க அல்லது நிறுத்த",
         "player.stopAndClose": "நிறுத்தி மூட",
         "player.close": "ப்ளேயரை மூடு",

@@ -2040,8 +2040,13 @@ body.bible-fullscreen-open {
 body.bible-fullscreen-open .app-header,
 body.bible-fullscreen-open .tab-nav,
 body.bible-fullscreen-open .mini-sermon-player,
+body.bible-fullscreen-open .mini-bible-player,
 body.bible-fullscreen-open .offline-badge {
     display: none !important;
+}
+
+.mini-bible-player {
+    z-index: 2499;
 }
 
 .bible-card.bible-card-fullscreen {
