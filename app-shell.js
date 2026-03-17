@@ -74,7 +74,7 @@
         "toggle.theme.toDark": "இருள் நிலைக்கு மாற்று",
         "splash.main": "புதிய எருசலேம் சபை",
         "splash.sub": "பெல்ஜியம்",
-        "home.welcomeBack": "வரவேற்கிறோம்",
+        "home.welcomeBack": "நல்வரவு",
         "home.tagline": "உங்கள் வாராந்திர விசுவாசப் பயணம் ஒரே இடத்தில்.",
         "home.bibleReadingTitle": "இன்றைய வேத வாசிப்பு",
         "home.dailyVerseTitle": "இன்றைய வேத வசனம்",
