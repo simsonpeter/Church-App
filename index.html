@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311cn">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311cn">
-    <link rel="manifest" href="site.webmanifest?v=20260311cn">
-    <link rel="stylesheet" href="styles.css?v=20260311cn">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311co">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311co">
+    <link rel="manifest" href="site.webmanifest?v=20260311co">
+    <link rel="stylesheet" href="styles.css?v=20260311co">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -333,9 +333,17 @@
                         <button type="button" class="button-link button-secondary bible-lang-btn active" id="bible-language-en" data-bible-lang="en" data-i18n="bible.languageEnglish">English</button>
                         <button type="button" class="button-link button-secondary bible-lang-btn" id="bible-language-ta" data-bible-lang="ta" data-i18n="bible.languageTamil">Tamil</button>
                     </div>
-                    <button type="button" class="bible-fullscreen-toggle" id="bible-fullscreen-toggle" aria-label="Full screen reading" title="Full screen reading">
-                        <i class="fa-solid fa-expand" aria-hidden="true"></i>
-                    </button>
+                    <div class="bible-utility-buttons">
+                        <button type="button" class="bible-icon-btn" id="bible-tts-toggle" aria-label="Start audio bible" title="Start audio bible">
+                            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="bible-icon-btn" id="bible-tts-stop" aria-label="Stop audio bible" title="Stop audio bible">
+                            <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="bible-icon-btn bible-fullscreen-toggle" id="bible-fullscreen-toggle" aria-label="Full screen reading" title="Full screen reading">
+                            <i class="fa-solid fa-expand" aria-hidden="true"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="bible-inline-row">
                     <label class="bible-field">
@@ -631,17 +639,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311cn"></script>
-    <script src="app-shell.js?v=20260311cn"></script>
-    <script src="events-engine.js?v=20260311cn"></script>
-    <script src="home-page.js?v=20260311cn"></script>
-    <script src="events-page.js?v=20260311cn"></script>
-    <script src="sermons-page.js?v=20260311cn"></script>
-    <script src="bible-page.js?v=20260311cn"></script>
-    <script src="songbook-page.js?v=20260311cn"></script>
-    <script src="contact-page.js?v=20260311cn"></script>
-    <script src="admin-mailbox-page.js?v=20260311cn"></script>
-    <script src="profile-page.js?v=20260311cn"></script>
-    <script src="spa-router.js?v=20260311cn"></script>
+    <script src="user-auth.js?v=20260311co"></script>
+    <script src="app-shell.js?v=20260311co"></script>
+    <script src="events-engine.js?v=20260311co"></script>
+    <script src="home-page.js?v=20260311co"></script>
+    <script src="events-page.js?v=20260311co"></script>
+    <script src="sermons-page.js?v=20260311co"></script>
+    <script src="bible-page.js?v=20260311co"></script>
+    <script src="songbook-page.js?v=20260311co"></script>
+    <script src="contact-page.js?v=20260311co"></script>
+    <script src="admin-mailbox-page.js?v=20260311co"></script>
+    <script src="profile-page.js?v=20260311co"></script>
+    <script src="spa-router.js?v=20260311co"></script>
 </body>
 </html>

@@ -1904,7 +1904,13 @@ body.auth-modal-open {
     margin: 8px 0 10px;
 }
 
-.bible-fullscreen-toggle {
+.bible-utility-buttons {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bible-icon-btn {
     width: 40px;
     height: 40px;
     border-radius: 999px;
@@ -1918,11 +1924,12 @@ body.auth-modal-open {
     box-shadow: 0 4px 10px rgba(127, 34, 34, 0.09);
 }
 
-.bible-fullscreen-toggle i {
+.bible-icon-btn i {
     font-size: 0.96rem;
 }
 
-.bible-fullscreen-toggle[aria-pressed="true"] {
+.bible-icon-btn[aria-pressed="true"],
+.bible-icon-btn.active {
     background: var(--primary-soft);
     border-color: #efb1b1;
 }
