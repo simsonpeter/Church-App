@@ -2060,6 +2060,12 @@ body.bible-fullscreen-open .offline-badge {
     display: none !important;
 }
 
+.bible-card.bible-card-fullscreen .bible-inline-row {
+    padding-top: 8px;
+    overflow-y: visible;
+    align-items: flex-start;
+}
+
 .bible-card.bible-card-fullscreen .bible-verse-list {
     margin-top: 0;
     max-height: none;
