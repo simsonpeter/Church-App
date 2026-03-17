@@ -252,12 +252,28 @@
             lines.push("Verse " + String(safeNumber) + ". " + text);
         });
 
-        var segments = [];
+        var pieces = [];
         lines.forEach(function (line) {
             splitLongSegment(line, 160).forEach(function (piece) {
-                segments.push(piece);
+                pieces.push(piece);
             });
         });
+        var segments = [];
+        var chunk = "";
+        pieces.forEach(function (piece) {
+            var next = chunk ? (chunk + ". " + piece) : piece;
+            if (next.length > 180) {
+                if (chunk) {
+                    segments.push(chunk);
+                }
+                chunk = piece;
+                return;
+            }
+            chunk = next;
+        });
+        if (chunk) {
+            segments.push(chunk);
+        }
         return segments;
     }
 
@@ -476,27 +492,14 @@
             return;
         }
         miniBiblePlayer = document.getElementById("mini-bible-player");
-        if (!miniBiblePlayer) {
-            miniBiblePlayer = document.createElement("div");
-            miniBiblePlayer.id = "mini-bible-player";
-            miniBiblePlayer.className = "mini-sermon-player mini-bible-player";
-            miniBiblePlayer.hidden = true;
-            miniBiblePlayer.innerHTML = "" +
-                "<button type=\"button\" class=\"mini-player-open\" aria-label=\"Open Bible page\">" +
-                "  <span class=\"mini-player-title\"></span>" +
-                "  <span class=\"mini-player-time\"></span>" +
-                "</button>" +
-                "<button type=\"button\" class=\"mini-player-btn\" aria-label=\"Play or pause audio bible\"><i class=\"fa-solid fa-play\"></i></button>" +
-                "<button type=\"button\" class=\"mini-player-btn\" aria-label=\"Stop audio bible\"><i class=\"fa-solid fa-xmark\"></i></button>";
-            document.body.appendChild(miniBiblePlayer);
+        miniBibleOpenButton = document.getElementById("mini-bible-open");
+        miniBibleTitleNode = document.getElementById("mini-bible-title");
+        miniBibleInfoNode = document.getElementById("mini-bible-info");
+        miniBiblePlayButton = document.getElementById("mini-bible-play");
+        miniBibleCloseButton = document.getElementById("mini-bible-close");
+        if (!miniBiblePlayer || !miniBibleOpenButton || !miniBibleTitleNode || !miniBibleInfoNode || !miniBiblePlayButton || !miniBibleCloseButton) {
+            return;
         }
-
-        miniBibleOpenButton = miniBiblePlayer.querySelector(".mini-player-open");
-        miniBibleTitleNode = miniBiblePlayer.querySelector(".mini-player-title");
-        miniBibleInfoNode = miniBiblePlayer.querySelector(".mini-player-time");
-        var miniButtons = miniBiblePlayer.querySelectorAll(".mini-player-btn");
-        miniBiblePlayButton = miniButtons[0] || null;
-        miniBibleCloseButton = miniButtons[1] || null;
 
         if (miniBibleOpenButton && !miniBibleOpenButton.dataset.bound) {
             miniBibleOpenButton.dataset.bound = "1";
@@ -525,6 +528,7 @@
         }
         var visible = isBiblePlaybackVisible();
         miniBiblePlayer.hidden = !visible;
+        miniBiblePlayer.style.display = visible ? "grid" : "";
         if (!visible) {
             return;
         }
@@ -1276,12 +1280,18 @@
     });
 
     document.addEventListener("njc:langchange", function () {
-        stopSpeechPlayback();
-        renderBible();
+        if (isBibleRouteActive() && !speechState.active && !speechState.paused) {
+            renderBible();
+            return;
+        }
+        updateTtsControls();
     });
     document.addEventListener("njc:cardlangchange", function () {
-        stopSpeechPlayback();
-        renderBible();
+        if (isBibleRouteActive() && !speechState.active && !speechState.paused) {
+            renderBible();
+            return;
+        }
+        updateTtsControls();
     });
 
     if (speechSupported) {
