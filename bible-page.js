@@ -65,6 +65,13 @@
     };
     var speakingUtterance = null;
     var currentSpeechText = "";
+    var currentSpeechStartVerse = 1;
+    var currentSpeechContext = {
+        language: "en",
+        location: { book: 0, chapter: 0 },
+        verses: []
+    };
+    var screenWakeLock = null;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && bibleCard) {
@@ -137,13 +144,18 @@
         return bestVoice;
     }
 
-    function buildChapterSpeechText(language, location, verses) {
+    function buildChapterSpeechText(language, location, verses, startVerseNumber) {
         var chapterNumber = Number(location && location.chapter || 0) + 1;
         var header = normalizeLanguage(language) === "ta"
             ? (getBookName(language, Number(location && location.book || 0)) + " அதிகாரம் " + String(chapterNumber))
             : (getBookName(language, Number(location && location.book || 0)) + " chapter " + String(chapterNumber));
+        var safeStartVerse = Math.max(1, Number(startVerseNumber || 1));
+        var startIndex = safeStartVerse - 1;
         var lines = [header];
         (Array.isArray(verses) ? verses : []).forEach(function (verseItem, index) {
+            if (index < startIndex) {
+                return;
+            }
             var safeNumber = index + 1;
             var text = String(verseItem && verseItem.Verse || "").replace(/\s+/g, " ").trim();
             if (!text) {
@@ -156,6 +168,64 @@
             lines.push("Verse " + String(safeNumber) + ". " + text);
         });
         return lines.join(". ");
+    }
+
+    function getSelectedVerseStart(maxVerses) {
+        var max = Math.max(1, Number(maxVerses || 1));
+        var chosen = Number(verseInput && verseInput.value);
+        if (!Number.isInteger(chosen) || chosen <= 0) {
+            return 1;
+        }
+        return Math.min(chosen, max);
+    }
+
+    function updateSpeechTextFromSelection() {
+        var verses = Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses : [];
+        if (!verses.length) {
+            currentSpeechText = "";
+            currentSpeechStartVerse = 1;
+            updateTtsControls();
+            return;
+        }
+        var startVerse = getSelectedVerseStart(verses.length);
+        currentSpeechStartVerse = startVerse;
+        currentSpeechText = buildChapterSpeechText(
+            normalizeLanguage(currentSpeechContext.language),
+            currentSpeechContext.location || { book: 0, chapter: 0 },
+            verses,
+            startVerse
+        );
+        updateTtsControls();
+    }
+
+    function releaseWakeLock() {
+        if (!screenWakeLock || typeof screenWakeLock.release !== "function") {
+            screenWakeLock = null;
+            return;
+        }
+        var lock = screenWakeLock;
+        screenWakeLock = null;
+        lock.release().catch(function () {
+            return null;
+        });
+    }
+
+    function requestWakeLock() {
+        if (typeof navigator === "undefined" || !navigator.wakeLock || typeof navigator.wakeLock.request !== "function") {
+            return;
+        }
+        navigator.wakeLock.request("screen").then(function (lock) {
+            screenWakeLock = lock;
+            if (lock && typeof lock.addEventListener === "function") {
+                lock.addEventListener("release", function () {
+                    if (screenWakeLock === lock) {
+                        screenWakeLock = null;
+                    }
+                });
+            }
+        }).catch(function () {
+            return null;
+        });
     }
 
     function updateTtsControls() {
@@ -204,6 +274,7 @@
         if (synth) {
             synth.cancel();
         }
+        releaseWakeLock();
         speakingUtterance = null;
         speechState.active = false;
         speechState.paused = false;
@@ -211,6 +282,7 @@
     }
 
     function startSpeechPlayback() {
+        updateSpeechTextFromSelection();
         if (!speechSupported || !currentSpeechText) {
             updateTtsControls();
             return;
@@ -234,6 +306,7 @@
             if (speakingUtterance !== utterance) {
                 return;
             }
+            releaseWakeLock();
             speakingUtterance = null;
             speechState.active = false;
             speechState.paused = false;
@@ -243,6 +316,7 @@
             if (speakingUtterance !== utterance) {
                 return;
             }
+            releaseWakeLock();
             speakingUtterance = null;
             speechState.active = false;
             speechState.paused = false;
@@ -252,6 +326,7 @@
         speechState.active = true;
         speechState.paused = false;
         updateTtsControls();
+        requestWakeLock();
         synth.speak(utterance);
     }
 
@@ -270,6 +345,13 @@
             return;
         }
         if (speechState.active && synth.paused) {
+            var currentVerseChoice = getSelectedVerseStart(
+                Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses.length : 1
+            );
+            if (currentVerseChoice !== currentSpeechStartVerse) {
+                startSpeechPlayback();
+                return;
+            }
             synth.resume();
             speechState.paused = false;
             updateTtsControls();
@@ -358,6 +440,11 @@
 
     function renderLoadError() {
         setStatus(T("bible.error", "Could not load Bible right now."), true);
+        currentSpeechContext = {
+            language: normalizeLanguage(state.language),
+            location: { book: 0, chapter: 0 },
+            verses: []
+        };
         currentSpeechText = "";
         stopSpeechPlayback();
         verseList.innerHTML = "" +
@@ -516,6 +603,11 @@
         setStatus(getBookName(language, location.book) + " " + String(location.chapter + 1), false);
 
         if (!verses.length) {
+            currentSpeechContext = {
+                language: language,
+                location: { book: location.book, chapter: location.chapter },
+                verses: []
+            };
             currentSpeechText = "";
             verseList.innerHTML = "" +
                 "<li>" +
@@ -539,11 +631,16 @@
                 "  <p class=\"bible-verse-text\">" + escapeHtml(text) + "</p>" +
                 "</li>";
         }).join("");
-        currentSpeechText = buildChapterSpeechText(language, location, verses);
+        currentSpeechContext = {
+            language: language,
+            location: { book: location.book, chapter: location.chapter },
+            verses: verses
+        };
+        updateSpeechTextFromSelection();
         if (resetPosition) {
             resetChapterViewPosition();
+            updateSpeechTextFromSelection();
         }
-        updateTtsControls();
     }
 
     function renderBible() {
@@ -613,6 +710,7 @@
         window.setTimeout(function () {
             target.classList.remove("highlight");
         }, 1600);
+        updateSpeechTextFromSelection();
     }
 
     languageEnButton.addEventListener("click", function () {
@@ -656,6 +754,11 @@
         verseGoButton.addEventListener("click", jumpToVerse);
     }
     if (verseInput) {
+        verseInput.addEventListener("input", function () {
+            if (!speechState.active) {
+                updateSpeechTextFromSelection();
+            }
+        });
         verseInput.addEventListener("keydown", function (event) {
             if (event.key === "Enter") {
                 event.preventDefault();
@@ -689,6 +792,11 @@
         exitFullScreenIfNeeded();
         if (!isBibleRouteActive()) {
             stopSpeechPlayback();
+        }
+    });
+    document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
+            requestWakeLock();
         }
     });
 
