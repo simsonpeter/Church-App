@@ -1944,7 +1944,7 @@
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons"];
+            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact"];
             var routeMap = {};
             primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
