@@ -2052,7 +2052,12 @@ body.bible-fullscreen-open .offline-badge {
 
 .bible-card.bible-card-fullscreen .bible-toolbar {
     margin: 0;
-    justify-content: space-between;
+    justify-content: flex-end;
+}
+
+.bible-card.bible-card-fullscreen .card-lang-top,
+.bible-card.bible-card-fullscreen .bible-lang-switch {
+    display: none !important;
 }
 
 .bible-card.bible-card-fullscreen .bible-verse-list {
