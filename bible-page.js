@@ -10,11 +10,10 @@
     var verseGoButton = document.getElementById("bible-verse-go");
     var prevChapterButton = document.getElementById("bible-prev-chapter");
     var nextChapterButton = document.getElementById("bible-next-chapter");
-    var fullScreenOpenButton = document.getElementById("bible-fullscreen-open");
-    var fullScreenExitButton = document.getElementById("bible-fullscreen-exit");
+    var fullScreenToggleButton = document.getElementById("bible-fullscreen-toggle");
+    var fullScreenToggleIcon = fullScreenToggleButton ? fullScreenToggleButton.querySelector("i") : null;
     var statusNote = document.getElementById("bible-status-note");
     var verseList = document.getElementById("bible-verse-list");
-    var bibleView = document.querySelector(".page-view[data-route=\"bible\"]");
     var bibleCard = verseList ? verseList.closest(".card") : null;
 
     if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton) {
@@ -181,13 +180,14 @@
         }
         document.body.classList.toggle("bible-fullscreen-open", shouldOpen);
         bibleCard.classList.toggle("bible-card-fullscreen", shouldOpen);
-        if (fullScreenOpenButton) {
-            fullScreenOpenButton.hidden = shouldOpen;
-            fullScreenOpenButton.setAttribute("aria-pressed", shouldOpen ? "true" : "false");
+        if (fullScreenToggleButton) {
+            var buttonLabel = shouldOpen ? T("bible.fullscreenExit", "Exit to app") : T("bible.fullscreenOpen", "Full screen reading");
+            fullScreenToggleButton.setAttribute("aria-pressed", shouldOpen ? "true" : "false");
+            fullScreenToggleButton.setAttribute("aria-label", buttonLabel);
+            fullScreenToggleButton.title = buttonLabel;
         }
-        if (fullScreenExitButton) {
-            fullScreenExitButton.hidden = !shouldOpen;
-            fullScreenExitButton.setAttribute("aria-pressed", shouldOpen ? "true" : "false");
+        if (fullScreenToggleIcon) {
+            fullScreenToggleIcon.className = "fa-solid " + (shouldOpen ? "fa-compress" : "fa-expand");
         }
         if (shouldOpen) {
             window.scrollTo(0, 0);
@@ -416,14 +416,10 @@
             }
         });
     }
-    if (fullScreenOpenButton) {
-        fullScreenOpenButton.addEventListener("click", function () {
-            setFullScreenMode(true);
-        });
-    }
-    if (fullScreenExitButton) {
-        fullScreenExitButton.addEventListener("click", function () {
-            setFullScreenMode(false);
+    if (fullScreenToggleButton) {
+        fullScreenToggleButton.addEventListener("click", function () {
+            var isOpen = document.body.classList.contains("bible-fullscreen-open");
+            setFullScreenMode(!isOpen);
         });
     }
 
@@ -435,11 +431,6 @@
     window.addEventListener("hashchange", function () {
         exitFullScreenIfNeeded();
     });
-    if (bibleView) {
-        bibleView.addEventListener("click", function () {
-            exitFullScreenIfNeeded();
-        });
-    }
 
     document.addEventListener("njc:langchange", function () {
         renderBible();
