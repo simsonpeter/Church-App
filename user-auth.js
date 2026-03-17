@@ -95,7 +95,13 @@
     }
 
     function emitAuthState() {
-        var state = user ? { uid: user.uid, email: user.email || "" } : null;
+        var state = user ? {
+            uid: user.uid,
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            phoneNumber: user.phoneNumber || ""
+        } : null;
         listeners.forEach(function (listener) {
             try {
                 listener(state);
@@ -572,7 +578,13 @@
             return function () { return null; };
         }
         listeners.push(listener);
-        listener(user ? { uid: user.uid, email: user.email || "" } : null);
+        listener(user ? {
+            uid: user.uid,
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            phoneNumber: user.phoneNumber || ""
+        } : null);
         return function () {
             listeners = listeners.filter(function (item) {
                 return item !== listener;
@@ -581,7 +593,13 @@
     }
 
     function getUser() {
-        return user ? { uid: user.uid, email: user.email || "" } : null;
+        return user ? {
+            uid: user.uid,
+            email: user.email || "",
+            displayName: user.displayName || "",
+            photoURL: user.photoURL || "",
+            phoneNumber: user.phoneNumber || ""
+        } : null;
     }
 
     window.NjcAuth = {

@@ -7,6 +7,7 @@
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var CARD_LANGUAGE_MAP_KEY = "njc_card_language_map_v1";
+    var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
     var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
     var NOTIFICATION_LAST_MAILBOX_KEY = "njc_notification_last_mailbox_v1";
@@ -31,6 +32,8 @@
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
         "menu.songbook": "பாடல் தொகுப்பு",
+        "menu.profile": "சுயவிவரம்",
+        "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
         "menu.settings": "அமைப்புகள்",
         "menu.login": "உள்நுழை / பதிவு",
@@ -390,6 +393,17 @@
         "settings.notificationsOff": "நிறுத்தப்பட்டுள்ளது",
         "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
         "settings.notificationsUnsupported": "ஆதரவு இல்லை",
+        "profile.eyebrow": "சுயவிவரம்",
+        "profile.title": "உங்கள் சுயவிவரம்",
+        "profile.info": "உங்கள் விவரங்களை புதுப்பிக்கவும்.",
+        "profile.fullName": "முழுப் பெயர்",
+        "profile.dob": "பிறந்த தேதி",
+        "profile.phone": "தொலைபேசி எண்",
+        "profile.photo": "புகைப்பட URL (விருப்பம்)",
+        "profile.save": "சுயவிவரம் சேமி",
+        "profile.saved": "சுயவிவரம் சேமிக்கப்பட்டது.",
+        "profile.savedLocal": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. இணையம் கிடைக்கும் போது மேகத்தில் ஒத்திசைக்கும்.",
+        "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "settings.close": "மூடு"
     };
 
@@ -1063,6 +1077,69 @@
         var activeUser = window.NjcAuth.getUser();
         var email = String(activeUser && activeUser.email || "").trim().toLowerCase();
         return email === ADMIN_EMAIL;
+    }
+
+    function getStoredProfileMap() {
+        try {
+            var raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function deriveNameFromEmail(email) {
+        var raw = String(email || "").trim().toLowerCase();
+        if (!raw || raw.indexOf("@") < 1) {
+            return "";
+        }
+        return raw.split("@")[0].replace(/[._-]+/g, " ").trim();
+    }
+
+    function getProfileForUser(activeUser) {
+        var uid = String(activeUser && activeUser.uid || "").trim();
+        if (!uid) {
+            return {};
+        }
+        var map = getStoredProfileMap();
+        var profile = map[uid];
+        return profile && typeof profile === "object" ? profile : {};
+    }
+
+    function getUserDisplayName(activeUser, profile) {
+        var fromProfile = String(profile && profile.fullName || "").trim();
+        if (fromProfile) {
+            return fromProfile;
+        }
+        var fromAuth = String(activeUser && activeUser.displayName || "").trim();
+        if (fromAuth) {
+            return fromAuth;
+        }
+        var fromEmail = deriveNameFromEmail(activeUser && activeUser.email || "");
+        if (fromEmail) {
+            return fromEmail;
+        }
+        return "";
+    }
+
+    function getUserPhotoUrl(activeUser, profile) {
+        var fromProfile = String(profile && profile.photoUrl || "").trim();
+        if (fromProfile) {
+            return fromProfile;
+        }
+        return String(activeUser && activeUser.photoURL || "").trim();
+    }
+
+    function getInitials(value) {
+        var parts = String(value || "").trim().split(/\s+/).filter(Boolean);
+        if (!parts.length) {
+            return "U";
+        }
+        if (parts.length === 1) {
+            return parts[0].slice(0, 2).toUpperCase();
+        }
+        return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
     }
 
     function diffMinutesFromBrusselsNow(nowBrussels, eventItem) {
@@ -1746,9 +1823,32 @@
         panelTop.appendChild(panelClose);
         panel.appendChild(panelTop);
 
+        var userSummary = document.createElement("div");
+        userSummary.className = "header-menu-user";
+        userSummary.innerHTML = "" +
+            "<div class=\"header-menu-user-avatar\">" +
+            "  <img class=\"header-menu-user-avatar-image\" alt=\"User photo\" hidden>" +
+            "  <span class=\"header-menu-user-avatar-fallback\">U</span>" +
+            "</div>" +
+            "<div class=\"header-menu-user-copy\">" +
+            "  <strong class=\"header-menu-user-name\"></strong>" +
+            "  <span class=\"page-note header-menu-user-email\"></span>" +
+            "</div>";
+        panel.appendChild(userSummary);
+        var userAvatarImage = userSummary.querySelector(".header-menu-user-avatar-image");
+        var userAvatarFallback = userSummary.querySelector(".header-menu-user-avatar-fallback");
+        var userNameNode = userSummary.querySelector(".header-menu-user-name");
+        var userEmailNode = userSummary.querySelector(".header-menu-user-email");
+
         var tabLinksContainer = document.createElement("nav");
         tabLinksContainer.className = "header-menu-tabs";
         panel.appendChild(tabLinksContainer);
+
+        var profileLink = document.createElement("a");
+        profileLink.className = "header-menu-link";
+        profileLink.href = "#profile";
+        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
+        panel.appendChild(profileLink);
 
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
@@ -1917,12 +2017,17 @@
             var openLabel = t("menu.open", "Open menu");
             var titleText = t("menu.title", "Menu");
             var closeText = t("menu.close", "Close menu");
+            var profileLabel = t("menu.profile", "Profile");
             var songbookLabel = t("menu.songbook", "Songbook");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
+            var profile = getProfileForUser(activeUser);
             var isLoggedIn = Boolean(activeUser && activeUser.uid);
+            var displayName = getUserDisplayName(activeUser, profile) || t("menu.profileGuest", "Guest");
+            var emailText = String(activeUser && activeUser.email || "").trim();
+            var photoUrl = getUserPhotoUrl(activeUser, profile);
             var isAdmin = String(activeUser && activeUser.email || "").trim().toLowerCase() === ADMIN_EMAIL;
             var authLabel = isLoggedIn ? t("menu.logout", "Logout") : t("menu.login", "Login / Register");
             var authIconClass = isLoggedIn ? "fa-right-from-bracket" : "fa-right-to-bracket";
@@ -1931,6 +2036,30 @@
             panelTitle.textContent = titleText;
             panelClose.setAttribute("aria-label", closeText);
             panelClose.title = closeText;
+            if (userNameNode) {
+                userNameNode.textContent = displayName;
+            }
+            if (userEmailNode) {
+                userEmailNode.textContent = emailText;
+            }
+            if (userAvatarFallback) {
+                userAvatarFallback.textContent = getInitials(displayName);
+            }
+            if (userAvatarImage && userAvatarFallback) {
+                if (photoUrl) {
+                    userAvatarImage.src = photoUrl;
+                    userAvatarImage.hidden = false;
+                    userAvatarFallback.hidden = true;
+                } else {
+                    userAvatarImage.hidden = true;
+                    userAvatarImage.removeAttribute("src");
+                    userAvatarFallback.hidden = false;
+                }
+            }
+            var profileNode = profileLink.querySelector("span");
+            if (profileNode) {
+                profileNode.textContent = profileLabel;
+            }
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
@@ -1958,9 +2087,11 @@
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
                 link.classList.toggle("active", Boolean(route) && route === currentRoute);
             });
+            var isProfile = getCurrentRoute() === "profile";
             var isSongbook = getCurrentRoute() === "songbook";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isSettings = getCurrentRoute() === "settings";
+            profileLink.classList.toggle("active", isProfile);
             songbookLink.classList.toggle("active", isSongbook);
             mailboxLink.classList.toggle("active", isMailbox);
             settingsLink.classList.toggle("active", isSettings);
@@ -2148,6 +2279,9 @@
             setLabels();
             positionPanel();
             positionNotificationCenter();
+        });
+        document.addEventListener("njc:profile-updated", function () {
+            setLabels();
         });
         document.addEventListener("njc:inapp-notifications-updated", function () {
             renderNotificationCenter();

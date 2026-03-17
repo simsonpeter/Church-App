@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bp">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bp">
-    <link rel="manifest" href="site.webmanifest?v=20260311bp">
-    <link rel="stylesheet" href="styles.css?v=20260311bp">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311bq">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311bq">
+    <link rel="manifest" href="site.webmanifest?v=20260311bq">
+    <link rel="stylesheet" href="styles.css?v=20260311bq">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -395,6 +395,41 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="profile">
+            <main class="app-content">
+            <section class="card profile-card">
+                <h2><i class="fa-solid fa-user"></i><span data-i18n="profile.title">Your profile</span></h2>
+                <p class="page-note" data-i18n="profile.info">Update your personal details.</p>
+                <div class="profile-card-top">
+                    <div class="profile-avatar">
+                        <img id="profile-avatar-image" alt="Profile photo" hidden>
+                        <span id="profile-avatar-fallback">U</span>
+                    </div>
+                </div>
+                <form id="profile-form" class="profile-form">
+                    <label class="profile-field">
+                        <span data-i18n="profile.fullName">Full name</span>
+                        <input id="profile-full-name" class="search-input" type="text" autocomplete="name" placeholder="John David">
+                    </label>
+                    <label class="profile-field">
+                        <span data-i18n="profile.dob">Date of birth</span>
+                        <input id="profile-dob" class="search-input" type="date" autocomplete="bday">
+                    </label>
+                    <label class="profile-field">
+                        <span data-i18n="profile.phone">Phone number</span>
+                        <input id="profile-phone" class="search-input" type="tel" autocomplete="tel" placeholder="+32 483 11 64 84">
+                    </label>
+                    <label class="profile-field">
+                        <span data-i18n="profile.photo">Photo URL (optional)</span>
+                        <input id="profile-photo-url" class="search-input" type="url" autocomplete="photo" placeholder="https://...">
+                    </label>
+                    <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
+                </form>
+                <p class="page-note" id="profile-note" hidden></p>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="mailbox">
             <main class="app-content">
             <section class="card">
@@ -543,15 +578,16 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bp"></script>
-    <script src="app-shell.js?v=20260311bp"></script>
-    <script src="events-engine.js?v=20260311bp"></script>
-    <script src="home-page.js?v=20260311bp"></script>
-    <script src="events-page.js?v=20260311bp"></script>
-    <script src="sermons-page.js?v=20260311bp"></script>
-    <script src="songbook-page.js?v=20260311bp"></script>
-    <script src="contact-page.js?v=20260311bp"></script>
-    <script src="admin-mailbox-page.js?v=20260311bp"></script>
-    <script src="spa-router.js?v=20260311bp"></script>
+    <script src="user-auth.js?v=20260311bq"></script>
+    <script src="app-shell.js?v=20260311bq"></script>
+    <script src="events-engine.js?v=20260311bq"></script>
+    <script src="home-page.js?v=20260311bq"></script>
+    <script src="events-page.js?v=20260311bq"></script>
+    <script src="sermons-page.js?v=20260311bq"></script>
+    <script src="songbook-page.js?v=20260311bq"></script>
+    <script src="contact-page.js?v=20260311bq"></script>
+    <script src="admin-mailbox-page.js?v=20260311bq"></script>
+    <script src="profile-page.js?v=20260311bq"></script>
+    <script src="spa-router.js?v=20260311bq"></script>
 </body>
 </html>

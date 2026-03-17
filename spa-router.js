@@ -55,6 +55,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        profile: {
+            icon: "fa-user",
+            eyebrowKey: "profile.eyebrow",
+            eyebrowText: "Profile",
+            titleKey: "profile.title",
+            titleText: "Your profile",
+            subtitleKey: "",
+            subtitleText: ""
+        },
         settings: {
             icon: "fa-sliders",
             eyebrowKey: "settings.eyebrow",
