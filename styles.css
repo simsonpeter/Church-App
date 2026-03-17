@@ -1935,8 +1935,20 @@ body.auth-modal-open {
 }
 
 .bible-lang-switch {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(92px, 1fr));
     gap: 8px;
+}
+
+.bible-lang-btn {
+    margin-top: 0 !important;
+    min-width: 0;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 1.2;
+    white-space: nowrap;
 }
 
 .bible-lang-btn.active {
