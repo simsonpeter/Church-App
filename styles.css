@@ -2041,18 +2041,13 @@ body.bible-fullscreen-open .offline-badge {
 }
 
 .bible-card.bible-card-fullscreen h2,
-.bible-card.bible-card-fullscreen > .page-note:first-of-type,
-.bible-card.bible-card-fullscreen #bible-status-note {
+.bible-card.bible-card-fullscreen > .page-note:first-of-type {
     display: none !important;
 }
 
 .bible-card.bible-card-fullscreen .bible-toolbar {
     margin: 0;
-    justify-content: flex-end;
-}
-
-.bible-card.bible-card-fullscreen .bible-lang-switch {
-    display: none;
+    justify-content: space-between;
 }
 
 .bible-card.bible-card-fullscreen .bible-verse-list {
