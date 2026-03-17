@@ -1900,15 +1900,18 @@ body.auth-modal-open {
     border-color: transparent;
 }
 
-.bible-select-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+.bible-inline-row {
+    display: flex;
+    gap: 8px;
+    align-items: end;
+    flex-wrap: nowrap;
+    overflow-x: auto;
 }
 
 .bible-field {
     display: grid;
     gap: 4px;
+    min-width: 0;
 }
 
 .bible-field > span {
@@ -1917,15 +1920,13 @@ body.auth-modal-open {
     font-weight: 650;
 }
 
-.bible-quick-row {
-    margin-top: 10px;
-    display: flex;
-    gap: 8px;
-    align-items: end;
+.bible-inline-row .bible-field:first-child {
+    flex: 1.8 1 0;
 }
 
-.bible-verse-field {
-    flex: 1 1 auto;
+.bible-inline-row .bible-field:nth-child(2),
+.bible-inline-row .bible-field:nth-child(3) {
+    flex: 0.8 1 0;
 }
 
 #bible-verse-go {
