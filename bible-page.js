@@ -10,8 +10,11 @@
     var verseGoButton = document.getElementById("bible-verse-go");
     var prevChapterButton = document.getElementById("bible-prev-chapter");
     var nextChapterButton = document.getElementById("bible-next-chapter");
+    var fullScreenOpenButton = document.getElementById("bible-fullscreen-open");
+    var fullScreenExitButton = document.getElementById("bible-fullscreen-exit");
     var statusNote = document.getElementById("bible-status-note");
     var verseList = document.getElementById("bible-verse-list");
+    var bibleView = document.querySelector(".page-view[data-route=\"bible\"]");
     var bibleCard = verseList ? verseList.closest(".card") : null;
 
     if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton) {
@@ -161,6 +164,43 @@
             state[language] = { book: 0, chapter: 0 };
         }
         return state[language];
+    }
+
+    function isBibleRouteActive() {
+        var route = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        return route === "bible";
+    }
+
+    function setFullScreenMode(open) {
+        if (!bibleCard) {
+            return;
+        }
+        var shouldOpen = Boolean(open);
+        if (shouldOpen && !isBibleRouteActive()) {
+            return;
+        }
+        document.body.classList.toggle("bible-fullscreen-open", shouldOpen);
+        bibleCard.classList.toggle("bible-card-fullscreen", shouldOpen);
+        if (fullScreenOpenButton) {
+            fullScreenOpenButton.hidden = shouldOpen;
+            fullScreenOpenButton.setAttribute("aria-pressed", shouldOpen ? "true" : "false");
+        }
+        if (fullScreenExitButton) {
+            fullScreenExitButton.hidden = !shouldOpen;
+            fullScreenExitButton.setAttribute("aria-pressed", shouldOpen ? "true" : "false");
+        }
+        if (shouldOpen) {
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function exitFullScreenIfNeeded() {
+        if (!document.body.classList.contains("bible-fullscreen-open")) {
+            return;
+        }
+        if (!isBibleRouteActive()) {
+            setFullScreenMode(false);
+        }
     }
 
     function clampLocation(data, location) {
@@ -376,6 +416,30 @@
             }
         });
     }
+    if (fullScreenOpenButton) {
+        fullScreenOpenButton.addEventListener("click", function () {
+            setFullScreenMode(true);
+        });
+    }
+    if (fullScreenExitButton) {
+        fullScreenExitButton.addEventListener("click", function () {
+            setFullScreenMode(false);
+        });
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            setFullScreenMode(false);
+        }
+    });
+    window.addEventListener("hashchange", function () {
+        exitFullScreenIfNeeded();
+    });
+    if (bibleView) {
+        bibleView.addEventListener("click", function () {
+            exitFullScreenIfNeeded();
+        });
+    }
 
     document.addEventListener("njc:langchange", function () {
         renderBible();
@@ -384,5 +448,6 @@
         renderBible();
     });
 
+    setFullScreenMode(false);
     renderBible();
 })();

@@ -1902,6 +1902,16 @@ body.auth-modal-open {
     margin: 8px 0 10px;
 }
 
+.bible-fullscreen-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 0 10px;
+}
+
+.bible-card.bible-card-fullscreen .bible-fullscreen-actions {
+    justify-content: flex-start;
+}
+
 .bible-lang-switch {
     display: inline-flex;
     gap: 8px;
@@ -1987,6 +1997,59 @@ body.auth-modal-open {
     margin: 0;
     color: var(--text);
     line-height: 1.55;
+}
+
+body.bible-fullscreen-open {
+    overflow: hidden;
+}
+
+body.bible-fullscreen-open .app-header,
+body.bible-fullscreen-open .tab-nav,
+body.bible-fullscreen-open .mini-sermon-player,
+body.bible-fullscreen-open .offline-badge {
+    display: none !important;
+}
+
+.bible-card.bible-card-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 5300;
+    border-radius: 0;
+    margin: 0;
+    width: 100vw;
+    width: 100dvw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    border: 0;
+    box-shadow: none;
+    padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: var(--bg-bottom);
+}
+
+.bible-card.bible-card-fullscreen h2,
+.bible-card.bible-card-fullscreen > .page-note:first-of-type,
+.bible-card.bible-card-fullscreen .bible-toolbar,
+.bible-card.bible-card-fullscreen #bible-status-note {
+    display: none !important;
+}
+
+.bible-card.bible-card-fullscreen #bible-fullscreen-open {
+    display: none;
+}
+
+.bible-card.bible-card-fullscreen #bible-fullscreen-exit {
+    display: inline-flex;
+}
+
+.bible-card.bible-card-fullscreen .bible-verse-list {
+    margin-top: 0;
+    max-height: none;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 #admin-mailbox-refresh {
