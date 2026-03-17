@@ -2061,9 +2061,19 @@ body.bible-fullscreen-open .offline-badge {
 }
 
 .bible-card.bible-card-fullscreen .bible-inline-row {
-    padding-top: 8px;
-    overflow-y: visible;
-    align-items: flex-start;
+    padding-top: 0;
+    overflow: visible;
+    align-items: end;
+    min-height: 68px;
+}
+
+.bible-card.bible-card-fullscreen .bible-field .search-input,
+.bible-card.bible-card-fullscreen #bible-verse-go {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    z-index: 2;
 }
 
 .bible-card.bible-card-fullscreen .bible-verse-list {
