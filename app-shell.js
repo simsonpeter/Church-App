@@ -31,6 +31,7 @@
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
+        "menu.bible": "வேதாகமம்",
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
@@ -187,6 +188,22 @@
         "events.specialEvent": "சிறப்பு நிகழ்வு",
         "events.typeRecurring": "மறுமொழி",
         "events.typeSpecial": "சிறப்பு",
+        "bible.eyebrow": "வேதாகமம்",
+        "bible.title": "வேதாகம வாசிப்பு",
+        "bible.info": "தமிழ் மற்றும் ஆங்கில வேதாகமத்தில் வாசிக்கவும்.",
+        "bible.languageLabel": "மொழி",
+        "bible.languageEnglish": "ஆங்கிலம்",
+        "bible.languageTamil": "தமிழ்",
+        "bible.book": "புத்தகம்",
+        "bible.chapter": "அதிகாரம்",
+        "bible.verse": "வசனம்",
+        "bible.go": "செல்",
+        "bible.prev": "முந்தைய அதிகாரம்",
+        "bible.next": "அடுத்த அதிகாரம்",
+        "bible.loading": "வேதாகமம் ஏற்றப்படுகிறது...",
+        "bible.error": "வேதாகமத்தை இப்போது ஏற்ற முடியவில்லை.",
+        "bible.noData": "இந்த அதிகாரத்திற்கு வசனங்கள் இல்லை.",
+        "bible.reference": "{book} {chapter}",
         "sermons.eyebrow": "பிரசங்கம்",
         "sermons.title": "சமீபத்திய செய்திகள்",
         "sermons.subtitle": "மீண்டும் கேளுங்கள், குறிப்பெடுங்கள், வாரம் முழுவதும் வளருங்கள்.",
@@ -1850,6 +1867,12 @@
         profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
         panel.appendChild(profileLink);
 
+        var bibleLink = document.createElement("a");
+        bibleLink.className = "header-menu-link";
+        bibleLink.href = "#bible";
+        bibleLink.innerHTML = "<i class=\"fa-solid fa-book-bible\"></i><span></span>";
+        panel.appendChild(bibleLink);
+
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
         songbookLink.href = "#songbook";
@@ -2018,6 +2041,7 @@
             var titleText = t("menu.title", "Menu");
             var closeText = t("menu.close", "Close menu");
             var profileLabel = t("menu.profile", "Profile");
+            var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2060,6 +2084,10 @@
             if (profileNode) {
                 profileNode.textContent = profileLabel;
             }
+            var bibleNode = bibleLink.querySelector("span");
+            if (bibleNode) {
+                bibleNode.textContent = bibleLabel;
+            }
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
@@ -2088,10 +2116,12 @@
                 link.classList.toggle("active", Boolean(route) && route === currentRoute);
             });
             var isProfile = getCurrentRoute() === "profile";
+            var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isSettings = getCurrentRoute() === "settings";
             profileLink.classList.toggle("active", isProfile);
+            bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
             mailboxLink.classList.toggle("active", isMailbox);
             settingsLink.classList.toggle("active", isSettings);

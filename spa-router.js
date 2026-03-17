@@ -37,6 +37,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        bible: {
+            icon: "fa-book-bible",
+            eyebrowKey: "bible.eyebrow",
+            eyebrowText: "Bible",
+            titleKey: "bible.title",
+            titleText: "Bible Reader",
+            subtitleKey: "",
+            subtitleText: ""
+        },
         songbook: {
             icon: "fa-music",
             eyebrowKey: "songbook.eyebrow",

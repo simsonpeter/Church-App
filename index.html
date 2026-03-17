@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311bq">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311bq">
-    <link rel="manifest" href="site.webmanifest?v=20260311bq">
-    <link rel="stylesheet" href="styles.css?v=20260311bq">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311br">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311br">
+    <link rel="manifest" href="site.webmanifest?v=20260311br">
+    <link rel="stylesheet" href="styles.css?v=20260311br">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -315,6 +315,48 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="bible">
+            <main class="app-content">
+            <section class="card bible-card">
+                <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="bible.title">Bible Reader</span></h2>
+                <p class="page-note" data-i18n="bible.info">Read in Tamil and English.</p>
+                <div class="bible-toolbar">
+                    <div class="bible-lang-switch" role="group" aria-label="Bible language">
+                        <button type="button" class="button-link button-secondary bible-lang-btn active" id="bible-language-en" data-bible-lang="en" data-i18n="bible.languageEnglish">English</button>
+                        <button type="button" class="button-link button-secondary bible-lang-btn" id="bible-language-ta" data-bible-lang="ta" data-i18n="bible.languageTamil">Tamil</button>
+                    </div>
+                </div>
+                <div class="bible-select-grid">
+                    <label class="bible-field">
+                        <span data-i18n="bible.book">Book</span>
+                        <select id="bible-book-select" class="search-input"></select>
+                    </label>
+                    <label class="bible-field">
+                        <span data-i18n="bible.chapter">Chapter</span>
+                        <select id="bible-chapter-select" class="search-input"></select>
+                    </label>
+                </div>
+                <div class="bible-quick-row">
+                    <label class="bible-field bible-verse-field">
+                        <span data-i18n="bible.verse">Verse</span>
+                        <input id="bible-verse-input" class="search-input" type="number" min="1" step="1" placeholder="1">
+                    </label>
+                    <button type="button" class="button-link button-secondary" id="bible-verse-go" data-i18n="bible.go">Go</button>
+                </div>
+                <div class="bible-nav-row">
+                    <button type="button" class="button-link button-secondary" id="bible-prev-chapter" data-i18n="bible.prev">Previous chapter</button>
+                    <button type="button" class="button-link button-secondary" id="bible-next-chapter" data-i18n="bible.next">Next chapter</button>
+                </div>
+                <p class="page-note" id="bible-status-note" data-i18n="bible.loading">Loading Bible...</p>
+                <ul class="list bible-verse-list" id="bible-verse-list">
+                    <li>
+                        <p data-i18n="bible.loading">Loading Bible...</p>
+                    </li>
+                </ul>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="songbook">
             <main class="app-content">
             <section class="card">
@@ -578,16 +620,17 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311bq"></script>
-    <script src="app-shell.js?v=20260311bq"></script>
-    <script src="events-engine.js?v=20260311bq"></script>
-    <script src="home-page.js?v=20260311bq"></script>
-    <script src="events-page.js?v=20260311bq"></script>
-    <script src="sermons-page.js?v=20260311bq"></script>
-    <script src="songbook-page.js?v=20260311bq"></script>
-    <script src="contact-page.js?v=20260311bq"></script>
-    <script src="admin-mailbox-page.js?v=20260311bq"></script>
-    <script src="profile-page.js?v=20260311bq"></script>
-    <script src="spa-router.js?v=20260311bq"></script>
+    <script src="user-auth.js?v=20260311br"></script>
+    <script src="app-shell.js?v=20260311br"></script>
+    <script src="events-engine.js?v=20260311br"></script>
+    <script src="home-page.js?v=20260311br"></script>
+    <script src="events-page.js?v=20260311br"></script>
+    <script src="sermons-page.js?v=20260311br"></script>
+    <script src="bible-page.js?v=20260311br"></script>
+    <script src="songbook-page.js?v=20260311br"></script>
+    <script src="contact-page.js?v=20260311br"></script>
+    <script src="admin-mailbox-page.js?v=20260311br"></script>
+    <script src="profile-page.js?v=20260311br"></script>
+    <script src="spa-router.js?v=20260311br"></script>
 </body>
 </html>
