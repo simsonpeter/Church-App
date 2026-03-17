@@ -66,7 +66,12 @@
         mode: "none"
     };
     var speakingUtterance = null;
-    var streamAudio = streamSupported ? new Audio() : null;
+    var streamAudio = streamSupported
+        ? (document.getElementById("bible-stream-audio") || new Audio())
+        : null;
+    var streamPrefetchAudio = streamSupported
+        ? (document.getElementById("bible-prefetch-audio") || new Audio())
+        : null;
     var currentSpeechText = "";
     var currentSpeechStartVerse = 1;
     var currentSpeechContext = {
@@ -78,6 +83,8 @@
     var streamQueue = [];
     var streamQueueIndex = 0;
     var streamErrorCount = 0;
+    var prefetchedSegmentIndex = -1;
+    var prefetchedSegmentUrl = "";
     var miniBiblePlayer = null;
     var miniBibleOpenButton = null;
     var miniBibleTitleNode = null;
@@ -356,7 +363,15 @@
             return false;
         }
         streamQueueIndex = index;
-        streamAudio.src = getRemoteTtsUrl(currentSpeechContext.language, streamQueue[streamQueueIndex]);
+        var nextUrl = "";
+        if (prefetchedSegmentIndex === streamQueueIndex && prefetchedSegmentUrl) {
+            nextUrl = prefetchedSegmentUrl;
+        } else {
+            nextUrl = getRemoteTtsUrl(currentSpeechContext.language, streamQueue[streamQueueIndex]);
+        }
+        streamAudio.src = nextUrl;
+        prefetchedSegmentIndex = -1;
+        prefetchedSegmentUrl = "";
         var playPromise = streamAudio.play();
         if (playPromise && typeof playPromise.catch === "function") {
             playPromise.catch(function () {
@@ -371,7 +386,31 @@
                 stopSpeechPlayback();
             });
         }
+        prefetchStreamSegment(streamQueueIndex + 1);
         return true;
+    }
+
+    function prefetchStreamSegment(index) {
+        if (!streamPrefetchAudio) {
+            return;
+        }
+        if (!Array.isArray(streamQueue) || index < 0 || index >= streamQueue.length) {
+            prefetchedSegmentIndex = -1;
+            prefetchedSegmentUrl = "";
+            streamPrefetchAudio.pause();
+            streamPrefetchAudio.removeAttribute("src");
+            streamPrefetchAudio.load();
+            return;
+        }
+        var nextUrl = getRemoteTtsUrl(currentSpeechContext.language, streamQueue[index]);
+        prefetchedSegmentIndex = index;
+        prefetchedSegmentUrl = nextUrl;
+        streamPrefetchAudio.src = nextUrl;
+        try {
+            streamPrefetchAudio.load();
+        } catch (err) {
+            return;
+        }
     }
 
     function startStreamPlayback() {
@@ -405,6 +444,8 @@
         }
         streamQueueIndex = 0;
         streamErrorCount = 0;
+        prefetchedSegmentIndex = -1;
+        prefetchedSegmentUrl = "";
         speechState.mode = "stream";
         speechState.active = true;
         speechState.paused = false;
@@ -424,6 +465,9 @@
             return;
         }
         streamAudio.preload = "auto";
+        if (streamPrefetchAudio) {
+            streamPrefetchAudio.preload = "auto";
+        }
         streamAudio.addEventListener("play", function () {
             if (speechState.mode !== "stream") {
                 return;
@@ -688,11 +732,18 @@
             streamAudio.removeAttribute("src");
             streamAudio.load();
         }
+        if (streamPrefetchAudio) {
+            streamPrefetchAudio.pause();
+            streamPrefetchAudio.removeAttribute("src");
+            streamPrefetchAudio.load();
+        }
         releaseWakeLock();
         speakingUtterance = null;
         streamQueue = [];
         streamQueueIndex = 0;
         streamErrorCount = 0;
+        prefetchedSegmentIndex = -1;
+        prefetchedSegmentUrl = "";
         updateTtsControls();
         syncMediaSessionState();
     }
@@ -715,6 +766,13 @@
             streamAudio.pause();
             streamAudio.removeAttribute("src");
             streamAudio.load();
+            if (streamPrefetchAudio) {
+                streamPrefetchAudio.pause();
+                streamPrefetchAudio.removeAttribute("src");
+                streamPrefetchAudio.load();
+            }
+            prefetchedSegmentIndex = -1;
+            prefetchedSegmentUrl = "";
             if (wasStreamMode) {
                 speechState.mode = "stream";
             }
