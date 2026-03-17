@@ -27,6 +27,7 @@
             var prayerDetailPrayButton = document.getElementById("prayer-detail-pray");
             var prayerDetailAnsweredButton = document.getElementById("prayer-detail-answered");
             var prayerDetailThankButton = document.getElementById("prayer-detail-thank");
+            var prayerDetailResetAnsweredButton = document.getElementById("prayer-detail-reset-answered");
             var prayerDetailEditButton = document.getElementById("prayer-detail-edit");
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
 
@@ -230,6 +231,12 @@
                     return false;
                 }
                 return currentUid === String(entry && entry.createdByUid || "").trim();
+            }
+
+            function isAdminUser() {
+                var activeUser = getCurrentUser();
+                var currentEmail = normalizeEmail(activeUser && activeUser.email);
+                return Boolean(currentEmail) && currentEmail === normalizeEmail(ADMIN_EMAIL);
             }
 
             function loadPrayerTranslationCache() {
@@ -589,6 +596,9 @@
                 if (prayerDetailThankButton) {
                     prayerDetailThankButton.setAttribute("data-prayer-id", prayerId || "");
                 }
+                if (prayerDetailResetAnsweredButton) {
+                    prayerDetailResetAnsweredButton.setAttribute("data-prayer-id", prayerId || "");
+                }
                 if (prayerDetailEditButton) {
                     prayerDetailEditButton.setAttribute("data-prayer-id", prayerId || "");
                 }
@@ -663,6 +673,11 @@
                     prayerDetailThankButton.classList.toggle("active", thankActive);
                 }
                 var canManage = canManagePrayerEntry(entry);
+                var canResetAnswered = isAdminUser();
+                if (prayerDetailResetAnsweredButton) {
+                    prayerDetailResetAnsweredButton.hidden = !canResetAnswered;
+                    prayerDetailResetAnsweredButton.disabled = !canResetAnswered || prayerWallBusy;
+                }
                 if (prayerDetailEditButton) {
                     prayerDetailEditButton.hidden = !canManage;
                     prayerDetailEditButton.disabled = !canManage || prayerWallBusy;
@@ -936,6 +951,14 @@
                     if (!targetEntry) {
                         throw new Error("Entry not found");
                     }
+                    if (action === "reset-answer" && !isAdminUser()) {
+                        showPrayerWallNote(
+                            "manageDenied",
+                            "contact.prayerWallManageDenied",
+                            "Only admin or the user who posted can edit/delete."
+                        );
+                        return;
+                    }
                     if ((action === "edit" || action === "delete") && !canManagePrayerEntry(targetEntry)) {
                         showPrayerWallNote(
                             "manageDenied",
@@ -963,6 +986,29 @@
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
                         setPrayerActionActive(prayerId, "thank", nextThankActive);
+                    } else if (action === "reset-answer") {
+                        targetEntry.answered = 0;
+                        targetEntry.updatedAt = new Date().toISOString();
+                        await savePrayerWallEntries(latestEntries);
+                        Object.keys(prayerActionState || {}).forEach(function (actorKey) {
+                            var actorState = prayerActionState[actorKey];
+                            if (!actorState || typeof actorState !== "object") {
+                                return;
+                            }
+                            var prayerState = actorState[String(prayerId || "")];
+                            if (!prayerState || typeof prayerState !== "object") {
+                                return;
+                            }
+                            delete prayerState.answer;
+                            if (!Object.keys(prayerState).length) {
+                                delete actorState[String(prayerId || "")];
+                            }
+                            if (!Object.keys(actorState).length) {
+                                delete prayerActionState[actorKey];
+                            }
+                        });
+                        savePrayerActionState();
+                        showPrayerWallNote("resetAnswered", "contact.prayerWallResetAnsweredDone", "Answered count reset.");
                     } else if (action === "edit") {
                         var nextMessage = window.prompt(
                             T("contact.prayerWallEditPrompt", "Edit prayer request", prayerCard),
@@ -1241,6 +1287,8 @@
                         prayerWallNote.textContent = T("contact.prayerWallPosted", "Prayer request added to wall.", prayerCard);
                     } else if (state === "updated") {
                         prayerWallNote.textContent = T("contact.prayerWallUpdated", "Prayer request updated.", prayerCard);
+                    } else if (state === "resetAnswered") {
+                        prayerWallNote.textContent = T("contact.prayerWallResetAnsweredDone", "Answered count reset.", prayerCard);
                     } else if (state === "deleted") {
                         prayerWallNote.textContent = T("contact.prayerWallDeleted", "Prayer request deleted.", prayerCard);
                     } else if (state === "manageDenied") {
