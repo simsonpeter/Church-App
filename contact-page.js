@@ -752,10 +752,10 @@
                 if (entries.length === 0) {
                     closePrayerDetail();
                     var noEntryTitle = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherTitle", "No other prayers yet", prayerCard)
+                        ? T("contact.prayerWallNoOtherTitle", "No daily prayers yet", prayerCard)
                         : T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now", prayerCard);
                     var noEntryBody = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherBody", "Other prayer requests will appear here.", prayerCard)
+                        ? T("contact.prayerWallNoOtherBody", "Daily prayer requests will appear here.", prayerCard)
                         : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
                     prayerWallList.innerHTML = "" +
                         "<li>" +
