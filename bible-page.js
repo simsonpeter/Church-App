@@ -251,8 +251,9 @@
         }
 
         verseList.innerHTML = verses.map(function (verseItem, index) {
-            var verseNum = Number(verseItem && verseItem.Verseid);
-            var safeNumber = Number.isInteger(verseNum) && verseNum > 0 ? verseNum : index + 1;
+            // Readingplan JSON uses global Verseid (e.g. 1001 for chapter 2 verse 1),
+            // but UI should always show chapter-local numbering: 1, 2, 3...
+            var safeNumber = index + 1;
             var text = String(verseItem && verseItem.Verse || "").trim();
             return "" +
                 "<li class=\"bible-verse-item\" id=\"bible-verse-" + String(safeNumber) + "\" data-verse-number=\"" + String(safeNumber) + "\">" +
