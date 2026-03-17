@@ -1922,6 +1922,11 @@ body.auth-modal-open {
     font-size: 0.96rem;
 }
 
+.bible-fullscreen-toggle[aria-pressed="true"] {
+    background: var(--primary-soft);
+    border-color: #efb1b1;
+}
+
 .bible-lang-switch {
     display: inline-flex;
     gap: 8px;

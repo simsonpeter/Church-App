@@ -187,7 +187,7 @@
             fullScreenToggleButton.title = buttonLabel;
         }
         if (fullScreenToggleIcon) {
-            fullScreenToggleIcon.className = "fa-solid " + (shouldOpen ? "fa-compress" : "fa-expand");
+            fullScreenToggleIcon.className = "fa-solid fa-expand";
         }
         if (shouldOpen) {
             window.scrollTo(0, 0);
