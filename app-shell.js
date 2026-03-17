@@ -1857,17 +1857,19 @@
         var userNameNode = userSummary.querySelector(".header-menu-user-name");
         var userEmailNode = userSummary.querySelector(".header-menu-user-email");
 
+        var primaryCard = document.createElement("section");
+        primaryCard.className = "header-menu-card";
+        panel.appendChild(primaryCard);
         var primaryLinksContainer = document.createElement("nav");
         primaryLinksContainer.className = "header-menu-tabs";
-        panel.appendChild(primaryLinksContainer);
+        primaryCard.appendChild(primaryLinksContainer);
 
-        var dividerTop = document.createElement("div");
-        dividerTop.className = "header-menu-divider";
-        panel.appendChild(dividerTop);
-
+        var bibleSongCard = document.createElement("section");
+        bibleSongCard.className = "header-menu-card";
+        panel.appendChild(bibleSongCard);
         var bibleSongLinksContainer = document.createElement("nav");
         bibleSongLinksContainer.className = "header-menu-tabs";
-        panel.appendChild(bibleSongLinksContainer);
+        bibleSongCard.appendChild(bibleSongLinksContainer);
 
         var bibleLink = document.createElement("a");
         bibleLink.className = "header-menu-link";
@@ -1881,32 +1883,24 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
-        var dividerBottom = document.createElement("div");
-        dividerBottom.className = "header-menu-divider";
-        panel.appendChild(dividerBottom);
-
+        var utilityCard = document.createElement("section");
+        utilityCard.className = "header-menu-card";
+        panel.appendChild(utilityCard);
         var utilityLinksContainer = document.createElement("nav");
         utilityLinksContainer.className = "header-menu-tabs";
-        panel.appendChild(utilityLinksContainer);
-
-        var mailboxLink = document.createElement("a");
-        mailboxLink.className = "header-menu-link";
-        mailboxLink.href = "#mailbox";
-        mailboxLink.innerHTML = "<i class=\"fa-solid fa-inbox\"></i><span></span>";
-        mailboxLink.hidden = true;
-        utilityLinksContainer.appendChild(mailboxLink);
-
-        var profileLink = document.createElement("a");
-        profileLink.className = "header-menu-link";
-        profileLink.href = "#profile";
-        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
-        utilityLinksContainer.appendChild(profileLink);
+        utilityCard.appendChild(utilityLinksContainer);
 
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
         settingsLink.href = "#settings";
         settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
         utilityLinksContainer.appendChild(settingsLink);
+
+        var profileLink = document.createElement("a");
+        profileLink.className = "header-menu-link";
+        profileLink.href = "#profile";
+        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
+        utilityLinksContainer.appendChild(profileLink);
 
         var authButton = document.createElement("button");
         authButton.type = "button";
@@ -2072,7 +2066,6 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
-            var mailboxLabel = t("menu.mailbox", "Mailbox");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
@@ -2081,7 +2074,6 @@
             var displayName = getUserDisplayName(activeUser, profile) || t("menu.profileGuest", "Guest");
             var emailText = String(activeUser && activeUser.email || "").trim();
             var photoUrl = getUserPhotoUrl(activeUser, profile);
-            var isAdmin = String(activeUser && activeUser.email || "").trim().toLowerCase() === ADMIN_EMAIL;
             var authLabel = isLoggedIn ? t("menu.logout", "Logout") : t("menu.login", "Login / Register");
             var authIconClass = isLoggedIn ? "fa-right-from-bracket" : "fa-right-to-bracket";
             button.setAttribute("aria-label", openLabel);
@@ -2121,11 +2113,6 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
-            var mailboxNode = mailboxLink.querySelector("span");
-            if (mailboxNode) {
-                mailboxNode.textContent = mailboxLabel;
-            }
-            mailboxLink.hidden = !isAdmin;
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -2147,12 +2134,10 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
-            var isMailbox = getCurrentRoute() === "mailbox";
             var isSettings = getCurrentRoute() === "settings";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
-            mailboxLink.classList.toggle("active", isMailbox);
             settingsLink.classList.toggle("active", isSettings);
             renderNotificationCenter();
         }

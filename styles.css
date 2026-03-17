@@ -1370,14 +1370,16 @@ body.header-menu-open {
 
 .header-menu-tabs {
     display: grid;
-    gap: 6px;
-    margin-bottom: 6px;
+    gap: 4px;
+    margin: 0;
 }
 
-.header-menu-divider {
-    height: 1px;
-    background: var(--line);
-    margin: 2px 2px 10px;
+.header-menu-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--surface-soft);
+    padding: 6px;
+    margin-bottom: 4px;
 }
 
 .header-menu-link {
