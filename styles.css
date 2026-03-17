@@ -1374,6 +1374,12 @@ body.header-menu-open {
     margin-bottom: 6px;
 }
 
+.header-menu-divider {
+    height: 1px;
+    background: var(--line);
+    margin: 2px 2px 10px;
+}
+
 .header-menu-link {
     width: 100%;
     display: flex;

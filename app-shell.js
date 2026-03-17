@@ -1857,46 +1857,62 @@
         var userNameNode = userSummary.querySelector(".header-menu-user-name");
         var userEmailNode = userSummary.querySelector(".header-menu-user-email");
 
-        var tabLinksContainer = document.createElement("nav");
-        tabLinksContainer.className = "header-menu-tabs";
-        panel.appendChild(tabLinksContainer);
+        var primaryLinksContainer = document.createElement("nav");
+        primaryLinksContainer.className = "header-menu-tabs";
+        panel.appendChild(primaryLinksContainer);
 
-        var profileLink = document.createElement("a");
-        profileLink.className = "header-menu-link";
-        profileLink.href = "#profile";
-        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
-        panel.appendChild(profileLink);
+        var dividerTop = document.createElement("div");
+        dividerTop.className = "header-menu-divider";
+        panel.appendChild(dividerTop);
+
+        var bibleSongLinksContainer = document.createElement("nav");
+        bibleSongLinksContainer.className = "header-menu-tabs";
+        panel.appendChild(bibleSongLinksContainer);
 
         var bibleLink = document.createElement("a");
         bibleLink.className = "header-menu-link";
         bibleLink.href = "#bible";
         bibleLink.innerHTML = "<i class=\"fa-solid fa-book-bible\"></i><span></span>";
-        panel.appendChild(bibleLink);
+        bibleSongLinksContainer.appendChild(bibleLink);
 
         var songbookLink = document.createElement("a");
         songbookLink.className = "header-menu-link";
         songbookLink.href = "#songbook";
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
-        panel.appendChild(songbookLink);
+        bibleSongLinksContainer.appendChild(songbookLink);
+
+        var dividerBottom = document.createElement("div");
+        dividerBottom.className = "header-menu-divider";
+        panel.appendChild(dividerBottom);
+
+        var utilityLinksContainer = document.createElement("nav");
+        utilityLinksContainer.className = "header-menu-tabs";
+        panel.appendChild(utilityLinksContainer);
 
         var mailboxLink = document.createElement("a");
         mailboxLink.className = "header-menu-link";
         mailboxLink.href = "#mailbox";
         mailboxLink.innerHTML = "<i class=\"fa-solid fa-inbox\"></i><span></span>";
         mailboxLink.hidden = true;
-        panel.appendChild(mailboxLink);
+        utilityLinksContainer.appendChild(mailboxLink);
+
+        var profileLink = document.createElement("a");
+        profileLink.className = "header-menu-link";
+        profileLink.href = "#profile";
+        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
+        utilityLinksContainer.appendChild(profileLink);
 
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
         settingsLink.href = "#settings";
         settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
-        panel.appendChild(settingsLink);
+        utilityLinksContainer.appendChild(settingsLink);
 
         var authButton = document.createElement("button");
         authButton.type = "button";
         authButton.className = "header-menu-link header-menu-action";
         authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
-        panel.appendChild(authButton);
+        utilityLinksContainer.appendChild(authButton);
         document.body.appendChild(panel);
 
         var notificationCenter = document.createElement("section");
@@ -1924,17 +1940,30 @@
         }
 
         function buildTabLinksInMenu() {
-            if (!tabLinksContainer) {
+            if (!primaryLinksContainer) {
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            tabLinksContainer.innerHTML = "";
+            var allowedRoutes = ["home", "prayer", "events", "sermons"];
+            var routeMap = {};
+            primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
                 var href = anchor.getAttribute("href") || "";
                 if (!href || href.charAt(0) !== "#") {
                     return;
                 }
                 var route = (anchor.getAttribute("data-route") || "").trim().toLowerCase();
+                if (!route) {
+                    return;
+                }
+                routeMap[route] = anchor;
+            });
+            allowedRoutes.forEach(function (route) {
+                var anchor = routeMap[route];
+                if (!anchor) {
+                    return;
+                }
+                var href = anchor.getAttribute("href") || "";
                 var labelNode = anchor.querySelector(".tab-label");
                 var iconNode = anchor.querySelector(".tab-icon i");
                 var iconClass = iconNode ? iconNode.className : "fa-solid fa-circle";
@@ -1944,7 +1973,7 @@
                 link.href = href;
                 link.setAttribute("data-route", route);
                 link.innerHTML = "<i class=\"" + iconClass + "\"></i><span>" + escapeHtml(labelText || "") + "</span>";
-                tabLinksContainer.appendChild(link);
+                primaryLinksContainer.appendChild(link);
             });
         }
 
@@ -2111,7 +2140,7 @@
             }
             buildTabLinksInMenu();
             var currentRoute = getCurrentRoute();
-            tabLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
+            primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
                 link.classList.toggle("active", Boolean(route) && route === currentRoute);
             });
