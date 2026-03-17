@@ -5,6 +5,7 @@
             var latestSermonsList = document.getElementById("latest-sermons-list");
             var showMoreSermonsButton = document.getElementById("show-more-sermons");
             var sermonSearch = document.getElementById("sermon-search");
+            var sermonFilterButton = document.getElementById("sermon-filter-btn");
             var sermonSearchButton = document.getElementById("sermon-search-btn");
             var sermonSearchNote = document.getElementById("sermon-search-note");
             var sermonFilterGroups = document.getElementById("sermon-filter-groups");
@@ -25,6 +26,7 @@
             var selectedSpeaker = "";
             var selectedMonth = "";
             var selectedSavedOnly = false;
+            var filterPanelPinned = false;
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -387,7 +389,12 @@
                 var hasSearch = searchQuery.trim().length > 0;
                 var hasActiveSearch = searchTriggered && hasSearch;
                 var hasFilters = Boolean(selectedSpeaker || selectedMonth || selectedSavedOnly);
-                var showTagGroups = (hasActiveSearch && filteredRecords.length > 0) || hasFilters;
+                var showTagGroups = filterPanelPinned || ((hasActiveSearch && filteredRecords.length > 0) || hasFilters);
+                if (sermonFilterButton) {
+                    sermonFilterButton.classList.toggle("active", showTagGroups);
+                    sermonFilterButton.setAttribute("aria-pressed", showTagGroups ? "true" : "false");
+                    sermonFilterButton.title = T("sermons.filterToggle", "Toggle filters", latestSermonsCard);
+                }
 
                 if (sermonFilterGroups) {
                     sermonFilterGroups.hidden = !showTagGroups;
@@ -692,6 +699,12 @@
             if (sermonSearchButton) {
                 sermonSearchButton.addEventListener("click", function () {
                     runSearchFromInput();
+                });
+            }
+            if (sermonFilterButton) {
+                sermonFilterButton.addEventListener("click", function () {
+                    filterPanelPinned = !filterPanelPinned;
+                    renderSermons();
                 });
             }
 

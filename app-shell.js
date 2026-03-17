@@ -233,6 +233,7 @@
         "sermons.searchNoResultsTitle": "பொருந்தும் பிரசங்கம் இல்லை",
         "sermons.searchNoResultsBody": "மற்றொரு சொல் வைத்து தேடிப் பார்க்கவும்.",
         "sermons.searchMatches": "{count} முடிவுகள் கிடைத்தன.",
+        "sermons.filterToggle": "வடிகட்டிகளை திற / மூடு",
         "sermons.filterSaved": "சேமித்தவை",
         "sermons.savedOnly": "சேமித்தவை மட்டும்",
         "sermons.speed": "வேகம்",

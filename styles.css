@@ -2265,6 +2265,26 @@ body.bible-fullscreen-open .offline-badge {
     align-items: center;
 }
 
+.sermons-search-row {
+    grid-template-columns: 1fr auto auto;
+}
+
+.sermon-filter-btn {
+    min-width: 44px;
+    width: 44px;
+    height: 42px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sermon-filter-btn.active {
+    background: var(--primary-soft);
+    border-color: #efb1b1;
+    color: var(--primary);
+}
+
 .search-input {
     width: 100%;
     border: 1px solid var(--line);
