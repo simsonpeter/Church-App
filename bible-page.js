@@ -54,6 +54,7 @@
         ta: null
     };
     var state = getStoredState();
+    var streamSupported = Boolean(typeof window !== "undefined" && typeof window.Audio === "function");
     var speechSupported = Boolean(
         typeof window !== "undefined" &&
         typeof window.speechSynthesis !== "undefined" &&
@@ -61,9 +62,11 @@
     );
     var speechState = {
         active: false,
-        paused: false
+        paused: false,
+        mode: "none"
     };
     var speakingUtterance = null;
+    var streamAudio = streamSupported ? new Audio() : null;
     var currentSpeechText = "";
     var currentSpeechStartVerse = 1;
     var currentSpeechContext = {
@@ -72,6 +75,9 @@
         verses: []
     };
     var screenWakeLock = null;
+    var streamQueue = [];
+    var streamQueueIndex = 0;
+    var streamErrorCount = 0;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && bibleCard) {
@@ -170,6 +176,281 @@
         return lines.join(". ");
     }
 
+    function splitLongSegment(text, maxLength) {
+        var clean = String(text || "").replace(/\s+/g, " ").trim();
+        var size = Math.max(80, Number(maxLength || 160));
+        if (!clean) {
+            return [];
+        }
+        if (clean.length <= size) {
+            return [clean];
+        }
+        var words = clean.split(" ");
+        var segments = [];
+        var cursor = "";
+        words.forEach(function (word) {
+            var next = cursor ? (cursor + " " + word) : word;
+            if (next.length > size) {
+                if (cursor) {
+                    segments.push(cursor);
+                }
+                if (word.length > size) {
+                    var chunk = word;
+                    while (chunk.length > size) {
+                        segments.push(chunk.slice(0, size));
+                        chunk = chunk.slice(size);
+                    }
+                    cursor = chunk;
+                    return;
+                }
+                cursor = word;
+                return;
+            }
+            cursor = next;
+        });
+        if (cursor) {
+            segments.push(cursor);
+        }
+        return segments;
+    }
+
+    function buildChapterSpeechSegments(language, location, verses, startVerseNumber) {
+        var activeLanguage = normalizeLanguage(language);
+        var chapterNumber = Number(location && location.chapter || 0) + 1;
+        var header = activeLanguage === "ta"
+            ? (getBookName(language, Number(location && location.book || 0)) + " அதிகாரம் " + String(chapterNumber))
+            : (getBookName(language, Number(location && location.book || 0)) + " chapter " + String(chapterNumber));
+        var safeStartVerse = Math.max(1, Number(startVerseNumber || 1));
+        var startIndex = safeStartVerse - 1;
+        var lines = [header];
+        if (safeStartVerse > 1) {
+            lines.push(activeLanguage === "ta"
+                ? ("வசனம் " + String(safeStartVerse) + " முதல் வாசிக்கப்படுகிறது")
+                : ("Starting from verse " + String(safeStartVerse))
+            );
+        }
+        (Array.isArray(verses) ? verses : []).forEach(function (verseItem, index) {
+            if (index < startIndex) {
+                return;
+            }
+            var safeNumber = index + 1;
+            var text = String(verseItem && verseItem.Verse || "").replace(/\s+/g, " ").trim();
+            if (!text) {
+                return;
+            }
+            if (activeLanguage === "ta") {
+                lines.push("வசனம் " + String(safeNumber) + ". " + text);
+                return;
+            }
+            lines.push("Verse " + String(safeNumber) + ". " + text);
+        });
+
+        var segments = [];
+        lines.forEach(function (line) {
+            splitLongSegment(line, 160).forEach(function (piece) {
+                segments.push(piece);
+            });
+        });
+        return segments;
+    }
+
+    function getRemoteTtsUrl(language, text) {
+        var targetLang = normalizeLanguage(language) === "ta" ? "ta" : "en";
+        return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=" +
+            encodeURIComponent(targetLang) +
+            "&q=" + encodeURIComponent(String(text || ""));
+    }
+
+    function syncMediaSessionState() {
+        if (typeof navigator === "undefined" || !navigator.mediaSession) {
+            return;
+        }
+        try {
+            var activeLanguage = normalizeLanguage(currentSpeechContext.language);
+            var location = currentSpeechContext.location || { book: 0, chapter: 0 };
+            var chapterNumber = Number(location.chapter || 0) + 1;
+            var metaTitle = getBookName(activeLanguage, Number(location.book || 0));
+            var metaArtist = activeLanguage === "ta"
+                ? ("அதிகாரம் " + String(chapterNumber) + " · வசனம் " + String(currentSpeechStartVerse) + "+")
+                : ("Chapter " + String(chapterNumber) + " · Verse " + String(currentSpeechStartVerse) + "+");
+            if (typeof window.MediaMetadata === "function") {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: metaTitle,
+                    artist: metaArtist,
+                    album: "NJC Bible Reader"
+                });
+            }
+            navigator.mediaSession.playbackState = speechState.active
+                ? (speechState.paused ? "paused" : "playing")
+                : "none";
+        } catch (err) {
+            return;
+        }
+    }
+
+    function setupMediaSessionHandlers() {
+        if (typeof navigator === "undefined" || !navigator.mediaSession) {
+            return;
+        }
+        try {
+            navigator.mediaSession.setActionHandler("play", function () {
+                toggleSpeechPlayback();
+            });
+            navigator.mediaSession.setActionHandler("pause", function () {
+                if (speechState.mode === "stream" && streamAudio && !streamAudio.paused) {
+                    streamAudio.pause();
+                    releaseWakeLock();
+                    return;
+                }
+                var synth = getSpeechSynthesisApi();
+                if (speechState.mode === "speech" && synth && synth.speaking && !synth.paused) {
+                    synth.pause();
+                    speechState.paused = true;
+                    releaseWakeLock();
+                    updateTtsControls();
+                }
+            });
+            navigator.mediaSession.setActionHandler("stop", function () {
+                stopSpeechPlayback();
+            });
+            navigator.mediaSession.setActionHandler("seekbackward", null);
+            navigator.mediaSession.setActionHandler("seekforward", null);
+            navigator.mediaSession.setActionHandler("previoustrack", null);
+            navigator.mediaSession.setActionHandler("nexttrack", null);
+        } catch (err) {
+            return;
+        }
+    }
+
+    function startStreamSegment(index) {
+        if (!streamAudio) {
+            return false;
+        }
+        if (!Array.isArray(streamQueue) || !streamQueue.length) {
+            return false;
+        }
+        if (index < 0 || index >= streamQueue.length) {
+            return false;
+        }
+        streamQueueIndex = index;
+        streamAudio.src = getRemoteTtsUrl(currentSpeechContext.language, streamQueue[streamQueueIndex]);
+        var playPromise = streamAudio.play();
+        if (playPromise && typeof playPromise.catch === "function") {
+            playPromise.catch(function () {
+                if (speechState.mode !== "stream") {
+                    return;
+                }
+                streamErrorCount += 1;
+                if (streamErrorCount <= 1) {
+                    startSpeechSynthesisPlayback();
+                    return;
+                }
+                stopSpeechPlayback();
+            });
+        }
+        return true;
+    }
+
+    function startStreamPlayback() {
+        if (!streamAudio) {
+            return false;
+        }
+        var wasStreamMode = speechState.mode === "stream";
+        if (wasStreamMode) {
+            speechState.mode = "none";
+        }
+        streamAudio.pause();
+        streamAudio.removeAttribute("src");
+        streamAudio.load();
+        if (wasStreamMode) {
+            speechState.mode = "stream";
+        }
+        var verses = Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses : [];
+        if (!verses.length) {
+            return false;
+        }
+        var startVerse = getSelectedVerseStart(verses.length);
+        currentSpeechStartVerse = startVerse;
+        streamQueue = buildChapterSpeechSegments(
+            normalizeLanguage(currentSpeechContext.language),
+            currentSpeechContext.location || { book: 0, chapter: 0 },
+            verses,
+            startVerse
+        );
+        if (!streamQueue.length) {
+            return false;
+        }
+        streamQueueIndex = 0;
+        streamErrorCount = 0;
+        speechState.mode = "stream";
+        speechState.active = true;
+        speechState.paused = false;
+        speakingUtterance = null;
+        var synth = getSpeechSynthesisApi();
+        if (synth) {
+            synth.cancel();
+        }
+        updateTtsControls();
+        syncMediaSessionState();
+        requestWakeLock();
+        return startStreamSegment(0);
+    }
+
+    function setupStreamAudio() {
+        if (!streamAudio) {
+            return;
+        }
+        streamAudio.preload = "auto";
+        streamAudio.addEventListener("play", function () {
+            if (speechState.mode !== "stream") {
+                return;
+            }
+            speechState.active = true;
+            speechState.paused = false;
+            requestWakeLock();
+            updateTtsControls();
+            syncMediaSessionState();
+        });
+        streamAudio.addEventListener("pause", function () {
+            if (speechState.mode !== "stream" || !speechState.active) {
+                return;
+            }
+            if (!streamAudio.ended) {
+                speechState.paused = true;
+                releaseWakeLock();
+                updateTtsControls();
+                syncMediaSessionState();
+            }
+        });
+        streamAudio.addEventListener("ended", function () {
+            if (speechState.mode !== "stream" || !speechState.active) {
+                return;
+            }
+            var nextIndex = streamQueueIndex + 1;
+            if (nextIndex < streamQueue.length) {
+                startStreamSegment(nextIndex);
+                return;
+            }
+            releaseWakeLock();
+            speechState.active = false;
+            speechState.paused = false;
+            speechState.mode = "none";
+            updateTtsControls();
+            syncMediaSessionState();
+        });
+        streamAudio.addEventListener("error", function () {
+            if (speechState.mode !== "stream" || !speechState.active) {
+                return;
+            }
+            streamErrorCount += 1;
+            if (streamErrorCount <= 1) {
+                startSpeechSynthesisPlayback();
+                return;
+            }
+            stopSpeechPlayback();
+        });
+    }
+
     function getSelectedVerseStart(maxVerses) {
         var max = Math.max(1, Number(maxVerses || 1));
         var chosen = Number(verseInput && verseInput.value);
@@ -196,6 +477,7 @@
             startVerse
         );
         updateTtsControls();
+        syncMediaSessionState();
     }
 
     function releaseWakeLock() {
@@ -232,7 +514,7 @@
         if (!ttsToggleButton || !ttsStopButton) {
             return;
         }
-        if (!speechSupported) {
+        if (!speechSupported && !streamSupported) {
             ttsToggleButton.disabled = true;
             ttsStopButton.disabled = true;
             ttsToggleButton.title = T("bible.ttsUnsupported", "Audio Bible is not supported in this browser.");
@@ -271,26 +553,47 @@
 
     function stopSpeechPlayback() {
         var synth = getSpeechSynthesisApi();
+        speechState.active = false;
+        speechState.paused = false;
+        speechState.mode = "none";
         if (synth) {
             synth.cancel();
         }
+        if (streamAudio) {
+            streamAudio.pause();
+            streamAudio.removeAttribute("src");
+            streamAudio.load();
+        }
         releaseWakeLock();
         speakingUtterance = null;
-        speechState.active = false;
-        speechState.paused = false;
+        streamQueue = [];
+        streamQueueIndex = 0;
+        streamErrorCount = 0;
         updateTtsControls();
+        syncMediaSessionState();
     }
 
-    function startSpeechPlayback() {
-        updateSpeechTextFromSelection();
-        if (!speechSupported || !currentSpeechText) {
+    function startSpeechSynthesisPlayback() {
+        if (!speechSupported) {
             updateTtsControls();
             return;
         }
         var synth = getSpeechSynthesisApi();
-        if (!synth) {
+        if (!synth || !currentSpeechText) {
             updateTtsControls();
             return;
+        }
+        if (streamAudio) {
+            var wasStreamMode = speechState.mode === "stream";
+            if (wasStreamMode) {
+                speechState.mode = "none";
+            }
+            streamAudio.pause();
+            streamAudio.removeAttribute("src");
+            streamAudio.load();
+            if (wasStreamMode) {
+                speechState.mode = "stream";
+            }
         }
         synth.cancel();
         var utterance = new SpeechSynthesisUtterance(currentSpeechText);
@@ -310,7 +613,9 @@
             speakingUtterance = null;
             speechState.active = false;
             speechState.paused = false;
+            speechState.mode = "none";
             updateTtsControls();
+            syncMediaSessionState();
         };
         utterance.onerror = function () {
             if (speakingUtterance !== utterance) {
@@ -320,41 +625,95 @@
             speakingUtterance = null;
             speechState.active = false;
             speechState.paused = false;
+            speechState.mode = "none";
             updateTtsControls();
+            syncMediaSessionState();
         };
         speakingUtterance = utterance;
+        speechState.mode = "speech";
         speechState.active = true;
         speechState.paused = false;
         updateTtsControls();
+        syncMediaSessionState();
         requestWakeLock();
         synth.speak(utterance);
     }
 
+    function startSpeechPlayback() {
+        updateSpeechTextFromSelection();
+        if (!currentSpeechText) {
+            updateTtsControls();
+            return;
+        }
+        if (streamSupported && startStreamPlayback()) {
+            return;
+        }
+        startSpeechSynthesisPlayback();
+    }
+
     function toggleSpeechPlayback() {
+        if (!speechSupported && !streamSupported) {
+            return;
+        }
+        if (speechState.mode === "stream" && streamAudio) {
+            var currentVerseChoice = getSelectedVerseStart(
+                Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses.length : 1
+            );
+            if (speechState.active && !speechState.paused && !streamAudio.paused) {
+                streamAudio.pause();
+                speechState.paused = true;
+                releaseWakeLock();
+                updateTtsControls();
+                syncMediaSessionState();
+                return;
+            }
+            if (speechState.active && speechState.paused) {
+                if (currentVerseChoice !== currentSpeechStartVerse) {
+                    startSpeechPlayback();
+                    return;
+                }
+                streamAudio.play().catch(function () {
+                    return null;
+                });
+                speechState.paused = false;
+                requestWakeLock();
+                updateTtsControls();
+                syncMediaSessionState();
+                return;
+            }
+            startSpeechPlayback();
+            return;
+        }
         if (!speechSupported) {
+            startSpeechPlayback();
             return;
         }
         var synth = getSpeechSynthesisApi();
         if (!synth) {
+            startSpeechPlayback();
             return;
         }
         if (speechState.active && synth.speaking && !synth.paused) {
             synth.pause();
             speechState.paused = true;
+            releaseWakeLock();
             updateTtsControls();
+            syncMediaSessionState();
             return;
         }
         if (speechState.active && synth.paused) {
-            var currentVerseChoice = getSelectedVerseStart(
+            var currentVerseChoiceSpeech = getSelectedVerseStart(
                 Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses.length : 1
             );
-            if (currentVerseChoice !== currentSpeechStartVerse) {
+            if (currentVerseChoiceSpeech !== currentSpeechStartVerse) {
                 startSpeechPlayback();
                 return;
             }
             synth.resume();
             speechState.paused = false;
+            requestWakeLock();
             updateTtsControls();
+            syncMediaSessionState();
             return;
         }
         startSpeechPlayback();
@@ -505,7 +864,6 @@
         }
         if (!isBibleRouteActive()) {
             setFullScreenMode(false);
-            stopSpeechPlayback();
         }
     }
 
@@ -790,9 +1148,6 @@
     });
     window.addEventListener("hashchange", function () {
         exitFullScreenIfNeeded();
-        if (!isBibleRouteActive()) {
-            stopSpeechPlayback();
-        }
     });
     document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
@@ -817,6 +1172,8 @@
             });
         }
     }
+    setupStreamAudio();
+    setupMediaSessionHandlers();
 
     setFullScreenMode(false);
     updateTtsControls();
