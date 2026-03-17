@@ -1,5 +1,6 @@
 (function () {
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
+    var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var routes = {
         home: {
             icon: "fa-church",
@@ -109,6 +110,61 @@
         return email === ADMIN_EMAIL;
     }
 
+    function getStoredProfileMap() {
+        try {
+            var raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function getProfileForUser(activeUser) {
+        var uid = String(activeUser && activeUser.uid || "").trim();
+        if (!uid) {
+            return {};
+        }
+        var map = getStoredProfileMap();
+        var profile = map[uid];
+        return profile && typeof profile === "object" ? profile : {};
+    }
+
+    function pickFirstName(nameText) {
+        var value = String(nameText || "").trim();
+        if (!value) {
+            return "";
+        }
+        var firstToken = value.split(/\s+/).filter(Boolean)[0] || "";
+        if (!firstToken) {
+            return "";
+        }
+        return firstToken.charAt(0).toUpperCase() + firstToken.slice(1);
+    }
+
+    function pickFirstNameFromEmail(email) {
+        var raw = String(email || "").trim().toLowerCase();
+        if (!raw || raw.indexOf("@") < 1) {
+            return "";
+        }
+        var localPart = raw.split("@")[0];
+        var firstToken = localPart.split(/[._-]+/).filter(Boolean)[0] || "";
+        return pickFirstName(firstToken);
+    }
+
+    function getHomeWelcomeTitle(config) {
+        var baseText = T(config.titleKey, "Welcome");
+        if (!window.NjcAuth || typeof window.NjcAuth.getUser !== "function") {
+            return baseText;
+        }
+        var activeUser = window.NjcAuth.getUser();
+        var profile = getProfileForUser(activeUser);
+        var firstName = pickFirstName(profile && profile.fullName)
+            || pickFirstName(activeUser && activeUser.displayName)
+            || pickFirstNameFromEmail(activeUser && activeUser.email);
+        return firstName ? (baseText + " " + firstName) : baseText;
+    }
+
     function getRouteFromHash() {
         var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (raw === "about") {
@@ -144,7 +200,9 @@
             eyebrow.classList.toggle("brand-title", current === "home");
             icon.className = "fa-solid " + config.icon;
             eyebrowText.textContent = T(config.eyebrowKey, config.eyebrowText);
-            title.textContent = T(config.titleKey, config.titleText);
+            title.textContent = current === "home"
+                ? getHomeWelcomeTitle(config)
+                : T(config.titleKey, config.titleText);
             var subtitleValue = config.subtitleKey ? T(config.subtitleKey, config.subtitleText) : (config.subtitleText || "");
             subtitle.textContent = subtitleValue;
             subtitle.hidden = !subtitleValue;
