@@ -20,6 +20,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
@@ -503,6 +504,23 @@
                 };
             }
 
+            function normalizeAdminNotice(item, index) {
+                var source = item && typeof item === "object" ? item : {};
+                var createdAt = String(source.createdAt || source.updatedAt || "").trim();
+                var createdYmd = toYmdKey(createdAt.slice(0, 10));
+                return {
+                    id: String(source.id || ("admin-notice-" + index)),
+                    title: String(source.title || "").trim(),
+                    titleTa: String(source.titleTa || "").trim(),
+                    body: String(source.body || "").trim(),
+                    bodyTa: String(source.bodyTa || "").trim(),
+                    date: toYmdKey(source.date) || createdYmd,
+                    expires: toYmdKey(source.expires),
+                    urgent: Boolean(source.urgent),
+                    link: String(source.link || "").trim()
+                };
+            }
+
             function stopAnnouncementsCarousel() {
                 if (announcementCarouselTimerId) {
                     window.clearInterval(announcementCarouselTimerId);
@@ -638,14 +656,54 @@
                     });
                 }
 
-                fetchJson(announcementsUrl)
-                    .catch(function () {
-                        return fetchJson(announcementsFallbackUrl);
-                    })
-                    .then(function (data) {
-                        var items = data && Array.isArray(data.items) ? data.items : [];
-                        allAnnouncements = items.map(normalizeAnnouncement).filter(function (item) {
-                            return item.title || item.body;
+                function fetchStaticAnnouncements() {
+                    return fetchJson(announcementsUrl)
+                        .catch(function () {
+                            return fetchJson(announcementsFallbackUrl);
+                        })
+                        .then(function (data) {
+                            var items = data && Array.isArray(data.items) ? data.items : [];
+                            return items.map(normalizeAnnouncement).filter(function (item) {
+                                return item.title || item.body;
+                            });
+                        })
+                        .catch(function () {
+                            return [];
+                        });
+                }
+
+                function fetchAdminNotices() {
+                    return fetch(adminNoticesUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                        .then(function (response) {
+                            if (response.status === 404) {
+                                return [];
+                            }
+                            if (!response.ok) {
+                                throw new Error("Failed to load admin notices");
+                            }
+                            return response.json().then(function (payload) {
+                                var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                                return entries.map(normalizeAdminNotice).filter(function (item) {
+                                    return item.title || item.body;
+                                });
+                            });
+                        })
+                        .catch(function () {
+                            return [];
+                        });
+                }
+
+                Promise.all([fetchStaticAnnouncements(), fetchAdminNotices()])
+                    .then(function (result) {
+                        var merged = (result[0] || []).concat(result[1] || []);
+                        var seen = {};
+                        allAnnouncements = merged.filter(function (item) {
+                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body)).trim();
+                            if (!key || seen[key]) {
+                                return false;
+                            }
+                            seen[key] = true;
+                            return true;
                         });
                         announcementsError = false;
                         renderAnnouncements();
@@ -1008,6 +1066,9 @@
 
             document.addEventListener("njc:userdata-updated", function () {
                 renderReadingPlan();
+            });
+            document.addEventListener("njc:admin-notices-updated", function () {
+                loadAnnouncements();
             });
 
             if (readingUnreadToggle) {

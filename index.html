@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311cu">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311cu">
-    <link rel="manifest" href="site.webmanifest?v=20260311cu">
-    <link rel="stylesheet" href="styles.css?v=20260311cu">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311cv">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311cv">
+    <link rel="manifest" href="site.webmanifest?v=20260311cv">
+    <link rel="stylesheet" href="styles.css?v=20260311cv">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -490,6 +490,91 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="admin">
+            <main class="app-content">
+            <section class="card">
+                <h2><i class="fa-solid fa-screwdriver-wrench"></i><span data-i18n="admin.title">Admin Dashboard</span></h2>
+                <p class="page-note" data-i18n="admin.info">Manage app content without code.</p>
+                <button class="button-link button-secondary" id="admin-dashboard-refresh" type="button" data-i18n="admin.refresh">Refresh data</button>
+                <p class="page-note" id="admin-dashboard-note" hidden></p>
+                <div class="admin-stats-grid">
+                    <article class="admin-stat-card">
+                        <strong data-i18n="admin.statsNotices">Notices</strong>
+                        <span id="admin-stat-notices">0</span>
+                    </article>
+                    <article class="admin-stat-card">
+                        <strong data-i18n="admin.statsEvents">Events</strong>
+                        <span id="admin-stat-events">0</span>
+                    </article>
+                    <article class="admin-stat-card">
+                        <strong data-i18n="admin.statsSermons">Sermons</strong>
+                        <span id="admin-stat-sermons">0</span>
+                    </article>
+                    <article class="admin-stat-card">
+                        <strong data-i18n="admin.statsUrgent">Urgent prayers</strong>
+                        <span id="admin-stat-urgent-prayers">0</span>
+                    </article>
+                </div>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="admin.noticeTitle">Send Notice</span></h2>
+                <form class="prayer-form" id="admin-notice-form">
+                    <input id="admin-notice-title" class="search-input" type="text" placeholder="Notice title" data-i18n-placeholder="admin.noticeTitlePlaceholder">
+                    <textarea id="admin-notice-body" class="search-input prayer-textarea" rows="3" placeholder="Notice message" data-i18n-placeholder="admin.noticeBodyPlaceholder"></textarea>
+                    <input id="admin-notice-link" class="search-input" type="url" placeholder="Optional link (https://...)" data-i18n-placeholder="admin.noticeLinkPlaceholder">
+                    <label class="prayer-wall-anon">
+                        <input id="admin-notice-urgent" type="checkbox">
+                        <span data-i18n="admin.noticeUrgent">Mark as urgent</span>
+                    </label>
+                    <button class="button-link" id="admin-notice-submit" type="submit" data-i18n="admin.noticePublish">Publish notice</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-calendar-plus"></i><span data-i18n="admin.eventTitle">Add Event</span></h2>
+                <form class="prayer-form" id="admin-event-form">
+                    <input id="admin-event-title" class="search-input" type="text" placeholder="Event title" data-i18n-placeholder="admin.eventTitlePlaceholder">
+                    <div class="admin-inline-fields">
+                        <input id="admin-event-date" class="search-input" type="date">
+                        <input id="admin-event-time" class="search-input" type="time">
+                    </div>
+                    <select id="admin-event-type" class="search-input">
+                        <option value="Special" data-i18n="admin.eventTypeSpecial">Special</option>
+                        <option value="Recurring" data-i18n="admin.eventTypeRecurring">Recurring</option>
+                    </select>
+                    <textarea id="admin-event-description" class="search-input prayer-textarea" rows="2" placeholder="Description" data-i18n-placeholder="admin.eventDescriptionPlaceholder"></textarea>
+                    <button class="button-link" id="admin-event-submit" type="submit" data-i18n="admin.eventPublish">Add event</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-microphone-lines"></i><span data-i18n="admin.sermonTitle">Add Sermon</span></h2>
+                <form class="prayer-form" id="admin-sermon-form">
+                    <input id="admin-sermon-title" class="search-input" type="text" placeholder="Tamil title" data-i18n-placeholder="admin.sermonTitlePlaceholder">
+                    <input id="admin-sermon-subtitle" class="search-input" type="text" placeholder="English subtitle" data-i18n-placeholder="admin.sermonSubtitlePlaceholder">
+                    <input id="admin-sermon-speaker" class="search-input" type="text" placeholder="Speaker name" data-i18n-placeholder="admin.sermonSpeakerPlaceholder">
+                    <div class="admin-inline-fields">
+                        <input id="admin-sermon-date" class="search-input" type="date">
+                        <input id="admin-sermon-audio" class="search-input" type="url" placeholder="Audio URL (https://...)" data-i18n-placeholder="admin.sermonAudioPlaceholder">
+                    </div>
+                    <button class="button-link" id="admin-sermon-submit" type="submit" data-i18n="admin.sermonPublish">Add sermon</button>
+                </form>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-thumbtack"></i><span data-i18n="admin.prayerTitle">Pin Urgent Prayer</span></h2>
+                <p class="page-note" data-i18n="admin.prayerInfo">Toggle urgent status for prayer wall requests.</p>
+                <ul class="list" id="admin-prayer-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="mailbox">
             <main class="app-content">
             <section class="card">
@@ -653,17 +738,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311cu"></script>
-    <script src="app-shell.js?v=20260311cu"></script>
-    <script src="events-engine.js?v=20260311cu"></script>
-    <script src="home-page.js?v=20260311cu"></script>
-    <script src="events-page.js?v=20260311cu"></script>
-    <script src="sermons-page.js?v=20260311cu"></script>
-    <script src="bible-page.js?v=20260311cu"></script>
-    <script src="songbook-page.js?v=20260311cu"></script>
-    <script src="contact-page.js?v=20260311cu"></script>
-    <script src="admin-mailbox-page.js?v=20260311cu"></script>
-    <script src="profile-page.js?v=20260311cu"></script>
-    <script src="spa-router.js?v=20260311cu"></script>
+    <script src="user-auth.js?v=20260311cv"></script>
+    <script src="app-shell.js?v=20260311cv"></script>
+    <script src="events-engine.js?v=20260311cv"></script>
+    <script src="home-page.js?v=20260311cv"></script>
+    <script src="events-page.js?v=20260311cv"></script>
+    <script src="sermons-page.js?v=20260311cv"></script>
+    <script src="bible-page.js?v=20260311cv"></script>
+    <script src="songbook-page.js?v=20260311cv"></script>
+    <script src="contact-page.js?v=20260311cv"></script>
+    <script src="admin-dashboard-page.js?v=20260311cv"></script>
+    <script src="admin-mailbox-page.js?v=20260311cv"></script>
+    <script src="profile-page.js?v=20260311cv"></script>
+    <script src="spa-router.js?v=20260311cv"></script>
 </body>
 </html>

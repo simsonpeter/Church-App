@@ -2,6 +2,7 @@
             var STATE_KEY = "njc_sermon_player_v1";
             var FAVORITES_KEY = "njc_sermon_favorites_v1";
             var sermonsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
+            var adminSermonsUrl = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
             var latestSermonsList = document.getElementById("latest-sermons-list");
             var showMoreSermonsButton = document.getElementById("show-more-sermons");
             var sermonSearch = document.getElementById("sermon-search");
@@ -21,6 +22,7 @@
             var currentSermon = null;
             var sermonsLoaded = false;
             var sermonsLoadFailed = false;
+            var hasRestoredPlayerState = false;
             var searchQuery = "";
             var searchTriggered = false;
             var selectedSpeaker = "";
@@ -216,6 +218,24 @@
                         ? (String(dateObj.getFullYear()) + "-" + String(dateObj.getMonth() + 1).padStart(2, "0"))
                         : ""
                 };
+            }
+
+            function fetchAdminSermons() {
+                return fetch(adminSermonsUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                    .then(function (response) {
+                        if (response.status === 404) {
+                            return [];
+                        }
+                        if (!response.ok) {
+                            throw new Error("Failed to load admin sermons");
+                        }
+                        return response.json().then(function (payload) {
+                            return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                        });
+                    })
+                    .catch(function () {
+                        return [];
+                    });
             }
 
             function renderLoadError() {
@@ -843,27 +863,52 @@
                 renderSermons();
             });
 
-            fetch(sermonsUrl)
-                .then(function (response) {
-                    if (!response.ok) {
-                        throw new Error("Failed to load sermons");
-                    }
-                    return response.json();
-                })
-                .then(function (sermons) {
-                    allSermons = (Array.isArray(sermons) ? sermons : [])
+            function loadSermonsData() {
+                Promise.allSettled([
+                    fetch(sermonsUrl).then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Failed to load sermons");
+                        }
+                        return response.json();
+                    }),
+                    fetchAdminSermons()
+                ]).then(function (result) {
+                    var remoteResult = result[0];
+                    var adminResult = result[1];
+                    var remoteItems = remoteResult && remoteResult.status === "fulfilled" && Array.isArray(remoteResult.value)
+                        ? remoteResult.value
+                        : [];
+                    var adminItems = adminResult && adminResult.status === "fulfilled" && Array.isArray(adminResult.value)
+                        ? adminResult.value
+                        : [];
+                    var merged = remoteItems.concat(adminItems);
+                    var seen = {};
+                    allSermons = merged
                         .map(normalizeSermon)
                         .filter(function (item) {
-                            return Boolean(item);
+                            if (!item) {
+                                return false;
+                            }
+                            var key = item.audioUrl
+                                ? ("audio:" + item.audioUrl)
+                                : ("title:" + item.title + "|" + item.dateKey);
+                            if (seen[key]) {
+                                return false;
+                            }
+                            seen[key] = true;
+                            return true;
                         })
                         .sort(function (a, b) {
                             return b.dateKey - a.dateKey;
                         });
+
                     sermonsLoaded = true;
+                    sermonsLoadFailed = false;
                     renderSermons();
 
                     var storedState = getStoredState();
-                    if (storedState && storedState.audioUrl) {
+                    if (!hasRestoredPlayerState && storedState && storedState.audioUrl) {
+                        hasRestoredPlayerState = true;
                         var restoredIndex = allSermons.findIndex(function (item) {
                             return item.audioUrl === storedState.audioUrl;
                         });
@@ -891,10 +936,16 @@
                             }
                         }
                     }
-                })
-                .catch(function () {
+                }).catch(function () {
                     sermonsLoaded = true;
                     sermonsLoadFailed = true;
                     renderLoadError();
                 });
+            }
+
+            document.addEventListener("njc:admin-sermons-updated", function () {
+                loadSermonsData();
+            });
+
+            loadSermonsData();
         })();

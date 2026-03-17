@@ -11,11 +11,13 @@
     var NOTIFICATION_LAST_SERMON_KEY = "njc_notification_last_sermon_v1";
     var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
     var NOTIFICATION_LAST_MAILBOX_KEY = "njc_notification_last_mailbox_v1";
+    var NOTIFICATION_LAST_NOTICE_KEY = "njc_notification_last_notice_v1";
     var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var CONTACT_FORM_FEED_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
+    var ADMIN_NOTICES_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var activeLanguage = "en";
     var notificationIntervalId = null;
@@ -36,6 +38,7 @@
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
+        "menu.admin": "நிர்வாக பலகை",
         "menu.settings": "அமைப்புகள்",
         "menu.login": "உள்நுழை / பதிவு",
         "menu.logout": "வெளியேறு",
@@ -300,6 +303,7 @@
         "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
         "notify.newPrayerTitle": "புதிய ஜெப வேண்டுதல் வந்துள்ளது",
         "notify.newMailboxTitle": "புதிய செய்தி வந்துள்ளது",
+        "notify.newNoticeTitle": "புதிய அறிவிப்பு வந்துள்ளது",
         "notify.menuInbox": "அறிவிப்புகள்",
         "notify.unread": "படிக்காதவை",
         "notify.noneTitle": "புதிய அறிவிப்புகள் இல்லை",
@@ -403,6 +407,51 @@
         "mailbox.read": "படித்தது",
         "mailbox.unread": "படிக்காதது",
         "mailbox.noReadToClear": "நீக்க படித்த செய்திகள் இல்லை.",
+        "admin.eyebrow": "நிர்வாகம்",
+        "admin.title": "நிர்வாக பலகை",
+        "admin.info": "கோடு இல்லாமல் உள்ளடக்கத்தை நிர்வகிக்கவும்.",
+        "admin.refresh": "தரவை புதுப்பி",
+        "admin.statsNotices": "அறிவிப்புகள்",
+        "admin.statsEvents": "நிகழ்வுகள்",
+        "admin.statsSermons": "பிரசங்கங்கள்",
+        "admin.statsUrgent": "அவசர ஜெபங்கள்",
+        "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
+        "admin.noticeTitlePlaceholder": "அறிவிப்பு தலைப்பு",
+        "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
+        "admin.noticeLinkPlaceholder": "விருப்ப இணைப்பு (https://...)",
+        "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
+        "admin.noticePublish": "அறிவிப்பை வெளியிடு",
+        "admin.eventTitle": "நிகழ்வு சேர்க்க",
+        "admin.eventTitlePlaceholder": "நிகழ்வு தலைப்பு",
+        "admin.eventDescriptionPlaceholder": "விளக்கம்",
+        "admin.eventTypeSpecial": "சிறப்பு",
+        "admin.eventTypeRecurring": "மறுமுறை",
+        "admin.eventPublish": "நிகழ்வு சேர்க்க",
+        "admin.sermonTitle": "பிரசங்கம் சேர்க்க",
+        "admin.sermonTitlePlaceholder": "தமிழ் தலைப்பு",
+        "admin.sermonSubtitlePlaceholder": "ஆங்கில துணைத்தலைப்பு",
+        "admin.sermonSpeakerPlaceholder": "பேச்சாளர் பெயர்",
+        "admin.sermonAudioPlaceholder": "ஆடியோ URL (https://...)",
+        "admin.sermonPublish": "பிரசங்கம் சேர்க்க",
+        "admin.prayerTitle": "அவசர ஜெபத்தை பின் செய்",
+        "admin.prayerInfo": "ஜெப வேண்டுதல்களின் அவசர நிலையை மாற்றவும்.",
+        "admin.prayerPin": "அவசரமாக குறி",
+        "admin.prayerUnpin": "அவசர குறியை நீக்கு",
+        "admin.prayerUpdated": "ஜெப அவசர நிலை புதுப்பிக்கப்பட்டது.",
+        "admin.loading": "நிர்வாக பலகை ஏற்றப்படுகிறது...",
+        "admin.loadingBody": "தயவுசெய்து காத்திருக்கவும்.",
+        "admin.emptyPrayersTitle": "ஜெப வேண்டுதல்கள் இல்லை",
+        "admin.emptyPrayersBody": "புதிய ஜெபங்கள் இங்கே தோன்றும்.",
+        "admin.noticeNeedFields": "அறிவிப்பு தலைப்பு மற்றும் செய்தியை உள்ளிடவும்.",
+        "admin.eventNeedFields": "நிகழ்வு தலைப்பு மற்றும் தேதியை உள்ளிடவும்.",
+        "admin.sermonNeedFields": "பிரசங்க தலைப்பு, தேதி மற்றும் ஆடியோ URL தேவை.",
+        "admin.noticeSaved": "அறிவிப்பு வெளியிடப்பட்டது.",
+        "admin.eventSaved": "நிகழ்வு சேர்க்கப்பட்டது.",
+        "admin.sermonSaved": "பிரசங்கம் சேர்க்கப்பட்டது.",
+        "admin.saved": "சேமிக்கப்பட்டது.",
+        "admin.validation": "தேவையான புலங்களை நிரப்பவும்.",
+        "admin.syncError": "நிர்வாக தரவை ஏற்ற முடியவில்லை.",
+        "admin.accessDenied": "இந்த பலகை நிர்வாகிக்கு மட்டும்.",
         "common.at": "மணிக்கு",
         "common.belgiumTime": "பெல்ஜியம் நேரம்",
         "common.today": "இன்று",
@@ -1128,6 +1177,10 @@
         return raw.split("@")[0].replace(/[._-]+/g, " ").trim();
     }
 
+    function normalizeEmail(email) {
+        return String(email || "").trim().toLowerCase();
+    }
+
     function getProfileForUser(activeUser) {
         var uid = String(activeUser && activeUser.uid || "").trim();
         if (!uid) {
@@ -1480,6 +1533,89 @@
             });
     }
 
+    function checkNewNoticeNotification(status) {
+        return fetch(ADMIN_NOTICES_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (response) {
+                if (response.status === 404) {
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error("Unable to load notices");
+                }
+                return response.json().then(function (payload) {
+                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                });
+            })
+            .then(function (entries) {
+                if (!entries.length) {
+                    return null;
+                }
+                var sorted = entries.slice().sort(function (a, b) {
+                    var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+                    var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+                    return bTime.localeCompare(aTime);
+                });
+                var latest = sorted[0] || {};
+                var title = String(latest.title || "").trim();
+                var body = String(latest.body || "").trim();
+                var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
+                if (!latestTime || !title) {
+                    return null;
+                }
+                var latestKey = latestTime + "|" + title.slice(0, 80);
+                var previousKey = "";
+                try {
+                    previousKey = window.localStorage.getItem(NOTIFICATION_LAST_NOTICE_KEY) || "";
+                } catch (err) {
+                    previousKey = "";
+                }
+                if (!previousKey) {
+                    try {
+                        window.localStorage.setItem(NOTIFICATION_LAST_NOTICE_KEY, latestKey);
+                    } catch (err) {
+                        return null;
+                    }
+                    return null;
+                }
+                if (latestKey === previousKey) {
+                    return null;
+                }
+                var compactBody = body.length > 120 ? (body.slice(0, 117) + "...") : body;
+                var notifyKey = "notice:" + latestKey;
+                addInAppNotification({
+                    id: notifyKey,
+                    kind: "notice",
+                    title: t("notify.newNoticeTitle", "New notice posted"),
+                    body: compactBody || title,
+                    url: "#home",
+                    createdAt: Date.now()
+                });
+                try {
+                    window.localStorage.setItem(NOTIFICATION_LAST_NOTICE_KEY, latestKey);
+                } catch (err) {
+                    return null;
+                }
+                var canPush = Boolean(status && status.enabled && status.supported && status.permission === "granted");
+                if (!canPush || wasNotified(notifyKey)) {
+                    return null;
+                }
+                return showNotification({
+                    title: t("notify.newNoticeTitle", "New notice posted"),
+                    body: compactBody || title,
+                    tag: notifyKey,
+                    url: "#home"
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
     function runNotificationChecks() {
         var status = getNotificationStatus();
         if (status.supported && status.enabled && status.permission === "granted") {
@@ -1488,6 +1624,7 @@
         checkNewSermonNotification(status);
         checkNewPrayerNotification(status);
         checkNewMailboxNotification(status);
+        checkNewNoticeNotification(status);
     }
 
     function startNotificationLoop() {
@@ -1904,6 +2041,18 @@
         utilityLinksContainer.className = "header-menu-tabs";
         utilityCard.appendChild(utilityLinksContainer);
 
+        var mailboxLink = document.createElement("a");
+        mailboxLink.className = "header-menu-link";
+        mailboxLink.href = "#mailbox";
+        mailboxLink.innerHTML = "<i class=\"fa-solid fa-inbox\"></i><span></span>";
+        utilityLinksContainer.appendChild(mailboxLink);
+
+        var adminLink = document.createElement("a");
+        adminLink.className = "header-menu-link";
+        adminLink.href = "#admin";
+        adminLink.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\"></i><span></span>";
+        utilityLinksContainer.appendChild(adminLink);
+
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
         settingsLink.href = "#settings";
@@ -2057,6 +2206,8 @@
                     iconClass = "fa-hands-praying";
                 } else if (item.kind === "mailbox") {
                     iconClass = "fa-envelope";
+                } else if (item.kind === "notice") {
+                    iconClass = "fa-bullhorn";
                 }
                 var readClass = item.read ? "notification-center-item" : "notification-center-item unread";
                 return "" +
@@ -2080,11 +2231,14 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var mailboxLabel = t("menu.mailbox", "Mailbox");
+            var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var profile = getProfileForUser(activeUser);
             var isLoggedIn = Boolean(activeUser && activeUser.uid);
+            var isAdmin = normalizeEmail(activeUser && activeUser.email) === normalizeEmail(ADMIN_EMAIL);
             var displayName = getUserDisplayName(activeUser, profile) || t("menu.profileGuest", "Guest");
             var emailText = String(activeUser && activeUser.email || "").trim();
             var photoUrl = getUserPhotoUrl(activeUser, profile);
@@ -2131,6 +2285,14 @@
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
             }
+            var mailboxNode = mailboxLink.querySelector("span");
+            if (mailboxNode) {
+                mailboxNode.textContent = mailboxLabel;
+            }
+            var adminNode = adminLink.querySelector("span");
+            if (adminNode) {
+                adminNode.textContent = adminLabel;
+            }
             var authNode = authButton.querySelector("span");
             if (authNode) {
                 authNode.textContent = authLabel;
@@ -2149,10 +2311,16 @@
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
             var isSettings = getCurrentRoute() === "settings";
+            var isMailbox = getCurrentRoute() === "mailbox";
+            var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
             settingsLink.classList.toggle("active", isSettings);
+            mailboxLink.classList.toggle("active", isMailbox);
+            adminLink.classList.toggle("active", isAdminRoute);
+            mailboxLink.hidden = !isAdmin;
+            adminLink.hidden = !isAdmin;
             renderNotificationCenter();
         }
 

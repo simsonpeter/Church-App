@@ -2426,6 +2426,39 @@ body.bible-fullscreen-open .offline-badge {
     gap: 8px;
 }
 
+.admin-stats-grid {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.admin-stat-card {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    padding: 10px;
+    display: grid;
+    gap: 4px;
+}
+
+.admin-stat-card strong {
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+
+.admin-stat-card span {
+    font-size: 1.18rem;
+    font-weight: 800;
+    color: var(--primary);
+}
+
+.admin-inline-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
 .button-secondary {
     background: var(--surface-soft);
     color: var(--text);

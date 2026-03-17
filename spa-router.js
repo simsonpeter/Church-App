@@ -83,6 +83,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        admin: {
+            icon: "fa-screwdriver-wrench",
+            eyebrowKey: "admin.eyebrow",
+            eyebrowText: "Admin",
+            titleKey: "admin.title",
+            titleText: "Admin Dashboard",
+            subtitleKey: "",
+            subtitleText: ""
+        },
         mailbox: {
             icon: "fa-inbox",
             eyebrowKey: "mailbox.eyebrow",
@@ -178,7 +187,7 @@
         if (raw === "about") {
             return "prayer";
         }
-        if (raw === "mailbox" && !isAdminUser()) {
+        if ((raw === "mailbox" || raw === "admin") && !isAdminUser()) {
             return "home";
         }
         return routes[raw] ? raw : "home";

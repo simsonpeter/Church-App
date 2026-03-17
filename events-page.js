@@ -5,6 +5,7 @@
             var upcomingCard = upcomingEventsList ? upcomingEventsList.closest(".card") : null;
             var specialCard = upcomingSpecialEventsList ? upcomingSpecialEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
+            var adminEventsUrl = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
             var allEvents = [];
             var showAll = false;
             var twoWeekCutoff = null;
@@ -50,6 +51,82 @@
                     hour: dt.getUTCHours(),
                     minute: dt.getUTCMinutes()
                 };
+            }
+
+            function toEventKey(year, month, day, hour, minute) {
+                return (year * 100000000) + (month * 1000000) + (day * 10000) + (hour * 100) + minute;
+            }
+
+            function parseTimeTo24(value) {
+                var input = String(value || "").trim();
+                var match = input.match(/^(\d{1,2}):(\d{2})(?:\s*([AaPp][Mm]))?$/);
+                if (!match) {
+                    return { hour: 19, minute: 0 };
+                }
+                var hour = Number(match[1]);
+                var minute = Number(match[2]);
+                var meridiem = match[3] ? match[3].toUpperCase() : "";
+                if (meridiem === "PM" && hour < 12) {
+                    hour += 12;
+                } else if (meridiem === "AM" && hour === 12) {
+                    hour = 0;
+                }
+                if (hour < 0 || hour > 23 || minute < 0 || minute > 59) {
+                    return { hour: 19, minute: 0 };
+                }
+                return { hour: hour, minute: minute };
+            }
+
+            function fetchAdminEvents() {
+                return fetch(adminEventsUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                    .then(function (response) {
+                        if (response.status === 404) {
+                            return [];
+                        }
+                        if (!response.ok) {
+                            throw new Error("Could not load admin events");
+                        }
+                        return response.json().then(function (payload) {
+                            return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                        });
+                    })
+                    .catch(function () {
+                        return [];
+                    });
+            }
+
+            function normalizeAdminEvents(entries, nowBrussels) {
+                var nowKey = Number(nowBrussels && nowBrussels.key || 0);
+                return (Array.isArray(entries) ? entries : []).map(function (entry) {
+                    var source = entry && typeof entry === "object" ? entry : {};
+                    var title = String(source.title || "").trim();
+                    var dateText = String(source.date || "").trim();
+                    var dateMatch = dateText.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+                    if (!title || !dateMatch) {
+                        return null;
+                    }
+                    var year = Number(dateMatch[1]);
+                    var month = Number(dateMatch[2]);
+                    var day = Number(dateMatch[3]);
+                    var parsedTime = parseTimeTo24(source.time);
+                    var key = toEventKey(year, month, day, parsedTime.hour, parsedTime.minute);
+                    if (key < nowKey) {
+                        return null;
+                    }
+                    return {
+                        title: title,
+                        description: String(source.description || "").trim(),
+                        year: year,
+                        month: month,
+                        day: day,
+                        hour: parsedTime.hour,
+                        minute: parsedTime.minute,
+                        type: source.type === "Recurring" ? "Recurring" : "Special",
+                        key: key
+                    };
+                }).filter(function (item) {
+                    return Boolean(item);
+                });
             }
 
             function toGoogleCalendarUrl(eventItem, sourceElement) {
@@ -270,24 +347,45 @@
                 renderUpcomingSpecial();
             });
 
-            NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 210 })
-                .then(function (result) {
-                    allEvents = result.events || [];
-                    twoWeekCutoff = NjcEvents.getWindowCutoffKey(result.nowBrussels, 14);
-                    renderUpcoming();
-                    renderUpcomingSpecial();
-                })
-                .catch(function () {
-                    stopSpecialCarousel();
-                    upcomingEventsList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming events", upcomingCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorBody", "Please refresh and try again.", upcomingCard)) + "</p>" +
-                        "</li>";
-                    upcomingSpecialEventsList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorTitle", "Could not load special events", specialCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorBody", "Please refresh and try again.", specialCard)) + "</p>" +
-                        "</li>";
-                });
+            function loadEventsData() {
+                NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 210 })
+                    .then(function (result) {
+                        return fetchAdminEvents().then(function (adminEntries) {
+                            var merged = (result.events || []).concat(normalizeAdminEvents(adminEntries, result.nowBrussels));
+                            var seen = {};
+                            allEvents = merged.filter(function (item) {
+                                var key = String(item.key) + "|" + String(item.title || "").trim();
+                                if (!key || seen[key]) {
+                                    return false;
+                                }
+                                seen[key] = true;
+                                return true;
+                            }).sort(function (a, b) {
+                                return a.key - b.key;
+                            });
+                            twoWeekCutoff = NjcEvents.getWindowCutoffKey(result.nowBrussels, 14);
+                            renderUpcoming();
+                            renderUpcomingSpecial();
+                        });
+                    })
+                    .catch(function () {
+                        stopSpecialCarousel();
+                        upcomingEventsList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming events", upcomingCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorBody", "Please refresh and try again.", upcomingCard)) + "</p>" +
+                            "</li>";
+                        upcomingSpecialEventsList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorTitle", "Could not load special events", specialCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorBody", "Please refresh and try again.", specialCard)) + "</p>" +
+                            "</li>";
+                    });
+            }
+
+            document.addEventListener("njc:admin-events-updated", function () {
+                loadEventsData();
+            });
+
+            loadEventsData();
         })();

@@ -1309,4 +1309,7 @@
                 renderPrayerWall();
                 renderPrayerDetail();
             });
+            document.addEventListener("njc:admin-prayer-updated", function () {
+                loadPrayerWall();
+            });
         })();
