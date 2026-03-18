@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311cz">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311cz">
-    <link rel="manifest" href="site.webmanifest?v=20260311cz">
-    <link rel="stylesheet" href="styles.css?v=20260311cz">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311da">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311da">
+    <link rel="manifest" href="site.webmanifest?v=20260311da">
+    <link rel="stylesheet" href="styles.css?v=20260311da">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -21,19 +21,15 @@
 
         <section class="page-view active" data-route="home">
             <main class="app-content">
-            <section class="quick-actions">
-                <a class="action-pill" href="#events">
-                    <span class="action-icon"><i class="fa-solid fa-calendar-days"></i></span>
-                    <span class="action-label" data-i18n="actions.events">Events</span>
-                </a>
-                <a class="action-pill" href="#sermons">
-                    <span class="action-icon"><i class="fa-solid fa-microphone-lines"></i></span>
-                    <span class="action-label" data-i18n="actions.sermons">Sermons</span>
-                </a>
-                <a class="action-pill" href="#contact">
-                    <span class="action-icon"><i class="fa-solid fa-phone"></i></span>
-                    <span class="action-label" data-i18n="actions.contact">Contact</span>
-                </a>
+            <section class="card">
+                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
+                <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
+                <ul class="list" id="home-announcements-list">
+                    <li>
+                        <h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3>
+                        <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
+                    </li>
+                </ul>
             </section>
 
             <section class="card verse-card">
@@ -67,17 +63,6 @@
                 </div>
                 <p id="daily-verse-text" class="daily-verse-text">Loading daily verse...</p>
                 <p id="daily-verse-reference" class="page-note"></p>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
-                <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
-                <ul class="list" id="home-announcements-list">
-                    <li>
-                        <h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3>
-                        <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
-                    </li>
-                </ul>
             </section>
 
             <section class="card hero-card">
@@ -774,18 +759,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311cz"></script>
-    <script src="app-shell.js?v=20260311cz"></script>
-    <script src="events-engine.js?v=20260311cz"></script>
-    <script src="home-page.js?v=20260311cz"></script>
-    <script src="events-page.js?v=20260311cz"></script>
-    <script src="sermons-page.js?v=20260311cz"></script>
-    <script src="bible-page.js?v=20260311cz"></script>
-    <script src="songbook-page.js?v=20260311cz"></script>
-    <script src="contact-page.js?v=20260311cz"></script>
-    <script src="admin-dashboard-page.js?v=20260311cz"></script>
-    <script src="admin-mailbox-page.js?v=20260311cz"></script>
-    <script src="profile-page.js?v=20260311cz"></script>
-    <script src="spa-router.js?v=20260311cz"></script>
+    <script src="user-auth.js?v=20260311da"></script>
+    <script src="app-shell.js?v=20260311da"></script>
+    <script src="events-engine.js?v=20260311da"></script>
+    <script src="home-page.js?v=20260311da"></script>
+    <script src="events-page.js?v=20260311da"></script>
+    <script src="sermons-page.js?v=20260311da"></script>
+    <script src="bible-page.js?v=20260311da"></script>
+    <script src="songbook-page.js?v=20260311da"></script>
+    <script src="contact-page.js?v=20260311da"></script>
+    <script src="admin-dashboard-page.js?v=20260311da"></script>
+    <script src="admin-mailbox-page.js?v=20260311da"></script>
+    <script src="profile-page.js?v=20260311da"></script>
+    <script src="spa-router.js?v=20260311da"></script>
 </body>
 </html>
