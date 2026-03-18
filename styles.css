@@ -990,6 +990,21 @@ button.button-link:disabled {
     transform: translateY(-1px);
 }
 
+.location-transit {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--surface-soft);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-soft);
+}
+
+.location-transit i {
+    margin-right: 6px;
+    color: var(--primary);
+}
+
 .location-map-frame-wrap {
     margin-top: 8px;
     border: 1px solid var(--line);
