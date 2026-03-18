@@ -21,14 +21,18 @@
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
+    var noticeTitleTaInput = document.getElementById("admin-notice-title-ta");
     var noticeBodyInput = document.getElementById("admin-notice-body");
+    var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
     var noticeLinkInput = document.getElementById("admin-notice-link");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeSubmit = document.getElementById("admin-notice-submit");
 
     var broadcastForm = document.getElementById("admin-broadcast-form");
     var broadcastTitleInput = document.getElementById("admin-broadcast-title");
+    var broadcastTitleTaInput = document.getElementById("admin-broadcast-title-ta");
     var broadcastBodyInput = document.getElementById("admin-broadcast-body");
+    var broadcastBodyTaInput = document.getElementById("admin-broadcast-body-ta");
     var broadcastCategoryInput = document.getElementById("admin-broadcast-category");
     var broadcastLinkInput = document.getElementById("admin-broadcast-link");
     var broadcastSubmit = document.getElementById("admin-broadcast-submit");
@@ -317,7 +321,9 @@
         noticeList.innerHTML = sorted.map(function (entry) {
             var id = String(entry && entry.id || "").trim();
             var title = String(entry && entry.title || "").trim();
+            var titleTa = String(entry && entry.titleTa || "").trim();
             var body = String(entry && entry.body || "").trim();
+            var bodyTa = String(entry && entry.bodyTa || "").trim();
             var link = String(entry && entry.link || "").trim();
             var urgent = Boolean(entry && entry.urgent);
             var tagText = urgent ? ("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgent", "Mark as urgent")) + "</span>") : "";
@@ -325,6 +331,8 @@
                 "<li>" +
                 "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + " " + tagText + "</h3>" +
                 "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
+                (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"edit\">" + escapeHtml(T("admin.noticeEdit", "Edit")) + "</button>" +
@@ -354,7 +362,9 @@
         broadcastList.innerHTML = sorted.map(function (entry) {
             var id = String(entry && entry.id || "").trim();
             var title = String(entry && entry.title || "").trim();
+            var titleTa = String(entry && entry.titleTa || "").trim();
             var body = String(entry && entry.body || "").trim();
+            var bodyTa = String(entry && entry.bodyTa || "").trim();
             var category = normalizeBroadcastCategory(entry && entry.category);
             var url = normalizeBroadcastUrl(entry && entry.url, category);
             var categoryLabel = getBroadcastCategoryLabel(category);
@@ -362,6 +372,8 @@
                 "<li>" +
                 "  <h3>" + escapeHtml(title || T("admin.broadcastTitle", "Broadcast Notifications")) + " <span class=\"prayer-list-urgent-badge\">" + escapeHtml(categoryLabel) + "</span></h3>" +
                 "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
+                (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 "  <p class=\"page-note\">" + escapeHtml(url) + "</p>" +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-broadcast-id=\"" + escapeHtml(id) + "\" data-admin-broadcast-action=\"edit\">" + escapeHtml(T("admin.broadcastEdit", "Edit")) + "</button>" +
@@ -554,7 +566,9 @@
             return;
         }
         var title = String(noticeTitleInput.value || "").trim();
+        var titleTa = String(noticeTitleTaInput && noticeTitleTaInput.value || "").trim();
         var body = String(noticeBodyInput.value || "").trim();
+        var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
         var link = String(noticeLinkInput.value || "").trim();
         if (!title || !body) {
             showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
@@ -564,7 +578,9 @@
         prependAndSave(ADMIN_NOTICES_URL, cachedNotices, {
             id: makeEntryId("notice"),
             title: title,
+            titleTa: titleTa,
             body: body,
+            bodyTa: bodyTa,
             link: link,
             urgent: Boolean(noticeUrgentInput.checked),
             date: toYmd(new Date().toISOString()),
@@ -573,7 +589,13 @@
         }).then(function (entries) {
             cachedNotices = entries;
             noticeTitleInput.value = "";
+            if (noticeTitleTaInput) {
+                noticeTitleTaInput.value = "";
+            }
             noticeBodyInput.value = "";
+            if (noticeBodyTaInput) {
+                noticeBodyTaInput.value = "";
+            }
             noticeLinkInput.value = "";
             noticeUrgentInput.checked = false;
             renderStats();
@@ -593,7 +615,9 @@
             return;
         }
         var title = String(broadcastTitleInput.value || "").trim();
+        var titleTa = String(broadcastTitleTaInput && broadcastTitleTaInput.value || "").trim();
         var body = String(broadcastBodyInput.value || "").trim();
+        var bodyTa = String(broadcastBodyTaInput && broadcastBodyTaInput.value || "").trim();
         var category = normalizeBroadcastCategory(broadcastCategoryInput.value);
         var url = normalizeBroadcastUrl(broadcastLinkInput.value, category);
         if (!title || !body) {
@@ -604,7 +628,9 @@
         prependAndSave(ADMIN_BROADCASTS_URL, cachedBroadcasts, {
             id: makeEntryId("broadcast"),
             title: title,
+            titleTa: titleTa,
             body: body,
+            bodyTa: bodyTa,
             category: category,
             url: url,
             createdAt: new Date().toISOString(),
@@ -612,7 +638,13 @@
         }).then(function (entries) {
             cachedBroadcasts = Array.isArray(entries) ? entries : [];
             broadcastTitleInput.value = "";
+            if (broadcastTitleTaInput) {
+                broadcastTitleTaInput.value = "";
+            }
             broadcastBodyInput.value = "";
+            if (broadcastBodyTaInput) {
+                broadcastBodyTaInput.value = "";
+            }
             broadcastCategoryInput.value = "general";
             broadcastLinkInput.value = "";
             renderBroadcastList();
@@ -758,6 +790,14 @@
         if (nextBody === null) {
             return;
         }
+        var nextTitleTa = window.prompt(T("admin.noticeEditPromptTitleTa", "Edit Tamil title (optional)"), String(current.titleTa || ""));
+        if (nextTitleTa === null) {
+            return;
+        }
+        var nextBodyTa = window.prompt(T("admin.noticeEditPromptBodyTa", "Edit Tamil message (optional)"), String(current.bodyTa || ""));
+        if (nextBodyTa === null) {
+            return;
+        }
         var nextLink = window.prompt(T("admin.noticeEditPromptLink", "Edit link (optional)"), String(current.link || ""));
         if (nextLink === null) {
             return;
@@ -771,6 +811,8 @@
         source[targetIndex] = Object.assign({}, current, {
             title: cleanTitle,
             body: cleanBody,
+            titleTa: String(nextTitleTa || "").trim(),
+            bodyTa: String(nextBodyTa || "").trim(),
             link: String(nextLink || "").trim(),
             updatedAt: new Date().toISOString()
         });
@@ -838,6 +880,14 @@
         if (nextBody === null) {
             return;
         }
+        var nextTitleTa = window.prompt(T("admin.broadcastEditPromptTitleTa", "Edit Tamil title (optional)"), String(current.titleTa || ""));
+        if (nextTitleTa === null) {
+            return;
+        }
+        var nextBodyTa = window.prompt(T("admin.broadcastEditPromptBodyTa", "Edit Tamil message (optional)"), String(current.bodyTa || ""));
+        if (nextBodyTa === null) {
+            return;
+        }
         var nextCategory = window.prompt(T("admin.broadcastEditPromptCategory", "Edit category (general/events/sermons/prayer/contact)"), String(current.category || "general"));
         if (nextCategory === null) {
             return;
@@ -856,6 +906,8 @@
         source[targetIndex] = Object.assign({}, current, {
             title: cleanTitle,
             body: cleanBody,
+            titleTa: String(nextTitleTa || "").trim(),
+            bodyTa: String(nextBodyTa || "").trim(),
             category: cleanCategory,
             url: normalizeBroadcastUrl(nextUrl, cleanCategory),
             updatedAt: new Date().toISOString()

@@ -1,25 +1,25 @@
-const APP_CACHE = "njc-app-cache-v111";
-const RUNTIME_CACHE = "njc-runtime-cache-v111";
+const APP_CACHE = "njc-app-cache-v112";
+const RUNTIME_CACHE = "njc-runtime-cache-v112";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260311dc",
-    "./user-auth.js?v=20260311dc",
-    "./app-shell.js?v=20260311dc",
-    "./events-engine.js?v=20260311dc",
-    "./home-page.js?v=20260311dc",
-    "./events-page.js?v=20260311dc",
-    "./sermons-page.js?v=20260311dc",
-    "./bible-page.js?v=20260311dc",
-    "./songbook-page.js?v=20260311dc",
-    "./contact-page.js?v=20260311dc",
-    "./admin-dashboard-page.js?v=20260311dc",
-    "./admin-mailbox-page.js?v=20260311dc",
-    "./profile-page.js?v=20260311dc",
-    "./spa-router.js?v=20260311dc",
-    "./site.webmanifest?v=20260311dc",
-    "./logo.png?v=20260311dc",
+    "./styles.css?v=20260311dd",
+    "./user-auth.js?v=20260311dd",
+    "./app-shell.js?v=20260311dd",
+    "./events-engine.js?v=20260311dd",
+    "./home-page.js?v=20260311dd",
+    "./events-page.js?v=20260311dd",
+    "./sermons-page.js?v=20260311dd",
+    "./bible-page.js?v=20260311dd",
+    "./songbook-page.js?v=20260311dd",
+    "./contact-page.js?v=20260311dd",
+    "./admin-dashboard-page.js?v=20260311dd",
+    "./admin-mailbox-page.js?v=20260311dd",
+    "./profile-page.js?v=20260311dd",
+    "./spa-router.js?v=20260311dd",
+    "./site.webmanifest?v=20260311dd",
+    "./logo.png?v=20260311dd",
     "./announcements.json"
 ];
 

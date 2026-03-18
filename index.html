@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311dc">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311dc">
-    <link rel="manifest" href="site.webmanifest?v=20260311dc">
-    <link rel="stylesheet" href="styles.css?v=20260311dc">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311dd">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311dd">
+    <link rel="manifest" href="site.webmanifest?v=20260311dd">
+    <link rel="stylesheet" href="styles.css?v=20260311dd">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -509,7 +509,9 @@
                 <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="admin.noticeTitle">Send Notice</span></h2>
                 <form class="prayer-form" id="admin-notice-form">
                     <input id="admin-notice-title" class="search-input" type="text" placeholder="Notice title" data-i18n-placeholder="admin.noticeTitlePlaceholder">
+                    <input id="admin-notice-title-ta" class="search-input" type="text" placeholder="Notice title in Tamil (optional)" data-i18n-placeholder="admin.noticeTitleTaPlaceholder">
                     <textarea id="admin-notice-body" class="search-input prayer-textarea" rows="3" placeholder="Notice message" data-i18n-placeholder="admin.noticeBodyPlaceholder"></textarea>
+                    <textarea id="admin-notice-body-ta" class="search-input prayer-textarea" rows="2" placeholder="Notice message in Tamil (optional)" data-i18n-placeholder="admin.noticeBodyTaPlaceholder"></textarea>
                     <input id="admin-notice-link" class="search-input" type="url" placeholder="Optional link (https://...)" data-i18n-placeholder="admin.noticeLinkPlaceholder">
                     <label class="prayer-wall-anon">
                         <input id="admin-notice-urgent" type="checkbox">
@@ -524,7 +526,9 @@
                 <p class="page-note" data-i18n="admin.broadcastInfo">Write one message and push to users by category.</p>
                 <form class="prayer-form" id="admin-broadcast-form">
                     <input id="admin-broadcast-title" class="search-input" type="text" placeholder="Broadcast title" data-i18n-placeholder="admin.broadcastTitlePlaceholder">
+                    <input id="admin-broadcast-title-ta" class="search-input" type="text" placeholder="Broadcast title in Tamil (optional)" data-i18n-placeholder="admin.broadcastTitleTaPlaceholder">
                     <textarea id="admin-broadcast-body" class="search-input prayer-textarea" rows="3" placeholder="Broadcast message" data-i18n-placeholder="admin.broadcastBodyPlaceholder"></textarea>
+                    <textarea id="admin-broadcast-body-ta" class="search-input prayer-textarea" rows="2" placeholder="Broadcast message in Tamil (optional)" data-i18n-placeholder="admin.broadcastBodyTaPlaceholder"></textarea>
                     <select id="admin-broadcast-category" class="search-input">
                         <option value="general" data-i18n="admin.broadcastCategoryGeneral">General</option>
                         <option value="events" data-i18n="admin.broadcastCategoryEvents">Events</option>
@@ -785,18 +789,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311dc"></script>
-    <script src="app-shell.js?v=20260311dc"></script>
-    <script src="events-engine.js?v=20260311dc"></script>
-    <script src="home-page.js?v=20260311dc"></script>
-    <script src="events-page.js?v=20260311dc"></script>
-    <script src="sermons-page.js?v=20260311dc"></script>
-    <script src="bible-page.js?v=20260311dc"></script>
-    <script src="songbook-page.js?v=20260311dc"></script>
-    <script src="contact-page.js?v=20260311dc"></script>
-    <script src="admin-dashboard-page.js?v=20260311dc"></script>
-    <script src="admin-mailbox-page.js?v=20260311dc"></script>
-    <script src="profile-page.js?v=20260311dc"></script>
-    <script src="spa-router.js?v=20260311dc"></script>
+    <script src="user-auth.js?v=20260311dd"></script>
+    <script src="app-shell.js?v=20260311dd"></script>
+    <script src="events-engine.js?v=20260311dd"></script>
+    <script src="home-page.js?v=20260311dd"></script>
+    <script src="events-page.js?v=20260311dd"></script>
+    <script src="sermons-page.js?v=20260311dd"></script>
+    <script src="bible-page.js?v=20260311dd"></script>
+    <script src="songbook-page.js?v=20260311dd"></script>
+    <script src="contact-page.js?v=20260311dd"></script>
+    <script src="admin-dashboard-page.js?v=20260311dd"></script>
+    <script src="admin-mailbox-page.js?v=20260311dd"></script>
+    <script src="profile-page.js?v=20260311dd"></script>
+    <script src="spa-router.js?v=20260311dd"></script>
 </body>
 </html>

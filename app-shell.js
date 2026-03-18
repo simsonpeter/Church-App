@@ -427,7 +427,9 @@
         "admin.statsUrgent": "அவசர ஜெபங்கள்",
         "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
         "admin.noticeTitlePlaceholder": "அறிவிப்பு தலைப்பு",
+        "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
+        "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
         "admin.noticeLinkPlaceholder": "விருப்ப இணைப்பு (https://...)",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
@@ -438,6 +440,8 @@
         "admin.noticeDeleteConfirm": "இந்த அறிவிப்பை நீக்கவா?",
         "admin.noticeEditPromptTitle": "தலைப்பை திருத்து",
         "admin.noticeEditPromptBody": "செய்தியை திருத்து",
+        "admin.noticeEditPromptTitleTa": "தமிழ் தலைப்பை திருத்து (விருப்பம்)",
+        "admin.noticeEditPromptBodyTa": "தமிழ் செய்தியை திருத்து (விருப்பம்)",
         "admin.noticeEditPromptLink": "இணைப்பை திருத்து (விருப்பம்)",
         "admin.noticeUpdated": "அறிவிப்பு புதுப்பிக்கப்பட்டது.",
         "admin.noticeDeleted": "அறிவிப்பு நீக்கப்பட்டது.",
@@ -446,7 +450,9 @@
         "admin.broadcastTitle": "அறிவிப்பு ஒலிபரப்பு",
         "admin.broadcastInfo": "ஒரு செய்தியை எழுதி வகைபடி எல்லா பயனர்களுக்கும் அனுப்புங்கள்.",
         "admin.broadcastTitlePlaceholder": "ஒலிபரப்பு தலைப்பு",
+        "admin.broadcastTitleTaPlaceholder": "ஒலிபரப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.broadcastBodyPlaceholder": "ஒலிபரப்பு செய்தி",
+        "admin.broadcastBodyTaPlaceholder": "ஒலிபரப்பு செய்தி (தமிழ், விருப்பம்)",
         "admin.broadcastLinkPlaceholder": "விருப்ப வழிநடத்தல் இணைப்பு (#events அல்லது https://...)",
         "admin.broadcastSend": "ஒலிபரப்பை அனுப்பு",
         "admin.broadcastRecentTitle": "சமீப ஒலிபரப்புகள்",
@@ -465,6 +471,8 @@
         "admin.broadcastDeleteConfirm": "இந்த ஒலிபரப்பை நீக்கவா?",
         "admin.broadcastEditPromptTitle": "தலைப்பை திருத்து",
         "admin.broadcastEditPromptBody": "செய்தியை திருத்து",
+        "admin.broadcastEditPromptTitleTa": "தமிழ் தலைப்பை திருத்து (விருப்பம்)",
+        "admin.broadcastEditPromptBodyTa": "தமிழ் செய்தியை திருத்து (விருப்பம்)",
         "admin.broadcastEditPromptCategory": "வகையை திருத்து (general/events/sermons/prayer/contact)",
         "admin.broadcastEditPromptUrl": "இலக்கு இணைப்பை திருத்து",
         "admin.broadcastUpdated": "ஒலிபரப்பு புதுப்பிக்கப்பட்டது.",
@@ -1688,6 +1696,10 @@
                 var latest = sorted[0] || {};
                 var title = String(latest.title || "").trim();
                 var body = String(latest.body || "").trim();
+                var titleTa = String(latest.titleTa || "").trim();
+                var bodyTa = String(latest.bodyTa || "").trim();
+                var localizedTitle = activeLanguage === "ta" ? (titleTa || title) : title;
+                var localizedBody = activeLanguage === "ta" ? (bodyTa || body) : body;
                 var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
                 if (!latestTime || !title) {
                     return null;
@@ -1713,7 +1725,8 @@
                 if (hadPreviousKey && latestKey === previousKey) {
                     return null;
                 }
-                var compactBody = body.length > 120 ? (body.slice(0, 117) + "...") : body;
+                var bodyText = localizedBody || localizedTitle || body || title;
+                var compactBody = bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText;
                 var notifyKey = "notice:" + latestKey;
                 addInAppNotification({
                     id: notifyKey,
@@ -1774,6 +1787,10 @@
                 var latest = sorted[0] || {};
                 var title = String(latest.title || "").trim();
                 var body = String(latest.body || "").trim();
+                var titleTa = String(latest.titleTa || "").trim();
+                var bodyTa = String(latest.bodyTa || "").trim();
+                var localizedTitle = activeLanguage === "ta" ? (titleTa || title) : title;
+                var localizedBody = activeLanguage === "ta" ? (bodyTa || body) : body;
                 var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
                 if (!latestTime || !title) {
                     return null;
@@ -1799,7 +1816,7 @@
                 var category = normalizeBroadcastCategory(latest.category);
                 var categoryLabel = getBroadcastCategoryLabel(category);
                 var targetUrl = normalizeBroadcastTargetUrl(latest.url, category);
-                var bodyText = body || title;
+                var bodyText = localizedBody || localizedTitle || body || title;
                 var decoratedBody = categoryLabel
                     ? ("[" + categoryLabel + "] " + bodyText)
                     : bodyText;
@@ -1808,7 +1825,7 @@
                 addInAppNotification({
                     id: notifyKey,
                     kind: "broadcast",
-                    title: title || t("notify.newBroadcastTitle", "New broadcast message"),
+                    title: localizedTitle || t("notify.newBroadcastTitle", "New broadcast message"),
                     body: compactBody,
                     url: targetUrl,
                     createdAt: Date.now()
@@ -1823,7 +1840,7 @@
                     return null;
                 }
                 return showNotification({
-                    title: title || t("notify.newBroadcastTitle", "New broadcast message"),
+                    title: localizedTitle || t("notify.newBroadcastTitle", "New broadcast message"),
                     body: compactBody,
                     tag: notifyKey,
                     url: targetUrl
