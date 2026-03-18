@@ -20,6 +20,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
@@ -41,6 +42,9 @@
             var announcementCarouselTimerId = null;
             var eventsMeta = null;
             var eventsError = false;
+            var announcementTranslationCache = getAnnouncementTranslationCache();
+            var announcementTranslationPending = {};
+            var announcementTranslationSaveTimerId = null;
             var verseLanguage = getStoredVerseLanguage();
             var dailyVerseRenderToken = 0;
             var kjvBiblePromise = null;
@@ -179,6 +183,139 @@
                     return null;
                 }
                 return null;
+            }
+
+            function getAnnouncementTranslationCache() {
+                try {
+                    var raw = window.localStorage.getItem(ANNOUNCEMENT_TRANSLATION_CACHE_KEY);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                } catch (err) {
+                    return {};
+                }
+            }
+
+            function saveAnnouncementTranslationCacheSoon() {
+                if (announcementTranslationSaveTimerId) {
+                    window.clearTimeout(announcementTranslationSaveTimerId);
+                }
+                announcementTranslationSaveTimerId = window.setTimeout(function () {
+                    announcementTranslationSaveTimerId = null;
+                    try {
+                        window.localStorage.setItem(ANNOUNCEMENT_TRANSLATION_CACHE_KEY, JSON.stringify(announcementTranslationCache));
+                    } catch (err) {
+                        return;
+                    }
+                }, 120);
+            }
+
+            function hasTamilCharacters(text) {
+                return /[\u0B80-\u0BFF]/.test(String(text || ""));
+            }
+
+            function hasLatinCharacters(text) {
+                return /[A-Za-z]/.test(String(text || ""));
+            }
+
+            function shouldTranslateAnnouncementText(text, targetLanguage) {
+                if (!text || String(text).trim().length > 700) {
+                    return false;
+                }
+                if (targetLanguage === "ta") {
+                    return hasLatinCharacters(text);
+                }
+                return hasTamilCharacters(text);
+            }
+
+            function buildAnnouncementTranslationKey(text, targetLanguage) {
+                return String(targetLanguage || "en") + "::" + String(text || "");
+            }
+
+            function extractGoogleTranslatedText(payload) {
+                if (!Array.isArray(payload) || !Array.isArray(payload[0])) {
+                    return "";
+                }
+                var chunks = payload[0].map(function (part) {
+                    return Array.isArray(part) ? String(part[0] || "") : "";
+                }).filter(Boolean);
+                return chunks.join("").trim();
+            }
+
+            function fetchAnnouncementTranslationGoogle(text, targetLanguage) {
+                var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=" +
+                    encodeURIComponent(targetLanguage) +
+                    "&dt=t&q=" + encodeURIComponent(text);
+                return fetch(url, { cache: "no-store" })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Translate request failed");
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        var translated = extractGoogleTranslatedText(payload);
+                        if (!translated) {
+                            throw new Error("Empty translate result");
+                        }
+                        return translated;
+                    });
+            }
+
+            function fetchAnnouncementTranslationMyMemory(text, targetLanguage) {
+                var url = "https://api.mymemory.translated.net/get?q=" +
+                    encodeURIComponent(text) +
+                    "&langpair=auto|" + encodeURIComponent(targetLanguage);
+                return fetch(url, { cache: "no-store" })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Fallback translate failed");
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        var translated = payload && payload.responseData ? String(payload.responseData.translatedText || "").trim() : "";
+                        if (!translated) {
+                            throw new Error("Empty fallback translate result");
+                        }
+                        return translated;
+                    });
+            }
+
+            function requestAnnouncementTranslation(text, targetLanguage) {
+                return fetchAnnouncementTranslationGoogle(text, targetLanguage)
+                    .catch(function () {
+                        return fetchAnnouncementTranslationMyMemory(text, targetLanguage);
+                    })
+                    .catch(function () {
+                        return text;
+                    });
+            }
+
+            function getTranslatedAnnouncementText(text, targetLanguage) {
+                var original = String(text || "").trim();
+                if (!shouldTranslateAnnouncementText(original, targetLanguage)) {
+                    return Promise.resolve(original);
+                }
+                var cacheKey = buildAnnouncementTranslationKey(original, targetLanguage);
+                if (Object.prototype.hasOwnProperty.call(announcementTranslationCache, cacheKey)) {
+                    return Promise.resolve(String(announcementTranslationCache[cacheKey] || original));
+                }
+                if (announcementTranslationPending[cacheKey]) {
+                    return announcementTranslationPending[cacheKey];
+                }
+                announcementTranslationPending[cacheKey] = requestAnnouncementTranslation(original, targetLanguage)
+                    .then(function (translated) {
+                        var finalText = String(translated || "").trim() || original;
+                        announcementTranslationCache[cacheKey] = finalText;
+                        saveAnnouncementTranslationCacheSoon();
+                        delete announcementTranslationPending[cacheKey];
+                        return finalText;
+                    })
+                    .catch(function () {
+                        delete announcementTranslationPending[cacheKey];
+                        return original;
+                    });
+                return announcementTranslationPending[cacheKey];
             }
 
             function localizeEventTitle(title, sourceElement) {
@@ -552,8 +689,13 @@
                 }
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
-                var titleText = isTamilLanguage(announcementsCard) && item.titleTa ? item.titleTa : item.title;
-                var bodyText = isTamilLanguage(announcementsCard) && item.bodyTa ? item.bodyTa : item.body;
+                var isTamil = isTamilLanguage(announcementsCard);
+                var titleText = isTamil
+                    ? (item.titleTa || item.titleTaAuto || item.title)
+                    : (item.title || item.titleEnAuto || item.titleTa || item.titleTaAuto);
+                var bodyText = isTamil
+                    ? (item.bodyTa || item.bodyTaAuto || item.body)
+                    : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
                 var dateText = formatYmdForLocale(item.date, announcementsCard);
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
@@ -579,12 +721,53 @@
 
                 announcementsList.innerHTML = "" +
                     "<li class=\"announcement-carousel-item\">" +
-                    "  <h3>" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p>" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
+                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
                     metaLine +
                     linkLine +
                     controls +
                     "</li>";
+
+                var activeAnnouncementId = String(item.id || "");
+                var activeIndex = announcementCarouselIndex;
+                if (isTamil) {
+                    if (!item.titleTa && !item.titleTaAuto && item.title) {
+                        getTranslatedAnnouncementText(item.title, "ta").then(function (translatedTitle) {
+                            if (!translatedTitle || !announcementsList || activeIndex !== announcementCarouselIndex) {
+                                return;
+                            }
+                            if (String((announcementCarouselItems[announcementCarouselIndex] || {}).id || "") !== activeAnnouncementId) {
+                                return;
+                            }
+                            if (!isTamilLanguage(announcementsCard)) {
+                                return;
+                            }
+                            item.titleTaAuto = translatedTitle;
+                            var titleNode = announcementsList.querySelector(".announcement-title");
+                            if (titleNode) {
+                                titleNode.innerHTML = urgentBadge + NjcEvents.escapeHtml(translatedTitle);
+                            }
+                        });
+                    }
+                    if (!item.bodyTa && !item.bodyTaAuto && item.body) {
+                        getTranslatedAnnouncementText(item.body, "ta").then(function (translatedBody) {
+                            if (!translatedBody || !announcementsList || activeIndex !== announcementCarouselIndex) {
+                                return;
+                            }
+                            if (String((announcementCarouselItems[announcementCarouselIndex] || {}).id || "") !== activeAnnouncementId) {
+                                return;
+                            }
+                            if (!isTamilLanguage(announcementsCard)) {
+                                return;
+                            }
+                            item.bodyTaAuto = translatedBody;
+                            var bodyNode = announcementsList.querySelector(".announcement-body");
+                            if (bodyNode) {
+                                bodyNode.textContent = translatedBody;
+                            }
+                        });
+                    }
+                }
             }
 
             function startAnnouncementsCarousel() {

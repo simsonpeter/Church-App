@@ -1662,7 +1662,8 @@
             });
     }
 
-    function checkNewNoticeNotification(status) {
+    function checkNewNoticeNotification(status, options) {
+        var config = options && typeof options === "object" ? options : {};
         return fetch(ADMIN_NOTICES_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
                 if (response.status === 404) {
@@ -1698,15 +1699,18 @@
                 } catch (err) {
                     previousKey = "";
                 }
+                var hadPreviousKey = Boolean(previousKey);
                 if (!previousKey) {
                     try {
                         window.localStorage.setItem(NOTIFICATION_LAST_NOTICE_KEY, latestKey);
                     } catch (err) {
                         return null;
                     }
-                    return null;
+                    if (!config.allowFirstNotification) {
+                        return null;
+                    }
                 }
-                if (latestKey === previousKey) {
+                if (hadPreviousKey && latestKey === previousKey) {
                     return null;
                 }
                 var compactBody = body.length > 120 ? (body.slice(0, 117) + "...") : body;
@@ -1947,6 +1951,10 @@
         });
         document.addEventListener("njc:admin-broadcast-updated", function () {
             runNotificationChecks();
+        });
+        document.addEventListener("njc:admin-notices-updated", function () {
+            var status = getNotificationStatus();
+            checkNewNoticeNotification(status, { allowFirstNotification: true });
         });
     }
 
