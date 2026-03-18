@@ -2008,6 +2008,7 @@ body.auth-modal-open {
     display: flex;
     gap: 10px;
     align-items: flex-start;
+    cursor: pointer;
 }
 
 .bible-verse-item.highlight {

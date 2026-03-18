@@ -12,6 +12,7 @@
     var nextChapterButton = document.getElementById("bible-next-chapter");
     var ttsToggleButton = document.getElementById("bible-tts-toggle");
     var ttsStopButton = document.getElementById("bible-tts-stop");
+    var shareVerseButton = document.getElementById("bible-verse-share");
     var ttsToggleIcon = ttsToggleButton ? ttsToggleButton.querySelector("i") : null;
     var fullScreenToggleButton = document.getElementById("bible-fullscreen-toggle");
     var fullScreenToggleIcon = fullScreenToggleButton ? fullScreenToggleButton.querySelector("i") : null;
@@ -85,6 +86,7 @@
     var streamErrorCount = 0;
     var prefetchedSegmentIndex = -1;
     var prefetchedSegmentUrl = "";
+    var shareImageBusy = false;
     var miniBiblePlayer = null;
     var miniBibleOpenButton = null;
     var miniBibleTitleNode = null;
@@ -647,6 +649,257 @@
         syncMediaSessionState();
     }
 
+    function getSelectedVersePayload() {
+        var verses = Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses : [];
+        if (!verses.length) {
+            return null;
+        }
+        var verseNumber = getSelectedVerseStart(verses.length);
+        var verseItem = verses[verseNumber - 1] || {};
+        var verseText = String(verseItem && verseItem.Verse || "").replace(/\s+/g, " ").trim();
+        if (!verseText) {
+            return null;
+        }
+        var language = normalizeLanguage(currentSpeechContext.language);
+        var location = currentSpeechContext.location || { book: 0, chapter: 0 };
+        var chapterNumber = Number(location.chapter || 0) + 1;
+        var bookNumber = Number(location.book || 0);
+        return {
+            language: language,
+            verseNumber: verseNumber,
+            chapterNumber: chapterNumber,
+            bookNumber: bookNumber,
+            bookName: getBookName(language, bookNumber),
+            verseText: verseText,
+            reference: getBookName(language, bookNumber) + " " + String(chapterNumber) + ":" + String(verseNumber)
+        };
+    }
+
+    function updateShareControls() {
+        if (!shareVerseButton) {
+            return;
+        }
+        var payload = getSelectedVersePayload();
+        var label = shareImageBusy
+            ? T("bible.shareGenerating", "Generating verse image...")
+            : T("bible.shareImage", "Share verse image");
+        shareVerseButton.disabled = shareImageBusy || !payload;
+        shareVerseButton.title = label;
+        shareVerseButton.setAttribute("aria-label", label);
+    }
+
+    function drawRoundedRect(ctx, x, y, width, height, radius) {
+        var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + width - r, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+        ctx.lineTo(x + width, y + height - r);
+        ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+        ctx.lineTo(x + r, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    function wrapTextToLines(ctx, text, maxWidth, maxLines) {
+        var words = String(text || "").trim().split(/\s+/).filter(Boolean);
+        if (!words.length) {
+            return [];
+        }
+        var lines = [];
+        var line = "";
+        words.forEach(function (word) {
+            var candidate = line ? (line + " " + word) : word;
+            if (ctx.measureText(candidate).width <= maxWidth) {
+                line = candidate;
+                return;
+            }
+            if (line) {
+                lines.push(line);
+            }
+            line = word;
+        });
+        if (line) {
+            lines.push(line);
+        }
+        if (maxLines > 0 && lines.length > maxLines) {
+            var clipped = lines.slice(0, maxLines);
+            var tail = clipped[maxLines - 1];
+            while (tail.length > 3 && ctx.measureText(tail + "...").width > maxWidth) {
+                tail = tail.slice(0, -1).trim();
+            }
+            clipped[maxLines - 1] = tail + "...";
+            return clipped;
+        }
+        return lines;
+    }
+
+    function buildVerseImageBlob(payload) {
+        return new Promise(function (resolve, reject) {
+            var canvas = document.createElement("canvas");
+            canvas.width = 1080;
+            canvas.height = 1350;
+            var ctx = canvas.getContext("2d");
+            if (!ctx) {
+                reject(new Error("canvas-unavailable"));
+                return;
+            }
+
+            var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+            bg.addColorStop(0, "#4f0b0b");
+            bg.addColorStop(0.5, "#8d1f1f");
+            bg.addColorStop(1, "#c74b4b");
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.globalAlpha = 0.18;
+            var glow = ctx.createRadialGradient(840, 260, 20, 840, 260, 520);
+            glow.addColorStop(0, "#ffffff");
+            glow.addColorStop(1, "rgba(255,255,255,0)");
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.globalAlpha = 1;
+
+            drawRoundedRect(ctx, 72, 96, 936, 1158, 44);
+            ctx.fillStyle = "rgba(255,255,255,0.14)";
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.22)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ffe8e8";
+            ctx.font = "700 40px 'Segoe UI', Arial, sans-serif";
+            ctx.fillText("NEW JERUSALEM CHURCH BELGIUM", 540, 186);
+
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.font = "900 132px Georgia, serif";
+            ctx.fillText("“", 190, 332);
+
+            var verseFont = payload.language === "ta"
+                ? "600 58px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                : "600 56px 'Segoe UI', Arial, sans-serif";
+            ctx.font = verseFont;
+            ctx.fillStyle = "#ffffff";
+            var textLines = wrapTextToLines(ctx, payload.verseText, 760, 13);
+            var lineHeight = payload.language === "ta" ? 78 : 74;
+            var textStartY = 340;
+            textLines.forEach(function (line, index) {
+                ctx.fillText(line, 540, textStartY + (index * lineHeight));
+            });
+
+            var refY = Math.min(1050, textStartY + textLines.length * lineHeight + 88);
+            ctx.fillStyle = "#ffe2e2";
+            ctx.font = payload.language === "ta"
+                ? "700 48px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                : "700 48px 'Segoe UI', Arial, sans-serif";
+            ctx.fillText(payload.reference, 540, refY);
+
+            drawRoundedRect(ctx, 322, 1108, 436, 96, 48);
+            ctx.fillStyle = "rgba(255,255,255,0.18)";
+            ctx.fill();
+            ctx.strokeStyle = "rgba(255,255,255,0.26)";
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "600 34px 'Segoe UI', Arial, sans-serif";
+            ctx.fillText("NJC • Verse Card", 540, 1168);
+
+            ctx.fillStyle = "rgba(255,255,255,0.8)";
+            ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
+            ctx.fillText(payload.language === "ta" ? "தமிழ்" : "English", 540, 1238);
+
+            canvas.toBlob(function (blob) {
+                if (!blob) {
+                    reject(new Error("image-generation-failed"));
+                    return;
+                }
+                resolve(blob);
+            }, "image/png");
+        });
+    }
+
+    function downloadBlob(blob, fileName) {
+        var url = URL.createObjectURL(blob);
+        var anchor = document.createElement("a");
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        window.setTimeout(function () {
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }, 0);
+    }
+
+    function slugifyForFileName(value) {
+        return String(value || "verse")
+            .toLowerCase()
+            .replace(/[^\w]+/g, "-")
+            .replace(/^-+|-+$/g, "")
+            .slice(0, 80) || "verse";
+    }
+
+    function shareVerseImage() {
+        if (shareImageBusy) {
+            return;
+        }
+        var payload = getSelectedVersePayload();
+        if (!payload) {
+            setStatus(T("bible.shareNoVerse", "Select a verse first."), true);
+            updateShareControls();
+            return;
+        }
+        shareImageBusy = true;
+        updateShareControls();
+        setStatus(T("bible.shareGenerating", "Generating verse image..."), false);
+        buildVerseImageBlob(payload).then(function (blob) {
+            var fileName = "njc-verse-" + slugifyForFileName(payload.reference) + ".png";
+            var shared = false;
+            if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
+                var file = new File([blob], fileName, { type: "image/png" });
+                var canShareFiles = true;
+                if (typeof navigator.canShare === "function") {
+                    canShareFiles = navigator.canShare({ files: [file] });
+                }
+                if (canShareFiles) {
+                    return navigator.share({
+                        title: payload.reference,
+                        text: payload.reference,
+                        files: [file]
+                    }).then(function () {
+                        shared = true;
+                    }).catch(function (error) {
+                        if (error && error.name === "AbortError") {
+                            throw error;
+                        }
+                    }).then(function () {
+                        if (!shared) {
+                            downloadBlob(blob, fileName);
+                            setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
+                            return;
+                        }
+                        setStatus(T("bible.shareReady", "Verse image ready to share."), false);
+                    });
+                }
+            }
+            downloadBlob(blob, fileName);
+            setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
+            return null;
+        }).catch(function (error) {
+            if (error && error.name === "AbortError") {
+                setStatus(T("bible.shareCancelled", "Share cancelled."), false);
+                return;
+            }
+            setStatus(T("bible.shareError", "Could not generate share image right now."), true);
+        }).finally(function () {
+            shareImageBusy = false;
+            updateShareControls();
+        });
+    }
+
     function releaseWakeLock() {
         if (!screenWakeLock || typeof screenWakeLock.release !== "function") {
             screenWakeLock = null;
@@ -679,6 +932,7 @@
 
     function updateTtsControls() {
         if (!ttsToggleButton || !ttsStopButton) {
+            updateShareControls();
             return;
         }
         if (!speechSupported && !streamSupported) {
@@ -688,6 +942,7 @@
             ttsToggleButton.setAttribute("aria-label", ttsToggleButton.title);
             ttsStopButton.title = ttsToggleButton.title;
             ttsStopButton.setAttribute("aria-label", ttsStopButton.title);
+            updateShareControls();
             return;
         }
         var toggleLabel;
@@ -716,6 +971,7 @@
         ttsStopButton.title = stopLabel;
         ttsStopButton.setAttribute("aria-label", stopLabel);
         ttsStopButton.disabled = !speechState.active && !speechState.paused;
+        updateShareControls();
         refreshMiniBiblePlayer();
     }
 
@@ -973,6 +1229,7 @@
 
     function renderLoading() {
         setStatus(T("bible.loading", "Loading Bible..."), false);
+        updateShareControls();
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.loading", "Loading Bible...")) + "</p>" +
@@ -988,6 +1245,7 @@
         };
         currentSpeechText = "";
         stopSpeechPlayback();
+        updateShareControls();
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.error", "Could not load Bible right now.")) + "</p>" +
@@ -1157,6 +1415,7 @@
                 resetChapterViewPosition();
             }
             updateTtsControls();
+            updateShareControls();
             return;
         }
 
@@ -1306,6 +1565,31 @@
             }
         });
     }
+    verseList.addEventListener("click", function (event) {
+        var target = event.target.closest(".bible-verse-item[data-verse-number]");
+        if (!target) {
+            return;
+        }
+        var verseNumber = Number(target.getAttribute("data-verse-number"));
+        if (!Number.isInteger(verseNumber) || verseNumber <= 0) {
+            return;
+        }
+        if (verseInput) {
+            verseInput.value = String(verseNumber);
+        }
+        verseList.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
+            node.classList.remove("highlight");
+        });
+        target.classList.add("highlight");
+        window.setTimeout(function () {
+            target.classList.remove("highlight");
+        }, 1600);
+        if (!speechState.active) {
+            updateSpeechTextFromSelection();
+        } else {
+            updateShareControls();
+        }
+    });
     if (fullScreenToggleButton) {
         fullScreenToggleButton.addEventListener("click", function () {
             var isOpen = document.body.classList.contains("bible-fullscreen-open");
@@ -1320,6 +1604,11 @@
     if (ttsStopButton) {
         ttsStopButton.addEventListener("click", function () {
             stopSpeechPlayback();
+        });
+    }
+    if (shareVerseButton) {
+        shareVerseButton.addEventListener("click", function () {
+            shareVerseImage();
         });
     }
 
