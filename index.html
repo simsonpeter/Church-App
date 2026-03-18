@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
-    <link rel="icon" type="image/png" href="logo.png?v=20260311cw">
-    <link rel="apple-touch-icon" href="logo.png?v=20260311cw">
-    <link rel="manifest" href="site.webmanifest?v=20260311cw">
-    <link rel="stylesheet" href="styles.css?v=20260311cw">
+    <link rel="icon" type="image/png" href="logo.png?v=20260311cx">
+    <link rel="apple-touch-icon" href="logo.png?v=20260311cx">
+    <link rel="manifest" href="site.webmanifest?v=20260311cx">
+    <link rel="stylesheet" href="styles.css?v=20260311cx">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -560,6 +560,17 @@
             </section>
 
             <section class="card">
+                <h2><i class="fa-solid fa-calendar-check"></i><span data-i18n="admin.eventManageTitle">Recent Events</span></h2>
+                <p class="page-note" data-i18n="admin.eventManageInfo">Edit or delete added events.</p>
+                <ul class="list" id="admin-event-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
                 <h2><i class="fa-solid fa-microphone-lines"></i><span data-i18n="admin.sermonTitle">Add Sermon</span></h2>
                 <form class="prayer-form" id="admin-sermon-form">
                     <input id="admin-sermon-title" class="search-input" type="text" placeholder="Tamil title" data-i18n-placeholder="admin.sermonTitlePlaceholder">
@@ -571,6 +582,17 @@
                     </div>
                     <button class="button-link" id="admin-sermon-submit" type="submit" data-i18n="admin.sermonPublish">Add sermon</button>
                 </form>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-headphones-simple"></i><span data-i18n="admin.sermonManageTitle">Recent Sermons</span></h2>
+                <p class="page-note" data-i18n="admin.sermonManageInfo">Edit or delete added sermons.</p>
+                <ul class="list" id="admin-sermon-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
             </section>
 
             <section class="card">
@@ -749,18 +771,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260311cw"></script>
-    <script src="app-shell.js?v=20260311cw"></script>
-    <script src="events-engine.js?v=20260311cw"></script>
-    <script src="home-page.js?v=20260311cw"></script>
-    <script src="events-page.js?v=20260311cw"></script>
-    <script src="sermons-page.js?v=20260311cw"></script>
-    <script src="bible-page.js?v=20260311cw"></script>
-    <script src="songbook-page.js?v=20260311cw"></script>
-    <script src="contact-page.js?v=20260311cw"></script>
-    <script src="admin-dashboard-page.js?v=20260311cw"></script>
-    <script src="admin-mailbox-page.js?v=20260311cw"></script>
-    <script src="profile-page.js?v=20260311cw"></script>
-    <script src="spa-router.js?v=20260311cw"></script>
+    <script src="user-auth.js?v=20260311cx"></script>
+    <script src="app-shell.js?v=20260311cx"></script>
+    <script src="events-engine.js?v=20260311cx"></script>
+    <script src="home-page.js?v=20260311cx"></script>
+    <script src="events-page.js?v=20260311cx"></script>
+    <script src="sermons-page.js?v=20260311cx"></script>
+    <script src="bible-page.js?v=20260311cx"></script>
+    <script src="songbook-page.js?v=20260311cx"></script>
+    <script src="contact-page.js?v=20260311cx"></script>
+    <script src="admin-dashboard-page.js?v=20260311cx"></script>
+    <script src="admin-mailbox-page.js?v=20260311cx"></script>
+    <script src="profile-page.js?v=20260311cx"></script>
+    <script src="spa-router.js?v=20260311cx"></script>
 </body>
 </html>

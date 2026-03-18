@@ -13,6 +13,8 @@
     var statSermons = document.getElementById("admin-stat-sermons");
     var statUrgentPrayers = document.getElementById("admin-stat-urgent-prayers");
     var noticeList = document.getElementById("admin-notice-list");
+    var eventList = document.getElementById("admin-event-list");
+    var sermonList = document.getElementById("admin-sermon-list");
     var prayerList = document.getElementById("admin-prayer-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
@@ -44,7 +46,7 @@
     var cachedPrayers = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !prayerList || !noticeForm || !eventForm || !sermonForm) {
+    if (!refreshButton || !note || !noticeList || !eventList || !sermonList || !prayerList || !noticeForm || !eventForm || !sermonForm) {
         return;
     }
 
@@ -98,6 +100,12 @@
         eventSubmit.disabled = busy;
         sermonSubmit.disabled = busy;
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+        eventList.querySelectorAll("button[data-admin-event-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+        sermonList.querySelectorAll("button[data-admin-sermon-id]").forEach(function (button) {
             button.disabled = busy;
         });
         prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
@@ -259,8 +267,91 @@
         });
     }
 
+    function renderEventList() {
+        if (!cachedEvents.length) {
+            eventList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.eventEmptyTitle", "No events yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.eventEmptyBody", "Added events will appear here.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = cachedEvents.slice().sort(function (a, b) {
+            var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+            var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+            return bTime.localeCompare(aTime);
+        }).slice(0, 30);
+        eventList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry && entry.id || "").trim();
+            var title = String(entry && entry.title || "").trim();
+            var date = String(entry && entry.date || "").trim();
+            var time = String(entry && entry.time || "").trim();
+            var type = String(entry && entry.type || "").trim();
+            var description = String(entry && entry.description || "").trim();
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(title || T("admin.eventTitle", "Add Event")) + "</h3>" +
+                "  <p class=\"page-note\">" + escapeHtml(date || "-") + (time ? (" • " + escapeHtml(time)) : "") + (type ? (" • " + escapeHtml(type)) : "") + "</p>" +
+                (description ? ("  <p class=\"admin-item-body\">" + escapeHtml(description) + "</p>") : "") +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-event-id=\"" + escapeHtml(id) + "\" data-admin-event-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-event-id=\"" + escapeHtml(id) + "\" data-admin-event-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        eventList.querySelectorAll("button[data-admin-event-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
+    function renderSermonList() {
+        if (!cachedSermons.length) {
+            sermonList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.sermonEmptyTitle", "No sermons yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.sermonEmptyBody", "Added sermons will appear here.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = cachedSermons.slice().sort(function (a, b) {
+            var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+            var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+            return bTime.localeCompare(aTime);
+        }).slice(0, 30);
+        sermonList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry && entry.id || "").trim();
+            var title = String(entry && entry.title || "").trim();
+            var subtitle = String(entry && entry.subtitle || "").trim();
+            var speaker = String(entry && entry.speaker || "").trim();
+            var date = String(entry && entry.date || "").trim();
+            var audioUrl = String(entry && entry.audioUrl || "").trim();
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(title || T("admin.sermonTitle", "Add Sermon")) + "</h3>" +
+                (subtitle ? ("  <p class=\"page-note\">" + escapeHtml(subtitle) + "</p>") : "") +
+                "  <p class=\"page-note\">" + escapeHtml(date || "-") + (speaker ? (" • " + escapeHtml(speaker)) : "") + "</p>" +
+                (audioUrl ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(audioUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(audioUrl) + "</a></p>") : "") +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-sermon-id=\"" + escapeHtml(id) + "\" data-admin-sermon-action=\"edit\">" + escapeHtml(T("admin.sermonEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-sermon-id=\"" + escapeHtml(id) + "\" data-admin-sermon-action=\"delete\">" + escapeHtml(T("admin.sermonDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        sermonList.querySelectorAll("button[data-admin-sermon-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
     function renderDenied() {
         noticeList.innerHTML = "" +
+            "<li>" +
+            "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+            "</li>";
+        eventList.innerHTML = "" +
+            "<li>" +
+            "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+            "</li>";
+        sermonList.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
             "</li>";
@@ -298,9 +389,11 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && cachedPrayers.length && cachedNotices.length + cachedEvents.length + cachedSermons.length > 0) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedEvents.length + cachedSermons.length > 0)) {
             renderStats();
             renderNoticeList();
+            renderEventList();
+            renderSermonList();
             renderPrayerList();
             return;
         }
@@ -320,6 +413,8 @@
             });
             renderStats();
             renderNoticeList();
+            renderEventList();
+            renderSermonList();
             renderPrayerList();
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
@@ -406,6 +501,7 @@
             eventTypeInput.value = "Special";
             eventDescriptionInput.value = "";
             renderStats();
+            renderEventList();
             showNote("success", "admin.eventSaved", "Event added.");
             document.dispatchEvent(new CustomEvent("njc:admin-events-updated"));
         }).catch(function () {
@@ -447,6 +543,7 @@
             sermonDateInput.value = "";
             sermonAudioInput.value = "";
             renderStats();
+            renderSermonList();
             showNote("success", "admin.sermonSaved", "Sermon added.");
             document.dispatchEvent(new CustomEvent("njc:admin-sermons-updated"));
         }).catch(function () {
@@ -537,6 +634,190 @@
         });
     });
 
+    eventList.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-admin-event-id][data-admin-event-action]");
+        if (!button || busy || !isAdminUser()) {
+            return;
+        }
+        var eventId = String(button.getAttribute("data-admin-event-id") || "").trim();
+        var action = String(button.getAttribute("data-admin-event-action") || "").trim();
+        if (!eventId || (action !== "edit" && action !== "delete")) {
+            return;
+        }
+        var source = cachedEvents.slice(0, MAX_ENTRIES);
+        var targetIndex = source.findIndex(function (entry) {
+            return String(entry && entry.id || "").trim() === eventId;
+        });
+        if (targetIndex < 0) {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            return;
+        }
+        if (action === "delete") {
+            var eventConfirmed = window.confirm(T("admin.eventDeleteConfirm", "Delete this event?"));
+            if (!eventConfirmed) {
+                return;
+            }
+            source.splice(targetIndex, 1);
+            setBusyState(true);
+            saveMantleEntries(ADMIN_EVENTS_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_EVENTS_URL);
+            }).then(function (entries) {
+                cachedEvents = Array.isArray(entries) ? entries : [];
+                renderStats();
+                renderEventList();
+                showNote("success", "admin.eventDeleted", "Event deleted.");
+                document.dispatchEvent(new CustomEvent("njc:admin-events-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+            return;
+        }
+        var current = source[targetIndex] || {};
+        var nextTitle = window.prompt(T("admin.eventEditPromptTitle", "Edit event title"), String(current.title || ""));
+        if (nextTitle === null) {
+            return;
+        }
+        var nextDate = window.prompt(T("admin.eventEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
+        if (nextDate === null) {
+            return;
+        }
+        var nextTime = window.prompt(T("admin.eventEditPromptTime", "Edit time (HH:MM)"), String(current.time || "19:00"));
+        if (nextTime === null) {
+            return;
+        }
+        var nextType = window.prompt(T("admin.eventEditPromptType", "Edit type (Special/Recurring)"), String(current.type || "Special"));
+        if (nextType === null) {
+            return;
+        }
+        var nextDescription = window.prompt(T("admin.eventEditPromptDescription", "Edit description"), String(current.description || ""));
+        if (nextDescription === null) {
+            return;
+        }
+        var cleanTitle = String(nextTitle || "").trim();
+        var cleanDate = String(nextDate || "").trim();
+        if (!cleanTitle || !/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+            showNote("validation", "admin.eventNeedFields", "Please enter event title and date.");
+            return;
+        }
+        var cleanType = String(nextType || "").trim().toLowerCase() === "recurring" ? "Recurring" : "Special";
+        source[targetIndex] = Object.assign({}, current, {
+            title: cleanTitle,
+            date: cleanDate,
+            time: String(nextTime || "19:00").trim() || "19:00",
+            type: cleanType,
+            description: String(nextDescription || "").trim(),
+            updatedAt: new Date().toISOString()
+        });
+        setBusyState(true);
+        saveMantleEntries(ADMIN_EVENTS_URL, source).then(function () {
+            return fetchMantleEntries(ADMIN_EVENTS_URL);
+        }).then(function (entries) {
+            cachedEvents = Array.isArray(entries) ? entries : [];
+            renderStats();
+            renderEventList();
+            showNote("success", "admin.eventUpdated", "Event updated.");
+            document.dispatchEvent(new CustomEvent("njc:admin-events-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    sermonList.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-admin-sermon-id][data-admin-sermon-action]");
+        if (!button || busy || !isAdminUser()) {
+            return;
+        }
+        var sermonId = String(button.getAttribute("data-admin-sermon-id") || "").trim();
+        var action = String(button.getAttribute("data-admin-sermon-action") || "").trim();
+        if (!sermonId || (action !== "edit" && action !== "delete")) {
+            return;
+        }
+        var source = cachedSermons.slice(0, MAX_ENTRIES);
+        var targetIndex = source.findIndex(function (entry) {
+            return String(entry && entry.id || "").trim() === sermonId;
+        });
+        if (targetIndex < 0) {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            return;
+        }
+        if (action === "delete") {
+            var sermonConfirmed = window.confirm(T("admin.sermonDeleteConfirm", "Delete this sermon?"));
+            if (!sermonConfirmed) {
+                return;
+            }
+            source.splice(targetIndex, 1);
+            setBusyState(true);
+            saveMantleEntries(ADMIN_SERMONS_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_SERMONS_URL);
+            }).then(function (entries) {
+                cachedSermons = Array.isArray(entries) ? entries : [];
+                renderStats();
+                renderSermonList();
+                showNote("success", "admin.sermonDeleted", "Sermon deleted.");
+                document.dispatchEvent(new CustomEvent("njc:admin-sermons-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+            return;
+        }
+        var current = source[targetIndex] || {};
+        var nextTitle = window.prompt(T("admin.sermonEditPromptTitle", "Edit Tamil title"), String(current.title || ""));
+        if (nextTitle === null) {
+            return;
+        }
+        var nextSubtitle = window.prompt(T("admin.sermonEditPromptSubtitle", "Edit English subtitle"), String(current.subtitle || ""));
+        if (nextSubtitle === null) {
+            return;
+        }
+        var nextSpeaker = window.prompt(T("admin.sermonEditPromptSpeaker", "Edit speaker"), String(current.speaker || ""));
+        if (nextSpeaker === null) {
+            return;
+        }
+        var nextDate = window.prompt(T("admin.sermonEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
+        if (nextDate === null) {
+            return;
+        }
+        var nextAudio = window.prompt(T("admin.sermonEditPromptAudio", "Edit audio URL"), String(current.audioUrl || ""));
+        if (nextAudio === null) {
+            return;
+        }
+        var cleanTitle = String(nextTitle || "").trim();
+        var cleanDate = String(nextDate || "").trim();
+        var cleanAudio = String(nextAudio || "").trim();
+        if (!cleanTitle || !cleanDate || !cleanAudio) {
+            showNote("validation", "admin.sermonNeedFields", "Please enter sermon title, date and audio URL.");
+            return;
+        }
+        source[targetIndex] = Object.assign({}, current, {
+            title: cleanTitle,
+            subtitle: String(nextSubtitle || "").trim(),
+            speaker: String(nextSpeaker || "").trim(),
+            date: cleanDate,
+            audioUrl: cleanAudio,
+            updatedAt: new Date().toISOString()
+        });
+        setBusyState(true);
+        saveMantleEntries(ADMIN_SERMONS_URL, source).then(function () {
+            return fetchMantleEntries(ADMIN_SERMONS_URL);
+        }).then(function (entries) {
+            cachedSermons = Array.isArray(entries) ? entries : [];
+            renderStats();
+            renderSermonList();
+            showNote("success", "admin.sermonUpdated", "Sermon updated.");
+            document.dispatchEvent(new CustomEvent("njc:admin-sermons-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
     prayerList.addEventListener("click", function (event) {
         var button = event.target.closest("button[data-admin-prayer-id]");
         if (!button || busy || !isAdminUser()) {
@@ -593,6 +874,8 @@
         }
         if (isAdminRoute()) {
             renderNoticeList();
+            renderEventList();
+            renderSermonList();
             renderPrayerList();
         }
     });
