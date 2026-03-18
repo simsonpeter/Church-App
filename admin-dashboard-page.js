@@ -12,6 +12,7 @@
     var statEvents = document.getElementById("admin-stat-events");
     var statSermons = document.getElementById("admin-stat-sermons");
     var statUrgentPrayers = document.getElementById("admin-stat-urgent-prayers");
+    var noticeList = document.getElementById("admin-notice-list");
     var prayerList = document.getElementById("admin-prayer-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
@@ -43,7 +44,7 @@
     var cachedPrayers = [];
     var busy = false;
 
-    if (!refreshButton || !note || !prayerList || !noticeForm || !eventForm || !sermonForm) {
+    if (!refreshButton || !note || !noticeList || !prayerList || !noticeForm || !eventForm || !sermonForm) {
         return;
     }
 
@@ -96,6 +97,9 @@
         noticeSubmit.disabled = busy;
         eventSubmit.disabled = busy;
         sermonSubmit.disabled = busy;
+        noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
         prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
             button.disabled = busy;
         });
@@ -218,7 +222,48 @@
         });
     }
 
+    function renderNoticeList() {
+        if (!cachedNotices.length) {
+            noticeList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.noticeEmptyTitle", "No announcements yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.noticeEmptyBody", "Posted announcements will appear here.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = cachedNotices.slice().sort(function (a, b) {
+            var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+            var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+            return bTime.localeCompare(aTime);
+        }).slice(0, 30);
+        noticeList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry && entry.id || "").trim();
+            var title = String(entry && entry.title || "").trim();
+            var body = String(entry && entry.body || "").trim();
+            var link = String(entry && entry.link || "").trim();
+            var urgent = Boolean(entry && entry.urgent);
+            var tagText = urgent ? ("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgent", "Mark as urgent")) + "</span>") : "";
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + " " + tagText + "</h3>" +
+                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"edit\">" + escapeHtml(T("admin.noticeEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"delete\">" + escapeHtml(T("admin.noticeDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
     function renderDenied() {
+        noticeList.innerHTML = "" +
+            "<li>" +
+            "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+            "</li>";
         prayerList.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
@@ -255,6 +300,7 @@
         setFormsEnabled(true);
         if (!force && cachedPrayers.length && cachedNotices.length + cachedEvents.length + cachedSermons.length > 0) {
             renderStats();
+            renderNoticeList();
             renderPrayerList();
             return;
         }
@@ -273,6 +319,7 @@
                 return Boolean(item.id);
             });
             renderStats();
+            renderNoticeList();
             renderPrayerList();
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
@@ -317,6 +364,7 @@
             noticeLinkInput.value = "";
             noticeUrgentInput.checked = false;
             renderStats();
+            renderNoticeList();
             showNote("success", "admin.noticeSaved", "Notice published.");
             document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
         }).catch(function () {
@@ -408,6 +456,87 @@
         });
     });
 
+    noticeList.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-admin-notice-id][data-admin-notice-action]");
+        if (!button || busy || !isAdminUser()) {
+            return;
+        }
+        var noticeId = String(button.getAttribute("data-admin-notice-id") || "").trim();
+        var action = String(button.getAttribute("data-admin-notice-action") || "").trim();
+        if (!noticeId || (action !== "edit" && action !== "delete")) {
+            return;
+        }
+        var source = cachedNotices.slice(0, MAX_ENTRIES);
+        var targetIndex = source.findIndex(function (entry) {
+            return String(entry && entry.id || "").trim() === noticeId;
+        });
+        if (targetIndex < 0) {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            return;
+        }
+        if (action === "delete") {
+            var confirmed = window.confirm(T("admin.noticeDeleteConfirm", "Delete this announcement?"));
+            if (!confirmed) {
+                return;
+            }
+            source.splice(targetIndex, 1);
+            setBusyState(true);
+            saveMantleEntries(ADMIN_NOTICES_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_NOTICES_URL);
+            }).then(function (entries) {
+                cachedNotices = Array.isArray(entries) ? entries : [];
+                renderStats();
+                renderNoticeList();
+                showNote("success", "admin.noticeDeleted", "Announcement deleted.");
+                document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+            return;
+        }
+        var current = source[targetIndex] || {};
+        var nextTitle = window.prompt(T("admin.noticeEditPromptTitle", "Edit title"), String(current.title || ""));
+        if (nextTitle === null) {
+            return;
+        }
+        var nextBody = window.prompt(T("admin.noticeEditPromptBody", "Edit message"), String(current.body || ""));
+        if (nextBody === null) {
+            return;
+        }
+        var nextLink = window.prompt(T("admin.noticeEditPromptLink", "Edit link (optional)"), String(current.link || ""));
+        if (nextLink === null) {
+            return;
+        }
+        var cleanTitle = String(nextTitle || "").trim();
+        var cleanBody = String(nextBody || "").trim();
+        if (!cleanTitle || !cleanBody) {
+            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+            return;
+        }
+        source[targetIndex] = Object.assign({}, current, {
+            title: cleanTitle,
+            body: cleanBody,
+            link: String(nextLink || "").trim(),
+            updatedAt: new Date().toISOString()
+        });
+        setBusyState(true);
+        saveMantleEntries(ADMIN_NOTICES_URL, source).then(function () {
+            return fetchMantleEntries(ADMIN_NOTICES_URL);
+        }).then(function (entries) {
+            cachedNotices = Array.isArray(entries) ? entries : [];
+            renderStats();
+            renderNoticeList();
+            showNote("success", "admin.noticeUpdated", "Announcement updated.");
+            document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
     prayerList.addEventListener("click", function (event) {
         var button = event.target.closest("button[data-admin-prayer-id]");
         if (!button || busy || !isAdminUser()) {
@@ -463,6 +592,7 @@
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
         }
         if (isAdminRoute()) {
+            renderNoticeList();
             renderPrayerList();
         }
     });

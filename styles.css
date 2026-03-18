@@ -2459,6 +2459,20 @@ body.bible-fullscreen-open .offline-badge {
     gap: 8px;
 }
 
+.admin-item-body {
+    margin-bottom: 6px;
+}
+
+.admin-item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-item-actions .button-link {
+    margin-top: 0;
+}
+
 .button-secondary {
     background: var(--surface-soft);
     color: var(--text);
