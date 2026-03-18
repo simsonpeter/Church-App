@@ -699,40 +699,6 @@
         return controls;
     }
 
-    function setLanguageButtonLabel(button) {
-        var nextLanguage = activeLanguage === "ta" ? "en" : "ta";
-        button.textContent = activeLanguage === "ta" ? "EN" : "TA";
-        var label = nextLanguage === "ta"
-            ? t("toggle.language.toTamil", "Switch language to Tamil")
-            : t("toggle.language.toEnglish", "Switch language to English");
-        button.setAttribute("aria-label", label);
-        button.title = label;
-    }
-
-    function setupLanguageToggle() {
-        var header = document.querySelector(".app-header");
-        if (!header || document.getElementById("language-toggle-btn")) {
-            return;
-        }
-
-        var button = document.createElement("button");
-        button.id = "language-toggle-btn";
-        button.className = "lang-toggle";
-        button.type = "button";
-        setLanguageButtonLabel(button);
-
-        button.addEventListener("click", function () {
-            var next = activeLanguage === "ta" ? "en" : "ta";
-            setLanguage(next, true, true);
-        });
-
-        document.addEventListener("njc:langchange", function () {
-            setLanguageButtonLabel(button);
-        });
-
-        ensureHeaderControls(header).appendChild(button);
-    }
-
     function getStoredCardLanguageMap() {
         try {
             var raw = window.localStorage.getItem(CARD_LANGUAGE_MAP_KEY);
@@ -2771,6 +2737,26 @@
         }
 
         var languageButton = document.getElementById("language-toggle-btn");
+        if (!languageButton) {
+            languageButton = document.createElement("button");
+            languageButton.id = "language-toggle-btn";
+            languageButton.className = "lang-toggle";
+            languageButton.type = "button";
+            languageButton.textContent = activeLanguage === "ta" ? "EN" : "TA";
+            languageButton.setAttribute("aria-label", activeLanguage === "ta"
+                ? t("toggle.language.toEnglish", "Switch language to English")
+                : t("toggle.language.toTamil", "Switch language to Tamil"));
+            languageButton.addEventListener("click", function () {
+                var next = activeLanguage === "ta" ? "en" : "ta";
+                setLanguage(next, true, true);
+            });
+            document.addEventListener("njc:langchange", function () {
+                languageButton.textContent = activeLanguage === "ta" ? "EN" : "TA";
+                languageButton.setAttribute("aria-label", activeLanguage === "ta"
+                    ? t("toggle.language.toEnglish", "Switch language to English")
+                    : t("toggle.language.toTamil", "Switch language to Tamil"));
+            });
+        }
         var themeButton = document.getElementById("theme-toggle-btn");
         var notifyButton = document.getElementById("notification-quick-btn");
         if (!languageButton && !themeButton && !notifyButton) {
@@ -3254,7 +3240,6 @@
         if (window.NjcAuth && typeof window.NjcAuth.init === "function") {
             window.NjcAuth.init();
         }
-        setupLanguageToggle();
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();
