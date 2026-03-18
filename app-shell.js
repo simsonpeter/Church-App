@@ -733,6 +733,38 @@
         ensureHeaderControls(header).appendChild(button);
     }
 
+    function setHeaderLanguageQuickButtonLabel(button) {
+        var nextLanguage = activeLanguage === "ta" ? "en" : "ta";
+        var shortCode = nextLanguage.toUpperCase();
+        var label = nextLanguage === "ta"
+            ? t("toggle.language.toTamil", "Switch language to Tamil")
+            : t("toggle.language.toEnglish", "Switch language to English");
+        button.innerHTML = "<i class=\"fa-solid fa-language\" aria-hidden=\"true\"></i><span class=\"header-language-code\">" + shortCode + "</span>";
+        button.setAttribute("aria-label", label);
+        button.title = label;
+    }
+
+    function setupHeaderLanguageQuickButton() {
+        var header = document.querySelector(".app-header");
+        if (!header || document.getElementById("header-language-btn")) {
+            return;
+        }
+        var controls = ensureHeaderControls(header);
+        var button = document.createElement("button");
+        button.id = "header-language-btn";
+        button.className = "notify-toggle header-language-toggle";
+        button.type = "button";
+        setHeaderLanguageQuickButtonLabel(button);
+        button.addEventListener("click", function () {
+            var next = activeLanguage === "ta" ? "en" : "ta";
+            setLanguage(next, true, true);
+        });
+        document.addEventListener("njc:langchange", function () {
+            setHeaderLanguageQuickButtonLabel(button);
+        });
+        controls.appendChild(button);
+    }
+
     function getStoredCardLanguageMap() {
         try {
             var raw = window.localStorage.getItem(CARD_LANGUAGE_MAP_KEY);
@@ -3260,6 +3292,7 @@
         setupNotificationQuickButton();
         setupSettingsPage();
         setupHeaderHamburgerMenu();
+        setupHeaderLanguageQuickButton();
         setupCardLanguageSwitchers();
         setupOfflineBadge();
         showSplashScreenOnce();
