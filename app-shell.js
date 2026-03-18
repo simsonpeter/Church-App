@@ -12,12 +12,14 @@
     var NOTIFICATION_LAST_PRAYER_KEY = "njc_notification_last_prayer_v1";
     var NOTIFICATION_LAST_MAILBOX_KEY = "njc_notification_last_mailbox_v1";
     var NOTIFICATION_LAST_NOTICE_KEY = "njc_notification_last_notice_v1";
+    var NOTIFICATION_LAST_BROADCAST_KEY = "njc_notification_last_broadcast_v1";
     var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var CONTACT_FORM_FEED_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
     var ADMIN_NOTICES_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+    var ADMIN_BROADCASTS_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var activeLanguage = "en";
     var notificationIntervalId = null;
@@ -311,6 +313,7 @@
         "notify.newPrayerTitle": "புதிய ஜெப வேண்டுதல் வந்துள்ளது",
         "notify.newMailboxTitle": "புதிய செய்தி வந்துள்ளது",
         "notify.newNoticeTitle": "புதிய அறிவிப்பு வந்துள்ளது",
+        "notify.newBroadcastTitle": "புதிய ஒலிபரப்பு செய்தி வந்துள்ளது",
         "notify.menuInbox": "அறிவிப்புகள்",
         "notify.unread": "படிக்காதவை",
         "notify.noneTitle": "புதிய அறிவிப்புகள் இல்லை",
@@ -440,6 +443,32 @@
         "admin.noticeDeleted": "அறிவிப்பு நீக்கப்பட்டது.",
         "admin.noticeEmptyTitle": "அறிவிப்புகள் இல்லை",
         "admin.noticeEmptyBody": "நீங்கள் வெளியிட்ட அறிவிப்புகள் இங்கே தோன்றும்.",
+        "admin.broadcastTitle": "அறிவிப்பு ஒலிபரப்பு",
+        "admin.broadcastInfo": "ஒரு செய்தியை எழுதி வகைபடி எல்லா பயனர்களுக்கும் அனுப்புங்கள்.",
+        "admin.broadcastTitlePlaceholder": "ஒலிபரப்பு தலைப்பு",
+        "admin.broadcastBodyPlaceholder": "ஒலிபரப்பு செய்தி",
+        "admin.broadcastLinkPlaceholder": "விருப்ப வழிநடத்தல் இணைப்பு (#events அல்லது https://...)",
+        "admin.broadcastSend": "ஒலிபரப்பை அனுப்பு",
+        "admin.broadcastRecentTitle": "சமீப ஒலிபரப்புகள்",
+        "admin.broadcastRecentInfo": "பயனர்களுக்கு அனுப்பிய சமீப செய்திகள்.",
+        "admin.broadcastCategoryGeneral": "பொது",
+        "admin.broadcastCategoryEvents": "நிகழ்வுகள்",
+        "admin.broadcastCategorySermons": "பிரசங்கங்கள்",
+        "admin.broadcastCategoryPrayer": "ஜெபம்",
+        "admin.broadcastCategoryContact": "தொடர்பு",
+        "admin.broadcastNeedFields": "ஒலிபரப்பு தலைப்பு மற்றும் செய்தியை உள்ளிடவும்.",
+        "admin.broadcastSaved": "ஒலிபரப்பு அனுப்பப்பட்டது.",
+        "admin.broadcastEmptyTitle": "ஒலிபரப்புகள் இல்லை",
+        "admin.broadcastEmptyBody": "நீங்கள் அனுப்பிய ஒலிபரப்புகள் இங்கே தோன்றும்.",
+        "admin.broadcastEdit": "திருத்து",
+        "admin.broadcastDelete": "நீக்கு",
+        "admin.broadcastDeleteConfirm": "இந்த ஒலிபரப்பை நீக்கவா?",
+        "admin.broadcastEditPromptTitle": "தலைப்பை திருத்து",
+        "admin.broadcastEditPromptBody": "செய்தியை திருத்து",
+        "admin.broadcastEditPromptCategory": "வகையை திருத்து (general/events/sermons/prayer/contact)",
+        "admin.broadcastEditPromptUrl": "இலக்கு இணைப்பை திருத்து",
+        "admin.broadcastUpdated": "ஒலிபரப்பு புதுப்பிக்கப்பட்டது.",
+        "admin.broadcastDeleted": "ஒலிபரப்பு நீக்கப்பட்டது.",
         "admin.eventTitle": "நிகழ்வு சேர்க்க",
         "admin.eventTitlePlaceholder": "நிகழ்வு தலைப்பு",
         "admin.eventDescriptionPlaceholder": "விளக்கம்",
@@ -1323,6 +1352,59 @@
             });
     }
 
+    function normalizeBroadcastCategory(value) {
+        var key = String(value || "").trim().toLowerCase();
+        if (key === "events" || key === "sermons" || key === "prayer" || key === "contact") {
+            return key;
+        }
+        return "general";
+    }
+
+    function getBroadcastRouteForCategory(category) {
+        var key = normalizeBroadcastCategory(category);
+        if (key === "events") {
+            return "#events";
+        }
+        if (key === "sermons") {
+            return "#sermons";
+        }
+        if (key === "prayer") {
+            return "#prayer";
+        }
+        if (key === "contact") {
+            return "#contact";
+        }
+        return "#home";
+    }
+
+    function normalizeBroadcastTargetUrl(value, category) {
+        var raw = String(value || "").trim();
+        if (/^https?:\/\//i.test(raw)) {
+            return raw;
+        }
+        if (/^#[a-z0-9/_-]*$/i.test(raw)) {
+            return raw;
+        }
+        return getBroadcastRouteForCategory(category);
+    }
+
+    function getBroadcastCategoryLabel(category) {
+        var key = normalizeBroadcastCategory(category);
+        if (key === "events") {
+            return t("admin.broadcastCategoryEvents", "Events");
+        }
+        if (key === "sermons") {
+            return t("admin.broadcastCategorySermons", "Sermons");
+        }
+        if (key === "prayer") {
+            return t("admin.broadcastCategoryPrayer", "Prayer");
+        }
+        if (key === "contact") {
+            return t("admin.broadcastCategoryContact", "Contact");
+        }
+        return t("admin.broadcastCategoryGeneral", "General");
+    }
+
     function checkNewSermonNotification(status) {
         return fetch(SERMONS_FEED_URL)
             .then(function (response) {
@@ -1663,6 +1745,96 @@
             });
     }
 
+    function checkNewBroadcastNotification(status) {
+        return fetch(ADMIN_BROADCASTS_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (response) {
+                if (response.status === 404) {
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error("Unable to load broadcasts");
+                }
+                return response.json().then(function (payload) {
+                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                });
+            })
+            .then(function (entries) {
+                if (!entries.length) {
+                    return null;
+                }
+                var sorted = entries.slice().sort(function (a, b) {
+                    var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+                    var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+                    return bTime.localeCompare(aTime);
+                });
+                var latest = sorted[0] || {};
+                var title = String(latest.title || "").trim();
+                var body = String(latest.body || "").trim();
+                var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
+                if (!latestTime || !title) {
+                    return null;
+                }
+                var latestKey = String(latest.id || "") + "|" + latestTime + "|" + title.slice(0, 80);
+                var previousKey = "";
+                try {
+                    previousKey = window.localStorage.getItem(NOTIFICATION_LAST_BROADCAST_KEY) || "";
+                } catch (err) {
+                    previousKey = "";
+                }
+                if (!previousKey) {
+                    try {
+                        window.localStorage.setItem(NOTIFICATION_LAST_BROADCAST_KEY, latestKey);
+                    } catch (err) {
+                        return null;
+                    }
+                    return null;
+                }
+                if (latestKey === previousKey) {
+                    return null;
+                }
+                var category = normalizeBroadcastCategory(latest.category);
+                var categoryLabel = getBroadcastCategoryLabel(category);
+                var targetUrl = normalizeBroadcastTargetUrl(latest.url, category);
+                var bodyText = body || title;
+                var decoratedBody = categoryLabel
+                    ? ("[" + categoryLabel + "] " + bodyText)
+                    : bodyText;
+                var compactBody = decoratedBody.length > 120 ? (decoratedBody.slice(0, 117) + "...") : decoratedBody;
+                var notifyKey = "broadcast:" + latestKey;
+                addInAppNotification({
+                    id: notifyKey,
+                    kind: "broadcast",
+                    title: title || t("notify.newBroadcastTitle", "New broadcast message"),
+                    body: compactBody,
+                    url: targetUrl,
+                    createdAt: Date.now()
+                });
+                try {
+                    window.localStorage.setItem(NOTIFICATION_LAST_BROADCAST_KEY, latestKey);
+                } catch (err) {
+                    return null;
+                }
+                var canPush = Boolean(status && status.enabled && status.supported && status.permission === "granted");
+                if (!canPush || wasNotified(notifyKey)) {
+                    return null;
+                }
+                return showNotification({
+                    title: title || t("notify.newBroadcastTitle", "New broadcast message"),
+                    body: compactBody,
+                    tag: notifyKey,
+                    url: targetUrl
+                }).then(function (sent) {
+                    if (sent) {
+                        markAsNotified(notifyKey);
+                    }
+                    return null;
+                });
+            })
+            .catch(function () {
+                return null;
+            });
+    }
+
     function runNotificationChecks() {
         var status = getNotificationStatus();
         if (status.supported && status.enabled && status.permission === "granted") {
@@ -1672,6 +1844,7 @@
         checkNewPrayerNotification(status);
         checkNewMailboxNotification(status);
         checkNewNoticeNotification(status);
+        checkNewBroadcastNotification(status);
     }
 
     function startNotificationLoop() {
@@ -1770,6 +1943,9 @@
             }
         });
         document.addEventListener("njc:authchange", function () {
+            runNotificationChecks();
+        });
+        document.addEventListener("njc:admin-broadcast-updated", function () {
             runNotificationChecks();
         });
     }
@@ -2255,6 +2431,8 @@
                     iconClass = "fa-envelope";
                 } else if (item.kind === "notice") {
                     iconClass = "fa-bullhorn";
+                } else if (item.kind === "broadcast") {
+                    iconClass = "fa-tower-broadcast";
                 }
                 var readClass = item.read ? "notification-center-item" : "notification-center-item unread";
                 return "" +

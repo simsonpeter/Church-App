@@ -1,6 +1,7 @@
 (function () {
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var ADMIN_NOTICES_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+    var ADMIN_BROADCASTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
     var ADMIN_EVENTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
     var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
@@ -13,6 +14,7 @@
     var statSermons = document.getElementById("admin-stat-sermons");
     var statUrgentPrayers = document.getElementById("admin-stat-urgent-prayers");
     var noticeList = document.getElementById("admin-notice-list");
+    var broadcastList = document.getElementById("admin-broadcast-list");
     var eventList = document.getElementById("admin-event-list");
     var sermonList = document.getElementById("admin-sermon-list");
     var prayerList = document.getElementById("admin-prayer-list");
@@ -23,6 +25,13 @@
     var noticeLinkInput = document.getElementById("admin-notice-link");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeSubmit = document.getElementById("admin-notice-submit");
+
+    var broadcastForm = document.getElementById("admin-broadcast-form");
+    var broadcastTitleInput = document.getElementById("admin-broadcast-title");
+    var broadcastBodyInput = document.getElementById("admin-broadcast-body");
+    var broadcastCategoryInput = document.getElementById("admin-broadcast-category");
+    var broadcastLinkInput = document.getElementById("admin-broadcast-link");
+    var broadcastSubmit = document.getElementById("admin-broadcast-submit");
 
     var eventForm = document.getElementById("admin-event-form");
     var eventTitleInput = document.getElementById("admin-event-title");
@@ -41,12 +50,13 @@
     var sermonSubmit = document.getElementById("admin-sermon-submit");
 
     var cachedNotices = [];
+    var cachedBroadcasts = [];
     var cachedEvents = [];
     var cachedSermons = [];
     var cachedPrayers = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !eventList || !sermonList || !prayerList || !noticeForm || !eventForm || !sermonForm) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !noticeForm || !broadcastForm || !eventForm || !sermonForm) {
         return;
     }
 
@@ -97,9 +107,13 @@
         busy = Boolean(value);
         refreshButton.disabled = busy;
         noticeSubmit.disabled = busy;
+        broadcastSubmit.disabled = busy;
         eventSubmit.disabled = busy;
         sermonSubmit.disabled = busy;
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+        broadcastList.querySelectorAll("button[data-admin-broadcast-id]").forEach(function (button) {
             button.disabled = busy;
         });
         eventList.querySelectorAll("button[data-admin-event-id]").forEach(function (button) {
@@ -142,6 +156,62 @@
         var m = String(date.getMonth() + 1).padStart(2, "0");
         var d = String(date.getDate()).padStart(2, "0");
         return String(y) + "-" + m + "-" + d;
+    }
+
+    function normalizeBroadcastCategory(value) {
+        var key = String(value || "").trim().toLowerCase();
+        if (key === "events" || key === "sermons" || key === "prayer" || key === "contact") {
+            return key;
+        }
+        return "general";
+    }
+
+    function getBroadcastDefaultUrl(category) {
+        var key = normalizeBroadcastCategory(category);
+        if (key === "events") {
+            return "#events";
+        }
+        if (key === "sermons") {
+            return "#sermons";
+        }
+        if (key === "prayer") {
+            return "#prayer";
+        }
+        if (key === "contact") {
+            return "#contact";
+        }
+        return "#home";
+    }
+
+    function normalizeBroadcastUrl(value, category) {
+        var raw = String(value || "").trim();
+        if (!raw) {
+            return getBroadcastDefaultUrl(category);
+        }
+        if (/^https?:\/\//i.test(raw)) {
+            return raw;
+        }
+        if (/^#[a-z0-9/_-]*$/i.test(raw)) {
+            return raw;
+        }
+        return getBroadcastDefaultUrl(category);
+    }
+
+    function getBroadcastCategoryLabel(category) {
+        var key = normalizeBroadcastCategory(category);
+        if (key === "events") {
+            return T("admin.broadcastCategoryEvents", "Events");
+        }
+        if (key === "sermons") {
+            return T("admin.broadcastCategorySermons", "Sermons");
+        }
+        if (key === "prayer") {
+            return T("admin.broadcastCategoryPrayer", "Prayer");
+        }
+        if (key === "contact") {
+            return T("admin.broadcastCategoryContact", "Contact");
+        }
+        return T("admin.broadcastCategoryGeneral", "General");
     }
 
     function normalizePrayerEntry(entry, index) {
@@ -267,6 +337,43 @@
         });
     }
 
+    function renderBroadcastList() {
+        if (!cachedBroadcasts.length) {
+            broadcastList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.broadcastEmptyTitle", "No broadcasts yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.broadcastEmptyBody", "Sent broadcasts will appear here.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = cachedBroadcasts.slice().sort(function (a, b) {
+            var aTime = String((a && (a.updatedAt || a.createdAt || a.date)) || "");
+            var bTime = String((b && (b.updatedAt || b.createdAt || b.date)) || "");
+            return bTime.localeCompare(aTime);
+        }).slice(0, 30);
+        broadcastList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry && entry.id || "").trim();
+            var title = String(entry && entry.title || "").trim();
+            var body = String(entry && entry.body || "").trim();
+            var category = normalizeBroadcastCategory(entry && entry.category);
+            var url = normalizeBroadcastUrl(entry && entry.url, category);
+            var categoryLabel = getBroadcastCategoryLabel(category);
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(title || T("admin.broadcastTitle", "Broadcast Notifications")) + " <span class=\"prayer-list-urgent-badge\">" + escapeHtml(categoryLabel) + "</span></h3>" +
+                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                "  <p class=\"page-note\">" + escapeHtml(url) + "</p>" +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-broadcast-id=\"" + escapeHtml(id) + "\" data-admin-broadcast-action=\"edit\">" + escapeHtml(T("admin.broadcastEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-broadcast-id=\"" + escapeHtml(id) + "\" data-admin-broadcast-action=\"delete\">" + escapeHtml(T("admin.broadcastDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        broadcastList.querySelectorAll("button[data-admin-broadcast-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
     function renderEventList() {
         if (!cachedEvents.length) {
             eventList.innerHTML = "" +
@@ -347,6 +454,10 @@
             "<li>" +
             "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
             "</li>";
+        broadcastList.innerHTML = "" +
+            "<li>" +
+            "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+            "</li>";
         eventList.innerHTML = "" +
             "<li>" +
             "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
@@ -370,6 +481,9 @@
         noticeForm.querySelectorAll("input,textarea,button").forEach(function (node) {
             node.disabled = !active;
         });
+        broadcastForm.querySelectorAll("input,textarea,select,button").forEach(function (node) {
+            node.disabled = !active;
+        });
         eventForm.querySelectorAll("input,textarea,select,button").forEach(function (node) {
             node.disabled = !active;
         });
@@ -389,9 +503,10 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedEvents.length + cachedSermons.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length > 0)) {
             renderStats();
             renderNoticeList();
+            renderBroadcastList();
             renderEventList();
             renderSermonList();
             renderPrayerList();
@@ -401,18 +516,21 @@
         clearNote();
         Promise.all([
             fetchMantleEntries(ADMIN_NOTICES_URL),
+            fetchMantleEntries(ADMIN_BROADCASTS_URL),
             fetchMantleEntries(ADMIN_EVENTS_URL),
             fetchMantleEntries(ADMIN_SERMONS_URL),
             fetchMantleEntries(PRAYER_WALL_URL)
         ]).then(function (result) {
             cachedNotices = Array.isArray(result[0]) ? result[0] : [];
-            cachedEvents = Array.isArray(result[1]) ? result[1] : [];
-            cachedSermons = Array.isArray(result[2]) ? result[2] : [];
-            cachedPrayers = (Array.isArray(result[3]) ? result[3] : []).map(normalizePrayerEntry).filter(function (item) {
+            cachedBroadcasts = Array.isArray(result[1]) ? result[1] : [];
+            cachedEvents = Array.isArray(result[2]) ? result[2] : [];
+            cachedSermons = Array.isArray(result[3]) ? result[3] : [];
+            cachedPrayers = (Array.isArray(result[4]) ? result[4] : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item.id);
             });
             renderStats();
             renderNoticeList();
+            renderBroadcastList();
             renderEventList();
             renderSermonList();
             renderPrayerList();
@@ -462,6 +580,44 @@
             renderNoticeList();
             showNote("success", "admin.noticeSaved", "Notice published.");
             document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    broadcastForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var title = String(broadcastTitleInput.value || "").trim();
+        var body = String(broadcastBodyInput.value || "").trim();
+        var category = normalizeBroadcastCategory(broadcastCategoryInput.value);
+        var url = normalizeBroadcastUrl(broadcastLinkInput.value, category);
+        if (!title || !body) {
+            showNote("validation", "admin.broadcastNeedFields", "Please enter broadcast title and message.");
+            return;
+        }
+        setBusyState(true);
+        prependAndSave(ADMIN_BROADCASTS_URL, cachedBroadcasts, {
+            id: makeEntryId("broadcast"),
+            title: title,
+            body: body,
+            category: category,
+            url: url,
+            createdAt: new Date().toISOString(),
+            createdByEmail: normalizeEmail(getUser() && getUser().email)
+        }).then(function (entries) {
+            cachedBroadcasts = Array.isArray(entries) ? entries : [];
+            broadcastTitleInput.value = "";
+            broadcastBodyInput.value = "";
+            broadcastCategoryInput.value = "general";
+            broadcastLinkInput.value = "";
+            renderBroadcastList();
+            showNote("success", "admin.broadcastSaved", "Broadcast sent.");
+            document.dispatchEvent(new CustomEvent("njc:admin-broadcast-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
         }).finally(function () {
@@ -627,6 +783,91 @@
             renderNoticeList();
             showNote("success", "admin.noticeUpdated", "Announcement updated.");
             document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    broadcastList.addEventListener("click", function (event) {
+        var button = event.target.closest("button[data-admin-broadcast-id][data-admin-broadcast-action]");
+        if (!button || busy || !isAdminUser()) {
+            return;
+        }
+        var broadcastId = String(button.getAttribute("data-admin-broadcast-id") || "").trim();
+        var action = String(button.getAttribute("data-admin-broadcast-action") || "").trim();
+        if (!broadcastId || (action !== "edit" && action !== "delete")) {
+            return;
+        }
+        var source = cachedBroadcasts.slice(0, MAX_ENTRIES);
+        var targetIndex = source.findIndex(function (entry) {
+            return String(entry && entry.id || "").trim() === broadcastId;
+        });
+        if (targetIndex < 0) {
+            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            return;
+        }
+        if (action === "delete") {
+            var confirmed = window.confirm(T("admin.broadcastDeleteConfirm", "Delete this broadcast?"));
+            if (!confirmed) {
+                return;
+            }
+            source.splice(targetIndex, 1);
+            setBusyState(true);
+            saveMantleEntries(ADMIN_BROADCASTS_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_BROADCASTS_URL);
+            }).then(function (entries) {
+                cachedBroadcasts = Array.isArray(entries) ? entries : [];
+                renderBroadcastList();
+                showNote("success", "admin.broadcastDeleted", "Broadcast deleted.");
+                document.dispatchEvent(new CustomEvent("njc:admin-broadcast-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+            return;
+        }
+        var current = source[targetIndex] || {};
+        var nextTitle = window.prompt(T("admin.broadcastEditPromptTitle", "Edit title"), String(current.title || ""));
+        if (nextTitle === null) {
+            return;
+        }
+        var nextBody = window.prompt(T("admin.broadcastEditPromptBody", "Edit message"), String(current.body || ""));
+        if (nextBody === null) {
+            return;
+        }
+        var nextCategory = window.prompt(T("admin.broadcastEditPromptCategory", "Edit category (general/events/sermons/prayer/contact)"), String(current.category || "general"));
+        if (nextCategory === null) {
+            return;
+        }
+        var nextUrl = window.prompt(T("admin.broadcastEditPromptUrl", "Edit target route/link"), String(current.url || ""));
+        if (nextUrl === null) {
+            return;
+        }
+        var cleanTitle = String(nextTitle || "").trim();
+        var cleanBody = String(nextBody || "").trim();
+        var cleanCategory = normalizeBroadcastCategory(nextCategory);
+        if (!cleanTitle || !cleanBody) {
+            showNote("validation", "admin.broadcastNeedFields", "Please enter broadcast title and message.");
+            return;
+        }
+        source[targetIndex] = Object.assign({}, current, {
+            title: cleanTitle,
+            body: cleanBody,
+            category: cleanCategory,
+            url: normalizeBroadcastUrl(nextUrl, cleanCategory),
+            updatedAt: new Date().toISOString()
+        });
+        setBusyState(true);
+        saveMantleEntries(ADMIN_BROADCASTS_URL, source).then(function () {
+            return fetchMantleEntries(ADMIN_BROADCASTS_URL);
+        }).then(function (entries) {
+            cachedBroadcasts = Array.isArray(entries) ? entries : [];
+            renderBroadcastList();
+            showNote("success", "admin.broadcastUpdated", "Broadcast updated.");
+            document.dispatchEvent(new CustomEvent("njc:admin-broadcast-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
         }).finally(function () {
@@ -861,19 +1102,19 @@
     });
 
     document.addEventListener("njc:langchange", function () {
-        if (note.hidden) {
-            return;
-        }
-        var state = note.dataset.state || "";
-        if (state === "success") {
-            showNote("success", "admin.saved", "Saved.");
-        } else if (state === "validation") {
-            showNote("validation", "admin.validation", "Please fill required fields.");
-        } else if (state === "error") {
-            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+        if (!note.hidden) {
+            var state = note.dataset.state || "";
+            if (state === "success") {
+                showNote("success", "admin.saved", "Saved.");
+            } else if (state === "validation") {
+                showNote("validation", "admin.validation", "Please fill required fields.");
+            } else if (state === "error") {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }
         }
         if (isAdminRoute()) {
             renderNoticeList();
+            renderBroadcastList();
             renderEventList();
             renderSermonList();
             renderPrayerList();
