@@ -1280,7 +1280,9 @@ body.songbook-fullscreen-open .offline-badge {
     box-shadow: -14px 0 28px rgba(40, 12, 12, 0.28);
     padding: calc(12px + env(safe-area-inset-top)) 14px calc(12px + env(safe-area-inset-bottom));
     width: min(300px, 50vw);
+    overflow-x: hidden;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     display: grid;
     align-content: start;
     gap: 10px;
