@@ -8,7 +8,7 @@
 
 ## Signing
 
-The signing key (`jayathasoft.keystore`) is shared from [Tcradios_new](https://github.com/simsonpeter/Tcradios_new).
+The release signing key (`jayathasoft.keystore`) is from [Tcradios_new](https://github.com/simsonpeter/Tcradios_new) — used only for signing, not branding. All icons and app name are NJC/Church App.
 
 ### Option A: keystore.properties (local build)
 
