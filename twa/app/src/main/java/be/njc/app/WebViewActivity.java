@@ -38,6 +38,8 @@ public class WebViewActivity extends Activity {
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
         settings.setMediaPlaybackRequiresUserGesture(false);
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE);
 
         webView.loadUrl(url);
         setContentView(webView);
