@@ -1,0 +1,65 @@
+{
+  "packageId": "com.jayathasoft.tcradios.app",
+  "host": "tcradios-new.vercel.app",
+  "name": "TC RADIOS",
+  "launcherName": "TC RADIOS",
+  "display": "standalone",
+  "themeColor": "#F97316",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/index.html",
+  "iconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
+  "maskableIconUrl": "https://tcradios-new.vercel.app/icons/icon-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "/home/simsonpeter/github/tcradios/Tcradios_new/twa/jayathasoft.keystore",
+    "alias": "jayathasoft-keystore"
+  },
+  "appVersionName": "Android Auto",
+  "appVersionCode": 29,
+  "shortcuts": [
+    {
+      "name": "Play Last Station",
+      "shortName": "Resume",
+      "url": "https://tcradios-new.vercel.app/?action=resume",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    },
+    {
+      "name": "Favorites",
+      "shortName": "Favorites",
+      "url": "https://tcradios-new.vercel.app/?tab=fav",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    },
+    {
+      "name": "Quick Play",
+      "shortName": "Play",
+      "url": "https://tcradios-new.vercel.app/?action=quickplay",
+      "chosenIconUrl": "https://tcradios-new.vercel.app/icons/icon-192x192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://tcradios-new.vercel.app/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://tcradios-new.vercel.app/",
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "appVersion": "cool"
+}
