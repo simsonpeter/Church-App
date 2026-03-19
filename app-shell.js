@@ -369,7 +369,7 @@
         "contact.prayerWallMessagePlaceholder": "ஜெப வேண்டுதல் எழுதுங்கள்",
         "contact.prayerWallAnonymousLabel": "அடையாளமில்லாமல் பகிர்",
         "contact.prayerWallUrgentLabel": "அவசர வேண்டுதல்",
-        "contact.prayerWallPastorOnlyLabel": "மந்திரிக்கு மட்டும் (நிர்வாகிக்கு மட்டும் தெரியும்)",
+        "contact.prayerWallPastorOnlyLabel": "மந்திரிக்கு மட்டும் (மந்திரிக்கு மட்டும் தெரியும்)",
         "contact.prayerWallPastorOnlyBadge": "மந்திரிக்கு மட்டும்",
         "contact.prayerWallUrgentBadge": "அவசரம்",
         "contact.prayerWallUrgentRibbon": "அவசர ஜெபம்",

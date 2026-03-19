@@ -241,6 +241,18 @@
                 return Boolean(currentEmail) && currentEmail === normalizeEmail(ADMIN_EMAIL);
             }
 
+            function canSeePastorOnlyEntry(entry) {
+                if (isAdminUser()) {
+                    return true;
+                }
+                var activeUser = getCurrentUser();
+                var currentUid = String(activeUser && activeUser.uid || "").trim();
+                if (!currentUid) {
+                    return false;
+                }
+                return currentUid === String(entry && entry.createdByUid || "").trim();
+            }
+
             function loadPrayerTranslationCache() {
                 try {
                     var raw = window.localStorage.getItem(PRAYER_TRANSLATION_CACHE_KEY);
@@ -664,7 +676,7 @@
                     }
                 }
                 if (prayerDetailPastorOnlyBadge) {
-                    prayerDetailPastorOnlyBadge.hidden = !(entry.pastorOnly && isAdminUser());
+                    prayerDetailPastorOnlyBadge.hidden = !(entry.pastorOnly && canSeePastorOnlyEntry(entry));
                     var pastorOnlyLabelText = T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard);
                     prayerDetailPastorOnlyBadge.setAttribute("title", pastorOnlyLabelText);
                     var pastorOnlyLabelNode = prayerDetailPastorOnlyBadge.querySelector("span");
@@ -881,9 +893,9 @@
                     return;
                 }
 
-                var visibleEntries = isAdminUser()
-                    ? prayerWallEntries
-                    : prayerWallEntries.filter(function (e) { return !e.pastorOnly; });
+                var visibleEntries = prayerWallEntries.filter(function (e) {
+                    return !e.pastorOnly || canSeePastorOnlyEntry(e);
+                });
                 var sortedEntries = getSortedPrayerEntries(visibleEntries).slice(0, 40);
                 if (activePrayerTab === "urgent" && !hasUrgentPrayerEntries(sortedEntries)) {
                     setActivePrayerTab("other");
@@ -926,7 +938,7 @@
                     var urgentRibbon = entry.urgent
                         ? ("<span class=\"prayer-list-corner-ribbon\">" + escapeHtml(urgentRibbonText) + "</span>")
                         : "";
-                    var pastorOnlyBadge = entry.pastorOnly && isAdminUser()
+                    var pastorOnlyBadge = entry.pastorOnly && canSeePastorOnlyEntry(entry)
                         ? ("<span class=\"prayer-list-pastor-only-badge\"><i class=\"fa-solid fa-lock\" aria-hidden=\"true\"></i>" + escapeHtml(T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard)) + "</span>")
                         : "";
                     return "" +
