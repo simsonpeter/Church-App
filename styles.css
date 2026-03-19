@@ -2704,6 +2704,24 @@ body.bible-fullscreen-open .offline-badge {
     font-size: 0.58rem;
 }
 
+.prayer-list-pastor-only-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #5a4a4a;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
+}
+
+.prayer-list-pastor-only-badge i {
+    font-size: 0.58rem;
+}
+
 body.prayer-detail-open {
     overflow: hidden;
 }
@@ -2778,6 +2796,7 @@ body.prayer-detail-open {
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
 }
 
 .prayer-detail-message {
@@ -2807,6 +2826,20 @@ body.prayer-detail-open {
     background: linear-gradient(145deg, #ff7a18, #ff3c3c);
     border: 1px solid rgba(255, 255, 255, 0.45);
     box-shadow: 0 4px 12px rgba(185, 22, 22, 0.35);
+}
+
+.prayer-detail-pastor-only-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #5a4a4a;
+    background: var(--surface-soft);
+    border: 1px solid var(--line);
 }
 
 .prayer-detail-actions {

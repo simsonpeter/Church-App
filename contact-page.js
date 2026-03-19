@@ -9,6 +9,7 @@
             var prayerWallMessage = document.getElementById("prayer-wall-message");
             var prayerWallAnonymous = document.getElementById("prayer-wall-anonymous");
             var prayerWallUrgent = document.getElementById("prayer-wall-urgent");
+            var prayerWallPastorOnly = document.getElementById("prayer-wall-pastor-only");
             var prayerWallOpenButton = document.getElementById("prayer-wall-open-btn");
             var prayerWallCancelButton = document.getElementById("prayer-wall-cancel-btn");
             var prayerWallNote = document.getElementById("prayer-wall-note");
@@ -24,6 +25,7 @@
             var prayerDetailMessage = document.getElementById("prayer-detail-message");
             var prayerDetailDate = document.getElementById("prayer-detail-date");
             var prayerDetailUrgentBadge = document.getElementById("prayer-detail-urgent");
+            var prayerDetailPastorOnlyBadge = document.getElementById("prayer-detail-pastor-only");
             var prayerDetailPrayButton = document.getElementById("prayer-detail-pray");
             var prayerDetailAnsweredButton = document.getElementById("prayer-detail-answered");
             var prayerDetailThankButton = document.getElementById("prayer-detail-thank");
@@ -507,6 +509,7 @@
                     message: String(source.message || "").trim(),
                     anonymous: Boolean(source.anonymous),
                     urgent: Boolean(source.urgent),
+                    pastorOnly: Boolean(source.pastorOnly),
                     prayed: Math.max(0, Number(source.prayed || 0) || 0),
                     answered: Math.max(0, Number(source.answered || 0) || 0),
                     thanked: Math.max(0, Number(source.thanked || 0) || 0),
@@ -658,6 +661,15 @@
                     var urgentLabelNode = prayerDetailUrgentBadge.querySelector("span");
                     if (urgentLabelNode) {
                         urgentLabelNode.textContent = urgentLabelText;
+                    }
+                }
+                if (prayerDetailPastorOnlyBadge) {
+                    prayerDetailPastorOnlyBadge.hidden = !(entry.pastorOnly && isAdminUser());
+                    var pastorOnlyLabelText = T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard);
+                    prayerDetailPastorOnlyBadge.setAttribute("title", pastorOnlyLabelText);
+                    var pastorOnlyLabelNode = prayerDetailPastorOnlyBadge.querySelector("span");
+                    if (pastorOnlyLabelNode) {
+                        pastorOnlyLabelNode.textContent = pastorOnlyLabelText;
                     }
                 }
                 if (prayerDetailPrayButton) {
@@ -869,7 +881,10 @@
                     return;
                 }
 
-                var sortedEntries = getSortedPrayerEntries(prayerWallEntries).slice(0, 40);
+                var visibleEntries = isAdminUser()
+                    ? prayerWallEntries
+                    : prayerWallEntries.filter(function (e) { return !e.pastorOnly; });
+                var sortedEntries = getSortedPrayerEntries(visibleEntries).slice(0, 40);
                 if (activePrayerTab === "urgent" && !hasUrgentPrayerEntries(sortedEntries)) {
                     setActivePrayerTab("other");
                     return;
@@ -911,6 +926,9 @@
                     var urgentRibbon = entry.urgent
                         ? ("<span class=\"prayer-list-corner-ribbon\">" + escapeHtml(urgentRibbonText) + "</span>")
                         : "";
+                    var pastorOnlyBadge = entry.pastorOnly && isAdminUser()
+                        ? ("<span class=\"prayer-list-pastor-only-badge\"><i class=\"fa-solid fa-lock\" aria-hidden=\"true\"></i>" + escapeHtml(T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard)) + "</span>")
+                        : "";
                     return "" +
                         "<li class=\"" + itemClass + "\">" +
                         "  " + urgentRibbon +
@@ -918,6 +936,7 @@
                         "    <div class=\"prayer-list-top\">" +
                         "      <h3 class=\"prayer-list-name\">" + escapeHtml(safeName) + "</h3>" +
                         "      " + urgentBadge +
+                        "      " + pastorOnlyBadge +
                         "    </div>" +
                         "    <p class=\"prayer-list-preview\">" + escapeHtml(previewText) + "</p>" +
                         "    <p class=\"prayer-list-translated-note\" hidden></p>" +
@@ -1133,6 +1152,7 @@
                     var messageValue = (prayerWallMessage.value || "").trim();
                     var anonymousValue = Boolean(prayerWallAnonymous.checked);
                     var urgentValue = Boolean(prayerWallUrgent && prayerWallUrgent.checked);
+                    var pastorOnlyValue = Boolean(prayerWallPastorOnly && prayerWallPastorOnly.checked);
                     var activeUser = getCurrentUser();
                     var ownerUid = String(activeUser && activeUser.uid || "").trim();
                     var ownerEmail = normalizeEmail(activeUser && activeUser.email);
@@ -1154,6 +1174,7 @@
                             message: messageValue,
                             anonymous: anonymousValue,
                             urgent: urgentValue,
+                            pastorOnly: pastorOnlyValue,
                             prayed: 0,
                             answered: 0,
                             thanked: 0,
@@ -1168,6 +1189,9 @@
                         prayerWallAnonymous.checked = false;
                         if (prayerWallUrgent) {
                             prayerWallUrgent.checked = false;
+                        }
+                        if (prayerWallPastorOnly) {
+                            prayerWallPastorOnly.checked = false;
                         }
                         closePrayerComposer();
                         showPrayerWallNote("posted", "contact.prayerWallPosted", "Prayer request added to wall.");

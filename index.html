@@ -105,6 +105,10 @@
                         <input id="prayer-wall-urgent" type="checkbox">
                         <span data-i18n="contact.prayerWallUrgentLabel">Mark as urgent</span>
                     </label>
+                    <label class="prayer-wall-anon">
+                        <input id="prayer-wall-pastor-only" type="checkbox">
+                        <span data-i18n="contact.prayerWallPastorOnlyLabel">Pastor only (visible to admin)</span>
+                    </label>
                     <div class="prayer-form-actions">
                         <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
                         <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
@@ -691,6 +695,10 @@
                     <span class="prayer-detail-urgent-badge" id="prayer-detail-urgent" hidden>
                         <i class="fa-solid fa-bolt" aria-hidden="true"></i>
                         <span data-i18n="contact.prayerWallUrgentBadge">Urgent</span>
+                    </span>
+                    <span class="prayer-detail-pastor-only-badge" id="prayer-detail-pastor-only" hidden>
+                        <i class="fa-solid fa-lock" aria-hidden="true"></i>
+                        <span data-i18n="contact.prayerWallPastorOnlyBadge">Pastor only</span>
                     </span>
                 </div>
                 <p class="prayer-detail-message" id="prayer-detail-message"></p>
