@@ -240,6 +240,22 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         onRouteChange();
+        var tabNav = document.querySelector(".tab-nav");
+        if (tabNav) {
+            tabNav.addEventListener("click", function (event) {
+                var tab = event.target.closest("a.tab[data-route][href^='#']");
+                if (!tab) {
+                    return;
+                }
+                var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
+                if (!route || !routes[route]) {
+                    return;
+                }
+                event.preventDefault();
+                window.location.hash = route;
+                setActiveRoute(route);
+            });
+        }
     });
 
     window.addEventListener("hashchange", onRouteChange);
