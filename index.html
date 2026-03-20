@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>NJC App</title>
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
@@ -902,6 +905,21 @@
     <audio id="bible-stream-audio" preload="auto" hidden></audio>
     <audio id="bible-prefetch-audio" preload="auto" hidden></audio>
 
+    <script>
+        (function () {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get("bypass") === "1") {
+                if ("serviceWorker" in navigator) {
+                    navigator.serviceWorker.getRegistrations().then(function (regs) {
+                        regs.forEach(function (r) { r.unregister(); });
+                        window.location.replace(window.location.pathname + window.location.hash || "./");
+                    });
+                    return;
+                }
+                window.location.replace(window.location.pathname + window.location.hash || "./");
+            }
+        })();
+    </script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
