@@ -238,25 +238,31 @@
         setActiveRoute(getRouteFromHash());
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        onRouteChange();
-        var tabNav = document.querySelector(".tab-nav");
-        if (tabNav) {
-            tabNav.addEventListener("click", function (event) {
-                var tab = event.target.closest("a.tab[data-route][href^='#']");
-                if (!tab) {
-                    return;
-                }
-                var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
-                if (!route || !routes[route]) {
-                    return;
-                }
-                event.preventDefault();
-                window.location.hash = route;
-                setActiveRoute(route);
-            });
+    function handleTabNavigation(event) {
+        var tab = event.target.closest(".tab-nav a.tab[data-route][href^='#']");
+        if (!tab) {
+            return;
         }
-    });
+        var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
+        if (!route || !routes[route]) {
+            return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        window.location.hash = route;
+        setActiveRoute(route);
+    }
+
+    function initRouter() {
+        onRouteChange();
+        document.body.addEventListener("click", handleTabNavigation, true);
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initRouter);
+    } else {
+        initRouter();
+    }
 
     window.addEventListener("hashchange", onRouteChange);
     document.addEventListener("njc:langchange", onRouteChange);
