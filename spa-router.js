@@ -243,23 +243,8 @@
         setActiveRoute(getRouteFromHash());
     }
 
-    function handleTabNavigation(event) {
-        var tab = event.target.closest(".tab-nav a.tab[data-route][href^='#']");
-        if (!tab) {
-            return;
-        }
-        var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
-        if (!route || !routes[route]) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        setActiveRoute(route);
-    }
-
     function initRouter() {
         onRouteChange();
-        document.body.addEventListener("click", handleTabNavigation, true);
     }
 
     if (document.readyState === "loading") {
