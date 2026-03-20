@@ -22,10 +22,20 @@
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+            var adminTriviaUrl = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
+            var triviaContent = document.getElementById("trivia-content");
+            var triviaLoading = document.getElementById("trivia-loading");
+            var triviaQuestionWrap = document.getElementById("trivia-question-wrap");
+            var triviaQuestionText = document.getElementById("trivia-question-text");
+            var triviaReference = document.getElementById("trivia-reference");
+            var triviaOptions = document.getElementById("trivia-options");
+            var triviaFeedback = document.getElementById("trivia-feedback");
+            var triviaEmpty = document.getElementById("trivia-empty");
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
+            var triviaCard = document.getElementById("trivia-card");
             var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
@@ -576,6 +586,19 @@
                     month: partValue("month"),
                     day: partValue("day")
                 };
+            }
+
+            function getLocalEffectiveDate() {
+                var now = new Date();
+                var hour = now.getHours();
+                var localDate = new Date(now);
+                if (hour < 8) {
+                    localDate.setDate(localDate.getDate() - 1);
+                }
+                var y = localDate.getFullYear();
+                var m = String(localDate.getMonth() + 1).padStart(2, "0");
+                var d = String(localDate.getDate()).padStart(2, "0");
+                return String(y) + "-" + m + "-" + d;
             }
 
             function getDayOfYear(ymd) {
@@ -1237,6 +1260,7 @@
                 renderReadingPlan();
                 renderDailyVerse();
                 renderAnnouncements();
+                loadTrivia();
                 renderThisWeekEvents();
             });
 
@@ -1244,6 +1268,7 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderAnnouncements();
+                loadTrivia();
                 renderThisWeekEvents();
             });
 
@@ -1253,6 +1278,92 @@
             document.addEventListener("njc:admin-notices-updated", function () {
                 loadAnnouncements();
             });
+            document.addEventListener("njc:admin-trivia-updated", function () {
+                loadTrivia();
+            });
+
+            function loadTrivia() {
+                if (!triviaLoading || !triviaQuestionWrap || !triviaQuestionText || !triviaOptions || !triviaEmpty) {
+                    return;
+                }
+                var effectiveDate = getLocalEffectiveDate();
+                triviaLoading.hidden = false;
+                triviaQuestionWrap.hidden = true;
+                triviaEmpty.hidden = true;
+                triviaLoading.textContent = T("home.triviaLoading", "Loading trivia...", triviaCard);
+                fetch(adminTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                    .then(function (response) {
+                        if (response.status === 404) {
+                            return { entries: [] };
+                        }
+                        if (!response.ok) {
+                            throw new Error("Trivia load failed");
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                        var match = entries.find(function (item) {
+                            return String(item && item.showDate || "").trim() === effectiveDate;
+                        });
+                        triviaLoading.hidden = true;
+                        if (!match) {
+                            triviaEmpty.hidden = false;
+                            triviaEmpty.textContent = T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", triviaCard);
+                            return;
+                        }
+                        var question = String(match.question || "").trim();
+                        var options = Array.isArray(match.options) ? match.options : [];
+                        var correctIndex = Number(match.correctIndex) || 0;
+                        var reference = String(match.reference || "").trim();
+                        triviaQuestionText.textContent = question || T("home.triviaNoQuestion", "No question", triviaCard);
+                        if (reference) {
+                            triviaReference.textContent = reference;
+                            triviaReference.hidden = false;
+                        } else {
+                            triviaReference.hidden = true;
+                        }
+                        triviaOptions.innerHTML = options.map(function (opt, index) {
+                            var label = String(opt || "").trim() || "-";
+                            return "<button type=\"button\" class=\"trivia-option-btn\" data-trivia-index=\"" + String(index) + "\" data-trivia-correct=\"" + (index === correctIndex ? "1" : "0") + "\">" + NjcEvents.escapeHtml(label) + "</button>";
+                        }).join("");
+                        triviaQuestionWrap.hidden = false;
+                        triviaFeedback.hidden = true;
+                        triviaOptions.querySelectorAll(".trivia-option-btn").forEach(function (btn) {
+                            btn.disabled = false;
+                        });
+                    })
+                    .catch(function () {
+                        triviaLoading.hidden = true;
+                        triviaEmpty.hidden = false;
+                        triviaEmpty.textContent = T("home.triviaError", "Could not load trivia. Try again later.", triviaCard);
+                    });
+            }
+
+            function setupTriviaOptionClicks() {
+                if (!triviaOptions || !triviaFeedback) {
+                    return;
+                }
+                triviaOptions.addEventListener("click", function (event) {
+                    var btn = event.target.closest(".trivia-option-btn");
+                    if (!btn || btn.disabled) {
+                        return;
+                    }
+                    var isCorrect = btn.getAttribute("data-trivia-correct") === "1";
+                    triviaOptions.querySelectorAll(".trivia-option-btn").forEach(function (b) {
+                        b.disabled = true;
+                    });
+                    triviaFeedback.hidden = false;
+                    if (isCorrect) {
+                        triviaFeedback.textContent = T("home.triviaCorrect", "Correct! Well done.", triviaCard);
+                        triviaFeedback.dataset.state = "success";
+                    } else {
+                        triviaFeedback.textContent = T("home.triviaWrong", "Not quite. Try again tomorrow!", triviaCard);
+                        triviaFeedback.dataset.state = "error";
+                    }
+                });
+            }
+            setupTriviaOptionClicks();
 
             if (readingUnreadToggle) {
                 readingUnreadToggle.addEventListener("click", function () {
@@ -1341,5 +1452,6 @@
             renderDailyVerse();
             loadTodayReadingPlan();
             loadAnnouncements();
+            loadTrivia();
             loadThisWeekEvents();
         })();

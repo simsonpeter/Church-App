@@ -65,6 +65,21 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
+            <section class="card" id="trivia-card">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <div id="trivia-content">
+                    <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap" hidden>
+                        <p class="trivia-question-text" id="trivia-question-text"></p>
+                        <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
+                        <div class="trivia-options" id="trivia-options"></div>
+                        <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
+                    </div>
+                    <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                </div>
+            </section>
+
             <section class="card hero-card">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
@@ -619,6 +634,26 @@
                 <h2><i class="fa-solid fa-headphones-simple"></i><span data-i18n="admin.sermonManageTitle">Recent Sermons</span></h2>
                 <p class="page-note" data-i18n="admin.sermonManageInfo">Edit or delete added sermons.</p>
                 <ul class="list" id="admin-sermon-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="admin.triviaTitle">Bible Trivia (Tamil)</span></h2>
+                <p class="page-note" data-i18n="admin.triviaInfo">Add Tamil Bible trivia. Shows from 8 AM local time on the scheduled date.</p>
+                <form class="prayer-form" id="admin-trivia-form">
+                    <textarea id="admin-trivia-question" class="search-input prayer-textarea" rows="2" placeholder="Question in Tamil" data-i18n-placeholder="admin.triviaQuestionPlaceholder"></textarea>
+                    <textarea id="admin-trivia-options" class="search-input prayer-textarea" rows="4" placeholder="Options (one per line)" data-i18n-placeholder="admin.triviaOptionsPlaceholder"></textarea>
+                    <input id="admin-trivia-correct" class="search-input" type="number" min="0" value="0" placeholder="Correct option index (0-based)" data-i18n-placeholder="admin.triviaCorrectPlaceholder">
+                    <input id="admin-trivia-reference" class="search-input" type="text" placeholder="Bible reference (e.g. யோவான் 3:16)" data-i18n-placeholder="admin.triviaReferencePlaceholder">
+                    <input id="admin-trivia-show-date" class="search-input" type="date" placeholder="Show date">
+                    <button class="button-link" id="admin-trivia-submit" type="submit" data-i18n="admin.triviaAdd">Add trivia</button>
+                </form>
+                <h3 class="admin-subtitle"><span data-i18n="admin.triviaManageTitle">Scheduled trivia</span></h3>
+                <ul class="list" id="admin-trivia-list">
                     <li>
                         <h3 data-i18n="admin.loading">Loading dashboard...</h3>
                         <p data-i18n="admin.loadingBody">Please wait.</p>
