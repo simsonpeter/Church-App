@@ -14,6 +14,7 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260318de",
     "./songbook-page.js?v=20260318de",
     "./contact-page.js?v=20260318de",
+    "./admin-trivia.js?v=20260318de",
     "./admin-dashboard-page.js?v=20260318de",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260318de",
