@@ -1309,6 +1309,42 @@
                 if (card) renderTriviaStats(card);
             });
 
+            function syncTriviaPointsForUser() {
+                var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                if (!user || !user.uid) return;
+                var uid = "u:" + String(user.uid);
+                var guestId = null;
+                try {
+                    guestId = window.localStorage.getItem(TRIVIA_GUEST_ID_KEY);
+                } catch (e) {}
+                var guestPoints = 0;
+                if (guestId) {
+                    try {
+                        var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
+                        var data = raw ? JSON.parse(raw) : {};
+                        guestPoints = Number(data["g:" + guestId]) || 0;
+                    } catch (e) {}
+                }
+                loadTriviaPointsFromCloud(user.uid).then(function (cloudPoints) {
+                    try {
+                        var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
+                        var data = raw ? JSON.parse(raw) : {};
+                        var localUser = Number(data[uid]) || 0;
+                        var cloud = Number(cloudPoints) || 0;
+                        var total = Math.max(localUser, cloud, 0) + (guestPoints || 0);
+                        data[uid] = total;
+                        if (guestPoints > 0 && guestId) {
+                            delete data["g:" + guestId];
+                        }
+                        window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
+                        syncTriviaPointsToCloud(user.uid, total);
+                        document.dispatchEvent(new CustomEvent("njc:trivia-points-updated", { detail: { points: total } }));
+                    } catch (e) {}
+                });
+            }
+
+            document.addEventListener("njc:authchange", syncTriviaPointsForUser);
+
             function getTriviaUserId() {
                 var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
                 if (user && user.uid) {
@@ -1412,13 +1448,39 @@
                 if (triviaStatStreak) triviaStatStreak.textContent = String(s.streak);
             }
 
+            function getTriviaFirestoreDoc(uid) {
+                if (!uid || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) return null;
+                try {
+                    return window.firebase.firestore()
+                        .collection("users").doc(uid)
+                        .collection("profile").doc("basic");
+                } catch (e) { return null; }
+            }
+
+            function syncTriviaPointsToCloud(uid, points) {
+                var doc = getTriviaFirestoreDoc(uid);
+                if (!doc) return;
+                doc.set({ triviaPoints: Number(points) || 0 }, { merge: true }).catch(function () {});
+            }
+
+            function loadTriviaPointsFromCloud(uid) {
+                var doc = getTriviaFirestoreDoc(uid);
+                if (!doc) return Promise.resolve(null);
+                return doc.get().then(function (snap) {
+                    return snap.exists ? Number(snap.data().triviaPoints) || 0 : null;
+                }).catch(function () { return null; });
+            }
+
             function addTriviaPoints(n) {
                 try {
                     var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
                     var data = raw ? JSON.parse(raw) : {};
                     var uid = getTriviaUserId();
+                    var isUser = uid && uid.indexOf("u:") === 0;
+                    var firebaseUid = isUser ? uid.replace(/^u:/, "") : null;
                     data[uid] = (Number(data[uid]) || 0) + (Number(n) || 0);
                     window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
+                    if (firebaseUid) syncTriviaPointsToCloud(firebaseUid, data[uid]);
                     document.dispatchEvent(new CustomEvent("njc:trivia-points-updated", { detail: { points: data[uid] } }));
                 } catch (e) {}
             }
@@ -1435,7 +1497,12 @@
 
             window.addEventListener("hashchange", function () {
                 var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-                if (route === "home" || route === "trivia") loadTrivia();
+                if (route === "home" || route === "trivia") {
+                    loadTrivia();
+                }
+                if (route === "home" || route === "trivia" || route === "profile") {
+                    syncTriviaPointsForUser();
+                }
             });
 
             function loadTrivia() {
@@ -1681,5 +1748,6 @@
             loadTodayReadingPlan();
             loadAnnouncements();
             loadTrivia();
+            syncTriviaPointsForUser();
             loadThisWeekEvents();
         })();
