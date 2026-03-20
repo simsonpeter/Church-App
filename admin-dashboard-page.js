@@ -197,7 +197,7 @@
             return "#prayer";
         }
         if (key === "contact") {
-            return "#contact";
+            return "#prayer";
         }
         return "#home";
     }

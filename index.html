@@ -65,19 +65,6 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
-            <section class="card verse-card" id="bible-trivia-card">
-                <h2><i class="fa-solid fa-circle-question"></i><span data-i18n="home.triviaTitle">Bible Trivia</span></h2>
-                <p class="page-note" data-i18n="home.triviaSubtitle">Today's Bible question in Tamil.</p>
-                <div id="bible-trivia-content" hidden>
-                    <p id="bible-trivia-question" class="trivia-question"></p>
-                    <button type="button" class="button-link button-secondary" id="bible-trivia-reveal" data-i18n="home.triviaReveal">Reveal answer</button>
-                    <p id="bible-trivia-answer" class="trivia-answer" hidden></p>
-                    <p id="bible-trivia-reference" class="page-note" hidden></p>
-                </div>
-                <p id="bible-trivia-loading" class="page-note">Loading trivia...</p>
-                <p id="bible-trivia-empty" class="page-note" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow.</p>
-            </section>
-
             <section class="card hero-card">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
@@ -163,7 +150,7 @@
                     <span class="action-icon"><i class="fa-solid fa-house"></i></span>
                     <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
                 </a>
-                <a class="action-pill" href="#contact">
+                <a class="action-pill" href="#events">
                     <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
                     <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
                 </a>
@@ -264,73 +251,20 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="contact">
+        <section class="page-view" data-route="trivia">
             <main class="app-content">
-<section class="card contact-block">
-                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
-                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
-                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
-            </section>
-
-            <section class="quick-actions">
-                <a class="action-pill" href="mailto:simsonpeter@gmail.com">
-                    <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
-                    <span class="action-label" data-i18n="actions.email">Email</span>
-                </a>
-                <a class="action-pill" href="tel:+32483116484">
-                    <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
-                    <span class="action-label" data-i18n="actions.call">Call</span>
-                </a>
-                <a class="action-pill" href="#events">
-                    <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
-                    <span class="action-label" data-i18n="actions.visit">Visit</span>
-                </a>
-            </section>
-
-            <section class="card">
-                <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
-                <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
-                <form class="prayer-form" id="prayer-request-form">
-                    <input
-                        id="prayer-name"
-                        class="search-input"
-                        type="text"
-                        data-i18n-placeholder="contact.prayerNamePlaceholder"
-                        placeholder="Your name (optional)">
-                    <textarea
-                        id="prayer-message"
-                        class="search-input prayer-textarea"
-                        rows="4"
-                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
-                        placeholder="Write your message"></textarea>
-                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
-                </form>
-                <p class="page-note" id="prayer-form-note" hidden></p>
-            </section>
-
-            <a class="card location-map-card" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
-                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
-                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
-                <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
-                <p class="location-transit">
-                    <i class="fa-solid fa-bus" aria-hidden="true"></i>
-                    <span data-i18n="contact.transitByBus">By bus:</span> 19, 23, 33
-                    <span data-i18n="contact.transitStopBus">(stop Deurne Van Deynsestraat)</span><br>
-                    <i class="fa-solid fa-train-tram" aria-hidden="true"></i>
-                    <span data-i18n="contact.transitByTram">By tram:</span> 5
-                    <span data-i18n="contact.transitStopTram">(stop Ten Eekhove)</span>,
-                    2, 3, 6 <span data-i18n="contact.transitStopSport">(stop Sport)</span>
-                </p>
-                <div class="location-map-frame-wrap" aria-hidden="true">
-                    <iframe
-                        class="location-map-frame"
-                        title="Map to New Jerusalem Church Belgium"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+            <section class="card verse-card" id="bible-trivia-card">
+                <h2><i class="fa-solid fa-circle-question"></i><span data-i18n="home.triviaTitle">Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Today's Bible question in Tamil.</p>
+                <div id="bible-trivia-content" hidden>
+                    <p id="bible-trivia-question" class="trivia-question"></p>
+                    <button type="button" class="button-link button-secondary" id="bible-trivia-reveal" data-i18n="home.triviaReveal">Reveal answer</button>
+                    <p id="bible-trivia-answer" class="trivia-answer" hidden></p>
+                    <p id="bible-trivia-reference" class="page-note" hidden></p>
                 </div>
-                <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
-            </a>
+                <p id="bible-trivia-loading" class="page-note">Loading trivia...</p>
+                <p id="bible-trivia-empty" class="page-note" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow.</p>
+            </section>
             </main>
         </section>
 
@@ -692,7 +626,7 @@
             <a class="tab" data-route="prayer" href="#prayer"><span class="tab-icon"><i class="fa-solid fa-hands-praying"></i></span><span class="tab-label" data-i18n="nav.prayer">Prayer</span></a>
             <a class="tab" data-route="events" href="#events"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
             <a class="tab" data-route="sermons" href="#sermons"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
-            <a class="tab" data-route="contact" href="#contact"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
+            <a class="tab" data-route="trivia" href="#trivia"><span class="tab-icon"><i class="fa-solid fa-circle-question"></i></span><span class="tab-label" data-i18n="nav.trivia">Trivia</span></a>
         </nav>
     </div>
 

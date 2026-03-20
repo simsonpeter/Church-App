@@ -32,6 +32,7 @@
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.contact": "தொடர்பு",
+        "nav.trivia": "வேத வினா",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
@@ -1379,7 +1380,7 @@
             return "#prayer";
         }
         if (key === "contact") {
-            return "#contact";
+            return "#prayer";
         }
         return "#home";
     }
@@ -2281,6 +2282,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var triviaLink = document.createElement("a");
+        triviaLink.className = "header-menu-link";
+        triviaLink.href = "#trivia";
+        triviaLink.innerHTML = "<i class=\"fa-solid fa-circle-question\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(triviaLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         panel.appendChild(utilityCard);
@@ -2348,7 +2355,7 @@
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact"];
+            var allowedRoutes = ["home", "prayer", "events", "sermons", "trivia"];
             var routeMap = {};
             primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
@@ -2480,6 +2487,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var triviaLabel = t("nav.trivia", "Trivia");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2530,6 +2538,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var triviaNode = triviaLink.querySelector("span");
+            if (triviaNode) {
+                triviaNode.textContent = triviaLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -2559,12 +2571,14 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isTrivia = getCurrentRoute() === "trivia";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            triviaLink.classList.toggle("active", isTrivia);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);

@@ -56,14 +56,14 @@
             subtitleKey: "",
             subtitleText: ""
         },
-        contact: {
-            icon: "fa-phone",
-            eyebrowKey: "contact.eyebrow",
-            eyebrowText: "Contact",
-            titleKey: "contact.title",
-            titleText: "Reach our team",
-            subtitleKey: "",
-            subtitleText: ""
+        trivia: {
+            icon: "fa-circle-question",
+            eyebrowKey: "home.triviaTitle",
+            eyebrowText: "Bible Trivia",
+            titleKey: "home.triviaTitle",
+            titleText: "Bible Trivia",
+            subtitleKey: "home.triviaSubtitle",
+            subtitleText: "Today's Bible question in Tamil."
         },
         profile: {
             icon: "fa-user",
