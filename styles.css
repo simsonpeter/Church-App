@@ -494,6 +494,12 @@ body.splash-active {
     cursor: default;
 }
 
+.trivia-participated {
+    margin: 0 0 10px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
 .trivia-options-wrap {
     margin-top: 12px;
 }

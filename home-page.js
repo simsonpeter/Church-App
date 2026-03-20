@@ -1423,9 +1423,15 @@
                     opts.dataset.triviaCorrectAnswer = correctAnswer;
                     wrap.hidden = false;
                     if (feedback) feedback.hidden = true;
+                    var participatedEl = card ? card.querySelector(".trivia-participated") : null;
+                    if (participatedEl) participatedEl.hidden = true;
                     var answered = effectiveDate ? getTriviaAnswered(effectiveDate) : null;
                     if (optsWrap && expandBtn) {
                         if (answered) {
+                            if (participatedEl) {
+                                participatedEl.hidden = false;
+                                participatedEl.textContent = T("home.triviaParticipated", "You already participated for today. Come back tomorrow!", card);
+                            }
                             expandBtn.hidden = false;
                             expandBtn.disabled = true;
                             expandBtn.classList.add("expanded");
@@ -1444,6 +1450,10 @@
                         }
                     } else {
                         if (answered) {
+                            if (participatedEl) {
+                                participatedEl.hidden = false;
+                                participatedEl.textContent = T("home.triviaParticipated", "You already participated for today. Come back tomorrow!", card);
+                            }
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
                             if (feedback) {
                                 feedback.hidden = false;

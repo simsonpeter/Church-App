@@ -137,6 +137,7 @@
         "home.triviaError": "வினாடியை ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
         "home.triviaCorrect": "சரி! நல்லது.",
         "home.triviaWrong": "சரியல்ல. நாளை மீண்டும் முயற்சிக்கவும்.",
+        "home.triviaParticipated": "இன்று ஏற்கனவே பங்கேற்றீர்கள். நாளை வாருங்கள்!",
         "home.triviaShowOptions": "விருப்பங்களை காட்டு",
         "home.triviaWrongTitle": "தவறு!",
         "home.triviaWrongMessage": "சரியான விடை:",
