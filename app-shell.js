@@ -650,6 +650,8 @@
         "profile.savedLocal": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. இணையம் கிடைக்கும் போது மேகத்தில் ஒத்திசைக்கும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
+        "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",
+        "app.refreshToUpdate": "புதுப்பிக்க கிளிக் செய்யவும்",
         "settings.close": "மூடு"
     };
 
@@ -1049,13 +1051,49 @@
         }, { passive: true });
     }
 
+    var SW_VERSION = "20260320u1";
+
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
             return;
         }
-        navigator.serviceWorker.register("service-worker.js").catch(function () {
+        navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
+            registration.update();
+            if (registration.waiting) {
+                showUpdateBanner();
+            }
+            registration.addEventListener("updatefound", function () {
+                var worker = registration.installing;
+                if (!worker) return;
+                worker.addEventListener("statechange", function () {
+                    if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                        showUpdateBanner();
+                    }
+                });
+            });
+        }).catch(function () {
             return null;
         });
+        navigator.serviceWorker.addEventListener("controllerchange", function () {
+            showUpdateBanner();
+        });
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") {
+                navigator.serviceWorker.getRegistration().then(function (r) {
+                    if (r) r.update();
+                });
+            }
+        });
+    }
+
+    function showUpdateBanner() {
+        var banner = document.getElementById("app-update-banner");
+        var refreshBtn = document.getElementById("app-update-refresh");
+        if (!banner || !refreshBtn) return;
+        banner.hidden = false;
+        refreshBtn.onclick = function () {
+            window.location.reload();
+        };
     }
 
     function notificationsSupported() {

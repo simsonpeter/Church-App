@@ -537,6 +537,40 @@ body.splash-active {
     margin-top: 12px;
 }
 
+.app-update-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 3400;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--primary);
+    color: #fff;
+    font-size: 0.9rem;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.app-update-banner[hidden] {
+    display: none !important;
+}
+
+.app-update-refresh {
+    flex-shrink: 0;
+    padding: 6px 14px;
+    background: #fff;
+    color: var(--primary);
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.app-update-refresh:hover {
+    background: rgba(255, 255, 255, 0.9);
+}
+
 .trivia-wrong-overlay {
     position: fixed;
     inset: 0;
