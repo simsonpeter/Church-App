@@ -65,6 +65,28 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
+            <section class="card trivia-card-compact" id="trivia-card-home">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <div id="trivia-content-home">
+                    <p class="page-note" id="trivia-loading-home" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap-home" hidden>
+                        <div class="trivia-compact-row">
+                            <p class="trivia-question-text" id="trivia-question-text-home"></p>
+                            <button type="button" class="trivia-expand-btn" id="trivia-expand-btn-home" aria-label="Show options" data-i18n-aria-label="home.triviaShowOptions">
+                                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="trivia-options-wrap" id="trivia-options-wrap-home" hidden>
+                            <p class="page-note trivia-reference" id="trivia-reference-home" hidden></p>
+                            <div class="trivia-options" id="trivia-options-home"></div>
+                            <p class="page-note trivia-feedback" id="trivia-feedback-home" hidden></p>
+                        </div>
+                    </div>
+                    <p class="page-note" id="trivia-empty-home" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                </div>
+            </section>
+
             <section class="card hero-card">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
@@ -107,7 +129,7 @@
                     </label>
                     <label class="prayer-wall-anon">
                         <input id="prayer-wall-pastor-only" type="checkbox">
-                        <span data-i18n="contact.prayerWallPastorOnlyLabel">Pastor only (visible to admin)</span>
+                        <span data-i18n="contact.prayerWallPastorOnlyLabel">Pastor only (only pastor can see this)</span>
                     </label>
                     <div class="prayer-form-actions">
                         <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
@@ -445,6 +467,26 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="trivia">
+            <main class="app-content">
+            <section class="card trivia-card" id="trivia-card">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <p class="page-note trivia-score" id="trivia-score" hidden></p>
+                <div id="trivia-content">
+                    <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap" hidden>
+                        <p class="trivia-question-text" id="trivia-question-text"></p>
+                        <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
+                        <div class="trivia-options" id="trivia-options"></div>
+                        <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
+                    </div>
+                    <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                </div>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="settings">
             <main class="app-content">
             <section class="card settings-card">
@@ -465,6 +507,7 @@
                         <img id="profile-avatar-image" alt="Profile photo" hidden>
                         <span id="profile-avatar-fallback">U</span>
                     </div>
+                    <p class="profile-trivia-points" id="profile-trivia-points" hidden><span data-i18n="profile.triviaPoints">Trivia points</span>: <strong id="profile-trivia-points-value">0</strong></p>
                 </div>
                 <form id="profile-form" class="profile-form">
                     <label class="profile-field">
@@ -627,6 +670,38 @@
             </section>
 
             <section class="card">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="admin.triviaTitle">Bible Trivia (Tamil)</span></h2>
+                <p class="page-note" data-i18n="admin.triviaInfo">Add Tamil Bible trivia. 4 answer options required. Shows from 8 AM local time on the scheduled date.</p>
+                <form class="prayer-form" id="admin-trivia-form">
+                    <textarea id="admin-trivia-question" class="search-input prayer-textarea" rows="2" placeholder="Question in Tamil" data-i18n-placeholder="admin.triviaQuestionPlaceholder"></textarea>
+                    <input id="admin-trivia-option1" class="search-input" type="text" placeholder="Option 1" data-i18n-placeholder="admin.triviaOption1">
+                    <input id="admin-trivia-option2" class="search-input" type="text" placeholder="Option 2" data-i18n-placeholder="admin.triviaOption2">
+                    <input id="admin-trivia-option3" class="search-input" type="text" placeholder="Option 3" data-i18n-placeholder="admin.triviaOption3">
+                    <input id="admin-trivia-option4" class="search-input" type="text" placeholder="Option 4" data-i18n-placeholder="admin.triviaOption4">
+                    <label class="admin-trivia-correct-label">
+                        <span data-i18n="admin.triviaCorrectLabel">Correct option:</span>
+                        <select id="admin-trivia-correct" class="search-input">
+                            <option value="0">1</option>
+                            <option value="1">2</option>
+                            <option value="2">3</option>
+                            <option value="3">4</option>
+                        </select>
+                    </label>
+                    <input id="admin-trivia-reference" class="search-input" type="text" placeholder="Bible reference (e.g. யோவான் 3:16)" data-i18n-placeholder="admin.triviaReferencePlaceholder">
+                    <input id="admin-trivia-show-date" class="search-input" type="date" placeholder="Show date">
+                    <button class="button-link" id="admin-trivia-submit" type="submit" data-i18n="admin.triviaAdd">Add trivia</button>
+                    <p class="page-note" id="admin-trivia-note" hidden></p>
+                </form>
+                <h3 class="admin-subtitle"><span data-i18n="admin.triviaManageTitle">Scheduled trivia</span></h3>
+                <ul class="list" id="admin-trivia-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="card">
                 <h2><i class="fa-solid fa-thumbtack"></i><span data-i18n="admin.prayerTitle">Pin Urgent Prayer</span></h2>
                 <p class="page-note" data-i18n="admin.prayerInfo">Toggle urgent status for prayer wall requests.</p>
                 <ul class="list" id="admin-prayer-list">
@@ -714,6 +789,16 @@
             </div>
         </section>
     </div>
+
+<div class="trivia-wrong-overlay" id="trivia-wrong-overlay" hidden>
+    <button class="trivia-wrong-backdrop" id="trivia-wrong-backdrop" aria-label="Close"></button>
+    <div class="trivia-wrong-popup">
+        <h3 id="trivia-wrong-title" data-i18n="home.triviaWrongTitle">Wrong!</h3>
+        <p id="trivia-wrong-message" data-i18n="home.triviaWrongMessage">The correct answer is:</p>
+        <p class="trivia-wrong-answer" id="trivia-wrong-answer"></p>
+        <button type="button" class="button-link" id="trivia-wrong-close" data-i18n="home.triviaWrongClose">OK</button>
+    </div>
+</div>
 
 <div class="sermon-player-overlay" id="sermon-player" hidden>
         <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
@@ -807,17 +892,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260318de"></script>
-    <script src="app-shell.js?v=20260318de"></script>
+    <script src="app-shell.js?v=20260320tr4"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260318de"></script>
+    <script src="home-page.js?v=20260320tr4"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260318de"></script>
     <script src="bible-page.js?v=20260318de"></script>
     <script src="songbook-page.js?v=20260318de"></script>
     <script src="contact-page.js?v=20260318de"></script>
+    <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260318de"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260318de"></script>
+    <script src="profile-page.js?v=20260320tr5"></script>
     <script src="spa-router.js?v=20260318de"></script>
 </body>
 </html>

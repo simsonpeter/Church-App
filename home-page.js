@@ -22,7 +22,36 @@
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+            var adminTriviaUrl = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
+            var triviaContent = document.getElementById("trivia-content");
+            var triviaLoading = document.getElementById("trivia-loading");
+            var triviaQuestionWrap = document.getElementById("trivia-question-wrap");
+            var triviaQuestionText = document.getElementById("trivia-question-text");
+            var triviaReference = document.getElementById("trivia-reference");
+            var triviaOptions = document.getElementById("trivia-options");
+            var triviaFeedback = document.getElementById("trivia-feedback");
+            var triviaEmpty = document.getElementById("trivia-empty");
+            var triviaCard = document.getElementById("trivia-card");
+            var triviaLoadingHome = document.getElementById("trivia-loading-home");
+            var triviaQuestionWrapHome = document.getElementById("trivia-question-wrap-home");
+            var triviaQuestionTextHome = document.getElementById("trivia-question-text-home");
+            var triviaReferenceHome = document.getElementById("trivia-reference-home");
+            var triviaOptionsHome = document.getElementById("trivia-options-home");
+            var triviaFeedbackHome = document.getElementById("trivia-feedback-home");
+            var triviaEmptyHome = document.getElementById("trivia-empty-home");
+            var triviaCardHome = document.getElementById("trivia-card-home");
+            var triviaExpandBtnHome = document.getElementById("trivia-expand-btn-home");
+            var triviaOptionsWrapHome = document.getElementById("trivia-options-wrap-home");
+            var triviaWrongOverlay = document.getElementById("trivia-wrong-overlay");
+            var triviaWrongAnswer = document.getElementById("trivia-wrong-answer");
+            var triviaWrongBackdrop = document.getElementById("trivia-wrong-backdrop");
+            var triviaWrongClose = document.getElementById("trivia-wrong-close");
+            var triviaScoreEl = document.getElementById("trivia-score");
+            var TRIVIA_ANSWERED_KEY = "njc_trivia_answered_v1";
+            var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
+            var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
+            var TRIVIA_POINTS_PER_CORRECT = 1;
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
@@ -576,6 +605,19 @@
                     month: partValue("month"),
                     day: partValue("day")
                 };
+            }
+
+            function getLocalEffectiveDate() {
+                var now = new Date();
+                var hour = now.getHours();
+                var localDate = new Date(now);
+                if (hour < 8) {
+                    localDate.setDate(localDate.getDate() - 1);
+                }
+                var y = localDate.getFullYear();
+                var m = String(localDate.getMonth() + 1).padStart(2, "0");
+                var d = String(localDate.getDate()).padStart(2, "0");
+                return String(y) + "-" + m + "-" + d;
             }
 
             function getDayOfYear(ymd) {
@@ -1237,6 +1279,7 @@
                 renderReadingPlan();
                 renderDailyVerse();
                 renderAnnouncements();
+                loadTrivia();
                 renderThisWeekEvents();
             });
 
@@ -1244,6 +1287,7 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderAnnouncements();
+                loadTrivia();
                 renderThisWeekEvents();
             });
 
@@ -1253,6 +1297,241 @@
             document.addEventListener("njc:admin-notices-updated", function () {
                 loadAnnouncements();
             });
+            document.addEventListener("njc:admin-trivia-updated", function () {
+                loadTrivia();
+            });
+            document.addEventListener("njc:trivia-points-updated", function () {
+                if (triviaScoreEl) {
+                    var pts = getTriviaPoints();
+                    triviaScoreEl.hidden = false;
+                    triviaScoreEl.textContent = T("home.triviaScore", "Your score: {count}").replace("{count}", String(pts));
+                }
+            });
+
+            function getTriviaUserId() {
+                var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                if (user && user.uid) {
+                    return "u:" + String(user.uid);
+                }
+                try {
+                    var gid = window.localStorage.getItem(TRIVIA_GUEST_ID_KEY);
+                    if (gid) return "g:" + gid;
+                    gid = "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+                    window.localStorage.setItem(TRIVIA_GUEST_ID_KEY, gid);
+                    return "g:" + gid;
+                } catch (e) {
+                    return "anon";
+                }
+            }
+
+            function getTriviaAnswered(date) {
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    return (data[uid] && data[uid][date]) || null;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function setTriviaAnswered(date, result) {
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    if (!data[uid]) data[uid] = {};
+                    data[uid][date] = result;
+                    window.localStorage.setItem(TRIVIA_ANSWERED_KEY, JSON.stringify(data));
+                } catch (e) {}
+            }
+
+            function getTriviaPoints() {
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    return Number(data[uid]) || 0;
+                } catch (e) {
+                    return 0;
+                }
+            }
+
+            function addTriviaPoints(n) {
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    data[uid] = (Number(data[uid]) || 0) + (Number(n) || 0);
+                    window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
+                    document.dispatchEvent(new CustomEvent("njc:trivia-points-updated", { detail: { points: data[uid] } }));
+                } catch (e) {}
+            }
+
+            function showTriviaWrongPopup(correctAnswer, card) {
+                if (!triviaWrongOverlay || !triviaWrongAnswer) return;
+                triviaWrongAnswer.textContent = correctAnswer || "";
+                triviaWrongOverlay.hidden = false;
+            }
+
+            function hideTriviaWrongPopup() {
+                if (triviaWrongOverlay) triviaWrongOverlay.hidden = true;
+            }
+
+            window.addEventListener("hashchange", function () {
+                var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+                if (route === "home" || route === "trivia") loadTrivia();
+            });
+
+            function loadTrivia() {
+                var hasPage = triviaLoading && triviaQuestionWrap && triviaQuestionText && triviaOptions && triviaEmpty;
+                var hasHome = triviaLoadingHome && triviaQuestionWrapHome && triviaQuestionTextHome && triviaOptionsHome && triviaEmptyHome;
+                if (!hasPage && !hasHome) return;
+                function setLoading(loading, wrap, empty, card) {
+                    if (loading) { loading.hidden = false; loading.textContent = T("home.triviaLoading", "Loading trivia...", card); }
+                    if (wrap) wrap.hidden = true;
+                    if (empty) empty.hidden = true;
+                }
+                function setMatch(match, loading, wrap, qText, ref, opts, empty, feedback, card, optsWrap, expandBtn, effectiveDate) {
+                    if (!loading || !wrap || !qText || !opts || !empty) return;
+                    loading.hidden = true;
+                    if (triviaScoreEl && card && card.id === "trivia-card") {
+                        var pts = getTriviaPoints();
+                        triviaScoreEl.hidden = false;
+                        triviaScoreEl.textContent = T("home.triviaScore", "Your score: {count}").replace("{count}", String(pts));
+                    }
+                    if (!match) {
+                        empty.hidden = false;
+                        empty.textContent = T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card);
+                        if (triviaScoreEl && card && card.id === "trivia-card") {
+                            triviaScoreEl.hidden = false;
+                        }
+                        return;
+                    }
+                    var question = String(match.question || "").trim();
+                    var options = Array.isArray(match.options) ? match.options : [];
+                    var correctIndex = Number(match.correctIndex) || 0;
+                    var correctAnswer = options[correctIndex] || "";
+                    var reference = String(match.reference || "").trim();
+                    empty.hidden = true;
+                    qText.textContent = question || T("home.triviaNoQuestion", "No question", card);
+                    if (ref) { ref.textContent = reference; ref.hidden = false; } else { ref.hidden = true; }
+                    opts.innerHTML = options.map(function (opt, index) {
+                        var label = String(opt || "").trim() || "-";
+                        return "<button type=\"button\" class=\"trivia-option-btn\" data-trivia-index=\"" + String(index) + "\" data-trivia-correct=\"" + (index === correctIndex ? "1" : "0") + "\">" + NjcEvents.escapeHtml(label) + "</button>";
+                    }).join("");
+                    opts.dataset.triviaCorrectAnswer = correctAnswer;
+                    wrap.hidden = false;
+                    if (feedback) feedback.hidden = true;
+                    var answered = effectiveDate ? getTriviaAnswered(effectiveDate) : null;
+                    if (optsWrap && expandBtn) {
+                        if (answered) {
+                            expandBtn.hidden = true;
+                            optsWrap.hidden = false;
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
+                            if (feedback) {
+                                feedback.hidden = false;
+                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                                feedback.dataset.state = answered === "correct" ? "success" : "error";
+                            }
+                        } else {
+                            expandBtn.hidden = false;
+                            expandBtn.classList.remove("expanded");
+                            optsWrap.hidden = true;
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
+                        }
+                    } else {
+                        if (answered) {
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
+                            if (feedback) {
+                                feedback.hidden = false;
+                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                                feedback.dataset.state = answered === "correct" ? "success" : "error";
+                            }
+                        } else {
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
+                        }
+                    }
+                }
+                function setError(loading, empty, card) {
+                    if (loading) loading.hidden = true;
+                    if (empty) { empty.hidden = false; empty.textContent = T("home.triviaError", "Could not load trivia. Try again later.", card); }
+                }
+                var effectiveDate = getLocalEffectiveDate();
+                if (hasPage) setLoading(triviaLoading, triviaQuestionWrap, triviaEmpty, triviaCard);
+                if (hasHome) setLoading(triviaLoadingHome, triviaQuestionWrapHome, triviaEmptyHome, triviaCardHome);
+                var timeoutMs = 15000;
+                var timeoutPromise = new Promise(function (_, reject) {
+                    setTimeout(function () { reject(new Error("Trivia load timeout")); }, timeoutMs);
+                });
+                Promise.race([
+                    fetch(adminTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                        .then(function (response) {
+                            if (response.status === 404) {
+                                return { entries: [] };
+                            }
+                            if (!response.ok) {
+                                throw new Error("Trivia load failed");
+                            }
+                            return response.json();
+                        }),
+                    timeoutPromise
+                ]).then(function (payload) {
+                        var entries = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.entries) ? payload.entries : []);
+                        var match = entries.find(function (item) {
+                            var showDate = String(item && (item.showDate || item.date) || "").trim();
+                            return showDate === effectiveDate;
+                        });
+                        if (hasPage) setMatch(match, triviaLoading, triviaQuestionWrap, triviaQuestionText, triviaReference, triviaOptions, triviaEmpty, triviaFeedback, triviaCard, null, null, effectiveDate);
+                        if (hasHome) setMatch(match, triviaLoadingHome, triviaQuestionWrapHome, triviaQuestionTextHome, triviaReferenceHome, triviaOptionsHome, triviaEmptyHome, triviaFeedbackHome, triviaCardHome, triviaOptionsWrapHome, triviaExpandBtnHome, effectiveDate);
+                    })
+                    .catch(function () {
+                        if (hasPage) setError(triviaLoading, triviaEmpty, triviaCard);
+                        if (hasHome) setError(triviaLoadingHome, triviaEmptyHome, triviaCardHome);
+                    });
+            }
+
+            function setupTriviaOptionClicks() {
+                document.addEventListener("click", function (event) {
+                    var btn = event.target.closest(".trivia-option-btn");
+                    if (!btn || btn.disabled) return;
+                    var opts = btn.closest(".trivia-options");
+                    var feedback = opts && opts.parentElement ? opts.parentElement.querySelector(".trivia-feedback") : null;
+                    var card = opts && opts.closest(".card") ? opts.closest(".card") : null;
+                    if (!opts || !feedback) return;
+                    var effectiveDate = getLocalEffectiveDate();
+                    if (getTriviaAnswered(effectiveDate)) return;
+                    var isCorrect = btn.getAttribute("data-trivia-correct") === "1";
+                    var correctAnswer = opts.dataset.triviaCorrectAnswer || "";
+                    setTriviaAnswered(effectiveDate, isCorrect ? "correct" : "wrong");
+                    opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
+                    feedback.hidden = false;
+                    if (isCorrect) {
+                        addTriviaPoints(TRIVIA_POINTS_PER_CORRECT);
+                        feedback.textContent = T("home.triviaCorrect", "Correct! Well done.", card) + " +" + TRIVIA_POINTS_PER_CORRECT + " " + T("home.triviaPoints", "pts", card);
+                        feedback.dataset.state = "success";
+                    } else {
+                        feedback.textContent = T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                        feedback.dataset.state = "error";
+                        showTriviaWrongPopup(correctAnswer, card);
+                    }
+                });
+            }
+            setupTriviaOptionClicks();
+
+            if (triviaExpandBtnHome && triviaOptionsWrapHome) {
+                triviaExpandBtnHome.addEventListener("click", function () {
+                    var expanded = triviaOptionsWrapHome.hidden;
+                    triviaOptionsWrapHome.hidden = !expanded;
+                    triviaExpandBtnHome.classList.toggle("expanded", !expanded);
+                });
+            }
+            if (triviaWrongBackdrop) {
+                triviaWrongBackdrop.addEventListener("click", hideTriviaWrongPopup);
+            }
+            if (triviaWrongClose) {
+                triviaWrongClose.addEventListener("click", hideTriviaWrongPopup);
+            }
 
             if (readingUnreadToggle) {
                 readingUnreadToggle.addEventListener("click", function () {
@@ -1341,5 +1620,6 @@
             renderDailyVerse();
             loadTodayReadingPlan();
             loadAnnouncements();
+            loadTrivia();
             loadThisWeekEvents();
         })();

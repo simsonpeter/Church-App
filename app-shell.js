@@ -37,6 +37,7 @@
         "menu.close": "பட்டியலை மூடு",
         "menu.bible": "வேதாகமம்",
         "menu.songbook": "பாடல் தொகுப்பு",
+        "menu.trivia": "வேத வினாடி",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -129,6 +130,20 @@
         "home.loadingWeekBody": "அடுத்த தேதிகளை கணக்கிட காத்திருக்கவும்.",
         "home.noEventsTitle": "இப்போது நிகழ்வுகள் இல்லை",
         "home.noEventsBody": "புதுப்பிப்புகளுக்கு நிகழ்வுகள் பக்கத்தை பார்க்கவும்.",
+        "home.triviaTitle": "இன்றைய வேத வினாடி",
+        "home.triviaSubtitle": "தமிழ் வேத வினாடி. காலை 8 மணிக்கு புதிய கேள்வி.",
+        "home.triviaLoading": "வினாடி ஏற்றப்படுகிறது...",
+        "home.triviaEmpty": "இன்று வினாடி இல்லை. நாளை காலை 8 மணிக்கு பார்க்கவும்.",
+        "home.triviaError": "வினாடியை ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "home.triviaCorrect": "சரி! நல்லது.",
+        "home.triviaWrong": "சரியல்ல. நாளை மீண்டும் முயற்சிக்கவும்.",
+        "home.triviaShowOptions": "விருப்பங்களை காட்டு",
+        "home.triviaWrongTitle": "தவறு!",
+        "home.triviaWrongMessage": "சரியான விடை:",
+        "home.triviaWrongClose": "சரி",
+        "home.triviaPoints": "புள்ளிகள்",
+        "home.triviaScore": "உங்கள் மதிப்பெண்: {count}",
+        "home.triviaNoQuestion": "கேள்வி இல்லை",
         "home.loadEventsErrorTitle": "இந்த வார நிகழ்வுகளை ஏற்ற முடியவில்லை",
         "home.loadEventsErrorBody": "புதுப்பிக்க நிகழ்வுகள் தாவலைத் திறக்கவும்.",
         "actions.events": "நிகழ்வு",
@@ -265,6 +280,8 @@
         "sermons.favoriteRemove": "பிடித்ததில் இருந்து நீக்கு",
         "songbook.eyebrow": "பாடல்கள்",
         "songbook.title": "NJC பாடல் தொகுப்பு",
+        "trivia.eyebrow": "வேத வினாடி",
+        "trivia.title": "இன்றைய வேத வினாடி",
         "songbook.subtitle": "NJC Songbook GitHub-இல் இருந்து பாடல்கள்.",
         "songbook.searchPlaceholder": "தலைப்பு, எழுத்தாளர், பாடல்வரியால் தேடுக",
         "songbook.loadingTitle": "பாடல்கள் ஏற்றப்படுகின்றன...",
@@ -369,7 +386,7 @@
         "contact.prayerWallMessagePlaceholder": "ஜெப வேண்டுதல் எழுதுங்கள்",
         "contact.prayerWallAnonymousLabel": "அடையாளமில்லாமல் பகிர்",
         "contact.prayerWallUrgentLabel": "அவசர வேண்டுதல்",
-        "contact.prayerWallPastorOnlyLabel": "மந்திரிக்கு மட்டும் (நிர்வாகிக்கு மட்டும் தெரியும்)",
+        "contact.prayerWallPastorOnlyLabel": "மந்திரிக்கு மட்டும் (மந்திரிக்கு மட்டும் தெரியும்)",
         "contact.prayerWallPastorOnlyBadge": "மந்திரிக்கு மட்டும்",
         "contact.prayerWallUrgentBadge": "அவசரம்",
         "contact.prayerWallUrgentRibbon": "அவசர ஜெபம்",
@@ -504,6 +521,34 @@
         "admin.eventDeleted": "நிகழ்வு நீக்கப்பட்டது.",
         "admin.eventEmptyTitle": "நிகழ்வுகள் இல்லை",
         "admin.eventEmptyBody": "நீங்கள் சேர்த்த நிகழ்வுகள் இங்கே தோன்றும்.",
+        "admin.triviaTitle": "வேத வினா (தமிழ்)",
+        "admin.triviaInfo": "தமிழில் வேத வினாக்களை சேர்க்கவும். 4 விடை விருப்பங்கள் தேவை.",
+        "admin.triviaQuestionPlaceholder": "வினா தமிழில்",
+        "admin.triviaOption1": "விருப்பம் 1",
+        "admin.triviaOption2": "விருப்பம் 2",
+        "admin.triviaOption3": "விருப்பம் 3",
+        "admin.triviaOption4": "விருப்பம் 4",
+        "admin.triviaCorrectLabel": "சரியான விருப்பம்:",
+        "admin.triviaReferencePlaceholder": "வேத மேற்கோள் (விரும்பினால்)",
+        "admin.triviaDatePlaceholder": "தேதி",
+        "admin.triviaPublish": "வினா சேர்",
+        "admin.triviaManageTitle": "சமீப வினாக்கள்",
+        "admin.triviaEmptyTitle": "வினாக்கள் இல்லை",
+        "admin.triviaEmptyBody": "தமிழில் வேத வினாக்களை சேர்க்கவும். 4 விடை விருப்பங்கள் தேவை.",
+        "admin.saving": "சேமிக்கிறது...",
+        "admin.triviaNeedFields": "வினா மற்றும் 4 விருப்பங்களை உள்ளிடவும்.",
+        "admin.triviaNeedDate": "சரியான தேதியை உள்ளிடவும் (YYYY-MM-DD).",
+        "admin.triviaSaved": "வினா சேர்க்கப்பட்டது.",
+        "admin.triviaEdit": "திருத்து",
+        "admin.triviaDelete": "நீக்கு",
+        "admin.triviaDeleteConfirm": "இந்த வினாவை நீக்கவா?",
+        "admin.triviaEditPromptQuestion": "வினா திருத்து (தமிழ்)",
+        "admin.triviaEditPromptOption": "விருப்பம்",
+        "admin.triviaEditPromptCorrect": "சரியான விருப்பம் (1-4)",
+        "admin.triviaEditPromptReference": "மேற்கோள் திருத்து (விரும்பினால்)",
+        "admin.triviaEditPromptDate": "தேதி திருத்து (YYYY-MM-DD)",
+        "admin.triviaUpdated": "வினா புதுப்பிக்கப்பட்டது.",
+        "admin.triviaDeleted": "வினா நீக்கப்பட்டது.",
         "admin.sermonTitle": "பிரசங்கம் சேர்க்க",
         "admin.sermonTitlePlaceholder": "தமிழ் தலைப்பு",
         "admin.sermonSubtitlePlaceholder": "ஆங்கில துணைத்தலைப்பு",
@@ -524,6 +569,30 @@
         "admin.sermonDeleted": "பிரசங்கம் நீக்கப்பட்டது.",
         "admin.sermonEmptyTitle": "பிரசங்கங்கள் இல்லை",
         "admin.sermonEmptyBody": "நீங்கள் சேர்த்த பிரசங்கங்கள் இங்கே தோன்றும்.",
+        "admin.triviaTitle": "வேத வினாடி (தமிழ்)",
+        "admin.triviaInfo": "தமிழ் வேத வினாடி சேர்க்கவும். திட்டமிடப்பட்ட தேதியில் காலை 8 மணிக்கு காண்பிக்கப்படும்.",
+        "admin.triviaQuestionPlaceholder": "கேள்வி (தமிழ்)",
+        "admin.triviaOptionsPlaceholder": "விருப்பங்கள் (ஒரு வரியில் ஒன்று)",
+        "admin.triviaCorrectPlaceholder": "சரியான விருப்ப குறியீடு (0 முதல்)",
+        "admin.triviaReferencePlaceholder": "வேத மேற்கோள் (எ.கா. யோவான் 3:16)",
+        "admin.triviaAdd": "வினாடி சேர்க்க",
+        "admin.triviaManageTitle": "திட்டமிடப்பட்ட வினாடிகள்",
+        "admin.triviaEmptyTitle": "வேத வினாடி இல்லை",
+        "admin.triviaEmptyBody": "தமிழ் வேத வினாடி கேள்விகளை சேர்க்கவும். திட்டமிடப்பட்ட தேதியில் காலை 8 மணிக்கு காண்பிக்கப்படும்.",
+        "admin.triviaQuestion": "கேள்வி",
+        "admin.triviaEdit": "திருத்து",
+        "admin.triviaDelete": "நீக்கு",
+        "admin.triviaDeleteConfirm": "இந்த வினாடியை நீக்கவா?",
+        "admin.triviaEditPromptQuestion": "கேள்வியை திருத்து (தமிழ்)",
+        "admin.triviaEditPromptOptions": "விருப்பங்களை திருத்து (ஒரு வரியில் ஒன்று)",
+        "admin.triviaEditPromptCorrect": "சரியான விருப்ப குறியீடு (0 முதல்)",
+        "admin.triviaEditPromptReference": "வேத மேற்கோள் (விருப்பம்)",
+        "admin.triviaEditPromptShowDate": "காண்பிக்கும் தேதி (YYYY-MM-DD)",
+        "admin.triviaUpdated": "வினாடி புதுப்பிக்கப்பட்டது.",
+        "admin.triviaDeleted": "வினாடி நீக்கப்பட்டது.",
+        "admin.triviaSaved": "வேத வினாடி சேர்க்கப்பட்டது.",
+        "admin.triviaNeedFields": "கேள்வி, குறைந்தது ஒரு விருப்பம் மற்றும் காண்பிக்கும் தேதியை உள்ளிடவும்.",
+        "admin.triviaNeedDate": "காண்பிக்கும் தேதி YYYY-MM-DD ஆக இருக்க வேண்டும்.",
         "admin.prayerTitle": "அவசர ஜெபத்தை பின் செய்",
         "admin.prayerInfo": "ஜெப வேண்டுதல்களின் அவசர நிலையை மாற்றவும்.",
         "admin.prayerPin": "அவசரமாக குறி",
@@ -575,6 +644,7 @@
         "profile.saved": "சுயவிவரம் சேமிக்கப்பட்டது.",
         "profile.savedLocal": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. இணையம் கிடைக்கும் போது மேகத்தில் ஒத்திசைக்கும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
+        "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
         "settings.close": "மூடு"
     };
 
@@ -2255,6 +2325,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var triviaLink = document.createElement("a");
+        triviaLink.className = "header-menu-link";
+        triviaLink.href = "#trivia";
+        triviaLink.innerHTML = "<i class=\"fa-solid fa-question-circle\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(triviaLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         panel.appendChild(utilityCard);
@@ -2454,6 +2530,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var triviaLabel = t("menu.trivia", "Trivia");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2504,6 +2581,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var triviaNode = triviaLink.querySelector("span");
+            if (triviaNode) {
+                triviaNode.textContent = triviaLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -2533,12 +2614,14 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isTrivia = getCurrentRoute() === "trivia";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            triviaLink.classList.toggle("active", isTrivia);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
@@ -2875,6 +2958,7 @@
         }
 
         document.addEventListener("njc:langchange", refreshSettingsItems);
+        document.addEventListener("njc:themechange", refreshSettingsItems);
         document.addEventListener("njc:notificationstatus", refreshSettingsItems);
         document.addEventListener("njc:inapp-notifications-updated", refreshSettingsItems);
     }
@@ -3153,6 +3237,7 @@
             applyTheme(nextTheme);
             persistTheme(nextTheme);
             setToggleIcon(button, nextTheme);
+            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
         });
 
         ensureHeaderControls(header).appendChild(button);
@@ -3164,6 +3249,7 @@
                     var systemTheme = getSystemTheme();
                     applyTheme(systemTheme);
                     setToggleIcon(button, systemTheme);
+                    document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: systemTheme } }));
                 }
             });
         }
