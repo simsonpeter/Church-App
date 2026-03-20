@@ -2777,6 +2777,47 @@
                 : t("settings.themeLight", "Light mode");
         }
 
+        function createThemeSettingsItem() {
+            var realButton = document.getElementById("theme-toggle-btn");
+            if (!realButton) {
+                return null;
+            }
+            var trigger = document.createElement("button");
+            trigger.type = "button";
+            trigger.className = "theme-toggle settings-theme-trigger";
+            trigger.setAttribute("aria-label", t("toggle.theme.toDark", "Switch to dark mode"));
+            var icon = document.documentElement.getAttribute("data-theme") === "dark" ? "fa-sun" : "fa-moon";
+            trigger.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
+            var item = document.createElement("div");
+            item.className = "settings-control-item";
+            var copy = document.createElement("div");
+            copy.className = "settings-control-copy";
+            var title = document.createElement("strong");
+            title.className = "settings-control-title";
+            var state = document.createElement("span");
+            state.className = "settings-control-state";
+            copy.appendChild(title);
+            copy.appendChild(state);
+            item.appendChild(trigger);
+            item.appendChild(copy);
+            function refresh() {
+                title.textContent = t("settings.theme", "Theme");
+                state.textContent = getThemeStateLabel();
+                state.hidden = !state.textContent;
+                var icon = document.documentElement.getAttribute("data-theme") === "dark" ? "fa-sun" : "fa-moon";
+                trigger.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
+            }
+            trigger.addEventListener("click", function () {
+                realButton.click();
+            });
+            item.addEventListener("click", function (event) {
+                if (event.target !== trigger && !trigger.contains(event.target)) {
+                    realButton.click();
+                }
+            });
+            return { node: item, refresh: refresh };
+        }
+
         function getLanguageStateLabel() {
             return activeLanguage === "ta"
                 ? t("settings.languageTamil", "Tamil")
@@ -2839,7 +2880,7 @@
         controls.innerHTML = "";
         var items = [];
         if (themeButton) {
-            var themeItem = createSettingsItem(themeButton, "settings.theme", "Theme", getThemeStateLabel);
+            var themeItem = createThemeSettingsItem();
             if (themeItem) {
                 controls.appendChild(themeItem.node);
                 items.push(themeItem);
@@ -2875,6 +2916,7 @@
         }
 
         document.addEventListener("njc:langchange", refreshSettingsItems);
+        document.addEventListener("njc:themechange", refreshSettingsItems);
         document.addEventListener("njc:notificationstatus", refreshSettingsItems);
         document.addEventListener("njc:inapp-notifications-updated", refreshSettingsItems);
     }
@@ -3134,15 +3176,10 @@
     }
 
     function setupThemeToggle() {
-        var header = document.querySelector(".app-header");
-        if (!header || document.getElementById("theme-toggle-btn")) {
+        var button = document.getElementById("theme-toggle-btn");
+        if (!button) {
             return;
         }
-
-        var button = document.createElement("button");
-        button.id = "theme-toggle-btn";
-        button.className = "theme-toggle";
-        button.type = "button";
 
         var activeTheme = getActiveTheme();
         applyTheme(activeTheme);
@@ -3153,9 +3190,8 @@
             applyTheme(nextTheme);
             persistTheme(nextTheme);
             setToggleIcon(button, nextTheme);
+            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
         });
-
-        ensureHeaderControls(header).appendChild(button);
 
         var media = window.matchMedia("(prefers-color-scheme: dark)");
         if (media && media.addEventListener) {
@@ -3164,6 +3200,7 @@
                     var systemTheme = getSystemTheme();
                     applyTheme(systemTheme);
                     setToggleIcon(button, systemTheme);
+                    document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: systemTheme } }));
                 }
             });
         }
