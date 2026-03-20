@@ -2917,138 +2917,199 @@ body.prayer-detail-open {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --bg-top: #311313;
-        --bg-mid: #240f0f;
-        --bg-bottom: #1a0b0b;
-        --surface: #2b1515;
-        --surface-soft: #381b1b;
-        --text: #fff2f2;
-        --muted: #e1bcbc;
-        --primary: #ff7f7f;
-        --primary-soft: #5b2525;
-        --line: #6f3232;
-        --header-start: #b71c1c;
-        --header-end: #f44336;
-        --shadow: 0 18px 45px rgba(3, 6, 24, 0.45);
+    :root:not([data-theme="light"]) {
+        --bg-top: #0a0a0a;
+        --bg-mid: #111111;
+        --bg-bottom: #1a1a1a;
+        --surface: #1a1a1a;
+        --surface-soft: #252525;
+        --text: #ffffff;
+        --muted: #a0a0a0;
+        --primary: #e0e0e0;
+        --primary-soft: #333333;
+        --line: #333333;
+        --header-start: #000000;
+        --header-end: #1a1a1a;
+        --shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
     }
 
-    .tab-nav {
-        background: rgba(37, 16, 16, 0.93);
+    :root:not([data-theme="light"]) .tab-nav {
+        background: rgba(26, 26, 26, 0.95);
     }
 
-    .tab {
-        color: #f2caca;
+    :root:not([data-theme="light"]) .tab {
+        color: #e0e0e0;
     }
 
-    .tab-icon {
-        background: #5f2727;
-        color: #fff1f1;
+    :root:not([data-theme="light"]) .tab-icon {
+        background: #333333;
+        color: #ffffff;
     }
 
-    .hero-card {
-        background: linear-gradient(160deg, #4a2020, #391818);
+    :root:not([data-theme="light"]) .hero-card {
+        background: linear-gradient(160deg, #252525, #1a1a1a);
     }
 
-    .verse-card {
-        background: linear-gradient(160deg, #3e1b1b, #301414);
+    :root:not([data-theme="light"]) .verse-card {
+        background: linear-gradient(160deg, #252525, #1a1a1a);
     }
 
-    .sermon-player-sheet {
-        background: linear-gradient(180deg, #2f1717, #241111);
-        border-color: #6c3434;
+    :root:not([data-theme="light"]) .sermon-player-sheet {
+        background: linear-gradient(180deg, #1a1a1a, #111111);
+        border-color: #333333;
     }
 
-    .sermon-player-display {
-        background: rgba(43, 21, 21, 0.82);
-        border-color: #764040;
+    :root:not([data-theme="light"]) .sermon-player-display {
+        background: rgba(26, 26, 26, 0.9);
+        border-color: #404040;
     }
 
-    .ipod-wheel {
-        background: linear-gradient(145deg, #3d1f1f, #2b1515);
-        border-color: #6b3333;
+    :root:not([data-theme="light"]) .ipod-wheel {
+        background: linear-gradient(145deg, #252525, #1a1a1a);
+        border-color: #333333;
     }
 
-    .wheel-btn {
-        color: #ffb8b8;
+    :root:not([data-theme="light"]) .wheel-btn {
+        color: #ffffff;
     }
 
-    .mini-sermon-player {
-        background: rgba(40, 17, 17, 0.96);
-        border-color: #6b3333;
+    :root:not([data-theme="light"]) .mini-sermon-player {
+        background: rgba(26, 26, 26, 0.98);
+        border-color: #333333;
     }
 
-    .mini-player-btn {
-        background: #5f2727;
-        color: #ffd8d8;
+    :root:not([data-theme="light"]) .mini-player-btn {
+        background: #333333;
+        color: #ffffff;
     }
 }
 
 html[data-theme="dark"] {
-    --bg-top: #311313;
-    --bg-mid: #240f0f;
-    --bg-bottom: #1a0b0b;
-    --surface: #2b1515;
-    --surface-soft: #381b1b;
-    --text: #fff2f2;
-    --muted: #e1bcbc;
-    --primary: #ff7f7f;
-    --primary-soft: #5b2525;
-    --line: #6f3232;
-    --header-start: #b71c1c;
-    --header-end: #f44336;
-    --shadow: 0 18px 45px rgba(3, 6, 24, 0.45);
+    --bg-top: #0a0a0a;
+    --bg-mid: #111111;
+    --bg-bottom: #1a1a1a;
+    --surface: #1a1a1a;
+    --surface-soft: #252525;
+    --text: #ffffff;
+    --muted: #a0a0a0;
+    --primary: #e0e0e0;
+    --primary-soft: #333333;
+    --line: #333333;
+    --header-start: #000000;
+    --header-end: #1a1a1a;
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
     color-scheme: dark;
 }
 
 html[data-theme="dark"] .tab-nav {
-    background: rgba(37, 16, 16, 0.93);
+    background: rgba(26, 26, 26, 0.95);
 }
 
 html[data-theme="dark"] .tab {
-    color: #f2caca;
+    color: #e0e0e0;
 }
 
 html[data-theme="dark"] .tab-icon {
-    background: #5f2727;
-    color: #fff1f1;
+    background: #333333;
+    color: #ffffff;
 }
 
 html[data-theme="dark"] .hero-card {
-    background: linear-gradient(160deg, #4a2020, #391818);
+    background: linear-gradient(160deg, #252525, #1a1a1a);
 }
 
 html[data-theme="dark"] .verse-card {
-    background: linear-gradient(160deg, #3e1b1b, #301414);
+    background: linear-gradient(160deg, #252525, #1a1a1a);
 }
 
 html[data-theme="dark"] .sermon-player-sheet {
-    background: linear-gradient(180deg, #2f1717, #241111);
-    border-color: #6c3434;
+    background: linear-gradient(180deg, #1a1a1a, #111111);
+    border-color: #333333;
 }
 
 html[data-theme="dark"] .sermon-player-display {
-    background: rgba(43, 21, 21, 0.82);
-    border-color: #764040;
+    background: rgba(26, 26, 26, 0.9);
+    border-color: #404040;
 }
 
 html[data-theme="dark"] .ipod-wheel {
-    background: linear-gradient(145deg, #3d1f1f, #2b1515);
-    border-color: #6b3333;
+    background: linear-gradient(145deg, #252525, #1a1a1a);
+    border-color: #333333;
 }
 
 html[data-theme="dark"] .wheel-btn {
-    color: #ffb8b8;
+    color: #ffffff;
 }
 
 html[data-theme="dark"] .mini-sermon-player {
-    background: rgba(40, 17, 17, 0.96);
-    border-color: #6b3333;
+    background: rgba(26, 26, 26, 0.98);
+    border-color: #333333;
 }
 
 html[data-theme="dark"] .mini-player-btn {
-    background: #5f2727;
-    color: #ffd8d8;
+    background: #333333;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .prayer-wall-tab.active {
+    border-color: rgba(255, 255, 255, 0.25);
+    color: #e0e0e0;
+}
+
+html[data-theme="dark"] .prayer-list-item-urgent {
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .prayer-list-item-urgent .prayer-list-name {
+    color: #e0e0e0;
+}
+
+html[data-theme="dark"] .prayer-list-chevron {
+    color: #a0a0a0;
+}
+
+html[data-theme="dark"] .prayer-list-urgent-badge {
+    background: linear-gradient(145deg, #404040, #333333);
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .prayer-list-corner-ribbon {
+    background: linear-gradient(135deg, #404040, #333333);
+}
+
+html[data-theme="dark"] .prayer-action-btn.active {
+    border-color: #404040;
+    color: #e0e0e0;
+}
+
+html[data-theme="dark"] .prayer-action-danger {
+    color: #e0e0e0;
+    border-color: #505050;
+}
+
+html[data-theme="dark"] .offline-badge {
+    background: #333333;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .prayer-list-item-urgent::before {
+    background: linear-gradient(180deg, #505050, #404040);
+    box-shadow: 1px 0 6px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .prayer-list-translated-note,
+html[data-theme="dark"] .prayer-detail-translated-note {
+    color: #a0a0a0;
+}
+
+html[data-theme="dark"] .prayer-detail-urgent-badge {
+    background: linear-gradient(145deg, #404040, #333333);
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .reading-progress-fill {
+    background: linear-gradient(90deg, #505050, #707070);
 }
 
 html[data-theme="light"] {
