@@ -1426,7 +1426,9 @@
                     var answered = effectiveDate ? getTriviaAnswered(effectiveDate) : null;
                     if (optsWrap && expandBtn) {
                         if (answered) {
-                            expandBtn.hidden = true;
+                            expandBtn.hidden = false;
+                            expandBtn.disabled = true;
+                            expandBtn.classList.add("expanded");
                             optsWrap.hidden = false;
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
                             if (feedback) {

@@ -489,6 +489,11 @@ body.splash-active {
     transform: rotate(180deg);
 }
 
+.trivia-expand-btn:disabled {
+    opacity: 0.7;
+    cursor: default;
+}
+
 .trivia-options-wrap {
     margin-top: 12px;
 }
