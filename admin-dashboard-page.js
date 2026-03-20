@@ -5,6 +5,7 @@
     var ADMIN_EVENTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
     var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
+    var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-bible-trivia/entries";
     var MAX_ENTRIES = 250;
 
     var refreshButton = document.getElementById("admin-dashboard-refresh");
@@ -18,6 +19,8 @@
     var eventList = document.getElementById("admin-event-list");
     var sermonList = document.getElementById("admin-sermon-list");
     var prayerList = document.getElementById("admin-prayer-list");
+    var triviaList = document.getElementById("admin-trivia-list");
+    var triviaForm = document.getElementById("admin-trivia-form");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -53,11 +56,18 @@
     var sermonAudioInput = document.getElementById("admin-sermon-audio");
     var sermonSubmit = document.getElementById("admin-sermon-submit");
 
+    var triviaQuestionInput = document.getElementById("admin-trivia-question");
+    var triviaAnswerInput = document.getElementById("admin-trivia-answer");
+    var triviaReferenceInput = document.getElementById("admin-trivia-reference");
+    var triviaDateInput = document.getElementById("admin-trivia-date");
+    var triviaSubmit = document.getElementById("admin-trivia-submit");
+
     var cachedNotices = [];
     var cachedBroadcasts = [];
     var cachedEvents = [];
     var cachedSermons = [];
     var cachedPrayers = [];
+    var cachedTrivia = [];
     var busy = false;
 
     if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !noticeForm || !broadcastForm || !eventForm || !sermonForm) {
@@ -129,6 +139,11 @@
         prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
             button.disabled = busy;
         });
+        if (triviaList) {
+            triviaList.querySelectorAll("button[data-admin-trivia-id]").forEach(function (button) {
+                button.disabled = busy;
+            });
+        }
     }
 
     function showNote(state, key, fallback) {
@@ -300,6 +315,51 @@
                 "</li>";
         }).join("");
         prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
+    function renderTriviaList() {
+        if (!triviaList) {
+            return;
+        }
+        if (!cachedTrivia.length) {
+            triviaList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.triviaEmptyTitle", "No trivia yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.triviaEmptyBody", "Add Bible trivia questions in Tamil. They will appear on the home page by scheduled date.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = cachedTrivia.slice().sort(function (a, b) {
+            var aDate = String((a && a.date) || "");
+            var bDate = String((b && b.date) || "");
+            var cmp = bDate.localeCompare(aDate);
+            if (cmp !== 0) {
+                return cmp;
+            }
+            var aTime = String((a && (a.updatedAt || a.createdAt)) || "");
+            var bTime = String((b && (b.updatedAt || b.createdAt)) || "");
+            return bTime.localeCompare(aTime);
+        }).slice(0, 50);
+        triviaList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry && entry.id || "").trim();
+            var questionTa = String(entry && entry.questionTa || "").trim();
+            var answerTa = String(entry && entry.answerTa || "").trim();
+            var reference = String(entry && entry.reference || "").trim();
+            var date = String(entry && entry.date || "").trim();
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(questionTa || T("admin.triviaTitle", "Bible Trivia")) + "</h3>" +
+                "  <p class=\"page-note\">" + escapeHtml(date || "-") + (reference ? (" • " + escapeHtml(reference)) : "") + "</p>" +
+                (answerTa ? ("  <p class=\"admin-item-body\">" + escapeHtml(answerTa.slice(0, 80)) + (answerTa.length > 80 ? "…" : "") + "</p>") : "") +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-trivia-id=\"" + escapeHtml(id) + "\" data-admin-trivia-action=\"edit\">" + escapeHtml(T("admin.triviaEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-trivia-id=\"" + escapeHtml(id) + "\" data-admin-trivia-action=\"delete\">" + escapeHtml(T("admin.triviaDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        triviaList.querySelectorAll("button[data-admin-trivia-id]").forEach(function (button) {
             button.disabled = busy;
         });
     }
@@ -482,6 +542,12 @@
             "<li>" +
             "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
             "</li>";
+        if (triviaList) {
+            triviaList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+                "</li>";
+        }
         statNotices.textContent = "0";
         statEvents.textContent = "0";
         statSermons.textContent = "0";
@@ -502,6 +568,11 @@
         sermonForm.querySelectorAll("input,button").forEach(function (node) {
             node.disabled = !active;
         });
+        if (triviaForm) {
+            triviaForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -515,13 +586,14 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
             renderEventList();
             renderSermonList();
             renderPrayerList();
+            renderTriviaList();
             return;
         }
         setBusyState(true);
@@ -531,7 +603,8 @@
             fetchMantleEntries(ADMIN_BROADCASTS_URL),
             fetchMantleEntries(ADMIN_EVENTS_URL),
             fetchMantleEntries(ADMIN_SERMONS_URL),
-            fetchMantleEntries(PRAYER_WALL_URL)
+            fetchMantleEntries(PRAYER_WALL_URL),
+            fetchMantleEntries(TRIVIA_URL)
         ]).then(function (result) {
             cachedNotices = Array.isArray(result[0]) ? result[0] : [];
             cachedBroadcasts = Array.isArray(result[1]) ? result[1] : [];
@@ -540,12 +613,14 @@
             cachedPrayers = (Array.isArray(result[4]) ? result[4] : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item.id);
             });
+            cachedTrivia = Array.isArray(result[5]) ? result[5] : [];
             renderStats();
             renderNoticeList();
             renderBroadcastList();
             renderEventList();
             renderSermonList();
             renderPrayerList();
+            renderTriviaList();
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
         }).finally(function () {
@@ -740,6 +815,52 @@
             setBusyState(false);
         });
     });
+
+    if (triviaForm && triviaQuestionInput && triviaAnswerInput && triviaDateInput) {
+        triviaForm.addEventListener("submit", function (event) {
+            event.preventDefault();
+            if (busy || !isAdminUser()) {
+                return;
+            }
+            var questionTa = String(triviaQuestionInput.value || "").trim();
+            var answerTa = String(triviaAnswerInput.value || "").trim();
+            var reference = String(triviaReferenceInput && triviaReferenceInput.value || "").trim();
+            var date = String(triviaDateInput.value || "").trim();
+            if (!questionTa || !answerTa || !date) {
+                showNote("validation", "admin.triviaNeedFields", "Please enter question, answer and date.");
+                return;
+            }
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+                showNote("validation", "admin.triviaNeedDate", "Please enter a valid date (YYYY-MM-DD).");
+                return;
+            }
+            setBusyState(true);
+            prependAndSave(TRIVIA_URL, cachedTrivia, {
+                id: makeEntryId("trivia"),
+                questionTa: questionTa,
+                answerTa: answerTa,
+                reference: reference,
+                date: date,
+                createdAt: new Date().toISOString(),
+                createdByEmail: normalizeEmail(getUser() && getUser().email)
+            }).then(function (entries) {
+                cachedTrivia = entries;
+                triviaQuestionInput.value = "";
+                triviaAnswerInput.value = "";
+                if (triviaReferenceInput) {
+                    triviaReferenceInput.value = "";
+                }
+                triviaDateInput.value = "";
+                renderTriviaList();
+                showNote("success", "admin.triviaSaved", "Trivia added.");
+                document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
 
     noticeList.addEventListener("click", function (event) {
         var button = event.target.closest("button[data-admin-notice-id][data-admin-notice-action]");
@@ -1149,6 +1270,93 @@
         });
     });
 
+    if (triviaList) {
+        triviaList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-trivia-id][data-admin-trivia-action]");
+            if (!button || busy || !isAdminUser()) {
+                return;
+            }
+            var triviaId = String(button.getAttribute("data-admin-trivia-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-trivia-action") || "").trim();
+            if (!triviaId || (action !== "edit" && action !== "delete")) {
+                return;
+            }
+            var source = cachedTrivia.slice(0, MAX_ENTRIES);
+            var targetIndex = source.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === triviaId;
+            });
+            if (targetIndex < 0) {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+                return;
+            }
+            if (action === "delete") {
+                var confirmed = window.confirm(T("admin.triviaDeleteConfirm", "Delete this trivia?"));
+                if (!confirmed) {
+                    return;
+                }
+                source.splice(targetIndex, 1);
+                setBusyState(true);
+                saveMantleEntries(TRIVIA_URL, source).then(function () {
+                    return fetchMantleEntries(TRIVIA_URL);
+                }).then(function (entries) {
+                    cachedTrivia = Array.isArray(entries) ? entries : [];
+                    renderTriviaList();
+                    showNote("success", "admin.triviaDeleted", "Trivia deleted.");
+                    document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+                return;
+            }
+            var current = source[targetIndex] || {};
+            var nextQuestion = window.prompt(T("admin.triviaEditPromptQuestion", "Edit question (Tamil)"), String(current.questionTa || ""));
+            if (nextQuestion === null) {
+                return;
+            }
+            var nextAnswer = window.prompt(T("admin.triviaEditPromptAnswer", "Edit answer (Tamil)"), String(current.answerTa || ""));
+            if (nextAnswer === null) {
+                return;
+            }
+            var nextReference = window.prompt(T("admin.triviaEditPromptReference", "Edit reference (optional)"), String(current.reference || ""));
+            if (nextReference === null) {
+                return;
+            }
+            var nextDate = window.prompt(T("admin.triviaEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
+            if (nextDate === null) {
+                return;
+            }
+            var cleanQuestion = String(nextQuestion || "").trim();
+            var cleanAnswer = String(nextAnswer || "").trim();
+            var cleanDate = String(nextDate || "").trim();
+            if (!cleanQuestion || !cleanAnswer || !/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+                showNote("validation", "admin.triviaNeedFields", "Please enter question, answer and valid date.");
+                return;
+            }
+            source[targetIndex] = Object.assign({}, current, {
+                questionTa: cleanQuestion,
+                answerTa: cleanAnswer,
+                reference: String(nextReference || "").trim(),
+                date: cleanDate,
+                updatedAt: new Date().toISOString()
+            });
+            setBusyState(true);
+            saveMantleEntries(TRIVIA_URL, source).then(function () {
+                return fetchMantleEntries(TRIVIA_URL);
+            }).then(function (entries) {
+                cachedTrivia = Array.isArray(entries) ? entries : [];
+                renderTriviaList();
+                showNote("success", "admin.triviaUpdated", "Trivia updated.");
+                document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
+
     refreshButton.addEventListener("click", function () {
         loadDashboard(true);
     });
@@ -1170,6 +1378,7 @@
             renderEventList();
             renderSermonList();
             renderPrayerList();
+            renderTriviaList();
         }
     });
 

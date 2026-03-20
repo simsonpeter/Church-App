@@ -22,7 +22,16 @@
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+            var bibleTriviaUrl = "https://mantledb.sh/v2/njc-belgium-bible-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
+            var bibleTriviaQuestion = document.getElementById("bible-trivia-question");
+            var bibleTriviaReveal = document.getElementById("bible-trivia-reveal");
+            var bibleTriviaAnswer = document.getElementById("bible-trivia-answer");
+            var bibleTriviaReference = document.getElementById("bible-trivia-reference");
+            var bibleTriviaLoading = document.getElementById("bible-trivia-loading");
+            var bibleTriviaEmpty = document.getElementById("bible-trivia-empty");
+            var bibleTriviaContent = document.getElementById("bible-trivia-content");
+            var bibleTriviaCard = document.getElementById("bible-trivia-card");
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
@@ -503,6 +512,74 @@
 
             function getTodayKey() {
                 return String(todayYmd.year) + "-" + String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
+            }
+
+            function fetchBibleTrivia() {
+                return fetch(bibleTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                    .then(function (response) {
+                        if (response.status === 404) {
+                            return [];
+                        }
+                        if (!response.ok) {
+                            throw new Error("Load trivia failed");
+                        }
+                        return response.json().then(function (payload) {
+                            return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                        });
+                    })
+                    .catch(function () {
+                        return [];
+                    });
+            }
+
+            function renderBibleTrivia(entries) {
+                if (!bibleTriviaQuestion || !bibleTriviaReveal || !bibleTriviaAnswer || !bibleTriviaReference || !bibleTriviaLoading || !bibleTriviaEmpty || !bibleTriviaContent) {
+                    return;
+                }
+                bibleTriviaLoading.hidden = true;
+                var todayKey = getTodayKey();
+                var forToday = (Array.isArray(entries) ? entries : []).filter(function (e) {
+                    var d = String(e && e.date || "").trim();
+                    return d === todayKey;
+                });
+                if (forToday.length === 0) {
+                    bibleTriviaContent.hidden = true;
+                    bibleTriviaEmpty.hidden = false;
+                    return;
+                }
+                bibleTriviaEmpty.hidden = true;
+                bibleTriviaContent.hidden = false;
+                var item = forToday[0];
+                var questionTa = String(item.questionTa || "").trim();
+                var answerTa = String(item.answerTa || "").trim();
+                var reference = String(item.reference || "").trim();
+                bibleTriviaQuestion.textContent = questionTa || T("home.triviaEmpty", "No trivia for today.", bibleTriviaCard);
+                bibleTriviaReveal.hidden = false;
+                bibleTriviaReveal.disabled = false;
+                bibleTriviaAnswer.hidden = true;
+                bibleTriviaAnswer.textContent = answerTa;
+                if (reference) {
+                    bibleTriviaReference.hidden = false;
+                    bibleTriviaReference.textContent = reference;
+                } else {
+                    bibleTriviaReference.hidden = true;
+                }
+            }
+
+            function loadBibleTrivia() {
+                if (!bibleTriviaLoading) {
+                    return;
+                }
+                bibleTriviaLoading.hidden = false;
+                if (bibleTriviaContent) {
+                    bibleTriviaContent.hidden = true;
+                }
+                if (bibleTriviaEmpty) {
+                    bibleTriviaEmpty.hidden = true;
+                }
+                fetchBibleTrivia().then(function (entries) {
+                    renderBibleTrivia(entries);
+                });
             }
 
             function getProgressMap() {
@@ -1336,10 +1413,24 @@
                 });
             }
 
+            if (bibleTriviaReveal) {
+                bibleTriviaReveal.addEventListener("click", function () {
+                    if (bibleTriviaAnswer) {
+                        bibleTriviaAnswer.hidden = false;
+                        bibleTriviaReveal.hidden = true;
+                    }
+                });
+            }
+
+            document.addEventListener("njc:admin-trivia-updated", function () {
+                loadBibleTrivia();
+            });
+
             updateReadingPlanMeta();
             renderReadingProgress();
             renderDailyVerse();
             loadTodayReadingPlan();
             loadAnnouncements();
             loadThisWeekEvents();
+            loadBibleTrivia();
         })();
