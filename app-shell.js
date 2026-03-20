@@ -635,6 +635,7 @@
         "settings.notificationsOff": "நிறுத்தப்பட்டுள்ளது",
         "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
         "settings.notificationsUnsupported": "ஆதரவு இல்லை",
+        "settings.checkForUpdates": "புதுப்பிப்புகளை சரிபார்க்கவும்",
         "profile.eyebrow": "சுயவிவரம்",
         "profile.title": "உங்கள் சுயவிவரம்",
         "profile.info": "உங்கள் விவரங்களை புதுப்பிக்கவும்.",
@@ -2984,6 +2985,40 @@
                 controls.appendChild(notifyItem.node);
                 items.push(notifyItem);
             }
+        }
+
+        if ("serviceWorker" in navigator) {
+            var updateBtn = document.createElement("button");
+            updateBtn.id = "settings-update-btn";
+            updateBtn.className = "settings-update-btn";
+            updateBtn.type = "button";
+            updateBtn.setAttribute("aria-label", t("settings.checkForUpdates", "Check for updates"));
+            updateBtn.innerHTML = "<i class=\"fa-solid fa-arrows-rotate\" aria-hidden=\"true\"></i>";
+            var updateItem = document.createElement("div");
+            updateItem.className = "settings-control-item";
+            var updateCopy = document.createElement("div");
+            updateCopy.className = "settings-control-copy";
+            var updateTitle = document.createElement("strong");
+            updateTitle.className = "settings-control-title";
+            updateTitle.textContent = t("settings.checkForUpdates", "Check for updates");
+            updateCopy.appendChild(updateTitle);
+            updateItem.appendChild(updateBtn);
+            updateItem.appendChild(updateCopy);
+            updateBtn.addEventListener("click", function () {
+                navigator.serviceWorker.getRegistration().then(function (reg) {
+                    if (!reg) return;
+                    reg.update().then(function () {
+                        if (reg.waiting) {
+                            showUpdateBanner();
+                        }
+                    });
+                });
+            });
+            document.addEventListener("njc:langchange", function () {
+                updateTitle.textContent = t("settings.checkForUpdates", "Check for updates");
+                updateBtn.setAttribute("aria-label", t("settings.checkForUpdates", "Check for updates"));
+            });
+            controls.appendChild(updateItem);
         }
 
         function refreshSettingsItems() {
