@@ -10,7 +10,10 @@
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaNote = document.getElementById("admin-trivia-note");
     var triviaQuestionInput = document.getElementById("admin-trivia-question");
-    var triviaOptionsInput = document.getElementById("admin-trivia-options");
+    var triviaOption1Input = document.getElementById("admin-trivia-option1");
+    var triviaOption2Input = document.getElementById("admin-trivia-option2");
+    var triviaOption3Input = document.getElementById("admin-trivia-option3");
+    var triviaOption4Input = document.getElementById("admin-trivia-option4");
     var triviaCorrectInput = document.getElementById("admin-trivia-correct");
     var triviaReferenceInput = document.getElementById("admin-trivia-reference");
     var triviaShowDateInput = document.getElementById("admin-trivia-show-date");
@@ -200,15 +203,16 @@
             return;
         }
         var question = String(triviaQuestionInput && triviaQuestionInput.value || "").trim();
-        var optionsRaw = String(triviaOptionsInput && triviaOptionsInput.value || "").trim();
-        var options = optionsRaw.split(/\n/).map(function (line) {
-            return String(line || "").trim();
-        }).filter(Boolean);
-        var correctIndex = Math.max(0, Math.min(options.length - 1, Number(triviaCorrectInput && triviaCorrectInput.value) || 0));
+        var opt1 = String(triviaOption1Input && triviaOption1Input.value || "").trim();
+        var opt2 = String(triviaOption2Input && triviaOption2Input.value || "").trim();
+        var opt3 = String(triviaOption3Input && triviaOption3Input.value || "").trim();
+        var opt4 = String(triviaOption4Input && triviaOption4Input.value || "").trim();
+        var options = [opt1, opt2, opt3, opt4].filter(Boolean);
+        var correctIndex = Math.max(0, Math.min(3, Number(triviaCorrectInput && triviaCorrectInput.value) || 0));
         var reference = String(triviaReferenceInput && triviaReferenceInput.value || "").trim();
         var showDate = String(triviaShowDateInput && triviaShowDateInput.value || "").trim();
-        if (!question || !options.length || !showDate) {
-            showTriviaNote("validation", "admin.triviaNeedFields", "Please enter question, at least one option, and show date.");
+        if (!question || options.length !== 4) {
+            showTriviaNote("validation", "admin.triviaNeedFields", "Please enter question and all 4 options.");
             return;
         }
         if (!/^\d{4}-\d{2}-\d{2}$/.test(showDate)) {
@@ -232,7 +236,10 @@
         }).then(function (entries) {
             cachedTrivia = entries;
             if (triviaQuestionInput) triviaQuestionInput.value = "";
-            if (triviaOptionsInput) triviaOptionsInput.value = "";
+            if (triviaOption1Input) triviaOption1Input.value = "";
+            if (triviaOption2Input) triviaOption2Input.value = "";
+            if (triviaOption3Input) triviaOption3Input.value = "";
+            if (triviaOption4Input) triviaOption4Input.value = "";
             if (triviaCorrectInput) triviaCorrectInput.value = "0";
             if (triviaReferenceInput) triviaReferenceInput.value = "";
             if (triviaShowDateInput) triviaShowDateInput.value = "";

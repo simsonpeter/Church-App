@@ -643,11 +643,22 @@
 
             <section class="card">
                 <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="admin.triviaTitle">Bible Trivia (Tamil)</span></h2>
-                <p class="page-note" data-i18n="admin.triviaInfo">Add Tamil Bible trivia. Shows from 8 AM local time on the scheduled date.</p>
+                <p class="page-note" data-i18n="admin.triviaInfo">Add Tamil Bible trivia. 4 answer options required. Shows from 8 AM local time on the scheduled date.</p>
                 <form class="prayer-form" id="admin-trivia-form">
                     <textarea id="admin-trivia-question" class="search-input prayer-textarea" rows="2" placeholder="Question in Tamil" data-i18n-placeholder="admin.triviaQuestionPlaceholder"></textarea>
-                    <textarea id="admin-trivia-options" class="search-input prayer-textarea" rows="4" placeholder="Options (one per line)" data-i18n-placeholder="admin.triviaOptionsPlaceholder"></textarea>
-                    <input id="admin-trivia-correct" class="search-input" type="number" min="0" value="0" placeholder="Correct option index (0-based)" data-i18n-placeholder="admin.triviaCorrectPlaceholder">
+                    <input id="admin-trivia-option1" class="search-input" type="text" placeholder="Option 1" data-i18n-placeholder="admin.triviaOption1">
+                    <input id="admin-trivia-option2" class="search-input" type="text" placeholder="Option 2" data-i18n-placeholder="admin.triviaOption2">
+                    <input id="admin-trivia-option3" class="search-input" type="text" placeholder="Option 3" data-i18n-placeholder="admin.triviaOption3">
+                    <input id="admin-trivia-option4" class="search-input" type="text" placeholder="Option 4" data-i18n-placeholder="admin.triviaOption4">
+                    <label class="admin-trivia-correct-label">
+                        <span data-i18n="admin.triviaCorrectLabel">Correct option:</span>
+                        <select id="admin-trivia-correct" class="search-input">
+                            <option value="0">1</option>
+                            <option value="1">2</option>
+                            <option value="2">3</option>
+                            <option value="3">4</option>
+                        </select>
+                    </label>
                     <input id="admin-trivia-reference" class="search-input" type="text" placeholder="Bible reference (e.g. யோவான் 3:16)" data-i18n-placeholder="admin.triviaReferencePlaceholder">
                     <input id="admin-trivia-show-date" class="search-input" type="date" placeholder="Show date">
                     <button class="button-link" id="admin-trivia-submit" type="submit" data-i18n="admin.triviaAdd">Add trivia</button>
@@ -851,7 +862,7 @@
     <script src="bible-page.js?v=20260318de"></script>
     <script src="songbook-page.js?v=20260318de"></script>
     <script src="contact-page.js?v=20260318de"></script>
-    <script src="admin-trivia.js?v=20260320tr2"></script>
+    <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260318de"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260318de"></script>
