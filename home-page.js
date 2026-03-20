@@ -1297,18 +1297,24 @@
                 triviaQuestionWrap.hidden = true;
                 triviaEmpty.hidden = true;
                 triviaLoading.textContent = T("home.triviaLoading", "Loading trivia...", triviaCard);
-                fetch(adminTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
-                    .then(function (response) {
-                        if (response.status === 404) {
-                            return { entries: [] };
-                        }
-                        if (!response.ok) {
-                            throw new Error("Trivia load failed");
-                        }
-                        return response.json();
-                    })
-                    .then(function (payload) {
-                        var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                var timeoutMs = 15000;
+                var timeoutPromise = new Promise(function (_, reject) {
+                    setTimeout(function () { reject(new Error("Trivia load timeout")); }, timeoutMs);
+                });
+                Promise.race([
+                    fetch(adminTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                        .then(function (response) {
+                            if (response.status === 404) {
+                                return { entries: [] };
+                            }
+                            if (!response.ok) {
+                                throw new Error("Trivia load failed");
+                            }
+                            return response.json();
+                        }),
+                    timeoutPromise
+                ]).then(function (payload) {
+                        var entries = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.entries) ? payload.entries : []);
                         var match = entries.find(function (item) {
                             var showDate = String(item && (item.showDate || item.date) || "").trim();
                             return showDate === effectiveDate;

@@ -80,27 +80,34 @@
     }
 
     function fetchTrivia() {
-        return fetch(TRIVIA_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
-            .then(function (response) {
-                if (response.status === 404) {
-                    return fetch(TRIVIA_URL, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ entries: [] })
-                    }).then(function (createResponse) {
-                        if (!createResponse.ok) {
-                            throw new Error("Init failed");
-                        }
-                        return [];
+        var timeoutMs = 15000;
+        var timeoutPromise = new Promise(function (_, reject) {
+            setTimeout(function () { reject(new Error("Load timeout")); }, timeoutMs);
+        });
+        return Promise.race([
+            fetch(TRIVIA_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+                .then(function (response) {
+                    if (response.status === 404) {
+                        return fetch(TRIVIA_URL, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ entries: [] })
+                        }).then(function (createResponse) {
+                            if (!createResponse.ok) {
+                                throw new Error("Init failed");
+                            }
+                            return [];
+                        });
+                    }
+                    if (!response.ok) {
+                        throw new Error("Load failed");
+                    }
+                    return response.json().then(function (payload) {
+                        return Array.isArray(payload) ? payload : (payload && Array.isArray(payload.entries) ? payload.entries : []);
                     });
-                }
-                if (!response.ok) {
-                    throw new Error("Load failed");
-                }
-                return response.json().then(function (payload) {
-                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
-                });
-            });
+                }),
+            timeoutPromise
+        ]);
     }
 
     function saveTrivia(entries) {
@@ -177,6 +184,7 @@
             renderTriviaList();
         }).catch(function () {
             showTriviaNote("error", "admin.syncError", "Could not load trivia.");
+            triviaList.innerHTML = "<li><h3>" + escapeHtml(T("admin.syncError", "Could not load trivia.")) + "</h3><p>" + escapeHtml(T("admin.syncErrorBody", "Check your connection and try again.")) + "</p></li>";
         }).finally(function () {
             setTriviaBusy(false);
         });
