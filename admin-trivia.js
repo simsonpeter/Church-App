@@ -184,7 +184,11 @@
 
     triviaForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        if (triviaBusy || !isAdminUser()) {
+        if (triviaBusy) {
+            return;
+        }
+        if (!isAdminUser()) {
+            showTriviaNote("validation", "admin.accessDenied", "Please sign in as admin to add trivia.");
             return;
         }
         var question = String(triviaQuestionInput && triviaQuestionInput.value || "").trim();

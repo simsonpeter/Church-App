@@ -1282,6 +1282,12 @@
                 loadTrivia();
             });
 
+            window.addEventListener("hashchange", function () {
+                if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "home") {
+                    loadTrivia();
+                }
+            });
+
             function loadTrivia() {
                 if (!triviaLoading || !triviaQuestionWrap || !triviaQuestionText || !triviaOptions || !triviaEmpty) {
                     return;
@@ -1304,7 +1310,8 @@
                     .then(function (payload) {
                         var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                         var match = entries.find(function (item) {
-                            return String(item && item.showDate || "").trim() === effectiveDate;
+                            var showDate = String(item && (item.showDate || item.date) || "").trim();
+                            return showDate === effectiveDate;
                         });
                         triviaLoading.hidden = true;
                         if (!match) {
