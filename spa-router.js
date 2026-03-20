@@ -227,6 +227,11 @@
 
         if (window.location.hash.replace(/^#/, "") !== current) {
             window.history.replaceState(null, "", "#" + current);
+            try {
+                window.dispatchEvent(new HashChangeEvent("hashchange"));
+            } catch (e) {
+                window.dispatchEvent(new Event("hashchange"));
+            }
         }
 
         window.setTimeout(function () {

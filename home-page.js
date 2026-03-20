@@ -1426,6 +1426,13 @@
                 loadBibleTrivia();
             });
 
+            window.addEventListener("hashchange", function () {
+                var route = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+                if (route === "trivia") {
+                    loadBibleTrivia();
+                }
+            });
+
             updateReadingPlanMeta();
             renderReadingProgress();
             renderDailyVerse();
