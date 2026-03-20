@@ -243,33 +243,31 @@
         setActiveRoute(getRouteFromHash());
     }
 
-    function handleTabClick(event) {
-        var tab = event.target.closest(".tab-nav a.tab[data-route][href^='#']");
-        if (!tab) {
-            return;
-        }
-        var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
-        var href = (tab.getAttribute("href") || "").trim();
-        if (!route || !routes[route] || !href || href.charAt(0) !== "#") {
-            return;
-        }
-        var currentHash = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-        if (currentHash === route) {
-            return;
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        window.location.hash = href;
-        setActiveRoute(route);
+    function makeTabHandler(route, href) {
+        return function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            var currentHash = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+            if (currentHash === route) {
+                return;
+            }
+            window.location.hash = href;
+            setActiveRoute(route);
+        };
     }
 
     function initRouter() {
         onRouteChange();
-        var tabNav = document.querySelector(".tab-nav");
-        if (tabNav) {
-            tabNav.addEventListener("click", handleTabClick, true);
-            tabNav.addEventListener("touchend", handleTabClick, { passive: false, capture: true });
-        }
+        document.querySelectorAll(".tab-nav a.tab[data-route][href^='#']").forEach(function (tab) {
+            var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
+            var href = (tab.getAttribute("href") || "").trim();
+            if (!route || !routes[route] || !href || href.charAt(0) !== "#") {
+                return;
+            }
+            var handler = makeTabHandler(route, href);
+            tab.addEventListener("click", handler, true);
+            tab.addEventListener("touchend", handler, { passive: false, capture: true });
+        });
     }
 
     if (document.readyState === "loading") {
