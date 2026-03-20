@@ -249,7 +249,6 @@
         }
         event.preventDefault();
         event.stopPropagation();
-        window.location.hash = route;
         setActiveRoute(route);
     }
 
