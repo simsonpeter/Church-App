@@ -1,5 +1,7 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
+    var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
+    var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
     var PROFILE_COLLECTION = "profile";
     var PROFILE_DOC_ID = "basic";
     var form = document.getElementById("profile-form");
@@ -11,6 +13,8 @@
     var note = document.getElementById("profile-note");
     var avatarImage = document.getElementById("profile-avatar-image");
     var avatarFallback = document.getElementById("profile-avatar-fallback");
+    var profileTriviaPoints = document.getElementById("profile-trivia-points");
+    var profileTriviaPointsValue = document.getElementById("profile-trivia-points-value");
     var profileCard = form ? form.closest(".card") : null;
     var busy = false;
     var noteState = "";
@@ -37,6 +41,40 @@
             return null;
         }
         return window.NjcAuth.getUser();
+    }
+
+    function getTriviaUserId() {
+        var user = getCurrentUser();
+        if (user && user.uid) {
+            return "u:" + String(user.uid);
+        }
+        try {
+            var gid = window.localStorage.getItem(TRIVIA_GUEST_ID_KEY);
+            if (gid) return "g:" + gid;
+            gid = "guest-" + Date.now() + "-" + Math.random().toString(36).slice(2, 10);
+            window.localStorage.setItem(TRIVIA_GUEST_ID_KEY, gid);
+            return "g:" + gid;
+        } catch (e) {
+            return "anon";
+        }
+    }
+
+    function getTriviaPoints() {
+        try {
+            var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
+            var data = raw ? JSON.parse(raw) : {};
+            var uid = getTriviaUserId();
+            return Number(data[uid]) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function renderProfileTriviaPoints() {
+        if (!profileTriviaPoints || !profileTriviaPointsValue) return;
+        var pts = getTriviaPoints();
+        profileTriviaPointsValue.textContent = String(pts);
+        profileTriviaPoints.hidden = false;
     }
 
     function getProfileMap() {
@@ -283,6 +321,7 @@
             setFormEnabled(false);
             populateForm({ fullName: "", dob: "", phone: "", photoUrl: "" });
             renderAvatar({}, user);
+            renderProfileTriviaPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
             return;
         }
@@ -292,6 +331,7 @@
         var localProfile = normalizeProfile(map[currentUid] || {}, user);
         populateForm(localProfile);
         renderAvatar(localProfile, user);
+        renderProfileTriviaPoints();
         setNote("", "", "");
 
         var doc = getFirestoreProfileDoc(currentUid);
@@ -404,6 +444,7 @@
 
     document.addEventListener("DOMContentLoaded", loadProfile);
     document.addEventListener("njc:authchange", loadProfile);
+    document.addEventListener("njc:trivia-points-updated", renderProfileTriviaPoints);
     document.addEventListener("njc:langchange", function () {
         refreshNoteTranslation();
     });
