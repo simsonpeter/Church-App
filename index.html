@@ -78,6 +78,7 @@
                             </button>
                         </div>
                         <div class="trivia-options-wrap" id="trivia-options-wrap-home" hidden>
+                            <p class="page-note trivia-participated" id="trivia-participated-home" hidden></p>
                             <p class="page-note trivia-reference" id="trivia-reference-home" hidden></p>
                             <div class="trivia-options" id="trivia-options-home"></div>
                             <p class="page-note trivia-feedback" id="trivia-feedback-home" hidden></p>
@@ -472,11 +473,20 @@
             <section class="card trivia-card" id="trivia-card">
                 <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
                 <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <div id="trivia-stats" class="trivia-stats" hidden>
+                    <div class="trivia-stats-grid">
+                        <div class="trivia-stat"><span class="trivia-stat-value" id="trivia-stat-points">0</span><span class="trivia-stat-label" data-i18n="home.triviaStatPoints">Points</span></div>
+                        <div class="trivia-stat"><span class="trivia-stat-value" id="trivia-stat-correct">0</span><span class="trivia-stat-label" data-i18n="home.triviaStatCorrect">Correct</span></div>
+                        <div class="trivia-stat"><span class="trivia-stat-value" id="trivia-stat-wrong">0</span><span class="trivia-stat-label" data-i18n="home.triviaStatWrong">Wrong</span></div>
+                        <div class="trivia-stat"><span class="trivia-stat-value" id="trivia-stat-streak">0</span><span class="trivia-stat-label" data-i18n="home.triviaStatStreak">Streak</span></div>
+                    </div>
+                </div>
                 <div id="trivia-content">
                     <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
                     <div id="trivia-question-wrap" hidden>
                         <p class="trivia-question-text" id="trivia-question-text"></p>
                         <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
+                        <p class="page-note trivia-participated" id="trivia-participated" hidden></p>
                         <div class="trivia-options" id="trivia-options"></div>
                         <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
                     </div>

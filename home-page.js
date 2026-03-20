@@ -47,6 +47,11 @@
             var triviaWrongAnswer = document.getElementById("trivia-wrong-answer");
             var triviaWrongBackdrop = document.getElementById("trivia-wrong-backdrop");
             var triviaWrongClose = document.getElementById("trivia-wrong-close");
+            var triviaStatsEl = document.getElementById("trivia-stats");
+            var triviaStatPoints = document.getElementById("trivia-stat-points");
+            var triviaStatCorrect = document.getElementById("trivia-stat-correct");
+            var triviaStatWrong = document.getElementById("trivia-stat-wrong");
+            var triviaStatStreak = document.getElementById("trivia-stat-streak");
             var TRIVIA_ANSWERED_KEY = "njc_trivia_answered_v1";
             var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
             var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
@@ -1299,6 +1304,10 @@
             document.addEventListener("njc:admin-trivia-updated", function () {
                 loadTrivia();
             });
+            document.addEventListener("njc:trivia-points-updated", function () {
+                var card = document.getElementById("trivia-card");
+                if (card) renderTriviaStats(card);
+            });
 
             function getTriviaUserId() {
                 var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
@@ -1349,6 +1358,60 @@
                 }
             }
 
+            function getTriviaStats() {
+                var points = getTriviaPoints();
+                var correct = 0;
+                var wrong = 0;
+                var byDate = {};
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    byDate = data[uid] || {};
+                    for (var d in byDate) {
+                        if (Object.prototype.hasOwnProperty.call(byDate, d) && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                            if (byDate[d] === "correct") correct++;
+                            else if (byDate[d] === "wrong") wrong++;
+                        }
+                    }
+                } catch (e) {}
+                var streak = 0;
+                var today = getLocalEffectiveDate();
+                for (var daysAgo = 0; daysAgo < 365; daysAgo++) {
+                    var d = getDateDaysAgo(today, daysAgo);
+                    if (byDate[d] === "correct") streak++;
+                    else break;
+                }
+                return { points: points, correct: correct, wrong: wrong, total: correct + wrong, streak: streak };
+            }
+
+            function getDateDaysAgo(fromYmd, daysAgo) {
+                try {
+                    var parts = fromYmd.split("-");
+                    var y = parseInt(parts[0], 10);
+                    var m = parseInt(parts[1], 10) - 1;
+                    var d = parseInt(parts[2], 10);
+                    var dt = new Date(y, m, d);
+                    dt.setDate(dt.getDate() - daysAgo);
+                    var yy = dt.getFullYear();
+                    var mm = String(dt.getMonth() + 1).padStart(2, "0");
+                    var dd = String(dt.getDate()).padStart(2, "0");
+                    return yy + "-" + mm + "-" + dd;
+                } catch (e) {
+                    return "";
+                }
+            }
+
+            function renderTriviaStats(card) {
+                if (!triviaStatsEl || !card || card.id !== "trivia-card") return;
+                var s = getTriviaStats();
+                triviaStatsEl.hidden = false;
+                if (triviaStatPoints) triviaStatPoints.textContent = String(s.points);
+                if (triviaStatCorrect) triviaStatCorrect.textContent = String(s.correct);
+                if (triviaStatWrong) triviaStatWrong.textContent = String(s.wrong);
+                if (triviaStatStreak) triviaStatStreak.textContent = String(s.streak);
+            }
+
             function addTriviaPoints(n) {
                 try {
                     var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
@@ -1387,6 +1450,7 @@
                 function setMatch(match, loading, wrap, qText, ref, opts, empty, feedback, card, optsWrap, expandBtn, effectiveDate) {
                     if (!loading || !wrap || !qText || !opts || !empty) return;
                     loading.hidden = true;
+                    if (card && card.id === "trivia-card") renderTriviaStats(card);
                     if (!match) {
                         empty.hidden = false;
                         empty.textContent = T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card);
@@ -1407,10 +1471,18 @@
                     opts.dataset.triviaCorrectAnswer = correctAnswer;
                     wrap.hidden = false;
                     if (feedback) feedback.hidden = true;
+                    var participatedEl = card ? card.querySelector(".trivia-participated") : null;
+                    if (participatedEl) participatedEl.hidden = true;
                     var answered = effectiveDate ? getTriviaAnswered(effectiveDate) : null;
                     if (optsWrap && expandBtn) {
                         if (answered) {
-                            expandBtn.hidden = true;
+                            if (participatedEl) {
+                                participatedEl.hidden = false;
+                                participatedEl.textContent = T("home.triviaParticipated", "You already participated for today. Come back tomorrow!", card);
+                            }
+                            expandBtn.hidden = false;
+                            expandBtn.disabled = true;
+                            expandBtn.classList.add("expanded");
                             optsWrap.hidden = false;
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
                             if (feedback) {
@@ -1425,7 +1497,20 @@
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
                         }
                     } else {
-                        opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
+                        if (answered) {
+                            if (participatedEl) {
+                                participatedEl.hidden = false;
+                                participatedEl.textContent = T("home.triviaParticipated", "You already participated for today. Come back tomorrow!", card);
+                            }
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
+                            if (feedback) {
+                                feedback.hidden = false;
+                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                                feedback.dataset.state = answered === "correct" ? "success" : "error";
+                            }
+                        } else {
+                            opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
+                        }
                     }
                 }
                 function setError(loading, empty, card) {
@@ -1457,7 +1542,7 @@
                             var showDate = String(item && (item.showDate || item.date) || "").trim();
                             return showDate === effectiveDate;
                         });
-                        if (hasPage) setMatch(match, triviaLoading, triviaQuestionWrap, triviaQuestionText, triviaReference, triviaOptions, triviaEmpty, triviaFeedback, triviaCard);
+                        if (hasPage) setMatch(match, triviaLoading, triviaQuestionWrap, triviaQuestionText, triviaReference, triviaOptions, triviaEmpty, triviaFeedback, triviaCard, null, null, effectiveDate);
                         if (hasHome) setMatch(match, triviaLoadingHome, triviaQuestionWrapHome, triviaQuestionTextHome, triviaReferenceHome, triviaOptionsHome, triviaEmptyHome, triviaFeedbackHome, triviaCardHome, triviaOptionsWrapHome, triviaExpandBtnHome, effectiveDate);
                     })
                     .catch(function () {
