@@ -1185,7 +1185,6 @@ body.songbook-fullscreen-open {
 }
 
 body.songbook-fullscreen-open .tab-nav,
-body.songbook-fullscreen-open .theme-toggle-floating,
 body.songbook-fullscreen-open .mini-player,
 body.songbook-fullscreen-open .offline-badge {
     display: none !important;
@@ -1267,36 +1266,6 @@ body.songbook-fullscreen-open .offline-badge {
     box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
     animation: fade-up-nav 0.55s ease both;
     z-index: 1000;
-}
-
-.theme-toggle-floating {
-    position: fixed;
-    top: max(12px, env(safe-area-inset-top));
-    right: max(16px, env(safe-area-inset-right));
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--text);
-    display: grid;
-    place-items: center;
-    box-shadow: 0 4px 16px rgba(31, 44, 105, 0.15);
-    z-index: 1001;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.theme-toggle-floating:hover {
-    transform: scale(1.06);
-    box-shadow: 0 6px 20px rgba(31, 44, 105, 0.22);
-}
-
-.theme-toggle-floating:active {
-    transform: scale(0.98);
-}
-
-.theme-toggle-floating i {
-    font-size: 1.1rem;
 }
 
 .header-menu-popover {
@@ -1614,7 +1583,6 @@ body.auth-entry-open {
 
 body.auth-entry-open .app-shell,
 body.auth-entry-open .tab-nav,
-body.auth-entry-open .theme-toggle-floating,
 body.auth-entry-open .mini-player {
     pointer-events: none;
 }
@@ -2094,7 +2062,6 @@ body.bible-fullscreen-open {
 
 body.bible-fullscreen-open .app-header,
 body.bible-fullscreen-open .tab-nav,
-body.bible-fullscreen-open .theme-toggle-floating,
 body.bible-fullscreen-open .mini-sermon-player,
 body.bible-fullscreen-open .mini-bible-player,
 body.bible-fullscreen-open .offline-badge {
@@ -3038,17 +3005,6 @@ html[data-theme="dark"] .tab-nav {
     background: rgba(37, 16, 16, 0.93);
 }
 
-html[data-theme="dark"] .theme-toggle-floating {
-    background: rgba(37, 16, 16, 0.95);
-    border-color: #6f3232;
-    color: #ffd8d8;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-}
-
-html[data-theme="dark"] .theme-toggle-floating:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
-}
-
 html[data-theme="dark"] .tab {
     color: #f2caca;
 }
@@ -3114,12 +3070,6 @@ html[data-theme="light"] {
 
 html[data-theme="light"] .tab-nav {
     background: rgba(255, 255, 255, 0.92);
-}
-
-html[data-theme="light"] .theme-toggle-floating {
-    background: rgba(255, 255, 255, 0.95);
-    border-color: rgba(127, 92, 92, 0.35);
-    color: #7f5c5c;
 }
 
 html[data-theme="light"] .tab {

@@ -2777,50 +2777,6 @@
                 : t("settings.themeLight", "Light mode");
         }
 
-        function createThemeSettingsItem() {
-            function doToggle() {
-                document.dispatchEvent(new CustomEvent("njc:theme-toggle-request"));
-            }
-            var trigger = document.createElement("button");
-            trigger.type = "button";
-            trigger.className = "theme-toggle settings-theme-trigger";
-            trigger.setAttribute("aria-label", t("toggle.theme.toDark", "Switch to dark mode"));
-            var icon = document.documentElement.getAttribute("data-theme") === "dark" ? "fa-sun" : "fa-moon";
-            trigger.innerHTML = "<i class=\"fa-solid " + icon + "\" aria-hidden=\"true\"></i>";
-            var item = document.createElement("div");
-            item.className = "settings-control-item";
-            var copy = document.createElement("div");
-            copy.className = "settings-control-copy";
-            var title = document.createElement("strong");
-            title.className = "settings-control-title";
-            var state = document.createElement("span");
-            state.className = "settings-control-state";
-            copy.appendChild(title);
-            copy.appendChild(state);
-            item.appendChild(trigger);
-            item.appendChild(copy);
-            function refresh() {
-                title.textContent = t("settings.theme", "Theme");
-                state.textContent = getThemeStateLabel();
-                state.hidden = !state.textContent;
-                var icon = document.documentElement.getAttribute("data-theme") === "dark" ? "fa-sun" : "fa-moon";
-                trigger.innerHTML = "<i class=\"fa-solid " + icon + "\" aria-hidden=\"true\"></i>";
-            }
-            function handleThemeClick(event) {
-                event.preventDefault();
-                event.stopPropagation();
-                doToggle();
-            }
-            trigger.addEventListener("click", handleThemeClick);
-            item.addEventListener("click", function (event) {
-                event.preventDefault();
-                if (event.target !== trigger && !trigger.contains(event.target)) {
-                    doToggle();
-                }
-            });
-            return { node: item, refresh: refresh };
-        }
-
         function getLanguageStateLabel() {
             return activeLanguage === "ta"
                 ? t("settings.languageTamil", "Tamil")
@@ -2883,7 +2839,7 @@
         controls.innerHTML = "";
         var items = [];
         if (themeButton) {
-            var themeItem = createThemeSettingsItem();
+            var themeItem = createSettingsItem(themeButton, "settings.theme", "Theme", getThemeStateLabel);
             if (themeItem) {
                 controls.appendChild(themeItem.node);
                 items.push(themeItem);
@@ -3157,10 +3113,6 @@
 
     function applyTheme(theme) {
         document.documentElement.setAttribute("data-theme", theme);
-        var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) {
-            meta.setAttribute("content", theme === "dark" ? "#1a0b0b" : "#ffffff");
-        }
     }
 
     function persistTheme(theme) {
@@ -3173,43 +3125,39 @@
     }
 
     function setToggleIcon(button, theme) {
-        if (!button) {
-            return;
-        }
         var icon = theme === "dark" ? "fa-sun" : "fa-moon";
         var label = theme === "dark"
             ? t("toggle.theme.toLight", "Switch to light mode")
             : t("toggle.theme.toDark", "Switch to dark mode");
-        button.innerHTML = "<i class=\"fa-solid " + icon + "\" aria-hidden=\"true\"></i>";
+        button.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
         button.setAttribute("aria-label", label);
         button.title = label;
     }
 
-    function performThemeToggle() {
-        var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
-        applyTheme(nextTheme);
-        persistTheme(nextTheme);
-        var btn = document.getElementById("theme-toggle-btn");
-        setToggleIcon(btn, nextTheme);
-        document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
-    }
-
     function setupThemeToggle() {
-        var button = document.getElementById("theme-toggle-btn");
-        if (!button) {
+        var header = document.querySelector(".app-header");
+        if (!header || document.getElementById("theme-toggle-btn")) {
             return;
         }
+
+        var button = document.createElement("button");
+        button.id = "theme-toggle-btn";
+        button.className = "theme-toggle";
+        button.type = "button";
 
         var activeTheme = getActiveTheme();
         applyTheme(activeTheme);
         setToggleIcon(button, activeTheme);
 
-        button.addEventListener("click", performThemeToggle);
+        button.addEventListener("click", function () {
+            var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+            applyTheme(nextTheme);
+            persistTheme(nextTheme);
+            setToggleIcon(button, nextTheme);
+            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
+        });
 
-        window.NjcTheme = window.NjcTheme || {};
-        window.NjcTheme.toggle = performThemeToggle;
-
-        document.addEventListener("njc:theme-toggle-request", performThemeToggle);
+        ensureHeaderControls(header).appendChild(button);
 
         var media = window.matchMedia("(prefers-color-scheme: dark)");
         if (media && media.addEventListener) {
