@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v116";
-const RUNTIME_CACHE = "njc-runtime-cache-v116";
+const APP_CACHE = "njc-app-cache-v119";
+const RUNTIME_CACHE = "njc-runtime-cache-v119";
 
 const CORE_ASSETS = [
     "./",
@@ -17,7 +17,7 @@ const CORE_ASSETS = [
     "./admin-trivia.js?v=20260320tr2",
     "./admin-dashboard-page.js?v=20260318de",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260318de",
+    "./profile-page.js?v=20260320tr5",
     "./spa-router.js?v=20260318de",
     "./site.webmanifest?v=20260318de",
     "./logo.png?v=20260318de",

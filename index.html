@@ -65,18 +65,25 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
-            <section class="card" id="trivia-card">
+            <section class="card trivia-card-compact" id="trivia-card-home">
                 <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
                 <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
-                <div id="trivia-content">
-                    <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
-                    <div id="trivia-question-wrap" hidden>
-                        <p class="trivia-question-text" id="trivia-question-text"></p>
-                        <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
-                        <div class="trivia-options" id="trivia-options"></div>
-                        <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
+                <div id="trivia-content-home">
+                    <p class="page-note" id="trivia-loading-home" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap-home" hidden>
+                        <div class="trivia-compact-row">
+                            <p class="trivia-question-text" id="trivia-question-text-home"></p>
+                            <button type="button" class="trivia-expand-btn" id="trivia-expand-btn-home" aria-label="Show options" data-i18n-aria-label="home.triviaShowOptions">
+                                <i class="fa-solid fa-chevron-down" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div class="trivia-options-wrap" id="trivia-options-wrap-home" hidden>
+                            <p class="page-note trivia-reference" id="trivia-reference-home" hidden></p>
+                            <div class="trivia-options" id="trivia-options-home"></div>
+                            <p class="page-note trivia-feedback" id="trivia-feedback-home" hidden></p>
+                        </div>
                     </div>
-                    <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                    <p class="page-note" id="trivia-empty-home" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
                 </div>
             </section>
 
@@ -480,6 +487,7 @@
                         <img id="profile-avatar-image" alt="Profile photo" hidden>
                         <span id="profile-avatar-fallback">U</span>
                     </div>
+                    <p class="profile-trivia-points" id="profile-trivia-points" hidden><span data-i18n="profile.triviaPoints">Trivia points</span>: <strong id="profile-trivia-points-value">0</strong></p>
                 </div>
                 <form id="profile-form" class="profile-form">
                     <label class="profile-field">
@@ -751,6 +759,16 @@
         </section>
     </div>
 
+<div class="trivia-wrong-overlay" id="trivia-wrong-overlay" hidden>
+    <button class="trivia-wrong-backdrop" id="trivia-wrong-backdrop" aria-label="Close"></button>
+    <div class="trivia-wrong-popup">
+        <h3 id="trivia-wrong-title" data-i18n="home.triviaWrongTitle">Wrong!</h3>
+        <p id="trivia-wrong-message" data-i18n="home.triviaWrongMessage">The correct answer is:</p>
+        <p class="trivia-wrong-answer" id="trivia-wrong-answer"></p>
+        <button type="button" class="button-link" id="trivia-wrong-close" data-i18n="home.triviaWrongClose">OK</button>
+    </div>
+</div>
+
 <div class="sermon-player-overlay" id="sermon-player" hidden>
         <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
         <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
@@ -854,7 +872,7 @@
     <script src="admin-trivia.js?v=20260320tr2"></script>
     <script src="admin-dashboard-page.js?v=20260318de"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260318de"></script>
+    <script src="profile-page.js?v=20260320tr5"></script>
     <script src="spa-router.js?v=20260318de"></script>
 </body>
 </html>
