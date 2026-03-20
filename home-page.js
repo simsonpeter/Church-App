@@ -1283,7 +1283,8 @@
             });
 
             window.addEventListener("hashchange", function () {
-                if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "home") {
+                var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+                if (route === "home" || route === "trivia") {
                     loadTrivia();
                 }
             });

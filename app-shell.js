@@ -37,6 +37,7 @@
         "menu.close": "பட்டியலை மூடு",
         "menu.bible": "வேதாகமம்",
         "menu.songbook": "பாடல் தொகுப்பு",
+        "menu.trivia": "வேத வினாடி",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -279,6 +280,8 @@
         "sermons.favoriteRemove": "பிடித்ததில் இருந்து நீக்கு",
         "songbook.eyebrow": "பாடல்கள்",
         "songbook.title": "NJC பாடல் தொகுப்பு",
+        "trivia.eyebrow": "வேத வினாடி",
+        "trivia.title": "இன்றைய வேத வினாடி",
         "songbook.subtitle": "NJC Songbook GitHub-இல் இருந்து பாடல்கள்.",
         "songbook.searchPlaceholder": "தலைப்பு, எழுத்தாளர், பாடல்வரியால் தேடுக",
         "songbook.loadingTitle": "பாடல்கள் ஏற்றப்படுகின்றன...",
@@ -2321,6 +2324,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var triviaLink = document.createElement("a");
+        triviaLink.className = "header-menu-link";
+        triviaLink.href = "#trivia";
+        triviaLink.innerHTML = "<i class=\"fa-solid fa-question-circle\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(triviaLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         panel.appendChild(utilityCard);
@@ -2520,6 +2529,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var triviaLabel = t("menu.trivia", "Trivia");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2569,6 +2579,10 @@
             var labelNode = songbookLink.querySelector("span");
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
+            }
+            var triviaNode = triviaLink.querySelector("span");
+            if (triviaNode) {
+                triviaNode.textContent = triviaLabel;
             }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {

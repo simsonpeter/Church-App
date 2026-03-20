@@ -56,6 +56,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        trivia: {
+            icon: "fa-question-circle",
+            eyebrowKey: "trivia.eyebrow",
+            eyebrowText: "Trivia",
+            titleKey: "trivia.title",
+            titleText: "Bible Trivia",
+            subtitleKey: "",
+            subtitleText: ""
+        },
         contact: {
             icon: "fa-phone",
             eyebrowKey: "contact.eyebrow",

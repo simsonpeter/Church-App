@@ -65,21 +65,6 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
-            <section class="card" id="trivia-card">
-                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
-                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
-                <div id="trivia-content">
-                    <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
-                    <div id="trivia-question-wrap" hidden>
-                        <p class="trivia-question-text" id="trivia-question-text"></p>
-                        <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
-                        <div class="trivia-options" id="trivia-options"></div>
-                        <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
-                    </div>
-                    <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
-                </div>
-            </section>
-
             <section class="card hero-card">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
@@ -456,6 +441,25 @@
                         <p data-i18n="songbook.loadingBody">Please wait while we fetch the songbook.</p>
                     </li>
                 </ul>
+            </section>
+            </main>
+        </section>
+
+        <section class="page-view" data-route="trivia">
+            <main class="app-content">
+            <section class="card" id="trivia-card">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <div id="trivia-content">
+                    <p class="page-note" id="trivia-loading" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap" hidden>
+                        <p class="trivia-question-text" id="trivia-question-text"></p>
+                        <p class="page-note trivia-reference" id="trivia-reference" hidden></p>
+                        <div class="trivia-options" id="trivia-options"></div>
+                        <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
+                    </div>
+                    <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                </div>
             </section>
             </main>
         </section>
