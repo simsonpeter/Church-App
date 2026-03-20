@@ -1271,8 +1271,8 @@ body.songbook-fullscreen-open .offline-badge {
 
 .theme-toggle-floating {
     position: fixed;
+    top: max(12px, env(safe-area-inset-top));
     right: max(16px, env(safe-area-inset-right));
-    bottom: max(12px, env(safe-area-inset-bottom));
     width: 44px;
     height: 44px;
     border-radius: 50%;

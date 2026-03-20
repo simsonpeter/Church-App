@@ -2778,8 +2778,10 @@
         }
 
         function createThemeSettingsItem() {
-            var realButton = document.getElementById("theme-toggle-btn");
-            if (!realButton) {
+            var doToggle = (window.NjcTheme && typeof window.NjcTheme.toggle === "function")
+                ? window.NjcTheme.toggle
+                : (typeof performThemeToggle === "function" ? performThemeToggle : null);
+            if (!doToggle) {
                 return null;
             }
             var trigger = document.createElement("button");
@@ -2807,12 +2809,15 @@
                 var icon = document.documentElement.getAttribute("data-theme") === "dark" ? "fa-sun" : "fa-moon";
                 trigger.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
             }
-            trigger.addEventListener("click", function () {
-                realButton.click();
-            });
+            function handleThemeClick(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                doToggle();
+            }
+            trigger.addEventListener("click", handleThemeClick);
             item.addEventListener("click", function (event) {
                 if (event.target !== trigger && !trigger.contains(event.target)) {
-                    realButton.click();
+                    doToggle();
                 }
             });
             return { node: item, refresh: refresh };
@@ -3166,6 +3171,9 @@
     }
 
     function setToggleIcon(button, theme) {
+        if (!button) {
+            return;
+        }
         var icon = theme === "dark" ? "fa-sun" : "fa-moon";
         var label = theme === "dark"
             ? t("toggle.theme.toLight", "Switch to light mode")
@@ -3173,6 +3181,15 @@
         button.innerHTML = "<i class=\"fa-solid " + icon + "\"></i>";
         button.setAttribute("aria-label", label);
         button.title = label;
+    }
+
+    function performThemeToggle() {
+        var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+        applyTheme(nextTheme);
+        persistTheme(nextTheme);
+        var btn = document.getElementById("theme-toggle-btn");
+        setToggleIcon(btn, nextTheme);
+        document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
     }
 
     function setupThemeToggle() {
@@ -3185,13 +3202,10 @@
         applyTheme(activeTheme);
         setToggleIcon(button, activeTheme);
 
-        button.addEventListener("click", function () {
-            var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
-            applyTheme(nextTheme);
-            persistTheme(nextTheme);
-            setToggleIcon(button, nextTheme);
-            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
-        });
+        button.addEventListener("click", performThemeToggle);
+
+        window.NjcTheme = window.NjcTheme || {};
+        window.NjcTheme.toggle = performThemeToggle;
 
         var media = window.matchMedia("(prefers-color-scheme: dark)");
         if (media && media.addEventListener) {
