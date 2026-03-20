@@ -47,7 +47,11 @@
             var triviaWrongAnswer = document.getElementById("trivia-wrong-answer");
             var triviaWrongBackdrop = document.getElementById("trivia-wrong-backdrop");
             var triviaWrongClose = document.getElementById("trivia-wrong-close");
-            var triviaScoreEl = document.getElementById("trivia-score");
+            var triviaStatsEl = document.getElementById("trivia-stats");
+            var triviaStatPoints = document.getElementById("trivia-stat-points");
+            var triviaStatCorrect = document.getElementById("trivia-stat-correct");
+            var triviaStatWrong = document.getElementById("trivia-stat-wrong");
+            var triviaStatStreak = document.getElementById("trivia-stat-streak");
             var TRIVIA_ANSWERED_KEY = "njc_trivia_answered_v1";
             var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
             var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
@@ -1301,11 +1305,8 @@
                 loadTrivia();
             });
             document.addEventListener("njc:trivia-points-updated", function () {
-                if (triviaScoreEl) {
-                    var pts = getTriviaPoints();
-                    triviaScoreEl.hidden = false;
-                    triviaScoreEl.textContent = T("home.triviaScore", "Your score: {count}").replace("{count}", String(pts));
-                }
+                var card = document.getElementById("trivia-card");
+                if (card) renderTriviaStats(card);
             });
 
             function getTriviaUserId() {
@@ -1357,6 +1358,60 @@
                 }
             }
 
+            function getTriviaStats() {
+                var points = getTriviaPoints();
+                var correct = 0;
+                var wrong = 0;
+                var byDate = {};
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    byDate = data[uid] || {};
+                    for (var d in byDate) {
+                        if (Object.prototype.hasOwnProperty.call(byDate, d) && /^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                            if (byDate[d] === "correct") correct++;
+                            else if (byDate[d] === "wrong") wrong++;
+                        }
+                    }
+                } catch (e) {}
+                var streak = 0;
+                var today = getLocalEffectiveDate();
+                for (var daysAgo = 0; daysAgo < 365; daysAgo++) {
+                    var d = getDateDaysAgo(today, daysAgo);
+                    if (byDate[d] === "correct") streak++;
+                    else break;
+                }
+                return { points: points, correct: correct, wrong: wrong, total: correct + wrong, streak: streak };
+            }
+
+            function getDateDaysAgo(fromYmd, daysAgo) {
+                try {
+                    var parts = fromYmd.split("-");
+                    var y = parseInt(parts[0], 10);
+                    var m = parseInt(parts[1], 10) - 1;
+                    var d = parseInt(parts[2], 10);
+                    var dt = new Date(y, m, d);
+                    dt.setDate(dt.getDate() - daysAgo);
+                    var yy = dt.getFullYear();
+                    var mm = String(dt.getMonth() + 1).padStart(2, "0");
+                    var dd = String(dt.getDate()).padStart(2, "0");
+                    return yy + "-" + mm + "-" + dd;
+                } catch (e) {
+                    return "";
+                }
+            }
+
+            function renderTriviaStats(card) {
+                if (!triviaStatsEl || !card || card.id !== "trivia-card") return;
+                var s = getTriviaStats();
+                triviaStatsEl.hidden = false;
+                if (triviaStatPoints) triviaStatPoints.textContent = String(s.points);
+                if (triviaStatCorrect) triviaStatCorrect.textContent = String(s.correct);
+                if (triviaStatWrong) triviaStatWrong.textContent = String(s.wrong);
+                if (triviaStatStreak) triviaStatStreak.textContent = String(s.streak);
+            }
+
             function addTriviaPoints(n) {
                 try {
                     var raw = window.localStorage.getItem(TRIVIA_POINTS_KEY);
@@ -1395,17 +1450,10 @@
                 function setMatch(match, loading, wrap, qText, ref, opts, empty, feedback, card, optsWrap, expandBtn, effectiveDate) {
                     if (!loading || !wrap || !qText || !opts || !empty) return;
                     loading.hidden = true;
-                    if (triviaScoreEl && card && card.id === "trivia-card") {
-                        var pts = getTriviaPoints();
-                        triviaScoreEl.hidden = false;
-                        triviaScoreEl.textContent = T("home.triviaScore", "Your score: {count}").replace("{count}", String(pts));
-                    }
+                    if (card && card.id === "trivia-card") renderTriviaStats(card);
                     if (!match) {
                         empty.hidden = false;
                         empty.textContent = T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card);
-                        if (triviaScoreEl && card && card.id === "trivia-card") {
-                            triviaScoreEl.hidden = false;
-                        }
                         return;
                     }
                     var question = String(match.question || "").trim();

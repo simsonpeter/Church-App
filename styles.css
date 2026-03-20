@@ -397,9 +397,42 @@ body.splash-active {
     line-height: 1.52;
 }
 
-.trivia-score {
-    margin: 0 0 8px;
-    font-weight: 600;
+.trivia-stats {
+    margin: 0 0 16px;
+}
+
+.trivia-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.trivia-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 8px;
+    background: var(--surface-soft);
+    border-radius: 8px;
+    border: 1px solid var(--line);
+}
+
+.trivia-stat-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.trivia-stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+@media (max-width: 360px) {
+    .trivia-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .trivia-question {
