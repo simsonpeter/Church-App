@@ -65,6 +65,21 @@
                 <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
+            <section class="card" id="trivia-card-home">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
+                <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <div id="trivia-content-home">
+                    <p class="page-note" id="trivia-loading-home" data-i18n="home.triviaLoading">Loading trivia...</p>
+                    <div id="trivia-question-wrap-home" hidden>
+                        <p class="trivia-question-text" id="trivia-question-text-home"></p>
+                        <p class="page-note trivia-reference" id="trivia-reference-home" hidden></p>
+                        <div class="trivia-options" id="trivia-options-home"></div>
+                        <p class="page-note trivia-feedback" id="trivia-feedback-home" hidden></p>
+                    </div>
+                    <p class="page-note" id="trivia-empty-home" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
+                </div>
+            </section>
+
             <section class="card hero-card">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">This Week</span></h2>
                 <ul class="list" id="this-week-events-list">
@@ -858,9 +873,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260318de"></script>
-    <script src="app-shell.js?v=20260318de"></script>
+    <script src="app-shell.js?v=20260320tr4"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260320tr2"></script>
+    <script src="home-page.js?v=20260320tr4"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260318de"></script>
     <script src="bible-page.js?v=20260318de"></script>

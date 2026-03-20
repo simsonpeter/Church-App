@@ -2613,12 +2613,14 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isTrivia = getCurrentRoute() === "trivia";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            triviaLink.classList.toggle("active", isTrivia);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
