@@ -70,8 +70,8 @@
                 <p class="page-note" data-i18n="home.triviaSubtitle">Today's Bible question in Tamil.</p>
                 <div id="bible-trivia-content" hidden>
                     <p id="bible-trivia-question" class="trivia-question"></p>
-                    <button type="button" class="button-link button-secondary" id="bible-trivia-reveal" data-i18n="home.triviaReveal">Reveal answer</button>
-                    <p id="bible-trivia-answer" class="trivia-answer" hidden></p>
+                    <div class="trivia-options" id="bible-trivia-options"></div>
+                    <p id="bible-trivia-feedback" class="page-note trivia-feedback" hidden></p>
                     <p id="bible-trivia-reference" class="page-note" hidden></p>
                 </div>
                 <p id="bible-trivia-loading" class="page-note">Loading trivia...</p>
@@ -641,10 +641,22 @@
 
             <section class="card">
                 <h2><i class="fa-solid fa-circle-question"></i><span data-i18n="admin.triviaTitle">Bible Trivia (Tamil)</span></h2>
-                <p class="page-note" data-i18n="admin.triviaInfo">Add and schedule Bible trivia questions in Tamil. Shown on home page by date.</p>
+                <p class="page-note" data-i18n="admin.triviaInfo">Add and schedule Bible trivia questions in Tamil. 4 answer options required.</p>
                 <form class="prayer-form" id="admin-trivia-form">
                     <input id="admin-trivia-question" class="search-input" type="text" placeholder="Question in Tamil" data-i18n-placeholder="admin.triviaQuestionPlaceholder">
-                    <textarea id="admin-trivia-answer" class="search-input prayer-textarea" rows="2" placeholder="Answer in Tamil" data-i18n-placeholder="admin.triviaAnswerPlaceholder"></textarea>
+                    <input id="admin-trivia-option1" class="search-input" type="text" placeholder="Option 1" data-i18n-placeholder="admin.triviaOption1">
+                    <input id="admin-trivia-option2" class="search-input" type="text" placeholder="Option 2" data-i18n-placeholder="admin.triviaOption2">
+                    <input id="admin-trivia-option3" class="search-input" type="text" placeholder="Option 3" data-i18n-placeholder="admin.triviaOption3">
+                    <input id="admin-trivia-option4" class="search-input" type="text" placeholder="Option 4" data-i18n-placeholder="admin.triviaOption4">
+                    <label class="admin-trivia-correct-label">
+                        <span data-i18n="admin.triviaCorrectLabel">Correct option:</span>
+                        <select id="admin-trivia-correct" class="search-input">
+                            <option value="0">1</option>
+                            <option value="1">2</option>
+                            <option value="2">3</option>
+                            <option value="3">4</option>
+                        </select>
+                    </label>
                     <input id="admin-trivia-reference" class="search-input" type="text" placeholder="Bible reference (optional)" data-i18n-placeholder="admin.triviaReferencePlaceholder">
                     <input id="admin-trivia-date" class="search-input" type="date" data-i18n-placeholder="admin.triviaDatePlaceholder">
                     <button class="button-link" id="admin-trivia-submit" type="submit" data-i18n="admin.triviaPublish">Add trivia</button>

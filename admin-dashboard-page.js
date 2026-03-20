@@ -57,7 +57,11 @@
     var sermonSubmit = document.getElementById("admin-sermon-submit");
 
     var triviaQuestionInput = document.getElementById("admin-trivia-question");
-    var triviaAnswerInput = document.getElementById("admin-trivia-answer");
+    var triviaOption1Input = document.getElementById("admin-trivia-option1");
+    var triviaOption2Input = document.getElementById("admin-trivia-option2");
+    var triviaOption3Input = document.getElementById("admin-trivia-option3");
+    var triviaOption4Input = document.getElementById("admin-trivia-option4");
+    var triviaCorrectInput = document.getElementById("admin-trivia-correct");
     var triviaReferenceInput = document.getElementById("admin-trivia-reference");
     var triviaDateInput = document.getElementById("admin-trivia-date");
     var triviaSubmit = document.getElementById("admin-trivia-submit");
@@ -345,14 +349,19 @@
         triviaList.innerHTML = sorted.map(function (entry) {
             var id = String(entry && entry.id || "").trim();
             var questionTa = String(entry && entry.questionTa || "").trim();
+            var options = Array.isArray(entry && entry.options) ? entry.options : [];
+            var correctIndex = Number(entry && entry.correctIndex) || 0;
             var answerTa = String(entry && entry.answerTa || "").trim();
             var reference = String(entry && entry.reference || "").trim();
             var date = String(entry && entry.date || "").trim();
+            var preview = options.length >= 4
+                ? options.map(function (o, i) { return (i === correctIndex ? "✓ " : "") + String(o || "").slice(0, 25); }).join(" | ")
+                : (answerTa ? answerTa.slice(0, 80) + (answerTa.length > 80 ? "…" : "") : "");
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(questionTa || T("admin.triviaTitle", "Bible Trivia")) + "</h3>" +
                 "  <p class=\"page-note\">" + escapeHtml(date || "-") + (reference ? (" • " + escapeHtml(reference)) : "") + "</p>" +
-                (answerTa ? ("  <p class=\"admin-item-body\">" + escapeHtml(answerTa.slice(0, 80)) + (answerTa.length > 80 ? "…" : "") + "</p>") : "") +
+                (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-trivia-id=\"" + escapeHtml(id) + "\" data-admin-trivia-action=\"edit\">" + escapeHtml(T("admin.triviaEdit", "Edit")) + "</button>" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-trivia-id=\"" + escapeHtml(id) + "\" data-admin-trivia-action=\"delete\">" + escapeHtml(T("admin.triviaDelete", "Delete")) + "</button>" +
@@ -816,29 +825,39 @@
         });
     });
 
-    if (triviaForm && triviaQuestionInput && triviaAnswerInput && triviaDateInput) {
+    if (triviaForm && triviaQuestionInput && triviaOption1Input && triviaOption2Input && triviaOption3Input && triviaOption4Input && triviaCorrectInput && triviaDateInput) {
         triviaForm.addEventListener("submit", function (event) {
             event.preventDefault();
             if (busy || !isAdminUser()) {
                 return;
             }
             var questionTa = String(triviaQuestionInput.value || "").trim();
-            var answerTa = String(triviaAnswerInput.value || "").trim();
+            var opt1 = String(triviaOption1Input.value || "").trim();
+            var opt2 = String(triviaOption2Input.value || "").trim();
+            var opt3 = String(triviaOption3Input.value || "").trim();
+            var opt4 = String(triviaOption4Input.value || "").trim();
+            var options = [opt1, opt2, opt3, opt4].filter(Boolean);
+            var correctIndex = Math.max(0, Math.min(3, Number(triviaCorrectInput.value) || 0));
             var reference = String(triviaReferenceInput && triviaReferenceInput.value || "").trim();
             var date = String(triviaDateInput.value || "").trim();
-            if (!questionTa || !answerTa || !date) {
-                showNote("validation", "admin.triviaNeedFields", "Please enter question, answer and date.");
+            if (!questionTa || options.length !== 4) {
+                showNote("validation", "admin.triviaNeedFields", "Please enter question and all 4 options.");
                 return;
             }
             if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
                 showNote("validation", "admin.triviaNeedDate", "Please enter a valid date (YYYY-MM-DD).");
                 return;
             }
+            if (correctIndex >= options.length) {
+                correctIndex = 0;
+            }
             setBusyState(true);
             prependAndSave(TRIVIA_URL, cachedTrivia, {
                 id: makeEntryId("trivia"),
                 questionTa: questionTa,
-                answerTa: answerTa,
+                options: options,
+                correctIndex: correctIndex,
+                answerTa: options[correctIndex],
                 reference: reference,
                 date: date,
                 createdAt: new Date().toISOString(),
@@ -846,7 +865,11 @@
             }).then(function (entries) {
                 cachedTrivia = entries;
                 triviaQuestionInput.value = "";
-                triviaAnswerInput.value = "";
+                triviaOption1Input.value = "";
+                triviaOption2Input.value = "";
+                triviaOption3Input.value = "";
+                triviaOption4Input.value = "";
+                triviaCorrectInput.value = "0";
                 if (triviaReferenceInput) {
                     triviaReferenceInput.value = "";
                 }
@@ -1311,12 +1334,32 @@
                 return;
             }
             var current = source[targetIndex] || {};
+            var opts = Array.isArray(current.options) ? current.options : [current.answerTa || "", "", "", ""];
+            while (opts.length < 4) {
+                opts.push("");
+            }
             var nextQuestion = window.prompt(T("admin.triviaEditPromptQuestion", "Edit question (Tamil)"), String(current.questionTa || ""));
             if (nextQuestion === null) {
                 return;
             }
-            var nextAnswer = window.prompt(T("admin.triviaEditPromptAnswer", "Edit answer (Tamil)"), String(current.answerTa || ""));
-            if (nextAnswer === null) {
+            var nextOpt1 = window.prompt(T("admin.triviaEditPromptOption", "Option 1"), String(opts[0] || ""));
+            if (nextOpt1 === null) {
+                return;
+            }
+            var nextOpt2 = window.prompt(T("admin.triviaEditPromptOption", "Option 2"), String(opts[1] || ""));
+            if (nextOpt2 === null) {
+                return;
+            }
+            var nextOpt3 = window.prompt(T("admin.triviaEditPromptOption", "Option 3"), String(opts[2] || ""));
+            if (nextOpt3 === null) {
+                return;
+            }
+            var nextOpt4 = window.prompt(T("admin.triviaEditPromptOption", "Option 4"), String(opts[3] || ""));
+            if (nextOpt4 === null) {
+                return;
+            }
+            var nextCorrect = window.prompt(T("admin.triviaEditPromptCorrect", "Correct option (1-4)"), String((Number(current.correctIndex) || 0) + 1);
+            if (nextCorrect === null) {
                 return;
             }
             var nextReference = window.prompt(T("admin.triviaEditPromptReference", "Edit reference (optional)"), String(current.reference || ""));
@@ -1328,15 +1371,18 @@
                 return;
             }
             var cleanQuestion = String(nextQuestion || "").trim();
-            var cleanAnswer = String(nextAnswer || "").trim();
+            var cleanOptions = [String(nextOpt1 || "").trim(), String(nextOpt2 || "").trim(), String(nextOpt3 || "").trim(), String(nextOpt4 || "").trim()];
+            var cleanCorrectIndex = Math.max(0, Math.min(3, (Number(nextCorrect) || 1) - 1));
             var cleanDate = String(nextDate || "").trim();
-            if (!cleanQuestion || !cleanAnswer || !/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
-                showNote("validation", "admin.triviaNeedFields", "Please enter question, answer and valid date.");
+            if (!cleanQuestion || cleanOptions.filter(Boolean).length !== 4 || !/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+                showNote("validation", "admin.triviaNeedFields", "Please enter question, all 4 options and valid date.");
                 return;
             }
             source[targetIndex] = Object.assign({}, current, {
                 questionTa: cleanQuestion,
-                answerTa: cleanAnswer,
+                options: cleanOptions,
+                correctIndex: cleanCorrectIndex,
+                answerTa: cleanOptions[cleanCorrectIndex],
                 reference: String(nextReference || "").trim(),
                 date: cleanDate,
                 updatedAt: new Date().toISOString()
