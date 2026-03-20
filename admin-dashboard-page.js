@@ -65,6 +65,7 @@
     var triviaReferenceInput = document.getElementById("admin-trivia-reference");
     var triviaDateInput = document.getElementById("admin-trivia-date");
     var triviaSubmit = document.getElementById("admin-trivia-submit");
+    var triviaNote = document.getElementById("admin-trivia-note");
 
     var cachedNotices = [];
     var cachedBroadcasts = [];
@@ -128,6 +129,9 @@
         broadcastSubmit.disabled = busy;
         eventSubmit.disabled = busy;
         sermonSubmit.disabled = busy;
+        if (triviaSubmit) {
+            triviaSubmit.disabled = busy;
+        }
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
             button.disabled = busy;
         });
@@ -825,33 +829,47 @@
         });
     });
 
-    if (triviaForm && triviaQuestionInput && triviaOption1Input && triviaOption2Input && triviaOption3Input && triviaOption4Input && triviaCorrectInput && triviaDateInput) {
+    if (triviaForm) {
         triviaForm.addEventListener("submit", function (event) {
             event.preventDefault();
             if (busy || !isAdminUser()) {
                 return;
             }
-            var questionTa = String(triviaQuestionInput.value || "").trim();
-            var opt1 = String(triviaOption1Input.value || "").trim();
-            var opt2 = String(triviaOption2Input.value || "").trim();
-            var opt3 = String(triviaOption3Input.value || "").trim();
-            var opt4 = String(triviaOption4Input.value || "").trim();
+            function showTriviaNote(state, key, fallback) {
+                var msg = T(key, fallback);
+                if (triviaNote) {
+                    triviaNote.hidden = false;
+                    triviaNote.textContent = msg;
+                    triviaNote.dataset.state = state || "";
+                } else {
+                    showNote(state, key, fallback);
+                }
+            }
+            var questionTa = String(triviaQuestionInput && triviaQuestionInput.value || "").trim();
+            var opt1 = String(triviaOption1Input && triviaOption1Input.value || "").trim();
+            var opt2 = String(triviaOption2Input && triviaOption2Input.value || "").trim();
+            var opt3 = String(triviaOption3Input && triviaOption3Input.value || "").trim();
+            var opt4 = String(triviaOption4Input && triviaOption4Input.value || "").trim();
             var options = [opt1, opt2, opt3, opt4].filter(Boolean);
-            var correctIndex = Math.max(0, Math.min(3, Number(triviaCorrectInput.value) || 0));
+            var correctIndex = Math.max(0, Math.min(3, Number(triviaCorrectInput && triviaCorrectInput.value) || 0));
             var reference = String(triviaReferenceInput && triviaReferenceInput.value || "").trim();
-            var date = String(triviaDateInput.value || "").trim();
+            var date = String(triviaDateInput && triviaDateInput.value || "").trim();
             if (!questionTa || options.length !== 4) {
-                showNote("validation", "admin.triviaNeedFields", "Please enter question and all 4 options.");
+                showTriviaNote("validation", "admin.triviaNeedFields", "Please enter question and all 4 options.");
                 return;
             }
             if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-                showNote("validation", "admin.triviaNeedDate", "Please enter a valid date (YYYY-MM-DD).");
+                showTriviaNote("validation", "admin.triviaNeedDate", "Please enter a valid date (YYYY-MM-DD).");
                 return;
             }
             if (correctIndex >= options.length) {
                 correctIndex = 0;
             }
             setBusyState(true);
+            if (triviaNote) {
+                triviaNote.hidden = false;
+                triviaNote.textContent = T("admin.saving", "Saving...");
+            }
             prependAndSave(TRIVIA_URL, cachedTrivia, {
                 id: makeEntryId("trivia"),
                 questionTa: questionTa,
@@ -864,21 +882,35 @@
                 createdByEmail: normalizeEmail(getUser() && getUser().email)
             }).then(function (entries) {
                 cachedTrivia = entries;
-                triviaQuestionInput.value = "";
-                triviaOption1Input.value = "";
-                triviaOption2Input.value = "";
-                triviaOption3Input.value = "";
-                triviaOption4Input.value = "";
-                triviaCorrectInput.value = "0";
+                if (triviaQuestionInput) {
+                    triviaQuestionInput.value = "";
+                }
+                if (triviaOption1Input) {
+                    triviaOption1Input.value = "";
+                }
+                if (triviaOption2Input) {
+                    triviaOption2Input.value = "";
+                }
+                if (triviaOption3Input) {
+                    triviaOption3Input.value = "";
+                }
+                if (triviaOption4Input) {
+                    triviaOption4Input.value = "";
+                }
+                if (triviaCorrectInput) {
+                    triviaCorrectInput.value = "0";
+                }
                 if (triviaReferenceInput) {
                     triviaReferenceInput.value = "";
                 }
-                triviaDateInput.value = "";
+                if (triviaDateInput) {
+                    triviaDateInput.value = "";
+                }
                 renderTriviaList();
-                showNote("success", "admin.triviaSaved", "Trivia added.");
+                showTriviaNote("success", "admin.triviaSaved", "Trivia added.");
                 document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
             }).catch(function () {
-                showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+                showTriviaNote("error", "admin.syncError", "Could not save. Check your connection.");
             }).finally(function () {
                 setBusyState(false);
             });
