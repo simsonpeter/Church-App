@@ -56,14 +56,14 @@
             subtitleKey: "",
             subtitleText: ""
         },
-        trivia: {
-            icon: "fa-circle-question",
-            eyebrowKey: "home.triviaTitle",
-            eyebrowText: "Bible Trivia",
-            titleKey: "home.triviaTitle",
-            titleText: "Bible Trivia",
-            subtitleKey: "home.triviaSubtitle",
-            subtitleText: "Today's Bible question in Tamil."
+        contact: {
+            icon: "fa-phone",
+            eyebrowKey: "contact.eyebrow",
+            eyebrowText: "Contact",
+            titleKey: "contact.title",
+            titleText: "Reach our team",
+            subtitleKey: "",
+            subtitleText: ""
         },
         profile: {
             icon: "fa-user",
@@ -227,11 +227,6 @@
 
         if (window.location.hash.replace(/^#/, "") !== current) {
             window.history.replaceState(null, "", "#" + current);
-            try {
-                window.dispatchEvent(new HashChangeEvent("hashchange"));
-            } catch (e) {
-                window.dispatchEvent(new Event("hashchange"));
-            }
         }
 
         window.setTimeout(function () {
@@ -243,38 +238,9 @@
         setActiveRoute(getRouteFromHash());
     }
 
-    function makeTabHandler(route, href) {
-        return function (event) {
-            event.preventDefault();
-            event.stopPropagation();
-            var currentHash = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-            if (currentHash === route) {
-                return;
-            }
-            window.location.hash = href;
-            setActiveRoute(route);
-        };
-    }
-
-    function initRouter() {
+    document.addEventListener("DOMContentLoaded", function () {
         onRouteChange();
-        document.querySelectorAll(".tab-nav a.tab[data-route][href^='#']").forEach(function (tab) {
-            var route = (tab.getAttribute("data-route") || "").trim().toLowerCase();
-            var href = (tab.getAttribute("href") || "").trim();
-            if (!route || !routes[route] || !href || href.charAt(0) !== "#") {
-                return;
-            }
-            var handler = makeTabHandler(route, href);
-            tab.addEventListener("click", handler, true);
-            tab.addEventListener("touchend", handler, { passive: false, capture: true });
-        });
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initRouter);
-    } else {
-        initRouter();
-    }
+    });
 
     window.addEventListener("hashchange", onRouteChange);
     document.addEventListener("njc:langchange", onRouteChange);
