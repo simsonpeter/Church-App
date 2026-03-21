@@ -624,6 +624,17 @@
                 return String(y) + "-" + m + "-" + d;
             }
 
+            function isTriviaWeekday(ymd) {
+                if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) return true;
+                var parts = ymd.split("-");
+                var year = parseInt(parts[0], 10);
+                var month = parseInt(parts[1], 10) - 1;
+                var day = parseInt(parts[2], 10);
+                var date = new Date(year, month, day);
+                var dow = date.getDay();
+                return dow >= 1 && dow <= 5;
+            }
+
             function getDayOfYear(ymd) {
                 var yearStart = Date.UTC(ymd.year, 0, 1);
                 var current = Date.UTC(ymd.year, ymd.month - 1, ymd.day);
@@ -1520,7 +1531,9 @@
                     if (card && card.id === "trivia-card") renderTriviaStats(card);
                     if (!match) {
                         empty.hidden = false;
-                        empty.textContent = T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card);
+                        empty.textContent = isTriviaWeekday(effectiveDate)
+                            ? T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card)
+                            : T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", card);
                         return;
                     }
                     var question = String(match.question || "").trim();
@@ -1585,6 +1598,19 @@
                     if (empty) { empty.hidden = false; empty.textContent = T("home.triviaError", "Could not load trivia. Try again later.", card); }
                 }
                 var effectiveDate = getLocalEffectiveDate();
+                if (!isTriviaWeekday(effectiveDate)) {
+                    if (hasPage) {
+                        triviaLoading.hidden = true;
+                        triviaEmpty.hidden = false;
+                        triviaEmpty.textContent = T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", triviaCard);
+                    }
+                    if (hasHome) {
+                        triviaLoadingHome.hidden = true;
+                        triviaEmptyHome.hidden = false;
+                        triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", triviaCardHome);
+                    }
+                    return;
+                }
                 if (hasPage) setLoading(triviaLoading, triviaQuestionWrap, triviaEmpty, triviaCard);
                 if (hasHome) setLoading(triviaLoadingHome, triviaQuestionWrapHome, triviaEmptyHome, triviaCardHome);
                 var timeoutMs = 15000;
