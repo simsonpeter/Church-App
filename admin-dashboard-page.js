@@ -253,9 +253,14 @@
         };
     }
 
+    var FETCH_TIMEOUT_MS = 15000;
+
     function fetchMantleEntries(url) {
-        return fetch(url + "?ts=" + String(Date.now()), { cache: "no-store" })
+        var controller = new AbortController();
+        var timeoutId = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
+        return fetch(url + "?ts=" + String(Date.now()), { cache: "no-store", signal: controller.signal })
             .then(function (response) {
+                clearTimeout(timeoutId);
                 if (response.status === 404) {
                     return fetch(url, {
                         method: "POST",
@@ -272,8 +277,13 @@
                     throw new Error("Load failed");
                 }
                 return response.json().then(function (payload) {
+                    if (Array.isArray(payload)) return payload;
                     return payload && Array.isArray(payload.entries) ? payload.entries : [];
                 });
+            })
+            .catch(function (err) {
+                clearTimeout(timeoutId);
+                throw err;
             });
     }
 
@@ -612,22 +622,28 @@
         }
         setBusyState(true);
         clearNote();
-        Promise.all([
+        Promise.allSettled([
             fetchMantleEntries(ADMIN_NOTICES_URL),
             fetchMantleEntries(ADMIN_BROADCASTS_URL),
             fetchMantleEntries(ADMIN_EVENTS_URL),
             fetchMantleEntries(ADMIN_SERMONS_URL),
             fetchMantleEntries(PRAYER_WALL_URL),
             fetchMantleEntries(TRIVIA_URL)
-        ]).then(function (result) {
-            cachedNotices = Array.isArray(result[0]) ? result[0] : [];
-            cachedBroadcasts = Array.isArray(result[1]) ? result[1] : [];
-            cachedEvents = Array.isArray(result[2]) ? result[2] : [];
-            cachedSermons = Array.isArray(result[3]) ? result[3] : [];
-            cachedPrayers = (Array.isArray(result[4]) ? result[4] : []).map(normalizePrayerEntry).filter(function (item) {
+        ]).then(function (results) {
+            function extract(idx) {
+                var r = results[idx];
+                if (!r) return [];
+                if (r.status === "fulfilled" && Array.isArray(r.value)) return r.value;
+                return [];
+            }
+            cachedNotices = extract(0);
+            cachedBroadcasts = extract(1);
+            cachedEvents = extract(2);
+            cachedSermons = extract(3);
+            cachedPrayers = extract(4).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item.id);
             });
-            cachedTrivia = Array.isArray(result[5]) ? result[5] : [];
+            cachedTrivia = extract(5);
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -635,8 +651,18 @@
             renderSermonList();
             renderPrayerList();
             renderTriviaList();
+            var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
+            if (failed > 0) {
+                showNote("error", "admin.syncError", "Some data could not be loaded. Pull to refresh.");
+            }
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            renderNoticeList();
+            renderBroadcastList();
+            renderEventList();
+            renderSermonList();
+            renderPrayerList();
+            renderTriviaList();
         }).finally(function () {
             setBusyState(false);
         });
