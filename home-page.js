@@ -717,6 +717,96 @@
                 };
             }
 
+            var USER_PROFILES_STORAGE_KEY = "njc_user_profiles_v1";
+
+            function monthDayMatchesStoredDate(ymdStr, brusselsYmd) {
+                if (!brusselsYmd || !ymdStr || !/^\d{4}-\d{2}-\d{2}$/.test(ymdStr)) {
+                    return false;
+                }
+                var parts = ymdStr.split("-");
+                return Number(parts[1]) === brusselsYmd.month && Number(parts[2]) === brusselsYmd.day;
+            }
+
+            function pickWishDisplayName(fullName, displayName, email) {
+                var fromName = String(fullName || displayName || "").trim();
+                if (fromName) {
+                    var first = fromName.split(/\s+/).filter(Boolean)[0] || "";
+                    if (first) {
+                        return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+                    }
+                }
+                var local = String(email || "").trim().split("@")[0];
+                if (local) {
+                    return local.charAt(0).toUpperCase() + local.slice(1).toLowerCase();
+                }
+                return "";
+            }
+
+            function getSavedUserProfile(uid) {
+                if (!uid) {
+                    return null;
+                }
+                try {
+                    var raw = window.localStorage.getItem(USER_PROFILES_STORAGE_KEY);
+                    var map = raw ? JSON.parse(raw) : {};
+                    var row = map[String(uid)];
+                    return row && typeof row === "object" ? row : null;
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            function buildPersonalWishAnnouncements() {
+                var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                var uid = auth && auth.uid ? String(auth.uid) : "";
+                if (!uid) {
+                    return [];
+                }
+                var profile = getSavedUserProfile(uid);
+                if (!profile) {
+                    return [];
+                }
+                var today = todayYmd;
+                var displayName = pickWishDisplayName(
+                    String(profile.fullName || "").trim(),
+                    String(auth.displayName || "").trim(),
+                    String(auth.email || "").trim()
+                );
+                var nameToken = displayName || T("home.personalWishFriend", "friend", announcementsCard);
+                var items = [];
+                if (monthDayMatchesStoredDate(String(profile.dob || "").trim(), today)) {
+                    items.push({
+                        id: "njc-personal-birthday",
+                        personalWish: "birthday",
+                        personalDisplayName: nameToken,
+                        title: "",
+                        titleTa: "",
+                        body: "",
+                        bodyTa: "",
+                        date: getTodayKey(),
+                        expires: "",
+                        urgent: false,
+                        link: ""
+                    });
+                }
+                if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
+                    items.push({
+                        id: "njc-personal-anniversary",
+                        personalWish: "anniversary",
+                        personalDisplayName: nameToken,
+                        title: "",
+                        titleTa: "",
+                        body: "",
+                        bodyTa: "",
+                        date: getTodayKey(),
+                        expires: "",
+                        urgent: false,
+                        link: ""
+                    });
+                }
+                return items;
+            }
+
             function stopAnnouncementsCarousel() {
                 if (announcementCarouselTimerId) {
                     window.clearInterval(announcementCarouselTimerId);
@@ -749,12 +839,23 @@
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
-                var titleText = isTamil
-                    ? (item.titleTa || item.titleTaAuto || item.title)
-                    : (item.title || item.titleEnAuto || item.titleTa || item.titleTaAuto);
-                var bodyText = isTamil
-                    ? (item.bodyTa || item.bodyTaAuto || item.body)
-                    : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
+                var titleText;
+                var bodyText;
+                var pname = String(item.personalDisplayName || "").trim() || T("home.personalWishFriend", "friend", announcementsCard);
+                if (item.personalWish === "birthday") {
+                    titleText = T("home.personalBirthdayTitle", "Happy birthday!", announcementsCard);
+                    bodyText = T("home.personalBirthdayBody", "Warm wishes on your special day, {name}. God bless you!").replace(/\{name\}/g, pname);
+                } else if (item.personalWish === "anniversary") {
+                    titleText = T("home.personalAnniversaryTitle", "Happy anniversary!", announcementsCard);
+                    bodyText = T("home.personalAnniversaryBody", "Celebrating your wedding anniversary today, {name}. God bless your marriage!").replace(/\{name\}/g, pname);
+                } else {
+                    titleText = isTamil
+                        ? (item.titleTa || item.titleTaAuto || item.title)
+                        : (item.title || item.titleEnAuto || item.titleTa || item.titleTaAuto);
+                    bodyText = isTamil
+                        ? (item.bodyTa || item.bodyTaAuto || item.body)
+                        : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
+                }
                 var dateText = formatYmdForLocale(item.date, announcementsCard);
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
@@ -778,8 +879,9 @@
                         "</div>";
                 }
 
+                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
                 announcementsList.innerHTML = "" +
-                    "<li class=\"announcement-carousel-item\">" +
+                    "<li class=\"" + liClass + "\">" +
                     "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
                     "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
                     metaLine +
@@ -789,7 +891,7 @@
 
                 var activeAnnouncementId = String(item.id || "");
                 var activeIndex = announcementCarouselIndex;
-                if (isTamil) {
+                if (isTamil && !item.personalWish) {
                     if (!item.titleTa && !item.titleTaAuto && item.title) {
                         getTranslatedAnnouncementText(item.title, "ta").then(function (translatedTitle) {
                             if (!translatedTitle || !announcementsList || activeIndex !== announcementCarouselIndex) {
@@ -859,9 +961,21 @@
                 var todayKey = getTodayKey();
                 var visibleItems = allAnnouncements
                     .filter(function (item) {
+                        if (item.personalWish) {
+                            return true;
+                        }
                         return !item.expires || item.expires >= todayKey;
                     })
                     .sort(function (a, b) {
+                        var ap = Boolean(a.personalWish);
+                        var bp = Boolean(b.personalWish);
+                        if (ap !== bp) {
+                            return ap ? -1 : 1;
+                        }
+                        if (ap && bp) {
+                            var order = { birthday: 0, anniversary: 1 };
+                            return (order[a.personalWish] || 9) - (order[b.personalWish] || 9);
+                        }
                         if (a.urgent !== b.urgent) {
                             return a.urgent ? -1 : 1;
                         }
@@ -937,9 +1051,18 @@
 
                 Promise.all([fetchStaticAnnouncements(), fetchAdminNotices()])
                     .then(function (result) {
-                        var merged = (result[0] || []).concat(result[1] || []);
+                        var personal = buildPersonalWishAnnouncements();
+                        var merged = personal.concat((result[0] || []).concat(result[1] || []));
                         var seen = {};
                         allAnnouncements = merged.filter(function (item) {
+                            if (item.personalWish) {
+                                var pkey = String(item.id || "").trim();
+                                if (!pkey || seen[pkey]) {
+                                    return false;
+                                }
+                                seen[pkey] = true;
+                                return true;
+                            }
                             var key = String(item.id || (item.title + "|" + item.date + "|" + item.body)).trim();
                             if (!key || seen[key]) {
                                 return false;
@@ -1314,6 +1437,9 @@
             document.addEventListener("njc:admin-notices-updated", function () {
                 loadAnnouncements();
             });
+            document.addEventListener("njc:profile-updated", function () {
+                loadAnnouncements();
+            });
             document.addEventListener("njc:admin-trivia-updated", function () {
                 loadTrivia();
             });
@@ -1356,7 +1482,10 @@
                 });
             }
 
-            document.addEventListener("njc:authchange", syncTriviaPointsForUser);
+            document.addEventListener("njc:authchange", function () {
+                syncTriviaPointsForUser();
+                loadAnnouncements();
+            });
 
             function getTriviaUserId() {
                 var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;

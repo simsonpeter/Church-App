@@ -7,6 +7,7 @@
     var form = document.getElementById("profile-form");
     var fullNameInput = document.getElementById("profile-full-name");
     var dobInput = document.getElementById("profile-dob");
+    var anniversaryInput = document.getElementById("profile-anniversary");
     var phoneInput = document.getElementById("profile-phone");
     var photoFileInput = document.getElementById("profile-photo-file");
     var saveButton = document.getElementById("profile-save-btn");
@@ -120,6 +121,7 @@
         var out = {
             fullName: base.fullName,
             dob: base.dob,
+            anniversary: base.anniversary,
             phone: base.phone,
             updatedAt: base.updatedAt
         };
@@ -168,7 +170,7 @@
 
     function setFormEnabled(enabled) {
         var disabled = !enabled;
-        [fullNameInput, dobInput, phoneInput, photoFileInput].forEach(function (node) {
+        [fullNameInput, dobInput, anniversaryInput, phoneInput, photoFileInput].forEach(function (node) {
             if (node) {
                 node.disabled = disabled;
             }
@@ -184,6 +186,7 @@
         return {
             fullName: String(source.fullName || activeUser.displayName || deriveNameFromEmail(activeUser.email || "")).trim(),
             dob: String(source.dob || "").trim(),
+            anniversary: String(source.anniversary || "").trim(),
             phone: String(source.phone || activeUser.phoneNumber || "").trim(),
             photoUrl: String(source.photoUrl || activeUser.photoURL || "").trim(),
             updatedAt: Number(source.updatedAt || Date.now()) || Date.now()
@@ -194,6 +197,7 @@
         return {
             fullName: String(fullNameInput && fullNameInput.value || "").trim(),
             dob: String(dobInput && dobInput.value || "").trim(),
+            anniversary: String(anniversaryInput && anniversaryInput.value || "").trim(),
             phone: String(phoneInput && phoneInput.value || "").trim(),
             photoUrl: String(selectedPhotoDataUrl || savedPhotoDataUrl || "").trim(),
             updatedAt: Date.now()
@@ -293,6 +297,9 @@
         if (dobInput) {
             dobInput.value = String(profile.dob || "");
         }
+        if (anniversaryInput) {
+            anniversaryInput.value = String(profile.anniversary || "");
+        }
         if (phoneInput) {
             phoneInput.value = String(profile.phone || "");
         }
@@ -345,7 +352,7 @@
         currentUid = String(user && user.uid || "");
         if (!currentUid) {
             setFormEnabled(false);
-            populateForm({ fullName: "", dob: "", phone: "", photoUrl: "" });
+            populateForm({ fullName: "", dob: "", anniversary: "", phone: "", photoUrl: "" });
             renderAvatar({}, user);
             renderProfileTriviaPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
@@ -374,6 +381,11 @@
             var cloudPhoto = String(cloudProfile.photoUrl || "").trim();
             if (!cloudPhoto && localPhoto) {
                 cloudProfile = Object.assign({}, cloudProfile, { photoUrl: localPhoto });
+            }
+            var localAnn = String(localProfile.anniversary || "").trim();
+            var cloudAnn = String(cloudProfile.anniversary || "").trim();
+            if (!cloudAnn && localAnn) {
+                cloudProfile = Object.assign({}, cloudProfile, { anniversary: localAnn });
             }
             map[currentUid] = cloudProfile;
             saveProfileMap(map);

@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260322t1">
+    <link rel="stylesheet" href="styles.css?v=20260322t3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -534,6 +534,11 @@
                         <input id="profile-dob" class="search-input" type="date" autocomplete="bday">
                     </label>
                     <label class="profile-field">
+                        <span data-i18n="profile.anniversary">Wedding anniversary</span>
+                        <input id="profile-anniversary" class="search-input" type="date" autocomplete="off">
+                        <small class="page-note" data-i18n="profile.anniversaryHelp">Optional. If set, you’ll see a wish on your anniversary on Home.</small>
+                    </label>
+                    <label class="profile-field">
                         <span data-i18n="profile.phone">Phone number</span>
                         <input id="profile-phone" class="search-input" type="tel" autocomplete="tel" placeholder="+32 483 11 64 84">
                     </label>
@@ -938,9 +943,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260318de"></script>
-    <script src="app-shell.js?v=20260322t2"></script>
+    <script src="app-shell.js?v=20260322t3"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260320tr6"></script>
+    <script src="home-page.js?v=20260322t3"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260318de"></script>
     <script src="bible-page.js?v=20260318de"></script>
@@ -949,7 +954,7 @@
     <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260322a1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260322t2"></script>
+    <script src="profile-page.js?v=20260322t3"></script>
     <script src="spa-router.js?v=20260318de"></script>
 </body>
 </html>

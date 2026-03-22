@@ -652,6 +652,12 @@ body.splash-active {
     animation: fade-up 0.28s ease both;
 }
 
+.announcement-carousel-item.announcement-personal-wish {
+    border-left: 4px solid #c9a227;
+    padding-left: 12px;
+    margin-left: -2px;
+}
+
 .announcement-carousel-controls {
     margin-top: 10px;
     display: grid;
