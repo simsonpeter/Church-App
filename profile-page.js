@@ -24,6 +24,10 @@
     var MAX_PHOTO_SIDE = 720;
     var PHOTO_QUALITY = 0.82;
     var MAX_DATA_URL_LENGTH = 900000;
+    /** Firestore document ~1 MiB max; leave headroom for field names and overhead. */
+    var MAX_FIRESTORE_PHOTOURL_CHARS = 750000;
+    /** Firebase Auth updateProfile rejects long or data: URLs; only sync http(s) links. */
+    var MAX_AUTH_PHOTO_URL_LENGTH = 2048;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && profileCard) {
@@ -109,6 +113,21 @@
         } catch (err) {
             return null;
         }
+    }
+
+    function profilePayloadForFirestore(profile) {
+        var base = profile && typeof profile === "object" ? profile : {};
+        var out = {
+            fullName: base.fullName,
+            dob: base.dob,
+            phone: base.phone,
+            updatedAt: base.updatedAt
+        };
+        var photo = String(base.photoUrl || "").trim();
+        if (photo && photo.length <= MAX_FIRESTORE_PHOTOURL_CHARS) {
+            out.photoUrl = photo;
+        }
+        return out;
     }
 
     function deriveNameFromEmail(email) {
@@ -302,9 +321,16 @@
             if (!authUser || typeof authUser.updateProfile !== "function") {
                 return;
             }
+            var rawPhoto = String(profile && profile.photoUrl || "").trim();
+            var safePhoto = "";
+            if (rawPhoto && (rawPhoto.indexOf("https://") === 0 || rawPhoto.indexOf("http://") === 0)) {
+                if (rawPhoto.length <= MAX_AUTH_PHOTO_URL_LENGTH) {
+                    safePhoto = rawPhoto;
+                }
+            }
             await authUser.updateProfile({
-                displayName: profile.fullName || "",
-                photoURL: profile.photoUrl || ""
+                displayName: String(profile && profile.fullName || "").trim(),
+                photoURL: safePhoto
             });
         } catch (err) {
             return;
@@ -344,6 +370,11 @@
                 return;
             }
             var cloudProfile = normalizeProfile(snapshot.data() || {}, user);
+            var localPhoto = String(localProfile.photoUrl || "").trim();
+            var cloudPhoto = String(cloudProfile.photoUrl || "").trim();
+            if (!cloudPhoto && localPhoto) {
+                cloudProfile = Object.assign({}, cloudProfile, { photoUrl: localPhoto });
+            }
             map[currentUid] = cloudProfile;
             saveProfileMap(map);
             populateForm(cloudProfile);
@@ -379,19 +410,49 @@
         notifyProfileUpdated(uid, profile);
 
         var doc = getFirestoreProfileDoc(uid);
-        if (doc) {
-            try {
-                await doc.set(profile, { merge: true });
-                await syncAuthBasicProfile(profile);
-                setNote("saved", "profile.saved", "Profile saved.");
-            } catch (err) {
-                setNote("savedLocal", "profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
-            } finally {
-                setBusy(false);
-            }
+        if (!doc) {
+            setNote("savedLocal", "profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
+            setBusy(false);
             return;
         }
-        setNote("savedLocal", "profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
+
+        var payload = profilePayloadForFirestore(profile);
+        var cloudSaved = false;
+        var cloudError = null;
+        try {
+            await doc.set(payload, { merge: true });
+            cloudSaved = true;
+        } catch (err) {
+            cloudError = err;
+            if (payload.photoUrl) {
+                try {
+                    var slim = Object.assign({}, payload);
+                    delete slim.photoUrl;
+                    await doc.set(slim, { merge: true });
+                    cloudSaved = true;
+                    cloudError = null;
+                } catch (err2) {
+                    cloudError = err2;
+                }
+            }
+        }
+
+        if (cloudSaved) {
+            setNote("saved", "profile.saved", "Profile saved.");
+        } else {
+            var code = cloudError && cloudError.code ? String(cloudError.code) : "";
+            if (code === "permission-denied") {
+                setNote("cloudDenied", "profile.cloudPermissionDenied", "Saved on this device. Cloud rules blocked the sync — check Firestore security rules for your account.");
+            } else {
+                setNote("savedLocal", "profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
+            }
+        }
+
+        try {
+            await syncAuthBasicProfile(profile);
+        } catch (authErr) {
+            /* Auth display photo only accepts short http(s) URLs; ignore failures. */
+        }
         setBusy(false);
     }
 
@@ -403,6 +464,8 @@
             note.textContent = T("profile.saved", "Profile saved.");
         } else if (noteState === "savedLocal") {
             note.textContent = T("profile.savedLocal", "Saved on this device. Cloud sync will retry later.");
+        } else if (noteState === "cloudDenied") {
+            note.textContent = T("profile.cloudPermissionDenied", "Saved on this device. Cloud rules blocked the sync — check Firestore security rules for your account.");
         } else if (noteState === "authRequired") {
             note.textContent = T("profile.loginRequired", "Please login to manage your profile.");
         } else if (noteState === "photoReadError") {
