@@ -16,6 +16,7 @@
     var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
+    var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
     var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var CONTACT_FORM_FEED_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
     var ADMIN_NOTICES_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -1518,26 +1519,39 @@
     }
 
     function checkNewSermonNotification(status) {
-        return fetch(SERMONS_FEED_URL)
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error("Unable to load sermons");
-                }
-                return response.json();
-            })
-            .then(function (raw) {
-                var sermons = Array.isArray(raw) ? raw : [];
-                var sorted = sermons
-                    .filter(function (item) { return item && item.title; })
-                    .sort(function (a, b) {
-                        return String(b.date || "").localeCompare(String(a.date || ""));
+        var timeoutMs = 15000;
+        var timeoutPromise = new Promise(function (_, reject) {
+            setTimeout(function () { reject(new Error("Timeout")); }, timeoutMs);
+        });
+        return Promise.race([
+            Promise.allSettled([
+                fetch(SERMONS_FEED_URL).then(function (r) {
+                    if (!r.ok) throw new Error("Load failed");
+                    return r.json();
+                }),
+                fetch(ADMIN_SERMONS_URL + "?ts=" + Date.now(), { cache: "no-store" }).then(function (r) {
+                    if (r.status === 404) return [];
+                    if (!r.ok) throw new Error("Load failed");
+                    return r.json().then(function (p) {
+                        return Array.isArray(p) ? p : (p && Array.isArray(p.entries) ? p.entries : []);
                     });
-                var latest = sorted[0];
-                if (!latest) {
-                    return null;
-                }
+                })
+            ]),
+            timeoutPromise
+        ]).then(function (results) {
+            var github = (results[0] && results[0].status === "fulfilled" && Array.isArray(results[0].value)) ? results[0].value : [];
+            var admin = (results[1] && results[1].status === "fulfilled" && Array.isArray(results[1].value)) ? results[1].value : [];
+            var merged = github.concat(admin).filter(function (item) { return item && item.title; });
+            var sorted = merged.sort(function (a, b) {
+                return String(b.date || b.createdAt || "").localeCompare(String(a.date || a.createdAt || ""));
+            });
+            var latest = sorted[0];
+            return latest;
+        })
+            .then(function (latest) {
+                if (!latest) return null;
 
-                var latestKey = String(latest.date || "") + "|" + String(latest.title || "");
+                var latestKey = String(latest.date || latest.createdAt || "") + "|" + String(latest.title || "");
                 var previousKey = "";
                 try {
                     previousKey = window.localStorage.getItem(NOTIFICATION_LAST_SERMON_KEY) || "";
@@ -1594,6 +1608,10 @@
                 return null;
             });
     }
+
+    document.addEventListener("njc:admin-sermons-updated", function () {
+        runNotificationChecks();
+    });
 
     function checkNewPrayerNotification(status) {
         return fetch(PRAYER_WALL_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
