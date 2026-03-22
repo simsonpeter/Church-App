@@ -1,10 +1,10 @@
-const APP_CACHE = "njc-app-cache-v120";
-const RUNTIME_CACHE = "njc-runtime-cache-v120";
+const APP_CACHE = "njc-app-cache-v121";
+const RUNTIME_CACHE = "njc-runtime-cache-v121";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260318de",
+    "./styles.css?v=20260320t2",
     "./user-auth.js?v=20260318de",
     "./app-shell.js?v=20260320u1",
     "./events-engine.js?v=20260318de",
@@ -81,6 +81,7 @@ self.addEventListener("fetch", function (event) {
     const url = new URL(event.request.url);
     const isSameOrigin = url.origin === self.location.origin;
     const isRemoteData = url.origin === "https://raw.githubusercontent.com";
+    const isMantleDb = url.origin === "https://mantledb.sh";
 
     if (event.request.mode === "navigate") {
         event.respondWith(
@@ -102,7 +103,7 @@ self.addEventListener("fetch", function (event) {
         return;
     }
 
-    if (isSameOrigin || isRemoteData) {
+    if (isSameOrigin || isRemoteData || isMantleDb) {
         event.respondWith(staleWhileRevalidate(event.request));
     }
 });

@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260318de">
+    <link rel="stylesheet" href="styles.css?v=20260320t2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -71,6 +71,7 @@
             <section class="card trivia-card-compact" id="trivia-card-home">
                 <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Trivia</span></h2>
                 <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from 8 AM your local time.</p>
+                <p class="page-note trivia-weekly-summary" id="trivia-weekly-summary-home" hidden></p>
                 <div id="trivia-content-home">
                     <p class="page-note" id="trivia-loading-home" data-i18n="home.triviaLoading">Loading trivia...</p>
                     <div id="trivia-question-wrap-home" hidden>
@@ -85,6 +86,7 @@
                             <p class="page-note trivia-reference" id="trivia-reference-home" hidden></p>
                             <div class="trivia-options" id="trivia-options-home"></div>
                             <p class="page-note trivia-feedback" id="trivia-feedback-home" hidden></p>
+                            <button type="button" class="button-link trivia-share-btn" id="trivia-share-btn-home" hidden data-i18n="home.triviaShare">Share result</button>
                         </div>
                     </div>
                     <p class="page-note" id="trivia-empty-home" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
@@ -492,6 +494,7 @@
                         <p class="page-note trivia-participated" id="trivia-participated" hidden></p>
                         <div class="trivia-options" id="trivia-options"></div>
                         <p class="page-note trivia-feedback" id="trivia-feedback" hidden></p>
+                        <button type="button" class="button-link trivia-share-btn" id="trivia-share-btn" hidden data-i18n="home.triviaShare">Share result</button>
                     </div>
                     <p class="page-note" id="trivia-empty" hidden data-i18n="home.triviaEmpty">No trivia for today. Check back tomorrow from 8 AM.</p>
                 </div>

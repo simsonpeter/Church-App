@@ -149,6 +149,10 @@
         "home.triviaStatCorrect": "சரி",
         "home.triviaStatWrong": "தவறு",
         "home.triviaStatStreak": "தொடர்",
+        "home.triviaShare": "முடிவை பகிர்",
+        "home.triviaShareText": "இன்றைய வேத வினாடி சரியாக பதிலளித்தேன்! +1 புள்ளி",
+        "home.triviaShareCopied": "நகலெடுக்கப்பட்டது",
+        "home.triviaWeeklySummary": "இந்த வாரம்: {correct} சரி, {wrong} தவறு",
         "home.triviaNoQuestion": "கேள்வி இல்லை",
         "home.loadEventsErrorTitle": "இந்த வார நிகழ்வுகளை ஏற்ற முடியவில்லை",
         "home.loadEventsErrorBody": "புதுப்பிக்க நிகழ்வுகள் தாவலைத் திறக்கவும்.",
@@ -331,6 +335,8 @@
         "notify.reminder15": "15 நிமிடம் முன்",
         "notify.reminder30": "30 நிமிடம் முன்",
         "notify.reminder60": "60 நிமிடம் முன்",
+        "notify.triviaReminderTitle": "வேத வினாடி",
+        "notify.triviaReminderBody": "இன்றைய தமிழ் வேத வினாடி தயார்! விளையாட கிளிக் செய்யவும்.",
         "notify.eventSoonTitle": "நிகழ்வு நினைவூட்டல்",
         "notify.newSermonTitle": "புதிய பிரசங்கம் கிடைக்கிறது",
         "notify.newPrayerTitle": "புதிய ஜெப வேண்டுதல் வந்துள்ளது",
@@ -637,6 +643,9 @@
         "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
         "settings.notificationsUnsupported": "ஆதரவு இல்லை",
         "settings.checkForUpdates": "புதுப்பிப்புகளை சரிபார்க்கவும்",
+        "settings.largerText": "பெரிய உரை",
+        "settings.largerTextOn": "ஆன்",
+        "settings.largerTextOff": "ஆஃப்",
         "profile.eyebrow": "சுயவிவரம்",
         "profile.title": "உங்கள் சுயவிவரம்",
         "profile.info": "உங்கள் விவரங்களை புதுப்பிக்கவும்.",
@@ -1944,10 +1953,38 @@
             });
     }
 
+    function checkTriviaReminder() {
+        if (!notificationsSupported() || getNotificationPermission() !== "granted") {
+            return;
+        }
+        var settings = getNotificationSettings();
+        if (!settings.enabled) return;
+        var now = new Date();
+        var brussels = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Brussels" }));
+        var dow = brussels.getDay();
+        var hour = brussels.getHours();
+        if (dow === 0 || dow === 6) return;
+        if (hour !== 8) return;
+        var y = brussels.getFullYear();
+        var m = String(brussels.getMonth() + 1).padStart(2, "0");
+        var d = String(brussels.getDate()).padStart(2, "0");
+        var key = "trivia:" + y + "-" + m + "-" + d;
+        if (wasNotified(key)) return;
+        showNotification({
+            title: t("notify.triviaReminderTitle", "Bible Trivia"),
+            body: t("notify.triviaReminderBody", "Today's Tamil Bible trivia is ready! Tap to play."),
+            tag: key,
+            url: "#home"
+        }).then(function (sent) {
+            if (sent) markAsNotified(key);
+        });
+    }
+
     function runNotificationChecks() {
         var status = getNotificationStatus();
         if (status.supported && status.enabled && status.permission === "granted") {
             checkEventReminder();
+            checkTriviaReminder();
         }
         checkNewSermonNotification(status);
         checkNewPrayerNotification(status);
@@ -2988,6 +3025,37 @@
             }
         }
 
+        var LARGER_TEXT_KEY = "njc_larger_text_v1";
+        function getLargerText() {
+            try {
+                return window.localStorage.getItem(LARGER_TEXT_KEY) === "1";
+            } catch (e) { return false; }
+        }
+        function setLargerText(on) {
+            try {
+                window.localStorage.setItem(LARGER_TEXT_KEY, on ? "1" : "0");
+            } catch (e) {}
+            document.documentElement.setAttribute("data-larger-text", on ? "1" : "0");
+        }
+        var largerTextBtn = document.createElement("button");
+        largerTextBtn.id = "settings-larger-text-btn";
+        largerTextBtn.className = "lang-toggle";
+        largerTextBtn.type = "button";
+        largerTextBtn.setAttribute("aria-label", t("settings.largerText", "Larger text"));
+        largerTextBtn.innerHTML = "<i class=\"fa-solid fa-text-height\" aria-hidden=\"true\"></i>";
+        var largerTextItem = createSettingsItem(largerTextBtn, "settings.largerText", "Larger text", function () {
+            return getLargerText() ? t("settings.largerTextOn", "On") : t("settings.largerTextOff", "Off");
+        });
+        largerTextBtn.addEventListener("click", function () {
+            setLargerText(!getLargerText());
+            refreshSettingsItems();
+        });
+        if (largerTextItem) {
+            controls.appendChild(largerTextItem.node);
+            items.push(largerTextItem);
+        }
+        setLargerText(getLargerText());
+
         if ("serviceWorker" in navigator) {
             var updateBtn = document.createElement("button");
             updateBtn.id = "settings-update-btn";
@@ -3393,6 +3461,10 @@
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
         activeLanguage = getActiveLanguage();
+        try {
+            var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";
+            document.documentElement.setAttribute("data-larger-text", lt ? "1" : "0");
+        } catch (e) {}
         window.NjcI18n = {
             t: t,
             tForElement: tForElement,

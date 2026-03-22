@@ -25,6 +25,15 @@ body {
     min-height: 100%;
 }
 
+html[data-larger-text="1"] {
+    font-size: 112.5%;
+}
+
+html[data-larger-text="1"] .card h2,
+html[data-larger-text="1"] .app-header h1 {
+    font-size: 1.15em;
+}
+
 body {
     min-height: 100vh;
     font-family: "Inter", "Segoe UI", Arial, sans-serif;
@@ -487,6 +496,20 @@ body.splash-active {
 
 .trivia-feedback[data-state="error"] {
     color: var(--primary);
+}
+
+.trivia-feedback-success {
+    animation: trivia-correct-pulse 0.5s ease;
+}
+
+@keyframes trivia-correct-pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+    100% { transform: scale(1); }
+}
+
+.trivia-share-btn {
+    margin-top: 8px;
 }
 
 .trivia-card-compact .trivia-compact-row {
@@ -3595,5 +3618,116 @@ html[data-theme="light"] .mini-player-btn {
     50% {
         opacity: 1;
         transform: translateX(-50%) scale(1.06);
+    }
+}
+
+/* Tablet and larger screens – scale up from mobile */
+@media (min-width: 600px) {
+    .app-shell {
+        max-width: 540px;
+        padding: 28px 24px 140px;
+    }
+    .app-header h1 {
+        font-size: 1.7rem;
+    }
+    .card {
+        padding: 22px;
+    }
+    .card h2 {
+        font-size: 1.15rem;
+    }
+    .search-input,
+    .page-note,
+    .list li p {
+        font-size: 1.02rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .app-shell {
+        max-width: 640px;
+        padding: 32px 28px 160px;
+    }
+    .app-header {
+        padding: 24px 24px;
+        min-height: 130px;
+    }
+    .app-header h1 {
+        font-size: 1.9rem;
+    }
+    .app-header p {
+        font-size: 1.05rem;
+    }
+    .eyebrow,
+    .brand-title {
+        font-size: 0.82rem;
+    }
+    .card {
+        padding: 26px;
+        border-radius: 20px;
+    }
+    .card h2 {
+        font-size: 1.25rem;
+        margin-bottom: 12px;
+    }
+    .card h2 i {
+        font-size: 1.25rem;
+    }
+    .app-content {
+        gap: 18px;
+        margin-top: 20px;
+    }
+    .search-input,
+    .page-note {
+        font-size: 1.08rem;
+    }
+    .list li h3 {
+        font-size: 1.08rem;
+    }
+    .list li p {
+        font-size: 1.02rem;
+    }
+    .button-link {
+        font-size: 1rem;
+        padding: 12px 20px;
+    }
+    .tab-label {
+        font-size: 0.95rem;
+    }
+    .theme-toggle,
+    .lang-toggle,
+    .notify-toggle,
+    .menu-toggle {
+        width: 44px;
+        height: 44px;
+        font-size: 0.9rem;
+    }
+    .settings-controls .theme-toggle,
+    .settings-controls .lang-toggle,
+    .settings-controls .notify-toggle,
+    .settings-controls .settings-update-btn {
+        width: 48px;
+        height: 48px;
+    }
+    .trivia-option-btn {
+        padding: 16px 20px;
+        font-size: 1.08rem;
+    }
+    .splash-inner {
+        max-width: min(92vw, 520px);
+    }
+    .splash-logo {
+        width: 150px;
+        height: 150px;
+    }
+    .splash-text {
+        font-size: 2.2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .app-shell {
+        max-width: 720px;
+        padding: 36px 32px 180px;
     }
 }

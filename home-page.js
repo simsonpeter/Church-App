@@ -47,6 +47,8 @@
             var triviaWrongAnswer = document.getElementById("trivia-wrong-answer");
             var triviaWrongBackdrop = document.getElementById("trivia-wrong-backdrop");
             var triviaWrongClose = document.getElementById("trivia-wrong-close");
+            var triviaShareBtnHome = document.getElementById("trivia-share-btn-home");
+            var triviaShareBtn = document.getElementById("trivia-share-btn");
             var triviaStatsEl = document.getElementById("trivia-stats");
             var triviaStatPoints = document.getElementById("trivia-stat-points");
             var triviaStatCorrect = document.getElementById("trivia-stat-correct");
@@ -1449,6 +1451,39 @@
                 }
             }
 
+            function getTriviaWeeklyStats() {
+                var s = getTriviaStats();
+                var today = getLocalEffectiveDate();
+                var weekCorrect = 0;
+                var weekWrong = 0;
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    var uid = getTriviaUserId();
+                    var byDate = data[uid] || {};
+                    for (var i = 0; i < 7; i++) {
+                        var d = getDateDaysAgo(today, i);
+                        if (byDate[d] === "correct") weekCorrect++;
+                        else if (byDate[d] === "wrong") weekWrong++;
+                    }
+                } catch (e) {}
+                return { correct: weekCorrect, wrong: weekWrong };
+            }
+
+            function renderTriviaWeeklySummary(card) {
+                var el = card ? card.querySelector(".trivia-weekly-summary") : null;
+                if (!el) return;
+                var w = getTriviaWeeklyStats();
+                if (w.correct === 0 && w.wrong === 0) {
+                    el.hidden = true;
+                    return;
+                }
+                el.hidden = false;
+                el.textContent = T("home.triviaWeeklySummary", "This week: {correct} correct, {wrong} wrong", card)
+                    .replace("{correct}", String(w.correct))
+                    .replace("{wrong}", String(w.wrong));
+            }
+
             function renderTriviaStats(card) {
                 if (!triviaStatsEl || !card || card.id !== "trivia-card") return;
                 var s = getTriviaStats();
@@ -1506,6 +1541,44 @@
                 if (triviaWrongOverlay) triviaWrongOverlay.hidden = true;
             }
 
+            function playTriviaSuccessSound() {
+                try {
+                    var ctx = window.AudioContext || window.webkitAudioContext;
+                    if (!ctx) return;
+                    var audioCtx = new ctx();
+                    var osc = audioCtx.createOscillator();
+                    var gain = audioCtx.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start(audioCtx.currentTime);
+                    osc.stop(audioCtx.currentTime + 0.35);
+                } catch (e) {}
+            }
+
+            function shareTriviaResult(card) {
+                var text = T("home.triviaShareText", "I got today's Bible trivia correct! +1 point");
+                if (navigator.share && navigator.canShare && navigator.canShare({ text: text })) {
+                    navigator.share({ text: text }).catch(function () {
+                        copyTriviaShareToClipboard(text);
+                    });
+                } else {
+                    copyTriviaShareToClipboard(text);
+                }
+            }
+
+            function copyTriviaShareToClipboard(text) {
+                navigator.clipboard.writeText(text).then(function () {
+                    if (window.NjcEvents && typeof window.NjcEvents.showToast === "function") {
+                        window.NjcEvents.showToast(T("home.triviaShareCopied", "Copied to clipboard"));
+                    }
+                }).catch(function () {});
+            }
+
             window.addEventListener("hashchange", function () {
                 var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
                 if (route === "home" || route === "trivia") {
@@ -1529,6 +1602,7 @@
                     if (!loading || !wrap || !qText || !opts || !empty) return;
                     loading.hidden = true;
                     if (card && card.id === "trivia-card") renderTriviaStats(card);
+                    if (card && card.id === "trivia-card-home") renderTriviaWeeklySummary(card);
                     if (!match) {
                         empty.hidden = false;
                         empty.textContent = isTriviaWeekday(effectiveDate)
@@ -1551,6 +1625,8 @@
                     opts.dataset.triviaCorrectAnswer = correctAnswer;
                     wrap.hidden = false;
                     if (feedback) feedback.hidden = true;
+                    var shareBtnEl = card ? card.querySelector(".trivia-share-btn") : null;
+                    if (shareBtnEl) shareBtnEl.hidden = true;
                     var participatedEl = card ? card.querySelector(".trivia-participated") : null;
                     if (participatedEl) participatedEl.hidden = true;
                     var answered = effectiveDate ? getTriviaAnswered(effectiveDate) : null;
@@ -1567,9 +1643,11 @@
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
                             if (feedback) {
                                 feedback.hidden = false;
-                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) + " +" + TRIVIA_POINTS_PER_CORRECT + " " + T("home.triviaPoints", "pts", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
                                 feedback.dataset.state = answered === "correct" ? "success" : "error";
                             }
+                            var shareBtn = card ? card.querySelector(".trivia-share-btn") : null;
+                            if (shareBtn) shareBtn.hidden = answered !== "correct";
                         } else {
                             expandBtn.hidden = false;
                             expandBtn.classList.remove("expanded");
@@ -1585,9 +1663,11 @@
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (b) { b.disabled = true; });
                             if (feedback) {
                                 feedback.hidden = false;
-                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
+                                feedback.textContent = answered === "correct" ? T("home.triviaCorrect", "Correct! Well done.", card) + " +" + TRIVIA_POINTS_PER_CORRECT + " " + T("home.triviaPoints", "pts", card) : T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
                                 feedback.dataset.state = answered === "correct" ? "success" : "error";
                             }
+                            var shareBtn = card ? card.querySelector(".trivia-share-btn") : null;
+                            if (shareBtn) shareBtn.hidden = answered !== "correct";
                         } else {
                             opts.querySelectorAll(".trivia-option-btn").forEach(function (btn) { btn.disabled = false; });
                         }
@@ -1608,6 +1688,7 @@
                         triviaLoadingHome.hidden = true;
                         triviaEmptyHome.hidden = false;
                         triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", triviaCardHome);
+                        renderTriviaWeeklySummary(triviaCardHome);
                     }
                     return;
                 }
@@ -1663,6 +1744,15 @@
                         addTriviaPoints(TRIVIA_POINTS_PER_CORRECT);
                         feedback.textContent = T("home.triviaCorrect", "Correct! Well done.", card) + " +" + TRIVIA_POINTS_PER_CORRECT + " " + T("home.triviaPoints", "pts", card);
                         feedback.dataset.state = "success";
+                        feedback.classList.add("trivia-feedback-success");
+                        setTimeout(function () { feedback.classList.remove("trivia-feedback-success"); }, 600);
+                        playTriviaSuccessSound();
+                        var shareBtn = opts.parentElement ? opts.parentElement.querySelector(".trivia-share-btn") : null;
+                        if (shareBtn) {
+                            shareBtn.hidden = false;
+                            shareBtn.onclick = function () { shareTriviaResult(card); };
+                        }
+                        if (card && card.id === "trivia-card-home") renderTriviaWeeklySummary(card);
                     } else {
                         feedback.textContent = T("home.triviaWrong", "Not quite. Try again tomorrow!", card);
                         feedback.dataset.state = "error";
