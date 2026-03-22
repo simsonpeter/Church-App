@@ -5,7 +5,7 @@
     var ADMIN_EVENTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
     var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
-    var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-bible-trivia/entries";
+    var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
     var MAX_ENTRIES = 250;
 
     var refreshButton = document.getElementById("admin-dashboard-refresh");
