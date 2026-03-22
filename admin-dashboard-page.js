@@ -64,7 +64,8 @@
     var triviaOption4Input = document.getElementById("admin-trivia-option4");
     var triviaCorrectInput = document.getElementById("admin-trivia-correct");
     var triviaReferenceInput = document.getElementById("admin-trivia-reference");
-    var triviaDateInput = document.getElementById("admin-trivia-date");
+    var triviaDateInput = document.getElementById("admin-trivia-show-date")
+        || document.getElementById("admin-trivia-date");
     var triviaSubmit = document.getElementById("admin-trivia-submit");
     var triviaNote = document.getElementById("admin-trivia-note");
 
@@ -1423,7 +1424,7 @@
             if (nextOpt4 === null) {
                 return;
             }
-            var nextCorrect = window.prompt(T("admin.triviaEditPromptCorrect", "Correct option (1-4)"), String((Number(current.correctIndex) || 0) + 1);
+            var nextCorrect = window.prompt(T("admin.triviaEditPromptCorrect", "Correct option (1-4)"), String((Number(current.correctIndex) || 0) + 1));
             if (nextCorrect === null) {
                 return;
             }
