@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260320t2">
+    <link rel="stylesheet" href="styles.css?v=20260322t1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -523,7 +523,6 @@
                         <img id="profile-avatar-image" alt="Profile photo" hidden>
                         <span id="profile-avatar-fallback">U</span>
                     </div>
-                    <p class="profile-trivia-points" id="profile-trivia-points" hidden><span data-i18n="profile.triviaPoints">Trivia points</span>: <strong id="profile-trivia-points-value">0</strong></p>
                 </div>
                 <form id="profile-form" class="profile-form">
                     <label class="profile-field">
@@ -546,6 +545,16 @@
                     <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
                 </form>
                 <p class="page-note" id="profile-note" hidden></p>
+            </section>
+            <section class="card profile-achievements-card">
+                <h2><i class="fa-solid fa-trophy"></i><span data-i18n="profile.achievementsTitle">Achievements</span></h2>
+                <p class="page-note" data-i18n="profile.achievementsInfo">Your points from activities in the app.</p>
+                <ul class="profile-achievements-list">
+                    <li class="profile-achievement-row">
+                        <span class="profile-achievement-name"><i class="fa-solid fa-question-circle" aria-hidden="true"></i><span data-i18n="profile.triviaPoints">Bible trivia</span></span>
+                        <strong id="profile-trivia-points-value" class="profile-achievement-value" aria-live="polite">0</strong>
+                    </li>
+                </ul>
             </section>
             </main>
         </section>
@@ -929,7 +938,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260318de"></script>
-    <script src="app-shell.js?v=20260321u1"></script>
+    <script src="app-shell.js?v=20260322t1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260320tr6"></script>
     <script src="events-page.js?v=20260318de"></script>
@@ -940,7 +949,7 @@
     <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260322a1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260320tr5"></script>
+    <script src="profile-page.js?v=20260322t1"></script>
     <script src="spa-router.js?v=20260318de"></script>
 </body>
 </html>

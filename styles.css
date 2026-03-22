@@ -2144,6 +2144,55 @@ body.auth-modal-open {
     margin: 6px 0 12px;
 }
 
+.profile-achievements-card {
+    margin-top: 4px;
+}
+
+.profile-achievements-list {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.profile-achievement-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: linear-gradient(180deg, var(--surface-soft), var(--surface));
+    box-shadow: 0 6px 14px rgba(40, 12, 12, 0.08);
+}
+
+.profile-achievement-name {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 650;
+    font-size: 0.95rem;
+    color: var(--text);
+    min-width: 0;
+}
+
+.profile-achievement-name i {
+    flex: 0 0 auto;
+    color: var(--primary);
+    font-size: 1.05rem;
+    width: 1.15rem;
+    text-align: center;
+}
+
+.profile-achievement-value {
+    flex: 0 0 auto;
+    font-size: 1.2rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+}
+
 .profile-avatar {
     width: 76px;
     height: 76px;

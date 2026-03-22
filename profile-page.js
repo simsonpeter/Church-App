@@ -13,7 +13,6 @@
     var note = document.getElementById("profile-note");
     var avatarImage = document.getElementById("profile-avatar-image");
     var avatarFallback = document.getElementById("profile-avatar-fallback");
-    var profileTriviaPoints = document.getElementById("profile-trivia-points");
     var profileTriviaPointsValue = document.getElementById("profile-trivia-points-value");
     var profileCard = form ? form.closest(".card") : null;
     var busy = false;
@@ -71,10 +70,11 @@
     }
 
     function renderProfileTriviaPoints() {
-        if (!profileTriviaPoints || !profileTriviaPointsValue) return;
+        if (!profileTriviaPointsValue) {
+            return;
+        }
         var pts = getTriviaPoints();
         profileTriviaPointsValue.textContent = String(pts);
-        profileTriviaPoints.hidden = false;
     }
 
     function getProfileMap() {

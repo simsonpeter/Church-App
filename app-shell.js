@@ -671,6 +671,8 @@
         "profile.savedLocal": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. இணையம் கிடைக்கும் போது மேகத்தில் ஒத்திசைக்கும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
+        "profile.achievementsTitle": "சாதனைகள்",
+        "profile.achievementsInfo": "செயலியில் செயல்பாடுகளிலிருந்து பெற்ற புள்ளிகள்.",
         "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",
         "app.refreshToUpdate": "புதுப்பிக்க கிளிக் செய்யவும்",
         "settings.close": "மூடு"
