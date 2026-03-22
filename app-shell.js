@@ -2392,6 +2392,9 @@
         panelTop.appendChild(panelClose);
         panel.appendChild(panelTop);
 
+        var menuScroll = document.createElement("div");
+        menuScroll.className = "header-menu-scroll";
+
         var userSummary = document.createElement("div");
         userSummary.className = "header-menu-user";
         userSummary.innerHTML = "" +
@@ -2403,7 +2406,7 @@
             "  <strong class=\"header-menu-user-name\"></strong>" +
             "  <span class=\"page-note header-menu-user-email\"></span>" +
             "</div>";
-        panel.appendChild(userSummary);
+        menuScroll.appendChild(userSummary);
         var userAvatarImage = userSummary.querySelector(".header-menu-user-avatar-image");
         var userAvatarFallback = userSummary.querySelector(".header-menu-user-avatar-fallback");
         var userNameNode = userSummary.querySelector(".header-menu-user-name");
@@ -2411,14 +2414,14 @@
 
         var primaryCard = document.createElement("section");
         primaryCard.className = "header-menu-card";
-        panel.appendChild(primaryCard);
+        menuScroll.appendChild(primaryCard);
         var primaryLinksContainer = document.createElement("nav");
         primaryLinksContainer.className = "header-menu-tabs";
         primaryCard.appendChild(primaryLinksContainer);
 
         var bibleSongCard = document.createElement("section");
         bibleSongCard.className = "header-menu-card";
-        panel.appendChild(bibleSongCard);
+        menuScroll.appendChild(bibleSongCard);
         var bibleSongLinksContainer = document.createElement("nav");
         bibleSongLinksContainer.className = "header-menu-tabs";
         bibleSongCard.appendChild(bibleSongLinksContainer);
@@ -2443,7 +2446,7 @@
 
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
-        panel.appendChild(utilityCard);
+        menuScroll.appendChild(utilityCard);
         var utilityLinksContainer = document.createElement("nav");
         utilityLinksContainer.className = "header-menu-tabs";
         utilityCard.appendChild(utilityLinksContainer);
@@ -2477,6 +2480,7 @@
         authButton.className = "header-menu-link header-menu-action";
         authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
         utilityLinksContainer.appendChild(authButton);
+        panel.appendChild(menuScroll);
         document.body.appendChild(panel);
 
         var notificationCenter = document.createElement("section");
