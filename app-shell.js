@@ -467,7 +467,7 @@
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
-        "admin.noticeLinkPlaceholder": "விருப்ப இணைப்பு (https://...)",
+        "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
         "admin.noticeManageTitle": "சமீப அறிவிப்புகள்",
