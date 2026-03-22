@@ -644,6 +644,11 @@
         "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
         "settings.notificationsUnsupported": "ஆதரவு இல்லை",
         "settings.checkForUpdates": "புதுப்பிப்புகளை சரிபார்க்கவும்",
+        "settings.updateChecking": "சரிபார்க்கிறது...",
+        "settings.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது!",
+        "settings.updateUpToDate": "நீங்கள் புதுப்பிக்கப்பட்டுள்ளீர்கள்.",
+        "settings.updateError": "சரிபார்க்க முடியவில்லை.",
+        "settings.appVersion": "செயலி பதிப்பு",
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
@@ -1063,7 +1068,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260320u1";
+    var SW_VERSION = "20260321u1";
+    var APP_VERSION = "2026.3.21";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -3064,6 +3070,10 @@
             updateBtn.type = "button";
             updateBtn.setAttribute("aria-label", t("settings.checkForUpdates", "Check for updates"));
             updateBtn.innerHTML = "<i class=\"fa-solid fa-arrows-rotate\" aria-hidden=\"true\"></i>";
+            var updateStatus = document.createElement("span");
+            updateStatus.className = "settings-control-state settings-update-status";
+            updateStatus.setAttribute("aria-live", "polite");
+            updateStatus.hidden = true;
             var updateItem = document.createElement("div");
             updateItem.className = "settings-control-item";
             var updateCopy = document.createElement("div");
@@ -3072,16 +3082,38 @@
             updateTitle.className = "settings-control-title";
             updateTitle.textContent = t("settings.checkForUpdates", "Check for updates");
             updateCopy.appendChild(updateTitle);
+            updateCopy.appendChild(updateStatus);
             updateItem.appendChild(updateBtn);
             updateItem.appendChild(updateCopy);
             updateBtn.addEventListener("click", function () {
+                updateStatus.textContent = t("settings.updateChecking", "Checking...");
+                updateStatus.hidden = false;
                 navigator.serviceWorker.getRegistration().then(function (reg) {
-                    if (!reg) return;
+                    if (!reg) {
+                        updateStatus.textContent = t("settings.updateError", "Could not check.");
+                        return;
+                    }
                     reg.update().then(function () {
-                        if (reg.waiting) {
+                        if (reg.waiting || reg.installing) {
+                            updateStatus.textContent = t("settings.updateAvailable", "New version available!");
                             showUpdateBanner();
+                        } else {
+                            updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
                         }
+                        var tmid = setTimeout(function () {
+                            updateStatus.textContent = "";
+                            updateStatus.hidden = true;
+                        }, 5000);
+                        updateStatus._clearStatus = function () {
+                            clearTimeout(tmid);
+                            updateStatus.textContent = "";
+                            updateStatus.hidden = true;
+                        };
+                    }).catch(function () {
+                        updateStatus.textContent = t("settings.updateError", "Could not check.");
                     });
+                }).catch(function () {
+                    updateStatus.textContent = t("settings.updateError", "Could not check.");
                 });
             });
             document.addEventListener("njc:langchange", function () {
@@ -3089,6 +3121,12 @@
                 updateBtn.setAttribute("aria-label", t("settings.checkForUpdates", "Check for updates"));
             });
             controls.appendChild(updateItem);
+        }
+
+        var versionNote = document.getElementById("settings-version-note");
+        var versionValue = document.getElementById("settings-version-value");
+        if (versionValue) {
+            versionValue.textContent = APP_VERSION;
         }
 
         function refreshSettingsItems() {
