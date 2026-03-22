@@ -548,6 +548,7 @@
         "admin.triviaEmptyTitle": "வினாக்கள் இல்லை",
         "admin.triviaEmptyBody": "தமிழில் வேத வினாக்களை சேர்க்கவும். 4 விடை விருப்பங்கள் தேவை.",
         "admin.saving": "சேமிக்கிறது...",
+        "admin.loginRequired": "நிர்வாகியாக உள்நுழையவும்.",
         "admin.triviaNeedFields": "வினா மற்றும் 4 விருப்பங்களை உள்ளிடவும்.",
         "admin.triviaNeedDate": "சரியான தேதியை உள்ளிடவும் (YYYY-MM-DD).",
         "admin.triviaSaved": "வினா சேர்க்கப்பட்டது.",

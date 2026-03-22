@@ -221,21 +221,28 @@
             }
 
             function fetchAdminSermons() {
-                return fetch(adminSermonsUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
-                    .then(function (response) {
-                        if (response.status === 404) {
-                            return [];
-                        }
-                        if (!response.ok) {
-                            throw new Error("Failed to load admin sermons");
-                        }
-                        return response.json().then(function (payload) {
-                            return payload && Array.isArray(payload.entries) ? payload.entries : [];
-                        });
-                    })
-                    .catch(function () {
-                        return [];
-                    });
+                var timeoutMs = 15000;
+                var timeoutPromise = new Promise(function (_, reject) {
+                    setTimeout(function () { reject(new Error("Timeout")); }, timeoutMs);
+                });
+                return Promise.race([
+                    fetch(adminSermonsUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                        .then(function (response) {
+                            if (response.status === 404) {
+                                return [];
+                            }
+                            if (!response.ok) {
+                                throw new Error("Failed to load admin sermons");
+                            }
+                            return response.json();
+                        }),
+                    timeoutPromise
+                ]).then(function (payload) {
+                    if (Array.isArray(payload)) return payload;
+                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
+                }).catch(function () {
+                    return [];
+                });
             }
 
             function renderLoadError() {

@@ -49,6 +49,7 @@
     var eventSubmit = document.getElementById("admin-event-submit");
 
     var sermonForm = document.getElementById("admin-sermon-form");
+    var sermonNote = document.getElementById("admin-sermon-note");
     var sermonTitleInput = document.getElementById("admin-sermon-title");
     var sermonSubtitleInput = document.getElementById("admin-sermon-subtitle");
     var sermonSpeakerInput = document.getElementById("admin-sermon-speaker");
@@ -789,18 +790,27 @@
 
     sermonForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        if (busy || !isAdminUser()) {
+        if (sermonNote) {
+            sermonNote.hidden = false;
+            sermonNote.dataset.state = "";
+        }
+        if (!isAdminUser()) {
+            if (sermonNote) sermonNote.textContent = T("admin.loginRequired", "Please sign in as admin.");
             return;
         }
+        if (busy) return;
         var title = String(sermonTitleInput.value || "").trim();
         var subtitle = String(sermonSubtitleInput.value || "").trim();
         var speaker = String(sermonSpeakerInput.value || "").trim();
         var date = String(sermonDateInput.value || "").trim();
         var audioUrl = String(sermonAudioInput.value || "").trim();
         if (!title || !date || !audioUrl) {
-            showNote("validation", "admin.sermonNeedFields", "Please enter sermon title, date and audio URL.");
+            var msg = T("admin.sermonNeedFields", "Please enter sermon title, date and audio URL.");
+            if (sermonNote) { sermonNote.textContent = msg; sermonNote.dataset.state = "error"; }
+            else showNote("validation", "admin.sermonNeedFields", msg);
             return;
         }
+        if (sermonNote) { sermonNote.textContent = T("admin.saving", "Saving..."); sermonNote.dataset.state = ""; }
         setBusyState(true);
         prependAndSave(ADMIN_SERMONS_URL, cachedSermons, {
             id: makeEntryId("sermon"),
@@ -820,10 +830,16 @@
             sermonAudioInput.value = "";
             renderStats();
             renderSermonList();
+            if (sermonNote) {
+                sermonNote.textContent = T("admin.sermonSaved", "Sermon added.");
+                sermonNote.dataset.state = "success";
+            }
             showNote("success", "admin.sermonSaved", "Sermon added.");
             document.dispatchEvent(new CustomEvent("njc:admin-sermons-updated"));
         }).catch(function () {
-            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            var msg = T("admin.syncError", "Could not save. Try again.");
+            if (sermonNote) { sermonNote.textContent = msg; sermonNote.dataset.state = "error"; }
+            showNote("error", "admin.syncError", msg);
         }).finally(function () {
             setBusyState(false);
         });
