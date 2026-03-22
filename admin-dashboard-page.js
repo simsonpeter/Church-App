@@ -253,7 +253,7 @@
         };
     }
 
-    var FETCH_TIMEOUT_MS = 15000;
+    var FETCH_TIMEOUT_MS = 8000;
 
     function fetchMantleEntries(url) {
         var controller = new AbortController();
@@ -298,6 +298,15 @@
             }
             return true;
         });
+    }
+
+    function renderErrorList(listEl) {
+        if (!listEl) return;
+        listEl.innerHTML = "" +
+            "<li>" +
+            "  <h3>" + escapeHtml(T("admin.loadErrorTitle", "Could not load")) + "</h3>" +
+            "  <p>" + escapeHtml(T("admin.loadErrorBody", "Tap the Refresh button above to retry.")) + "</p>" +
+            "</li>";
     }
 
     function renderStats() {
@@ -622,6 +631,19 @@
         }
         setBusyState(true);
         clearNote();
+        var loadDone = false;
+        var safetyTimer = setTimeout(function () {
+            if (loadDone) return;
+            loadDone = true;
+            showNote("error", "admin.syncError", "Load timed out. Tap Refresh to retry.");
+            renderNoticeList();
+            renderBroadcastList();
+            renderEventList();
+            renderSermonList();
+            renderPrayerList();
+            renderTriviaList();
+            setBusyState(false);
+        }, 12000);
         Promise.allSettled([
             fetchMantleEntries(ADMIN_NOTICES_URL),
             fetchMantleEntries(ADMIN_BROADCASTS_URL),
@@ -630,40 +652,58 @@
             fetchMantleEntries(PRAYER_WALL_URL),
             fetchMantleEntries(TRIVIA_URL)
         ]).then(function (results) {
+            if (loadDone) return;
+            loadDone = true;
+            clearTimeout(safetyTimer);
             function extract(idx) {
                 var r = results[idx];
                 if (!r) return [];
                 if (r.status === "fulfilled" && Array.isArray(r.value)) return r.value;
                 return [];
             }
+            function failed(idx) {
+                var r = results[idx];
+                return !r || r.status === "rejected";
+            }
             cachedNotices = extract(0);
             cachedBroadcasts = extract(1);
             cachedEvents = extract(2);
             cachedSermons = extract(3);
-            cachedPrayers = extract(4).map(normalizePrayerEntry).filter(function (item) {
-                return Boolean(item.id);
-            });
+            var rawPrayers = extract(4);
+            cachedPrayers = Array.isArray(rawPrayers) ? rawPrayers.map(normalizePrayerEntry).filter(function (item) {
+                return Boolean(item && item.id);
+            }) : [];
             cachedTrivia = extract(5);
             renderStats();
-            renderNoticeList();
-            renderBroadcastList();
-            renderEventList();
-            renderSermonList();
-            renderPrayerList();
-            renderTriviaList();
-            var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
-            if (failed > 0) {
-                showNote("error", "admin.syncError", "Some data could not be loaded. Pull to refresh.");
+            if (failed(0)) renderErrorList(noticeList);
+            else renderNoticeList();
+            if (failed(1)) renderErrorList(broadcastList);
+            else renderBroadcastList();
+            if (failed(2)) renderErrorList(eventList);
+            else renderEventList();
+            if (failed(3)) renderErrorList(sermonList);
+            else renderSermonList();
+            if (failed(4)) renderErrorList(prayerList);
+            else renderPrayerList();
+            if (failed(5) && triviaList) renderErrorList(triviaList);
+            else renderTriviaList();
+            var failedCount = results.filter(function (r) { return r.status === "rejected"; }).length;
+            if (failedCount > 0) {
+                showNote("error", "admin.syncError", "Some data could not load. Tap Refresh to retry.");
             }
         }).catch(function () {
-            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
-            renderNoticeList();
-            renderBroadcastList();
-            renderEventList();
-            renderSermonList();
-            renderPrayerList();
-            renderTriviaList();
+            if (loadDone) return;
+            loadDone = true;
+            clearTimeout(safetyTimer);
+            showNote("error", "admin.syncError", "Could not load. Tap Refresh to retry.");
+            renderErrorList(noticeList);
+            renderErrorList(broadcastList);
+            renderErrorList(eventList);
+            renderErrorList(sermonList);
+            renderErrorList(prayerList);
+            if (triviaList) renderErrorList(triviaList);
         }).finally(function () {
+            if (!loadDone) clearTimeout(safetyTimer);
             setBusyState(false);
         });
     }
