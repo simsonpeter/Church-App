@@ -394,6 +394,9 @@
                     if (!textNode) {
                         return;
                     }
+                    if (track.clientWidth <= 1) {
+                        return;
+                    }
                     if (textNode.scrollWidth > track.clientWidth + 4) {
                         track.classList.add("marquee");
                     }
@@ -409,6 +412,8 @@
                     applySermonTextMarquee();
                     marqueeRefreshTimerId = null;
                 }, 220);
+                window.setTimeout(applySermonTextMarquee, 500);
+                window.setTimeout(applySermonTextMarquee, 1200);
             }
 
             function renderSermons() {
@@ -838,6 +843,24 @@
                 }
                 scheduleSermonMarqueeRefresh();
             });
+            window.addEventListener("hashchange", function () {
+                if (!sermonsLoaded || sermonsLoadFailed) {
+                    return;
+                }
+                var route = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+                if (route === "sermons") {
+                    scheduleSermonMarqueeRefresh();
+                }
+            });
+            if ("IntersectionObserver" in window && latestSermonsList) {
+                new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting && sermonsLoaded && !sermonsLoadFailed) {
+                            scheduleSermonMarqueeRefresh();
+                        }
+                    });
+                }, { root: null, threshold: 0.05 }).observe(latestSermonsList);
+            }
             window.addEventListener("beforeunload", function () {
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });

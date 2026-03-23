@@ -896,9 +896,16 @@ body.splash-active {
     display: block;
     width: 100%;
     max-width: 100%;
-    overflow: hidden;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
     white-space: nowrap;
-    text-overflow: ellipsis;
+}
+
+.sermon-marquee-track.marquee {
+    overflow-x: hidden;
+    overflow-y: hidden;
 }
 
 .sermon-marquee-text {
@@ -1033,10 +1040,22 @@ body.sermon-player-open {
 .sermon-player-display h3 {
     margin: 0;
     font-size: 1rem;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .sermon-player-display p {
     margin-top: 4px;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .sermon-progress-row {
@@ -1159,11 +1178,18 @@ body.sermon-player-open {
     color: inherit;
     display: grid;
     gap: 2px;
+    min-width: 0;
 }
 
 .mini-player-title {
     font-weight: 700;
     font-size: 0.9rem;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .mini-player-time {
