@@ -1153,10 +1153,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u4";
-    var APP_VERSION = "2026.3.25b";
+    var SW_VERSION = "20260325u5";
+    var APP_VERSION = "2026.3.25c";
 
-    var UPDATE_NOTES_TEXT = "Songbook: reliable open on iOS (button + touch), reading tools, profile export.";
+    var UPDATE_NOTES_TEXT = "Songbook loads from Firestore via Firebase SDK (your cloud songs).";
 
     function getUpdateSnoozeUntilMs() {
         try {

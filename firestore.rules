@@ -1,5 +1,7 @@
 rules_version = '2';
 // Church-App Firestore paths:
+//   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
+//   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
@@ -14,6 +16,17 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    // Songbook (written from NJC Song / admin tools; church app loads with Firebase SDK).
+    match /lyrics/{songId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    match /serviceSongs/{entryId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
 
     match /users/{userId}/profile/{docId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;

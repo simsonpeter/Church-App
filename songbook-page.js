@@ -263,8 +263,37 @@
         };
     }
 
+    function songFromPlainFirestoreFields(data, docId) {
+        var d = data && typeof data === "object" ? data : {};
+        var title = String(
+            d.songTitle || d.title || d.displayName || d.name || d.songName || d.Title || d.SongTitle || ""
+        ).trim();
+        if (!title) {
+            return null;
+        }
+        var lyrics = String(
+            d.lyricsText || d.lyrics || d.content || d.body || d.text || d.lyric || d.Lyrics || d.lyrics_text || ""
+        ).trim();
+        var author = String(
+            d.author || d.composer || d.writer || d.singer || d.lyricist || d.Author || ""
+        ).trim();
+        return normalizeSong({
+            id: String(docId || d.id || "").trim() || ("song-" + String(Date.now())),
+            title: title,
+            titleRomanized: String(d.songTitleRomanized || d.titleRomanized || d.title_romanized || "").trim(),
+            author: author,
+            lyrics: lyrics,
+            lyricsRomanized: String(d.lyricsTextRomanized || d.lyricsRomanized || d.lyrics_romanized || "").trim()
+        }, 0);
+    }
+
     function normalizeFirestoreSong(doc, index) {
         var source = doc && typeof doc === "object" ? doc : {};
+        if (typeof source.data === "function") {
+            var snapData = source.data();
+            var sid = typeof source.id === "string" ? source.id : "";
+            return songFromPlainFirestoreFields(snapData, sid);
+        }
         var fields = source.fields && typeof source.fields === "object" ? source.fields : {};
         var title = getFirestoreString(fields, ["songTitle", "title", "displayName", "name"]);
         if (!title) {
@@ -304,8 +333,20 @@
         return String(song.lyrics || "").trim();
     }
 
+    function serviceSongFromPlainData(data, docId) {
+        var d = data && typeof data === "object" ? data : {};
+        return {
+            id: String(docId || ""),
+            order: Number(d.order) || 0,
+            songTitle: String(d.songTitle || d.title || "").trim()
+        };
+    }
+
     function normalizeServiceSongDoc(doc, index) {
         var source = doc && typeof doc === "object" ? doc : {};
+        if (typeof source.data === "function") {
+            return serviceSongFromPlainData(source.data(), source.id);
+        }
         var fields = source.fields && typeof source.fields === "object" ? source.fields : {};
         var docName = String(source.name || "");
         var id = docName.split("/").pop() || ("service-song-" + index);
@@ -347,6 +388,54 @@
         return FIRESTORE_SERVICE_URL + "?" + params.toString();
     }
 
+    function fetchFirestoreSongsViaSdk() {
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.resolve([]);
+        }
+        try {
+            var db = window.firebase.firestore();
+            var FieldPath = window.firebase.firestore.FieldPath;
+            var all = [];
+            var pageSize = FIRESTORE_PAGE_SIZE;
+            function fetchPageAfter(lastDoc, pageCount) {
+                if (pageCount >= FIRESTORE_MAX_PAGES) {
+                    return Promise.resolve(all);
+                }
+                var q = db.collection("lyrics").orderBy(FieldPath.documentId()).limit(pageSize);
+                if (lastDoc) {
+                    q = q.startAfter(lastDoc);
+                }
+                return q.get().then(function (snap) {
+                    snap.forEach(function (doc) {
+                        var song = songFromPlainFirestoreFields(doc.data(), doc.id);
+                        if (song) {
+                            all.push(song);
+                        }
+                    });
+                    if (snap.size < pageSize) {
+                        return all;
+                    }
+                    var last = snap.docs[snap.docs.length - 1];
+                    return fetchPageAfter(last, pageCount + 1);
+                });
+            }
+            return fetchPageAfter(null, 0).catch(function () {
+                return db.collection("lyrics").get().then(function (snap) {
+                    var out = [];
+                    snap.forEach(function (doc) {
+                        var song = songFromPlainFirestoreFields(doc.data(), doc.id);
+                        if (song) {
+                            out.push(song);
+                        }
+                    });
+                    return out;
+                });
+            });
+        } catch (err) {
+            return Promise.resolve([]);
+        }
+    }
+
     function fetchFirestoreSongs() {
         var allDocuments = [];
         function fetchPage(pageToken, pageCount) {
@@ -377,6 +466,27 @@
         });
     }
 
+    function fetchServiceSongsViaSdk() {
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.resolve([]);
+        }
+        try {
+            var db = window.firebase.firestore();
+            return db.collection("serviceSongs").get().then(function (snap) {
+                var out = [];
+                snap.forEach(function (doc) {
+                    var row = serviceSongFromPlainData(doc.data(), doc.id);
+                    if (row && row.id) {
+                        out.push(row);
+                    }
+                });
+                return out;
+            });
+        } catch (err) {
+            return Promise.resolve([]);
+        }
+    }
+
     function fetchServiceSongs() {
         var allDocuments = [];
         function fetchPage(pageToken) {
@@ -402,6 +512,36 @@
                 return Boolean(entry && entry.id);
             });
         });
+    }
+
+    function loadMainSongsFromCloud() {
+        return fetchFirestoreSongsViaSdk()
+            .then(function (sdkSongs) {
+                if (sdkSongs && sdkSongs.length) {
+                    return sdkSongs;
+                }
+                return fetchFirestoreSongs();
+            })
+            .then(function (firestoreSongs) {
+                if (firestoreSongs && firestoreSongs.length) {
+                    return firestoreSongs;
+                }
+                return fetchFallbackSongs();
+            })
+            .catch(function () {
+                return fetchFallbackSongs();
+            })
+            .then(function (finalSongs) {
+                songs = finalSongs || [];
+                loadFailed = false;
+                renderSongbook();
+                return null;
+            })
+            .catch(function () {
+                loadFailed = true;
+                renderSongbook();
+                return null;
+            });
     }
 
     function fetchFallbackSongs() {
@@ -741,7 +881,13 @@
         if (activeSongbookTab === "service") {
             renderSongbook();
         }
-        return fetchServiceSongs()
+        return fetchServiceSongsViaSdk()
+            .then(function (sdkRows) {
+                if (sdkRows && sdkRows.length) {
+                    return sdkRows;
+                }
+                return fetchServiceSongs();
+            })
             .then(function (entries) {
                 serviceSongs = entries;
                 serviceLoadFailed = false;
@@ -894,37 +1040,29 @@
     });
 
     document.addEventListener("njc:authchange", function () {
-        renderSongbook();
+        loadMainSongsFromCloud();
+        loadServiceSongs(false);
     });
 
-    /* Firestore REST list without an API key often returns 403; fallback JSON supplies songs. */
-    fetchFirestoreSongs()
-        .then(function (firestoreSongs) {
-            if (firestoreSongs && firestoreSongs.length) {
-                songs = firestoreSongs;
-                loadFailed = false;
-                renderSongbook();
-                return;
-            }
-            return fetchFallbackSongs().then(function (fallbackSongs) {
-                songs = fallbackSongs;
-                loadFailed = false;
-                renderSongbook();
-            });
-        })
-        .catch(function () {
-            return fetchFallbackSongs().then(function (fallbackSongs) {
-                songs = fallbackSongs;
-                loadFailed = false;
-                renderSongbook();
-            });
-        })
-        .catch(function () {
-            loadFailed = true;
-            renderSongbook();
-        });
+    /* Prefer Firebase SDK (respects rules + auth). REST list is unauthenticated and usually 403. */
+    function startSongbookLoads() {
+        loadMainSongsFromCloud();
+        loadServiceSongs(false);
+    }
 
-    loadServiceSongs(false);
+    if (window.NjcAuth && typeof window.NjcAuth.onStateChange === "function") {
+        window.NjcAuth.onStateChange(function () {
+            startSongbookLoads();
+        });
+    } else {
+        startSongbookLoads();
+    }
+
+    window.setTimeout(function () {
+        if (!songs.length && !loadFailed) {
+            startSongbookLoads();
+        }
+    }, 800);
     updateScriptSwitcherUI();
     setActiveSongbookTab("songs");
 })();
