@@ -29,8 +29,6 @@
     var activeSongbookTab = "songs";
     var favoriteMap = getStoredFlagMap(SONGBOOK_FAVORITES_KEY);
     var scriptMode = getStoredScriptMode();
-    var songOpenFromTouchAt = 0;
-
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
             if (songbookCard && typeof window.NjcI18n.tForElement === "function") {
@@ -952,25 +950,8 @@
             if (!opener) {
                 return;
             }
-            if (Date.now() - songOpenFromTouchAt < 450) {
-                return;
-            }
             openSongFromOpener(opener);
         });
-
-        /* iOS: opening from touch + debounce avoids double-open when a delayed click follows. */
-        songbookList.addEventListener("touchend", function (event) {
-            var actionButton = event.target.closest("button.songbook-action-btn[data-song-id][data-song-action]");
-            if (actionButton) {
-                return;
-            }
-            var opener = event.target.closest("button.songbook-open-btn[data-song-id]");
-            if (!opener || !songbookList.contains(opener)) {
-                return;
-            }
-            songOpenFromTouchAt = Date.now();
-            openSongFromOpener(opener);
-        }, { passive: true });
     }
 
     if (songbookSearch) {
