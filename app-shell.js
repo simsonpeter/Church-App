@@ -2913,11 +2913,29 @@
             positionPanel();
             positionNotificationCenter();
         });
-        window.addEventListener("scroll", function () {
-            if (!panel.hidden) {
+        function scrollEventOriginatedInside(el, container) {
+            if (!container || !el) {
+                return false;
+            }
+            if (el === container) {
+                return true;
+            }
+            if (el.nodeType === 1 && typeof el.closest === "function" && el.closest("#" + container.id)) {
+                return true;
+            }
+            try {
+                return container.contains(el);
+            } catch (err) {
+                return false;
+            }
+        }
+
+        window.addEventListener("scroll", function (event) {
+            var target = event.target;
+            if (!panel.hidden && !scrollEventOriginatedInside(target, panel)) {
                 closePanel();
             }
-            if (!notificationCenter.hidden) {
+            if (!notificationCenter.hidden && !scrollEventOriginatedInside(target, notificationCenter)) {
                 closeNotificationCenter();
             }
         }, true);
