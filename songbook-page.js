@@ -29,6 +29,7 @@
     var activeSongbookTab = "songs";
     var favoriteMap = getStoredFlagMap(SONGBOOK_FAVORITES_KEY);
     var scriptMode = getStoredScriptMode();
+    var songOpenFromTouchAt = 0;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -712,10 +713,10 @@
             return "" +
                 "<li class=\"songbook-item\">" +
                 "  <div class=\"songbook-item-row\">" +
-                "    <div class=\"songbook-open-btn\" role=\"button\" tabindex=\"0\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
+                "    <button type=\"button\" class=\"songbook-open-btn\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
                 "        <h3 class=\"songbook-title-line\">" + orderPrefix + "<span>" + escapeHtml(getSongDisplayTitle(song) || song.title) + "</span></h3>" +
                 (song.author ? "        <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
-                "    </div>" +
+                "    </button>" +
                 actionsHtml +
                 "  </div>" +
                 "</li>";
@@ -771,11 +772,11 @@
         return Promise.resolve();
     }
 
-    function openSongFromTarget(target) {
-        if (!target) {
+    function openSongFromOpener(opener) {
+        if (!opener) {
             return;
         }
-        var songId = target.getAttribute("data-song-id") || "";
+        var songId = opener.getAttribute("data-song-id") || "";
         if (!songId) {
             return;
         }
@@ -801,24 +802,29 @@
                 });
                 return;
             }
-            var opener = event.target.closest(".songbook-open-btn[data-song-id]");
+            var opener = event.target.closest("button.songbook-open-btn[data-song-id]");
             if (!opener) {
                 return;
             }
-            openSongFromTarget(opener);
-        });
-
-        songbookList.addEventListener("keydown", function (event) {
-            if (event.key !== "Enter" && event.key !== " ") {
+            if (Date.now() - songOpenFromTouchAt < 450) {
                 return;
             }
-            var opener = event.target.closest(".songbook-open-btn[data-song-id]");
+            openSongFromOpener(opener);
+        });
+
+        /* iOS: opening from touch + debounce avoids double-open when a delayed click follows. */
+        songbookList.addEventListener("touchend", function (event) {
+            var actionButton = event.target.closest("button.songbook-action-btn[data-song-id][data-song-action]");
+            if (actionButton) {
+                return;
+            }
+            var opener = event.target.closest("button.songbook-open-btn[data-song-id]");
             if (!opener || !songbookList.contains(opener)) {
                 return;
             }
-            event.preventDefault();
-            openSongFromTarget(opener);
-        });
+            songOpenFromTouchAt = Date.now();
+            openSongFromOpener(opener);
+        }, { passive: true });
     }
 
     if (songbookSearch) {

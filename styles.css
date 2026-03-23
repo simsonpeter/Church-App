@@ -1592,6 +1592,13 @@ button.button-link:disabled {
     background: rgba(198, 31, 31, 0.06);
 }
 
+/* Let the button receive the tap on iOS (avoids hits on nested text nodes). */
+.songbook-open-btn h3,
+.songbook-open-btn p,
+.songbook-open-btn span {
+    pointer-events: none;
+}
+
 .songbook-item-actions {
     display: grid;
     gap: 6px;

@@ -1153,10 +1153,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u3";
-    var APP_VERSION = "2026.3.25a";
+    var SW_VERSION = "20260325u4";
+    var APP_VERSION = "2026.3.25b";
 
-    var UPDATE_NOTES_TEXT = "Leaderboard, reading tools, profile export, admin preview, fixes.";
+    var UPDATE_NOTES_TEXT = "Songbook: reliable open on iOS (button + touch), reading tools, profile export.";
 
     function getUpdateSnoozeUntilMs() {
         try {
