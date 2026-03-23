@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v136";
-const RUNTIME_CACHE = "njc-runtime-cache-v136";
+const APP_CACHE = "njc-app-cache-v137";
+const RUNTIME_CACHE = "njc-runtime-cache-v137";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260324u1",
     "./user-auth.js?v=20260324u3",
-    "./app-shell.js?v=20260324u5",
+    "./app-shell.js?v=20260324u6",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260324u1",
     "./events-page.js?v=20260318de",
@@ -54,14 +54,14 @@ self.addEventListener("message", function (event) {
 });
 
 self.addEventListener("install", function (event) {
+    // Do not call skipWaiting() here. If we did, the new worker would activate
+    // immediately, controllerchange would fire, and the app would hide the
+    // "Update available" dialog before the user taps "Update now". Activation
+    // is triggered only by SKIP_WAITING from the page (see message listener).
     event.waitUntil(
-        caches.open(APP_CACHE)
-            .then(function (cache) {
-                return cache.addAll(CORE_ASSETS);
-            })
-            .then(function () {
-                return self.skipWaiting();
-            })
+        caches.open(APP_CACHE).then(function (cache) {
+            return cache.addAll(CORE_ASSETS);
+        })
     );
 });
 
