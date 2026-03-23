@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v135";
-const RUNTIME_CACHE = "njc-runtime-cache-v135";
+const APP_CACHE = "njc-app-cache-v136";
+const RUNTIME_CACHE = "njc-runtime-cache-v136";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260324u1",
     "./user-auth.js?v=20260324u3",
-    "./app-shell.js?v=20260324u4",
+    "./app-shell.js?v=20260324u5",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260324u1",
     "./events-page.js?v=20260318de",
@@ -19,7 +19,7 @@ const CORE_ASSETS = [
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260324u3",
     "./spa-router.js?v=20260324u4",
-    "./user-achievements-page.js?v=20260324u4",
+    "./user-achievements-page.js?v=20260324u5",
     "./site.webmanifest?v=20260318de",
     "./logo.png?v=20260318de",
     "./announcements.json"

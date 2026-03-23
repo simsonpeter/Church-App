@@ -1106,8 +1106,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u4";
-    var APP_VERSION = "2026.3.24d";
+    var SW_VERSION = "20260324u5";
+    var APP_VERSION = "2026.3.24e";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {

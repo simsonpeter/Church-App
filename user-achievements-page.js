@@ -16,6 +16,42 @@
         return n.toFixed(1);
     }
 
+    function toNum(value) {
+        var n = Number(value);
+        return isNaN(n) ? 0 : n;
+    }
+
+    function compareLeaderboardRows(a, b) {
+        var dt = (b.totalPoints || 0) - (a.totalPoints || 0);
+        if (dt !== 0) {
+            return dt;
+        }
+        var dq = (b.triviaPoints || 0) - (a.triviaPoints || 0);
+        if (dq !== 0) {
+            return dq;
+        }
+        var na = String(a.displayName || "").toLowerCase();
+        var nb = String(b.displayName || "").toLowerCase();
+        if (na < nb) {
+            return -1;
+        }
+        if (na > nb) {
+            return 1;
+        }
+        return 0;
+    }
+
+    function assignRanks(rows) {
+        var displayRank = 1;
+        rows.forEach(function (row, index) {
+            if (index > 0 && row.totalPoints < rows[index - 1].totalPoints) {
+                displayRank = index + 1;
+            }
+            row.rank = displayRank;
+        });
+        return rows;
+    }
+
     function isAchievementsRouteActive() {
         var view = document.querySelector('.page-view[data-route="user-achievements"]');
         return Boolean(view && view.classList.contains("active"));
@@ -68,8 +104,8 @@
             "  <span class=\"user-achievements-num\">" + totalLabel + "</span>" +
             "</li>";
 
-        var body = rows.map(function (row, index) {
-            var rank = index + 1;
+        var body = rows.map(function (row) {
+            var rank = row.rank != null ? row.rank : 1;
             var name = String(row.displayName || "Member").trim() || "Member";
             return "" +
                 "<li class=\"user-achievements-row\">" +
@@ -128,9 +164,9 @@
                     var rows = [];
                     snap.forEach(function (doc) {
                         var d = doc.data() || {};
-                        var trivia = Number(d.triviaPoints) || 0;
-                        var reading = Number(d.readingPoints) || 0;
-                        var total = typeof d.totalPoints === "number" ? d.totalPoints : trivia + reading;
+                        var trivia = toNum(d.triviaPoints);
+                        var reading = toNum(d.readingPoints);
+                        var total = trivia + reading;
                         rows.push({
                             displayName: d.displayName,
                             triviaPoints: trivia,
@@ -138,9 +174,8 @@
                             totalPoints: total
                         });
                     });
-                    rows.sort(function (a, b) {
-                        return (b.totalPoints || 0) - (a.totalPoints || 0);
-                    });
+                    rows.sort(compareLeaderboardRows);
+                    assignRanks(rows);
                     setStatus("");
                     if (!rows.length) {
                         setStatus(T("userAchievements.empty", "No scores yet. Play trivia and complete Bible reading."));
