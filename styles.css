@@ -4286,3 +4286,265 @@ html[data-theme="light"] .mini-player-btn {
         padding: 36px 32px 180px;
     }
 }
+
+/* Offline banner */
+.offline-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 20000;
+    padding: 8px 14px;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 650;
+    background: linear-gradient(90deg, #4a3728, #6b4423);
+    color: #fff8f0;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+body:has(.offline-banner:not([hidden])) .app-shell {
+    padding-top: 36px;
+}
+
+/* Update modal: third button + release notes */
+.app-update-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+}
+
+.app-update-notes {
+    margin: 0 0 8px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+}
+
+/* Reading extras */
+.reading-extra-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.reading-streak-line,
+.reading-nudge-line {
+    margin-top: 6px;
+}
+
+.reading-nudge-line {
+    color: var(--primary);
+    font-weight: 650;
+}
+
+.reading-heatmap-wrap {
+    margin-top: 10px;
+}
+
+.reading-heatmap-title {
+    margin-bottom: 6px;
+}
+
+.reading-heatmap {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    max-width: 280px;
+}
+
+.reading-heatmap-cell {
+    aspect-ratio: 1;
+    border-radius: 4px;
+    background: var(--line);
+    min-width: 0;
+}
+
+.reading-heatmap-cell--empty {
+    background: transparent;
+}
+
+.reading-heatmap-cell--l1 {
+    background: linear-gradient(180deg, #f0c4c4, #e8a8a8);
+}
+
+.reading-heatmap-cell--l2 {
+    background: linear-gradient(180deg, #d85a5a, #b71c1c);
+}
+
+/* Announcements dismiss */
+.announcement-dismiss-btn {
+    margin-top: 4px;
+    font-size: 0.85rem;
+}
+
+/* Profile checkboxes & badges */
+.profile-checkbox-field {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.profile-checkbox-field input {
+    margin-top: 4px;
+    flex-shrink: 0;
+}
+
+.profile-export-row {
+    margin: 6px 0 4px;
+}
+
+.profile-badges-block {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.profile-badges-title {
+    font-size: 0.95rem;
+    margin: 0 0 8px;
+}
+
+.profile-badges-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.profile-badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.profile-badge-empty {
+    list-style: none;
+}
+
+/* User achievements: pinned + meta */
+.user-achievements-pinned {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--line);
+}
+
+.user-achievements-group-summary {
+    margin-top: 4px;
+    font-weight: 650;
+}
+
+.user-achievements-name-cell {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+}
+
+.user-achievements-name-line {
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.user-achievements-you-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 2px 6px;
+    border-radius: 6px;
+    background: var(--primary-soft);
+    color: var(--primary);
+    vertical-align: middle;
+}
+
+.user-achievements-row--you {
+    border-color: #e8b4b4;
+    background: linear-gradient(180deg, #fff8f8, var(--surface));
+}
+
+.user-achievements-updated {
+    font-size: 0.68rem;
+    opacity: 0.75;
+    font-weight: 500;
+}
+
+.user-achievements-head-meta {
+    font-weight: 500;
+    opacity: 0.75;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.user-achievements-row--head .user-achievements-name-cell {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px;
+}
+
+/* Admin presets modal */
+.admin-presets-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 25000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+}
+
+.admin-presets-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    background: rgba(20, 10, 10, 0.45);
+    backdrop-filter: blur(4px);
+}
+
+.admin-presets-sheet {
+    position: relative;
+    width: min(100%, 400px);
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: 16px 16px 0 0;
+    padding: 16px 16px 20px;
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.admin-presets-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.admin-preset-chip {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.admin-hints-list li {
+    margin-bottom: 8px;
+}
+
+.admin-leaderboard-list li {
+    padding: 4px 0;
+}

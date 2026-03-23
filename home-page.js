@@ -12,6 +12,12 @@
             var readingProgressRemaining = document.getElementById("reading-progress-remaining");
             var readingUnreadToggle = document.getElementById("reading-unread-toggle");
             var readingUnreadList = document.getElementById("reading-unread-list");
+            var readingStreakLine = document.getElementById("reading-streak-line");
+            var readingNudgeLine = document.getElementById("reading-nudge-line");
+            var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
+            var readingHeatmapToggle = document.getElementById("reading-heatmap-toggle");
+            var readingHeatmapWrap = document.getElementById("reading-heatmap-wrap");
+            var readingHeatmap = document.getElementById("reading-heatmap");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
@@ -22,6 +28,7 @@
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
+            var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
             var adminTriviaUrl = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
@@ -70,6 +77,7 @@
             var fullReadingPlan = [];
             var readingPlanError = false;
             var unreadListOpen = false;
+            var heatmapOpen = false;
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
@@ -918,6 +926,9 @@
                 var linkLine = item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
+                var dismissBtn = !item.personalWish
+                    ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
+                    : "";
 
                 var controls = "";
                 if (announcementCarouselItems.length > 1) {
@@ -940,6 +951,7 @@
                     "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
                     metaLine +
                     linkLine +
+                    dismissBtn +
                     controls +
                     "</li>";
 
@@ -1013,10 +1025,14 @@
                 }
 
                 var todayKey = getTodayKey();
+                var dismissed = getAnnouncementDismissedSet();
                 var visibleItems = allAnnouncements
                     .filter(function (item) {
                         if (item.personalWish) {
                             return true;
+                        }
+                        if (dismissed[String(item.id || "")]) {
+                            return false;
                         }
                         return !item.expires || item.expires >= todayKey;
                     })
@@ -1258,6 +1274,172 @@
                 };
             }
 
+            function ymdToUtcNoon(ymd) {
+                if (!ymd || !/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+                    return null;
+                }
+                var p = ymd.split("-");
+                return new Date(Date.UTC(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0));
+            }
+
+            function brusselsYmdFromDate(d) {
+                var parts = new Intl.DateTimeFormat("en-CA", {
+                    timeZone: brusselsTimeZone,
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                }).formatToParts(d);
+                var y = "";
+                var m = "";
+                var day = "";
+                parts.forEach(function (pt) {
+                    if (pt.type === "year") y = pt.value;
+                    if (pt.type === "month") m = pt.value;
+                    if (pt.type === "day") day = pt.value;
+                });
+                if (!y || !m || !day) {
+                    return "";
+                }
+                return y + "-" + m + "-" + day;
+            }
+
+            function addDaysToYmd(ymd, deltaDays) {
+                var d = ymdToUtcNoon(ymd);
+                if (!d) {
+                    return "";
+                }
+                d.setUTCDate(d.getUTCDate() + deltaDays);
+                var yy = d.getUTCFullYear();
+                var mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+                var dd = String(d.getUTCDate()).padStart(2, "0");
+                return yy + "-" + mm + "-" + dd;
+            }
+
+            function isReadingDayCompleteBrussels(ymdKey) {
+                if (!Array.isArray(fullReadingPlan) || fullReadingPlan.length === 0 || !ymdKey) {
+                    return false;
+                }
+                var parts = ymdKey.split("-");
+                var dayNumber = getDayOfYear({
+                    year: Number(parts[0]),
+                    month: Number(parts[1]),
+                    day: Number(parts[2])
+                });
+                var dayPlan = fullReadingPlan[dayNumber - 1];
+                if (!dayPlan) {
+                    return false;
+                }
+                var progressMap = getProgressMap();
+                var progress = progressMap[ymdKey] || {};
+                return isPlanDayComplete(dayPlan, progress);
+            }
+
+            function computeReadingDayStreakBrussels() {
+                var todayB = brusselsYmdFromDate(new Date());
+                if (!todayB) {
+                    return 0;
+                }
+                var streak = 0;
+                var y = todayB;
+                for (var i = 0; i < 800; i++) {
+                    if (!isReadingDayCompleteBrussels(y)) {
+                        break;
+                    }
+                    streak++;
+                    y = addDaysToYmd(y, -1);
+                    if (!y) {
+                        break;
+                    }
+                }
+                return streak;
+            }
+
+            function renderReadingStreakAndNudge() {
+                if (readingStreakLine) {
+                    var streak = computeReadingDayStreakBrussels();
+                    if (streak > 0) {
+                        readingStreakLine.textContent = formatCount(T("home.readingStreakDays", "{count}-day reading streak (Brussels days)", readingCard), streak);
+                        readingStreakLine.hidden = false;
+                    } else {
+                        readingStreakLine.textContent = "";
+                        readingStreakLine.hidden = true;
+                    }
+                }
+                if (readingNudgeLine) {
+                    var todayB = brusselsYmdFromDate(new Date());
+                    var hour = new Date().getHours();
+                    var prog = todayB ? getProgressForDate(todayB) : { morning: false, evening: false };
+                    var msg = "";
+                    if (todayB && hour >= 5 && hour < 14 && !prog.morning) {
+                        msg = T("home.readingNudgeMorning", "Don’t forget today’s morning reading.", readingCard);
+                    } else if (todayB && hour >= 14 && hour < 22 && !prog.evening) {
+                        msg = T("home.readingNudgeEvening", "Don’t forget today’s evening reading.", readingCard);
+                    }
+                    readingNudgeLine.textContent = msg;
+                    readingNudgeLine.hidden = !msg;
+                }
+            }
+
+            function renderReadingHeatmap() {
+                if (!readingHeatmap || !readingHeatmapWrap) {
+                    return;
+                }
+                if (!heatmapOpen) {
+                    readingHeatmapWrap.hidden = true;
+                    readingHeatmap.innerHTML = "";
+                    return;
+                }
+                var todayB = brusselsYmdFromDate(new Date());
+                if (!todayB) {
+                    readingHeatmapWrap.hidden = true;
+                    return;
+                }
+                var py = Number(todayB.slice(0, 4));
+                var pm = Number(todayB.slice(5, 7));
+                var y = py;
+                var m = pm;
+                var first = new Date(Date.UTC(y, m - 1, 1, 12, 0, 0));
+                var startWeekday = first.getUTCDay();
+                var daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
+                var cells = [];
+                var i;
+                for (i = 0; i < startWeekday; i++) {
+                    cells.push("<span class=\"reading-heatmap-cell reading-heatmap-cell--empty\"></span>");
+                }
+                var map = getProgressMap();
+                for (var d = 1; d <= daysInMonth; d++) {
+                    var key = String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+                    var e = map[key] || {};
+                    var mDone = Boolean(e.morning);
+                    var evDone = Boolean(e.evening);
+                    var level = mDone && evDone ? 2 : (mDone || evDone ? 1 : 0);
+                    cells.push("<span class=\"reading-heatmap-cell reading-heatmap-cell--l" + level + "\" title=\"" + key + "\"></span>");
+                }
+                readingHeatmap.innerHTML = cells.join("");
+                readingHeatmapWrap.hidden = false;
+            }
+
+            function getAnnouncementDismissedSet() {
+                try {
+                    var raw = window.localStorage.getItem(ANNOUNCEMENT_DISMISSED_KEY);
+                    var o = raw ? JSON.parse(raw) : {};
+                    return o && typeof o === "object" ? o : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function markAnnouncementDismissed(id) {
+                if (!id) {
+                    return;
+                }
+                try {
+                    var o = getAnnouncementDismissedSet();
+                    o[String(id)] = Date.now();
+                    window.localStorage.setItem(ANNOUNCEMENT_DISMISSED_KEY, JSON.stringify(o));
+                } catch (e) {}
+            }
+
             function renderUnreadBacklog(items) {
                 if (!readingUnreadList) {
                     return;
@@ -1346,6 +1528,8 @@
                 }
                 readingUnreadToggle.disabled = false;
                 renderUnreadBacklog(progress.unreadBacklog);
+                renderReadingStreakAndNudge();
+                renderReadingHeatmap();
             }
 
             function renderReadingPlan() {
@@ -2013,8 +2197,40 @@
                 });
             }
 
+            if (readingHeatmapToggle && readingHeatmapWrap) {
+                readingHeatmapToggle.addEventListener("click", function () {
+                    heatmapOpen = !heatmapOpen;
+                    readingHeatmapToggle.classList.toggle("active", heatmapOpen);
+                    renderReadingHeatmap();
+                });
+            }
+
+            if (readingShareProgressBtn) {
+                readingShareProgressBtn.addEventListener("click", function () {
+                    var prog = buildReadingProgressData();
+                    var pct = prog ? prog.percentComplete : 0;
+                    var done = prog ? prog.completedDays : 0;
+                    var tot = prog ? prog.totalDays : 0;
+                    var line = T("home.readingShareLine", "My Bible reading plan: {done}/{total} days ({pct}%) — NJC App").replace("{done}", String(done)).replace("{total}", String(tot)).replace("{pct}", String(pct));
+                    if (navigator.share) {
+                        navigator.share({ text: line }).catch(function () {});
+                    } else {
+                        try {
+                            navigator.clipboard.writeText(line);
+                        } catch (e) {}
+                    }
+                });
+            }
+
             if (announcementsList) {
                 announcementsList.addEventListener("click", function (event) {
+                    var dismissBtnEl = event.target.closest("button[data-announcement-dismiss]");
+                    if (dismissBtnEl) {
+                        var did = dismissBtnEl.getAttribute("data-announcement-dismiss") || "";
+                        markAnnouncementDismissed(did);
+                        renderAnnouncements();
+                        return;
+                    }
                     var actionButton = event.target.closest("button[data-announcement-action]");
                     if (actionButton) {
                         var action = actionButton.getAttribute("data-announcement-action");

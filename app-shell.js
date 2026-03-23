@@ -707,6 +707,53 @@
         "userAchievements.colTrivia": "வினாடி",
         "userAchievements.colReading": "வாசிப்பு",
         "userAchievements.colTotal": "மொத்தம்",
+        "userAchievements.colUpdatedHint": "ஒத்திசைவு",
+        "userAchievements.updatedJustNow": "இப்போது",
+        "userAchievements.updatedMinutes": "{n} நிமி முன்",
+        "userAchievements.updatedHours": "{n} மணி முன்",
+        "userAchievements.updatedDays": "{n} நாள் முன்",
+        "userAchievements.emptyLong": "இன்னும் பட்டியல் காலியாக உள்ளது. உறுப்பினர்கள் உள்நுழைந்து செயலியை ஒருமுறை திறக்க வேண்டும்; பின் மீண்டும் ஏற்று என தட்டவும்.",
+        "userAchievements.groupSummary": "உங்கள் குழு \"{tag}\": {count} பேர் · மொத்தம் {pts} புள்ளிகள்",
+        "userAchievements.youLabel": "நீங்கள்",
+        "userAchievements.youPinned": "நீங்கள்",
+        "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
+        "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
+        "profile.leaderboardAnonymous": "பொது பட்டியலில் \"Anonymous\" என காட்டு",
+        "profile.photoSkipCloud": "புகைப்படத்தை இந்த சாதனத்தில் மட்டும் வை (மேகத்தில் ஏற்ற வேண்டாம்)",
+        "profile.exportData": "என் தரவை பதிவிறக்கு (JSON)",
+        "profile.badgesTitle": "பதக்கங்கள்",
+        "profile.badgesEmpty": "பதக்கங்களுக்கு வாசிப்பு மற்றும் வினாடியை தொடரவும்.",
+        "profile.badgeReader10": "அர்ப்பணிப்புள்ள வாசகர் (10+ வாசிப்பு)",
+        "profile.badgeTrivia10": "வினாடி வீரர் (10+ புள்ளிகள்)",
+        "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
+        "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
+        "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
+        "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
+        "app.updateNotesPrefix": "புதியவை:",
+        "home.readingStreakDays": "தொடர்ச்சியான {count} நாள் வாசிப்பு (பிரஸ்ஸெல்ஸ் நாட்கள்)",
+        "home.readingNudgeMorning": "இன்றைய காலை வாசிப்பை மறக்க வேண்டாம்.",
+        "home.readingNudgeEvening": "இன்றைய மாலை வாசிப்பை மறக்க வேண்டாம்.",
+        "home.readingShareProgress": "முன்னேற்றத்தை பகிர்",
+        "home.readingHeatmapToggle": "இந்த மாதம்",
+        "home.readingHeatmapTitle": "இந்த மாத வாசிப்பு (அடர் = அதிகம்)",
+        "home.readingShareLine": "என் வேத வாசிப்பு திட்டம்: {done}/{total} நாட்கள் ({pct}%) — NJC செயலி",
+        "home.announcementDismiss": "படித்ததாக குறி",
+        "admin.leaderboardPreviewTitle": "பயனர் சாதனைகள் முன்னோட்டம்",
+        "admin.leaderboardPreviewInfo": "Firestore பொது பட்டியல் (செயலி பட்டியல் போல).",
+        "admin.leaderboardPreviewRefresh": "பட்டியலை ஏற்று",
+        "admin.leaderboardLoading": "ஏற்றுகிறது…",
+        "admin.leaderboardLoaded": "{n} வரிகள்",
+        "admin.leaderboardEmpty": "இன்னும் வரிகள் இல்லை.",
+        "admin.leaderboardError": "ஏற்ற முடியவில்லை (Firestore விதிகளை சரிபார்க்கவும்).",
+        "admin.leaderboardNeedLogin": "இந்த உலாவியில் Firebase உடன் உள்நுழையவும்.",
+        "admin.scheduleHintsTitle": "உள்ளடக்க அட்டவணை குறிப்புகள்",
+        "admin.scheduleHintTrivia": "வினாடி: காட்டு தேதியை அமைத்தால் அன்று காலை 8 மணி முதல் புதிய கேள்வி.",
+        "admin.scheduleHintEvents": "நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் நிகழ்வு தாவலில் தோன்றும்.",
+        "admin.scheduleHintNotices": "அறிவிப்புகள்: MantleDB-க்கு வெளியிடவும்; நிலையான பட்டியலுடன் இணைகின்றன.",
+        "admin.noticeLinkPresets": "செயலி இணைப்பு முன்னமைவுகள்",
+        "admin.linkPresetsTitle": "செயலி இணைப்பை சேர்",
+        "admin.linkPresetsInfo": "புலத்தை நிரப்ப ஒரு பாதையை தட்டவும்.",
+        "admin.linkPresetsClose": "மூடு",
         "settings.close": "மூடு"
     };
 
@@ -1106,8 +1153,37 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u6";
-    var APP_VERSION = "2026.3.24f";
+    var SW_VERSION = "20260325u2";
+    var APP_VERSION = "2026.3.25";
+
+    var UPDATE_NOTES_TEXT = "Leaderboard, reading tools, profile export, admin preview, fixes.";
+
+    function getUpdateSnoozeUntilMs() {
+        try {
+            var raw = window.localStorage.getItem("njc_update_snooze_until_v1");
+            var n = Number(raw);
+            return isNaN(n) ? 0 : n;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function isUpdateSnoozeActive() {
+        return Date.now() < getUpdateSnoozeUntilMs();
+    }
+
+    function setupOfflineBanner() {
+        var banner = document.getElementById("offline-banner");
+        if (!banner) {
+            return;
+        }
+        function sync() {
+            banner.hidden = navigator.onLine !== false;
+        }
+        sync();
+        window.addEventListener("online", sync);
+        window.addEventListener("offline", sync);
+    }
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -1115,7 +1191,7 @@
         }
         navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
             registration.update();
-            if (registration.waiting) {
+            if (registration.waiting && !isUpdateSnoozeActive()) {
                 showUpdateModal(registration);
             }
             registration.addEventListener("updatefound", function () {
@@ -1124,7 +1200,7 @@
                     return;
                 }
                 worker.addEventListener("statechange", function () {
-                    if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                    if (worker.state === "installed" && navigator.serviceWorker.controller && !isUpdateSnoozeActive()) {
                         showUpdateModal(registration);
                     }
                 });
@@ -1159,6 +1235,8 @@
         var overlay = document.getElementById("app-update-overlay");
         var confirmBtn = document.getElementById("app-update-confirm");
         var dismissBtn = document.getElementById("app-update-dismiss");
+        var snoozeBtn = document.getElementById("app-update-snooze");
+        var notesEl = document.getElementById("app-update-notes");
         var backdrop = document.getElementById("app-update-backdrop");
         if (!overlay || !confirmBtn || !dismissBtn) {
             return;
@@ -1170,11 +1248,22 @@
         } catch (ignore) {
             /* sessionStorage unavailable */
         }
+        if (isUpdateSnoozeActive()) {
+            return;
+        }
         if (!overlay.hidden) {
             return;
         }
         overlay.hidden = false;
         document.body.classList.add("app-update-open");
+
+        if (notesEl) {
+            var prefix = (window.NjcI18n && typeof window.NjcI18n.t === "function")
+                ? window.NjcI18n.t("app.updateNotesPrefix", "What's new:")
+                : "What's new:";
+            notesEl.textContent = prefix + " " + UPDATE_NOTES_TEXT;
+            notesEl.hidden = false;
+        }
 
         function reloadForUpdate() {
             try {
@@ -1196,10 +1285,22 @@
             hideUpdateModal();
         }
 
+        function snooze24h() {
+            try {
+                window.localStorage.setItem("njc_update_snooze_until_v1", String(Date.now() + 86400000));
+            } catch (e1) {
+                return null;
+            }
+            hideUpdateModal();
+        }
+
         confirmBtn.onclick = function () {
             reloadForUpdate();
         };
         dismissBtn.onclick = dismiss;
+        if (snoozeBtn) {
+            snoozeBtn.onclick = snooze24h;
+        }
         if (backdrop) {
             backdrop.onclick = dismiss;
         }
@@ -3642,6 +3743,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
+        setupOfflineBanner();
         activeLanguage = getActiveLanguage();
         try {
             var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";
@@ -3679,6 +3781,9 @@
                     var map = raw ? JSON.parse(raw) : {};
                     if (map && typeof map === "object") {
                         var p = map[uid];
+                        if (p && p.leaderboardAnonymous) {
+                            return "Anonymous";
+                        }
                         var name = p && String(p.fullName || "").trim();
                         if (name) {
                             return name.slice(0, 80);
@@ -3697,6 +3802,21 @@
                     }
                 }
                 return "Member";
+            }
+
+            function sanitizeGroupId(raw) {
+                var s = String(raw || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+                return s.slice(0, 40);
+            }
+
+            function readProfileGroupId(uid) {
+                try {
+                    var map = JSON.parse(window.localStorage.getItem(PROFILES_KEY) || "{}");
+                    var p = map && map[uid];
+                    return sanitizeGroupId(p && p.groupId);
+                } catch (e) {
+                    return "";
+                }
             }
 
             function syncMyPublicScore() {
@@ -3722,15 +3842,18 @@
                 } catch (e3) {}
                 var total = trivia + reading;
                 var displayName = pickDisplayName(uid, user);
+                var groupId = readProfileGroupId(uid);
                 try {
                     var ref = window.firebase.firestore().collection(COL).doc(uid);
-                    return ref.set({
+                    var payload = {
                         displayName: displayName,
                         triviaPoints: trivia,
                         readingPoints: reading,
                         totalPoints: total,
-                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true }).then(function () {
+                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                        groupId: groupId || window.firebase.firestore.FieldValue.delete()
+                    };
+                    return ref.set(payload, { merge: true }).then(function () {
                         return true;
                     }).catch(function () {
                         return null;

@@ -10,6 +10,10 @@
     var dobInput = document.getElementById("profile-dob");
     var anniversaryInput = document.getElementById("profile-anniversary");
     var phoneInput = document.getElementById("profile-phone");
+    var groupIdInput = document.getElementById("profile-group-id");
+    var leaderboardAnonymousInput = document.getElementById("profile-leaderboard-anonymous");
+    var photoSkipCloudInput = document.getElementById("profile-photo-skip-cloud");
+    var exportBtn = document.getElementById("profile-export-btn");
     var photoFileInput = document.getElementById("profile-photo-file");
     var saveButton = document.getElementById("profile-save-btn");
     var note = document.getElementById("profile-note");
@@ -18,6 +22,8 @@
     var profileTriviaPointsValue = document.getElementById("profile-trivia-points-value");
     var profileReadingPointsValue = document.getElementById("profile-reading-points-value");
     var profileTotalPointsValue = document.getElementById("profile-total-points-value");
+    var profileBadgesList = document.getElementById("profile-badges-list");
+    var profileAchievementsCard = document.querySelector(".profile-achievements-card");
     var profileCard = form ? form.closest(".card") : null;
     var busy = false;
     var noteState = "";
@@ -96,6 +102,40 @@
         }
     }
 
+    function escapeHtmlLite(s) {
+        return String(s || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+    }
+
+    function renderProfileBadges() {
+        if (!profileBadgesList) {
+            return;
+        }
+        var tr = getTriviaPoints();
+        var rd = getReadingPoints();
+        var sum = tr + rd;
+        var badges = [];
+        if (rd >= 10) {
+            badges.push({ icon: "book-open", label: T("profile.badgeReader10", "Dedicated reader (10+ reading points)") });
+        }
+        if (tr >= 10) {
+            badges.push({ icon: "question-circle", label: T("profile.badgeTrivia10", "Trivia champion (10+ trivia points)") });
+        }
+        if (sum >= 25) {
+            badges.push({ icon: "star", label: T("profile.badgeAllStar", "All-star (25+ total points)") });
+        }
+        if (!badges.length) {
+            profileBadgesList.innerHTML = "<li class=\"page-note profile-badge-empty\">" + escapeHtmlLite(T("profile.badgesEmpty", "Keep reading and playing trivia to earn badges.")) + "</li>";
+            return;
+        }
+        profileBadgesList.innerHTML = badges.map(function (b) {
+            return "<li class=\"profile-badge-chip\"><i class=\"fa-solid fa-" + b.icon + "\" aria-hidden=\"true\"></i> " + escapeHtmlLite(b.label) + "</li>";
+        }).join("");
+    }
+
     function renderProfileAchievementPoints() {
         var trivia = getTriviaPoints();
         var reading = getReadingPoints();
@@ -109,6 +149,7 @@
         if (profileTotalPointsValue) {
             profileTotalPointsValue.textContent = formatHalfPointTotal(total);
         }
+        renderProfileBadges();
     }
 
     function syncAchievementBoardIfPossible() {
@@ -162,11 +203,20 @@
             dob: base.dob,
             anniversary: base.anniversary,
             phone: base.phone,
+            groupId: base.groupId || "",
+            leaderboardAnonymous: Boolean(base.leaderboardAnonymous),
+            photoSkipCloud: Boolean(base.photoSkipCloud),
             updatedAt: base.updatedAt
         };
-        var photo = String(base.photoUrl || "").trim();
-        if (photo && photo.length <= MAX_FIRESTORE_PHOTOURL_CHARS) {
-            out.photoUrl = photo;
+        if (base.photoSkipCloud) {
+            out.photoUrl = window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue
+                ? window.firebase.firestore.FieldValue.delete()
+                : "";
+        } else {
+            var photo = String(base.photoUrl || "").trim();
+            if (photo && photo.length <= MAX_FIRESTORE_PHOTOURL_CHARS) {
+                out.photoUrl = photo;
+            }
         }
         return out;
     }
@@ -209,7 +259,7 @@
 
     function setFormEnabled(enabled) {
         var disabled = !enabled;
-        [fullNameInput, dobInput, anniversaryInput, phoneInput, photoFileInput].forEach(function (node) {
+        [fullNameInput, dobInput, anniversaryInput, phoneInput, groupIdInput, leaderboardAnonymousInput, photoSkipCloudInput, photoFileInput].forEach(function (node) {
             if (node) {
                 node.disabled = disabled;
             }
@@ -217,6 +267,10 @@
         if (saveButton) {
             saveButton.disabled = disabled || busy;
         }
+    }
+
+    function sanitizeGroupIdInput(raw) {
+        return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
     }
 
     function normalizeProfile(profile, user) {
@@ -227,6 +281,9 @@
             dob: String(source.dob || "").trim(),
             anniversary: String(source.anniversary || "").trim(),
             phone: String(source.phone || activeUser.phoneNumber || "").trim(),
+            groupId: sanitizeGroupIdInput(source.groupId),
+            leaderboardAnonymous: Boolean(source.leaderboardAnonymous),
+            photoSkipCloud: Boolean(source.photoSkipCloud),
             photoUrl: String(source.photoUrl || activeUser.photoURL || "").trim(),
             updatedAt: Number(source.updatedAt || Date.now()) || Date.now()
         };
@@ -238,6 +295,9 @@
             dob: String(dobInput && dobInput.value || "").trim(),
             anniversary: String(anniversaryInput && anniversaryInput.value || "").trim(),
             phone: String(phoneInput && phoneInput.value || "").trim(),
+            groupId: sanitizeGroupIdInput(groupIdInput && groupIdInput.value),
+            leaderboardAnonymous: Boolean(leaderboardAnonymousInput && leaderboardAnonymousInput.checked),
+            photoSkipCloud: Boolean(photoSkipCloudInput && photoSkipCloudInput.checked),
             photoUrl: String(selectedPhotoDataUrl || savedPhotoDataUrl || "").trim(),
             updatedAt: Date.now()
         };
@@ -342,6 +402,15 @@
         if (phoneInput) {
             phoneInput.value = String(profile.phone || "");
         }
+        if (groupIdInput) {
+            groupIdInput.value = String(profile.groupId || "");
+        }
+        if (leaderboardAnonymousInput) {
+            leaderboardAnonymousInput.checked = Boolean(profile.leaderboardAnonymous);
+        }
+        if (photoSkipCloudInput) {
+            photoSkipCloudInput.checked = Boolean(profile.photoSkipCloud);
+        }
         savedPhotoDataUrl = String(profile.photoUrl || "");
         selectedPhotoDataUrl = "";
         if (photoFileInput) {
@@ -374,6 +443,9 @@
                     safePhoto = rawPhoto;
                 }
             }
+            if (profile && profile.photoSkipCloud) {
+                safePhoto = "";
+            }
             await authUser.updateProfile({
                 displayName: String(profile && profile.fullName || "").trim(),
                 photoURL: safePhoto
@@ -391,7 +463,7 @@
         currentUid = String(user && user.uid || "");
         if (!currentUid) {
             setFormEnabled(false);
-            populateForm({ fullName: "", dob: "", anniversary: "", phone: "", photoUrl: "" });
+            populateForm({ fullName: "", dob: "", anniversary: "", phone: "", groupId: "", leaderboardAnonymous: false, photoSkipCloud: false, photoUrl: "" });
             renderAvatar({}, user);
             renderProfileAchievementPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
@@ -422,6 +494,15 @@
             var cloudPhoto = String(cloudProfile.photoUrl || "").trim();
             if (!cloudPhoto && localPhoto) {
                 cloudProfile = Object.assign({}, cloudProfile, { photoUrl: localPhoto });
+            }
+            if (!String(cloudProfile.groupId || "").trim() && String(localProfile.groupId || "").trim()) {
+                cloudProfile = Object.assign({}, cloudProfile, { groupId: sanitizeGroupIdInput(localProfile.groupId) });
+            }
+            if (!cloudProfile.leaderboardAnonymous && localProfile.leaderboardAnonymous) {
+                cloudProfile = Object.assign({}, cloudProfile, { leaderboardAnonymous: true });
+            }
+            if (!cloudProfile.photoSkipCloud && localProfile.photoSkipCloud) {
+                cloudProfile = Object.assign({}, cloudProfile, { photoSkipCloud: true });
             }
             var localAnn = String(localProfile.anniversary || "").trim();
             var cloudAnn = String(cloudProfile.anniversary || "").trim();
@@ -479,7 +560,7 @@
             cloudSaved = true;
         } catch (err) {
             cloudError = err;
-            if (payload.photoUrl) {
+            if (typeof payload.photoUrl === "string" && payload.photoUrl) {
                 try {
                     var slim = Object.assign({}, payload);
                     delete slim.photoUrl;
@@ -533,6 +614,38 @@
         }
     }
 
+    if (exportBtn) {
+        exportBtn.addEventListener("click", function () {
+            var user = getCurrentUser();
+            var pack = {
+                exportedAt: new Date().toISOString(),
+                uid: user && user.uid ? String(user.uid) : null,
+                profile: normalizeProfile(getCurrentFormProfile(), user || {}),
+                triviaPoints: getTriviaPoints(),
+                readingPoints: getReadingPoints()
+            };
+            try {
+                pack.localKeys = {
+                    profile: window.localStorage.getItem(PROFILE_STORAGE_KEY),
+                    triviaPoints: window.localStorage.getItem(TRIVIA_POINTS_KEY),
+                    readingPoints: window.localStorage.getItem(READING_POINTS_KEY),
+                    readingProgress: window.localStorage.getItem("njc_reading_progress_v1")
+                };
+            } catch (e) {}
+            var blob = new Blob([JSON.stringify(pack, null, 2)], { type: "application/json" });
+            var url = URL.createObjectURL(blob);
+            var a = document.createElement("a");
+            a.href = url;
+            a.download = "njc-my-data.json";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.setTimeout(function () {
+                URL.revokeObjectURL(url);
+            }, 2000);
+        });
+    }
+
     if (form) {
         form.addEventListener("submit", saveProfile);
     }
@@ -569,6 +682,7 @@
     document.addEventListener("njc:reading-points-updated", renderProfileAchievementPoints);
     document.addEventListener("njc:langchange", function () {
         refreshNoteTranslation();
+        renderProfileBadges();
     });
     document.addEventListener("njc:cardlangchange", function () {
         refreshNoteTranslation();

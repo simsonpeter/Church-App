@@ -11,10 +11,13 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260324u1">
+    <link rel="stylesheet" href="styles.css?v=20260325u1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
+    <div class="offline-banner" id="offline-banner" hidden role="status" aria-live="polite">
+        <span data-i18n="app.offlineBanner">You’re offline — showing saved content. Some features may be limited.</span>
+    </div>
     <div class="app-shell">
         <header class="app-header home-header" id="spa-header">
             <div class="eyebrow brand-title" id="spa-header-eyebrow"><i id="spa-header-icon" class="fa-solid fa-church"></i><span id="spa-header-eyebrow-text">NJC Belgium</span></div>
@@ -48,6 +51,16 @@
                     </div>
                     <p class="page-note" id="reading-progress-summary"></p>
                     <p class="page-note" id="reading-progress-remaining"></p>
+                    <p class="page-note reading-streak-line" id="reading-streak-line" hidden></p>
+                    <p class="page-note reading-nudge-line" id="reading-nudge-line" hidden></p>
+                    <div class="reading-extra-actions">
+                        <button type="button" class="button-link button-secondary" id="reading-share-progress-btn" data-i18n="home.readingShareProgress">Share progress</button>
+                        <button type="button" class="button-link button-secondary" id="reading-heatmap-toggle" data-i18n="home.readingHeatmapToggle">This month</button>
+                    </div>
+                    <div class="reading-heatmap-wrap" id="reading-heatmap-wrap" hidden>
+                        <p class="page-note reading-heatmap-title" data-i18n="home.readingHeatmapTitle">Reading this month (darker = more done)</p>
+                        <div class="reading-heatmap" id="reading-heatmap" aria-hidden="true"></div>
+                    </div>
                     <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
                 </div>
                 <ul class="list" id="today-reading-plan-list">
@@ -512,6 +525,8 @@
                 <div class="user-achievements-toolbar">
                     <button type="button" class="button-link" id="user-achievements-refresh" data-i18n="userAchievements.refresh">Refresh</button>
                 </div>
+                <p class="page-note user-achievements-group-summary" id="user-achievements-group-summary" hidden></p>
+                <ul class="user-achievements-list user-achievements-pinned" id="user-achievements-pinned" hidden></ul>
                 <ul class="user-achievements-list" id="user-achievements-list" hidden></ul>
             </section>
             </main>
@@ -558,10 +573,26 @@
                         <input id="profile-phone" class="search-input" type="tel" autocomplete="tel" placeholder="+32 483 11 64 84">
                     </label>
                     <label class="profile-field">
+                        <span data-i18n="profile.groupId">Small group / team tag (optional)</span>
+                        <input id="profile-group-id" class="search-input" type="text" autocomplete="off" maxlength="40" placeholder="e.g. youth-west">
+                        <small class="page-note" data-i18n="profile.groupIdHelp">Same tag = combined points on User achievements. Letters, numbers, dash.</small>
+                    </label>
+                    <label class="profile-field profile-checkbox-field">
+                        <input id="profile-leaderboard-anonymous" type="checkbox">
+                        <span data-i18n="profile.leaderboardAnonymous">Show me as “Anonymous” on the public leaderboard</span>
+                    </label>
+                    <label class="profile-field profile-checkbox-field">
+                        <input id="profile-photo-skip-cloud" type="checkbox">
+                        <span data-i18n="profile.photoSkipCloud">Keep profile photo on this device only (do not upload to cloud)</span>
+                    </label>
+                    <label class="profile-field">
                         <span data-i18n="profile.photo">Photo (optional)</span>
                         <input id="profile-photo-file" class="search-input" type="file" accept="image/*">
                         <small class="page-note" data-i18n="profile.photoHelp">Choose a photo from your device.</small>
                     </label>
+                    <div class="profile-export-row">
+                        <button type="button" class="button-link button-secondary" id="profile-export-btn" data-i18n="profile.exportData">Download my data (JSON)</button>
+                    </div>
                     <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
                 </form>
                 <p class="page-note" id="profile-note" hidden></p>
@@ -583,6 +614,10 @@
                         <strong id="profile-reading-points-value" class="profile-achievement-value" aria-live="polite">0</strong>
                     </li>
                 </ul>
+                <div class="profile-badges-block" id="profile-badges-block">
+                    <h3 class="profile-badges-title" data-i18n="profile.badgesTitle">Badges</h3>
+                    <ul class="profile-badges-list" id="profile-badges-list"></ul>
+                </div>
             </section>
             </main>
         </section>
@@ -614,6 +649,23 @@
                 </div>
             </section>
 
+            <section class="card admin-leaderboard-preview-card">
+                <h2><i class="fa-solid fa-ranking-star"></i><span data-i18n="admin.leaderboardPreviewTitle">User achievements preview</span></h2>
+                <p class="page-note" data-i18n="admin.leaderboardPreviewInfo">Public leaderboard from Firestore (same as the app menu).</p>
+                <button type="button" class="button-link button-secondary" id="admin-leaderboard-refresh" data-i18n="admin.leaderboardPreviewRefresh">Load leaderboard</button>
+                <p class="page-note" id="admin-leaderboard-status" hidden></p>
+                <ul class="list admin-leaderboard-list" id="admin-leaderboard-list" hidden></ul>
+            </section>
+
+            <section class="card admin-schedule-hints-card">
+                <h2><i class="fa-solid fa-calendar-check"></i><span data-i18n="admin.scheduleHintsTitle">Content schedule tips</span></h2>
+                <ul class="list admin-hints-list">
+                    <li data-i18n="admin.scheduleHintTrivia">Trivia: set the show date in the trivia form so a new question unlocks from 8 AM that day (weekdays in the app).</li>
+                    <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
+                    <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
+                </ul>
+            </section>
+
             <section class="card">
                 <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="admin.noticeTitle">Send Notice</span></h2>
                 <form class="prayer-form" id="admin-notice-form">
@@ -622,6 +674,7 @@
                     <textarea id="admin-notice-body" class="search-input prayer-textarea" rows="3" placeholder="Notice message" data-i18n-placeholder="admin.noticeBodyPlaceholder"></textarea>
                     <textarea id="admin-notice-body-ta" class="search-input prayer-textarea" rows="2" placeholder="Notice message in Tamil (optional)" data-i18n-placeholder="admin.noticeBodyTaPlaceholder"></textarea>
                     <input id="admin-notice-link" class="search-input" type="text" inputmode="url" autocomplete="off" placeholder="e.g. #sermons or full URL (https://…)" data-i18n-placeholder="admin.noticeLinkPlaceholder" title="In-app tabs: #home #prayer #events #sermons #contact #trivia #bible #songbook. Or paste any https:// link.">
+                    <button type="button" class="button-link button-secondary" id="admin-notice-link-presets-btn" data-i18n="admin.noticeLinkPresets">App link presets</button>
                     <label class="prayer-wall-anon">
                         <input id="admin-notice-urgent" type="checkbox">
                         <span data-i18n="admin.noticeUrgent">Mark as urgent</span>
@@ -853,9 +906,11 @@
         <h2 class="app-update-title" id="app-update-title" data-i18n="app.updateTitle">Update available</h2>
         <p class="app-update-lead" data-i18n="app.updateLead">A new version is ready with improvements and fixes.</p>
         <p class="page-note app-update-hint" data-i18n="app.updateHint">Tap Update now to reload and finish installing.</p>
+        <p class="page-note app-update-notes" id="app-update-notes" hidden></p>
         <div class="app-update-actions">
             <button type="button" class="button-link app-update-btn-primary" id="app-update-confirm" data-i18n="app.updateNow">Update now</button>
-            <button type="button" class="button-link button-secondary app-update-btn-secondary" id="app-update-dismiss" data-i18n="app.updateLater">Not now</button>
+            <button type="button" class="button-link button-secondary app-update-btn-secondary" id="app-update-snooze" data-i18n="app.updateSnooze24h">Remind in 24 hours</button>
+            <button type="button" class="button-link button-secondary app-update-btn-secondary" id="app-update-dismiss" data-i18n="app.updateLater">Not now (this session)</button>
         </div>
     </div>
 </div>
@@ -977,19 +1032,20 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260324u3"></script>
-    <script src="app-shell.js?v=20260324u6"></script>
+    <script src="app-shell.js?v=20260325u2"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260324u1"></script>
+    <script src="home-page.js?v=20260325u1"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260323t1"></script>
     <script src="bible-page.js?v=20260318de"></script>
     <script src="songbook-page.js?v=20260318de"></script>
     <script src="contact-page.js?v=20260318de"></script>
     <script src="admin-trivia.js?v=20260320tr3"></script>
-    <script src="admin-dashboard-page.js?v=20260322a1"></script>
+    <script src="admin-dashboard-page.js?v=20260325u1"></script>
+    <script src="admin-extras.js?v=20260325u1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260324u3"></script>
+    <script src="profile-page.js?v=20260325u1"></script>
     <script src="spa-router.js?v=20260324u4"></script>
-    <script src="user-achievements-page.js?v=20260324u5"></script>
+    <script src="user-achievements-page.js?v=20260325u1"></script>
 </body>
 </html>
