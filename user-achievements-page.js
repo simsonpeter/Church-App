@@ -170,6 +170,8 @@
         }
     }
 
+    document.addEventListener("njc:routechange", onVisibleRefresh);
+
     document.addEventListener("DOMContentLoaded", function () {
         var els = getElements();
         if (els.refresh) {
@@ -180,12 +182,6 @@
         onVisibleRefresh();
     });
 
-    window.addEventListener("hashchange", onVisibleRefresh);
-    document.addEventListener("njc:langchange", function () {
-        if (isAchievementsRouteActive()) {
-            loadLeaderboard();
-        }
-    });
     document.addEventListener("njc:authchange", onVisibleRefresh);
     document.addEventListener("njc:trivia-points-updated", onVisibleRefresh);
     document.addEventListener("njc:reading-points-updated", onVisibleRefresh);

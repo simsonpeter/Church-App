@@ -247,6 +247,8 @@
             window.history.replaceState(null, "", "#" + current);
         }
 
+        document.dispatchEvent(new CustomEvent("njc:routechange", { detail: { route: current } }));
+
         window.setTimeout(function () {
             window.scrollTo(0, 0);
         }, 0);
