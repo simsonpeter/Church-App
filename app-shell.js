@@ -1153,8 +1153,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u5";
-    var APP_VERSION = "2026.3.25c";
+    var SW_VERSION = "20260325u6";
+    var APP_VERSION = "2026.3.25d";
 
     var UPDATE_NOTES_TEXT = "Songbook loads from Firestore via Firebase SDK (your cloud songs).";
 

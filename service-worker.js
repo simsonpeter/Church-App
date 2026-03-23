@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v141";
-const RUNTIME_CACHE = "njc-runtime-cache-v141";
+const APP_CACHE = "njc-app-cache-v142";
+const RUNTIME_CACHE = "njc-runtime-cache-v142";
 
 const CORE_ASSETS = [
     "./",
