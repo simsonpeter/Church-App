@@ -637,6 +637,9 @@
                 }
                 if (firebaseUid) {
                     syncReadingPointsToCloud(firebaseUid, total);
+                    if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+                        window.NjcAchievementBoard.syncMyPublicScore();
+                    }
                 }
                 document.dispatchEvent(new CustomEvent("njc:reading-points-updated", { detail: { points: total } }));
                 return null;
@@ -1529,6 +1532,9 @@
                         }
                         window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
                         syncTriviaPointsToCloud(user.uid, total);
+                        if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+                            window.NjcAchievementBoard.syncMyPublicScore();
+                        }
                         document.dispatchEvent(new CustomEvent("njc:trivia-points-updated", { detail: { points: total } }));
                     } catch (e) {}
                 });
@@ -1708,7 +1714,12 @@
                     var firebaseUid = isUser ? uid.replace(/^u:/, "") : null;
                     data[uid] = (Number(data[uid]) || 0) + (Number(n) || 0);
                     window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
-                    if (firebaseUid) syncTriviaPointsToCloud(firebaseUid, data[uid]);
+                    if (firebaseUid) {
+                        syncTriviaPointsToCloud(firebaseUid, data[uid]);
+                        if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+                            window.NjcAchievementBoard.syncMyPublicScore();
+                        }
+                    }
                     document.dispatchEvent(new CustomEvent("njc:trivia-points-updated", { detail: { points: data[uid] } }));
                 } catch (e) {}
             }

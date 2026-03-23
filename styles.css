@@ -2503,6 +2503,113 @@ body.auth-modal-open {
     color: var(--primary);
 }
 
+.user-achievements-toolbar {
+    margin-top: 6px;
+}
+
+.user-achievements-list {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.user-achievements-row {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr) auto auto auto;
+    gap: 6px 10px;
+    align-items: center;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: linear-gradient(180deg, var(--surface-soft), var(--surface));
+    box-shadow: 0 4px 12px rgba(40, 12, 12, 0.06);
+    font-size: 0.9rem;
+    animation: fade-up 0.42s ease both;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.user-achievements-row:not(.user-achievements-row--head):nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.user-achievements-row:not(.user-achievements-row--head):nth-child(3) {
+    animation-delay: 0.1s;
+}
+
+.user-achievements-row:not(.user-achievements-row--head):nth-child(4) {
+    animation-delay: 0.14s;
+}
+
+.user-achievements-row:not(.user-achievements-row--head):nth-child(5) {
+    animation-delay: 0.18s;
+}
+
+.user-achievements-row:not(.user-achievements-row--head):hover {
+    transform: translateX(2px);
+    box-shadow: 0 6px 16px rgba(40, 12, 12, 0.09);
+    border-color: #e8b4b4;
+}
+
+.user-achievements-row--head {
+    font-weight: 700;
+    font-size: 0.72rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    opacity: 0.82;
+    background: var(--surface-soft);
+    box-shadow: none;
+    animation: none;
+}
+
+.user-achievements-row--head:hover {
+    transform: none;
+    border-color: var(--line);
+}
+
+.user-achievements-rank {
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    text-align: center;
+}
+
+.user-achievements-name {
+    min-width: 0;
+    font-weight: 650;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-achievements-num {
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    min-width: 2.5rem;
+    color: var(--text-muted, #666);
+}
+
+.user-achievements-num--total {
+    font-weight: 800;
+    color: var(--primary);
+    min-width: 2.75rem;
+}
+
+@media (max-width: 380px) {
+    .user-achievements-row {
+        grid-template-columns: 1.6rem minmax(0, 1fr) auto auto auto;
+        gap: 4px 6px;
+        padding: 8px 8px;
+        font-size: 0.82rem;
+    }
+
+    .user-achievements-row--head {
+        font-size: 0.65rem;
+    }
+}
+
 .profile-avatar {
     width: 76px;
     height: 76px;

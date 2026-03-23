@@ -39,6 +39,7 @@
         "menu.bible": "வேதாகமம்",
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.trivia": "வேத வினாடி",
+        "menu.userAchievements": "பயனர் சாதனைகள்",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -691,6 +692,21 @@
         "app.updateNow": "இப்போது புதுப்பி",
         "app.updateLater": "இப்போது வேண்டாம்",
         "app.updateDismissAria": "உரையாடலை மூடு",
+        "userAchievements.eyebrow": "சமூகம்",
+        "userAchievements.title": "பயனர் சாதனைகள்",
+        "userAchievements.subtitle": "வினாடி மற்றும் வேத வாசிப்பு புள்ளிகள்",
+        "userAchievements.lead": "உள்நுழைந்த உறுப்பினர்களின் புள்ளிகள் (வினாடி + வேத வாசிப்பு).",
+        "userAchievements.loginHint": "பட்டியலில் தோன்ற உள்நுழையவும்; உங்கள் பெயர் சுயவிவரத்திலிருந்து எடுக்கப்படும்.",
+        "userAchievements.refresh": "மீண்டும் ஏற்று",
+        "userAchievements.loading": "புள்ளிகள் ஏற்றப்படுகின்றன…",
+        "userAchievements.empty": "இன்னும் புள்ளிகள் இல்லை. வினாடியில் பங்கேற்று வேத வாசிப்பை முடிக்கவும்.",
+        "userAchievements.error": "பட்டியலை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "userAchievements.errorRules": "பொது வாசிப்பு தடுக்கப்பட்டது — Firestore விதிகளில் userAchievementScores-க்கு allow read சேர்க்கவும்.",
+        "userAchievements.colRank": "#",
+        "userAchievements.colName": "பெயர்",
+        "userAchievements.colTrivia": "வினாடி",
+        "userAchievements.colReading": "வாசிப்பு",
+        "userAchievements.colTotal": "மொத்தம்",
         "settings.close": "மூடு"
     };
 
@@ -1090,8 +1106,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260323u1";
-    var APP_VERSION = "2026.3.23";
+    var SW_VERSION = "20260324u1";
+    var APP_VERSION = "2026.3.24";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -2515,6 +2531,12 @@
         triviaLink.innerHTML = "<i class=\"fa-solid fa-question-circle\"></i><span></span>";
         bibleSongLinksContainer.appendChild(triviaLink);
 
+        var achievementsLink = document.createElement("a");
+        achievementsLink.className = "header-menu-link";
+        achievementsLink.href = "#user-achievements";
+        achievementsLink.innerHTML = "<i class=\"fa-solid fa-trophy\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(achievementsLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         menuScroll.appendChild(utilityCard);
@@ -2716,6 +2738,7 @@
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
             var triviaLabel = t("menu.trivia", "Trivia");
+            var achievementsLabel = t("menu.userAchievements", "User achievements");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2770,6 +2793,10 @@
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
             }
+            var achievementsNode = achievementsLink.querySelector("span");
+            if (achievementsNode) {
+                achievementsNode.textContent = achievementsLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -2800,6 +2827,7 @@
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
             var isTrivia = getCurrentRoute() === "trivia";
+            var isAchievements = getCurrentRoute() === "user-achievements";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
@@ -2807,6 +2835,7 @@
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
             triviaLink.classList.toggle("active", isTrivia);
+            achievementsLink.classList.toggle("active", isAchievements);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
@@ -3633,6 +3662,83 @@
             apply: applyTranslations,
             formatCount: translateCountText
         };
+
+        window.NjcAchievementBoard = (function () {
+            var COL = "userAchievementScores";
+            var TRIVIA_KEY = "njc_trivia_points_v1";
+            var READING_KEY = "njc_reading_points_v1";
+            var PROFILES_KEY = "njc_user_profiles_v1";
+
+            function pickDisplayName(uid, user) {
+                try {
+                    var raw = window.localStorage.getItem(PROFILES_KEY);
+                    var map = raw ? JSON.parse(raw) : {};
+                    if (map && typeof map === "object") {
+                        var p = map[uid];
+                        var name = p && String(p.fullName || "").trim();
+                        if (name) {
+                            return name.slice(0, 80);
+                        }
+                    }
+                } catch (e1) {}
+                var dn = user && String(user.displayName || "").trim();
+                if (dn) {
+                    return dn.slice(0, 80);
+                }
+                var em = user && user.email;
+                if (em) {
+                    var local = String(em).split("@")[0].replace(/[._-]+/g, " ").trim();
+                    if (local) {
+                        return local.slice(0, 80);
+                    }
+                }
+                return "Member";
+            }
+
+            function syncMyPublicScore() {
+                var authApi = window.NjcAuth;
+                var user = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
+                if (!user || !user.uid) {
+                    return Promise.resolve(null);
+                }
+                if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+                    return Promise.resolve(null);
+                }
+                var uid = String(user.uid);
+                var tid = "u:" + uid;
+                var trivia = 0;
+                var reading = 0;
+                try {
+                    var tmap = JSON.parse(window.localStorage.getItem(TRIVIA_KEY) || "{}");
+                    trivia = Number(tmap[tid]) || 0;
+                } catch (e2) {}
+                try {
+                    var rmap = JSON.parse(window.localStorage.getItem(READING_KEY) || "{}");
+                    reading = Number(rmap[tid]) || 0;
+                } catch (e3) {}
+                var total = trivia + reading;
+                var displayName = pickDisplayName(uid, user);
+                try {
+                    var ref = window.firebase.firestore().collection(COL).doc(uid);
+                    return ref.set({
+                        displayName: displayName,
+                        triviaPoints: trivia,
+                        readingPoints: reading,
+                        totalPoints: total,
+                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true }).then(function () {
+                        return true;
+                    }).catch(function () {
+                        return null;
+                    });
+                } catch (e4) {
+                    return Promise.resolve(null);
+                }
+            }
+
+            return { syncMyPublicScore: syncMyPublicScore };
+        })();
+
         setLanguage(activeLanguage, false, true);
         if (window.NjcAuth && typeof window.NjcAuth.init === "function") {
             window.NjcAuth.init();

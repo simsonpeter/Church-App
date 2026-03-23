@@ -494,6 +494,9 @@
         } catch (authErr) {
             /* Auth display photo only accepts short http(s) URLs; ignore failures. */
         }
+        if (uid && window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+            window.NjcAchievementBoard.syncMyPublicScore();
+        }
         setBusy(false);
     }
 

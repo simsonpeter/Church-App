@@ -65,6 +65,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "user-achievements": {
+            icon: "fa-trophy",
+            eyebrowKey: "userAchievements.eyebrow",
+            eyebrowText: "Community",
+            titleKey: "userAchievements.title",
+            titleText: "User achievements",
+            subtitleKey: "userAchievements.subtitle",
+            subtitleText: "Trivia and Bible reading points"
+        },
         contact: {
             icon: "fa-phone",
             eyebrowKey: "contact.eyebrow",
