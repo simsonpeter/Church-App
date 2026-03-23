@@ -2239,6 +2239,33 @@ body.auth-modal-open {
     margin-top: 4px;
 }
 
+.profile-achievements-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 12px 0 14px;
+    padding: 14px 16px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--primary-soft), rgba(255, 236, 236, 0.95));
+    border: 1px solid rgba(200, 100, 100, 0.35);
+    box-shadow: 0 6px 16px rgba(120, 22, 22, 0.1);
+}
+
+.profile-achievements-total-label {
+    font-size: 0.95rem;
+    font-weight: 750;
+    color: var(--text);
+}
+
+.profile-achievements-total-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary);
+    line-height: 1;
+}
+
 .profile-achievements-list {
     list-style: none;
     margin: 4px 0 0;

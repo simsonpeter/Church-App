@@ -17,6 +17,7 @@
     var avatarFallback = document.getElementById("profile-avatar-fallback");
     var profileTriviaPointsValue = document.getElementById("profile-trivia-points-value");
     var profileReadingPointsValue = document.getElementById("profile-reading-points-value");
+    var profileTotalPointsValue = document.getElementById("profile-total-points-value");
     var profileCard = form ? form.closest(".card") : null;
     var busy = false;
     var noteState = "";
@@ -96,11 +97,17 @@
     }
 
     function renderProfileAchievementPoints() {
+        var trivia = getTriviaPoints();
+        var reading = getReadingPoints();
+        var total = trivia + reading;
         if (profileTriviaPointsValue) {
-            profileTriviaPointsValue.textContent = String(getTriviaPoints());
+            profileTriviaPointsValue.textContent = String(trivia);
         }
         if (profileReadingPointsValue) {
-            profileReadingPointsValue.textContent = formatHalfPointTotal(getReadingPoints());
+            profileReadingPointsValue.textContent = formatHalfPointTotal(reading);
+        }
+        if (profileTotalPointsValue) {
+            profileTotalPointsValue.textContent = formatHalfPointTotal(total);
         }
     }
 

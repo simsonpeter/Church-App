@@ -680,6 +680,7 @@
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
         "profile.readingPoints": "வேத வாசிப்பு புள்ளிகள்",
+        "profile.totalPoints": "மொத்த புள்ளிகள்",
         "profile.achievementsTitle": "சாதனைகள்",
         "profile.achievementsInfo": "செயலியில் செயல்பாடுகளிலிருந்து பெற்ற புள்ளிகள்.",
         "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",
