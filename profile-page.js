@@ -1,6 +1,7 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
+    var READING_POINTS_KEY = "njc_reading_points_v1";
     var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
     var PROFILE_COLLECTION = "profile";
     var PROFILE_DOC_ID = "basic";
@@ -15,6 +16,7 @@
     var avatarImage = document.getElementById("profile-avatar-image");
     var avatarFallback = document.getElementById("profile-avatar-fallback");
     var profileTriviaPointsValue = document.getElementById("profile-trivia-points-value");
+    var profileReadingPointsValue = document.getElementById("profile-reading-points-value");
     var profileCard = form ? form.closest(".card") : null;
     var busy = false;
     var noteState = "";
@@ -74,12 +76,32 @@
         }
     }
 
-    function renderProfileTriviaPoints() {
-        if (!profileTriviaPointsValue) {
-            return;
+    function formatHalfPointTotal(value) {
+        var n = Number(value) || 0;
+        if (Math.abs(n - Math.round(n)) < 1e-9) {
+            return String(Math.round(n));
         }
-        var pts = getTriviaPoints();
-        profileTriviaPointsValue.textContent = String(pts);
+        return n.toFixed(1);
+    }
+
+    function getReadingPoints() {
+        try {
+            var raw = window.localStorage.getItem(READING_POINTS_KEY);
+            var data = raw ? JSON.parse(raw) : {};
+            var uid = getTriviaUserId();
+            return Number(data[uid]) || 0;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function renderProfileAchievementPoints() {
+        if (profileTriviaPointsValue) {
+            profileTriviaPointsValue.textContent = String(getTriviaPoints());
+        }
+        if (profileReadingPointsValue) {
+            profileReadingPointsValue.textContent = formatHalfPointTotal(getReadingPoints());
+        }
     }
 
     function getProfileMap() {
@@ -354,7 +376,7 @@
             setFormEnabled(false);
             populateForm({ fullName: "", dob: "", anniversary: "", phone: "", photoUrl: "" });
             renderAvatar({}, user);
-            renderProfileTriviaPoints();
+            renderProfileAchievementPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
             return;
         }
@@ -364,7 +386,7 @@
         var localProfile = normalizeProfile(map[currentUid] || {}, user);
         populateForm(localProfile);
         renderAvatar(localProfile, user);
-        renderProfileTriviaPoints();
+        renderProfileAchievementPoints();
         setNote("", "", "");
 
         var doc = getFirestoreProfileDoc(currentUid);
@@ -519,7 +541,8 @@
 
     document.addEventListener("DOMContentLoaded", loadProfile);
     document.addEventListener("njc:authchange", loadProfile);
-    document.addEventListener("njc:trivia-points-updated", renderProfileTriviaPoints);
+    document.addEventListener("njc:trivia-points-updated", renderProfileAchievementPoints);
+    document.addEventListener("njc:reading-points-updated", renderProfileAchievementPoints);
     document.addEventListener("njc:langchange", function () {
         refreshNoteTranslation();
     });

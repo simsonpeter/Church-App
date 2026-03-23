@@ -679,6 +679,7 @@
         "profile.cloudPermissionDenied": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. மேக ஒத்திசைவு Firestore பாதுகாப்பு விதிகளால் தடுக்கப்பட்டது — நிர்வாகியை தொடர்பு கொள்ளவும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
+        "profile.readingPoints": "வேத வாசிப்பு புள்ளிகள்",
         "profile.achievementsTitle": "சாதனைகள்",
         "profile.achievementsInfo": "செயலியில் செயல்பாடுகளிலிருந்து பெற்ற புள்ளிகள்.",
         "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",

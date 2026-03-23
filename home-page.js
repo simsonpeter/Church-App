@@ -1,5 +1,6 @@
 (function () {
             var READING_PROGRESS_KEY = "njc_reading_progress_v1";
+            var READING_POINTS_KEY = "njc_reading_points_v1";
             var DAILY_VERSE_LANGUAGE_KEY = "njc_daily_verse_language_v1";
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
@@ -589,6 +590,56 @@
                 entry[part] = Boolean(value);
                 map[targetKey] = entry;
                 saveProgressMap(map);
+                recalcAndStoreReadingPoints();
+            }
+
+            function computeReadingPointsTotal() {
+                var map = getProgressMap();
+                var halfCount = 0;
+                Object.keys(map).forEach(function (k) {
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(k)) {
+                        return;
+                    }
+                    var e = map[k];
+                    if (!e || typeof e !== "object") {
+                        return;
+                    }
+                    if (e.morning) {
+                        halfCount += 1;
+                    }
+                    if (e.evening) {
+                        halfCount += 1;
+                    }
+                });
+                return halfCount * 0.5;
+            }
+
+            function syncReadingPointsToCloud(uid, points) {
+                var doc = getTriviaFirestoreDoc(uid);
+                if (!doc) {
+                    return;
+                }
+                doc.set({ readingPoints: Number(points) || 0 }, { merge: true }).catch(function () {});
+            }
+
+            function recalcAndStoreReadingPoints() {
+                var total = computeReadingPointsTotal();
+                var uid = getTriviaUserId();
+                var isUser = uid && uid.indexOf("u:") === 0;
+                var firebaseUid = isUser ? uid.replace(/^u:/, "") : null;
+                try {
+                    var raw = window.localStorage.getItem(READING_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    data[uid] = total;
+                    window.localStorage.setItem(READING_POINTS_KEY, JSON.stringify(data));
+                } catch (err) {
+                    return null;
+                }
+                if (firebaseUid) {
+                    syncReadingPointsToCloud(firebaseUid, total);
+                }
+                document.dispatchEvent(new CustomEvent("njc:reading-points-updated", { detail: { points: total } }));
+                return null;
             }
 
             function getBrusselsYmd() {
@@ -1433,6 +1484,7 @@
 
             document.addEventListener("njc:userdata-updated", function () {
                 renderReadingPlan();
+                recalcAndStoreReadingPoints();
             });
             document.addEventListener("njc:admin-notices-updated", function () {
                 loadAnnouncements();
@@ -1484,6 +1536,7 @@
 
             document.addEventListener("njc:authchange", function () {
                 syncTriviaPointsForUser();
+                recalcAndStoreReadingPoints();
                 loadAnnouncements();
             });
 
@@ -1994,5 +2047,6 @@
             loadAnnouncements();
             loadTrivia();
             syncTriviaPointsForUser();
+            recalcAndStoreReadingPoints();
             loadThisWeekEvents();
         })();
