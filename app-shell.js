@@ -695,7 +695,7 @@
         "userAchievements.eyebrow": "சமூகம்",
         "userAchievements.title": "பயனர் சாதனைகள்",
         "userAchievements.subtitle": "வினாடி மற்றும் வேத வாசிப்பு புள்ளிகள்",
-        "userAchievements.lead": "உள்நுழைந்த உறுப்பினர்களின் புள்ளிகள் (வினாடி + வேத வாசிப்பு).",
+        "userAchievements.lead": "வினாடி மற்றும் வேத வாசிப்பு புள்ளிகள். ஒவ்வொரு உறுப்பினரும் உள்நுழைந்து செயலியை திறந்த பிறகே பட்டியலில் தோன்றுவர் (ஒவ்வொரு சாதனமும் ஒரு மேக வரியை வெளியிடும்). மீண்டும் ஏற்று என தட்டவும்.",
         "userAchievements.loginHint": "பட்டியலில் தோன்ற உள்நுழையவும்; உங்கள் பெயர் சுயவிவரத்திலிருந்து எடுக்கப்படும்.",
         "userAchievements.refresh": "மீண்டும் ஏற்று",
         "userAchievements.loading": "புள்ளிகள் ஏற்றப்படுகின்றன…",
@@ -1106,8 +1106,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u2";
-    var APP_VERSION = "2026.3.24b";
+    var SW_VERSION = "20260324u3";
+    var APP_VERSION = "2026.3.24c";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -3669,6 +3669,10 @@
             var READING_KEY = "njc_reading_points_v1";
             var PROFILES_KEY = "njc_user_profiles_v1";
 
+            function looksLikeEmail(text) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(text || "").trim());
+            }
+
             function pickDisplayName(uid, user) {
                 try {
                     var raw = window.localStorage.getItem(PROFILES_KEY);
@@ -3682,7 +3686,7 @@
                     }
                 } catch (e1) {}
                 var dn = user && String(user.displayName || "").trim();
-                if (dn) {
+                if (dn && !looksLikeEmail(dn)) {
                     return dn.slice(0, 80);
                 }
                 var em = user && user.email;

@@ -538,6 +538,11 @@
             emitAuthState();
             if (user) {
                 pullCloudToLocalOrBootstrap();
+                window.setTimeout(function () {
+                    if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+                        window.NjcAchievementBoard.syncMyPublicScore();
+                    }
+                }, 0);
             }
             updateEntryOverlayVisibility();
         });

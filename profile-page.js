@@ -111,6 +111,16 @@
         }
     }
 
+    function syncAchievementBoardIfPossible() {
+        if (!currentUid) {
+            return;
+        }
+        var board = window.NjcAchievementBoard;
+        if (board && typeof board.syncMyPublicScore === "function") {
+            board.syncMyPublicScore();
+        }
+    }
+
     function getProfileMap() {
         try {
             var raw = window.localStorage.getItem(PROFILE_STORAGE_KEY);
@@ -398,11 +408,13 @@
 
         var doc = getFirestoreProfileDoc(currentUid);
         if (!doc) {
+            syncAchievementBoardIfPossible();
             return;
         }
         try {
             var snapshot = await doc.get();
             if (!snapshot.exists) {
+                syncAchievementBoardIfPossible();
                 return;
             }
             var cloudProfile = normalizeProfile(snapshot.data() || {}, user);
@@ -422,8 +434,10 @@
             renderAvatar(cloudProfile, user);
             notifyProfileUpdated(currentUid, cloudProfile);
         } catch (err) {
+            syncAchievementBoardIfPossible();
             return;
         }
+        syncAchievementBoardIfPossible();
     }
 
     async function saveProfile(event) {
