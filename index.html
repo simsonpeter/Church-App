@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260322t5">
+    <link rel="stylesheet" href="styles.css?v=20260323t1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -821,9 +821,20 @@
         </section>
     </div>
 
-<div class="app-update-banner" id="app-update-banner" hidden role="status">
-    <span id="app-update-text" data-i18n="app.updateAvailable">New version available.</span>
-    <button type="button" class="button-link app-update-refresh" id="app-update-refresh" data-i18n="app.refreshToUpdate">Refresh to update</button>
+<div class="app-update-overlay" id="app-update-overlay" hidden>
+    <button type="button" class="app-update-backdrop" id="app-update-backdrop" aria-label="Dismiss" data-i18n-aria-label="app.updateDismissAria"></button>
+    <div class="app-update-sheet" role="dialog" aria-modal="true" aria-labelledby="app-update-title">
+        <div class="app-update-icon-wrap" aria-hidden="true">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+        </div>
+        <h2 class="app-update-title" id="app-update-title" data-i18n="app.updateTitle">Update available</h2>
+        <p class="app-update-lead" data-i18n="app.updateLead">A new version is ready with improvements and fixes.</p>
+        <p class="page-note app-update-hint" data-i18n="app.updateHint">Tap Update now to reload and finish installing.</p>
+        <div class="app-update-actions">
+            <button type="button" class="button-link app-update-btn-primary" id="app-update-confirm" data-i18n="app.updateNow">Update now</button>
+            <button type="button" class="button-link button-secondary app-update-btn-secondary" id="app-update-dismiss" data-i18n="app.updateLater">Not now</button>
+        </div>
+    </div>
 </div>
 
 <div class="trivia-wrong-overlay" id="trivia-wrong-overlay" hidden>
@@ -943,11 +954,11 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260318de"></script>
-    <script src="app-shell.js?v=20260322t4"></script>
+    <script src="app-shell.js?v=20260323t1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260322t3"></script>
     <script src="events-page.js?v=20260318de"></script>
-    <script src="sermons-page.js?v=20260322t1"></script>
+    <script src="sermons-page.js?v=20260323t1"></script>
     <script src="bible-page.js?v=20260318de"></script>
     <script src="songbook-page.js?v=20260318de"></script>
     <script src="contact-page.js?v=20260318de"></script>

@@ -560,38 +560,123 @@ body.splash-active {
     margin-top: 12px;
 }
 
-.app-update-banner {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    z-index: 3400;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 12px 16px;
-    background: var(--primary);
-    color: #fff;
-    font-size: 0.9rem;
-    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
+body.app-update-open {
+    overflow: hidden;
 }
 
-.app-update-banner[hidden] {
+.app-update-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 4500;
+    display: grid;
+    place-items: center;
+    padding: 20px 16px;
+    box-sizing: border-box;
+}
+
+.app-update-overlay[hidden] {
     display: none !important;
 }
 
-.app-update-refresh {
-    flex-shrink: 0;
-    padding: 6px 14px;
-    background: #fff;
-    color: var(--primary);
-    border-radius: 8px;
-    font-weight: 600;
+.app-update-backdrop {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background: rgba(18, 8, 8, 0.5);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
 }
 
-.app-update-refresh:hover {
-    background: rgba(255, 255, 255, 0.9);
+.app-update-sheet {
+    position: relative;
+    z-index: 1;
+    width: min(340px, 100%);
+    max-height: min(90vh, 520px);
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 22px;
+    padding: 22px 20px 20px;
+    background: linear-gradient(165deg, #fffefb 0%, #fff5f5 45%, #ffffff 100%);
+    border: 1px solid rgba(200, 120, 120, 0.35);
+    box-shadow:
+        0 24px 48px rgba(60, 12, 12, 0.22),
+        0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+    text-align: center;
+    animation: app-update-pop 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes app-update-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.94) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.app-update-icon-wrap {
+    width: 52px;
+    height: 52px;
+    margin: 0 auto 14px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(145deg, #ffe8e8, #ffd0d0);
+    border: 1px solid #f0b8b8;
+    color: var(--primary);
+    font-size: 1.35rem;
+    box-shadow: 0 6px 14px rgba(180, 40, 40, 0.15);
+}
+
+.app-update-title {
+    margin: 0 0 8px;
+    font-size: 1.22rem;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.25;
+}
+
+.app-update-lead {
+    margin: 0 0 6px;
+    font-size: 0.94rem;
+    color: var(--text);
+    line-height: 1.45;
+}
+
+.app-update-hint {
+    margin: 0 0 18px !important;
+    font-size: 0.82rem !important;
+}
+
+.app-update-actions {
+    display: grid;
+    gap: 10px;
+}
+
+.app-update-btn-primary {
+    margin: 0 !important;
+    width: 100%;
+    display: block;
+    padding: 12px 16px !important;
+    border-radius: 14px !important;
+    font-size: 0.95rem !important;
+    box-shadow: 0 8px 20px rgba(200, 50, 50, 0.28);
+}
+
+.app-update-btn-secondary {
+    margin: 0 !important;
+    width: 100%;
+    display: block;
+    padding: 10px 16px !important;
+    border-radius: 14px !important;
+    font-size: 0.88rem !important;
+    background: var(--surface-soft) !important;
+    color: var(--text) !important;
+    border: 1px solid var(--line) !important;
 }
 
 .trivia-wrong-overlay {
@@ -862,6 +947,17 @@ body.splash-active {
     padding: 11px 12px;
     cursor: pointer;
     font: inherit;
+    border-radius: 14px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sermon-open-btn:focus {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.sermon-open-btn:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .sermon-open-top {
@@ -889,48 +985,19 @@ body.splash-active {
 .sermon-open-main {
     min-width: 0;
     display: grid;
-    gap: 2px;
+    gap: 4px;
 }
 
-.sermon-marquee-track {
-    display: block;
-    width: 100%;
+.sermon-open-main .sermon-line {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    hyphens: auto;
     max-width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    white-space: nowrap;
-}
-
-.sermon-marquee-track.marquee {
-    overflow-x: hidden;
-    overflow-y: hidden;
-}
-
-.sermon-marquee-text {
-    display: inline-block;
-    white-space: nowrap;
-    vertical-align: top;
-}
-
-.sermon-marquee-track.marquee .sermon-marquee-text {
-    padding-right: 20px;
-    animation: sermon-line-marquee 8s linear infinite;
-}
-
-.sermon-marquee-track.marquee .sermon-marquee-text::after {
-    content: "   •   " attr(data-marquee-text);
-}
-
-.sermon-marquee-track:not(.marquee) .sermon-marquee-text {
-    overflow: visible;
-    text-overflow: clip;
 }
 
 .sermon-line {
     margin: 0;
-    line-height: 1.25;
+    line-height: 1.35;
     max-width: 100%;
 }
 
@@ -951,18 +1018,10 @@ body.splash-active {
     color: var(--muted);
 }
 
-.sermon-open-btn:disabled {
+.sermon-open-btn[aria-disabled="true"] {
     cursor: not-allowed;
     opacity: 0.6;
-}
-
-@keyframes sermon-line-marquee {
-    0% {
-        transform: translateX(0);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+    pointer-events: none;
 }
 
 .sermon-hint {

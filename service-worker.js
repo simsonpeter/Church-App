@@ -1,16 +1,16 @@
-const APP_CACHE = "njc-app-cache-v127";
-const RUNTIME_CACHE = "njc-runtime-cache-v127";
+const APP_CACHE = "njc-app-cache-v128";
+const RUNTIME_CACHE = "njc-runtime-cache-v128";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260322t5",
+    "./styles.css?v=20260323t1",
     "./user-auth.js?v=20260318de",
-    "./app-shell.js?v=20260322t4",
+    "./app-shell.js?v=20260323t1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260322t3",
     "./events-page.js?v=20260318de",
-    "./sermons-page.js?v=20260322t1",
+    "./sermons-page.js?v=20260323t1",
     "./bible-page.js?v=20260318de",
     "./songbook-page.js?v=20260318de",
     "./contact-page.js?v=20260318de",
@@ -45,6 +45,12 @@ function staleWhileRevalidate(request) {
         return cached || networkFetch;
     });
 }
+
+self.addEventListener("message", function (event) {
+    if (event && event.data && event.data.type === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
+});
 
 self.addEventListener("install", function (event) {
     event.waitUntil(

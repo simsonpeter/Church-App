@@ -683,6 +683,12 @@
         "profile.achievementsInfo": "செயலியில் செயல்பாடுகளிலிருந்து பெற்ற புள்ளிகள்.",
         "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",
         "app.refreshToUpdate": "புதுப்பிக்க கிளிக் செய்யவும்",
+        "app.updateTitle": "புதுப்பிப்பு தயார்",
+        "app.updateLead": "மேம்பாடுகள் மற்றும் சரிப்புகளுடன் புதிய பதிப்பு தயார்.",
+        "app.updateHint": "நிறுவுதலை முடிக்க மீண்டும் ஏற்ற \"இப்போது புதுப்பி\" என தட்டவும்.",
+        "app.updateNow": "இப்போது புதுப்பி",
+        "app.updateLater": "இப்போது வேண்டாம்",
+        "app.updateDismissAria": "உரையாடலை மூடு",
         "settings.close": "மூடு"
     };
 
@@ -1082,8 +1088,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260321u1";
-    var APP_VERSION = "2026.3.21";
+    var SW_VERSION = "20260323u1";
+    var APP_VERSION = "2026.3.23";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -1092,14 +1098,16 @@
         navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
             registration.update();
             if (registration.waiting) {
-                showUpdateBanner();
+                showUpdateModal(registration);
             }
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
-                if (!worker) return;
+                if (!worker) {
+                    return;
+                }
                 worker.addEventListener("statechange", function () {
                     if (worker.state === "installed" && navigator.serviceWorker.controller) {
-                        showUpdateBanner();
+                        showUpdateModal(registration);
                     }
                 });
             });
@@ -1107,25 +1115,76 @@
             return null;
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-            showUpdateBanner();
+            hideUpdateModal();
         });
         document.addEventListener("visibilitychange", function () {
             if (document.visibilityState === "visible") {
                 navigator.serviceWorker.getRegistration().then(function (r) {
-                    if (r) r.update();
+                    if (r) {
+                        r.update();
+                    }
                 });
             }
         });
     }
 
-    function showUpdateBanner() {
-        var banner = document.getElementById("app-update-banner");
-        var refreshBtn = document.getElementById("app-update-refresh");
-        if (!banner || !refreshBtn) return;
-        banner.hidden = false;
-        refreshBtn.onclick = function () {
+    function hideUpdateModal() {
+        var overlay = document.getElementById("app-update-overlay");
+        if (!overlay) {
+            return;
+        }
+        overlay.hidden = true;
+        document.body.classList.remove("app-update-open");
+    }
+
+    function showUpdateModal(registration) {
+        var overlay = document.getElementById("app-update-overlay");
+        var confirmBtn = document.getElementById("app-update-confirm");
+        var dismissBtn = document.getElementById("app-update-dismiss");
+        var backdrop = document.getElementById("app-update-backdrop");
+        if (!overlay || !confirmBtn || !dismissBtn) {
+            return;
+        }
+        try {
+            if (window.sessionStorage.getItem("njc_update_prompt_dismissed") === "1") {
+                return;
+            }
+        } catch (ignore) {
+            /* sessionStorage unavailable */
+        }
+        if (!overlay.hidden) {
+            return;
+        }
+        overlay.hidden = false;
+        document.body.classList.add("app-update-open");
+
+        function reloadForUpdate() {
+            try {
+                if (registration && registration.waiting) {
+                    registration.waiting.postMessage({ type: "SKIP_WAITING" });
+                }
+            } catch (err) {
+                return null;
+            }
             window.location.reload();
+        }
+
+        function dismiss() {
+            try {
+                window.sessionStorage.setItem("njc_update_prompt_dismissed", "1");
+            } catch (err) {
+                return null;
+            }
+            hideUpdateModal();
+        }
+
+        confirmBtn.onclick = function () {
+            reloadForUpdate();
         };
+        dismissBtn.onclick = dismiss;
+        if (backdrop) {
+            backdrop.onclick = dismiss;
+        }
     }
 
     function notificationsSupported() {
@@ -3149,7 +3208,7 @@
                     reg.update().then(function () {
                         if (reg.waiting || reg.installing) {
                             updateStatus.textContent = t("settings.updateAvailable", "New version available!");
-                            showUpdateBanner();
+                            showUpdateModal(reg);
                         } else {
                             updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
                         }
