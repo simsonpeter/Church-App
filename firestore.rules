@@ -1,10 +1,16 @@
 rules_version = '2';
-// Paths used by Church-App (songbook-add54 / profile-page.js, user-auth.js, home-page.js):
-//   users/{uid}/profile/basic  — profile fields + triviaPoints (merge)
+// Church-App Firestore paths:
+//   users/{uid}/profile/basic  — profile + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
+//   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //
-// Deploy: firebase deploy --only firestore:rules
-// Or paste into Firebase console → Firestore → Rules.
+// If "User achievements" shows "Public read is blocked", this file is not published
+// for THIS Firebase project yet. Fix:
+//   1) Firebase console → Firestore Database → Rules (not Version history)
+//   2) Ensure the userAchievementScores block below is present, then Publish.
+//   3) Or from repo: firebase deploy --only firestore:rules
+// If you already have other match rules in production, ADD this block; do not delete
+// your existing matches unless you intend to replace the whole file with this one.
 
 service cloud.firestore {
   match /databases/{database}/documents {

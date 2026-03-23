@@ -155,7 +155,7 @@
                     }
                     var code = err && err.code ? String(err.code) : "";
                     if (code === "permission-denied") {
-                        setStatus(T("userAchievements.errorRules", "Public read is blocked — add allow read for userAchievementScores in Firestore rules."));
+                        setStatus(T("userAchievements.errorRules", "Could not load the leaderboard: Firestore blocked this read. Publish the rules in this app’s repo (firestore.rules) so userAchievementScores allows public read, or ask your admin to update Firestore → Rules → Publish."));
                     } else {
                         setStatus(T("userAchievements.error", "Could not load the list. Try again."));
                     }

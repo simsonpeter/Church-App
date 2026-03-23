@@ -701,7 +701,7 @@
         "userAchievements.loading": "புள்ளிகள் ஏற்றப்படுகின்றன…",
         "userAchievements.empty": "இன்னும் புள்ளிகள் இல்லை. வினாடியில் பங்கேற்று வேத வாசிப்பை முடிக்கவும்.",
         "userAchievements.error": "பட்டியலை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
-        "userAchievements.errorRules": "பொது வாசிப்பு தடுக்கப்பட்டது — Firestore விதிகளில் userAchievementScores-க்கு allow read சேர்க்கவும்.",
+        "userAchievements.errorRules": "பட்டியலை ஏற்ற முடியவில்லை: Firestore இந்த வாசிப்பை தடுத்தது. செயலியின் firestore.rules விதிகளை இந்த Firebase திட்டத்தில் வெளியிடவும் (userAchievementScores-க்கு பொது வாசிப்பு), அல்லது நிர்வாகியை தொடர்பு கொள்ளவும்.",
         "userAchievements.colRank": "#",
         "userAchievements.colName": "பெயர்",
         "userAchievements.colTrivia": "வினாடி",
@@ -1106,8 +1106,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u1";
-    var APP_VERSION = "2026.3.24";
+    var SW_VERSION = "20260324u2";
+    var APP_VERSION = "2026.3.24b";
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
