@@ -334,6 +334,26 @@ body.splash-active {
     animation-delay: 0.11s;
 }
 
+.app-content > .card:nth-child(4) {
+    animation-delay: 0.16s;
+}
+
+.app-content > .card:nth-child(5) {
+    animation-delay: 0.21s;
+}
+
+.app-content > .card:nth-child(6) {
+    animation-delay: 0.26s;
+}
+
+.app-content > .card:nth-child(7) {
+    animation-delay: 0.31s;
+}
+
+.app-content > .card:nth-child(8) {
+    animation-delay: 0.36s;
+}
+
 .card:hover {
     transform: translateY(-2px);
     box-shadow: 0 14px 28px rgba(127, 34, 34, 0.12);
@@ -351,6 +371,11 @@ body.splash-active {
 .card h2 i {
     color: var(--primary);
     font-size: 1.05rem;
+    transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.card:hover h2 i {
+    transform: rotate(-8deg) scale(1.08);
 }
 
 .card p {
@@ -760,6 +785,17 @@ body.app-update-open {
     color: var(--text);
     display: grid;
     place-items: center;
+    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.announcement-nav-btn:hover {
+    transform: scale(1.08);
+    background: var(--primary-soft);
+    border-color: #e0a0a0;
+}
+
+.announcement-nav-btn:active {
+    transform: scale(0.95);
 }
 
 .announcement-dots {
@@ -820,7 +856,20 @@ body.app-update-open {
     justify-items: center;
     gap: 6px;
     box-shadow: 0 6px 18px rgba(127, 34, 34, 0.09);
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.25s ease;
+    animation: fade-up 0.5s ease both;
+}
+
+.quick-actions .action-pill:nth-child(1) {
+    animation-delay: 0.05s;
+}
+
+.quick-actions .action-pill:nth-child(2) {
+    animation-delay: 0.12s;
+}
+
+.quick-actions .action-pill:nth-child(3) {
+    animation-delay: 0.19s;
 }
 
 .action-pill:hover {
@@ -875,6 +924,24 @@ body.app-update-open {
     border-radius: 14px;
     padding: 12px 8px;
     animation: fade-up 0.45s ease both;
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.stats-grid .stat:nth-child(1) {
+    animation-delay: 0.04s;
+}
+
+.stats-grid .stat:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.stats-grid .stat:nth-child(3) {
+    animation-delay: 0.16s;
+}
+
+.stat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(120, 22, 22, 0.1);
 }
 
 .stat strong {
@@ -907,6 +974,54 @@ body.app-update-open {
 .list li:hover {
     transform: translateY(-1px);
     border-color: #ecb0b0;
+}
+
+.app-content .card ul.list > li {
+    animation: fade-up 0.4s ease both;
+}
+
+.app-content .card ul.list > li:nth-child(1) {
+    animation-delay: 0.02s;
+}
+
+.app-content .card ul.list > li:nth-child(2) {
+    animation-delay: 0.05s;
+}
+
+.app-content .card ul.list > li:nth-child(3) {
+    animation-delay: 0.08s;
+}
+
+.app-content .card ul.list > li:nth-child(4) {
+    animation-delay: 0.11s;
+}
+
+.app-content .card ul.list > li:nth-child(5) {
+    animation-delay: 0.14s;
+}
+
+.app-content .card ul.list > li:nth-child(6) {
+    animation-delay: 0.17s;
+}
+
+.app-content .card ul.list > li:nth-child(7) {
+    animation-delay: 0.2s;
+}
+
+.app-content .card ul.list > li:nth-child(8) {
+    animation-delay: 0.23s;
+}
+
+.app-content .card ul.list > li:nth-child(9) {
+    animation-delay: 0.26s;
+}
+
+.app-content .card ul.list > li:nth-child(10) {
+    animation-delay: 0.29s;
+}
+
+.app-content .card ul.list > li:nth-child(n + 11) {
+    animation-delay: 0.32s;
 }
 
 .list h3 {
@@ -949,6 +1064,13 @@ body.app-update-open {
     font: inherit;
     border-radius: 14px;
     -webkit-tap-highlight-color: transparent;
+    transition: transform 0.22s ease, background-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.sermon-open-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 245, 245, 0.65);
+    box-shadow: 0 6px 14px rgba(120, 22, 22, 0.07);
 }
 
 .sermon-open-btn:focus {
@@ -1294,8 +1416,13 @@ button.button-link:disabled {
 }
 
 .button-link:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 18px rgba(202, 50, 50, 0.28);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 22px rgba(202, 50, 50, 0.32);
+}
+
+.button-link:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
 }
 
 .button-link:active,
@@ -1593,8 +1720,13 @@ body.songbook-fullscreen-open .offline-badge {
     border-radius: 18px;
     padding: 8px;
     box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
-    animation: fade-up-nav 0.55s ease both;
+    animation: fade-up-nav 0.55s ease both, tab-bar-glow 4s ease-in-out infinite;
     z-index: 1000;
+    transition: box-shadow 0.35s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.tab-nav:hover {
+    box-shadow: 0 14px 32px rgba(180, 40, 40, 0.16);
 }
 
 .header-menu-popover {
@@ -1741,6 +1873,25 @@ body.header-menu-open {
     box-shadow: 0 8px 18px rgba(40, 12, 12, 0.12);
     padding: 8px;
     margin: 0 0 10px;
+    animation: fade-up 0.38s ease both;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.header-menu-scroll > .header-menu-card:nth-child(2) {
+    animation-delay: 0.02s;
+}
+
+.header-menu-scroll > .header-menu-card:nth-child(3) {
+    animation-delay: 0.06s;
+}
+
+.header-menu-scroll > .header-menu-card:nth-child(4) {
+    animation-delay: 0.1s;
+}
+
+.header-menu-card:hover {
+    border-color: #e8c0c0;
+    box-shadow: 0 10px 22px rgba(40, 12, 12, 0.14);
 }
 
 .header-menu-card:last-of-type {
@@ -1758,6 +1909,11 @@ body.header-menu-open {
     text-decoration: none;
     font-size: 1rem;
     font-weight: 650;
+    transition: transform 0.2s ease, background-color 0.2s ease, padding-left 0.2s ease;
+}
+
+.header-menu-link:active {
+    transform: scale(0.98);
 }
 
 .header-menu-link i {
@@ -2075,6 +2231,15 @@ body.auth-modal-open {
     animation: tab-pulse 1.8s ease-in-out infinite;
 }
 
+.tab:not(.active):hover {
+    transform: translateY(-1px);
+}
+
+.tab:not(.active):hover .tab-icon {
+    transform: scale(1.06);
+    background: #ffe0e0;
+}
+
 .tab-label {
     font-size: 0.7rem;
     line-height: 1;
@@ -2250,6 +2415,15 @@ body.auth-modal-open {
     background: linear-gradient(135deg, var(--primary-soft), rgba(255, 236, 236, 0.95));
     border: 1px solid rgba(200, 100, 100, 0.35);
     box-shadow: 0 6px 16px rgba(120, 22, 22, 0.1);
+    animation:
+        fade-up 0.5s ease both,
+        achievement-total-glow 3.2s ease-in-out infinite;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.profile-achievements-total:hover {
+    transform: scale(1.01);
+    box-shadow: 0 10px 22px rgba(160, 40, 40, 0.14);
 }
 
 .profile-achievements-total-label {
@@ -2264,6 +2438,8 @@ body.auth-modal-open {
     font-variant-numeric: tabular-nums;
     color: var(--primary);
     line-height: 1;
+    animation: achievement-points-pop 0.75s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.12s;
 }
 
 .profile-achievements-list {
@@ -2284,6 +2460,22 @@ body.auth-modal-open {
     border-radius: 14px;
     background: linear-gradient(180deg, var(--surface-soft), var(--surface));
     box-shadow: 0 6px 14px rgba(40, 12, 12, 0.08);
+    animation: fade-up 0.45s ease both;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.profile-achievement-row:nth-child(1) {
+    animation-delay: 0.08s;
+}
+
+.profile-achievement-row:nth-child(2) {
+    animation-delay: 0.14s;
+}
+
+.profile-achievement-row:hover {
+    transform: translateX(2px);
+    box-shadow: 0 8px 18px rgba(40, 12, 12, 0.11);
+    border-color: #e8b4b4;
 }
 
 .profile-achievement-name {
@@ -2321,6 +2513,7 @@ body.auth-modal-open {
     place-items: center;
     overflow: hidden;
     box-shadow: 0 8px 20px rgba(120, 22, 22, 0.12);
+    animation: profile-avatar-in 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .profile-avatar img {
@@ -2669,6 +2862,11 @@ body.bible-fullscreen-open .offline-badge {
     margin: 0;
     accent-color: var(--primary);
     flex: 0 0 auto;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.reading-inline-tick:checked {
+    transform: scale(1.15);
 }
 
 .reading-compact-row {
@@ -2685,6 +2883,22 @@ body.bible-fullscreen-open .offline-badge {
     border: 1px solid var(--line);
     border-radius: 10px;
     padding: 8px 9px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    animation: fade-up 0.42s ease both;
+}
+
+.reading-compact-row .reading-compact-item:nth-child(1) {
+    animation-delay: 0.04s;
+}
+
+.reading-compact-row .reading-compact-item:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+.reading-compact-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(120, 22, 22, 0.09);
+    border-color: #e8c4c4;
 }
 
 .reading-compact-item .reading-item-title {
@@ -2726,8 +2940,10 @@ body.bible-fullscreen-open .offline-badge {
     display: block;
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, #b71c1c, #ef5350);
-    transition: width 0.25s ease;
+    background: linear-gradient(90deg, #b71c1c, #ef5350, #ff8a80, #ef5350);
+    background-size: 220% 100%;
+    transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: reading-progress-shine 2.8s linear infinite;
 }
 
 .reading-unread-toggle {
@@ -3799,6 +4015,57 @@ html[data-theme="light"] .mini-player-btn {
     50% {
         opacity: 1;
         transform: translateX(-50%) scale(1.06);
+    }
+}
+
+@keyframes achievement-total-glow {
+    0%,
+    100% {
+        box-shadow: 0 6px 16px rgba(120, 22, 22, 0.1);
+    }
+    50% {
+        box-shadow: 0 9px 24px rgba(180, 50, 50, 0.15);
+    }
+}
+
+@keyframes achievement-points-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.45) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes profile-avatar-in {
+    from {
+        opacity: 0;
+        transform: scale(0.82);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes reading-progress-shine {
+    0% {
+        background-position: 0% 50%;
+    }
+    100% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes tab-bar-glow {
+    0%,
+    100% {
+        box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
+    }
+    50% {
+        box-shadow: 0 12px 30px rgba(200, 60, 60, 0.14);
     }
 }
 
