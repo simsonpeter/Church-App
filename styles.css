@@ -1574,6 +1574,22 @@ button.button-link:disabled {
     font: inherit;
     padding: 0;
     cursor: pointer;
+    border-radius: 10px;
+    -webkit-tap-highlight-color: transparent;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.songbook-open-btn:focus {
+    outline: none;
+}
+
+.songbook-open-btn:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+.songbook-open-btn:hover {
+    background: rgba(198, 31, 31, 0.06);
 }
 
 .songbook-item-actions {

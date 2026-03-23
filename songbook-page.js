@@ -712,10 +712,10 @@
             return "" +
                 "<li class=\"songbook-item\">" +
                 "  <div class=\"songbook-item-row\">" +
-                "    <button type=\"button\" class=\"songbook-open-btn\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
+                "    <div class=\"songbook-open-btn\" role=\"button\" tabindex=\"0\" data-song-id=\"" + escapeHtml(song.id) + "\">" +
                 "        <h3 class=\"songbook-title-line\">" + orderPrefix + "<span>" + escapeHtml(getSongDisplayTitle(song) || song.title) + "</span></h3>" +
                 (song.author ? "        <p class=\"songbook-author\">" + escapeHtml(authorPrefix + ": " + song.author) + "</p>" : "") +
-                "    </button>" +
+                "    </div>" +
                 actionsHtml +
                 "  </div>" +
                 "</li>";
@@ -771,6 +771,25 @@
         return Promise.resolve();
     }
 
+    function openSongFromTarget(target) {
+        if (!target) {
+            return;
+        }
+        var songId = target.getAttribute("data-song-id") || "";
+        if (!songId) {
+            return;
+        }
+        var targetSong = visibleSongs.find(function (song) {
+            return song.id === songId;
+        }) || songs.find(function (song) {
+            return song.id === songId;
+        });
+        if (!targetSong) {
+            return;
+        }
+        openSongFullscreen(targetSong);
+    }
+
     if (songbookList) {
         songbookList.addEventListener("click", function (event) {
             var actionButton = event.target.closest("button.songbook-action-btn[data-song-id][data-song-action]");
@@ -782,23 +801,23 @@
                 });
                 return;
             }
-            var button = event.target.closest("button.songbook-open-btn[data-song-id]");
-            if (!button) {
+            var opener = event.target.closest(".songbook-open-btn[data-song-id]");
+            if (!opener) {
                 return;
             }
-            var songId = button.getAttribute("data-song-id") || "";
-            if (!songId) {
+            openSongFromTarget(opener);
+        });
+
+        songbookList.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") {
                 return;
             }
-            var targetSong = visibleSongs.find(function (song) {
-                return song.id === songId;
-            }) || songs.find(function (song) {
-                return song.id === songId;
-            });
-            if (!targetSong) {
+            var opener = event.target.closest(".songbook-open-btn[data-song-id]");
+            if (!opener || !songbookList.contains(opener)) {
                 return;
             }
-            openSongFullscreen(targetSong);
+            event.preventDefault();
+            openSongFromTarget(opener);
         });
     }
 
@@ -872,11 +891,20 @@
         renderSongbook();
     });
 
+    /* Firestore REST list without an API key often returns 403; fallback JSON supplies songs. */
     fetchFirestoreSongs()
         .then(function (firestoreSongs) {
-            songs = firestoreSongs;
-            loadFailed = false;
-            renderSongbook();
+            if (firestoreSongs && firestoreSongs.length) {
+                songs = firestoreSongs;
+                loadFailed = false;
+                renderSongbook();
+                return;
+            }
+            return fetchFallbackSongs().then(function (fallbackSongs) {
+                songs = fallbackSongs;
+                loadFailed = false;
+                renderSongbook();
+            });
         })
         .catch(function () {
             return fetchFallbackSongs().then(function (fallbackSongs) {

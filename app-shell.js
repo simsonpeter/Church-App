@@ -1153,8 +1153,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u2";
-    var APP_VERSION = "2026.3.25";
+    var SW_VERSION = "20260325u3";
+    var APP_VERSION = "2026.3.25a";
 
     var UPDATE_NOTES_TEXT = "Leaderboard, reading tools, profile export, admin preview, fixes.";
 
