@@ -2990,15 +2990,6 @@ body.bible-fullscreen-open .offline-badge {
         width: 38px;
         height: 38px;
     }
-
-    .bible-inline-row {
-        flex-wrap: wrap;
-    }
-
-    .bible-inline-row .bible-field:first-child {
-        flex: 1 1 100%;
-        min-width: 0;
-    }
 }
 
 .bible-card.bible-card-fullscreen .card-lang-top,
