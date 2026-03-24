@@ -665,9 +665,9 @@
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
-        "settings.fontSection": "எழுத்துரு (முன்னோட்டத்துடன்)",
-        "settings.fontSectionExpand": "திறக்க தட்டவும்",
-        "settings.fontSectionCollapse": "மூட தட்டவும்",
+        "settings.fonts": "எழுத்துருக்கள்",
+        "settings.fontsClosed": "மூடியுள்ளது",
+        "settings.fontsOpen": "திறந்துள்ளது",
         "settings.fontEnglish": "ஆங்கில உரை",
         "settings.fontTamil": "தமிழ் உரை",
         "settings.fontPreviewEn": "முன்னோட்டம் (ஆங்கிலம்)",
@@ -1277,8 +1277,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260326u2";
-    var APP_VERSION = "2026.3.26a";
+    var SW_VERSION = "20260326u3";
+    var APP_VERSION = "2026.3.26b";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
@@ -3447,52 +3447,45 @@
             { value: "system", key: "settings.fontTaSystem", fallback: "System Tamil fonts" }
         ];
 
-        var fontSection = document.createElement("div");
-        fontSection.className = "settings-font-section";
-
-        var fontHeaderBtn = document.createElement("button");
-        fontHeaderBtn.type = "button";
-        fontHeaderBtn.className = "settings-font-section-toggle";
-        fontHeaderBtn.setAttribute("aria-expanded", "false");
-        var fontHeading = document.createElement("span");
-        fontHeading.className = "settings-font-heading";
-        fontHeading.setAttribute("data-i18n", "settings.fontSection");
-        fontHeading.setAttribute("data-i18n-fallback", "Fonts (with preview)");
-        var fontChevron = document.createElement("i");
-        fontChevron.className = "fa-solid fa-chevron-down settings-font-chevron";
-        fontChevron.setAttribute("aria-hidden", "true");
-        var fontHint = document.createElement("span");
-        fontHint.className = "settings-font-toggle-hint page-note";
-        fontHint.setAttribute("data-i18n", "settings.fontSectionExpand");
-        fontHint.setAttribute("data-i18n-fallback", "Tap to open");
-        fontHeaderBtn.appendChild(fontHeading);
-        fontHeaderBtn.appendChild(fontHint);
-        fontHeaderBtn.appendChild(fontChevron);
-        fontSection.appendChild(fontHeaderBtn);
-
         var fontBody = document.createElement("div");
         fontBody.className = "settings-font-section-body";
         var fontPanelOpen = getFontPanelOpenStored();
         fontBody.hidden = !fontPanelOpen;
-        fontSection.classList.toggle("settings-font-section--open", fontPanelOpen);
-        fontHeaderBtn.setAttribute("aria-expanded", fontPanelOpen ? "true" : "false");
 
-        function syncFontPanelHint() {
-            var open = !fontBody.hidden;
-            fontHint.setAttribute("data-i18n", open ? "settings.fontSectionCollapse" : "settings.fontSectionExpand");
-            fontHint.setAttribute("data-i18n-fallback", open ? "Tap to close" : "Tap to open");
-            fontHint.textContent = t(open ? "settings.fontSectionCollapse" : "settings.fontSectionExpand", open ? "Tap to close" : "Tap to open");
+        var fontToggleBtn = document.createElement("button");
+        fontToggleBtn.type = "button";
+        fontToggleBtn.id = "settings-font-toggle-btn";
+        fontToggleBtn.className = "lang-toggle";
+        fontToggleBtn.innerHTML = "<i class=\"fa-solid fa-font\" aria-hidden=\"true\"></i>";
+        fontToggleBtn.setAttribute("aria-expanded", fontPanelOpen ? "true" : "false");
+        fontToggleBtn.setAttribute("aria-label", t("settings.fonts", "Fonts"));
+
+        function getFontPanelStateLabel() {
+            return fontBody.hidden
+                ? t("settings.fontsClosed", "Closed")
+                : t("settings.fontsOpen", "Open");
         }
-        syncFontPanelHint();
 
-        fontHeaderBtn.addEventListener("click", function () {
+        fontToggleBtn.addEventListener("click", function () {
             var next = fontBody.hidden;
             fontBody.hidden = !next;
             persistFontPanelOpen(next);
-            fontSection.classList.toggle("settings-font-section--open", next);
-            fontHeaderBtn.setAttribute("aria-expanded", next ? "true" : "false");
-            syncFontPanelHint();
+            fontToggleBtn.setAttribute("aria-expanded", next ? "true" : "false");
+            refreshSettingsItems();
         });
+
+        var fontItem = createSettingsItem(fontToggleBtn, "settings.fonts", "Fonts", getFontPanelStateLabel);
+        if (fontItem) {
+            controls.appendChild(fontItem.node);
+            items.push(fontItem);
+        }
+        document.addEventListener("njc:langchange", function () {
+            fontToggleBtn.setAttribute("aria-label", t("settings.fonts", "Fonts"));
+        });
+
+        var fontSection = document.createElement("div");
+        fontSection.className = "settings-font-section";
+        fontSection.appendChild(fontBody);
 
         function fillFontSelect(select, options, current) {
             select.innerHTML = "";
@@ -3575,9 +3568,7 @@
         prevTa.appendChild(prevTaText);
         fontBody.appendChild(prevTa);
 
-        fontSection.appendChild(fontBody);
         controls.appendChild(fontSection);
-        document.addEventListener("njc:langchange", syncFontPanelHint);
 
         if ("serviceWorker" in navigator) {
             var updateBtn = document.createElement("button");

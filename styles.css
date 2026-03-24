@@ -2435,65 +2435,8 @@ body.auth-modal-open {
     overflow: hidden;
 }
 
-.settings-font-section-toggle {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    flex-wrap: wrap;
-    padding: 12px 14px;
-    margin: 0;
-    border: 0;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    text-align: left;
-    cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-}
-
-.settings-font-section-toggle:hover {
-    background: rgba(198, 31, 31, 0.05);
-}
-
-.settings-font-section-toggle:focus {
-    outline: none;
-}
-
-.settings-font-section-toggle:focus-visible {
-    outline: 2px solid var(--primary);
-    outline-offset: -2px;
-}
-
-.settings-font-heading {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 750;
-    color: var(--text);
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.settings-font-toggle-hint {
-    margin: 0;
-    flex: 0 0 auto;
-    font-size: 0.72rem;
-}
-
-.settings-font-chevron {
-    flex: 0 0 auto;
-    font-size: 0.75rem;
-    color: var(--muted);
-    transition: transform 0.2s ease;
-}
-
-.settings-font-section--open .settings-font-chevron {
-    transform: rotate(180deg);
-}
-
 .settings-font-section-body {
-    padding: 0 14px 12px;
+    padding: 12px 14px;
     display: grid;
     gap: 10px;
 }
