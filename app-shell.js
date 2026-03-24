@@ -739,7 +739,7 @@
         "userAchievements.youLabel": "நீங்கள்",
         "userAchievements.youPinned": "நீங்கள்",
         "chat.eyebrow": "சமூகம்",
-        "chat.title": "சபை அரட்டை",
+        "chat.title": "அரட்டை",
         "chat.subtitle": "உரை செய்திகள் மட்டும் — உள்நுழைந்த உறுப்பினர்கள். அன்புடனும் மரியாதையுடனும் பேசுங்கள்.",
         "chat.loginRequired": "செய்திகளை படிக்கவும் அனுப்பவும் முதலில் உள்நுழையவும்.",
         "chat.empty": "இன்னும் செய்திகள் இல்லை. வணக்கம் சொல்லுங்கள்!",
@@ -1289,8 +1289,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260328u1";
-    var APP_VERSION = "2026.3.28a";
+    var SW_VERSION = "20260328u2";
+    var APP_VERSION = "2026.3.28b";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 

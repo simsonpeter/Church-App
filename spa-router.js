@@ -79,7 +79,7 @@
             eyebrowKey: "chat.eyebrow",
             eyebrowText: "Community",
             titleKey: "chat.title",
-            titleText: "Church chat",
+            titleText: "Chat",
             subtitleKey: "chat.subtitle",
             subtitleText: "Text only, members only"
         },

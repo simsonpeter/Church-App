@@ -4642,7 +4642,7 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     padding: 4px 0;
 }
 
-/* Church chat (members only) */
+/* Chat (members only, text) */
 .chat-messages-wrap {
     margin: 12px 0 14px;
     border: 1px solid var(--line);
