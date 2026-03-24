@@ -2808,7 +2808,8 @@ body.auth-modal-open {
     min-width: 0;
 }
 
-.bible-lang-btn {
+/* Beats `button.button-link { font: inherit }` and later `.button-link` media rules */
+button.button-link.bible-lang-btn {
     margin-top: 0 !important;
     min-width: 0;
     display: inline-flex !important;
@@ -2973,6 +2974,10 @@ body.bible-fullscreen-open .offline-badge {
     .bible-toolbar {
         align-items: stretch;
         flex-direction: column;
+    }
+
+    .bible-toolbar .bible-lang-switch {
+        align-self: flex-start;
     }
 
     .bible-utility-buttons {
@@ -4467,7 +4472,7 @@ html[data-theme="light"] .mini-player-btn {
     .list li p {
         font-size: 1.02rem;
     }
-    .button-link {
+    .button-link:not(.bible-lang-btn) {
         font-size: 1rem;
         padding: 12px 20px;
     }
