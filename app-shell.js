@@ -1167,11 +1167,6 @@
                 applyCardLanguage(card);
                 return;
             }
-            if (card.classList.contains("reading-plan-card")) {
-                getCardId(card, index);
-                applyCardLanguage(card);
-                return;
-            }
             var cardId = getCardId(card, index);
             if (card.querySelector(".card-lang-toggle")) {
                 applyCardLanguage(card);
@@ -1415,8 +1410,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330u1";
-    var APP_VERSION = "2026.3.30a";
+    var SW_VERSION = "20260330u2";
+    var APP_VERSION = "2026.3.30b";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
