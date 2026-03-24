@@ -89,6 +89,7 @@
         "home.welcomeBack": "நல்வரவு",
         "home.tagline": "உங்கள் வாராந்திர விசுவாசப் பயணம் ஒரே இடத்தில்.",
         "home.bibleReadingTitle": "இன்றைய வேத வாசிப்பு",
+        "home.readingCardLanguage": "இந்த அட்டையின் மொழியை மாற்று",
         "home.dailyVerseTitle": "இன்றைய வேத வசனம்",
         "home.dailyVerseToggleToTamil": "வசனத்தை தமிழில் காண்",
         "home.dailyVerseToggleToEnglish": "Show verse in English",
@@ -1133,12 +1134,15 @@
                 return;
             }
             var nextLanguage = choice === "ta" ? "en" : "ta";
-            button.textContent = nextLanguage.toUpperCase();
             var label = nextLanguage === "ta"
                 ? t("toggle.language.toTamil", "Switch language to Tamil")
                 : t("toggle.language.toEnglish", "Switch language to English");
             button.setAttribute("aria-label", label);
             button.title = label;
+            if (button.classList.contains("reading-inline-lang-btn")) {
+                return;
+            }
+            button.textContent = nextLanguage.toUpperCase();
         }
 
         function applyCardLanguage(card) {
@@ -1152,8 +1156,9 @@
             var choice = getCardLanguageChoice(cardId, cardLanguageMap);
             var effectiveLanguage = getCardEffectiveLanguage(cardId, cardLanguageMap);
             applyTranslations(card, effectiveLanguage);
-            var toggle = card.querySelector(".card-lang-toggle");
-            refreshCardToggleUi(toggle, choice);
+            card.querySelectorAll(".card-lang-toggle, .reading-inline-lang-btn").forEach(function (toggle) {
+                refreshCardToggleUi(toggle, choice);
+            });
         }
 
         function buildCardSwitcher(card, index) {
@@ -1161,6 +1166,11 @@
                 return;
             }
             if (card.querySelector("#daily-verse-language-toggle")) {
+                applyCardLanguage(card);
+                return;
+            }
+            if (card.classList.contains("reading-plan-card")) {
+                getCardId(card, index);
                 applyCardLanguage(card);
                 return;
             }
@@ -1216,13 +1226,50 @@
         refreshAllCardLanguages();
         document.addEventListener("njc:langchange", function () {
             cards.forEach(function (card) {
-                var toggle = card.querySelector(".card-lang-toggle");
-                if (toggle) {
-                    var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
-                    refreshCardToggleUi(toggle, getCardLanguageChoice(cardId, cardLanguageMap));
+                var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
+                if (!cardId) {
+                    return;
                 }
+                var ch = getCardLanguageChoice(cardId, cardLanguageMap);
+                card.querySelectorAll(".card-lang-toggle, .reading-inline-lang-btn").forEach(function (toggle) {
+                    refreshCardToggleUi(toggle, ch);
+                });
             });
             refreshAllCardLanguages();
+        });
+
+        document.addEventListener("njc:reading-plan-rendered", function () {
+            var card = document.querySelector(".card.reading-plan-card");
+            if (card) {
+                applyCardLanguage(card);
+            }
+        });
+
+        document.body.addEventListener("click", function (ev) {
+            var btn = ev.target.closest(".reading-inline-lang-btn");
+            if (!btn || !document.documentElement.contains(btn)) {
+                return;
+            }
+            var card = btn.closest(".card.reading-plan-card");
+            if (!card) {
+                return;
+            }
+            var cardId = String(card.getAttribute("data-card-lang-id") || "").trim();
+            if (!cardId) {
+                return;
+            }
+            ev.preventDefault();
+            var current = getCardLanguageChoice(cardId, cardLanguageMap);
+            var nextChoice = current === "ta" ? "en" : "ta";
+            cardLanguageMap[cardId] = nextChoice;
+            cardLanguageMap = saveCardLanguageMap(cardLanguageMap) || cardLanguageMap;
+            applyCardLanguage(card);
+            document.dispatchEvent(new CustomEvent("njc:cardlangchange", {
+                detail: {
+                    cardId: cardId,
+                    language: nextChoice
+                }
+            }));
         });
     }
 
@@ -1306,8 +1353,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329u3";
-    var APP_VERSION = "2026.3.29c";
+    var SW_VERSION = "20260329u4";
+    var APP_VERSION = "2026.3.29d";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
