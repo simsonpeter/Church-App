@@ -121,7 +121,8 @@
                 { label: "Bible", v: "#bible" },
                 { label: "Songbook", v: "#songbook" },
                 { label: "Profile", v: "#profile" },
-                { label: "User achievements", v: "#user-achievements" }
+                { label: "User achievements", v: "#user-achievements" },
+                { label: "Chat", v: "#chat" }
             ];
             var overlay = document.createElement("div");
             overlay.id = "admin-link-presets-overlay";

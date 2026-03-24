@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260326u3">
+    <link rel="stylesheet" href="styles.css?v=20260327u2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -543,6 +543,27 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="chat">
+            <main class="app-content">
+            <section class="card chat-page-card">
+                <h2><i class="fa-solid fa-comments"></i><span data-i18n="chat.title">Church chat</span></h2>
+                <p class="page-note" data-i18n="chat.subtitle">For signed-in members. Be kind and respectful.</p>
+                <p class="page-note" id="chat-status" aria-live="polite" hidden></p>
+                <div class="chat-messages-wrap">
+                    <div class="chat-messages" id="chat-messages" aria-live="polite"></div>
+                </div>
+                <form id="chat-form" class="chat-form" hidden>
+                    <input type="file" id="chat-image-input" accept="image/*" class="chat-image-input" hidden>
+                    <button type="button" class="button-link button-secondary chat-image-btn" id="chat-image-btn" aria-label="Attach photo" data-i18n-aria-label="chat.attachPhoto">
+                        <i class="fa-solid fa-image" aria-hidden="true"></i>
+                    </button>
+                    <input type="text" id="chat-input" class="search-input chat-input" maxlength="4000" autocomplete="off" placeholder="Type a message…" data-i18n-placeholder="chat.inputPlaceholder">
+                    <button type="submit" class="button-link" id="chat-send" data-i18n="chat.send">Send</button>
+                </form>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="profile">
             <main class="app-content">
             <section class="card profile-card">
@@ -1031,8 +1052,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260324u3"></script>
-    <script src="app-shell.js?v=20260326u3"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
+    <script src="user-auth.js?v=20260327u2"></script>
+    <script src="app-shell.js?v=20260327u2"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260325u1"></script>
     <script src="events-page.js?v=20260318de"></script>
@@ -1042,10 +1064,11 @@
     <script src="contact-page.js?v=20260318de"></script>
     <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260325u1"></script>
-    <script src="admin-extras.js?v=20260325u1"></script>
+    <script src="admin-extras.js?v=20260327u2"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260325u1"></script>
-    <script src="spa-router.js?v=20260324u4"></script>
+    <script src="chat-page.js?v=20260327u2"></script>
+    <script src="spa-router.js?v=20260327u2"></script>
     <script src="user-achievements-page.js?v=20260325u1"></script>
 </body>
 </html>

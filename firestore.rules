@@ -5,12 +5,14 @@ rules_version = '2';
 //   users/{uid}/profile/basic  — profile + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
+//   chatMessages/{msgId} — church group chat (signed-in only)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
 // for THIS Firebase project yet. Fix:
 //   1) Firebase console → Firestore Database → Rules (not Version history)
 //   2) Ensure the userAchievementScores block below is present, then Publish.
 //   3) Or from repo: firebase deploy --only firestore:rules
+//   chat_uploads/{uid}/... in Storage — deploy: firebase deploy --only storage
 // If you already have other match rules in production, ADD this block; do not delete
 // your existing matches unless you intend to replace the whole file with this one.
 
@@ -42,6 +44,27 @@ service cloud.firestore {
     match /userAchievementScores/{userId} {
       allow read: if true;
       allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /chatMessages/{messageId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+        && request.resource.data.senderUid == request.auth.uid
+        && request.resource.data.senderName is string
+        && request.resource.data.senderName.size() > 0
+        && request.resource.data.senderName.size() < 200
+        && request.resource.data.createdAt is timestamp
+        && (
+          (request.resource.data.type == "text"
+            && request.resource.data.text is string
+            && request.resource.data.text.size() > 0
+            && request.resource.data.text.size() < 5000)
+          || (request.resource.data.type == "image"
+            && request.resource.data.imageUrl is string
+            && request.resource.data.imageUrl.size() > 0
+            && request.resource.data.imageUrl.size() < 2100)
+        );
+      allow update, delete: if false;
     }
   }
 }

@@ -43,6 +43,7 @@
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.trivia": "வேத வினாடி",
         "menu.userAchievements": "பயனர் சாதனைகள்",
+        "menu.chat": "அரட்டை",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -737,6 +738,22 @@
         "userAchievements.groupSummary": "உங்கள் குழு \"{tag}\": {count} பேர் · மொத்தம் {pts} புள்ளிகள்",
         "userAchievements.youLabel": "நீங்கள்",
         "userAchievements.youPinned": "நீங்கள்",
+        "chat.eyebrow": "சமூகம்",
+        "chat.title": "சபை அரட்டை",
+        "chat.subtitle": "உள்நுழைந்த உறுப்பினர்கள் மட்டும். அன்புடனும் மரியாதையுடனும் பேசுங்கள்.",
+        "chat.loginRequired": "செய்திகளை படிக்கவும் அனுப்பவும் முதலில் உள்நுழையவும்.",
+        "chat.empty": "இன்னும் செய்திகள் இல்லை. வணக்கம் சொல்லுங்கள்!",
+        "chat.inputPlaceholder": "செய்தியை தட்டச்சு செய்யவும்…",
+        "chat.send": "அனுப்பு",
+        "chat.attachPhoto": "புகைப்படத்தை இணை",
+        "chat.loadError": "செய்திகளை ஏற்ற முடியவில்லை. Firestore விதிகளை சரிபார்க்கவும்.",
+        "chat.sendFailed": "அனுப்ப முடியவில்லை. இணைப்பு மற்றும் விதிகளை சரிபார்க்கவும்.",
+        "chat.notImage": "படக் கோப்பை தேர்ந்தெடுக்கவும்.",
+        "chat.imageTooBig": "படம் 4 MB க்குள் இருக்க வேண்டும்.",
+        "chat.storageUnavailable": "புகைப்பட பதிவேற்றம் கிடைக்கவில்லை.",
+        "chat.uploading": "பதிவேற்றுகிறது…",
+        "chat.uploadFailed": "பதிவேற்றம் தோல்வி. Storage விதிகளை சரிபார்க்கவும்.",
+        "chat.textTooLong": "செய்தி மிக நீளமாக உள்ளது.",
         "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
         "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
         "profile.leaderboardAnonymous": "பொது பட்டியலில் \"Anonymous\" என காட்டு",
@@ -1277,8 +1294,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260326u3";
-    var APP_VERSION = "2026.3.26b";
+    var SW_VERSION = "20260327u2";
+    var APP_VERSION = "2026.3.27b";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
@@ -2762,6 +2779,12 @@
         achievementsLink.innerHTML = "<i class=\"fa-solid fa-trophy\"></i><span></span>";
         bibleSongLinksContainer.appendChild(achievementsLink);
 
+        var chatLink = document.createElement("a");
+        chatLink.className = "header-menu-link";
+        chatLink.href = "#chat";
+        chatLink.innerHTML = "<i class=\"fa-solid fa-comments\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(chatLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         menuScroll.appendChild(utilityCard);
@@ -2964,6 +2987,7 @@
             var songbookLabel = t("menu.songbook", "Songbook");
             var triviaLabel = t("menu.trivia", "Trivia");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
+            var chatLabel = t("menu.chat", "Chat");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -3022,6 +3046,10 @@
             if (achievementsNode) {
                 achievementsNode.textContent = achievementsLabel;
             }
+            var chatNode = chatLink.querySelector("span");
+            if (chatNode) {
+                chatNode.textContent = chatLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -3053,6 +3081,7 @@
             var isSongbook = getCurrentRoute() === "songbook";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
+            var isChat = getCurrentRoute() === "chat";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
@@ -3061,6 +3090,7 @@
             songbookLink.classList.toggle("active", isSongbook);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
+            chatLink.classList.toggle("active", isChat);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);

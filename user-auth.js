@@ -514,6 +514,9 @@
             }
             auth = window.firebase.auth();
             db = window.firebase.firestore();
+            if (typeof window.firebase.storage === "function") {
+                window.firebase.storage();
+            }
             return true;
         } catch (err) {
             return false;

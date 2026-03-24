@@ -74,6 +74,15 @@
             subtitleKey: "userAchievements.subtitle",
             subtitleText: "Trivia and Bible reading points"
         },
+        chat: {
+            icon: "fa-comments",
+            eyebrowKey: "chat.eyebrow",
+            eyebrowText: "Community",
+            titleKey: "chat.title",
+            titleText: "Church chat",
+            subtitleKey: "chat.subtitle",
+            subtitleText: "Members only"
+        },
         contact: {
             icon: "fa-phone",
             eyebrowKey: "contact.eyebrow",
