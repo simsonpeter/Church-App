@@ -84,6 +84,10 @@
     var streamQueue = [];
     var streamQueueIndex = 0;
     var streamErrorCount = 0;
+    var speechSynthSegments = [];
+    var speechSynthSegmentIndex = 0;
+    var speechSynthPendingTimerId = null;
+    var speechSynthUserPaused = false;
     var prefetchedSegmentIndex = -1;
     var prefetchedSegmentUrl = "";
     var shareImageBusy = false;
@@ -335,8 +339,11 @@
                     return;
                 }
                 var synth = getSpeechSynthesisApi();
-                if (speechState.mode === "speech" && synth && synth.speaking && !synth.paused) {
-                    synth.pause();
+                if (speechState.mode === "speech" && synth) {
+                    speechSynthUserPaused = true;
+                    if (synth.speaking && !synth.paused) {
+                        synth.pause();
+                    }
                     speechState.paused = true;
                     releaseWakeLock();
                     updateTtsControls();
@@ -382,7 +389,7 @@
                 }
                 streamErrorCount += 1;
                 if (streamErrorCount <= 1) {
-                    startSpeechSynthesisPlayback();
+                    startSpeechSynthesisPlaybackQueued();
                     return;
                 }
                 stopSpeechPlayback();
@@ -448,6 +455,13 @@
         streamErrorCount = 0;
         prefetchedSegmentIndex = -1;
         prefetchedSegmentUrl = "";
+        speechSynthSegments = [];
+        speechSynthSegmentIndex = 0;
+        speechSynthUserPaused = false;
+        if (speechSynthPendingTimerId !== null) {
+            window.clearTimeout(speechSynthPendingTimerId);
+            speechSynthPendingTimerId = null;
+        }
         speechState.mode = "stream";
         speechState.active = true;
         speechState.paused = false;
@@ -513,7 +527,7 @@
             }
             streamErrorCount += 1;
             if (streamErrorCount <= 1) {
-                startSpeechSynthesisPlayback();
+                startSpeechSynthesisPlaybackQueued();
                 return;
             }
             stopSpeechPlayback();
@@ -1000,42 +1014,66 @@
         streamErrorCount = 0;
         prefetchedSegmentIndex = -1;
         prefetchedSegmentUrl = "";
+        speechSynthSegments = [];
+        speechSynthSegmentIndex = 0;
+        speechSynthUserPaused = false;
+        if (speechSynthPendingTimerId !== null) {
+            window.clearTimeout(speechSynthPendingTimerId);
+            speechSynthPendingTimerId = null;
+        }
         updateTtsControls();
         syncMediaSessionState();
     }
 
-    function startSpeechSynthesisPlayback() {
-        if (!speechSupported) {
-            updateTtsControls();
+    function clearStreamAudioOnly() {
+        if (!streamAudio) {
             return;
         }
+        var wasStreamMode = speechState.mode === "stream";
+        if (wasStreamMode) {
+            speechState.mode = "none";
+        }
+        streamAudio.pause();
+        streamAudio.removeAttribute("src");
+        streamAudio.load();
+        if (streamPrefetchAudio) {
+            streamPrefetchAudio.pause();
+            streamPrefetchAudio.removeAttribute("src");
+            streamPrefetchAudio.load();
+        }
+        prefetchedSegmentIndex = -1;
+        prefetchedSegmentUrl = "";
+    }
+
+    function speakNextSpeechSynthSegment() {
         var synth = getSpeechSynthesisApi();
-        if (!synth || !currentSpeechText) {
-            updateTtsControls();
+        if (!synth || speechState.mode !== "speech") {
             return;
         }
-        if (streamAudio) {
-            var wasStreamMode = speechState.mode === "stream";
-            if (wasStreamMode) {
-                speechState.mode = "none";
-            }
-            streamAudio.pause();
-            streamAudio.removeAttribute("src");
-            streamAudio.load();
-            if (streamPrefetchAudio) {
-                streamPrefetchAudio.pause();
-                streamPrefetchAudio.removeAttribute("src");
-                streamPrefetchAudio.load();
-            }
-            prefetchedSegmentIndex = -1;
-            prefetchedSegmentUrl = "";
-            if (wasStreamMode) {
-                speechState.mode = "stream";
-            }
+        if (speechSynthUserPaused) {
+            return;
         }
-        synth.cancel();
-        var utterance = new SpeechSynthesisUtterance(currentSpeechText);
-        var activeLanguage = normalizeLanguage(state.language);
+        if (speechSynthSegmentIndex >= speechSynthSegments.length) {
+            releaseWakeLock();
+            speakingUtterance = null;
+            speechState.active = false;
+            speechState.paused = false;
+            speechState.mode = "none";
+            speechSynthSegments = [];
+            speechSynthSegmentIndex = 0;
+            speechSynthUserPaused = false;
+            updateTtsControls();
+            syncMediaSessionState();
+            return;
+        }
+        var text = String(speechSynthSegments[speechSynthSegmentIndex] || "").trim();
+        if (!text) {
+            speechSynthSegmentIndex += 1;
+            speakNextSpeechSynthSegment();
+            return;
+        }
+        var utterance = new SpeechSynthesisUtterance(text);
+        var activeLanguage = normalizeLanguage(currentSpeechContext.language);
         utterance.lang = activeLanguage === "ta" ? "ta-IN" : "en-GB";
         utterance.rate = activeLanguage === "ta" ? 0.9 : 0.95;
         utterance.pitch = 1;
@@ -1047,34 +1085,85 @@
             if (speakingUtterance !== utterance) {
                 return;
             }
-            releaseWakeLock();
+            if (speechSynthUserPaused) {
+                return;
+            }
+            speechSynthSegmentIndex += 1;
             speakingUtterance = null;
-            speechState.active = false;
-            speechState.paused = false;
-            speechState.mode = "none";
-            updateTtsControls();
-            syncMediaSessionState();
+            if (speechSynthPendingTimerId !== null) {
+                window.clearTimeout(speechSynthPendingTimerId);
+            }
+            speechSynthPendingTimerId = window.setTimeout(function () {
+                speechSynthPendingTimerId = null;
+                speakNextSpeechSynthSegment();
+            }, 0);
         };
         utterance.onerror = function () {
             if (speakingUtterance !== utterance) {
                 return;
             }
-            releaseWakeLock();
+            if (speechSynthUserPaused) {
+                return;
+            }
+            speechSynthSegmentIndex += 1;
             speakingUtterance = null;
-            speechState.active = false;
-            speechState.paused = false;
-            speechState.mode = "none";
-            updateTtsControls();
-            syncMediaSessionState();
+            if (speechSynthPendingTimerId !== null) {
+                window.clearTimeout(speechSynthPendingTimerId);
+            }
+            speechSynthPendingTimerId = window.setTimeout(function () {
+                speechSynthPendingTimerId = null;
+                speakNextSpeechSynthSegment();
+            }, 0);
         };
         speakingUtterance = utterance;
+        synth.speak(utterance);
+    }
+
+    function startSpeechSynthesisPlaybackQueued() {
+        if (!speechSupported) {
+            updateTtsControls();
+            return false;
+        }
+        var synth = getSpeechSynthesisApi();
+        if (!synth) {
+            updateTtsControls();
+            return false;
+        }
+        var verses = Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses : [];
+        if (!verses.length) {
+            updateTtsControls();
+            return false;
+        }
+        var startVerse = getSelectedVerseStart(verses.length);
+        currentSpeechStartVerse = startVerse;
+        var segments = buildChapterSpeechSegments(
+            normalizeLanguage(currentSpeechContext.language),
+            currentSpeechContext.location || { book: 0, chapter: 0 },
+            verses,
+            startVerse
+        );
+        if (!segments.length) {
+            updateTtsControls();
+            return false;
+        }
+        clearStreamAudioOnly();
+        synth.cancel();
+        if (speechSynthPendingTimerId !== null) {
+            window.clearTimeout(speechSynthPendingTimerId);
+            speechSynthPendingTimerId = null;
+        }
+        speechSynthSegments = segments;
+        speechSynthSegmentIndex = 0;
+        speechSynthUserPaused = false;
+        speakingUtterance = null;
         speechState.mode = "speech";
         speechState.active = true;
         speechState.paused = false;
         updateTtsControls();
         syncMediaSessionState();
         requestWakeLock();
-        synth.speak(utterance);
+        speakNextSpeechSynthSegment();
+        return true;
     }
 
     function startSpeechPlayback() {
@@ -1083,10 +1172,13 @@
             updateTtsControls();
             return;
         }
+        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
+            return;
+        }
         if (streamSupported && startStreamPlayback()) {
             return;
         }
-        startSpeechSynthesisPlayback();
+        updateTtsControls();
     }
 
     function toggleSpeechPlayback() {
@@ -1131,25 +1223,40 @@
             startSpeechPlayback();
             return;
         }
-        if (speechState.active && synth.speaking && !synth.paused) {
-            synth.pause();
+        if (speechState.mode === "speech" && speechState.active && !speechState.paused) {
+            if (synth.speaking && !synth.paused) {
+                synth.pause();
+                speechSynthUserPaused = true;
+                speechState.paused = true;
+                releaseWakeLock();
+                updateTtsControls();
+                syncMediaSessionState();
+                return;
+            }
+            speechSynthUserPaused = true;
             speechState.paused = true;
             releaseWakeLock();
             updateTtsControls();
             syncMediaSessionState();
             return;
         }
-        if (speechState.active && synth.paused) {
+        if (speechState.mode === "speech" && speechState.active && speechState.paused) {
             var currentVerseChoiceSpeech = getSelectedVerseStart(
                 Array.isArray(currentSpeechContext.verses) ? currentSpeechContext.verses.length : 1
             );
             if (currentVerseChoiceSpeech !== currentSpeechStartVerse) {
+                speechSynthUserPaused = false;
                 startSpeechPlayback();
                 return;
             }
-            synth.resume();
+            speechSynthUserPaused = false;
             speechState.paused = false;
             requestWakeLock();
+            if (synth.paused) {
+                synth.resume();
+            } else {
+                speakNextSpeechSynthSegment();
+            }
             updateTtsControls();
             syncMediaSessionState();
             return;

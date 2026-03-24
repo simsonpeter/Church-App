@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v149";
-const RUNTIME_CACHE = "njc-runtime-cache-v149";
+const APP_CACHE = "njc-app-cache-v150";
+const RUNTIME_CACHE = "njc-runtime-cache-v150";
 
 const CORE_ASSETS = [
     "./",
@@ -11,7 +11,7 @@ const CORE_ASSETS = [
     "./home-page.js?v=20260325u1",
     "./events-page.js?v=20260318de",
     "./sermons-page.js?v=20260323t1",
-    "./bible-page.js?v=20260318de",
+    "./bible-page.js?v=20260328u3",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260318de",
     "./admin-trivia.js?v=20260320tr3",
