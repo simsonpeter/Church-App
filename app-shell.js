@@ -1306,10 +1306,14 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329u2";
-    var APP_VERSION = "2026.3.29b";
+    var SW_VERSION = "20260329u3";
+    var APP_VERSION = "2026.3.29c";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
+
+    var UPDATE_DISMISS_SCRIPT_KEY = "njc_update_dismissed_sw_script_v1";
+    var lastVisibilitySwUpdateAt = 0;
+    var VISIBILITY_SW_UPDATE_MIN_MS = 10 * 60 * 1000;
 
     function getUpdateSnoozeUntilMs() {
         try {
@@ -1323,6 +1327,61 @@
 
     function isUpdateSnoozeActive() {
         return Date.now() < getUpdateSnoozeUntilMs();
+    }
+
+    function getWaitingScriptUrl(registration) {
+        if (!registration || !registration.waiting) {
+            return "";
+        }
+        try {
+            return String(registration.waiting.scriptURL || "");
+        } catch (e1) {
+            return "";
+        }
+    }
+
+    function isUpdateDismissedForThisWaitingWorker(registration) {
+        var url = getWaitingScriptUrl(registration);
+        if (!url) {
+            return false;
+        }
+        try {
+            return window.localStorage.getItem(UPDATE_DISMISS_SCRIPT_KEY) === url;
+        } catch (e2) {
+            return false;
+        }
+    }
+
+    function rememberUpdateDismissedForWaitingWorker(registration) {
+        var url = getWaitingScriptUrl(registration);
+        if (!url) {
+            return;
+        }
+        try {
+            window.localStorage.setItem(UPDATE_DISMISS_SCRIPT_KEY, url);
+        } catch (e3) {}
+    }
+
+    function clearStoredUpdateDismissIfIdle(registration) {
+        if (registration && registration.waiting) {
+            return;
+        }
+        try {
+            window.localStorage.removeItem(UPDATE_DISMISS_SCRIPT_KEY);
+        } catch (e4) {}
+    }
+
+    function tryShowUpdateModal(registration) {
+        if (!registration || !registration.waiting) {
+            return;
+        }
+        if (isUpdateSnoozeActive()) {
+            return;
+        }
+        if (isUpdateDismissedForThisWaitingWorker(registration)) {
+            return;
+        }
+        showUpdateModal(registration);
     }
 
     function setupOfflineBanner() {
@@ -1343,18 +1402,17 @@
             return;
         }
         navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
+            clearStoredUpdateDismissIfIdle(registration);
             registration.update();
-            if (registration.waiting && !isUpdateSnoozeActive()) {
-                showUpdateModal(registration);
-            }
+            tryShowUpdateModal(registration);
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
                 if (!worker) {
                     return;
                 }
                 worker.addEventListener("statechange", function () {
-                    if (worker.state === "installed" && navigator.serviceWorker.controller && !isUpdateSnoozeActive()) {
-                        showUpdateModal(registration);
+                    if (worker.state === "installed" && navigator.serviceWorker.controller) {
+                        tryShowUpdateModal(registration);
                     }
                 });
             });
@@ -1363,15 +1421,24 @@
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
             hideUpdateModal();
+            navigator.serviceWorker.getRegistration().then(function (r) {
+                clearStoredUpdateDismissIfIdle(r);
+            });
         });
         document.addEventListener("visibilitychange", function () {
-            if (document.visibilityState === "visible") {
-                navigator.serviceWorker.getRegistration().then(function (r) {
-                    if (r) {
-                        r.update();
-                    }
-                });
+            if (document.visibilityState !== "visible") {
+                return;
             }
+            var now = Date.now();
+            if (now - lastVisibilitySwUpdateAt < VISIBILITY_SW_UPDATE_MIN_MS) {
+                return;
+            }
+            lastVisibilitySwUpdateAt = now;
+            navigator.serviceWorker.getRegistration().then(function (r) {
+                if (r) {
+                    r.update();
+                }
+            });
         });
     }
 
@@ -1394,14 +1461,10 @@
         if (!overlay || !confirmBtn || !dismissBtn) {
             return;
         }
-        try {
-            if (window.sessionStorage.getItem("njc_update_prompt_dismissed") === "1") {
-                return;
-            }
-        } catch (ignore) {
-            /* sessionStorage unavailable */
-        }
         if (isUpdateSnoozeActive()) {
+            return;
+        }
+        if (isUpdateDismissedForThisWaitingWorker(registration)) {
             return;
         }
         if (!overlay.hidden) {
@@ -1430,11 +1493,7 @@
         }
 
         function dismiss() {
-            try {
-                window.sessionStorage.setItem("njc_update_prompt_dismissed", "1");
-            } catch (err) {
-                return null;
-            }
+            rememberUpdateDismissedForWaitingWorker(registration);
             hideUpdateModal();
         }
 
@@ -1444,6 +1503,7 @@
             } catch (e1) {
                 return null;
             }
+            rememberUpdateDismissedForWaitingWorker(registration);
             hideUpdateModal();
         }
 
