@@ -1411,10 +1411,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u2";
-    var APP_VERSION = "2026.3.30e";
-
-    var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
+    var SW_VERSION = "20260324u3";
+    var APP_VERSION = "2026.3.24";
+    /** Short release note; modal also shows SW_VERSION so text changes every build. */
+    var UPDATE_NOTES_SUMMARY = "Bible reader layout and language controls, PWA cache updates.";
 
     var UPDATE_DISMISS_SCRIPT_KEY = "njc_update_dismissed_sw_script_v1";
     var lastVisibilitySwUpdateAt = 0;
@@ -1582,7 +1582,7 @@
             var prefix = (window.NjcI18n && typeof window.NjcI18n.t === "function")
                 ? window.NjcI18n.t("app.updateNotesPrefix", "What's new:")
                 : "What's new:";
-            notesEl.textContent = prefix + " " + UPDATE_NOTES_TEXT;
+            notesEl.textContent = prefix + " " + UPDATE_NOTES_SUMMARY + " (" + SW_VERSION + ")";
             notesEl.hidden = false;
         }
 
