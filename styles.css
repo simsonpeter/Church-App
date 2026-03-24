@@ -1,4 +1,6 @@
 :root {
+    --font-stack-en: "Inter", "Segoe UI", system-ui, sans-serif;
+    --font-stack-ta: "Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif;
     color-scheme: light dark;
     --bg-top: #ffe3e3;
     --bg-mid: #fff1f1;
@@ -34,9 +36,17 @@ html[data-larger-text="1"] .app-header h1 {
     font-size: 1.15em;
 }
 
+html[lang="en"] {
+    font-family: var(--font-stack-en);
+}
+
+html[lang="ta"] {
+    font-family: var(--font-stack-ta);
+}
+
 body {
     min-height: 100vh;
-    font-family: "Inter", "Segoe UI", Arial, sans-serif;
+    font-family: inherit;
     color: var(--text);
     background: radial-gradient(circle at top right, var(--bg-top), var(--bg-mid) 45%, var(--bg-bottom) 100%);
     background-size: 145% 145%;
@@ -2415,6 +2425,65 @@ body.auth-modal-open {
 
 .settings-controls .settings-update-btn:hover {
     background: var(--primary-soft);
+}
+
+.settings-font-section {
+    margin-top: 4px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface-soft);
+    display: grid;
+    gap: 10px;
+}
+
+.settings-font-heading {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 750;
+    color: var(--text);
+}
+
+.settings-font-row {
+    display: grid;
+    gap: 6px;
+}
+
+.settings-font-label {
+    font-size: 0.82rem;
+    font-weight: 650;
+    color: var(--muted);
+}
+
+.settings-font-select {
+    width: 100%;
+    max-width: 100%;
+}
+
+.settings-font-preview-block {
+    margin-top: 4px;
+}
+
+.settings-font-preview-caption {
+    margin: 0 0 4px;
+}
+
+.settings-font-preview-sample {
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    font-size: 1rem;
+    line-height: 1.45;
+}
+
+.settings-font-preview-en {
+    font-family: var(--font-stack-en);
+}
+
+.settings-font-preview-ta {
+    font-family: var(--font-stack-ta);
 }
 
 .profile-card-top {

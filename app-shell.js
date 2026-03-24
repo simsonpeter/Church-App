@@ -4,6 +4,8 @@
     var SPLASH_KEY = "njc_splash_seen_v1";
     var THEME_KEY = "njc_theme_v1";
     var LANGUAGE_KEY = "njc_language_v1";
+    var FONT_EN_KEY = "njc_font_preset_en_v1";
+    var FONT_TA_KEY = "njc_font_preset_ta_v1";
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var CARD_LANGUAGE_MAP_KEY = "njc_card_language_map_v1";
@@ -662,6 +664,22 @@
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
+        "settings.fontSection": "எழுத்துரு (முன்னோட்டத்துடன்)",
+        "settings.fontEnglish": "ஆங்கில உரை",
+        "settings.fontTamil": "தமிழ் உரை",
+        "settings.fontPreviewEn": "முன்னோட்டம் (ஆங்கிலம்)",
+        "settings.fontPreviewTa": "முன்னோட்டம் (தமிழ்)",
+        "settings.fontEnInter": "Inter (இயல்புநிலை)",
+        "settings.fontEnDmSans": "DM Sans",
+        "settings.fontEnSourceSans": "Source Sans 3",
+        "settings.fontEnOpenSans": "Open Sans",
+        "settings.fontEnLato": "Lato",
+        "settings.fontEnSystem": "கணினி / சாதன எழுத்துரு",
+        "settings.fontTaNoto": "Noto Sans Tamil (இயல்புநிலை)",
+        "settings.fontTaMuktaMalar": "Mukta Malar",
+        "settings.fontTaHindMadurai": "Hind Madurai",
+        "settings.fontTaCatamaran": "Catamaran",
+        "settings.fontTaSystem": "கணினி தமிழ் எழுத்துரு",
         "profile.eyebrow": "சுயவிவரம்",
         "profile.title": "உங்கள் சுயவிவரம்",
         "profile.info": "உங்கள் விவரங்களை புதுப்பிக்கவும்.",
@@ -803,6 +821,95 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    var FONT_PRESETS_EN = {
+        inter: { stack: '"Inter", "Segoe UI", system-ui, sans-serif', googleFamily: "Inter:wght@400;600;700" },
+        dm: { stack: '"DM Sans", system-ui, sans-serif', googleFamily: "DM Sans:wght@400;600;700" },
+        source: { stack: '"Source Sans 3", "Segoe UI", system-ui, sans-serif', googleFamily: "Source Sans 3:wght@400;600;700" },
+        open: { stack: '"Open Sans", "Segoe UI", system-ui, sans-serif', googleFamily: "Open Sans:wght@400;600;700" },
+        lato: { stack: '"Lato", "Segoe UI", system-ui, sans-serif', googleFamily: "Lato:wght@400;700" },
+        system: { stack: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', googleFamily: "" }
+    };
+
+    var FONT_PRESETS_TA = {
+        noto: { stack: '"Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif', googleFamily: "Noto Sans Tamil:wght@400;600;700" },
+        mukta: { stack: '"Mukta Malar", "Noto Sans Tamil", "Latha", sans-serif', googleFamily: "Mukta Malar:wght@400;600;700" },
+        hind: { stack: '"Hind Madurai", "Noto Sans Tamil", sans-serif', googleFamily: "Hind Madurai:wght@400;600;700" },
+        catamaran: { stack: '"Catamaran", "Noto Sans Tamil", sans-serif', googleFamily: "Catamaran:wght@400;600;700" },
+        system: { stack: '"Latha", "Nirmala UI", "Tamil Sangam MN", "Noto Sans Tamil", system-ui, sans-serif', googleFamily: "" }
+    };
+
+    var loadedGoogleFontIds = {};
+
+    function normalizeFontPreset(map, key, fallbackKey) {
+        var k = String(key || "").trim().toLowerCase();
+        if (map[k]) {
+            return k;
+        }
+        return fallbackKey;
+    }
+
+    function getStoredFontEn() {
+        try {
+            var raw = String(window.localStorage.getItem(FONT_EN_KEY) || "").trim().toLowerCase();
+            if (FONT_PRESETS_EN[raw]) {
+                return raw;
+            }
+        } catch (e) {}
+        return "inter";
+    }
+
+    function getStoredFontTa() {
+        try {
+            var raw = String(window.localStorage.getItem(FONT_TA_KEY) || "").trim().toLowerCase();
+            if (FONT_PRESETS_TA[raw]) {
+                return raw;
+            }
+        } catch (e) {}
+        return "noto";
+    }
+
+    function persistFontEn(key) {
+        try {
+            window.localStorage.setItem(FONT_EN_KEY, key);
+        } catch (e) {}
+    }
+
+    function persistFontTa(key) {
+        try {
+            window.localStorage.setItem(FONT_TA_KEY, key);
+        } catch (e) {}
+    }
+
+    function loadGoogleFontFamilies(familyParams) {
+        var list = (familyParams || []).filter(Boolean);
+        if (!list.length) {
+            return;
+        }
+        var idKey = list.join("|");
+        if (loadedGoogleFontIds[idKey]) {
+            return;
+        }
+        var qs = list.map(function (p) {
+            return "family=" + String(p).replace(/ /g, "+");
+        }).join("&");
+        var href = "https://fonts.googleapis.com/css2?" + qs + "&display=swap";
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.setAttribute("data-njc-fonts", "1");
+        document.head.appendChild(link);
+        loadedGoogleFontIds[idKey] = true;
+    }
+
+    function applyFontVariables(enKey, taKey) {
+        var en = FONT_PRESETS_EN[enKey] || FONT_PRESETS_EN.inter;
+        var ta = FONT_PRESETS_TA[taKey] || FONT_PRESETS_TA.noto;
+        var root = document.documentElement;
+        root.style.setProperty("--font-stack-en", en.stack);
+        root.style.setProperty("--font-stack-ta", ta.stack);
+        loadGoogleFontFamilies([en.googleFamily, ta.googleFamily].filter(Boolean));
     }
 
     function translateCountText(template, count) {
@@ -1153,10 +1260,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u6";
-    var APP_VERSION = "2026.3.25d";
+    var SW_VERSION = "20260326u1";
+    var APP_VERSION = "2026.3.26";
 
-    var UPDATE_NOTES_TEXT = "Songbook loads from Firestore via Firebase SDK (your cloud songs).";
+    var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
     function getUpdateSnoozeUntilMs() {
         try {
@@ -3307,6 +3414,113 @@
         }
         setLargerText(getLargerText());
 
+        var EN_FONT_OPTIONS = [
+            { value: "inter", key: "settings.fontEnInter", fallback: "Inter (default)" },
+            { value: "dm", key: "settings.fontEnDmSans", fallback: "DM Sans" },
+            { value: "source", key: "settings.fontEnSourceSans", fallback: "Source Sans 3" },
+            { value: "open", key: "settings.fontEnOpenSans", fallback: "Open Sans" },
+            { value: "lato", key: "settings.fontEnLato", fallback: "Lato" },
+            { value: "system", key: "settings.fontEnSystem", fallback: "System / device font" }
+        ];
+        var TA_FONT_OPTIONS = [
+            { value: "noto", key: "settings.fontTaNoto", fallback: "Noto Sans Tamil (default)" },
+            { value: "mukta", key: "settings.fontTaMuktaMalar", fallback: "Mukta Malar" },
+            { value: "hind", key: "settings.fontTaHindMadurai", fallback: "Hind Madurai" },
+            { value: "catamaran", key: "settings.fontTaCatamaran", fallback: "Catamaran" },
+            { value: "system", key: "settings.fontTaSystem", fallback: "System Tamil fonts" }
+        ];
+
+        var fontSection = document.createElement("div");
+        fontSection.className = "settings-font-section";
+        var fontHeading = document.createElement("h3");
+        fontHeading.className = "settings-font-heading";
+        fontHeading.setAttribute("data-i18n", "settings.fontSection");
+        fontHeading.setAttribute("data-i18n-fallback", "Fonts (with preview)");
+        fontSection.appendChild(fontHeading);
+
+        function fillFontSelect(select, options, current) {
+            select.innerHTML = "";
+            options.forEach(function (optDef) {
+                var opt = document.createElement("option");
+                opt.value = optDef.value;
+                opt.setAttribute("data-i18n", optDef.key);
+                opt.setAttribute("data-i18n-fallback", optDef.fallback);
+                opt.textContent = t(optDef.key, optDef.fallback);
+                select.appendChild(opt);
+            });
+            select.value = current;
+        }
+
+        var enRow = document.createElement("div");
+        enRow.className = "settings-font-row";
+        var enLabel = document.createElement("label");
+        enLabel.className = "settings-font-label";
+        enLabel.setAttribute("for", "settings-font-en");
+        enLabel.setAttribute("data-i18n", "settings.fontEnglish");
+        enLabel.setAttribute("data-i18n-fallback", "English text");
+        var enSelect = document.createElement("select");
+        enSelect.id = "settings-font-en";
+        enSelect.className = "search-input settings-font-select";
+        fillFontSelect(enSelect, EN_FONT_OPTIONS, getStoredFontEn());
+        enSelect.addEventListener("change", function () {
+            var v = normalizeFontPreset(FONT_PRESETS_EN, enSelect.value, "inter");
+            persistFontEn(v);
+            applyFontVariables(v, getStoredFontTa());
+        });
+        enRow.appendChild(enLabel);
+        enRow.appendChild(enSelect);
+        fontSection.appendChild(enRow);
+
+        var taRow = document.createElement("div");
+        taRow.className = "settings-font-row";
+        var taLabel = document.createElement("label");
+        taLabel.className = "settings-font-label";
+        taLabel.setAttribute("for", "settings-font-ta");
+        taLabel.setAttribute("data-i18n", "settings.fontTamil");
+        taLabel.setAttribute("data-i18n-fallback", "Tamil text");
+        var taSelect = document.createElement("select");
+        taSelect.id = "settings-font-ta";
+        taSelect.className = "search-input settings-font-select";
+        fillFontSelect(taSelect, TA_FONT_OPTIONS, getStoredFontTa());
+        taSelect.addEventListener("change", function () {
+            var v = normalizeFontPreset(FONT_PRESETS_TA, taSelect.value, "noto");
+            persistFontTa(v);
+            applyFontVariables(getStoredFontEn(), v);
+        });
+        taRow.appendChild(taLabel);
+        taRow.appendChild(taSelect);
+        fontSection.appendChild(taRow);
+
+        var prevEn = document.createElement("div");
+        prevEn.className = "settings-font-preview-block";
+        var prevEnCap = document.createElement("p");
+        prevEnCap.className = "page-note settings-font-preview-caption";
+        prevEnCap.setAttribute("data-i18n", "settings.fontPreviewEn");
+        prevEnCap.setAttribute("data-i18n-fallback", "Preview (English)");
+        var prevEnText = document.createElement("p");
+        prevEnText.className = "settings-font-preview-sample settings-font-preview-en";
+        prevEnText.setAttribute("lang", "en");
+        prevEnText.textContent = "The Lord is my shepherd; I shall not want. — Psalm 23";
+        prevEn.appendChild(prevEnCap);
+        prevEn.appendChild(prevEnText);
+        fontSection.appendChild(prevEn);
+
+        var prevTa = document.createElement("div");
+        prevTa.className = "settings-font-preview-block";
+        var prevTaCap = document.createElement("p");
+        prevTaCap.className = "page-note settings-font-preview-caption";
+        prevTaCap.setAttribute("data-i18n", "settings.fontPreviewTa");
+        prevTaCap.setAttribute("data-i18n-fallback", "Preview (Tamil)");
+        var prevTaText = document.createElement("p");
+        prevTaText.className = "settings-font-preview-sample settings-font-preview-ta";
+        prevTaText.setAttribute("lang", "ta");
+        prevTaText.textContent = "கர்த்தர் என் மேய்ப்பர், எனக்கு குறைவுண்டாகாது.";
+        prevTa.appendChild(prevTaCap);
+        prevTa.appendChild(prevTaText);
+        fontSection.appendChild(prevTa);
+
+        controls.appendChild(fontSection);
+
         if ("serviceWorker" in navigator) {
             var updateBtn = document.createElement("button");
             updateBtn.id = "settings-update-btn";
@@ -3749,6 +3963,7 @@
             var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";
             document.documentElement.setAttribute("data-larger-text", lt ? "1" : "0");
         } catch (e) {}
+        applyFontVariables(getStoredFontEn(), getStoredFontTa());
         window.NjcI18n = {
             t: t,
             tForElement: tForElement,
