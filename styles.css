@@ -2801,10 +2801,10 @@ body.auth-modal-open {
 }
 
 .bible-lang-switch {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    flex: 1 1 220px;
+    display: inline-grid;
+    grid-template-columns: repeat(2, max-content);
+    gap: 6px;
+    flex: 0 0 auto;
     min-width: 0;
 }
 
@@ -2817,6 +2817,10 @@ body.auth-modal-open {
     text-align: center;
     line-height: 1.2;
     white-space: nowrap;
+    padding: 6px 12px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 650;
 }
 
 .bible-lang-btn.active {
