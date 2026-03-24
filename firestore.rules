@@ -22,7 +22,7 @@ service cloud.firestore {
     function isAdmin() {
       return request.auth != null
         && request.auth.token.email != null
-        && request.auth.token.email == "simsonpeter@gmail.com";
+        && request.auth.token.email.lower() == "simsonpeter@gmail.com";
     }
 
     // Songbook (written from NJC Song / admin tools; church app loads with Firebase SDK).

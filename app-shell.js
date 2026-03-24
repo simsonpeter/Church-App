@@ -785,6 +785,7 @@
         "admin.triviaInsightsLoaded": "{n} பயனர்கள்",
         "admin.triviaInsightsEmpty": "இன்னும் தரவு இல்லை. பயனர்கள் உள்நுழைந்து செயலியை திறந்த பிறகு தோன்றும்.",
         "admin.triviaInsightsError": "ஏற்ற முடியவில்லை. Firestore விதிகளை வெளியிடவும் (நிர்வாகி மின்னஞ்சல் + adminTriviaReports).",
+        "admin.triviaInsightsRulesHint": "வினாடி நெடுவரிசைகளுக்கு புதிய Firestore விதிகள் தேவை: adminTriviaReports-க்கு நிர்வாகி வாசிப்பை வெளியிட்டு மீண்டும் ஏற்றவும்.",
         "admin.triviaInsightsColUser": "பயனர்",
         "admin.triviaInsightsColStatus": "நிலை",
         "admin.triviaInsightsColCorrect": "சரி",
@@ -1305,8 +1306,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329u1";
-    var APP_VERSION = "2026.3.29a";
+    var SW_VERSION = "20260329u2";
+    var APP_VERSION = "2026.3.29b";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 

@@ -108,12 +108,22 @@
             statusEl.hidden = false;
         }
         var db = window.firebase.firestore();
-        Promise.all([
+        Promise.allSettled([
             db.collection("userAchievementScores").get(),
             db.collection("adminTriviaReports").get()
         ]).then(function (results) {
-            var scoreSnap = results[0];
-            var reportSnap = results[1];
+            var scoreRes = results[0];
+            var reportRes = results[1];
+            if (scoreRes.status !== "fulfilled") {
+                if (statusEl) {
+                    statusEl.textContent = T("admin.triviaInsightsError", "Could not load. Publish updated Firestore rules (admin email + adminTriviaReports).");
+                    statusEl.hidden = false;
+                }
+                return;
+            }
+            var reportsDenied = reportRes.status !== "fulfilled";
+            var scoreSnap = scoreRes.value;
+            var reportSnap = reportsDenied ? null : reportRes.value;
             var byUid = {};
             scoreSnap.forEach(function (doc) {
                 var d = doc.data() || {};
@@ -128,25 +138,27 @@
                     triviaByDate: {}
                 };
             });
-            reportSnap.forEach(function (doc) {
-                var d = doc.data() || {};
-                var base = byUid[doc.id] || {
-                    displayName: "Member",
-                    lastActiveAt: null,
-                    triviaPoints: 0,
-                    correctCount: 0,
-                    wrongCount: 0,
-                    lastQuizDate: "",
-                    lastResult: "",
-                    triviaByDate: {}
-                };
-                base.correctCount = Number(d.correctCount) || 0;
-                base.wrongCount = Number(d.wrongCount) || 0;
-                base.lastQuizDate = String(d.lastQuizDate || "");
-                base.lastResult = String(d.lastResult || "");
-                base.triviaByDate = d.triviaByDate && typeof d.triviaByDate === "object" ? d.triviaByDate : {};
-                byUid[doc.id] = base;
-            });
+            if (reportSnap && typeof reportSnap.forEach === "function") {
+                reportSnap.forEach(function (doc) {
+                    var d = doc.data() || {};
+                    var base = byUid[doc.id] || {
+                        displayName: "Member",
+                        lastActiveAt: null,
+                        triviaPoints: 0,
+                        correctCount: 0,
+                        wrongCount: 0,
+                        lastQuizDate: "",
+                        lastResult: "",
+                        triviaByDate: {}
+                    };
+                    base.correctCount = Number(d.correctCount) || 0;
+                    base.wrongCount = Number(d.wrongCount) || 0;
+                    base.lastQuizDate = String(d.lastQuizDate || "");
+                    base.lastResult = String(d.lastResult || "");
+                    base.triviaByDate = d.triviaByDate && typeof d.triviaByDate === "object" ? d.triviaByDate : {};
+                    byUid[doc.id] = base;
+                });
+            }
             var uids = Object.keys(byUid);
             uids.sort(function (a, b) {
                 var ra = byUid[a];
@@ -156,7 +168,12 @@
                 return tb - ta;
             });
             if (statusEl) {
-                statusEl.textContent = T("admin.triviaInsightsLoaded", "{n} users").replace("{n}", String(uids.length));
+                var baseMsg = T("admin.triviaInsightsLoaded", "{n} users").replace("{n}", String(uids.length));
+                if (reportsDenied) {
+                    baseMsg += " — " + T("admin.triviaInsightsRulesHint", "Trivia columns need new Firestore rules: publish adminTriviaReports read for your admin email, then reload.");
+                }
+                statusEl.textContent = baseMsg;
+                statusEl.dataset.state = reportsDenied ? "warning" : "";
                 statusEl.hidden = false;
             }
             if (!tbody || !wrap) {
@@ -190,6 +207,7 @@
         }).catch(function () {
             if (statusEl) {
                 statusEl.textContent = T("admin.triviaInsightsError", "Could not load. Publish updated Firestore rules (admin email + adminTriviaReports).");
+                statusEl.dataset.state = "error";
                 statusEl.hidden = false;
             }
         });
