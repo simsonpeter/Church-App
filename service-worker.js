@@ -1,24 +1,27 @@
-const APP_CACHE = "njc-app-cache-v122";
-const RUNTIME_CACHE = "njc-runtime-cache-v122";
+const APP_CACHE = "njc-app-cache-v146";
+const RUNTIME_CACHE = "njc-runtime-cache-v146";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260320t2",
-    "./user-auth.js?v=20260318de",
-    "./app-shell.js?v=20260321u1",
+    "./styles.css?v=20260327u1",
+    "./user-auth.js?v=20260327u1",
+    "./app-shell.js?v=20260327u1",
     "./events-engine.js?v=20260318de",
-    "./home-page.js?v=20260320tr6",
+    "./home-page.js?v=20260325u1",
     "./events-page.js?v=20260318de",
-    "./sermons-page.js?v=20260318de",
+    "./sermons-page.js?v=20260323t1",
     "./bible-page.js?v=20260318de",
-    "./songbook-page.js?v=20260318de",
+    "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260318de",
     "./admin-trivia.js?v=20260320tr3",
-    "./admin-dashboard-page.js?v=20260322a1",
+    "./admin-dashboard-page.js?v=20260325u1",
+    "./admin-extras.js?v=20260327u1",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260320tr5",
-    "./spa-router.js?v=20260318de",
+    "./profile-page.js?v=20260325u1",
+    "./chat-page.js?v=20260327u1",
+    "./spa-router.js?v=20260327u1",
+    "./user-achievements-page.js?v=20260325u1",
     "./site.webmanifest?v=20260318de",
     "./logo.png?v=20260318de",
     "./announcements.json"
@@ -46,15 +49,21 @@ function staleWhileRevalidate(request) {
     });
 }
 
+self.addEventListener("message", function (event) {
+    if (event && event.data && event.data.type === "SKIP_WAITING") {
+        self.skipWaiting();
+    }
+});
+
 self.addEventListener("install", function (event) {
+    // Do not call skipWaiting() here. If we did, the new worker would activate
+    // immediately, controllerchange would fire, and the app would hide the
+    // "Update available" dialog before the user taps "Update now". Activation
+    // is triggered only by SKIP_WAITING from the page (see message listener).
     event.waitUntil(
-        caches.open(APP_CACHE)
-            .then(function (cache) {
-                return cache.addAll(CORE_ASSETS);
-            })
-            .then(function () {
-                return self.skipWaiting();
-            })
+        caches.open(APP_CACHE).then(function (cache) {
+            return cache.addAll(CORE_ASSETS);
+        })
     );
 });
 

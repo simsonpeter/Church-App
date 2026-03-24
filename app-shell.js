@@ -4,6 +4,9 @@
     var SPLASH_KEY = "njc_splash_seen_v1";
     var THEME_KEY = "njc_theme_v1";
     var LANGUAGE_KEY = "njc_language_v1";
+    var FONT_EN_KEY = "njc_font_preset_en_v1";
+    var FONT_TA_KEY = "njc_font_preset_ta_v1";
+    var FONT_PANEL_OPEN_KEY = "njc_font_settings_panel_open_v1";
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var CARD_LANGUAGE_MAP_KEY = "njc_card_language_map_v1";
@@ -39,6 +42,8 @@
         "menu.bible": "வேதாகமம்",
         "menu.songbook": "பாடல் தொகுப்பு",
         "menu.trivia": "வேத வினாடி",
+        "menu.userAchievements": "பயனர் சாதனைகள்",
+        "menu.chat": "அரட்டை",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -103,6 +108,11 @@
         "home.announcementNext": "அடுத்த அறிவிப்பு",
         "home.announcementDot": "அறிவிப்பு",
         "home.readMore": "மேலும் பார்க்க",
+        "home.personalWishFriend": "நண்பரே",
+        "home.personalBirthdayTitle": "பிறந்தநாள் வாழ்த்துக்கள்!",
+        "home.personalBirthdayBody": "உங்கள் சிறப்பு நாளில் அன்புடன் வாழ்த்துகிறோம், {name}. தேவன் உங்களை ஆசீர்வதிப்பார்!",
+        "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
+        "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
         "home.readingProgressTitle": "வாசிப்பு முன்னேற்றம்",
         "home.readingProgressSummary": "{done}/{total} நாட்கள் முடிந்தது",
@@ -467,7 +477,7 @@
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
-        "admin.noticeLinkPlaceholder": "விருப்ப இணைப்பு (https://...)",
+        "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
         "admin.noticeManageTitle": "சமீப அறிவிப்புகள்",
@@ -656,11 +666,31 @@
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
+        "settings.fonts": "எழுத்துருக்கள்",
+        "settings.fontsClosed": "மூடியுள்ளது",
+        "settings.fontsOpen": "திறந்துள்ளது",
+        "settings.fontEnglish": "ஆங்கில உரை",
+        "settings.fontTamil": "தமிழ் உரை",
+        "settings.fontPreviewEn": "முன்னோட்டம் (ஆங்கிலம்)",
+        "settings.fontPreviewTa": "முன்னோட்டம் (தமிழ்)",
+        "settings.fontEnInter": "Inter (இயல்புநிலை)",
+        "settings.fontEnDmSans": "DM Sans",
+        "settings.fontEnSourceSans": "Source Sans 3",
+        "settings.fontEnOpenSans": "Open Sans",
+        "settings.fontEnLato": "Lato",
+        "settings.fontEnSystem": "கணினி / சாதன எழுத்துரு",
+        "settings.fontTaNoto": "Noto Sans Tamil (இயல்புநிலை)",
+        "settings.fontTaMuktaMalar": "Mukta Malar",
+        "settings.fontTaHindMadurai": "Hind Madurai",
+        "settings.fontTaCatamaran": "Catamaran",
+        "settings.fontTaSystem": "கணினி தமிழ் எழுத்துரு",
         "profile.eyebrow": "சுயவிவரம்",
         "profile.title": "உங்கள் சுயவிவரம்",
         "profile.info": "உங்கள் விவரங்களை புதுப்பிக்கவும்.",
         "profile.fullName": "முழுப் பெயர்",
         "profile.dob": "பிறந்த தேதி",
+        "profile.anniversary": "திருமண நாள்",
+        "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
         "profile.phone": "தொலைபேசி எண்",
         "profile.photo": "புகைப்படம் (விருப்பம்)",
         "profile.photoHelp": "உங்கள் சாதனத்தில் இருந்து புகைப்படம் தேர்ந்தெடுக்கவும்.",
@@ -669,10 +699,99 @@
         "profile.save": "சுயவிவரம் சேமி",
         "profile.saved": "சுயவிவரம் சேமிக்கப்பட்டது.",
         "profile.savedLocal": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. இணையம் கிடைக்கும் போது மேகத்தில் ஒத்திசைக்கும்.",
+        "profile.cloudPermissionDenied": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. மேக ஒத்திசைவு Firestore பாதுகாப்பு விதிகளால் தடுக்கப்பட்டது — நிர்வாகியை தொடர்பு கொள்ளவும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேத வினாடி புள்ளிகள்",
+        "profile.readingPoints": "வேத வாசிப்பு புள்ளிகள்",
+        "profile.totalPoints": "மொத்த புள்ளிகள்",
+        "profile.achievementsTitle": "சாதனைகள்",
+        "profile.achievementsInfo": "செயலியில் செயல்பாடுகளிலிருந்து பெற்ற புள்ளிகள்.",
         "app.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது.",
         "app.refreshToUpdate": "புதுப்பிக்க கிளிக் செய்யவும்",
+        "app.updateTitle": "புதுப்பிப்பு தயார்",
+        "app.updateLead": "மேம்பாடுகள் மற்றும் சரிப்புகளுடன் புதிய பதிப்பு தயார்.",
+        "app.updateHint": "நிறுவுதலை முடிக்க மீண்டும் ஏற்ற \"இப்போது புதுப்பி\" என தட்டவும்.",
+        "app.updateNow": "இப்போது புதுப்பி",
+        "app.updateLater": "இப்போது வேண்டாம்",
+        "app.updateDismissAria": "உரையாடலை மூடு",
+        "userAchievements.eyebrow": "சமூகம்",
+        "userAchievements.title": "பயனர் சாதனைகள்",
+        "userAchievements.subtitle": "வினாடி மற்றும் வேத வாசிப்பு புள்ளிகள்",
+        "userAchievements.lead": "வினாடி மற்றும் வேத வாசிப்பு புள்ளிகள். ஒவ்வொரு உறுப்பினரும் உள்நுழைந்து செயலியை திறந்த பிறகே பட்டியலில் தோன்றுவர் (ஒவ்வொரு சாதனமும் ஒரு மேக வரியை வெளியிடும்). மீண்டும் ஏற்று என தட்டவும்.",
+        "userAchievements.loginHint": "பட்டியலில் தோன்ற உள்நுழையவும்; உங்கள் பெயர் சுயவிவரத்திலிருந்து எடுக்கப்படும்.",
+        "userAchievements.refresh": "மீண்டும் ஏற்று",
+        "userAchievements.loading": "புள்ளிகள் ஏற்றப்படுகின்றன…",
+        "userAchievements.empty": "இன்னும் புள்ளிகள் இல்லை. வினாடியில் பங்கேற்று வேத வாசிப்பை முடிக்கவும்.",
+        "userAchievements.error": "பட்டியலை ஏற்ற முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "userAchievements.errorRules": "பட்டியலை ஏற்ற முடியவில்லை: Firestore இந்த வாசிப்பை தடுத்தது. செயலியின் firestore.rules விதிகளை இந்த Firebase திட்டத்தில் வெளியிடவும் (userAchievementScores-க்கு பொது வாசிப்பு), அல்லது நிர்வாகியை தொடர்பு கொள்ளவும்.",
+        "userAchievements.colRank": "#",
+        "userAchievements.colName": "பெயர்",
+        "userAchievements.colTrivia": "வினாடி",
+        "userAchievements.colReading": "வாசிப்பு",
+        "userAchievements.colTotal": "மொத்தம்",
+        "userAchievements.colUpdatedHint": "ஒத்திசைவு",
+        "userAchievements.updatedJustNow": "இப்போது",
+        "userAchievements.updatedMinutes": "{n} நிமி முன்",
+        "userAchievements.updatedHours": "{n} மணி முன்",
+        "userAchievements.updatedDays": "{n} நாள் முன்",
+        "userAchievements.emptyLong": "இன்னும் பட்டியல் காலியாக உள்ளது. உறுப்பினர்கள் உள்நுழைந்து செயலியை ஒருமுறை திறக்க வேண்டும்; பின் மீண்டும் ஏற்று என தட்டவும்.",
+        "userAchievements.groupSummary": "உங்கள் குழு \"{tag}\": {count} பேர் · மொத்தம் {pts} புள்ளிகள்",
+        "userAchievements.youLabel": "நீங்கள்",
+        "userAchievements.youPinned": "நீங்கள்",
+        "chat.eyebrow": "சமூகம்",
+        "chat.title": "சபை அரட்டை",
+        "chat.subtitle": "உள்நுழைந்த உறுப்பினர்கள் மட்டும். அன்புடனும் மரியாதையுடனும் பேசுங்கள்.",
+        "chat.loginRequired": "செய்திகளை படிக்கவும் அனுப்பவும் முதலில் உள்நுழையவும்.",
+        "chat.empty": "இன்னும் செய்திகள் இல்லை. வணக்கம் சொல்லுங்கள்!",
+        "chat.inputPlaceholder": "செய்தியை தட்டச்சு செய்யவும்…",
+        "chat.send": "அனுப்பு",
+        "chat.attachPhoto": "புகைப்படத்தை இணை",
+        "chat.loadError": "செய்திகளை ஏற்ற முடியவில்லை. Firestore விதிகளை சரிபார்க்கவும்.",
+        "chat.sendFailed": "அனுப்ப முடியவில்லை. இணைப்பு மற்றும் விதிகளை சரிபார்க்கவும்.",
+        "chat.notImage": "படக் கோப்பை தேர்ந்தெடுக்கவும்.",
+        "chat.imageTooBig": "படம் 4 MB க்குள் இருக்க வேண்டும்.",
+        "chat.storageUnavailable": "புகைப்பட பதிவேற்றம் கிடைக்கவில்லை.",
+        "chat.uploading": "பதிவேற்றுகிறது…",
+        "chat.uploadFailed": "பதிவேற்றம் தோல்வி. Storage விதிகளை சரிபார்க்கவும்.",
+        "chat.textTooLong": "செய்தி மிக நீளமாக உள்ளது.",
+        "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
+        "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
+        "profile.leaderboardAnonymous": "பொது பட்டியலில் \"Anonymous\" என காட்டு",
+        "profile.photoSkipCloud": "புகைப்படத்தை இந்த சாதனத்தில் மட்டும் வை (மேகத்தில் ஏற்ற வேண்டாம்)",
+        "profile.exportData": "என் தரவை பதிவிறக்கு (JSON)",
+        "profile.badgesTitle": "பதக்கங்கள்",
+        "profile.badgesEmpty": "பதக்கங்களுக்கு வாசிப்பு மற்றும் வினாடியை தொடரவும்.",
+        "profile.badgeReader10": "அர்ப்பணிப்புள்ள வாசகர் (10+ வாசிப்பு)",
+        "profile.badgeTrivia10": "வினாடி வீரர் (10+ புள்ளிகள்)",
+        "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
+        "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
+        "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
+        "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
+        "app.updateNotesPrefix": "புதியவை:",
+        "home.readingStreakDays": "தொடர்ச்சியான {count} நாள் வாசிப்பு (பிரஸ்ஸெல்ஸ் நாட்கள்)",
+        "home.readingNudgeMorning": "இன்றைய காலை வாசிப்பை மறக்க வேண்டாம்.",
+        "home.readingNudgeEvening": "இன்றைய மாலை வாசிப்பை மறக்க வேண்டாம்.",
+        "home.readingShareProgress": "முன்னேற்றத்தை பகிர்",
+        "home.readingHeatmapToggle": "இந்த மாதம்",
+        "home.readingHeatmapTitle": "இந்த மாத வாசிப்பு (அடர் = அதிகம்)",
+        "home.readingShareLine": "என் வேத வாசிப்பு திட்டம்: {done}/{total} நாட்கள் ({pct}%) — NJC செயலி",
+        "home.announcementDismiss": "படித்ததாக குறி",
+        "admin.leaderboardPreviewTitle": "பயனர் சாதனைகள் முன்னோட்டம்",
+        "admin.leaderboardPreviewInfo": "Firestore பொது பட்டியல் (செயலி பட்டியல் போல).",
+        "admin.leaderboardPreviewRefresh": "பட்டியலை ஏற்று",
+        "admin.leaderboardLoading": "ஏற்றுகிறது…",
+        "admin.leaderboardLoaded": "{n} வரிகள்",
+        "admin.leaderboardEmpty": "இன்னும் வரிகள் இல்லை.",
+        "admin.leaderboardError": "ஏற்ற முடியவில்லை (Firestore விதிகளை சரிபார்க்கவும்).",
+        "admin.leaderboardNeedLogin": "இந்த உலாவியில் Firebase உடன் உள்நுழையவும்.",
+        "admin.scheduleHintsTitle": "உள்ளடக்க அட்டவணை குறிப்புகள்",
+        "admin.scheduleHintTrivia": "வினாடி: காட்டு தேதியை அமைத்தால் அன்று காலை 8 மணி முதல் புதிய கேள்வி.",
+        "admin.scheduleHintEvents": "நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் நிகழ்வு தாவலில் தோன்றும்.",
+        "admin.scheduleHintNotices": "அறிவிப்புகள்: MantleDB-க்கு வெளியிடவும்; நிலையான பட்டியலுடன் இணைகின்றன.",
+        "admin.noticeLinkPresets": "செயலி இணைப்பு முன்னமைவுகள்",
+        "admin.linkPresetsTitle": "செயலி இணைப்பை சேர்",
+        "admin.linkPresetsInfo": "புலத்தை நிரப்ப ஒரு பாதையை தட்டவும்.",
+        "admin.linkPresetsClose": "மூடு",
         "settings.close": "மூடு"
     };
 
@@ -722,6 +841,109 @@
             .replace(/>/g, "&gt;")
             .replace(/"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    var FONT_PRESETS_EN = {
+        inter: { stack: '"Inter", "Segoe UI", system-ui, sans-serif', googleFamily: "Inter:wght@400;600;700" },
+        dm: { stack: '"DM Sans", system-ui, sans-serif', googleFamily: "DM Sans:wght@400;600;700" },
+        source: { stack: '"Source Sans 3", "Segoe UI", system-ui, sans-serif', googleFamily: "Source Sans 3:wght@400;600;700" },
+        open: { stack: '"Open Sans", "Segoe UI", system-ui, sans-serif', googleFamily: "Open Sans:wght@400;600;700" },
+        lato: { stack: '"Lato", "Segoe UI", system-ui, sans-serif', googleFamily: "Lato:wght@400;700" },
+        system: { stack: 'system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif', googleFamily: "" }
+    };
+
+    var FONT_PRESETS_TA = {
+        noto: { stack: '"Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif', googleFamily: "Noto Sans Tamil:wght@400;600;700" },
+        mukta: { stack: '"Mukta Malar", "Noto Sans Tamil", "Latha", sans-serif', googleFamily: "Mukta Malar:wght@400;600;700" },
+        hind: { stack: '"Hind Madurai", "Noto Sans Tamil", sans-serif', googleFamily: "Hind Madurai:wght@400;600;700" },
+        catamaran: { stack: '"Catamaran", "Noto Sans Tamil", sans-serif', googleFamily: "Catamaran:wght@400;600;700" },
+        system: { stack: '"Latha", "Nirmala UI", "Tamil Sangam MN", "Noto Sans Tamil", system-ui, sans-serif', googleFamily: "" }
+    };
+
+    var loadedGoogleFontIds = {};
+
+    function normalizeFontPreset(map, key, fallbackKey) {
+        var k = String(key || "").trim().toLowerCase();
+        if (map[k]) {
+            return k;
+        }
+        return fallbackKey;
+    }
+
+    function getStoredFontEn() {
+        try {
+            var raw = String(window.localStorage.getItem(FONT_EN_KEY) || "").trim().toLowerCase();
+            if (FONT_PRESETS_EN[raw]) {
+                return raw;
+            }
+        } catch (e) {}
+        return "inter";
+    }
+
+    function getStoredFontTa() {
+        try {
+            var raw = String(window.localStorage.getItem(FONT_TA_KEY) || "").trim().toLowerCase();
+            if (FONT_PRESETS_TA[raw]) {
+                return raw;
+            }
+        } catch (e) {}
+        return "noto";
+    }
+
+    function persistFontEn(key) {
+        try {
+            window.localStorage.setItem(FONT_EN_KEY, key);
+        } catch (e) {}
+    }
+
+    function persistFontTa(key) {
+        try {
+            window.localStorage.setItem(FONT_TA_KEY, key);
+        } catch (e) {}
+    }
+
+    function getFontPanelOpenStored() {
+        try {
+            return window.localStorage.getItem(FONT_PANEL_OPEN_KEY) === "1";
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function persistFontPanelOpen(open) {
+        try {
+            window.localStorage.setItem(FONT_PANEL_OPEN_KEY, open ? "1" : "0");
+        } catch (e) {}
+    }
+
+    function loadGoogleFontFamilies(familyParams) {
+        var list = (familyParams || []).filter(Boolean);
+        if (!list.length) {
+            return;
+        }
+        var idKey = list.join("|");
+        if (loadedGoogleFontIds[idKey]) {
+            return;
+        }
+        var qs = list.map(function (p) {
+            return "family=" + String(p).replace(/ /g, "+");
+        }).join("&");
+        var href = "https://fonts.googleapis.com/css2?" + qs + "&display=swap";
+        var link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = href;
+        link.setAttribute("data-njc-fonts", "1");
+        document.head.appendChild(link);
+        loadedGoogleFontIds[idKey] = true;
+    }
+
+    function applyFontVariables(enKey, taKey) {
+        var en = FONT_PRESETS_EN[enKey] || FONT_PRESETS_EN.inter;
+        var ta = FONT_PRESETS_TA[taKey] || FONT_PRESETS_TA.noto;
+        var root = document.documentElement;
+        root.style.setProperty("--font-stack-en", en.stack);
+        root.style.setProperty("--font-stack-ta", ta.stack);
+        loadGoogleFontFamilies([en.googleFamily, ta.googleFamily].filter(Boolean));
     }
 
     function translateCountText(template, count) {
@@ -1072,8 +1294,37 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260321u1";
-    var APP_VERSION = "2026.3.21";
+    var SW_VERSION = "20260327u1";
+    var APP_VERSION = "2026.3.27a";
+
+    var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
+
+    function getUpdateSnoozeUntilMs() {
+        try {
+            var raw = window.localStorage.getItem("njc_update_snooze_until_v1");
+            var n = Number(raw);
+            return isNaN(n) ? 0 : n;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    function isUpdateSnoozeActive() {
+        return Date.now() < getUpdateSnoozeUntilMs();
+    }
+
+    function setupOfflineBanner() {
+        var banner = document.getElementById("offline-banner");
+        if (!banner) {
+            return;
+        }
+        function sync() {
+            banner.hidden = navigator.onLine !== false;
+        }
+        sync();
+        window.addEventListener("online", sync);
+        window.addEventListener("offline", sync);
+    }
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
@@ -1081,15 +1332,17 @@
         }
         navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
             registration.update();
-            if (registration.waiting) {
-                showUpdateBanner();
+            if (registration.waiting && !isUpdateSnoozeActive()) {
+                showUpdateModal(registration);
             }
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
-                if (!worker) return;
+                if (!worker) {
+                    return;
+                }
                 worker.addEventListener("statechange", function () {
-                    if (worker.state === "installed" && navigator.serviceWorker.controller) {
-                        showUpdateBanner();
+                    if (worker.state === "installed" && navigator.serviceWorker.controller && !isUpdateSnoozeActive()) {
+                        showUpdateModal(registration);
                     }
                 });
             });
@@ -1097,25 +1350,101 @@
             return null;
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
-            showUpdateBanner();
+            hideUpdateModal();
         });
         document.addEventListener("visibilitychange", function () {
             if (document.visibilityState === "visible") {
                 navigator.serviceWorker.getRegistration().then(function (r) {
-                    if (r) r.update();
+                    if (r) {
+                        r.update();
+                    }
                 });
             }
         });
     }
 
-    function showUpdateBanner() {
-        var banner = document.getElementById("app-update-banner");
-        var refreshBtn = document.getElementById("app-update-refresh");
-        if (!banner || !refreshBtn) return;
-        banner.hidden = false;
-        refreshBtn.onclick = function () {
+    function hideUpdateModal() {
+        var overlay = document.getElementById("app-update-overlay");
+        if (!overlay) {
+            return;
+        }
+        overlay.hidden = true;
+        document.body.classList.remove("app-update-open");
+    }
+
+    function showUpdateModal(registration) {
+        var overlay = document.getElementById("app-update-overlay");
+        var confirmBtn = document.getElementById("app-update-confirm");
+        var dismissBtn = document.getElementById("app-update-dismiss");
+        var snoozeBtn = document.getElementById("app-update-snooze");
+        var notesEl = document.getElementById("app-update-notes");
+        var backdrop = document.getElementById("app-update-backdrop");
+        if (!overlay || !confirmBtn || !dismissBtn) {
+            return;
+        }
+        try {
+            if (window.sessionStorage.getItem("njc_update_prompt_dismissed") === "1") {
+                return;
+            }
+        } catch (ignore) {
+            /* sessionStorage unavailable */
+        }
+        if (isUpdateSnoozeActive()) {
+            return;
+        }
+        if (!overlay.hidden) {
+            return;
+        }
+        overlay.hidden = false;
+        document.body.classList.add("app-update-open");
+
+        if (notesEl) {
+            var prefix = (window.NjcI18n && typeof window.NjcI18n.t === "function")
+                ? window.NjcI18n.t("app.updateNotesPrefix", "What's new:")
+                : "What's new:";
+            notesEl.textContent = prefix + " " + UPDATE_NOTES_TEXT;
+            notesEl.hidden = false;
+        }
+
+        function reloadForUpdate() {
+            try {
+                if (registration && registration.waiting) {
+                    registration.waiting.postMessage({ type: "SKIP_WAITING" });
+                }
+            } catch (err) {
+                return null;
+            }
             window.location.reload();
+        }
+
+        function dismiss() {
+            try {
+                window.sessionStorage.setItem("njc_update_prompt_dismissed", "1");
+            } catch (err) {
+                return null;
+            }
+            hideUpdateModal();
+        }
+
+        function snooze24h() {
+            try {
+                window.localStorage.setItem("njc_update_snooze_until_v1", String(Date.now() + 86400000));
+            } catch (e1) {
+                return null;
+            }
+            hideUpdateModal();
+        }
+
+        confirmBtn.onclick = function () {
+            reloadForUpdate();
         };
+        dismissBtn.onclick = dismiss;
+        if (snoozeBtn) {
+            snoozeBtn.onclick = snooze24h;
+        }
+        if (backdrop) {
+            backdrop.onclick = dismiss;
+        }
     }
 
     function notificationsSupported() {
@@ -2392,6 +2721,9 @@
         panelTop.appendChild(panelClose);
         panel.appendChild(panelTop);
 
+        var menuScroll = document.createElement("div");
+        menuScroll.className = "header-menu-scroll";
+
         var userSummary = document.createElement("div");
         userSummary.className = "header-menu-user";
         userSummary.innerHTML = "" +
@@ -2403,7 +2735,7 @@
             "  <strong class=\"header-menu-user-name\"></strong>" +
             "  <span class=\"page-note header-menu-user-email\"></span>" +
             "</div>";
-        panel.appendChild(userSummary);
+        menuScroll.appendChild(userSummary);
         var userAvatarImage = userSummary.querySelector(".header-menu-user-avatar-image");
         var userAvatarFallback = userSummary.querySelector(".header-menu-user-avatar-fallback");
         var userNameNode = userSummary.querySelector(".header-menu-user-name");
@@ -2411,14 +2743,14 @@
 
         var primaryCard = document.createElement("section");
         primaryCard.className = "header-menu-card";
-        panel.appendChild(primaryCard);
+        menuScroll.appendChild(primaryCard);
         var primaryLinksContainer = document.createElement("nav");
         primaryLinksContainer.className = "header-menu-tabs";
         primaryCard.appendChild(primaryLinksContainer);
 
         var bibleSongCard = document.createElement("section");
         bibleSongCard.className = "header-menu-card";
-        panel.appendChild(bibleSongCard);
+        menuScroll.appendChild(bibleSongCard);
         var bibleSongLinksContainer = document.createElement("nav");
         bibleSongLinksContainer.className = "header-menu-tabs";
         bibleSongCard.appendChild(bibleSongLinksContainer);
@@ -2441,9 +2773,21 @@
         triviaLink.innerHTML = "<i class=\"fa-solid fa-question-circle\"></i><span></span>";
         bibleSongLinksContainer.appendChild(triviaLink);
 
+        var achievementsLink = document.createElement("a");
+        achievementsLink.className = "header-menu-link";
+        achievementsLink.href = "#user-achievements";
+        achievementsLink.innerHTML = "<i class=\"fa-solid fa-trophy\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(achievementsLink);
+
+        var chatLink = document.createElement("a");
+        chatLink.className = "header-menu-link";
+        chatLink.href = "#chat";
+        chatLink.innerHTML = "<i class=\"fa-solid fa-comments\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(chatLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
-        panel.appendChild(utilityCard);
+        menuScroll.appendChild(utilityCard);
         var utilityLinksContainer = document.createElement("nav");
         utilityLinksContainer.className = "header-menu-tabs";
         utilityCard.appendChild(utilityLinksContainer);
@@ -2477,6 +2821,7 @@
         authButton.className = "header-menu-link header-menu-action";
         authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
         utilityLinksContainer.appendChild(authButton);
+        panel.appendChild(menuScroll);
         document.body.appendChild(panel);
 
         var notificationCenter = document.createElement("section");
@@ -2641,6 +2986,8 @@
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
             var triviaLabel = t("menu.trivia", "Trivia");
+            var achievementsLabel = t("menu.userAchievements", "User achievements");
+            var chatLabel = t("menu.chat", "Chat");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -2695,6 +3042,14 @@
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
             }
+            var achievementsNode = achievementsLink.querySelector("span");
+            if (achievementsNode) {
+                achievementsNode.textContent = achievementsLabel;
+            }
+            var chatNode = chatLink.querySelector("span");
+            if (chatNode) {
+                chatNode.textContent = chatLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -2725,6 +3080,8 @@
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
             var isTrivia = getCurrentRoute() === "trivia";
+            var isAchievements = getCurrentRoute() === "user-achievements";
+            var isChat = getCurrentRoute() === "chat";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
@@ -2732,6 +3089,8 @@
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
             triviaLink.classList.toggle("active", isTrivia);
+            achievementsLink.classList.toggle("active", isAchievements);
+            chatLink.classList.toggle("active", isChat);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
@@ -2899,11 +3258,29 @@
             positionPanel();
             positionNotificationCenter();
         });
-        window.addEventListener("scroll", function () {
-            if (!panel.hidden) {
+        function scrollEventOriginatedInside(el, container) {
+            if (!container || !el) {
+                return false;
+            }
+            if (el === container) {
+                return true;
+            }
+            if (el.nodeType === 1 && typeof el.closest === "function" && el.closest("#" + container.id)) {
+                return true;
+            }
+            try {
+                return container.contains(el);
+            } catch (err) {
+                return false;
+            }
+        }
+
+        window.addEventListener("scroll", function (event) {
+            var target = event.target;
+            if (!panel.hidden && !scrollEventOriginatedInside(target, panel)) {
                 closePanel();
             }
-            if (!notificationCenter.hidden) {
+            if (!notificationCenter.hidden && !scrollEventOriginatedInside(target, notificationCenter)) {
                 closeNotificationCenter();
             }
         }, true);
@@ -3084,6 +3461,145 @@
         }
         setLargerText(getLargerText());
 
+        var EN_FONT_OPTIONS = [
+            { value: "inter", key: "settings.fontEnInter", fallback: "Inter (default)" },
+            { value: "dm", key: "settings.fontEnDmSans", fallback: "DM Sans" },
+            { value: "source", key: "settings.fontEnSourceSans", fallback: "Source Sans 3" },
+            { value: "open", key: "settings.fontEnOpenSans", fallback: "Open Sans" },
+            { value: "lato", key: "settings.fontEnLato", fallback: "Lato" },
+            { value: "system", key: "settings.fontEnSystem", fallback: "System / device font" }
+        ];
+        var TA_FONT_OPTIONS = [
+            { value: "noto", key: "settings.fontTaNoto", fallback: "Noto Sans Tamil (default)" },
+            { value: "mukta", key: "settings.fontTaMuktaMalar", fallback: "Mukta Malar" },
+            { value: "hind", key: "settings.fontTaHindMadurai", fallback: "Hind Madurai" },
+            { value: "catamaran", key: "settings.fontTaCatamaran", fallback: "Catamaran" },
+            { value: "system", key: "settings.fontTaSystem", fallback: "System Tamil fonts" }
+        ];
+
+        var fontBody = document.createElement("div");
+        fontBody.className = "settings-font-section-body";
+        var fontPanelOpen = getFontPanelOpenStored();
+        fontBody.hidden = !fontPanelOpen;
+
+        var fontToggleBtn = document.createElement("button");
+        fontToggleBtn.type = "button";
+        fontToggleBtn.id = "settings-font-toggle-btn";
+        fontToggleBtn.className = "lang-toggle";
+        fontToggleBtn.innerHTML = "<i class=\"fa-solid fa-font\" aria-hidden=\"true\"></i>";
+        fontToggleBtn.setAttribute("aria-expanded", fontPanelOpen ? "true" : "false");
+        fontToggleBtn.setAttribute("aria-label", t("settings.fonts", "Fonts"));
+
+        function getFontPanelStateLabel() {
+            return fontBody.hidden
+                ? t("settings.fontsClosed", "Closed")
+                : t("settings.fontsOpen", "Open");
+        }
+
+        fontToggleBtn.addEventListener("click", function () {
+            var next = fontBody.hidden;
+            fontBody.hidden = !next;
+            persistFontPanelOpen(next);
+            fontToggleBtn.setAttribute("aria-expanded", next ? "true" : "false");
+            refreshSettingsItems();
+        });
+
+        var fontItem = createSettingsItem(fontToggleBtn, "settings.fonts", "Fonts", getFontPanelStateLabel);
+        if (fontItem) {
+            controls.appendChild(fontItem.node);
+            items.push(fontItem);
+        }
+        document.addEventListener("njc:langchange", function () {
+            fontToggleBtn.setAttribute("aria-label", t("settings.fonts", "Fonts"));
+        });
+
+        var fontSection = document.createElement("div");
+        fontSection.className = "settings-font-section";
+        fontSection.appendChild(fontBody);
+
+        function fillFontSelect(select, options, current) {
+            select.innerHTML = "";
+            options.forEach(function (optDef) {
+                var opt = document.createElement("option");
+                opt.value = optDef.value;
+                opt.setAttribute("data-i18n", optDef.key);
+                opt.setAttribute("data-i18n-fallback", optDef.fallback);
+                opt.textContent = t(optDef.key, optDef.fallback);
+                select.appendChild(opt);
+            });
+            select.value = current;
+        }
+
+        var enRow = document.createElement("div");
+        enRow.className = "settings-font-row";
+        var enLabel = document.createElement("label");
+        enLabel.className = "settings-font-label";
+        enLabel.setAttribute("for", "settings-font-en");
+        enLabel.setAttribute("data-i18n", "settings.fontEnglish");
+        enLabel.setAttribute("data-i18n-fallback", "English text");
+        var enSelect = document.createElement("select");
+        enSelect.id = "settings-font-en";
+        enSelect.className = "search-input settings-font-select";
+        fillFontSelect(enSelect, EN_FONT_OPTIONS, getStoredFontEn());
+        enSelect.addEventListener("change", function () {
+            var v = normalizeFontPreset(FONT_PRESETS_EN, enSelect.value, "inter");
+            persistFontEn(v);
+            applyFontVariables(v, getStoredFontTa());
+        });
+        enRow.appendChild(enLabel);
+        enRow.appendChild(enSelect);
+        fontBody.appendChild(enRow);
+
+        var taRow = document.createElement("div");
+        taRow.className = "settings-font-row";
+        var taLabel = document.createElement("label");
+        taLabel.className = "settings-font-label";
+        taLabel.setAttribute("for", "settings-font-ta");
+        taLabel.setAttribute("data-i18n", "settings.fontTamil");
+        taLabel.setAttribute("data-i18n-fallback", "Tamil text");
+        var taSelect = document.createElement("select");
+        taSelect.id = "settings-font-ta";
+        taSelect.className = "search-input settings-font-select";
+        fillFontSelect(taSelect, TA_FONT_OPTIONS, getStoredFontTa());
+        taSelect.addEventListener("change", function () {
+            var v = normalizeFontPreset(FONT_PRESETS_TA, taSelect.value, "noto");
+            persistFontTa(v);
+            applyFontVariables(getStoredFontEn(), v);
+        });
+        taRow.appendChild(taLabel);
+        taRow.appendChild(taSelect);
+        fontBody.appendChild(taRow);
+
+        var prevEn = document.createElement("div");
+        prevEn.className = "settings-font-preview-block";
+        var prevEnCap = document.createElement("p");
+        prevEnCap.className = "page-note settings-font-preview-caption";
+        prevEnCap.setAttribute("data-i18n", "settings.fontPreviewEn");
+        prevEnCap.setAttribute("data-i18n-fallback", "Preview (English)");
+        var prevEnText = document.createElement("p");
+        prevEnText.className = "settings-font-preview-sample settings-font-preview-en";
+        prevEnText.setAttribute("lang", "en");
+        prevEnText.textContent = "The Lord is my shepherd; I shall not want. — Psalm 23";
+        prevEn.appendChild(prevEnCap);
+        prevEn.appendChild(prevEnText);
+        fontBody.appendChild(prevEn);
+
+        var prevTa = document.createElement("div");
+        prevTa.className = "settings-font-preview-block";
+        var prevTaCap = document.createElement("p");
+        prevTaCap.className = "page-note settings-font-preview-caption";
+        prevTaCap.setAttribute("data-i18n", "settings.fontPreviewTa");
+        prevTaCap.setAttribute("data-i18n-fallback", "Preview (Tamil)");
+        var prevTaText = document.createElement("p");
+        prevTaText.className = "settings-font-preview-sample settings-font-preview-ta";
+        prevTaText.setAttribute("lang", "ta");
+        prevTaText.textContent = "கர்த்தர் என் மேய்ப்பர், எனக்கு குறைவுண்டாகாது.";
+        prevTa.appendChild(prevTaCap);
+        prevTa.appendChild(prevTaText);
+        fontBody.appendChild(prevTa);
+
+        controls.appendChild(fontSection);
+
         if ("serviceWorker" in navigator) {
             var updateBtn = document.createElement("button");
             updateBtn.id = "settings-update-btn";
@@ -3117,7 +3633,7 @@
                     reg.update().then(function () {
                         if (reg.waiting || reg.installing) {
                             updateStatus.textContent = t("settings.updateAvailable", "New version available!");
-                            showUpdateBanner();
+                            showUpdateModal(reg);
                         } else {
                             updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
                         }
@@ -3520,11 +4036,13 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
+        setupOfflineBanner();
         activeLanguage = getActiveLanguage();
         try {
             var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";
             document.documentElement.setAttribute("data-larger-text", lt ? "1" : "0");
         } catch (e) {}
+        applyFontVariables(getStoredFontEn(), getStoredFontTa());
         window.NjcI18n = {
             t: t,
             tForElement: tForElement,
@@ -3540,6 +4058,108 @@
             apply: applyTranslations,
             formatCount: translateCountText
         };
+
+        window.NjcAchievementBoard = (function () {
+            var COL = "userAchievementScores";
+            var TRIVIA_KEY = "njc_trivia_points_v1";
+            var READING_KEY = "njc_reading_points_v1";
+            var PROFILES_KEY = "njc_user_profiles_v1";
+
+            function looksLikeEmail(text) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(text || "").trim());
+            }
+
+            function pickDisplayName(uid, user) {
+                try {
+                    var raw = window.localStorage.getItem(PROFILES_KEY);
+                    var map = raw ? JSON.parse(raw) : {};
+                    if (map && typeof map === "object") {
+                        var p = map[uid];
+                        if (p && p.leaderboardAnonymous) {
+                            return "Anonymous";
+                        }
+                        var name = p && String(p.fullName || "").trim();
+                        if (name) {
+                            return name.slice(0, 80);
+                        }
+                    }
+                } catch (e1) {}
+                var dn = user && String(user.displayName || "").trim();
+                if (dn && !looksLikeEmail(dn)) {
+                    return dn.slice(0, 80);
+                }
+                var em = user && user.email;
+                if (em) {
+                    var local = String(em).split("@")[0].replace(/[._-]+/g, " ").trim();
+                    if (local) {
+                        return local.slice(0, 80);
+                    }
+                }
+                return "Member";
+            }
+
+            function sanitizeGroupId(raw) {
+                var s = String(raw || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+                return s.slice(0, 40);
+            }
+
+            function readProfileGroupId(uid) {
+                try {
+                    var map = JSON.parse(window.localStorage.getItem(PROFILES_KEY) || "{}");
+                    var p = map && map[uid];
+                    return sanitizeGroupId(p && p.groupId);
+                } catch (e) {
+                    return "";
+                }
+            }
+
+            function syncMyPublicScore() {
+                var authApi = window.NjcAuth;
+                var user = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
+                if (!user || !user.uid) {
+                    return Promise.resolve(null);
+                }
+                if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+                    return Promise.resolve(null);
+                }
+                var uid = String(user.uid);
+                var tid = "u:" + uid;
+                var trivia = 0;
+                var reading = 0;
+                try {
+                    var tmap = JSON.parse(window.localStorage.getItem(TRIVIA_KEY) || "{}");
+                    trivia = Number(tmap[tid]) || 0;
+                } catch (e2) {}
+                try {
+                    var rmap = JSON.parse(window.localStorage.getItem(READING_KEY) || "{}");
+                    reading = Number(rmap[tid]) || 0;
+                } catch (e3) {}
+                var total = trivia + reading;
+                var displayName = pickDisplayName(uid, user);
+                var groupId = readProfileGroupId(uid);
+                try {
+                    var ref = window.firebase.firestore().collection(COL).doc(uid);
+                    var payload = {
+                        displayName: displayName,
+                        triviaPoints: trivia,
+                        readingPoints: reading,
+                        totalPoints: total,
+                        updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                        groupId: groupId || window.firebase.firestore.FieldValue.delete()
+                    };
+                    return ref.set(payload, { merge: true }).then(function () {
+                        return true;
+                    }).catch(function () {
+                        return null;
+                    });
+                } catch (e4) {
+                    return Promise.resolve(null);
+                }
+            }
+
+            return { syncMyPublicScore: syncMyPublicScore };
+        })();
+
         setLanguage(activeLanguage, false, true);
         if (window.NjcAuth && typeof window.NjcAuth.init === "function") {
             window.NjcAuth.init();

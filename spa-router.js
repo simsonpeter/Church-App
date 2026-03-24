@@ -65,6 +65,24 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "user-achievements": {
+            icon: "fa-trophy",
+            eyebrowKey: "userAchievements.eyebrow",
+            eyebrowText: "Community",
+            titleKey: "userAchievements.title",
+            titleText: "User achievements",
+            subtitleKey: "userAchievements.subtitle",
+            subtitleText: "Trivia and Bible reading points"
+        },
+        chat: {
+            icon: "fa-comments",
+            eyebrowKey: "chat.eyebrow",
+            eyebrowText: "Community",
+            titleKey: "chat.title",
+            titleText: "Church chat",
+            subtitleKey: "chat.subtitle",
+            subtitleText: "Members only"
+        },
         contact: {
             icon: "fa-phone",
             eyebrowKey: "contact.eyebrow",
@@ -237,6 +255,8 @@
         if (window.location.hash.replace(/^#/, "") !== current) {
             window.history.replaceState(null, "", "#" + current);
         }
+
+        document.dispatchEvent(new CustomEvent("njc:routechange", { detail: { route: current } }));
 
         window.setTimeout(function () {
             window.scrollTo(0, 0);
