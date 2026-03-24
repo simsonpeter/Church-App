@@ -189,20 +189,6 @@
         return bestVoice;
     }
 
-    function hasTamilSpeechVoice() {
-        var voices = getSpeechVoices();
-        if (!voices.length) {
-            return false;
-        }
-        return voices.some(function (voice) {
-            var lang = String(voice && voice.lang || "").toLowerCase();
-            if (lang.indexOf("ta") === 0) {
-                return true;
-            }
-            return String(voice && voice.name || "").toLowerCase().indexOf("tamil") >= 0;
-        });
-    }
-
     function buildChapterSpeechText(language, location, verses, startVerseNumber) {
         var chapterNumber = Number(location && location.chapter || 0) + 1;
         var header = normalizeLanguage(language) === "ta"

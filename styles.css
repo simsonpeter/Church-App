@@ -2745,6 +2745,19 @@ body.auth-modal-open {
     font-weight: 650;
 }
 
+/* Flex column so verse list grows with content (avoids clipped Tamil in nested scroll) */
+.bible-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    overflow: visible;
+}
+
+.bible-card > h2 {
+    margin-bottom: 6px;
+}
+
 .bible-toolbar {
     display: flex;
     align-items: center;
@@ -2752,6 +2765,7 @@ body.auth-modal-open {
     flex-wrap: wrap;
     gap: 8px;
     margin: 8px 0 10px;
+    flex-shrink: 0;
 }
 
 .bible-utility-buttons {
@@ -2847,15 +2861,29 @@ body.auth-modal-open {
 
 .bible-nav-row {
     margin-top: 10px;
+    margin-bottom: 4px;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
+    flex-shrink: 0;
+}
+
+.bible-card #bible-status-note:empty {
+    display: none;
 }
 
 .bible-verse-list {
-    margin-top: 8px;
-    max-height: min(56vh, 520px);
-    overflow: auto;
+    margin-top: 10px;
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Entrance animation clips Tamil glyphs at list top; verse rows don't need it */
+.bible-card .bible-verse-list > li {
+    animation: none !important;
 }
 
 .bible-verse-item {
@@ -2863,6 +2891,7 @@ body.auth-modal-open {
     gap: 10px;
     align-items: flex-start;
     cursor: pointer;
+    scroll-margin-top: 12px;
 }
 
 .bible-verse-item.highlight {
@@ -2885,7 +2914,9 @@ body.auth-modal-open {
 .bible-verse-text {
     margin: 0;
     color: var(--text);
-    line-height: 1.55;
+    line-height: 1.65;
+    word-break: normal;
+    overflow-wrap: anywhere;
 }
 
 body.bible-fullscreen-open {
@@ -2937,6 +2968,7 @@ body.bible-fullscreen-open .offline-badge {
 @media (max-width: 460px) {
     .bible-toolbar {
         align-items: stretch;
+        flex-direction: column;
     }
 
     .bible-utility-buttons {
@@ -2948,6 +2980,15 @@ body.bible-fullscreen-open .offline-badge {
     .bible-icon-btn {
         width: 38px;
         height: 38px;
+    }
+
+    .bible-inline-row {
+        flex-wrap: wrap;
+    }
+
+    .bible-inline-row .bible-field:first-child {
+        flex: 1 1 100%;
+        min-width: 0;
     }
 }
 
