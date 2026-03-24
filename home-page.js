@@ -1,6 +1,7 @@
 (function () {
             var READING_PROGRESS_KEY = "njc_reading_progress_v1";
             var READING_POINTS_KEY = "njc_reading_points_v1";
+            var READING_BONUS_POINTS_KEY = "njc_reading_bonus_points_v1";
             var DAILY_VERSE_LANGUAGE_KEY = "njc_daily_verse_language_v1";
             var todayReadingPlanList = document.getElementById("today-reading-plan-list");
             var todayReadingPlanMeta = document.getElementById("today-reading-plan-meta");
@@ -623,6 +624,16 @@
                 return halfCount * 0.5;
             }
 
+            function getReadingBonusPoints(uid) {
+                try {
+                    var raw = window.localStorage.getItem(READING_BONUS_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    return Number(data[String(uid || "")]) || 0;
+                } catch (e) {
+                    return 0;
+                }
+            }
+
             function syncReadingPointsToCloud(uid, points) {
                 var doc = getTriviaFirestoreDoc(uid);
                 if (!doc) {
@@ -632,8 +643,10 @@
             }
 
             function recalcAndStoreReadingPoints() {
-                var total = computeReadingPointsTotal();
+                var planPts = computeReadingPointsTotal();
                 var uid = getTriviaUserId();
+                var bonus = getReadingBonusPoints(uid);
+                var total = planPts + bonus;
                 var isUser = uid && uid.indexOf("u:") === 0;
                 var firebaseUid = isUser ? uid.replace(/^u:/, "") : null;
                 try {
@@ -653,6 +666,29 @@
                 document.dispatchEvent(new CustomEvent("njc:reading-points-updated", { detail: { points: total } }));
                 return null;
             }
+
+            function addReadingBonusPoints(delta) {
+                var d = Number(delta) || 0;
+                if (d <= 0) {
+                    return;
+                }
+                var uid = getTriviaUserId();
+                try {
+                    var raw = window.localStorage.getItem(READING_BONUS_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    data[uid] = (Number(data[uid]) || 0) + d;
+                    window.localStorage.setItem(READING_BONUS_POINTS_KEY, JSON.stringify(data));
+                } catch (e) {
+                    return null;
+                }
+                recalcAndStoreReadingPoints();
+                return null;
+            }
+
+            window.NjcReadingPoints = {
+                recalc: recalcAndStoreReadingPoints,
+                addBonus: addReadingBonusPoints
+            };
 
             function getBrusselsYmd() {
                 var parts = new Intl.DateTimeFormat("en-GB", {

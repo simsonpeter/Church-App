@@ -818,6 +818,16 @@
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
             sermonAudio.addEventListener("ended", function () {
+                if (currentSermon && currentSermon.audioUrl) {
+                    var dur = sermonAudio.duration;
+                    document.dispatchEvent(new CustomEvent("njc:sermon-listen-complete", {
+                        detail: {
+                            audioUrl: currentSermon.audioUrl,
+                            duration: Number.isFinite(dur) && dur > 0 ? dur : 0,
+                            currentTime: sermonAudio.currentTime || 0
+                        }
+                    }));
+                }
                 playNext(1);
             });
             window.addEventListener("beforeunload", function () {
