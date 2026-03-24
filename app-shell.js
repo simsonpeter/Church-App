@@ -779,6 +779,22 @@
         "admin.leaderboardEmpty": "இன்னும் வரிகள் இல்லை.",
         "admin.leaderboardError": "ஏற்ற முடியவில்லை (Firestore விதிகளை சரிபார்க்கவும்).",
         "admin.leaderboardNeedLogin": "இந்த உலாவியில் Firebase உடன் உள்நுழையவும்.",
+        "admin.triviaInsightsTitle": "பயனர் வாரியாக வினாடி & செயல்பாடு",
+        "admin.triviaInsightsInfo": "உள்நுழைந்த பயனர்கள் மட்டும். வினாடி விளையாடும்போது ஒத்திசைகிறது. “ஆன்லைன்” = கடைசி 3 நிமிடத்தில் செயலி திறந்திருந்தது.",
+        "admin.triviaInsightsRefresh": "பயனர் புள்ளிவிவரம் ஏற்று",
+        "admin.triviaInsightsLoaded": "{n} பயனர்கள்",
+        "admin.triviaInsightsEmpty": "இன்னும் தரவு இல்லை. பயனர்கள் உள்நுழைந்து செயலியை திறந்த பிறகு தோன்றும்.",
+        "admin.triviaInsightsError": "ஏற்ற முடியவில்லை. Firestore விதிகளை வெளியிடவும் (நிர்வாகி மின்னஞ்சல் + adminTriviaReports).",
+        "admin.triviaInsightsColUser": "பயனர்",
+        "admin.triviaInsightsColStatus": "நிலை",
+        "admin.triviaInsightsColCorrect": "சரி",
+        "admin.triviaInsightsColWrong": "தவறு",
+        "admin.triviaInsightsColLast": "கடைசி வினாடி",
+        "admin.triviaInsightsColDetail": "தேதி வாரியாக",
+        "admin.triviaInsightsOnline": "ஆன்லைன்",
+        "admin.triviaInsightsJustNow": "இப்போது",
+        "admin.triviaInsightsAgo": "முன்",
+        "admin.triviaInsightsDays": "நாட்கள்",
         "admin.scheduleHintsTitle": "உள்ளடக்க அட்டவணை குறிப்புகள்",
         "admin.scheduleHintTrivia": "வினாடி: காட்டு தேதியை அமைத்தால் அன்று காலை 8 மணி முதல் புதிய கேள்வி.",
         "admin.scheduleHintEvents": "நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் நிகழ்வு தாவலில் தோன்றும்.",
@@ -1289,8 +1305,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260328u3";
-    var APP_VERSION = "2026.3.28c";
+    var SW_VERSION = "20260329u1";
+    var APP_VERSION = "2026.3.29a";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
@@ -4140,6 +4156,7 @@
                         readingPoints: reading,
                         totalPoints: total,
                         updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                        lastActiveAt: window.firebase.firestore.FieldValue.serverTimestamp(),
                         groupId: groupId || window.firebase.firestore.FieldValue.delete()
                     };
                     return ref.set(payload, { merge: true }).then(function () {

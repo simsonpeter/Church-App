@@ -6,6 +6,7 @@ rules_version = '2';
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   chatMessages/{msgId} — church group chat: text only, signed-in users
+//   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
 // for THIS Firebase project yet. Fix:
@@ -17,6 +18,12 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email != null
+        && request.auth.token.email == "simsonpeter@gmail.com";
+    }
 
     // Songbook (written from NJC Song / admin tools; church app loads with Firebase SDK).
     match /lyrics/{songId} {
@@ -30,11 +37,13 @@ service cloud.firestore {
     }
 
     match /users/{userId}/profile/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /users/{userId}/app/{docId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
 
     // Public leaderboard rows (one doc per Firebase uid). Anyone can read;
@@ -43,6 +52,28 @@ service cloud.firestore {
     match /userAchievementScores/{userId} {
       allow read: if true;
       allow create, update, delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /adminTriviaReports/{userId} {
+      allow read: if isAdmin();
+      allow create, update: if request.auth != null
+        && request.auth.uid == userId
+        && request.resource.data.correctCount is int
+        && request.resource.data.correctCount >= 0
+        && request.resource.data.correctCount <= 10000
+        && request.resource.data.wrongCount is int
+        && request.resource.data.wrongCount >= 0
+        && request.resource.data.wrongCount <= 10000
+        && request.resource.data.lastQuizDate is string
+        && request.resource.data.lastQuizDate.size() <= 12
+        && request.resource.data.lastResult is string
+        && (request.resource.data.lastResult == "correct"
+            || request.resource.data.lastResult == "wrong"
+            || request.resource.data.lastResult == "")
+        && request.resource.data.lastUpdatedAt is timestamp
+        && (!request.resource.data.keys().hasAny(["triviaByDate"])
+            || request.resource.data.triviaByDate is map);
+      allow delete: if false;
     }
 
     match /chatMessages/{messageId} {

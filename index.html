@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260328u2">
+    <link rel="stylesheet" href="styles.css?v=20260329u1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -674,6 +674,28 @@
                 <ul class="list admin-leaderboard-list" id="admin-leaderboard-list" hidden></ul>
             </section>
 
+            <section class="card admin-trivia-insights-card">
+                <h2><i class="fa-solid fa-chart-simple"></i><span data-i18n="admin.triviaInsightsTitle">Trivia & activity per user</span></h2>
+                <p class="page-note" data-i18n="admin.triviaInsightsInfo">Signed-in users only. Answers sync when they play trivia. “Online” = active in the last 3 minutes (app open).</p>
+                <button type="button" class="button-link button-secondary" id="admin-trivia-insights-refresh" data-i18n="admin.triviaInsightsRefresh">Load user insights</button>
+                <p class="page-note" id="admin-trivia-insights-status" hidden></p>
+                <div class="admin-trivia-insights-table-wrap" id="admin-trivia-insights-wrap" hidden>
+                    <table class="admin-trivia-insights-table" id="admin-trivia-insights-table" aria-describedby="admin-trivia-insights-status">
+                        <thead>
+                            <tr>
+                                <th data-i18n="admin.triviaInsightsColUser">User</th>
+                                <th data-i18n="admin.triviaInsightsColStatus">Status</th>
+                                <th data-i18n="admin.triviaInsightsColCorrect">Correct</th>
+                                <th data-i18n="admin.triviaInsightsColWrong">Wrong</th>
+                                <th data-i18n="admin.triviaInsightsColLast">Last quiz</th>
+                                <th data-i18n="admin.triviaInsightsColDetail">By date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-trivia-insights-tbody"></tbody>
+                    </table>
+                </div>
+            </section>
+
             <section class="card admin-schedule-hints-card">
                 <h2><i class="fa-solid fa-calendar-check"></i><span data-i18n="admin.scheduleHintsTitle">Content schedule tips</span></h2>
                 <ul class="list admin-hints-list">
@@ -1048,10 +1070,10 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
-    <script src="user-auth.js?v=20260328u2"></script>
-    <script src="app-shell.js?v=20260328u2"></script>
+    <script src="user-auth.js?v=20260329u1"></script>
+    <script src="app-shell.js?v=20260329u1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260325u1"></script>
+    <script src="home-page.js?v=20260329u1"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260323t1"></script>
     <script src="bible-page.js?v=20260328u3"></script>
@@ -1059,7 +1081,7 @@
     <script src="contact-page.js?v=20260318de"></script>
     <script src="admin-trivia.js?v=20260320tr3"></script>
     <script src="admin-dashboard-page.js?v=20260325u1"></script>
-    <script src="admin-extras.js?v=20260328u2"></script>
+    <script src="admin-extras.js?v=20260329u1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260325u1"></script>
     <script src="chat-page.js?v=20260328u2"></script>

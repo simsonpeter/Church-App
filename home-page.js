@@ -66,6 +66,7 @@
             var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
             var TRIVIA_GUEST_ID_KEY = "njc_trivia_guest_id_v1";
             var TRIVIA_POINTS_PER_CORRECT = 1;
+            var ADMIN_TRIVIA_REPORT_MAX_DATES = 120;
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
@@ -1687,6 +1688,90 @@
                 if (card) renderTriviaStats(card);
             });
 
+            function capTriviaByDateMap(byDate, maxKeys) {
+                var cap = Math.max(30, Number(maxKeys) || 120);
+                var keys = Object.keys(byDate || {}).filter(function (d) {
+                    return /^\d{4}-\d{2}-\d{2}$/.test(d);
+                }).sort();
+                if (keys.length <= cap) {
+                    return byDate;
+                }
+                var drop = keys.length - cap;
+                var next = {};
+                keys.slice(drop).forEach(function (k) {
+                    next[k] = byDate[k];
+                });
+                return next;
+            }
+
+            function buildAdminTriviaReportPayload(firebaseUid) {
+                var storedUid = "u:" + String(firebaseUid || "");
+                var byDate = {};
+                try {
+                    var raw = window.localStorage.getItem(TRIVIA_ANSWERED_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    byDate = (data && data[storedUid] && typeof data[storedUid] === "object") ? data[storedUid] : {};
+                } catch (e1) {
+                    byDate = {};
+                }
+                var correct = 0;
+                var wrong = 0;
+                var lastQuizDate = "";
+                var lastResult = "";
+                var sortedDates = [];
+                for (var d in byDate) {
+                    if (!Object.prototype.hasOwnProperty.call(byDate, d) || !/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                        continue;
+                    }
+                    var v = byDate[d];
+                    if (v === "correct") {
+                        correct += 1;
+                    } else if (v === "wrong") {
+                        wrong += 1;
+                    }
+                    sortedDates.push(d);
+                }
+                sortedDates.sort();
+                if (sortedDates.length) {
+                    lastQuizDate = sortedDates[sortedDates.length - 1];
+                    lastResult = String(byDate[lastQuizDate] || "");
+                    if (lastResult !== "correct" && lastResult !== "wrong") {
+                        lastResult = "";
+                    }
+                }
+                var capped = capTriviaByDateMap(byDate, ADMIN_TRIVIA_REPORT_MAX_DATES);
+                return {
+                    correctCount: correct,
+                    wrongCount: wrong,
+                    lastQuizDate: lastQuizDate,
+                    lastResult: lastResult,
+                    triviaByDate: capped,
+                    lastUpdatedAt: window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue
+                        ? window.firebase.firestore.FieldValue.serverTimestamp()
+                        : null
+                };
+            }
+
+            function syncTriviaAdminReportToCloud(firebaseUid) {
+                if (!firebaseUid || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+                    return;
+                }
+                if (!window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+                    return;
+                }
+                try {
+                    var payload = buildAdminTriviaReportPayload(firebaseUid);
+                    if (!payload.lastUpdatedAt) {
+                        return;
+                    }
+                    window.firebase.firestore()
+                        .collection("adminTriviaReports")
+                        .doc(String(firebaseUid))
+                        .set(payload, { merge: true })
+                        .catch(function () {});
+                } catch (e2) {}
+            }
+
             function syncTriviaPointsForUser() {
                 var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
                 if (!user || !user.uid) return;
@@ -1716,6 +1801,7 @@
                         }
                         window.localStorage.setItem(TRIVIA_POINTS_KEY, JSON.stringify(data));
                         syncTriviaPointsToCloud(user.uid, total);
+                        syncTriviaAdminReportToCloud(user.uid);
                         if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
                             window.NjcAchievementBoard.syncMyPublicScore();
                         }
@@ -1765,6 +1851,10 @@
                     if (!data[uid]) data[uid] = {};
                     data[uid][date] = result;
                     window.localStorage.setItem(TRIVIA_ANSWERED_KEY, JSON.stringify(data));
+                    var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                    if (user && user.uid && uid.indexOf("u:") === 0) {
+                        syncTriviaAdminReportToCloud(user.uid);
+                    }
                 } catch (e) {}
             }
 

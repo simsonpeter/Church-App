@@ -19,6 +19,7 @@
     var listeners = [];
     var saveTimerId = null;
     var syncInFlight = false;
+    var activityHeartbeatId = null;
 
     var modalOverlay = null;
     var modeText = null;
@@ -138,6 +139,9 @@
         syncInFlight = true;
         try {
             var payload = buildLocalPayload();
+            if (window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue) {
+                payload.lastSeenAt = window.firebase.firestore.FieldValue.serverTimestamp();
+            }
             await doc.set(payload, { merge: true });
         } catch (err) {
             return;
@@ -157,6 +161,28 @@
             saveTimerId = null;
             syncLocalToCloud();
         }, 450);
+    }
+
+    function stopActivityHeartbeat() {
+        if (activityHeartbeatId !== null) {
+            window.clearInterval(activityHeartbeatId);
+            activityHeartbeatId = null;
+        }
+    }
+
+    function startActivityHeartbeat() {
+        stopActivityHeartbeat();
+        if (!user || !db) {
+            return;
+        }
+        activityHeartbeatId = window.setInterval(function () {
+            if (user && db) {
+                syncLocalToCloud();
+                if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
+                    window.NjcAchievementBoard.syncMyPublicScore();
+                }
+            }
+        }, 120000);
     }
 
     async function pullCloudToLocalOrBootstrap() {
@@ -543,6 +569,9 @@
                         window.NjcAchievementBoard.syncMyPublicScore();
                     }
                 }, 0);
+                startActivityHeartbeat();
+            } else {
+                stopActivityHeartbeat();
             }
             updateEntryOverlayVisibility();
         });

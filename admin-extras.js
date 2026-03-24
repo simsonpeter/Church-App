@@ -36,6 +36,165 @@
             .replace(/'/g, "&#39;");
     }
 
+    var ONLINE_MS = 3 * 60 * 1000;
+
+    function tsToMs(ts) {
+        if (!ts) {
+            return null;
+        }
+        if (typeof ts.toMillis === "function") {
+            return ts.toMillis();
+        }
+        if (typeof ts.seconds === "number") {
+            return ts.seconds * 1000;
+        }
+        return null;
+    }
+
+    function formatRelativeActivity(ts) {
+        var ms = tsToMs(ts);
+        if (ms === null || isNaN(ms)) {
+            return { label: "—", online: false };
+        }
+        var age = Date.now() - ms;
+        if (age < ONLINE_MS) {
+            return { label: T("admin.triviaInsightsOnline", "Online"), online: true };
+        }
+        if (age < 60 * 1000) {
+            return { label: T("admin.triviaInsightsJustNow", "Just now"), online: false };
+        }
+        if (age < 60 * 60 * 1000) {
+            return { label: Math.floor(age / 60000) + "m " + T("admin.triviaInsightsAgo", "ago"), online: false };
+        }
+        if (age < 48 * 60 * 60 * 1000) {
+            return { label: Math.floor(age / 3600000) + "h " + T("admin.triviaInsightsAgo", "ago"), online: false };
+        }
+        return { label: Math.floor(age / 86400000) + "d " + T("admin.triviaInsightsAgo", "ago"), online: false };
+    }
+
+    function triviaByDateSummary(map) {
+        if (!map || typeof map !== "object") {
+            return "";
+        }
+        var keys = Object.keys(map).filter(function (d) {
+            return /^\d{4}-\d{2}-\d{2}$/.test(d);
+        }).sort();
+        if (!keys.length) {
+            return "";
+        }
+        var lines = keys.map(function (d) {
+            return d + ": " + String(map[d] || "");
+        });
+        return lines.join("\n");
+    }
+
+    function loadAdminTriviaInsights() {
+        var refreshBtn = document.getElementById("admin-trivia-insights-refresh");
+        var statusEl = document.getElementById("admin-trivia-insights-status");
+        var wrap = document.getElementById("admin-trivia-insights-wrap");
+        var tbody = document.getElementById("admin-trivia-insights-tbody");
+        if (!refreshBtn || !isAdminUser()) {
+            return;
+        }
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            if (statusEl) {
+                statusEl.textContent = T("admin.leaderboardNeedLogin", "Sign in with the app (Firebase) on this browser to load the leaderboard.");
+                statusEl.hidden = false;
+            }
+            return;
+        }
+        if (statusEl) {
+            statusEl.textContent = T("admin.leaderboardLoading", "Loading…");
+            statusEl.hidden = false;
+        }
+        var db = window.firebase.firestore();
+        Promise.all([
+            db.collection("userAchievementScores").get(),
+            db.collection("adminTriviaReports").get()
+        ]).then(function (results) {
+            var scoreSnap = results[0];
+            var reportSnap = results[1];
+            var byUid = {};
+            scoreSnap.forEach(function (doc) {
+                var d = doc.data() || {};
+                byUid[doc.id] = {
+                    displayName: String(d.displayName || "Member"),
+                    lastActiveAt: d.lastActiveAt || d.updatedAt || null,
+                    triviaPoints: Number(d.triviaPoints) || 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    lastQuizDate: "",
+                    lastResult: "",
+                    triviaByDate: {}
+                };
+            });
+            reportSnap.forEach(function (doc) {
+                var d = doc.data() || {};
+                var base = byUid[doc.id] || {
+                    displayName: "Member",
+                    lastActiveAt: null,
+                    triviaPoints: 0,
+                    correctCount: 0,
+                    wrongCount: 0,
+                    lastQuizDate: "",
+                    lastResult: "",
+                    triviaByDate: {}
+                };
+                base.correctCount = Number(d.correctCount) || 0;
+                base.wrongCount = Number(d.wrongCount) || 0;
+                base.lastQuizDate = String(d.lastQuizDate || "");
+                base.lastResult = String(d.lastResult || "");
+                base.triviaByDate = d.triviaByDate && typeof d.triviaByDate === "object" ? d.triviaByDate : {};
+                byUid[doc.id] = base;
+            });
+            var uids = Object.keys(byUid);
+            uids.sort(function (a, b) {
+                var ra = byUid[a];
+                var rb = byUid[b];
+                var ta = tsToMs(ra.lastActiveAt) || 0;
+                var tb = tsToMs(rb.lastActiveAt) || 0;
+                return tb - ta;
+            });
+            if (statusEl) {
+                statusEl.textContent = T("admin.triviaInsightsLoaded", "{n} users").replace("{n}", String(uids.length));
+                statusEl.hidden = false;
+            }
+            if (!tbody || !wrap) {
+                return;
+            }
+            if (!uids.length) {
+                tbody.innerHTML = "<tr><td colspan=\"6\"><p class=\"page-note\">" + escapeHtml(T("admin.triviaInsightsEmpty", "No data yet. Users appear after they sign in and open the app.")) + "</p></td></tr>";
+                wrap.hidden = false;
+                return;
+            }
+            tbody.innerHTML = uids.map(function (uid) {
+                var r = byUid[uid];
+                var act = formatRelativeActivity(r.lastActiveAt);
+                var statusClass = act.online ? "admin-status-online" : "admin-status-offline";
+                var lastQuiz = r.lastQuizDate
+                    ? (r.lastQuizDate + (r.lastResult ? " (" + r.lastResult + ")" : ""))
+                    : "—";
+                var detail = triviaByDateSummary(r.triviaByDate);
+                var detailShort = detail ? (detail.split("\n").length + " " + T("admin.triviaInsightsDays", "days")) : "—";
+                return "" +
+                    "<tr>" +
+                    "<td><strong>" + escapeHtml(r.displayName) + "</strong><br><span class=\"page-note\">" + escapeHtml(uid.slice(0, 12)) + "…</span></td>" +
+                    "<td><span class=\"" + statusClass + "\">" + escapeHtml(act.label) + "</span></td>" +
+                    "<td>" + escapeHtml(String(r.correctCount)) + "</td>" +
+                    "<td>" + escapeHtml(String(r.wrongCount)) + "</td>" +
+                    "<td>" + escapeHtml(lastQuiz) + "</td>" +
+                    "<td title=\"" + escapeHtml(detail) + "\">" + escapeHtml(detailShort) + "</td>" +
+                    "</tr>";
+            }).join("");
+            wrap.hidden = false;
+        }).catch(function () {
+            if (statusEl) {
+                statusEl.textContent = T("admin.triviaInsightsError", "Could not load. Publish updated Firestore rules (admin email + adminTriviaReports).");
+                statusEl.hidden = false;
+            }
+        });
+    }
+
     function loadAdminLeaderboardPreview() {
         var leaderboardRefreshBtn = document.getElementById("admin-leaderboard-refresh");
         var leaderboardStatus = document.getElementById("admin-leaderboard-status");
@@ -164,6 +323,15 @@
                     return;
                 }
                 loadAdminLeaderboardPreview();
+            });
+        }
+        var triviaInsightsBtn = document.getElementById("admin-trivia-insights-refresh");
+        if (triviaInsightsBtn) {
+            triviaInsightsBtn.addEventListener("click", function () {
+                if (!isAdminUser()) {
+                    return;
+                }
+                loadAdminTriviaInsights();
             });
         }
         bindLinkPresets();

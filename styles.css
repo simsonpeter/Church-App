@@ -4642,6 +4642,46 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     padding: 4px 0;
 }
 
+.admin-trivia-insights-table-wrap {
+    margin-top: 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+}
+
+.admin-trivia-insights-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.admin-trivia-insights-table th,
+.admin-trivia-insights-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+}
+
+.admin-trivia-insights-table th {
+    font-weight: 700;
+    background: var(--surface-soft);
+}
+
+.admin-trivia-insights-table tbody tr:last-child td {
+    border-bottom: 0;
+}
+
+.admin-status-online {
+    color: #1a7f37;
+    font-weight: 650;
+}
+
+.admin-status-offline {
+    opacity: 0.85;
+}
+
 /* Chat (members only, text) */
 .chat-messages-wrap {
     margin: 12px 0 14px;
