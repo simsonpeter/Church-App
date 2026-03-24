@@ -248,6 +248,7 @@
         "bible.ttsResume": "ஒலி வேதாகமத்தை தொடரு",
         "bible.ttsStop": "ஒலி வேதாகமத்தை நிறுத்து",
         "bible.ttsUnsupported": "இந்த உலாவியில் ஒலி வேதாகமம் ஆதரவு இல்லை.",
+        "bible.ttsNoAudio": "ஒலி தொடங்கவில்லை. ஒலியளவு மற்றும் பேச்சு அமைப்புகளை சரிபார்க்கவும்.",
         "bible.loading": "வேதாகமம் ஏற்றப்படுகிறது...",
         "bible.error": "வேதாகமத்தை இப்போது ஏற்ற முடியவில்லை.",
         "bible.noData": "இந்த அதிகாரத்திற்கு வசனங்கள் இல்லை.",
@@ -1410,8 +1411,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330u2";
-    var APP_VERSION = "2026.3.30b";
+    var SW_VERSION = "20260330u3";
+    var APP_VERSION = "2026.3.30c";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 

@@ -73,6 +73,18 @@
     var streamPrefetchAudio = streamSupported
         ? (document.getElementById("bible-prefetch-audio") || new Audio())
         : null;
+    if (streamAudio) {
+        try {
+            streamAudio.setAttribute("playsinline", "");
+            streamAudio.setAttribute("webkit-playsinline", "");
+        } catch (a1) {}
+    }
+    if (streamPrefetchAudio) {
+        try {
+            streamPrefetchAudio.setAttribute("playsinline", "");
+            streamPrefetchAudio.setAttribute("webkit-playsinline", "");
+        } catch (a2) {}
+    }
     var currentSpeechText = "";
     var currentSpeechStartVerse = 1;
     var currentSpeechContext = {
@@ -88,6 +100,9 @@
     var speechSynthSegmentIndex = 0;
     var speechSynthPendingTimerId = null;
     var speechSynthUserPaused = false;
+    var speechSynthWatchTimerId = null;
+    var SPEECH_CHAIN_GAP_MS = 55;
+    var SPEECH_START_WATCH_MS = 1200;
     var prefetchedSegmentIndex = -1;
     var prefetchedSegmentUrl = "";
     var shareImageBusy = false;
@@ -989,7 +1004,49 @@
         refreshMiniBiblePlayer();
     }
 
+    function clearSpeechSynthWatch() {
+        if (speechSynthWatchTimerId !== null) {
+            window.clearTimeout(speechSynthWatchTimerId);
+            speechSynthWatchTimerId = null;
+        }
+    }
+
+    function tryStreamFallbackAfterSpeechFail() {
+        clearSpeechSynthWatch();
+        if (!streamSupported) {
+            setStatus(T("bible.ttsNoAudio", "Could not start voice. Check device volume and Speech settings."), true);
+            stopSpeechPlayback();
+            return;
+        }
+        stopSpeechPlayback();
+        updateSpeechTextFromSelection();
+        if (currentSpeechText && startStreamPlayback()) {
+            setStatus("", false);
+            return;
+        }
+        setStatus(T("bible.ttsNoAudio", "Could not start audio. Check volume and try again."), true);
+    }
+
+    function armSpeechStartWatch() {
+        clearSpeechSynthWatch();
+        speechSynthWatchTimerId = window.setTimeout(function () {
+            speechSynthWatchTimerId = null;
+            if (speechState.mode !== "speech" || !speechState.active || speechState.paused || speechSynthUserPaused) {
+                return;
+            }
+            var synth = getSpeechSynthesisApi();
+            if (!synth) {
+                tryStreamFallbackAfterSpeechFail();
+                return;
+            }
+            if (!synth.speaking && !synth.pending) {
+                tryStreamFallbackAfterSpeechFail();
+            }
+        }, SPEECH_START_WATCH_MS);
+    }
+
     function stopSpeechPlayback() {
+        clearSpeechSynthWatch();
         var synth = getSpeechSynthesisApi();
         speechState.active = false;
         speechState.paused = false;
@@ -1081,6 +1138,9 @@
         if (voice) {
             utterance.voice = voice;
         }
+        utterance.onstart = function () {
+            clearSpeechSynthWatch();
+        };
         utterance.onend = function () {
             if (speakingUtterance !== utterance) {
                 return;
@@ -1096,7 +1156,7 @@
             speechSynthPendingTimerId = window.setTimeout(function () {
                 speechSynthPendingTimerId = null;
                 speakNextSpeechSynthSegment();
-            }, 0);
+            }, SPEECH_CHAIN_GAP_MS);
         };
         utterance.onerror = function () {
             if (speakingUtterance !== utterance) {
@@ -1113,10 +1173,40 @@
             speechSynthPendingTimerId = window.setTimeout(function () {
                 speechSynthPendingTimerId = null;
                 speakNextSpeechSynthSegment();
-            }, 0);
+            }, SPEECH_CHAIN_GAP_MS);
         };
         speakingUtterance = utterance;
         synth.speak(utterance);
+    }
+
+    function ensureSpeechVoicesLoaded(callback) {
+        var synth = getSpeechSynthesisApi();
+        if (!synth) {
+            if (typeof callback === "function") {
+                callback();
+            }
+            return;
+        }
+        var voices = getSpeechVoices();
+        if (voices.length) {
+            if (typeof callback === "function") {
+                callback();
+            }
+            return;
+        }
+        function onVoices() {
+            synth.removeEventListener("voiceschanged", onVoices);
+            if (typeof callback === "function") {
+                callback();
+            }
+        }
+        synth.addEventListener("voiceschanged", onVoices);
+        window.setTimeout(function () {
+            synth.removeEventListener("voiceschanged", onVoices);
+            if (typeof callback === "function") {
+                callback();
+            }
+        }, 800);
     }
 
     function startSpeechSynthesisPlaybackQueued() {
@@ -1162,7 +1252,13 @@
         updateTtsControls();
         syncMediaSessionState();
         requestWakeLock();
-        speakNextSpeechSynthSegment();
+        ensureSpeechVoicesLoaded(function () {
+            if (speechState.mode !== "speech" || !speechState.active) {
+                return;
+            }
+            speakNextSpeechSynthSegment();
+            armSpeechStartWatch();
+        });
         return true;
     }
 
@@ -1172,8 +1268,10 @@
             updateTtsControls();
             return;
         }
-        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
-            return;
+        if (speechSupported) {
+            if (startSpeechSynthesisPlaybackQueued()) {
+                return;
+            }
         }
         if (streamSupported && startStreamPlayback()) {
             return;
