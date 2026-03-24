@@ -149,10 +149,11 @@ body.splash-active {
 }
 
 .app-shell {
-    max-width: 430px;
+    max-width: none;
+    width: 100%;
     min-height: 100vh;
-    margin: 0 auto;
-    padding: 22px 18px 128px;
+    margin: 0;
+    padding: max(0px, env(safe-area-inset-top)) 0 calc(112px + env(safe-area-inset-bottom));
     position: relative;
 }
 
@@ -167,12 +168,13 @@ body.splash-active {
 .app-header {
     background: linear-gradient(145deg, var(--header-start), var(--header-end));
     color: #ffffff;
-    padding: 18px 18px;
+    padding: 16px env(safe-area-inset-right, 0px) 16px env(safe-area-inset-left, 0px);
     min-height: 118px;
-    border-radius: 24px;
-    box-shadow: var(--shadow);
+    border-radius: 0;
+    box-shadow: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.22);
     position: sticky;
-    top: max(10px, env(safe-area-inset-top));
+    top: 0;
     z-index: 1400;
     overflow: hidden;
     display: flex;
@@ -214,7 +216,7 @@ body.splash-active {
 .header-controls {
     position: absolute;
     top: 14px;
-    right: 14px;
+    right: max(8px, env(safe-area-inset-right, 0px));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -321,19 +323,24 @@ body.splash-active {
 }
 
 .app-content {
-    margin-top: 16px;
+    margin-top: 0;
     display: grid;
-    gap: 14px;
+    gap: 0;
 }
 
 .card {
     background: var(--surface);
-    border-radius: 18px;
-    padding: 18px;
-    border: 1px solid var(--line);
-    box-shadow: 0 8px 24px rgba(127, 34, 34, 0.08);
-    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+    border-radius: 0;
+    padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+    border: solid var(--line);
+    border-width: 0 0 1px;
+    box-shadow: none;
+    transition: border-color 0.22s ease;
     animation: fade-up 0.45s ease both;
+}
+
+.app-content > .card:last-child {
+    border-bottom-width: 0;
 }
 
 .card:nth-child(2) {
@@ -365,17 +372,23 @@ body.splash-active {
 }
 
 .card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px rgba(127, 34, 34, 0.12);
     border-color: #efb9b9;
 }
 
+.app-content > .card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .card h2 {
-    margin: 0 0 10px;
+    margin: 0;
+    padding: 12px 0 8px;
     font-size: 1.05rem;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .card h2 i {
@@ -390,8 +403,13 @@ body.splash-active {
 
 .card p {
     margin: 0;
+    padding: 0 0 10px;
     color: var(--muted);
     line-height: 1.45;
+}
+
+.card h2 + p {
+    padding-top: 0;
 }
 
 .card-lang-top {
@@ -399,12 +417,14 @@ body.splash-active {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    margin-bottom: 10px;
+    margin: 0 0 8px;
+    padding: 12px 0 0;
 }
 
 .card-lang-top > h2 {
     margin: 0;
     min-width: 0;
+    padding: 0;
 }
 
 .card-lang-toggle {
@@ -774,8 +794,8 @@ body.app-update-open {
 
 .announcement-carousel-item.announcement-personal-wish {
     border-left: 4px solid #c9a227;
-    padding-left: 12px;
-    margin-left: -2px;
+    padding-left: 0;
+    margin-left: 0;
 }
 
 .announcement-carousel-controls {
@@ -975,14 +995,14 @@ body.app-update-open {
 
 .list li {
     background: var(--surface-soft);
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 12px 14px;
-    transition: transform 0.2s ease, border-color 0.2s ease;
+    border: solid var(--line);
+    border-width: 0 0 1px;
+    border-radius: 0;
+    padding: 10px 0;
+    transition: border-color 0.2s ease;
 }
 
 .list li:hover {
-    transform: translateY(-1px);
     border-color: #ecb0b0;
 }
 
@@ -1187,10 +1207,11 @@ body.sermon-player-open {
 
 .sermon-player-sheet {
     position: relative;
-    width: min(430px, 100%);
-    margin: 0 auto;
-    border-radius: 22px 22px 0 0;
-    padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    padding: 16px env(safe-area-inset-right, 0px) calc(16px + env(safe-area-inset-bottom, 0px)) env(safe-area-inset-left, 0px);
     background: linear-gradient(180deg, #fff8f8, #ffecec);
     border: 1px solid #efc5c5;
     box-shadow: 0 -20px 45px rgba(58, 11, 11, 0.26);
@@ -1339,19 +1360,21 @@ body.sermon-player-open {
     font-size: 1.1rem;
 }
 
-/* Clear fixed tab bar (~72–88px) + safe area; Tamil/long labels need extra room */
+/* Clear fixed tab bar + safe area */
 .mini-sermon-player {
     position: fixed;
-    left: 50%;
-    transform: translateX(-50%);
-    bottom: calc(max(12px, env(safe-area-inset-bottom)) + 108px);
-    width: min(410px, calc(100% - 20px));
+    left: 0;
+    right: 0;
+    transform: none;
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 56px);
+    width: 100%;
+    max-width: none;
     z-index: 2500;
     display: grid;
     grid-template-columns: 1fr auto auto;
     align-items: center;
     gap: 8px;
-    padding: 10px;
+    padding: 10px env(safe-area-inset-right, 0px) 10px env(safe-area-inset-left, 0px);
     border-radius: 16px;
     border: 1px solid #efc7c7;
     background: rgba(255, 245, 245, 0.97);
@@ -1731,8 +1754,9 @@ body.songbook-fullscreen-open .offline-badge {
 }
 
 .songbook-fullscreen-inner {
-    width: min(430px, 100%);
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
 }
 
 .songbook-fullscreen-body h2 {
@@ -1741,18 +1765,21 @@ body.songbook-fullscreen-open .offline-badge {
 
 .tab-nav {
     position: fixed;
-    left: 50%;
-    bottom: max(12px, env(safe-area-inset-bottom));
-    transform: translateX(-50%);
-    width: min(410px, calc(100% - 20px));
+    left: 0;
+    right: 0;
+    bottom: 0;
+    transform: none;
+    width: 100%;
+    max-width: none;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.92);
+    gap: 0;
+    background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(10px);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 8px;
+    border: solid var(--line);
+    border-width: 1px 0 0;
+    border-radius: 0;
+    padding: 6px env(safe-area-inset-right, 0px) max(6px, env(safe-area-inset-bottom)) env(safe-area-inset-left, 0px);
     box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
     animation: fade-up-nav 0.55s ease both, tab-bar-glow 4s ease-in-out infinite;
     z-index: 1000;
@@ -2953,7 +2980,7 @@ body.bible-fullscreen-open .offline-badge {
     max-width: none;
     border: 0;
     box-shadow: none;
-    padding: calc(10px + env(safe-area-inset-top)) 12px calc(10px + env(safe-area-inset-bottom));
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -3126,8 +3153,8 @@ body.bible-fullscreen-open .offline-badge {
 .reading-compact-item {
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 8px 9px;
+    border-radius: 0;
+    padding: 0;
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     animation: fade-up 0.42s ease both;
 }
@@ -3142,7 +3169,7 @@ body.bible-fullscreen-open .offline-badge {
 
 .home-global-fab {
     position: fixed;
-    right: max(14px, env(safe-area-inset-right));
+    right: max(8px, env(safe-area-inset-right, 0px));
     z-index: 5100;
     width: 52px;
     height: 52px;
@@ -3755,8 +3782,9 @@ body.prayer-detail-open {
 
 .prayer-detail-sheet {
     position: relative;
-    width: min(430px, 100%);
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
     border-radius: 22px 22px 0 0;
     padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
     background: var(--surface);
@@ -4421,11 +4449,12 @@ html[data-theme="light"] .mini-player-btn {
 
 @media (min-width: 768px) {
     .app-shell {
-        max-width: 640px;
-        padding: 32px 28px 160px;
+        max-width: none;
+        width: 100%;
+        padding: env(safe-area-inset-top, 0px) 0 calc(120px + env(safe-area-inset-bottom, 0px));
     }
     .app-header {
-        padding: 24px 24px;
+        padding: 20px env(safe-area-inset-right, 0px) 20px env(safe-area-inset-left, 0px);
         min-height: 130px;
     }
     .app-header h1 {
@@ -4439,8 +4468,8 @@ html[data-theme="light"] .mini-player-btn {
         font-size: 0.82rem;
     }
     .card {
-        padding: 26px;
-        border-radius: 20px;
+        padding: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+        border-radius: 0;
     }
     .card h2 {
         font-size: 1.25rem;
@@ -4503,8 +4532,9 @@ html[data-theme="light"] .mini-player-btn {
 
 @media (min-width: 1024px) {
     .app-shell {
-        max-width: 720px;
-        padding: 36px 32px 180px;
+        max-width: none;
+        width: 100%;
+        padding: env(safe-area-inset-top, 0px) 0 calc(124px + env(safe-area-inset-bottom, 0px));
     }
 }
 
@@ -4571,7 +4601,8 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 4px;
-    max-width: 280px;
+    max-width: none;
+    width: 100%;
 }
 
 .reading-heatmap-cell {
