@@ -1411,8 +1411,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330u3";
-    var APP_VERSION = "2026.3.30c";
+    var SW_VERSION = "20260330u4";
+    var APP_VERSION = "2026.3.30d";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 

@@ -102,6 +102,7 @@
     var speechSynthUserPaused = false;
     var speechSynthWatchTimerId = null;
     var SPEECH_CHAIN_GAP_MS = 55;
+    var SPEECH_CHAIN_GAP_MS_TA = 95;
     var SPEECH_START_WATCH_MS = 1200;
     var prefetchedSegmentIndex = -1;
     var prefetchedSegmentUrl = "";
@@ -156,6 +157,9 @@
                 return String(voice && voice.name || "").toLowerCase().indexOf("tamil") >= 0;
             });
         }
+        if (targetLang === "ta" && !candidates.length) {
+            return null;
+        }
         if (!candidates.length) {
             candidates = voices;
         }
@@ -183,6 +187,20 @@
             }
         });
         return bestVoice;
+    }
+
+    function hasTamilSpeechVoice() {
+        var voices = getSpeechVoices();
+        if (!voices.length) {
+            return false;
+        }
+        return voices.some(function (voice) {
+            var lang = String(voice && voice.lang || "").toLowerCase();
+            if (lang.indexOf("ta") === 0) {
+                return true;
+            }
+            return String(voice && voice.name || "").toLowerCase().indexOf("tamil") >= 0;
+        });
     }
 
     function buildChapterSpeechText(language, location, verses, startVerseNumber) {
@@ -610,8 +628,8 @@
         var sermonMini = document.getElementById("mini-sermon-player");
         var sermonVisible = Boolean(sermonMini && !sermonMini.hidden);
         miniBiblePlayer.style.bottom = sermonVisible
-            ? "calc(max(12px, env(safe-area-inset-bottom)) + 146px)"
-            : "calc(max(12px, env(safe-area-inset-bottom)) + 86px)";
+            ? "calc(max(12px, env(safe-area-inset-bottom)) + 176px)"
+            : "calc(max(12px, env(safe-area-inset-bottom)) + 108px)";
         miniBibleTitleNode.textContent = T("bible.title", "Bible Reader");
         miniBibleInfoNode.textContent = getMiniBibleInfoText();
 
@@ -1132,12 +1150,13 @@
         var utterance = new SpeechSynthesisUtterance(text);
         var activeLanguage = normalizeLanguage(currentSpeechContext.language);
         utterance.lang = activeLanguage === "ta" ? "ta-IN" : "en-GB";
-        utterance.rate = activeLanguage === "ta" ? 0.9 : 0.95;
+        utterance.rate = activeLanguage === "ta" ? 0.88 : 0.95;
         utterance.pitch = 1;
         var voice = pickNaturalVoice(activeLanguage);
         if (voice) {
             utterance.voice = voice;
         }
+        var chainGap = activeLanguage === "ta" ? SPEECH_CHAIN_GAP_MS_TA : SPEECH_CHAIN_GAP_MS;
         utterance.onstart = function () {
             clearSpeechSynthWatch();
         };
@@ -1156,7 +1175,7 @@
             speechSynthPendingTimerId = window.setTimeout(function () {
                 speechSynthPendingTimerId = null;
                 speakNextSpeechSynthSegment();
-            }, SPEECH_CHAIN_GAP_MS);
+            }, chainGap);
         };
         utterance.onerror = function () {
             if (speakingUtterance !== utterance) {
@@ -1173,7 +1192,7 @@
             speechSynthPendingTimerId = window.setTimeout(function () {
                 speechSynthPendingTimerId = null;
                 speakNextSpeechSynthSegment();
-            }, SPEECH_CHAIN_GAP_MS);
+            }, chainGap);
         };
         speakingUtterance = utterance;
         synth.speak(utterance);
@@ -1268,10 +1287,12 @@
             updateTtsControls();
             return;
         }
-        if (speechSupported) {
-            if (startSpeechSynthesisPlaybackQueued()) {
-                return;
-            }
+        var lang = normalizeLanguage(currentSpeechContext.language);
+        if (lang === "ta" && streamSupported && startStreamPlayback()) {
+            return;
+        }
+        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
+            return;
         }
         if (streamSupported && startStreamPlayback()) {
             return;
