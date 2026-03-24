@@ -5,14 +5,13 @@ rules_version = '2';
 //   users/{uid}/profile/basic  — profile + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
-//   chatMessages/{msgId} — church group chat (signed-in only)
+//   chatMessages/{msgId} — church group chat: text only, signed-in users
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
 // for THIS Firebase project yet. Fix:
 //   1) Firebase console → Firestore Database → Rules (not Version history)
 //   2) Ensure the userAchievementScores block below is present, then Publish.
 //   3) Or from repo: firebase deploy --only firestore:rules
-//   chat_uploads/{uid}/... in Storage — deploy: firebase deploy --only storage
 // If you already have other match rules in production, ADD this block; do not delete
 // your existing matches unless you intend to replace the whole file with this one.
 
@@ -54,16 +53,10 @@ service cloud.firestore {
         && request.resource.data.senderName.size() > 0
         && request.resource.data.senderName.size() < 200
         && request.resource.data.createdAt is timestamp
-        && (
-          (request.resource.data.type == "text"
-            && request.resource.data.text is string
-            && request.resource.data.text.size() > 0
-            && request.resource.data.text.size() < 5000)
-          || (request.resource.data.type == "image"
-            && request.resource.data.imageUrl is string
-            && request.resource.data.imageUrl.size() > 0
-            && request.resource.data.imageUrl.size() < 2100)
-        );
+        && request.resource.data.type == "text"
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() < 5000;
       allow update, delete: if false;
     }
   }

@@ -2,14 +2,11 @@
     var CHAT_COLLECTION = "chatMessages";
     var PROFILE_KEY = "njc_user_profiles_v1";
     var MAX_TEXT = 4000;
-    var MAX_IMAGE_BYTES = 4 * 1024 * 1024;
 
     var messagesEl = document.getElementById("chat-messages");
     var formEl = document.getElementById("chat-form");
     var inputEl = document.getElementById("chat-input");
     var sendBtn = document.getElementById("chat-send");
-    var imageInput = document.getElementById("chat-image-input");
-    var imageBtn = document.getElementById("chat-image-btn");
     var statusEl = document.getElementById("chat-status");
     var chatCard = document.querySelector(".chat-page-card");
 
@@ -115,9 +112,9 @@
             var bubbleClass = mine ? "chat-bubble chat-bubble--mine" : "chat-bubble";
             var name = escapeHtml(d.senderName || "");
             var time = formatTime(d.createdAt);
-            var body = "";
-            if (d.type === "image" && d.imageUrl) {
-                body = "<a href=\"" + escapeHtml(d.imageUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\"><img class=\"chat-image\" src=\"" + escapeHtml(d.imageUrl) + "\" alt=\"\"></a>";
+            var body;
+            if (d.type === "image") {
+                body = "<p class=\"chat-text chat-legacy-note\">" + escapeHtml(T("chat.legacyImage", "[Photo — sharing images is turned off.]")) + "</p>";
             } else {
                 body = "<p class=\"chat-text\">" + escapeHtml(String(d.text || "")).replace(/\n/g, "<br>") + "</p>";
             }
@@ -184,9 +181,6 @@
         if (sendBtn) {
             sendBtn.disabled = !loggedIn || sending;
         }
-        if (imageBtn) {
-            imageBtn.disabled = !loggedIn || sending;
-        }
     }
 
     function refreshChat() {
@@ -249,72 +243,10 @@
             });
     }
 
-    function sendImageFile(file) {
-        var user = getUser();
-        if (!user || !user.uid || !file || sending) {
-            return;
-        }
-        if (!file.type || file.type.indexOf("image/") !== 0) {
-            setStatus(T("chat.notImage", "Please choose an image file."));
-            return;
-        }
-        if (file.size > MAX_IMAGE_BYTES) {
-            setStatus(T("chat.imageTooBig", "Image must be under 4 MB."));
-            return;
-        }
-        if (!window.firebase || !window.firebase.storage) {
-            setStatus(T("chat.storageUnavailable", "Photo upload is not available."));
-            return;
-        }
-        sending = true;
-        updateGuestUi();
-        setStatus(T("chat.uploading", "Uploading…"));
-        var safe = String(file.name || "photo").replace(/[^\w.\-]+/g, "_").slice(0, 80);
-        var path = "chat_uploads/" + user.uid + "/" + Date.now() + "_" + safe;
-        var ref = window.firebase.storage().ref(path);
-        ref.put(file)
-            .then(function (snap) {
-                return snap.ref.getDownloadURL();
-            })
-            .then(function (url) {
-                var db = window.firebase.firestore();
-                return db.collection(CHAT_COLLECTION).add({
-                    type: "image",
-                    imageUrl: String(url),
-                    senderUid: user.uid,
-                    senderName: displayNameForUser(user),
-                    createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
-                });
-            })
-            .catch(function () {
-                setStatus(T("chat.uploadFailed", "Upload failed. Enable Storage rules for chat_uploads."));
-            })
-            .finally(function () {
-                sending = false;
-                setStatus("");
-                updateGuestUi();
-                if (imageInput) {
-                    imageInput.value = "";
-                }
-            });
-    }
-
     if (formEl) {
         formEl.addEventListener("submit", function (ev) {
             ev.preventDefault();
             sendText();
-        });
-    }
-
-    if (imageBtn && imageInput) {
-        imageBtn.addEventListener("click", function () {
-            imageInput.click();
-        });
-        imageInput.addEventListener("change", function () {
-            var f = imageInput.files && imageInput.files[0];
-            if (f) {
-                sendImageFile(f);
-            }
         });
     }
 

@@ -740,20 +740,15 @@
         "userAchievements.youPinned": "நீங்கள்",
         "chat.eyebrow": "சமூகம்",
         "chat.title": "சபை அரட்டை",
-        "chat.subtitle": "உள்நுழைந்த உறுப்பினர்கள் மட்டும். அன்புடனும் மரியாதையுடனும் பேசுங்கள்.",
+        "chat.subtitle": "உரை செய்திகள் மட்டும் — உள்நுழைந்த உறுப்பினர்கள். அன்புடனும் மரியாதையுடனும் பேசுங்கள்.",
         "chat.loginRequired": "செய்திகளை படிக்கவும் அனுப்பவும் முதலில் உள்நுழையவும்.",
         "chat.empty": "இன்னும் செய்திகள் இல்லை. வணக்கம் சொல்லுங்கள்!",
         "chat.inputPlaceholder": "செய்தியை தட்டச்சு செய்யவும்…",
         "chat.send": "அனுப்பு",
-        "chat.attachPhoto": "புகைப்படத்தை இணை",
         "chat.loadError": "செய்திகளை ஏற்ற முடியவில்லை. Firestore விதிகளை சரிபார்க்கவும்.",
         "chat.sendFailed": "அனுப்ப முடியவில்லை. இணைப்பு மற்றும் விதிகளை சரிபார்க்கவும்.",
-        "chat.notImage": "படக் கோப்பை தேர்ந்தெடுக்கவும்.",
-        "chat.imageTooBig": "படம் 4 MB க்குள் இருக்க வேண்டும்.",
-        "chat.storageUnavailable": "புகைப்பட பதிவேற்றம் கிடைக்கவில்லை.",
-        "chat.uploading": "பதிவேற்றுகிறது…",
-        "chat.uploadFailed": "பதிவேற்றம் தோல்வி. Storage விதிகளை சரிபார்க்கவும்.",
         "chat.textTooLong": "செய்தி மிக நீளமாக உள்ளது.",
+        "chat.legacyImage": "[புகைப்படம் — பட பகிர்வு அணைக்கப்பட்டுள்ளது.]",
         "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
         "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
         "profile.leaderboardAnonymous": "பொது பட்டியலில் \"Anonymous\" என காட்டு",
@@ -1294,8 +1289,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260327u2";
-    var APP_VERSION = "2026.3.27b";
+    var SW_VERSION = "20260328u1";
+    var APP_VERSION = "2026.3.28a";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 

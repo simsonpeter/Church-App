@@ -81,7 +81,7 @@
             titleKey: "chat.title",
             titleText: "Church chat",
             subtitleKey: "chat.subtitle",
-            subtitleText: "Members only"
+            subtitleText: "Text only, members only"
         },
         contact: {
             icon: "fa-phone",
