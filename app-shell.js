@@ -1411,12 +1411,15 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u3";
+    var SW_VERSION = "20260324u4";
     var APP_VERSION = "2026.3.24";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
     var UPDATE_NOTES_SUMMARY = "Bible reader layout and language controls, PWA cache updates.";
 
-    var UPDATE_DISMISS_SCRIPT_KEY = "njc_update_dismissed_sw_script_v1";
+    /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
+    var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
+    var SESSION_UPDATE_MODAL_AUTO_KEY = "njc_update_modal_auto_shown_v1";
+    var updateModalAutoInFlight = false;
     var lastVisibilitySwUpdateAt = 0;
     var VISIBILITY_SW_UPDATE_MIN_MS = 10 * 60 * 1000;
 
@@ -1434,37 +1437,55 @@
         return Date.now() < getUpdateSnoozeUntilMs();
     }
 
-    function getWaitingScriptUrl(registration) {
+    function getWaitingWorkerAppCacheId(registration) {
         if (!registration || !registration.waiting) {
-            return "";
+            return Promise.resolve("");
         }
-        try {
-            return String(registration.waiting.scriptURL || "");
-        } catch (e1) {
-            return "";
-        }
+        return new Promise(function (resolve) {
+            var settled = false;
+            function done(value) {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                resolve(value || "");
+            }
+            var timer = window.setTimeout(function () {
+                done("");
+            }, 2500);
+            try {
+                var channel = new MessageChannel();
+                channel.port1.onmessage = function (ev) {
+                    window.clearTimeout(timer);
+                    var v = ev && ev.data && ev.data.version;
+                    done(typeof v === "string" ? v : "");
+                };
+                registration.waiting.postMessage({ type: "GET_APP_CACHE_VERSION" }, [channel.port2]);
+            } catch (e2) {
+                window.clearTimeout(timer);
+                done("");
+            }
+        });
     }
 
-    function isUpdateDismissedForThisWaitingWorker(registration) {
-        var url = getWaitingScriptUrl(registration);
-        if (!url) {
+    function isUpdateDismissedForBuild(buildId) {
+        if (!buildId) {
             return false;
         }
         try {
-            return window.localStorage.getItem(UPDATE_DISMISS_SCRIPT_KEY) === url;
-        } catch (e2) {
+            return window.localStorage.getItem(UPDATE_DISMISS_BUILD_KEY) === buildId;
+        } catch (e3) {
             return false;
         }
     }
 
-    function rememberUpdateDismissedForWaitingWorker(registration) {
-        var url = getWaitingScriptUrl(registration);
-        if (!url) {
+    function rememberUpdateDismissedForBuild(buildId) {
+        if (!buildId) {
             return;
         }
         try {
-            window.localStorage.setItem(UPDATE_DISMISS_SCRIPT_KEY, url);
-        } catch (e3) {}
+            window.localStorage.setItem(UPDATE_DISMISS_BUILD_KEY, buildId);
+        } catch (e4) {}
     }
 
     function clearStoredUpdateDismissIfIdle(registration) {
@@ -1472,21 +1493,59 @@
             return;
         }
         try {
-            window.localStorage.removeItem(UPDATE_DISMISS_SCRIPT_KEY);
-        } catch (e4) {}
+            window.localStorage.removeItem(UPDATE_DISMISS_BUILD_KEY);
+        } catch (e5) {}
     }
 
-    function tryShowUpdateModal(registration) {
+    function hasAutoUpdateModalBeenShownThisSession() {
+        try {
+            return window.sessionStorage.getItem(SESSION_UPDATE_MODAL_AUTO_KEY) === "1";
+        } catch (e6) {
+            return false;
+        }
+    }
+
+    function markAutoUpdateModalShownThisSession() {
+        try {
+            window.sessionStorage.setItem(SESSION_UPDATE_MODAL_AUTO_KEY, "1");
+        } catch (e7) {}
+    }
+
+    function tryShowUpdateModal(registration, options) {
+        var opts = options || {};
+        var fromSettings = Boolean(opts.fromSettings);
         if (!registration || !registration.waiting) {
             return;
         }
         if (isUpdateSnoozeActive()) {
             return;
         }
-        if (isUpdateDismissedForThisWaitingWorker(registration)) {
-            return;
+        if (!fromSettings) {
+            if (updateModalAutoInFlight) {
+                return;
+            }
+            updateModalAutoInFlight = true;
         }
-        showUpdateModal(registration);
+        getWaitingWorkerAppCacheId(registration).then(function (buildId) {
+            function releaseAutoLock() {
+                if (!fromSettings) {
+                    updateModalAutoInFlight = false;
+                }
+            }
+            if (!fromSettings) {
+                if (buildId && isUpdateDismissedForBuild(buildId)) {
+                    releaseAutoLock();
+                    return;
+                }
+                if (hasAutoUpdateModalBeenShownThisSession()) {
+                    releaseAutoLock();
+                    return;
+                }
+                markAutoUpdateModalShownThisSession();
+            }
+            showUpdateModal(registration, { dismissedBuildId: buildId });
+            releaseAutoLock();
+        });
     }
 
     function setupOfflineBanner() {
@@ -1506,10 +1565,9 @@
         if (!("serviceWorker" in navigator)) {
             return;
         }
-        navigator.serviceWorker.register("service-worker.js?v=" + SW_VERSION).then(function (registration) {
+        navigator.serviceWorker.register("service-worker.js", { updateViaCache: "none" }).then(function (registration) {
             clearStoredUpdateDismissIfIdle(registration);
             registration.update();
-            tryShowUpdateModal(registration);
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
                 if (!worker) {
@@ -1556,7 +1614,9 @@
         document.body.classList.remove("app-update-open");
     }
 
-    function showUpdateModal(registration) {
+    function showUpdateModal(registration, options) {
+        var opts = options || {};
+        var dismissedBuildId = opts.dismissedBuildId;
         var overlay = document.getElementById("app-update-overlay");
         var confirmBtn = document.getElementById("app-update-confirm");
         var dismissBtn = document.getElementById("app-update-dismiss");
@@ -1567,9 +1627,6 @@
             return;
         }
         if (isUpdateSnoozeActive()) {
-            return;
-        }
-        if (isUpdateDismissedForThisWaitingWorker(registration)) {
             return;
         }
         if (!overlay.hidden) {
@@ -1597,8 +1654,20 @@
             window.location.reload();
         }
 
+        function resolveDismissBuildId(cb) {
+            if (dismissedBuildId) {
+                cb(dismissedBuildId);
+                return;
+            }
+            getWaitingWorkerAppCacheId(registration).then(function (id) {
+                cb(id || "");
+            });
+        }
+
         function dismiss() {
-            rememberUpdateDismissedForWaitingWorker(registration);
+            resolveDismissBuildId(function (id) {
+                rememberUpdateDismissedForBuild(id);
+            });
             hideUpdateModal();
         }
 
@@ -1608,7 +1677,9 @@
             } catch (e1) {
                 return null;
             }
-            rememberUpdateDismissedForWaitingWorker(registration);
+            resolveDismissBuildId(function (id) {
+                rememberUpdateDismissedForBuild(id);
+            });
             hideUpdateModal();
         }
 
@@ -3810,7 +3881,7 @@
                     reg.update().then(function () {
                         if (reg.waiting || reg.installing) {
                             updateStatus.textContent = t("settings.updateAvailable", "New version available!");
-                            showUpdateModal(reg);
+                            tryShowUpdateModal(reg, { fromSettings: true });
                         } else {
                             updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
                         }

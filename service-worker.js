@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v164";
-const RUNTIME_CACHE = "njc-runtime-cache-v164";
+const APP_CACHE = "njc-app-cache-v165";
+const RUNTIME_CACHE = "njc-runtime-cache-v165";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260324u2",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260324u3",
+    "./app-shell.js?v=20260324u4",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260330u1",
     "./events-page.js?v=20260318de",
@@ -50,8 +50,19 @@ function staleWhileRevalidate(request) {
 }
 
 self.addEventListener("message", function (event) {
-    if (event && event.data && event.data.type === "SKIP_WAITING") {
+    if (!event || !event.data) {
+        return;
+    }
+    if (event.data.type === "SKIP_WAITING") {
         self.skipWaiting();
+        return;
+    }
+    if (event.data.type === "GET_APP_CACHE_VERSION" && event.ports && event.ports[0]) {
+        try {
+            event.ports[0].postMessage({ type: "APP_CACHE_VERSION", version: APP_CACHE });
+        } catch (e) {
+            return null;
+        }
     }
 });
 
