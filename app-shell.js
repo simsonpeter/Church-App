@@ -748,6 +748,9 @@
         "chat.loadError": "செய்திகளை ஏற்ற முடியவில்லை. Firestore விதிகளை சரிபார்க்கவும்.",
         "chat.sendFailed": "அனுப்ப முடியவில்லை. இணைப்பு மற்றும் விதிகளை சரிபார்க்கவும்.",
         "chat.textTooLong": "செய்தி மிக நீளமாக உள்ளது.",
+        "chat.queuedOffline": "இணையம் இல்லை — செய்தி வரிசையில். இணைக்கும்போது அனுப்பப்படும்.",
+        "chat.sendingQueued": "வரிசையிலுள்ள செய்திகளை அனுப்புகிறது…",
+        "chat.pendingHint": "இணையம் வந்ததும் அனுப்பப்படும்",
         "chat.legacyImage": "[புகைப்படம் — பட பகிர்வு அணைக்கப்பட்டுள்ளது.]",
         "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
         "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
@@ -1412,8 +1415,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329u6";
-    var APP_VERSION = "2026.3.29f";
+    var SW_VERSION = "20260330u1";
+    var APP_VERSION = "2026.3.30a";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
@@ -4211,6 +4214,79 @@
             }, 320);
         }, 2600);
     }
+
+    window.NjcUiFeedback = (function () {
+        function prefersReducedMotion() {
+            try {
+                return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        function lightHaptic(style) {
+            if (prefersReducedMotion()) {
+                return;
+            }
+            try {
+                var nav = window.navigator;
+                if (nav && nav.vibrate) {
+                    if (style === "success") {
+                        nav.vibrate([12, 40, 18]);
+                    } else {
+                        nav.vibrate(10);
+                    }
+                }
+            } catch (e2) {}
+        }
+
+        function playSoftTone(freqHz, durationSec, volume) {
+            if (prefersReducedMotion()) {
+                return;
+            }
+            try {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) {
+                    return;
+                }
+                var ctx = new Ctx();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = "sine";
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                var v = Math.min(0.22, Math.max(0.02, Number(volume) || 0.08));
+                var dur = Math.min(0.5, Math.max(0.04, Number(durationSec) || 0.12));
+                osc.frequency.setValueAtTime(Number(freqHz) || 440, ctx.currentTime);
+                gain.gain.setValueAtTime(v, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + dur + 0.02);
+            } catch (e3) {}
+        }
+
+        function celebrateSuccess() {
+            lightHaptic("success");
+            playSoftTone(523.25, 0.08, 0.1);
+            window.setTimeout(function () {
+                playSoftTone(659.25, 0.08, 0.09);
+            }, 70);
+            window.setTimeout(function () {
+                playSoftTone(783.99, 0.1, 0.08);
+            }, 140);
+        }
+
+        function readingCheckIn() {
+            lightHaptic("light");
+            playSoftTone(440, 0.06, 0.06);
+        }
+
+        return {
+            celebrateSuccess: celebrateSuccess,
+            readingCheckIn: readingCheckIn,
+            prefersReducedMotion: prefersReducedMotion
+        };
+    })();
 
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();

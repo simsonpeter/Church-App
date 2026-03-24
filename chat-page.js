@@ -1,7 +1,9 @@
 (function () {
     var CHAT_COLLECTION = "chatMessages";
     var PROFILE_KEY = "njc_user_profiles_v1";
+    var QUEUE_KEY = "njc_chat_outbox_v1";
     var MAX_TEXT = 4000;
+    var MAX_QUEUE = 30;
 
     var messagesEl = document.getElementById("chat-messages");
     var formEl = document.getElementById("chat-form");
@@ -12,6 +14,7 @@
 
     var unsubscribe = null;
     var sending = false;
+    var lastServerDocs = [];
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function" && chatCard && typeof window.NjcI18n.tForElement === "function") {
@@ -62,6 +65,43 @@
         return "Member";
     }
 
+    function loadQueue(uid) {
+        if (!uid) {
+            return [];
+        }
+        try {
+            var raw = window.localStorage.getItem(QUEUE_KEY);
+            var o = raw ? JSON.parse(raw) : {};
+            var list = o && o[uid] && Array.isArray(o[uid]) ? o[uid] : [];
+            return list.filter(function (item) {
+                return item && typeof item.text === "string" && item.text.trim();
+            }).slice(0, MAX_QUEUE);
+        } catch (e) {
+            return [];
+        }
+    }
+
+    function saveQueue(uid, list) {
+        if (!uid) {
+            return;
+        }
+        try {
+            var raw = window.localStorage.getItem(QUEUE_KEY);
+            var o = raw ? JSON.parse(raw) : {};
+            if (!o || typeof o !== "object") {
+                o = {};
+            }
+            o[uid] = Array.isArray(list) ? list.slice(0, MAX_QUEUE) : [];
+            window.localStorage.setItem(QUEUE_KEY, JSON.stringify(o));
+        } catch (e2) {}
+    }
+
+    function enqueueMessage(uid, text) {
+        var q = loadQueue(uid);
+        q.push({ text: String(text).trim(), queuedAt: Date.now() });
+        saveQueue(uid, q);
+    }
+
     function setStatus(msg) {
         if (!statusEl) {
             return;
@@ -95,17 +135,33 @@
         }
     }
 
-    function renderMessages(docs) {
+    function formatQueuedTime(ms) {
+        try {
+            return new Date(ms).toLocaleString(undefined, {
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        } catch (e) {
+            return "";
+        }
+    }
+
+    function renderCombined(docs) {
         if (!messagesEl) {
             return;
         }
-        var uid = getUser() && getUser().uid ? String(getUser().uid) : "";
-        var rows = docs.slice().reverse();
-        if (!rows.length) {
+        var user = getUser();
+        var uid = user && user.uid ? String(user.uid) : "";
+        var pending = uid ? loadQueue(uid) : [];
+        var rows = Array.isArray(docs) ? docs.slice().reverse() : [];
+        if (!rows.length && !pending.length) {
             messagesEl.innerHTML = "<p class=\"page-note chat-empty\">" + escapeHtml(T("chat.empty", "No messages yet. Say hello!")) + "</p>";
+            scrollToBottom();
             return;
         }
-        messagesEl.innerHTML = rows.map(function (snap) {
+        var html = rows.map(function (snap) {
             var d = snap.data() || {};
             var sid = String(d.senderUid || "");
             var mine = uid && sid === uid;
@@ -127,6 +183,20 @@
                 "  </div>" +
                 "</div>";
         }).join("");
+        var myName = escapeHtml(displayNameForUser(user) || "Member");
+        pending.forEach(function (item) {
+            var qt = formatQueuedTime(item.queuedAt || Date.now());
+            html += "" +
+                "<div class=\"chat-row chat-row--mine\">" +
+                "  <div class=\"chat-bubble chat-bubble--mine chat-bubble--pending\">" +
+                "    <div class=\"chat-meta\"><span class=\"chat-name\">" + myName + "</span>" +
+                (qt ? "<span class=\"chat-time\">" + escapeHtml(qt) + "</span>" : "") + "</div>" +
+                "    <p class=\"chat-pending-hint\">" + escapeHtml(T("chat.pendingHint", "Will send when you’re back online")) + "</p>" +
+                "    <p class=\"chat-text\">" + escapeHtml(String(item.text || "")).replace(/\n/g, "<br>") + "</p>" +
+                "  </div>" +
+                "</div>";
+        });
+        messagesEl.innerHTML = html;
         scrollToBottom();
     }
 
@@ -154,8 +224,12 @@
                 snap.forEach(function (doc) {
                     list.push(doc);
                 });
-                renderMessages(list);
+                lastServerDocs = list;
+                renderCombined(list);
                 setStatus("");
+                if (navigator.onLine !== false) {
+                    flushOutbox();
+                }
             }, function () {
                 setStatus(T("chat.loadError", "Could not load messages. Check Firestore rules."));
             });
@@ -199,6 +273,62 @@
         startListen();
     }
 
+    function flushOutbox() {
+        var user = getUser();
+        if (!user || !user.uid || sending) {
+            return;
+        }
+        if (navigator.onLine === false) {
+            return;
+        }
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return;
+        }
+        var uid = String(user.uid);
+        var q = loadQueue(uid);
+        if (!q.length) {
+            return;
+        }
+        sending = true;
+        updateGuestUi();
+        if (isChatRoute()) {
+            setStatus(T("chat.sendingQueued", "Sending queued messages…"));
+        }
+        var db = window.firebase.firestore();
+
+        function sendNext() {
+            var queue = loadQueue(uid);
+            if (!queue.length) {
+                sending = false;
+                updateGuestUi();
+                setStatus("");
+                renderCombined(lastServerDocs);
+                return;
+            }
+            var item = queue[0];
+            var payload = {
+                type: "text",
+                text: String(item.text || "").trim(),
+                senderUid: uid,
+                senderName: displayNameForUser(user),
+                createdAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            };
+            db.collection(CHAT_COLLECTION).add(payload)
+                .then(function () {
+                    queue.shift();
+                    saveQueue(uid, queue);
+                    sendNext();
+                })
+                .catch(function () {
+                    sending = false;
+                    updateGuestUi();
+                    setStatus("");
+                    renderCombined(lastServerDocs);
+                });
+        }
+        sendNext();
+    }
+
     function sendText() {
         var user = getUser();
         if (!user || !user.uid || sending) {
@@ -213,6 +343,15 @@
             return;
         }
         if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return;
+        }
+        if (navigator.onLine === false) {
+            enqueueMessage(user.uid, text);
+            if (inputEl) {
+                inputEl.value = "";
+            }
+            renderCombined(lastServerDocs);
+            setStatus(T("chat.queuedOffline", "You’re offline — message queued. It will send when you’re back online."));
             return;
         }
         sending = true;
@@ -235,7 +374,12 @@
                 }
             })
             .catch(function () {
-                setStatus(T("chat.sendFailed", "Could not send. Check connection and rules."));
+                enqueueMessage(user.uid, text);
+                if (inputEl) {
+                    inputEl.value = "";
+                }
+                renderCombined(lastServerDocs);
+                setStatus(T("chat.queuedOffline", "Could not send — message saved. It will send when you’re back online."));
             })
             .finally(function () {
                 sending = false;
@@ -250,9 +394,26 @@
         });
     }
 
+    window.addEventListener("online", function () {
+        flushOutbox();
+        if (isChatRoute()) {
+            setStatus("");
+        }
+    });
+
     document.addEventListener("DOMContentLoaded", refreshChat);
-    document.addEventListener("njc:routechange", refreshChat);
-    document.addEventListener("njc:authchange", refreshChat);
+    document.addEventListener("njc:routechange", function () {
+        refreshChat();
+        if (isChatRoute() && navigator.onLine !== false) {
+            flushOutbox();
+        }
+    });
+    document.addEventListener("njc:authchange", function () {
+        refreshChat();
+        if (navigator.onLine !== false) {
+            flushOutbox();
+        }
+    });
     document.addEventListener("njc:profile-updated", function () {
         if (isChatRoute()) {
             refreshChat();

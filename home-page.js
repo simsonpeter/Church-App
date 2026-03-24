@@ -2009,22 +2009,9 @@
             }
 
             function playTriviaSuccessSound() {
-                try {
-                    var ctx = window.AudioContext || window.webkitAudioContext;
-                    if (!ctx) return;
-                    var audioCtx = new ctx();
-                    var osc = audioCtx.createOscillator();
-                    var gain = audioCtx.createGain();
-                    osc.connect(gain);
-                    gain.connect(audioCtx.destination);
-                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
-                    osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
-                    osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2);
-                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
-                    osc.start(audioCtx.currentTime);
-                    osc.stop(audioCtx.currentTime + 0.35);
-                } catch (e) {}
+                if (window.NjcUiFeedback && typeof window.NjcUiFeedback.celebrateSuccess === "function") {
+                    window.NjcUiFeedback.celebrateSuccess();
+                }
             }
 
             function shareTriviaResult(card) {
@@ -2265,6 +2252,9 @@
                 } else {
                     setTodayProgress(part, target.checked);
                 }
+                if (target.checked && window.NjcUiFeedback && typeof window.NjcUiFeedback.readingCheckIn === "function") {
+                    window.NjcUiFeedback.readingCheckIn();
+                }
                 var tooltip = getReadTooltip(part, target.checked, readingCard);
                 target.title = tooltip;
                 target.setAttribute("aria-label", tooltip);
@@ -2283,6 +2273,9 @@
                         return;
                     }
                     setProgressForDate(dateKey, part, target.checked);
+                    if (target.checked && window.NjcUiFeedback && typeof window.NjcUiFeedback.readingCheckIn === "function") {
+                        window.NjcUiFeedback.readingCheckIn();
+                    }
                     renderReadingPlan();
                 });
             }

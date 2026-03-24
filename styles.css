@@ -3053,12 +3053,15 @@ body.bible-fullscreen-open .offline-badge {
 .reading-item-title {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    min-height: 44px;
 }
 
 .reading-inline-tick {
-    width: 15px;
-    height: 15px;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    min-height: 22px;
     margin: 0;
     accent-color: var(--primary);
     flex: 0 0 auto;
@@ -4323,6 +4326,35 @@ html[data-theme="light"] .mini-player-btn {
     }
 }
 
+/* Narrow phones: larger tap targets for bottom nav & trivia */
+@media (max-width: 380px) {
+    .tab-nav {
+        padding: 10px 6px;
+        gap: 4px;
+    }
+    .tab {
+        min-height: 48px;
+        padding: 6px 2px;
+    }
+    .tab-icon {
+        font-size: 1.12rem;
+    }
+    .trivia-option-btn {
+        padding: 14px 14px;
+        min-height: 48px;
+    }
+    .reading-unread-line {
+        min-height: 44px;
+        align-items: center;
+    }
+    .reading-unread-line input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        min-height: 22px;
+    }
+}
+
 /* Tablet and larger screens – scale up from mobile */
 @media (min-width: 600px) {
     .app-shell {
@@ -4813,6 +4845,18 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     word-break: break-word;
 }
 
+.chat-bubble--pending {
+    border-style: dashed;
+    opacity: 0.95;
+}
+
+.chat-pending-hint {
+    margin: 0 0 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.85;
+}
+
 .chat-legacy-note {
     font-style: italic;
     opacity: 0.85;
@@ -4828,6 +4872,13 @@ body:has(.offline-banner:not([hidden])) .app-shell {
 .chat-form .chat-input {
     flex: 1 1 160px;
     min-width: 0;
+    min-height: 48px;
+}
+
+.chat-form #chat-send {
+    min-height: 48px;
+    min-width: 72px;
+    padding: 12px 16px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
