@@ -3071,9 +3071,8 @@ body.bible-fullscreen-open .offline-badge {
 
 .reading-compact-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
-    align-items: stretch;
     background: transparent !important;
     border: 0 !important;
     padding: 0 !important;
@@ -3096,41 +3095,51 @@ body.bible-fullscreen-open .offline-badge {
     animation-delay: 0.1s;
 }
 
-.reading-compact-lang-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 44px;
-    padding: 4px 0;
-}
-
-.reading-inline-lang-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+.home-global-lang-fab {
+    position: fixed;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px);
+    z-index: 5100;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
     border: 1px solid var(--line);
     background: var(--surface);
     color: var(--accent, #b42323);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    padding: 0;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.reading-inline-lang-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(120, 22, 22, 0.1);
-    border-color: #e8c4c4;
+.home-global-lang-fab:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 24px rgba(120, 22, 22, 0.18);
 }
 
-.reading-inline-lang-btn:focus-visible {
+.home-global-lang-fab:focus-visible {
     outline: 2px solid var(--accent, #b42323);
-    outline-offset: 2px;
+    outline-offset: 3px;
 }
 
-.reading-inline-lang-btn i {
-    font-size: 1.15rem;
+.home-global-lang-fab i {
+    font-size: 1.35rem;
+}
+
+.home-global-lang-fab[hidden] {
+    display: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .home-global-lang-fab {
+        transition: none;
+    }
+    .home-global-lang-fab:hover {
+        transform: none;
+    }
 }
 
 .reading-compact-item:hover {

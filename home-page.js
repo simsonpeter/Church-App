@@ -1552,14 +1552,7 @@
                 var progress = getTodayProgress();
                 var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
                 var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
-                var langLabel = T("home.readingCardLanguage", "Switch this card language", readingCard);
-                var langBtn = "" +
-                    "<div class=\"reading-compact-lang-wrap\">" +
-                    "  <button type=\"button\" class=\"reading-inline-lang-btn card-lang-toggle\" aria-label=\"" + NjcEvents.escapeHtml(langLabel) + "\" title=\"" + NjcEvents.escapeHtml(langLabel) + "\">" +
-                    "    <i class=\"fa-solid fa-language\" aria-hidden=\"true\"></i>" +
-                    "  </button>" +
-                    "</div>";
-                var compactHtml = morningBlock + eveningBlock + langBtn;
+                var compactHtml = morningBlock + eveningBlock;
 
                 if (!compactHtml) {
                     todayReadingPlanList.innerHTML = "" +
@@ -1572,7 +1565,6 @@
                 }
 
                 todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
-                document.dispatchEvent(new CustomEvent("njc:reading-plan-rendered"));
                 renderReadingProgress();
             }
 
