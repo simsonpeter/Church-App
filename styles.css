@@ -3095,10 +3095,9 @@ body.bible-fullscreen-open .offline-badge {
     animation-delay: 0.1s;
 }
 
-.home-global-lang-fab {
+.home-global-fab {
     position: fixed;
     right: max(14px, env(safe-area-inset-right));
-    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px);
     z-index: 5100;
     width: 52px;
     height: 52px;
@@ -3115,29 +3114,37 @@ body.bible-fullscreen-open .offline-badge {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.home-global-lang-fab:hover {
+.home-global-theme-fab {
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px + 60px);
+}
+
+.home-global-lang-fab {
+    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px);
+}
+
+.home-global-fab:hover {
     transform: scale(1.05);
     box-shadow: 0 8px 24px rgba(120, 22, 22, 0.18);
 }
 
-.home-global-lang-fab:focus-visible {
+.home-global-fab:focus-visible {
     outline: 2px solid var(--accent, #b42323);
     outline-offset: 3px;
 }
 
-.home-global-lang-fab i {
+.home-global-fab i {
     font-size: 1.35rem;
 }
 
-.home-global-lang-fab[hidden] {
+.home-global-fab[hidden] {
     display: none !important;
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .home-global-lang-fab {
+    .home-global-fab {
         transition: none;
     }
-    .home-global-lang-fab:hover {
+    .home-global-fab:hover {
         transform: none;
     }
 }

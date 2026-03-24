@@ -1241,7 +1241,7 @@
             fab = document.createElement("button");
             fab.id = "home-global-lang-fab";
             fab.type = "button";
-            fab.className = "home-global-lang-fab";
+            fab.className = "home-global-lang-fab home-global-fab";
             fab.setAttribute("aria-hidden", "true");
             fab.innerHTML = "<i class=\"fa-solid fa-language\" aria-hidden=\"true\"></i>";
             document.body.appendChild(fab);
@@ -1277,6 +1277,55 @@
 
         document.addEventListener("njc:langchange", function () {
             refreshFabUi();
+        });
+        document.addEventListener("njc:routechange", syncFabVisibility);
+        window.addEventListener("hashchange", syncFabVisibility);
+        syncFabVisibility();
+    }
+
+    function setupHomeGlobalThemeFab() {
+        var fab = document.getElementById("home-global-theme-fab");
+        if (!fab) {
+            fab = document.createElement("button");
+            fab.id = "home-global-theme-fab";
+            fab.type = "button";
+            fab.className = "home-global-theme-fab home-global-fab";
+            fab.setAttribute("aria-hidden", "true");
+            document.body.appendChild(fab);
+        }
+
+        function refreshThemeFabUi() {
+            var theme = document.documentElement.getAttribute("data-theme") || getActiveTheme();
+            setToggleIcon(fab, theme);
+        }
+
+        function syncFabVisibility() {
+            var onHome = getCurrentRouteId() === "home";
+            var hide = !onHome
+                || document.body.classList.contains("auth-entry-open")
+                || document.body.classList.contains("bible-fullscreen-open")
+                || document.body.classList.contains("songbook-fullscreen-open")
+                || document.body.classList.contains("app-update-open");
+            fab.hidden = hide;
+            fab.setAttribute("aria-hidden", hide ? "true" : "false");
+            if (!hide) {
+                refreshThemeFabUi();
+            }
+        }
+
+        fab.addEventListener("click", function () {
+            var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+            applyTheme(nextTheme);
+            persistTheme(nextTheme);
+            refreshThemeFabUi();
+            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
+        });
+
+        document.addEventListener("njc:themechange", function () {
+            refreshThemeFabUi();
+        });
+        document.addEventListener("njc:langchange", function () {
+            refreshThemeFabUi();
         });
         document.addEventListener("njc:routechange", syncFabVisibility);
         window.addEventListener("hashchange", syncFabVisibility);
@@ -1363,8 +1412,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329u5";
-    var APP_VERSION = "2026.3.29e";
+    var SW_VERSION = "20260329u6";
+    var APP_VERSION = "2026.3.29f";
 
     var UPDATE_NOTES_TEXT = "Settings: choose English & Tamil fonts with live preview.";
 
@@ -4301,6 +4350,7 @@
         setupHeaderHamburgerMenu();
         setupCardLanguageSwitchers();
         setupHomeGlobalLanguageFab();
+        setupHomeGlobalThemeFab();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();
