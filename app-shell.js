@@ -95,6 +95,8 @@
         "home.dailyVerseVersionEnglish": "KJV",
         "home.dailyVerseVersionTamil": "BSI (பழைய)",
         "home.dailyVerseEmptyBody": "இன்றைய வசனம் கிடைக்கவில்லை.",
+        "home.dailyVerseLoading": "இன்றைய வசனம் ஏற்றப்படுகிறது...",
+        "home.dailyVerseVersionEnglishDaily": "Bible.org (இன்றைய வசனம்)",
         "home.announcementsTitle": "அறிவிப்புகள்",
         "home.announcementsSubtitle": "இந்த வாரத்தின் சமீபத்திய புதுப்பிப்புகள்.",
         "home.loadingAnnouncementsTitle": "அறிவிப்புகள் ஏற்றப்படுகின்றன...",

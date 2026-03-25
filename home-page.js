@@ -445,6 +445,81 @@
                     : T("home.dailyVerseVersionEnglish", "KJV", verseCard);
             }
 
+            function getEnglishDailyVerseSourceLabel() {
+                return T("home.dailyVerseVersionEnglishDaily", "Bible.org (verse of the day)", verseCard);
+            }
+
+            function votdCacheDateKey() {
+                return String(todayYmd.year) + "-" + String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
+            }
+
+            var DAILY_VERSE_VOTD_CACHE_KEY = "njc_daily_verse_votd_cache_v1";
+
+            function readVerseOfTheDayCache() {
+                try {
+                    var raw = window.localStorage.getItem(DAILY_VERSE_VOTD_CACHE_KEY);
+                    if (!raw) {
+                        return null;
+                    }
+                    var parsed = JSON.parse(raw);
+                    if (!parsed || typeof parsed !== "object") {
+                        return null;
+                    }
+                    if (parsed.dateKey !== votdCacheDateKey()) {
+                        return null;
+                    }
+                    var reference = String(parsed.reference || "").trim();
+                    var textEn = String(parsed.textEn || "").trim();
+                    if (!reference || !textEn) {
+                        return null;
+                    }
+                    return { reference: reference, textEn: textEn };
+                } catch (err) {
+                    return null;
+                }
+            }
+
+            function saveVerseOfTheDayCache(entry) {
+                try {
+                    window.localStorage.setItem(DAILY_VERSE_VOTD_CACHE_KEY, JSON.stringify({
+                        dateKey: votdCacheDateKey(),
+                        reference: entry.reference,
+                        textEn: entry.textEn
+                    }));
+                } catch (err) {
+                    return null;
+                }
+                return null;
+            }
+
+            function fetchVerseOfTheDayFromApi() {
+                var url = "https://labs.bible.org/api/?passage=votd&type=json";
+                return fetch(url, { cache: "no-store" })
+                    .then(function (response) {
+                        if (!response.ok) {
+                            throw new Error("Daily verse request failed");
+                        }
+                        return response.json();
+                    })
+                    .then(function (rows) {
+                        var row = Array.isArray(rows) && rows.length ? rows[0] : null;
+                        if (!row || typeof row !== "object") {
+                            throw new Error("Daily verse payload empty");
+                        }
+                        var book = String(row.bookname || "").trim();
+                        var chapter = String(row.chapter || "").trim();
+                        var verse = String(row.verse || "").trim();
+                        var text = String(row.text || "").replace(/\s+/g, " ").trim();
+                        if (!book || !chapter || !verse || !text) {
+                            throw new Error("Daily verse payload incomplete");
+                        }
+                        return {
+                            reference: book + " " + chapter + ":" + verse,
+                            textEn: text
+                        };
+                    });
+            }
+
             function parseSingleVerseReference(reference) {
                 var text = String(reference || "").trim();
                 var match = text.match(/^(.+?)\s+(\d+):(\d+)$/);
@@ -550,30 +625,82 @@
                     return;
                 }
                 var dayNum = getDayOfYear(todayYmd);
-                if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
-                    applyDailyVerseBackdrop(dayNum, 0);
-                    dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
-                    dailyVerseReference.textContent = "";
-                    return;
-                }
                 dailyVerseRenderToken += 1;
                 var renderToken = dailyVerseRenderToken;
-                var verseIndex = (dayNum - 1) % dailyVersePool.length;
-                applyDailyVerseBackdrop(dayNum, verseIndex);
-                var verseItem = dailyVersePool[verseIndex];
                 var showTamil = verseLanguage === "ta";
                 var languageKey = showTamil ? "ta" : "en";
-                dailyVerseText.textContent = showTamil ? (verseItem.textTa || verseItem.textEn) : verseItem.textEn;
-                dailyVerseReference.textContent = (verseItem.reference || "") + " • " + getVerseVersionLabel(showTamil);
-                setDailyVerseToggleLabel();
-                resolveDailyVerseText(verseItem.reference, languageKey).then(function (text) {
-                    if (renderToken !== dailyVerseRenderToken) {
+
+                function renderDailyVerseFallback() {
+                    if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
+                        applyDailyVerseBackdrop(dayNum, 0);
+                        dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
+                        dailyVerseReference.textContent = "";
+                        setDailyVerseToggleLabel();
                         return;
                     }
-                    if (text) {
-                        dailyVerseText.textContent = text;
+                    var verseIndex = (dayNum - 1) % dailyVersePool.length;
+                    applyDailyVerseBackdrop(dayNum, verseIndex);
+                    var verseItem = dailyVersePool[verseIndex];
+                    dailyVerseText.textContent = showTamil ? (verseItem.textTa || verseItem.textEn) : verseItem.textEn;
+                    dailyVerseReference.textContent = (verseItem.reference || "") + " • " + getVerseVersionLabel(showTamil);
+                    setDailyVerseToggleLabel();
+                    resolveDailyVerseText(verseItem.reference, languageKey).then(function (text) {
+                        if (renderToken !== dailyVerseRenderToken) {
+                            return;
+                        }
+                        if (text) {
+                            dailyVerseText.textContent = text;
+                        }
+                    });
+                }
+
+                function applyVerseOfTheDay(entry) {
+                    var hash = 0;
+                    var refStr = String(entry.reference || "");
+                    for (var i = 0; i < refStr.length; i += 1) {
+                        hash = (hash * 31 + refStr.charCodeAt(i)) >>> 0;
                     }
-                });
+                    applyDailyVerseBackdrop(dayNum, hash % 1000);
+                    dailyVerseReference.textContent = entry.reference + " • " + (showTamil ? getVerseVersionLabel(true) : getEnglishDailyVerseSourceLabel());
+                    setDailyVerseToggleLabel();
+                    dailyVerseText.textContent = entry.textEn;
+                    if (showTamil) {
+                        resolveDailyVerseText(entry.reference, "ta").then(function (text) {
+                            if (renderToken !== dailyVerseRenderToken) {
+                                return;
+                            }
+                            if (text) {
+                                dailyVerseText.textContent = text;
+                            }
+                        });
+                    }
+                }
+
+                var cachedVotd = readVerseOfTheDayCache();
+                if (cachedVotd) {
+                    applyVerseOfTheDay(cachedVotd);
+                    return;
+                }
+
+                applyDailyVerseBackdrop(dayNum, 0);
+                dailyVerseText.textContent = T("home.dailyVerseLoading", "Loading daily verse...", verseCard);
+                dailyVerseReference.textContent = "";
+                setDailyVerseToggleLabel();
+
+                fetchVerseOfTheDayFromApi()
+                    .then(function (entry) {
+                        saveVerseOfTheDayCache(entry);
+                        if (renderToken !== dailyVerseRenderToken) {
+                            return;
+                        }
+                        applyVerseOfTheDay(entry);
+                    })
+                    .catch(function () {
+                        if (renderToken !== dailyVerseRenderToken) {
+                            return;
+                        }
+                        renderDailyVerseFallback();
+                    });
             }
 
             function getTodayKey() {
