@@ -25,12 +25,6 @@
     --card-gradient-bottom: #fff6f4;
     --body-glow-top: rgba(255, 206, 168, 0.38);
     --body-glow-corner: rgba(229, 57, 53, 0.08);
-    /* Hero card band (scoped on .card-hero-band; never touches app header vars) */
-    --hero-band-start: var(--header-start);
-    --hero-band-mid: #c62828;
-    --hero-band-end: var(--header-end);
-    --hero-band-glow: rgba(255, 236, 236, 0.55);
-    --hero-band-shine: rgba(255, 255, 255, 0.2);
 }
 
 * {
@@ -396,7 +390,7 @@ body.splash-active {
     z-index: 0;
 }
 
-.card.card-v-mesh > *:not(.card-hero-band) {
+.card.card-v-mesh > * {
     position: relative;
     z-index: 1;
 }
@@ -479,140 +473,6 @@ body.splash-active {
 
 .card.location-map-card.card-v-map .location-map-cta {
     color: #0f766e;
-}
-
-/* —— Hero band: short, soft blend into card; palette stays close to app header —— */
-.card-has-hero-band {
-    --card-hero-h: clamp(52px, 15vw, 76px);
-    padding-top: calc(var(--card-hero-h) + 14px);
-}
-
-.card-has-hero-band.card-v-featured::before {
-    display: none;
-}
-
-.card-hero-band {
-    --hero-band-start: var(--header-start);
-    --hero-band-end: var(--header-end);
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: calc(var(--card-hero-h) + 22px);
-    border-radius: inherit;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 2;
-    background:
-        radial-gradient(ellipse 95% 130% at 18% -35%, var(--hero-band-glow), transparent 52%),
-        radial-gradient(ellipse 70% 100% at 92% 10%, var(--hero-band-shine), transparent 48%),
-        linear-gradient(152deg, var(--hero-band-start) 0%, var(--hero-band-mid) 48%, var(--hero-band-end) 100%);
-    mask-image: linear-gradient(to bottom, #000 0%, #000 38%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 38%, transparent 100%);
-}
-
-.card-hero-band::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(105deg, transparent 0%, rgba(255, 255, 255, 0.07) 45%, transparent 78%);
-    opacity: 1;
-    pointer-events: none;
-}
-
-.card-has-hero-band > *:not(.card-hero-band) {
-    position: relative;
-    z-index: 3;
-}
-
-.card-has-hero-band > h2:first-of-type {
-    margin-top: 2px;
-}
-
-/* Subtle tint shifts (same red family + neutrals); avoids rainbow clash with pink page bg */
-.card-hero-band--announcements {
-    --hero-band-glow: rgba(255, 232, 232, 0.6);
-}
-
-.card-hero-band--prayer-wall {
-    --hero-band-glow: rgba(255, 214, 228, 0.55);
-    --hero-band-mid: #b71c4a;
-}
-
-.card-hero-band--events-spotlight {
-    --hero-band-glow: rgba(255, 228, 200, 0.5);
-    --hero-band-mid: #c2410c;
-}
-
-.card-hero-band--sermons {
-    --hero-band-glow: rgba(240, 230, 255, 0.45);
-    --hero-band-mid: #9c1f4a;
-}
-
-.card-hero-band--contact {
-    --hero-band-glow: rgba(255, 244, 232, 0.55);
-    --hero-band-start: #9a3412;
-    --hero-band-mid: #c2410c;
-    --hero-band-end: #ea580c;
-}
-
-.card-hero-band--bible {
-    --hero-band-glow: rgba(255, 237, 213, 0.32);
-    --hero-band-shine: rgba(255, 255, 255, 0.1);
-    --hero-band-start: #1e293b;
-    --hero-band-mid: #334155;
-    --hero-band-end: #475569;
-}
-
-.card-hero-band--songbook {
-    --hero-band-glow: rgba(245, 230, 255, 0.48);
-    --hero-band-mid: #a31552;
-}
-
-.card-hero-band--trivia {
-    --hero-band-glow: rgba(237, 233, 254, 0.5);
-    --hero-band-start: #5b21b6;
-    --hero-band-mid: #6d28d9;
-    --hero-band-end: #7c3aed;
-}
-
-.card-hero-band--achievements {
-    --hero-band-glow: rgba(255, 235, 200, 0.55);
-    --hero-band-start: #9a3412;
-    --hero-band-mid: #c2410c;
-    --hero-band-end: #ea580c;
-}
-
-.card-hero-band--settings {
-    --hero-band-glow: rgba(248, 250, 252, 0.55);
-    --hero-band-shine: rgba(255, 255, 255, 0.32);
-    --hero-band-start: #64748b;
-    --hero-band-mid: #78869b;
-    --hero-band-end: #94a3b8;
-}
-
-.card-hero-band--chat {
-    --hero-band-glow: rgba(224, 242, 254, 0.4);
-    --hero-band-mid: #b91c1c;
-}
-
-.card-hero-band--profile {
-    --hero-band-glow: rgba(220, 252, 246, 0.38);
-    --hero-band-mid: #be123c;
-}
-
-.card-hero-band--admin {
-    --hero-band-glow: rgba(254, 215, 215, 0.35);
-    --hero-band-start: #450a0a;
-    --hero-band-mid: #7f1d1d;
-    --hero-band-end: #b91c1c;
-}
-
-.card-hero-band--mailbox {
-    --hero-band-glow: rgba(224, 242, 254, 0.38);
-    --hero-band-mid: #991b1b;
 }
 
 .card:nth-child(2) {
@@ -3267,10 +3127,6 @@ body.bible-fullscreen-open .offline-badge {
     border-left: 0;
 }
 
-.bible-card.bible-card-fullscreen .card-hero-band {
-    display: none !important;
-}
-
 .bible-card.bible-card-fullscreen h2,
 .bible-card.bible-card-fullscreen > .page-note:first-of-type {
     display: none !important;
@@ -4374,112 +4230,6 @@ body.prayer-detail-open {
         color: #5eead4;
     }
 
-    :root:not([data-theme="light"]) .card-hero-band {
-        --hero-band-shine: rgba(255, 255, 255, 0.06);
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band::after {
-        opacity: 0.35;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--announcements {
-        --hero-band-glow: rgba(254, 202, 202, 0.12);
-        --hero-band-start: #3f0a0a;
-        --hero-band-mid: #7f1d1d;
-        --hero-band-end: #991b1b;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--prayer-wall {
-        --hero-band-glow: rgba(251, 207, 232, 0.14);
-        --hero-band-start: #4a0d26;
-        --hero-band-mid: #831843;
-        --hero-band-end: #9d174d;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--events-spotlight {
-        --hero-band-glow: rgba(253, 230, 138, 0.12);
-        --hero-band-start: #713f12;
-        --hero-band-mid: #b45309;
-        --hero-band-end: #ca8a04;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--sermons {
-        --hero-band-glow: rgba(233, 213, 255, 0.12);
-        --hero-band-start: #4c1d79;
-        --hero-band-mid: #6b21a8;
-        --hero-band-end: #7e22ce;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--contact {
-        --hero-band-glow: rgba(254, 215, 170, 0.12);
-        --hero-band-start: #7c2d12;
-        --hero-band-mid: #9a3412;
-        --hero-band-end: #c2410c;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--bible {
-        --hero-band-glow: rgba(148, 163, 184, 0.1);
-        --hero-band-start: #0f172a;
-        --hero-band-mid: #1e293b;
-        --hero-band-end: #334155;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--songbook {
-        --hero-band-glow: rgba(233, 213, 255, 0.12);
-        --hero-band-start: #581c87;
-        --hero-band-mid: #6b21a8;
-        --hero-band-end: #7e22ce;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--trivia {
-        --hero-band-glow: rgba(199, 210, 254, 0.12);
-        --hero-band-start: #312e81;
-        --hero-band-mid: #4338ca;
-        --hero-band-end: #4f46e5;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--achievements {
-        --hero-band-glow: rgba(253, 230, 138, 0.12);
-        --hero-band-start: #713f12;
-        --hero-band-mid: #b45309;
-        --hero-band-end: #ca8a04;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--settings {
-        --hero-band-glow: rgba(226, 232, 240, 0.08);
-        --hero-band-start: #1e293b;
-        --hero-band-mid: #334155;
-        --hero-band-end: #475569;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--chat {
-        --hero-band-glow: rgba(191, 219, 254, 0.1);
-        --hero-band-start: #450a0a;
-        --hero-band-mid: #991b1b;
-        --hero-band-end: #b91c1c;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--profile {
-        --hero-band-glow: rgba(254, 202, 202, 0.1);
-        --hero-band-start: #7f1d1d;
-        --hero-band-mid: #9f1239;
-        --hero-band-end: #be123c;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--admin {
-        --hero-band-glow: rgba(254, 202, 202, 0.12);
-        --hero-band-start: #450a0a;
-        --hero-band-mid: #7f1d1d;
-        --hero-band-end: #991b1b;
-    }
-
-    :root:not([data-theme="light"]) .card-hero-band--mailbox {
-        --hero-band-glow: rgba(191, 219, 254, 0.1);
-        --hero-band-start: #450a0a;
-        --hero-band-mid: #7f1d1d;
-        --hero-band-end: #991b1b;
-    }
-
     :root:not([data-theme="light"]) .sermon-player-sheet {
         background: linear-gradient(180deg, #1a1a1a, #111111);
         border-color: #333333;
@@ -4641,112 +4391,6 @@ html[data-theme="dark"] .card.location-map-card.card-v-map {
 html[data-theme="dark"] .card.location-map-card.card-v-map h2 i,
 html[data-theme="dark"] .card.location-map-card.card-v-map .location-map-cta {
     color: #5eead4;
-}
-
-html[data-theme="dark"] .card-hero-band {
-    --hero-band-shine: rgba(255, 255, 255, 0.06);
-}
-
-html[data-theme="dark"] .card-hero-band::after {
-    opacity: 0.35;
-}
-
-html[data-theme="dark"] .card-hero-band--announcements {
-    --hero-band-glow: rgba(254, 202, 202, 0.12);
-    --hero-band-start: #3f0a0a;
-    --hero-band-mid: #7f1d1d;
-    --hero-band-end: #991b1b;
-}
-
-html[data-theme="dark"] .card-hero-band--prayer-wall {
-    --hero-band-glow: rgba(251, 207, 232, 0.14);
-    --hero-band-start: #4a0d26;
-    --hero-band-mid: #831843;
-    --hero-band-end: #9d174d;
-}
-
-html[data-theme="dark"] .card-hero-band--events-spotlight {
-    --hero-band-glow: rgba(253, 230, 138, 0.12);
-    --hero-band-start: #713f12;
-    --hero-band-mid: #b45309;
-    --hero-band-end: #ca8a04;
-}
-
-html[data-theme="dark"] .card-hero-band--sermons {
-    --hero-band-glow: rgba(233, 213, 255, 0.12);
-    --hero-band-start: #4c1d79;
-    --hero-band-mid: #6b21a8;
-    --hero-band-end: #7e22ce;
-}
-
-html[data-theme="dark"] .card-hero-band--contact {
-    --hero-band-glow: rgba(254, 215, 170, 0.12);
-    --hero-band-start: #7c2d12;
-    --hero-band-mid: #9a3412;
-    --hero-band-end: #c2410c;
-}
-
-html[data-theme="dark"] .card-hero-band--bible {
-    --hero-band-glow: rgba(148, 163, 184, 0.1);
-    --hero-band-start: #0f172a;
-    --hero-band-mid: #1e293b;
-    --hero-band-end: #334155;
-}
-
-html[data-theme="dark"] .card-hero-band--songbook {
-    --hero-band-glow: rgba(233, 213, 255, 0.12);
-    --hero-band-start: #581c87;
-    --hero-band-mid: #6b21a8;
-    --hero-band-end: #7e22ce;
-}
-
-html[data-theme="dark"] .card-hero-band--trivia {
-    --hero-band-glow: rgba(199, 210, 254, 0.12);
-    --hero-band-start: #312e81;
-    --hero-band-mid: #4338ca;
-    --hero-band-end: #4f46e5;
-}
-
-html[data-theme="dark"] .card-hero-band--achievements {
-    --hero-band-glow: rgba(253, 230, 138, 0.12);
-    --hero-band-start: #713f12;
-    --hero-band-mid: #b45309;
-    --hero-band-end: #ca8a04;
-}
-
-html[data-theme="dark"] .card-hero-band--settings {
-    --hero-band-glow: rgba(226, 232, 240, 0.08);
-    --hero-band-start: #1e293b;
-    --hero-band-mid: #334155;
-    --hero-band-end: #475569;
-}
-
-html[data-theme="dark"] .card-hero-band--chat {
-    --hero-band-glow: rgba(191, 219, 254, 0.1);
-    --hero-band-start: #450a0a;
-    --hero-band-mid: #991b1b;
-    --hero-band-end: #b91c1c;
-}
-
-html[data-theme="dark"] .card-hero-band--profile {
-    --hero-band-glow: rgba(254, 202, 202, 0.1);
-    --hero-band-start: #7f1d1d;
-    --hero-band-mid: #9f1239;
-    --hero-band-end: #be123c;
-}
-
-html[data-theme="dark"] .card-hero-band--admin {
-    --hero-band-glow: rgba(254, 202, 202, 0.12);
-    --hero-band-start: #450a0a;
-    --hero-band-mid: #7f1d1d;
-    --hero-band-end: #991b1b;
-}
-
-html[data-theme="dark"] .card-hero-band--mailbox {
-    --hero-band-glow: rgba(191, 219, 254, 0.1);
-    --hero-band-start: #450a0a;
-    --hero-band-mid: #7f1d1d;
-    --hero-band-end: #991b1b;
 }
 
 html[data-theme="dark"] .sermon-player-sheet {
