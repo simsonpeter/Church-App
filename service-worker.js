@@ -4,7 +4,7 @@ const RUNTIME_CACHE = "njc-runtime-cache-v168";
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260324u4",
+    "./styles.css?v=20260325u1",
     "./user-auth.js?v=20260329u1",
     "./app-shell.js?v=20260324u5",
     "./events-engine.js?v=20260318de",

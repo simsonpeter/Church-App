@@ -1,6 +1,11 @@
 :root {
     --font-stack-en: "Inter", "Segoe UI", system-ui, sans-serif;
     --font-stack-ta: "Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif;
+    /* Full width on phones; cap width on larger screens so lines do not sprawl */
+    --app-shell-max: 100%;
+    --app-inline-pad: max(18px, env(safe-area-inset-left), env(safe-area-inset-right));
+    /* Matches .app-shell inner width (column minus horizontal padding) */
+    --app-content-width: calc(min(var(--app-shell-max), 100vw) - 2 * var(--app-inline-pad));
     color-scheme: light dark;
     --bg-top: #ffe3e3;
     --bg-mid: #fff1f1;
@@ -149,10 +154,11 @@ body.splash-active {
 }
 
 .app-shell {
-    max-width: 430px;
+    width: 100%;
+    max-width: var(--app-shell-max);
     min-height: 100vh;
     margin: 0 auto;
-    padding: 22px 18px 128px;
+    padding: 22px var(--app-inline-pad) 128px;
     position: relative;
 }
 
@@ -1187,7 +1193,7 @@ body.sermon-player-open {
 
 .sermon-player-sheet {
     position: relative;
-    width: min(430px, 100%);
+    width: min(100%, var(--app-shell-max));
     margin: 0 auto;
     border-radius: 22px 22px 0 0;
     padding: 16px 16px calc(16px + env(safe-area-inset-bottom));
@@ -1345,7 +1351,7 @@ body.sermon-player-open {
     left: 50%;
     transform: translateX(-50%);
     bottom: calc(max(12px, env(safe-area-inset-bottom)) + 108px);
-    width: min(410px, calc(100% - 20px));
+    width: var(--app-content-width);
     z-index: 2500;
     display: grid;
     grid-template-columns: 1fr auto auto;
@@ -1731,7 +1737,7 @@ body.songbook-fullscreen-open .offline-badge {
 }
 
 .songbook-fullscreen-inner {
-    width: min(430px, 100%);
+    width: min(100%, var(--app-shell-max));
     margin: 0 auto;
 }
 
@@ -1744,7 +1750,7 @@ body.songbook-fullscreen-open .offline-badge {
     left: 50%;
     bottom: max(12px, env(safe-area-inset-bottom));
     transform: translateX(-50%);
-    width: min(410px, calc(100% - 20px));
+    width: var(--app-content-width);
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
@@ -3755,7 +3761,7 @@ body.prayer-detail-open {
 
 .prayer-detail-sheet {
     position: relative;
-    width: min(430px, 100%);
+    width: min(100%, var(--app-shell-max));
     margin: 0 auto;
     border-radius: 22px 22px 0 0;
     padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
@@ -4399,9 +4405,12 @@ html[data-theme="light"] .mini-player-btn {
 
 /* Tablet and larger screens – scale up from mobile */
 @media (min-width: 600px) {
+    :root {
+        --app-shell-max: 540px;
+        --app-inline-pad: max(24px, env(safe-area-inset-left), env(safe-area-inset-right));
+    }
     .app-shell {
-        max-width: 540px;
-        padding: 28px 24px 140px;
+        padding: 28px var(--app-inline-pad) 140px;
     }
     .app-header h1 {
         font-size: 1.7rem;
@@ -4420,9 +4429,12 @@ html[data-theme="light"] .mini-player-btn {
 }
 
 @media (min-width: 768px) {
+    :root {
+        --app-shell-max: 640px;
+        --app-inline-pad: max(28px, env(safe-area-inset-left), env(safe-area-inset-right));
+    }
     .app-shell {
-        max-width: 640px;
-        padding: 32px 28px 160px;
+        padding: 32px var(--app-inline-pad) 160px;
     }
     .app-header {
         padding: 24px 24px;
@@ -4502,9 +4514,12 @@ html[data-theme="light"] .mini-player-btn {
 }
 
 @media (min-width: 1024px) {
+    :root {
+        --app-shell-max: 720px;
+        --app-inline-pad: max(32px, env(safe-area-inset-left), env(safe-area-inset-right));
+    }
     .app-shell {
-        max-width: 720px;
-        padding: 36px 32px 180px;
+        padding: 36px var(--app-inline-pad) 180px;
     }
 }
 
