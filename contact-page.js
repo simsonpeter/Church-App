@@ -876,7 +876,7 @@
                 if (prayerWallLoading) {
                     closePrayerDetail();
                     prayerWallList.innerHTML = "" +
-                        "<li>" +
+                        "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(T("contact.prayerWallLoadingTitle", "Loading prayer wall...", prayerCard)) + "</h3>" +
                         "  <p>" + escapeHtml(T("contact.prayerWallLoadingBody", "Please wait.", prayerCard)) + "</p>" +
                         "</li>";
@@ -886,7 +886,7 @@
                 if (prayerWallError) {
                     closePrayerDetail();
                     prayerWallList.innerHTML = "" +
-                        "<li>" +
+                        "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(T("contact.prayerWallLoadErrorTitle", "Could not load prayer wall", prayerCard)) + "</h3>" +
                         "  <p>" + escapeHtml(T("contact.prayerWallLoadErrorBody", "Please check your connection and try again.", prayerCard)) + "</p>" +
                         "</li>";
@@ -911,7 +911,7 @@
                         ? T("contact.prayerWallNoOtherBody", "Daily prayer requests will appear here.", prayerCard)
                         : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
                     prayerWallList.innerHTML = "" +
-                        "<li>" +
+                        "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(noEntryTitle) + "</h3>" +
                         "  <p>" + escapeHtml(noEntryBody) + "</p>" +
                         "</li>";
