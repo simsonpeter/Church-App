@@ -360,17 +360,119 @@ body.splash-active {
     overflow: hidden;
 }
 
-.card::before {
+/* —— Card visual variants (mix with semantic classes like .hero-card, .bible-card) —— */
+
+.card.card-v-glass {
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.94), rgba(255, 248, 248, 0.88));
+    border-color: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(14px) saturate(1.12);
+    -webkit-backdrop-filter: blur(14px) saturate(1.12);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 14px 40px rgba(60, 20, 30, 0.08),
+        0 4px 12px rgba(127, 34, 34, 0.06);
+}
+
+.card.card-v-mesh {
+    isolation: isolate;
+    background: linear-gradient(168deg, #ffffff 0%, #fff8f6 100%);
+    border-color: #edd5d5;
+}
+
+.card.card-v-mesh::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-image: radial-gradient(circle at 1.2px 1.2px, rgba(229, 57, 53, 0.07) 1.2px, transparent 0);
+    background-size: 20px 20px;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.card.card-v-mesh > * {
+    position: relative;
+    z-index: 1;
+}
+
+.card.card-v-featured {
+    border-radius: 22px;
+    border-color: rgba(229, 57, 53, 0.28);
+    background: linear-gradient(168deg, #fffefd 0%, #fff0ee 48%, #fff5f8 100%);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.92) inset,
+        0 16px 42px rgba(120, 28, 28, 0.1),
+        0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.card.card-v-featured::before {
     content: "";
     position: absolute;
     top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    border-radius: 20px 0 0 20px;
-    background: linear-gradient(180deg, var(--accent-warm), var(--primary));
-    opacity: 0.85;
+    left: 12px;
+    right: 12px;
+    height: 3px;
+    border-radius: 0 0 6px 6px;
+    background: linear-gradient(90deg, var(--accent-warm), var(--primary), #b71c1c);
     pointer-events: none;
+    z-index: 2;
+}
+
+.card.card-v-ink {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border-color: #cbd5e1;
+    border-left: 4px solid #334155;
+    padding-left: 17px;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.8) inset,
+        0 10px 28px rgba(15, 23, 42, 0.07);
+}
+
+.card.card-v-ink h2 i {
+    color: #475569;
+}
+
+.card.card-v-playful {
+    background: linear-gradient(145deg, #faf8ff 0%, #fff5f7 50%, #fff8f4 100%);
+    border-color: #e9d5ff;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 12px 32px rgba(88, 28, 135, 0.07),
+        0 4px 14px rgba(127, 34, 34, 0.05);
+}
+
+.card.card-v-playful h2 i {
+    color: #7c3aed;
+}
+
+.card.card-v-minimal {
+    background: rgba(255, 255, 255, 0.55);
+    border-style: dashed;
+    border-color: #e8bcbc;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset, 0 8px 20px rgba(90, 24, 24, 0.04);
+}
+
+.card.hero-card.card-v-elevated {
+    border-radius: 22px;
+    border-color: rgba(229, 57, 53, 0.2);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 20px 48px rgba(100, 24, 24, 0.12),
+        0 6px 16px rgba(127, 34, 34, 0.08);
+}
+
+.card.location-map-card.card-v-map {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
+    border-color: #94a3b8;
+    color: var(--text);
+}
+
+.card.location-map-card.card-v-map h2 i {
+    color: #0f766e;
+}
+
+.card.location-map-card.card-v-map .location-map-cta {
+    color: #0f766e;
 }
 
 .card:nth-child(2) {
@@ -407,7 +509,7 @@ body.splash-active {
         0 1px 0 rgba(255, 255, 255, 0.85) inset,
         0 18px 36px rgba(90, 24, 24, 0.1),
         0 4px 12px rgba(127, 34, 34, 0.07);
-    border-color: #e8a8a8;
+    border-color: #e0a5a5;
 }
 
 .card h2 {
@@ -883,9 +985,8 @@ body.app-update-open {
     background: linear-gradient(160deg, #fffefe, #fff3f3);
 }
 
-.card.hero-card::before,
-.card.verse-card::before {
-    opacity: 0.4;
+.card.verse-card.card-v-featured {
+    background: linear-gradient(165deg, #fff8f6 0%, #ffe9ea 45%, #fff5f8 100%);
 }
 
 .meta {
@@ -3017,6 +3118,15 @@ body.bible-fullscreen-open .offline-badge {
     background: var(--bg-bottom);
 }
 
+.bible-card.bible-card-fullscreen::before {
+    display: none !important;
+    content: none !important;
+}
+
+.bible-card.bible-card-fullscreen.card-v-ink {
+    border-left: 0;
+}
+
 .bible-card.bible-card-fullscreen h2,
 .bible-card.bible-card-fullscreen > .page-note:first-of-type {
     display: none !important;
@@ -4035,6 +4145,91 @@ body.prayer-detail-open {
         background: linear-gradient(160deg, #252525, #1a1a1a);
     }
 
+    :root:not([data-theme="light"]) .card.card-v-glass {
+        background: linear-gradient(145deg, rgba(40, 40, 40, 0.92), rgba(24, 24, 24, 0.88));
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.05) inset,
+            0 14px 40px rgba(0, 0, 0, 0.45),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-mesh {
+        background: linear-gradient(168deg, #242424 0%, #181818 100%);
+        border-color: #404040;
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-mesh::before {
+        background-image: radial-gradient(circle at 1.2px 1.2px, rgba(255, 255, 255, 0.06) 1.2px, transparent 0);
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-featured {
+        background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
+        border-color: rgba(201, 162, 39, 0.35);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 16px 42px rgba(0, 0, 0, 0.5),
+            0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-featured::before {
+        background: linear-gradient(90deg, #c9a227, #e57373, #b71c1c);
+    }
+
+    :root:not([data-theme="light"]) .card.verse-card.card-v-featured {
+        background: linear-gradient(165deg, #2a2424 0%, #1e1a1a 45%, #221e1e 100%);
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-ink {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        border-color: #334155;
+        border-left-color: #94a3b8;
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.04) inset,
+            0 10px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-ink h2 i {
+        color: #cbd5e1;
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-playful {
+        background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
+        border-color: #4c3a6b;
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.05) inset,
+            0 12px 32px rgba(0, 0, 0, 0.42),
+            0 4px 14px rgba(0, 0, 0, 0.28);
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-playful h2 i {
+        color: #c4b5fd;
+    }
+
+    :root:not([data-theme="light"]) .card.card-v-minimal {
+        background: rgba(30, 30, 30, 0.65);
+        border-color: #505050;
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 20px rgba(0, 0, 0, 0.35);
+    }
+
+    :root:not([data-theme="light"]) .card.hero-card.card-v-elevated {
+        border-color: rgba(255, 255, 255, 0.12);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 20px 48px rgba(0, 0, 0, 0.55),
+            0 6px 16px rgba(0, 0, 0, 0.35);
+    }
+
+    :root:not([data-theme="light"]) .card.location-map-card.card-v-map {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
+        border-color: #475569;
+    }
+
+    :root:not([data-theme="light"]) .card.location-map-card.card-v-map h2 i,
+    :root:not([data-theme="light"]) .card.location-map-card.card-v-map .location-map-cta {
+        color: #5eead4;
+    }
+
     :root:not([data-theme="light"]) .sermon-player-sheet {
         background: linear-gradient(180deg, #1a1a1a, #111111);
         border-color: #333333;
@@ -4111,6 +4306,91 @@ html[data-theme="dark"] .hero-card {
 
 html[data-theme="dark"] .verse-card {
     background: linear-gradient(160deg, #252525, #1a1a1a);
+}
+
+html[data-theme="dark"] .card.card-v-glass {
+    background: linear-gradient(145deg, rgba(40, 40, 40, 0.92), rgba(24, 24, 24, 0.88));
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 14px 40px rgba(0, 0, 0, 0.45),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .card.card-v-mesh {
+    background: linear-gradient(168deg, #242424 0%, #181818 100%);
+    border-color: #404040;
+}
+
+html[data-theme="dark"] .card.card-v-mesh::before {
+    background-image: radial-gradient(circle at 1.2px 1.2px, rgba(255, 255, 255, 0.06) 1.2px, transparent 0);
+}
+
+html[data-theme="dark"] .card.card-v-featured {
+    background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
+    border-color: rgba(201, 162, 39, 0.35);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06) inset,
+        0 16px 42px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+html[data-theme="dark"] .card.card-v-featured::before {
+    background: linear-gradient(90deg, #c9a227, #e57373, #b71c1c);
+}
+
+html[data-theme="dark"] .card.verse-card.card-v-featured {
+    background: linear-gradient(165deg, #2a2424 0%, #1e1a1a 45%, #221e1e 100%);
+}
+
+html[data-theme="dark"] .card.card-v-ink {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    border-color: #334155;
+    border-left-color: #94a3b8;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.04) inset,
+        0 10px 28px rgba(0, 0, 0, 0.4);
+}
+
+html[data-theme="dark"] .card.card-v-ink h2 i {
+    color: #cbd5e1;
+}
+
+html[data-theme="dark"] .card.card-v-playful {
+    background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
+    border-color: #4c3a6b;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 12px 32px rgba(0, 0, 0, 0.42),
+        0 4px 14px rgba(0, 0, 0, 0.28);
+}
+
+html[data-theme="dark"] .card.card-v-playful h2 i {
+    color: #c4b5fd;
+}
+
+html[data-theme="dark"] .card.card-v-minimal {
+    background: rgba(30, 30, 30, 0.65);
+    border-color: #505050;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .card.hero-card.card-v-elevated {
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06) inset,
+        0 20px 48px rgba(0, 0, 0, 0.55),
+        0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+html[data-theme="dark"] .card.location-map-card.card-v-map {
+    background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
+    border-color: #475569;
+}
+
+html[data-theme="dark"] .card.location-map-card.card-v-map h2 i,
+html[data-theme="dark"] .card.location-map-card.card-v-map .location-map-cta {
+    color: #5eead4;
 }
 
 html[data-theme="dark"] .sermon-player-sheet {
