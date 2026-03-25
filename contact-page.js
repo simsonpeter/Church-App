@@ -950,10 +950,14 @@
                         "      " + urgentBadge +
                         "      " + pastorOnlyBadge +
                         "    </div>" +
-                        "    <p class=\"prayer-list-preview\">" + escapeHtml(previewText) + "</p>" +
-                        "    <p class=\"prayer-list-translated-note\" hidden></p>" +
+                        "    <div class=\"prayer-list-body\">" +
+                        "      <p class=\"prayer-list-preview\">" + escapeHtml(previewText) + "</p>" +
+                        "    </div>" +
                         "    <div class=\"prayer-list-meta\">" +
-                        "      <span class=\"page-note\">" + escapeHtml(dateText) + "</span>" +
+                        "      <div class=\"prayer-list-meta-start\">" +
+                        "        <p class=\"prayer-list-translated-note\" hidden></p>" +
+                        "        <span class=\"page-note prayer-list-date\">" + escapeHtml(dateText) + "</span>" +
+                        "      </div>" +
                         "      <span class=\"prayer-list-prayed\">" + escapeHtml(prayedLabel) + "</span>" +
                         "      <span class=\"prayer-list-chevron\" aria-hidden=\"true\"><i class=\"fa-solid fa-chevron-right\"></i></span>" +
                         "    </div>" +
