@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260318de">
-    <link rel="stylesheet" href="styles.css?v=20260325u7">
+    <link rel="stylesheet" href="styles.css?v=20260330dv1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -75,13 +75,17 @@
                 <ul class="list reading-unread-list" id="reading-unread-list" hidden></ul>
             </section>
 
-            <section class="card card-v-mesh">
-                <div class="daily-verse-top">
-                    <h2><i class="fa-solid fa-quote-left"></i><span data-i18n="home.dailyVerseTitle">Daily Verse</span></h2>
-                    <button id="daily-verse-language-toggle" class="mini-toggle" type="button" aria-label="Toggle daily verse language">TA</button>
+            <section class="card card-v-mesh daily-verse-card" id="daily-verse-card">
+                <div class="daily-verse-panel" id="daily-verse-panel" data-daily-verse-backdrop="gradient">
+                    <div class="daily-verse-panel-inner">
+                        <div class="daily-verse-top">
+                            <h2><i class="fa-solid fa-quote-left"></i><span data-i18n="home.dailyVerseTitle">Daily Verse</span></h2>
+                            <button id="daily-verse-language-toggle" class="mini-toggle" type="button" aria-label="Toggle daily verse language">TA</button>
+                        </div>
+                        <p id="daily-verse-text" class="daily-verse-text">Loading daily verse...</p>
+                        <p id="daily-verse-reference" class="daily-verse-reference page-note"></p>
+                    </div>
                 </div>
-                <p id="daily-verse-text" class="daily-verse-text">Loading daily verse...</p>
-                <p id="daily-verse-reference" class="page-note"></p>
             </section>
 
             <section class="card trivia-card-compact card-v-playful" id="trivia-card-home">
@@ -1076,7 +1080,7 @@
     <script src="user-auth.js?v=20260329u1"></script>
     <script src="app-shell.js?v=20260324u5"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260330u2"></script>
+    <script src="home-page.js?v=20260330dv1"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260324u1"></script>

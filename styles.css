@@ -558,6 +558,95 @@ body.splash-active {
     flex: 0 0 auto;
 }
 
+.daily-verse-card {
+    overflow: hidden;
+}
+
+.daily-verse-panel {
+    --dv-h1: 350;
+    --dv-h2: 28;
+    --dv-h3: 200;
+    position: relative;
+    margin: -4px -6px 0;
+    border-radius: 16px;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.daily-verse-panel-inner {
+    position: relative;
+    z-index: 2;
+    padding: 14px 14px 12px;
+}
+
+.daily-verse-panel::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: var(--daily-verse-bg-image, none);
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.03);
+}
+
+.daily-verse-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+        142deg,
+        hsla(var(--dv-h1), 58%, 36%, 0.9) 0%,
+        hsla(var(--dv-h2), 52%, 32%, 0.82) 48%,
+        hsla(var(--dv-h3), 45%, 18%, 0.88) 100%
+    );
+}
+
+/* Soft gradient only (no photo) — readable on light text colors */
+.daily-verse-panel[data-daily-verse-backdrop="gradient"]::before {
+    display: none;
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
+    background: linear-gradient(
+        148deg,
+        hsl(var(--dv-h1), 42%, 94%) 0%,
+        hsl(var(--dv-h2), 38%, 90%) 42%,
+        hsl(var(--dv-h3), 36%, 86%) 100%
+    );
+    opacity: 1;
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-panel-inner {
+    color: #ffffff;
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-top h2 {
+    color: #ffffff;
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-top h2 i {
+    color: rgba(255, 248, 248, 0.95);
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-reference {
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-text {
+    color: #ffffff;
+}
+
+.daily-verse-panel[data-daily-verse-backdrop="photo"] .mini-toggle {
+    border-color: rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
 .daily-verse-top {
     display: flex;
     align-items: center;
@@ -586,6 +675,70 @@ body.splash-active {
     color: var(--text);
     font-size: 0.92rem;
     line-height: 1.52;
+}
+
+.daily-verse-reference {
+    margin-top: 6px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
+        background: linear-gradient(
+            148deg,
+            hsl(var(--dv-h1), 22%, 22%) 0%,
+            hsl(var(--dv-h2), 18%, 18%) 45%,
+            hsl(var(--dv-h3), 16%, 14%) 100%
+        );
+    }
+
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-top h2,
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
+        color: #f4f4f5;
+    }
+
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-top h2 i {
+        color: rgba(254, 226, 226, 0.92);
+    }
+
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
+        color: rgba(228, 228, 231, 0.78);
+    }
+
+    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
+        border-color: rgba(255, 255, 255, 0.22);
+        background: rgba(255, 255, 255, 0.08);
+        color: #f4f4f5;
+    }
+}
+
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
+    background: linear-gradient(
+        148deg,
+        hsl(var(--dv-h1), 22%, 22%) 0%,
+        hsl(var(--dv-h2), 18%, 18%) 45%,
+        hsl(var(--dv-h3), 16%, 14%) 100%
+    );
+}
+
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-top h2,
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
+    color: #f4f4f5;
+}
+
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-top h2 i {
+    color: rgba(254, 226, 226, 0.92);
+}
+
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
+    color: rgba(228, 228, 231, 0.78);
+}
+
+html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
+    border-color: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.08);
+    color: #f4f4f5;
 }
 
 .trivia-stats {

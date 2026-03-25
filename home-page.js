@@ -519,18 +519,47 @@
                 });
             }
 
+            function applyDailyVerseBackdrop(dayNumber, verseIndex) {
+                var panel = document.getElementById("daily-verse-panel");
+                if (!panel) {
+                    return;
+                }
+                var day = Number(dayNumber) || 1;
+                var vIdx = Number(verseIndex) || 0;
+                var seed = day * 10007 + vIdx * 9181 + 2025;
+                var usePhoto = seed % 3 !== 0;
+                var h1 = seed % 360;
+                var h2 = (h1 + 38 + (seed % 80)) % 360;
+                var h3 = (h1 + 150 + (seed % 60)) % 360;
+                panel.style.setProperty("--dv-h1", String(h1));
+                panel.style.setProperty("--dv-h2", String(h2));
+                panel.style.setProperty("--dv-h3", String(h3));
+                if (usePhoto) {
+                    panel.setAttribute("data-daily-verse-backdrop", "photo");
+                    var picId = 1 + (Math.abs(seed * 7919) % 999);
+                    var url = "https://picsum.photos/id/" + picId + "/900/600";
+                    panel.style.setProperty("--daily-verse-bg-image", "url(\"" + url + "\")");
+                } else {
+                    panel.setAttribute("data-daily-verse-backdrop", "gradient");
+                    panel.style.removeProperty("--daily-verse-bg-image");
+                }
+            }
+
             function renderDailyVerse() {
                 if (!dailyVerseText || !dailyVerseReference) {
                     return;
                 }
+                var dayNum = getDayOfYear(todayYmd);
                 if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
+                    applyDailyVerseBackdrop(dayNum, 0);
                     dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
                     dailyVerseReference.textContent = "";
                     return;
                 }
                 dailyVerseRenderToken += 1;
                 var renderToken = dailyVerseRenderToken;
-                var verseIndex = (getDayOfYear(todayYmd) - 1) % dailyVersePool.length;
+                var verseIndex = (dayNum - 1) % dailyVersePool.length;
+                applyDailyVerseBackdrop(dayNum, verseIndex);
                 var verseItem = dailyVersePool[verseIndex];
                 var showTamil = verseLanguage === "ta";
                 var languageKey = showTamil ? "ta" : "en";
