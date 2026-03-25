@@ -1426,17 +1426,17 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u5";
-    var APP_VERSION = "2026.3.24";
+    var SW_VERSION = "20260325u1";
+    var APP_VERSION = "2026.3.25";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Bible reader layout and language controls, PWA cache updates.";
+    var UPDATE_NOTES_SUMMARY = "Daily verse uses bundled KJV/BSI text; PWA cache bump for reliable updates.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
     var SESSION_UPDATE_MODAL_AUTO_KEY = "njc_update_modal_auto_shown_v1";
     var updateModalAutoInFlight = false;
     var lastVisibilitySwUpdateAt = 0;
-    var VISIBILITY_SW_UPDATE_MIN_MS = 10 * 60 * 1000;
+    var VISIBILITY_SW_UPDATE_MIN_MS = 2 * 60 * 1000;
 
     function getUpdateSnoozeUntilMs() {
         try {
