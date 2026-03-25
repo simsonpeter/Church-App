@@ -608,6 +608,28 @@ body.splash-active {
     border: 1px solid var(--line);
 }
 
+.card .trivia-stat {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 8px 4px;
+    border-right: 1px solid var(--line);
+}
+
+.card .trivia-stats-grid .trivia-stat:nth-child(4n) {
+    border-right: 0;
+}
+
+@media (max-width: 360px) {
+    .card .trivia-stats-grid .trivia-stat:nth-child(4n) {
+        border-right: 1px solid var(--line);
+    }
+
+    .card .trivia-stats-grid .trivia-stat:nth-child(2n) {
+        border-right: 0;
+    }
+}
+
 .trivia-stat-value {
     font-size: 1.25rem;
     font-weight: 700;
@@ -1137,6 +1159,35 @@ body.app-update-open {
     border-color: #ecb0b0;
 }
 
+/* Lists inside a card: divider rows, not nested mini-cards */
+.card ul.list {
+    gap: 0;
+}
+
+.card ul.list > li {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+    box-shadow: none;
+    transition: none;
+}
+
+.card ul.list > li:hover {
+    transform: none;
+    border-color: var(--line);
+}
+
+.card ul.list > li:first-child {
+    padding-top: 0;
+}
+
+.card ul.list > li:last-child {
+    border-bottom: 0;
+    padding-bottom: 2px;
+}
+
 .app-content .card ul.list > li {
     animation: fade-up 0.4s ease both;
 }
@@ -1232,6 +1283,20 @@ body.app-update-open {
     transform: translateY(-1px);
     background: rgba(255, 245, 245, 0.65);
     box-shadow: 0 6px 14px rgba(120, 22, 22, 0.07);
+}
+
+.card .sermon-open-btn {
+    border-radius: 10px;
+}
+
+.card .sermon-open-btn:hover {
+    transform: none;
+    box-shadow: none;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+html[data-theme="dark"] .card .sermon-open-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .sermon-open-btn:focus {
@@ -2730,6 +2795,51 @@ body.auth-modal-open {
     border-color: #e8b4b4;
 }
 
+.profile-achievements-card .profile-achievements-total {
+    margin: 8px 0 12px;
+    padding: 10px 0 12px;
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+    transition: none;
+}
+
+.profile-achievements-card .profile-achievements-total:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.profile-achievements-card .profile-achievements-total-value {
+    animation: none;
+}
+
+.profile-achievements-card .profile-achievements-list {
+    gap: 0;
+}
+
+.profile-achievements-card .profile-achievement-row {
+    padding: 12px 0;
+    border: 0;
+    border-radius: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
+    box-shadow: none;
+    transition: none;
+}
+
+.profile-achievements-card .profile-achievement-row:last-child {
+    border-bottom: 0;
+}
+
+.profile-achievements-card .profile-achievement-row:hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--line);
+}
+
 .profile-achievement-name {
     display: inline-flex;
     align-items: center;
@@ -2819,6 +2929,39 @@ body.auth-modal-open {
 .user-achievements-row--head:hover {
     transform: none;
     border-color: var(--line);
+}
+
+.card .user-achievements-list {
+    gap: 0;
+}
+
+.card .user-achievements-row {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    transition: none;
+}
+
+.card .user-achievements-row:last-child {
+    border-bottom: 0;
+}
+
+.card .user-achievements-row:not(.user-achievements-row--head):hover {
+    transform: none;
+    box-shadow: none;
+    border-color: var(--line);
+}
+
+.card .user-achievements-row--head {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid var(--line);
+    padding-top: 0;
+    padding-bottom: 8px;
+    margin-bottom: 4px;
 }
 
 .user-achievements-rank {
@@ -3602,6 +3745,22 @@ body.bible-fullscreen-open .offline-badge {
     gap: 4px;
 }
 
+.card .admin-stat-card {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 10px 8px;
+    border-bottom: 1px solid var(--line);
+}
+
+.card .admin-stats-grid .admin-stat-card:nth-child(odd) {
+    border-right: 1px solid var(--line);
+}
+
+.card .admin-stats-grid .admin-stat-card:nth-last-child(-n + 2) {
+    border-bottom: 0;
+}
+
 .admin-stat-card strong {
     font-size: 0.8rem;
     color: var(--muted);
@@ -3726,16 +3885,21 @@ body.bible-fullscreen-open .offline-badge {
 .prayer-list-item {
     padding: 0 !important;
     overflow: hidden;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    background: var(--surface);
+    border-radius: 0;
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: transparent;
     position: relative;
 }
 
+.prayer-wall-list .prayer-list-item:last-child {
+    border-bottom: 0;
+}
+
 .prayer-list-item-urgent {
-    border-color: rgba(225, 38, 38, 0.64);
-    box-shadow: 0 0 0 1px rgba(225, 38, 38, 0.2), 0 10px 20px rgba(201, 35, 35, 0.18);
-    animation: urgent-card-pulse 2.2s ease-in-out infinite;
+    border-bottom-color: rgba(225, 38, 38, 0.45);
+    background: rgba(254, 226, 226, 0.22);
+    animation: urgent-row-pulse 2.2s ease-in-out infinite;
 }
 
 .prayer-list-item-urgent::before {
@@ -4046,13 +4210,23 @@ body.prayer-detail-open {
     }
 }
 
-@keyframes urgent-card-pulse {
+@keyframes urgent-row-pulse {
     0%,
     100% {
-        box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.2), 0 8px 18px rgba(213, 41, 41, 0.14);
+        background-color: rgba(254, 226, 226, 0.18);
     }
     50% {
-        box-shadow: 0 0 0 1px rgba(255, 91, 91, 0.44), 0 12px 24px rgba(213, 41, 41, 0.24);
+        background-color: rgba(254, 202, 202, 0.4);
+    }
+}
+
+@keyframes urgent-row-pulse-dark {
+    0%,
+    100% {
+        background-color: rgba(127, 29, 29, 0.16);
+    }
+    50% {
+        background-color: rgba(127, 29, 29, 0.36);
     }
 }
 
@@ -4258,6 +4432,17 @@ body.prayer-detail-open {
         background: #333333;
         color: #ffffff;
     }
+
+    :root:not([data-theme="light"]) .prayer-list-item-urgent {
+        border-bottom-color: rgba(248, 113, 113, 0.35);
+        background: rgba(127, 29, 29, 0.22);
+        box-shadow: none;
+        animation: urgent-row-pulse-dark 2.2s ease-in-out infinite;
+    }
+
+    :root:not([data-theme="light"]) .card .sermon-open-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
 }
 
 html[data-theme="dark"] {
@@ -4428,8 +4613,10 @@ html[data-theme="dark"] .prayer-wall-tab.active {
 }
 
 html[data-theme="dark"] .prayer-list-item-urgent {
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 10px 20px rgba(0, 0, 0, 0.3);
+    border-bottom-color: rgba(248, 113, 113, 0.35);
+    background: rgba(127, 29, 29, 0.22);
+    box-shadow: none;
+    animation: urgent-row-pulse-dark 2.2s ease-in-out infinite;
 }
 
 html[data-theme="dark"] .prayer-list-item-urgent .prayer-list-name {
