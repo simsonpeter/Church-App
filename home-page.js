@@ -1061,6 +1061,30 @@
                 }
             }
 
+            function applyAnnouncementsCardGradient() {
+                if (!announcementsCard) {
+                    return;
+                }
+                var seed = 0;
+                try {
+                    if (window.crypto && window.crypto.getRandomValues) {
+                        var buf = new Uint32Array(1);
+                        window.crypto.getRandomValues(buf);
+                        seed = buf[0];
+                    } else {
+                        seed = Math.floor(Math.random() * 0xffffffff);
+                    }
+                } catch (err) {
+                    seed = Math.floor(Math.random() * 0xffffffff);
+                }
+                var h1 = seed % 360;
+                var h2 = (h1 + 38 + (seed >>> 8) % 80) % 360;
+                var h3 = (h1 + 150 + (seed >>> 16) % 60) % 360;
+                announcementsCard.style.setProperty("--ann-h1", String(h1));
+                announcementsCard.style.setProperty("--ann-h2", String(h2));
+                announcementsCard.style.setProperty("--ann-h3", String(h3));
+            }
+
             function nextAnnouncementIndex(step) {
                 var total = announcementCarouselItems.length;
                 if (total <= 1) {
@@ -2537,6 +2561,7 @@
             updateReadingPlanMeta();
             renderReadingProgress();
             renderDailyVerse();
+            applyAnnouncementsCardGradient();
             loadTodayReadingPlan();
             loadAnnouncements();
             loadTrivia();

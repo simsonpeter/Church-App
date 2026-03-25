@@ -373,6 +373,76 @@ body.splash-active {
         0 4px 12px rgba(127, 34, 34, 0.06);
 }
 
+/* Home announcements: soft random pastel gradient (hues set in JS: --ann-h1 … --ann-h3) */
+.card.announcements-card {
+    --ann-h1: 210;
+    --ann-h2: 248;
+    --ann-h3: 318;
+    isolation: isolate;
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.55);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.85) inset,
+        0 14px 40px rgba(60, 20, 30, 0.08),
+        0 4px 12px rgba(127, 34, 34, 0.06);
+}
+
+.card.announcements-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        148deg,
+        hsl(var(--ann-h1), 44%, 94%) 0%,
+        hsl(var(--ann-h2), 40%, 91%) 46%,
+        hsl(var(--ann-h3), 38%, 88%) 100%
+    );
+}
+
+.card.announcements-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .card.announcements-card {
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.05) inset,
+            0 14px 40px rgba(0, 0, 0, 0.45),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    :root:not([data-theme="light"]) .card.announcements-card::before {
+        background: linear-gradient(
+            148deg,
+            hsl(var(--ann-h1), 22%, 22%) 0%,
+            hsl(var(--ann-h2), 18%, 18%) 45%,
+            hsl(var(--ann-h3), 16%, 14%) 100%
+        );
+    }
+}
+
+html[data-theme="dark"] .card.announcements-card {
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.05) inset,
+        0 14px 40px rgba(0, 0, 0, 0.45),
+        0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+html[data-theme="dark"] .card.announcements-card::before {
+    background: linear-gradient(
+        148deg,
+        hsl(var(--ann-h1), 22%, 22%) 0%,
+        hsl(var(--ann-h2), 18%, 18%) 45%,
+        hsl(var(--ann-h3), 16%, 14%) 100%
+    );
+}
+
 .card.card-v-mesh {
     isolation: isolate;
     background: linear-gradient(168deg, #ffffff 0%, #fff8f6 100%);

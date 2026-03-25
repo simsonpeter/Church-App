@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260325u1";
-    var APP_VERSION = "2026.3.25";
+    var SW_VERSION = "20260326u1";
+    var APP_VERSION = "2026.3.26";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily verse uses bundled KJV/BSI text; PWA cache bump for reliable updates.";
+    var UPDATE_NOTES_SUMMARY = "Announcements card: random soft gradient; PWA cache bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
