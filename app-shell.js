@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260326u1";
+    var SW_VERSION = "20260326u2";
     var APP_VERSION = "2026.3.26";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Announcements card: random soft gradient; PWA cache bump.";
+    var UPDATE_NOTES_SUMMARY = "Announcements gradient matches app rose/gold palette; PWA cache bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

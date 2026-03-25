@@ -373,14 +373,19 @@ body.splash-active {
         0 4px 12px rgba(127, 34, 34, 0.06);
 }
 
-/* Home announcements: soft random pastel gradient (hues set in JS: --ann-h1 … --ann-h3) */
+/* Home announcements: soft gradient in app palette (rose / coral / warm gold); JS varies angle & stops only */
 .card.announcements-card {
-    --ann-h1: 210;
-    --ann-h2: 248;
-    --ann-h3: 318;
+    --ann-angle: 152deg;
+    --ann-mix: 50%;
+    --ann-gold-x: 92%;
+    --ann-gold-y: 6%;
+    --ann-red-x: 10%;
+    --ann-red-y: 88%;
+    --ann-gold-a: 0.11;
+    --ann-red-a: 0.07;
     isolation: isolate;
     background: transparent;
-    border-color: rgba(255, 255, 255, 0.55);
+    border-color: rgba(243, 208, 208, 0.85);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.85) inset,
         0 14px 40px rgba(60, 20, 30, 0.08),
@@ -394,12 +399,24 @@ body.splash-active {
     border-radius: inherit;
     z-index: 0;
     pointer-events: none;
-    background: linear-gradient(
-        148deg,
-        hsl(var(--ann-h1), 44%, 94%) 0%,
-        hsl(var(--ann-h2), 40%, 91%) 46%,
-        hsl(var(--ann-h3), 38%, 88%) 100%
-    );
+    background-image:
+        radial-gradient(
+            ellipse 115% 80% at var(--ann-gold-x) var(--ann-gold-y),
+            rgba(232, 160, 84, var(--ann-gold-a)),
+            transparent 52%
+        ),
+        radial-gradient(
+            ellipse 100% 70% at var(--ann-red-x) var(--ann-red-y),
+            rgba(229, 57, 53, var(--ann-red-a)),
+            transparent 50%
+        ),
+        linear-gradient(
+            var(--ann-angle),
+            #ffffff 0%,
+            var(--surface-soft) 26%,
+            rgba(255, 236, 232, 0.97) var(--ann-mix),
+            rgba(255, 250, 248, 1) 100%
+        );
 }
 
 .card.announcements-card > * {
@@ -409,7 +426,7 @@ body.splash-active {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .card.announcements-card {
-        border-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(120, 60, 60, 0.45);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.05) inset,
             0 14px 40px rgba(0, 0, 0, 0.45),
@@ -417,17 +434,29 @@ body.splash-active {
     }
 
     :root:not([data-theme="light"]) .card.announcements-card::before {
-        background: linear-gradient(
-            148deg,
-            hsl(var(--ann-h1), 22%, 22%) 0%,
-            hsl(var(--ann-h2), 18%, 18%) 45%,
-            hsl(var(--ann-h3), 16%, 14%) 100%
-        );
+        background-image:
+            radial-gradient(
+                ellipse 115% 80% at var(--ann-gold-x) var(--ann-gold-y),
+                rgba(201, 162, 39, calc(var(--ann-gold-a) * 0.85)),
+                transparent 52%
+            ),
+            radial-gradient(
+                ellipse 100% 70% at var(--ann-red-x) var(--ann-red-y),
+                rgba(183, 28, 28, calc(var(--ann-red-a) * 1.1)),
+                transparent 50%
+            ),
+            linear-gradient(
+                var(--ann-angle),
+                #2a2222 0%,
+                #241c1c 30%,
+                rgba(35, 22, 22, 0.98) var(--ann-mix),
+                #1e1818 100%
+            );
     }
 }
 
 html[data-theme="dark"] .card.announcements-card {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(120, 60, 60, 0.45);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.05) inset,
         0 14px 40px rgba(0, 0, 0, 0.45),
@@ -435,12 +464,24 @@ html[data-theme="dark"] .card.announcements-card {
 }
 
 html[data-theme="dark"] .card.announcements-card::before {
-    background: linear-gradient(
-        148deg,
-        hsl(var(--ann-h1), 22%, 22%) 0%,
-        hsl(var(--ann-h2), 18%, 18%) 45%,
-        hsl(var(--ann-h3), 16%, 14%) 100%
-    );
+    background-image:
+        radial-gradient(
+            ellipse 115% 80% at var(--ann-gold-x) var(--ann-gold-y),
+            rgba(201, 162, 39, calc(var(--ann-gold-a) * 0.85)),
+            transparent 52%
+        ),
+        radial-gradient(
+            ellipse 100% 70% at var(--ann-red-x) var(--ann-red-y),
+            rgba(183, 28, 28, calc(var(--ann-red-a) * 1.1)),
+            transparent 50%
+        ),
+        linear-gradient(
+            var(--ann-angle),
+            #2a2222 0%,
+            #241c1c 30%,
+            rgba(35, 22, 22, 0.98) var(--ann-mix),
+            #1e1818 100%
+        );
 }
 
 .card.card-v-mesh {

@@ -1065,24 +1065,38 @@
                 if (!announcementsCard) {
                     return;
                 }
-                var seed = 0;
+                var a = 0;
+                var b = 0;
                 try {
                     if (window.crypto && window.crypto.getRandomValues) {
-                        var buf = new Uint32Array(1);
+                        var buf = new Uint32Array(2);
                         window.crypto.getRandomValues(buf);
-                        seed = buf[0];
+                        a = buf[0];
+                        b = buf[1];
                     } else {
-                        seed = Math.floor(Math.random() * 0xffffffff);
+                        a = Math.floor(Math.random() * 0xffffffff);
+                        b = Math.floor(Math.random() * 0xffffffff);
                     }
                 } catch (err) {
-                    seed = Math.floor(Math.random() * 0xffffffff);
+                    a = Math.floor(Math.random() * 0xffffffff);
+                    b = Math.floor(Math.random() * 0xffffffff);
                 }
-                var h1 = seed % 360;
-                var h2 = (h1 + 38 + (seed >>> 8) % 80) % 360;
-                var h3 = (h1 + 150 + (seed >>> 16) % 60) % 360;
-                announcementsCard.style.setProperty("--ann-h1", String(h1));
-                announcementsCard.style.setProperty("--ann-h2", String(h2));
-                announcementsCard.style.setProperty("--ann-h3", String(h3));
+                var angle = 142 + (a % 27);
+                var midStop = 44 + (a >>> 8) % 14;
+                var goldX = 86 + (b % 13);
+                var goldY = 2 + (b >>> 8) % 10;
+                var redX = 4 + (b >>> 16) % 14;
+                var redY = 78 + (b >>> 24) % 18;
+                var goldA = 0.09 + ((a >>> 16) % 7) / 100;
+                var redA = 0.055 + ((a >>> 20) % 6) / 100;
+                announcementsCard.style.setProperty("--ann-angle", String(angle) + "deg");
+                announcementsCard.style.setProperty("--ann-mix", String(midStop) + "%");
+                announcementsCard.style.setProperty("--ann-gold-x", String(goldX) + "%");
+                announcementsCard.style.setProperty("--ann-gold-y", String(goldY) + "%");
+                announcementsCard.style.setProperty("--ann-red-x", String(redX) + "%");
+                announcementsCard.style.setProperty("--ann-red-y", String(redY) + "%");
+                announcementsCard.style.setProperty("--ann-gold-a", String(goldA));
+                announcementsCard.style.setProperty("--ann-red-a", String(redA));
             }
 
             function nextAnnouncementIndex(step) {
