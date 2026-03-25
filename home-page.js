@@ -445,10 +445,6 @@
                     : T("home.dailyVerseVersionEnglish", "KJV", verseCard);
             }
 
-            function getEnglishDailyVerseSourceLabel() {
-                return T("home.dailyVerseVersionEnglishDaily", "Bible.org (verse of the day)", verseCard);
-            }
-
             function votdCacheDateKey() {
                 return String(todayYmd.year) + "-" + String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
             }
@@ -469,11 +465,10 @@
                         return null;
                     }
                     var reference = String(parsed.reference || "").trim();
-                    var textEn = String(parsed.textEn || "").trim();
-                    if (!reference || !textEn) {
+                    if (!reference) {
                         return null;
                     }
-                    return { reference: reference, textEn: textEn };
+                    return { reference: reference };
                 } catch (err) {
                     return null;
                 }
@@ -483,8 +478,7 @@
                 try {
                     window.localStorage.setItem(DAILY_VERSE_VOTD_CACHE_KEY, JSON.stringify({
                         dateKey: votdCacheDateKey(),
-                        reference: entry.reference,
-                        textEn: entry.textEn
+                        reference: entry.reference
                     }));
                 } catch (err) {
                     return null;
@@ -509,13 +503,11 @@
                         var book = String(row.bookname || "").trim();
                         var chapter = String(row.chapter || "").trim();
                         var verse = String(row.verse || "").trim();
-                        var text = String(row.text || "").replace(/\s+/g, " ").trim();
-                        if (!book || !chapter || !verse || !text) {
+                        if (!book || !chapter || !verse) {
                             throw new Error("Daily verse payload incomplete");
                         }
                         return {
-                            reference: book + " " + chapter + ":" + verse,
-                            textEn: text
+                            reference: book + " " + chapter + ":" + verse
                         };
                     });
             }
@@ -661,19 +653,19 @@
                         hash = (hash * 31 + refStr.charCodeAt(i)) >>> 0;
                     }
                     applyDailyVerseBackdrop(dayNum, hash % 1000);
-                    dailyVerseReference.textContent = entry.reference + " • " + (showTamil ? getVerseVersionLabel(true) : getEnglishDailyVerseSourceLabel());
+                    dailyVerseReference.textContent = entry.reference + " • " + getVerseVersionLabel(showTamil);
                     setDailyVerseToggleLabel();
-                    dailyVerseText.textContent = entry.textEn;
-                    if (showTamil) {
-                        resolveDailyVerseText(entry.reference, "ta").then(function (text) {
-                            if (renderToken !== dailyVerseRenderToken) {
-                                return;
-                            }
-                            if (text) {
-                                dailyVerseText.textContent = text;
-                            }
-                        });
-                    }
+                    dailyVerseText.textContent = T("home.dailyVerseLoading", "Loading daily verse...", verseCard);
+                    resolveDailyVerseText(entry.reference, languageKey).then(function (text) {
+                        if (renderToken !== dailyVerseRenderToken) {
+                            return;
+                        }
+                        if (text) {
+                            dailyVerseText.textContent = text;
+                        } else {
+                            dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
+                        }
+                    });
                 }
 
                 var cachedVotd = readVerseOfTheDayCache();
