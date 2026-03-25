@@ -1774,7 +1774,7 @@ body.songbook-fullscreen-open .offline-badge {
     border-radius: 0;
     box-shadow: -14px 0 28px rgba(40, 12, 12, 0.28);
     padding: 0;
-    width: min(300px, 50vw);
+    width: min(380px, 92vw);
     max-height: 100vh;
     max-height: 100dvh;
     overflow: hidden;

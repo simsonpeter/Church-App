@@ -1256,12 +1256,15 @@
         }
 
         function syncFabVisibility() {
-            var onHome = getCurrentRouteId() === "home";
-            var hide = !onHome
+            var hide = document.body.classList.contains("header-menu-open")
                 || document.body.classList.contains("auth-entry-open")
+                || document.body.classList.contains("auth-modal-open")
                 || document.body.classList.contains("bible-fullscreen-open")
                 || document.body.classList.contains("songbook-fullscreen-open")
-                || document.body.classList.contains("app-update-open");
+                || document.body.classList.contains("sermon-player-open")
+                || document.body.classList.contains("prayer-detail-open")
+                || document.body.classList.contains("app-update-open")
+                || document.body.classList.contains("splash-active");
             fab.hidden = hide;
             fab.setAttribute("aria-hidden", hide ? "true" : "false");
             if (!hide) {
@@ -1279,6 +1282,10 @@
         });
         document.addEventListener("njc:routechange", syncFabVisibility);
         window.addEventListener("hashchange", syncFabVisibility);
+        if (typeof MutationObserver !== "undefined") {
+            var fabObserver = new MutationObserver(syncFabVisibility);
+            fabObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+        }
         syncFabVisibility();
     }
 
@@ -1299,12 +1306,15 @@
         }
 
         function syncFabVisibility() {
-            var onHome = getCurrentRouteId() === "home";
-            var hide = !onHome
+            var hide = document.body.classList.contains("header-menu-open")
                 || document.body.classList.contains("auth-entry-open")
+                || document.body.classList.contains("auth-modal-open")
                 || document.body.classList.contains("bible-fullscreen-open")
                 || document.body.classList.contains("songbook-fullscreen-open")
-                || document.body.classList.contains("app-update-open");
+                || document.body.classList.contains("sermon-player-open")
+                || document.body.classList.contains("prayer-detail-open")
+                || document.body.classList.contains("app-update-open")
+                || document.body.classList.contains("splash-active");
             fab.hidden = hide;
             fab.setAttribute("aria-hidden", hide ? "true" : "false");
             if (!hide) {
@@ -1328,6 +1338,10 @@
         });
         document.addEventListener("njc:routechange", syncFabVisibility);
         window.addEventListener("hashchange", syncFabVisibility);
+        if (typeof MutationObserver !== "undefined") {
+            var themeFabObserver = new MutationObserver(syncFabVisibility);
+            themeFabObserver.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+        }
         syncFabVisibility();
     }
 
@@ -1411,7 +1425,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260324u4";
+    var SW_VERSION = "20260324u5";
     var APP_VERSION = "2026.3.24";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
     var UPDATE_NOTES_SUMMARY = "Bible reader layout and language controls, PWA cache updates.";
