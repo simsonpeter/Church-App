@@ -1,4 +1,6 @@
 :root {
+    /* Fluid root size: scales gently with viewport; rem-based UI tracks together. */
+    --fs-root: clamp(15px, calc(12px + 1.6vw), 18px);
     --font-stack-en: "DM Sans", "Inter", "Segoe UI", system-ui, sans-serif;
     --font-stack-ta: "Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif;
     /* Full width on phones; cap width on larger screens so lines do not sprawl */
@@ -31,19 +33,20 @@
     box-sizing: border-box;
 }
 
+html {
+    font-size: var(--fs-root);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+html[data-larger-text="1"] {
+    font-size: calc(var(--fs-root) * 1.125);
+}
+
 html,
 body {
     margin: 0;
     min-height: 100%;
-}
-
-html[data-larger-text="1"] {
-    font-size: 112.5%;
-}
-
-html[data-larger-text="1"] .card h2,
-html[data-larger-text="1"] .app-header h1 {
-    font-size: 1.15em;
 }
 
 html[lang="en"] {
@@ -57,6 +60,7 @@ html[lang="ta"] {
 body {
     min-height: 100vh;
     font-family: inherit;
+    font-size: 1rem;
     color: var(--text);
     background-color: var(--bg-bottom);
     background-image:
@@ -140,7 +144,7 @@ body.splash-active {
 
 .splash-text {
     margin-top: 16px;
-    font-size: clamp(1.35rem, 5.2vw, 2rem);
+    font-size: clamp(1.45rem, 1.1rem + 1.35vw, 1.95rem);
     font-weight: 800;
     line-height: 1.15;
     letter-spacing: 0.03em;
@@ -5550,19 +5554,8 @@ html[data-theme="light"] .mini-player-btn {
     .app-shell {
         padding: 28px var(--app-inline-pad) 140px;
     }
-    .app-header h1 {
-        font-size: 1.7rem;
-    }
     .card {
         padding: 22px;
-    }
-    .card h2 {
-        font-size: 1.15rem;
-    }
-    .search-input,
-    .page-note,
-    .list li p {
-        font-size: 1.02rem;
     }
 }
 
@@ -5578,47 +5571,20 @@ html[data-theme="light"] .mini-player-btn {
         padding: 24px 24px;
         min-height: 130px;
     }
-    .app-header h1 {
-        font-size: 1.9rem;
-    }
-    .app-header p {
-        font-size: 1.05rem;
-    }
-    .eyebrow,
-    .brand-title {
-        font-size: 0.82rem;
-    }
     .card {
         padding: 26px;
         border-radius: 20px;
     }
-    .card h2 {
-        font-size: 1.25rem;
-        margin-bottom: 12px;
-    }
-    .card h2 i {
-        font-size: 1.25rem;
+    .card > h2:first-child,
+    a.card > h2:first-child {
+        margin-bottom: 14px;
     }
     .app-content {
         gap: 18px;
         margin-top: 20px;
     }
-    .search-input,
-    .page-note {
-        font-size: 1.08rem;
-    }
-    .list li h3 {
-        font-size: 1.08rem;
-    }
-    .list li p {
-        font-size: 1.02rem;
-    }
     .button-link:not(.bible-lang-btn) {
-        font-size: 1rem;
         padding: 12px 20px;
-    }
-    .tab-label {
-        font-size: 0.95rem;
     }
     .theme-toggle,
     .lang-toggle,
@@ -5626,7 +5592,6 @@ html[data-theme="light"] .mini-player-btn {
     .menu-toggle {
         width: 44px;
         height: 44px;
-        font-size: 0.9rem;
     }
     .settings-controls .theme-toggle,
     .settings-controls .lang-toggle,
@@ -5637,7 +5602,6 @@ html[data-theme="light"] .mini-player-btn {
     }
     .trivia-option-btn {
         padding: 16px 20px;
-        font-size: 1.08rem;
     }
     .splash-inner {
         max-width: min(92vw, 520px);
@@ -5645,9 +5609,6 @@ html[data-theme="light"] .mini-player-btn {
     .splash-logo {
         width: 150px;
         height: 150px;
-    }
-    .splash-text {
-        font-size: 2.2rem;
     }
 }
 
