@@ -363,8 +363,10 @@ body.splash-active {
     --card-pad: 18px;
     --card-pad-start: var(--card-pad);
     --card-pad-end: var(--card-pad);
+    --card-radius: 20px;
+    --card-title-top-radius: max(0px, calc(var(--card-radius) - var(--card-border-width)));
     background: linear-gradient(168deg, var(--card-gradient-top) 0%, var(--card-gradient-bottom) 100%);
-    border-radius: 20px;
+    border-radius: var(--card-radius);
     padding: var(--card-pad);
     border: var(--card-border-width) solid var(--card-border-color);
     box-shadow: var(--card-shadow-ambient);
@@ -516,7 +518,8 @@ html[data-theme="dark"] .card.announcements-card::before {
 }
 
 .card.card-v-featured {
-    border-radius: 22px;
+    --card-radius: 22px;
+    border-radius: var(--card-radius);
     border-color: rgba(198, 40, 40, 0.52);
     background: linear-gradient(168deg, #fffefd 0%, #fff0ee 48%, #fff5f8 100%);
     box-shadow:
@@ -585,7 +588,8 @@ html[data-theme="dark"] .card.announcements-card::before {
 }
 
 .card.hero-card.card-v-elevated {
-    border-radius: 22px;
+    --card-radius: 22px;
+    border-radius: var(--card-radius);
     border-color: rgba(190, 45, 45, 0.5);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.92) inset,
@@ -733,6 +737,8 @@ a.card > h2:first-child {
     background: linear-gradient(150deg, var(--header-start) 0%, #c62828 42%, var(--header-end) 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+    border-top-left-radius: var(--card-title-top-radius);
+    border-top-right-radius: var(--card-title-top-radius);
 }
 
 .card > h2:first-child i,
@@ -794,6 +800,8 @@ a.card:hover > h2:not(:first-child) i {
     background: linear-gradient(150deg, var(--header-start) 0%, #c62828 42%, var(--header-end) 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+    border-top-left-radius: var(--card-title-top-radius);
+    border-top-right-radius: var(--card-title-top-radius);
 }
 
 .card-lang-top > h2 {
@@ -825,9 +833,10 @@ a.card:hover > h2:not(:first-child) i {
     --dv-h1: 350;
     --dv-h2: 28;
     --dv-h3: 200;
+    --dv-panel-radius: 16px;
     position: relative;
     margin: -4px -6px 0;
-    border-radius: 16px;
+    border-radius: var(--dv-panel-radius);
     overflow: hidden;
     isolation: isolate;
 }
@@ -921,6 +930,8 @@ a.card:hover > h2:not(:first-child) i {
     background: linear-gradient(150deg, var(--header-start) 0%, #c62828 42%, var(--header-end) 100%);
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+    border-top-left-radius: var(--dv-panel-radius);
+    border-top-right-radius: var(--dv-panel-radius);
 }
 
 .daily-verse-top h2 {
@@ -5900,7 +5911,8 @@ html[data-theme="light"] .mini-player-btn {
     .card {
         --card-pad: 26px;
         padding: 26px;
-        border-radius: 20px;
+        --card-radius: 20px;
+        border-radius: var(--card-radius);
     }
     .card > h2:first-child,
     a.card > h2:first-child {
