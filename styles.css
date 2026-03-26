@@ -922,14 +922,22 @@ a.card:hover > h2:not(:first-child) i {
     border-top-right-radius: var(--dv-panel-radius);
 }
 
+/* Match .card > h2:first-child — daily verse h2 is nested in .daily-verse-panel, not a direct .card child, so it does not inherit that rule and would otherwise use the UA h2 size. */
 .daily-verse-top h2 {
     margin-bottom: 0;
     margin-top: 0;
     color: #ffffff;
+    font-size: 1.06rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .daily-verse-top h2 i {
     color: rgba(255, 248, 248, 0.95);
+    font-size: 1.05rem;
 }
 
 .daily-verse-panel .daily-verse-top .mini-toggle {
