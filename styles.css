@@ -35,6 +35,8 @@
     --accent-warm: #e8a054;
     --card-gradient-top: #ffffff;
     --card-gradient-bottom: #fff3f0;
+    --card-border-width: 2px;
+    --card-border-color: rgba(158, 52, 52, 0.55);
     --body-glow-top: rgba(255, 206, 168, 0.38);
     --body-glow-corner: rgba(229, 57, 53, 0.08);
 }
@@ -364,7 +366,7 @@ body.splash-active {
     background: linear-gradient(168deg, var(--card-gradient-top) 0%, var(--card-gradient-bottom) 100%);
     border-radius: 20px;
     padding: var(--card-pad);
-    border: 1px solid rgba(214, 140, 140, 0.55);
+    border: var(--card-border-width) solid var(--card-border-color);
     box-shadow: var(--card-shadow-ambient);
     transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
     animation: fade-up 0.45s ease both;
@@ -376,7 +378,7 @@ body.splash-active {
 
 .card.card-v-glass {
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.97), rgba(255, 248, 248, 0.92));
-    border-color: rgba(220, 160, 160, 0.5);
+    border-color: rgba(176, 88, 88, 0.58);
     backdrop-filter: blur(14px) saturate(1.12);
     -webkit-backdrop-filter: blur(14px) saturate(1.12);
     box-shadow: var(--card-shadow-ambient);
@@ -394,7 +396,7 @@ body.splash-active {
     --ann-red-a: 0.07;
     isolation: isolate;
     background: transparent;
-    border-color: rgba(210, 145, 145, 0.55);
+    border-color: rgba(168, 72, 72, 0.58);
     box-shadow: var(--card-shadow-ambient);
 }
 
@@ -439,7 +441,7 @@ body.splash-active {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .card.announcements-card {
-        border-color: rgba(120, 60, 60, 0.45);
+        border-color: rgba(255, 255, 255, 0.26);
         box-shadow: var(--card-shadow-ambient);
     }
 
@@ -466,7 +468,7 @@ body.splash-active {
 }
 
 html[data-theme="dark"] .card.announcements-card {
-    border-color: rgba(120, 60, 60, 0.45);
+    border-color: rgba(255, 255, 255, 0.26);
     box-shadow: var(--card-shadow-ambient);
 }
 
@@ -494,7 +496,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 .card.card-v-mesh {
     isolation: isolate;
     background: linear-gradient(168deg, #ffffff 0%, #fff8f6 100%);
-    border-color: #edd5d5;
+    border-color: rgba(200, 120, 120, 0.65);
 }
 
 .card.card-v-mesh::before {
@@ -515,7 +517,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 .card.card-v-featured {
     border-radius: 22px;
-    border-color: rgba(229, 57, 53, 0.32);
+    border-color: rgba(198, 40, 40, 0.52);
     background: linear-gradient(168deg, #fffefd 0%, #fff0ee 48%, #fff5f8 100%);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.92) inset,
@@ -541,8 +543,9 @@ html[data-theme="dark"] .card.announcements-card::before {
 .card.card-v-ink {
     --card-pad-start: 17px;
     background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
-    border-color: #b8c5d4;
-    border-left: 4px solid #334155;
+    border: var(--card-border-width) solid #94a3b8;
+    border-left-width: 5px;
+    border-left-color: #334155;
     padding-left: 17px;
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.88) inset,
@@ -558,7 +561,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 .card.card-v-playful {
     background: linear-gradient(145deg, #faf8ff 0%, #fff5f7 50%, #fff8f4 100%);
-    border-color: #d4c2e8;
+    border-color: rgba(124, 58, 237, 0.38);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.9) inset,
         0 0 0 1px rgba(255, 255, 255, 0.5) inset,
@@ -574,7 +577,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 .card.card-v-minimal {
     background: rgba(255, 255, 255, 0.78);
     border-style: dashed;
-    border-color: #dcb0b0;
+    border-color: rgba(176, 88, 88, 0.7);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.85) inset,
         0 20px 44px rgba(90, 24, 24, 0.08),
@@ -583,7 +586,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 .card.hero-card.card-v-elevated {
     border-radius: 22px;
-    border-color: rgba(229, 57, 53, 0.28);
+    border-color: rgba(190, 45, 45, 0.5);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.92) inset,
         0 0 0 1px rgba(255, 255, 255, 0.5) inset,
@@ -594,7 +597,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 .card.location-map-card.card-v-map {
     background: linear-gradient(180deg, #ffffff 0%, #f8fafc 55%, #f1f5f9 100%);
-    border-color: #8ca3b8;
+    border-color: #64748b;
     color: var(--text);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.9) inset,
@@ -642,7 +645,7 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 .card:hover {
     transform: translateY(-3px);
-    border-color: #d89898;
+    border-color: rgba(140, 40, 40, 0.72);
 }
 
 .card:not(.card-v-featured):not(.card-v-ink):not(.card-v-playful):not(.card-v-minimal):not(.hero-card):not(.location-map-card):hover {
@@ -703,12 +706,12 @@ html[data-theme="dark"] .card.announcements-card::before {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .card:hover {
-        border-color: rgba(255, 255, 255, 0.14);
+        border-color: rgba(255, 255, 255, 0.32);
     }
 }
 
 html[data-theme="dark"] .card:hover {
-    border-color: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.32);
 }
 
 .card > h2:first-child,
@@ -5118,6 +5121,8 @@ body.prayer-detail-open {
         --accent-warm: #c9a227;
         --card-gradient-top: #262626;
         --card-gradient-bottom: #141414;
+        --card-border-width: 2px;
+        --card-border-color: rgba(255, 255, 255, 0.22);
         --card-shadow-ambient:
             0 1px 0 rgba(255, 255, 255, 0.07) inset,
             0 0 0 1px rgba(255, 255, 255, 0.05) inset,
@@ -5162,7 +5167,7 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-glass {
         background: linear-gradient(145deg, rgba(40, 40, 40, 0.92), rgba(24, 24, 24, 0.88));
-        border-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.28);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.05) inset,
             0 14px 40px rgba(0, 0, 0, 0.45),
@@ -5171,7 +5176,7 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-mesh {
         background: linear-gradient(168deg, #242424 0%, #181818 100%);
-        border-color: #404040;
+        border-color: rgba(255, 255, 255, 0.22);
     }
 
     :root:not([data-theme="light"]) .card.card-v-mesh::before {
@@ -5180,7 +5185,7 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-featured {
         background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
-        border-color: rgba(201, 162, 39, 0.35);
+        border-color: rgba(201, 162, 39, 0.55);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.06) inset,
             0 16px 42px rgba(0, 0, 0, 0.5),
@@ -5197,8 +5202,9 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-ink {
         background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-        border-color: #334155;
-        border-left-color: #94a3b8;
+        border: var(--card-border-width) solid #64748b;
+        border-left-width: 5px;
+        border-left-color: #cbd5e1;
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.04) inset,
             0 10px 28px rgba(0, 0, 0, 0.4);
@@ -5210,7 +5216,7 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-playful {
         background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
-        border-color: #4c3a6b;
+        border-color: rgba(167, 139, 250, 0.45);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.05) inset,
             0 12px 32px rgba(0, 0, 0, 0.42),
@@ -5223,12 +5229,12 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.card-v-minimal {
         background: rgba(30, 30, 30, 0.65);
-        border-color: #505050;
+        border-color: rgba(255, 255, 255, 0.28);
         box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 20px rgba(0, 0, 0, 0.35);
     }
 
     :root:not([data-theme="light"]) .card.hero-card.card-v-elevated {
-        border-color: rgba(255, 255, 255, 0.12);
+        border-color: rgba(255, 255, 255, 0.28);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.06) inset,
             0 20px 48px rgba(0, 0, 0, 0.55),
@@ -5237,7 +5243,7 @@ body.prayer-detail-open {
 
     :root:not([data-theme="light"]) .card.location-map-card.card-v-map {
         background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
-        border-color: #475569;
+        border-color: #94a3b8;
     }
 
     :root:not([data-theme="light"]) .card.location-map-card.card-v-map > h2:not(:first-child) i,
@@ -5303,6 +5309,8 @@ html[data-theme="dark"] {
     --accent-warm: #c9a227;
     --card-gradient-top: #262626;
     --card-gradient-bottom: #141414;
+    --card-border-width: 2px;
+    --card-border-color: rgba(255, 255, 255, 0.22);
     --card-shadow-ambient:
         0 1px 0 rgba(255, 255, 255, 0.07) inset,
         0 0 0 1px rgba(255, 255, 255, 0.05) inset,
@@ -5348,7 +5356,7 @@ html[data-theme="dark"] .verse-card {
 
 html[data-theme="dark"] .card.card-v-glass {
     background: linear-gradient(145deg, rgba(40, 40, 40, 0.92), rgba(24, 24, 24, 0.88));
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.28);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.05) inset,
         0 14px 40px rgba(0, 0, 0, 0.45),
@@ -5357,7 +5365,7 @@ html[data-theme="dark"] .card.card-v-glass {
 
 html[data-theme="dark"] .card.card-v-mesh {
     background: linear-gradient(168deg, #242424 0%, #181818 100%);
-    border-color: #404040;
+    border-color: rgba(255, 255, 255, 0.22);
 }
 
 html[data-theme="dark"] .card.card-v-mesh::before {
@@ -5366,7 +5374,7 @@ html[data-theme="dark"] .card.card-v-mesh::before {
 
 html[data-theme="dark"] .card.card-v-featured {
     background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
-    border-color: rgba(201, 162, 39, 0.35);
+    border-color: rgba(201, 162, 39, 0.55);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.06) inset,
         0 16px 42px rgba(0, 0, 0, 0.5),
@@ -5383,8 +5391,9 @@ html[data-theme="dark"] .card.verse-card.card-v-featured {
 
 html[data-theme="dark"] .card.card-v-ink {
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
-    border-color: #334155;
-    border-left-color: #94a3b8;
+    border: var(--card-border-width) solid #64748b;
+    border-left-width: 5px;
+    border-left-color: #cbd5e1;
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.04) inset,
         0 10px 28px rgba(0, 0, 0, 0.4);
@@ -5396,7 +5405,7 @@ html[data-theme="dark"] .card.card-v-ink > h2:not(:first-child) i {
 
 html[data-theme="dark"] .card.card-v-playful {
     background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
-    border-color: #4c3a6b;
+    border-color: rgba(167, 139, 250, 0.45);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.05) inset,
         0 12px 32px rgba(0, 0, 0, 0.42),
@@ -5409,12 +5418,12 @@ html[data-theme="dark"] .card.card-v-playful > h2:not(:first-child) i {
 
 html[data-theme="dark"] .card.card-v-minimal {
     background: rgba(30, 30, 30, 0.65);
-    border-color: #505050;
+    border-color: rgba(255, 255, 255, 0.28);
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 html[data-theme="dark"] .card.hero-card.card-v-elevated {
-    border-color: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.28);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.06) inset,
         0 20px 48px rgba(0, 0, 0, 0.55),
@@ -5423,7 +5432,7 @@ html[data-theme="dark"] .card.hero-card.card-v-elevated {
 
 html[data-theme="dark"] .card.location-map-card.card-v-map {
     background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
-    border-color: #475569;
+    border-color: #94a3b8;
 }
 
 html[data-theme="dark"] .card.location-map-card.card-v-map > h2:not(:first-child) i,
@@ -5565,6 +5574,8 @@ html[data-theme="light"] {
     --accent-warm: #e8a054;
     --card-gradient-top: #ffffff;
     --card-gradient-bottom: #fff3f0;
+    --card-border-width: 2px;
+    --card-border-color: rgba(158, 52, 52, 0.55);
     --body-glow-top: rgba(255, 206, 168, 0.38);
     --body-glow-corner: rgba(229, 57, 53, 0.08);
     color-scheme: light;
