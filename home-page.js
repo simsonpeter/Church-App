@@ -91,6 +91,38 @@
             var dailyVerseRenderToken = 0;
             var kjvBiblePromise = null;
             var tamilBiblePromise = null;
+            /** Reject if `promise` does not settle within `ms` (fail fast on slow networks). */
+            function promiseWithTimeout(promise, ms, errMsg) {
+                var msNum = Number(ms) || 10000;
+                return Promise.race([
+                    promise,
+                    new Promise(function (_, reject) {
+                        setTimeout(function () {
+                            reject(new Error(errMsg || "timeout"));
+                        }, msNum);
+                    })
+                ]);
+            }
+            /** Run non-critical work after first paint / when the browser is idle. */
+            function runWhenIdle(fn, timeoutMs) {
+                var t = Number(timeoutMs);
+                if (!Number.isFinite(t) || t < 0) {
+                    t = 1800;
+                }
+                if (typeof window.requestIdleCallback === "function") {
+                    window.requestIdleCallback(function () {
+                        try {
+                            fn();
+                        } catch (e) {}
+                    }, { timeout: t });
+                } else {
+                    setTimeout(function () {
+                        try {
+                            fn();
+                        } catch (e) {}
+                    }, 80);
+                }
+            }
             var bookMapEnglish = {
                 "Gen.": "Genesis", "Exo.": "Exodus", "Lev.": "Leviticus", "Num.": "Numbers", "Deu.": "Deuteronomy",
                 "Jos.": "Joshua", "Judg.": "Judges", "Ruth.": "Ruth", "1 Sam.": "1 Samuel", "2 Sam.": "2 Samuel",
@@ -484,7 +516,8 @@
 
             function fetchVerseOfTheDayFromApi() {
                 var url = "https://labs.bible.org/api/?passage=votd&type=json";
-                return fetch(url, { cache: "no-store" })
+                return promiseWithTimeout(
+                    fetch(url, { cache: "no-store" })
                     .then(function (response) {
                         if (!response.ok) {
                             throw new Error("Daily verse request failed");
@@ -505,7 +538,10 @@
                         return {
                             reference: book + " " + chapter + ":" + verse
                         };
-                    });
+                    }),
+                    6000,
+                    "VOTD timeout"
+                );
             }
 
             function parseSingleVerseReference(reference) {
@@ -572,6 +608,12 @@
                 }
                 return targetPromise;
             }
+
+            (function preloadBibleJsonForHome() {
+                try {
+                    loadBibleData(verseLanguage === "ta" ? "ta" : "en");
+                } catch (e) {}
+            })();
 
             function resolveDailyVerseText(reference, languageKey) {
                 return loadBibleData(languageKey).then(function (bibleData) {
@@ -1749,7 +1791,7 @@
             function loadTodayReadingPlan() {
                 var dayOfYear = getDayOfYear(todayYmd);
 
-                fetch(readingPlanUrl)
+                promiseWithTimeout(fetch(readingPlanUrl), 12000, "Reading plan timeout")
                     .then(function (response) {
                         if (!response.ok) {
                             throw new Error("Could not load reading plan");
@@ -2526,8 +2568,11 @@
             applyAnnouncementsCardGradient();
             loadTodayReadingPlan();
             loadAnnouncements();
-            loadTrivia();
-            syncTriviaPointsForUser();
             recalcAndStoreReadingPoints();
-            loadThisWeekEvents();
+            /* Trivia + events + cloud sync are not needed for first paint — defer to idle time. */
+            runWhenIdle(function () {
+                loadTrivia();
+                syncTriviaPointsForUser();
+                loadThisWeekEvents();
+            }, 2200);
         })();
