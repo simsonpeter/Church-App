@@ -16,9 +16,6 @@
             var readingStreakLine = document.getElementById("reading-streak-line");
             var readingNudgeLine = document.getElementById("reading-nudge-line");
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
-            var readingHeatmapToggle = document.getElementById("reading-heatmap-toggle");
-            var readingHeatmapWrap = document.getElementById("reading-heatmap-wrap");
-            var readingHeatmap = document.getElementById("reading-heatmap");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
@@ -79,7 +76,6 @@
             var fullReadingPlan = [];
             var readingPlanError = false;
             var unreadListOpen = false;
-            var heatmapOpen = false;
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
@@ -1603,45 +1599,6 @@
                 }
             }
 
-            function renderReadingHeatmap() {
-                if (!readingHeatmap || !readingHeatmapWrap) {
-                    return;
-                }
-                if (!heatmapOpen) {
-                    readingHeatmapWrap.hidden = true;
-                    readingHeatmap.innerHTML = "";
-                    return;
-                }
-                var todayB = brusselsYmdFromDate(new Date());
-                if (!todayB) {
-                    readingHeatmapWrap.hidden = true;
-                    return;
-                }
-                var py = Number(todayB.slice(0, 4));
-                var pm = Number(todayB.slice(5, 7));
-                var y = py;
-                var m = pm;
-                var first = new Date(Date.UTC(y, m - 1, 1, 12, 0, 0));
-                var startWeekday = first.getUTCDay();
-                var daysInMonth = new Date(Date.UTC(y, m, 0)).getUTCDate();
-                var cells = [];
-                var i;
-                for (i = 0; i < startWeekday; i++) {
-                    cells.push("<span class=\"reading-heatmap-cell reading-heatmap-cell--empty\"></span>");
-                }
-                var map = getProgressMap();
-                for (var d = 1; d <= daysInMonth; d++) {
-                    var key = String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
-                    var e = map[key] || {};
-                    var mDone = Boolean(e.morning);
-                    var evDone = Boolean(e.evening);
-                    var level = mDone && evDone ? 2 : (mDone || evDone ? 1 : 0);
-                    cells.push("<span class=\"reading-heatmap-cell reading-heatmap-cell--l" + level + "\" title=\"" + key + "\"></span>");
-                }
-                readingHeatmap.innerHTML = cells.join("");
-                readingHeatmapWrap.hidden = false;
-            }
-
             function getAnnouncementDismissedSet() {
                 try {
                     var raw = window.localStorage.getItem(ANNOUNCEMENT_DISMISSED_KEY);
@@ -1752,7 +1709,6 @@
                 readingUnreadToggle.disabled = false;
                 renderUnreadBacklog(progress.unreadBacklog);
                 renderReadingStreakAndNudge();
-                renderReadingHeatmap();
             }
 
             function renderReadingPlan() {
@@ -2499,14 +2455,6 @@
                         window.NjcUiFeedback.readingCheckIn();
                     }
                     renderReadingPlan();
-                });
-            }
-
-            if (readingHeatmapToggle && readingHeatmapWrap) {
-                readingHeatmapToggle.addEventListener("click", function () {
-                    heatmapOpen = !heatmapOpen;
-                    readingHeatmapToggle.classList.toggle("active", heatmapOpen);
-                    renderReadingHeatmap();
                 });
             }
 

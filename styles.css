@@ -4109,6 +4109,9 @@ body.bible-fullscreen-open .offline-badge {
     font-size: 0.76rem;
     padding: 7px 10px;
     width: fit-content;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .reading-unread-list {
@@ -5983,12 +5986,56 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     line-height: 1.45;
 }
 
-/* Reading extras */
-.reading-extra-actions {
+/* Reading extras — compact row: share icon + unread toggle */
+.reading-actions-row {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    align-items: center;
     gap: 8px;
-    margin-top: 8px;
+    margin-top: 6px;
+}
+
+.reading-share-icon-btn {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    color: var(--primary);
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.reading-share-icon-btn:hover {
+    background: var(--surface);
+    border-color: #ecb0b0;
+    transform: translateY(-1px);
+}
+
+html[data-theme="dark"] .reading-share-icon-btn {
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .reading-share-icon-btn:hover {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.reading-share-icon-btn i {
+    font-size: 1rem;
+}
+
+.reading-actions-row .reading-unread-toggle {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-top: 0;
+    text-align: center;
+    justify-content: center;
 }
 
 .reading-streak-line,

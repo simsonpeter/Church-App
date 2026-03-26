@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260401u1";
-    var APP_VERSION = "2026.4.1";
+    var SW_VERSION = "20260402u1";
+    var APP_VERSION = "2026.4.2";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily verse title typography matches other card titles; PWA cache bump.";
+    var UPDATE_NOTES_SUMMARY = "Compact Bible reading card: share icon + unread on one row; month heatmap removed; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

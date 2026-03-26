@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260401h2t1">
+    <link rel="stylesheet" href="styles.css?v=20260402read1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -56,15 +56,12 @@
                     <p class="page-note" id="reading-progress-remaining"></p>
                     <p class="page-note reading-streak-line" id="reading-streak-line" hidden></p>
                     <p class="page-note reading-nudge-line" id="reading-nudge-line" hidden></p>
-                    <div class="reading-extra-actions">
-                        <button type="button" class="button-link button-secondary" id="reading-share-progress-btn" data-i18n="home.readingShareProgress">Share progress</button>
-                        <button type="button" class="button-link button-secondary" id="reading-heatmap-toggle" data-i18n="home.readingHeatmapToggle">This month</button>
+                    <div class="reading-actions-row">
+                        <button type="button" class="reading-share-icon-btn" id="reading-share-progress-btn" data-i18n-aria-label="home.readingShareProgress" data-i18n-aria-fallback="Share reading progress" data-i18n-title="home.readingShareProgress" data-i18n-title-fallback="Share progress" aria-label="Share reading progress" title="Share progress">
+                            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+                        </button>
+                        <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
                     </div>
-                    <div class="reading-heatmap-wrap" id="reading-heatmap-wrap" hidden>
-                        <p class="page-note reading-heatmap-title" data-i18n="home.readingHeatmapTitle">Reading this month (darker = more done)</p>
-                        <div class="reading-heatmap" id="reading-heatmap" aria-hidden="true"></div>
-                    </div>
-                    <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
                 </div>
                 <ul class="list" id="today-reading-plan-list">
                     <li>
@@ -1078,9 +1075,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260401u1"></script>
+    <script src="app-shell.js?v=20260402u1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260326dv2"></script>
+    <script src="home-page.js?v=20260402dv1"></script>
     <script src="events-page.js?v=20260318de"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260324u1"></script>
