@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v199";
-const RUNTIME_CACHE = "njc-runtime-cache-v199";
+const APP_CACHE = "njc-app-cache-v200";
+const RUNTIME_CACHE = "njc-runtime-cache-v200";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260410orig1",
+    "./styles.css?v=20260411cb1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260410u2",
+    "./app-shell.js?v=20260411u1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260403perf1",
     "./events-page.js?v=20260318de",
@@ -25,8 +25,24 @@ const CORE_ASSETS = [
     "./user-achievements-page.js?v=20260325u1",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
-    "./reading-plan-banner.jpg?v=20260407b1",
-    "./announcements-banner.jpg?v=20260410orig1",
+    "./achievements-banner.jpg?v=20260411cb1",
+    "./admin-banner.jpg?v=20260411cb1",
+    "./announcements-banner.jpg?v=20260411cb1",
+    "./archive-banner.jpg?v=20260411cb1",
+    "./bible-reader-banner.jpg?v=20260411cb1",
+    "./chat-banner.jpg?v=20260411cb1",
+    "./contact-banner.jpg?v=20260411cb1",
+    "./contact-form-banner.jpg?v=20260411cb1",
+    "./daily-verse-banner.jpg?v=20260411cb1",
+    "./events-banner.jpg?v=20260411cb1",
+    "./mailbox-banner.jpg?v=20260411cb1",
+    "./prayer-banner.jpg?v=20260411cb1",
+    "./profile-banner.jpg?v=20260411cb1",
+    "./reading-plan-banner.jpg?v=20260411cb1",
+    "./sermons-banner.jpg?v=20260411cb1",
+    "./settings-banner.jpg?v=20260411cb1",
+    "./songbook-banner.jpg?v=20260411cb1",
+    "./trivia-banner.jpg?v=20260411cb1",
     "./announcements.json"
 ];
 

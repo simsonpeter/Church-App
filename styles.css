@@ -4058,8 +4058,8 @@ body.bible-fullscreen-open .offline-badge {
     color: var(--muted);
 }
 
-.announcements-banner,
-.reading-plan-banner {
+/* Photo strip under card titles (home + all tab pages) */
+.card-banner {
     margin: 4px calc(-1 * var(--card-pad)) 10px;
     width: calc(100% + 2 * var(--card-pad));
     max-width: none;
@@ -4070,8 +4070,7 @@ body.bible-fullscreen-open .offline-badge {
     background: var(--surface-soft);
 }
 
-.announcements-banner img,
-.reading-plan-banner img {
+.card-banner img {
     display: block;
     width: 100%;
     height: auto;
