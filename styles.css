@@ -4080,11 +4080,6 @@ body.bible-fullscreen-open .offline-badge {
     object-position: center;
 }
 
-/* Megaphone art sits left; keep composition like reference (clear space on the right). */
-.announcements-banner img {
-    object-position: left center;
-}
-
 .reading-progress-wrap {
     margin: 8px 0 10px;
     display: grid;
