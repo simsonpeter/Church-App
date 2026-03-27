@@ -2018,18 +2018,20 @@ body.sermon-player-open {
 }
 
 /* Clear fixed tab bar (~72–88px) + safe area; Tamil/long labels need extra room */
+/* Above .home-global-fab (5100) so play/close stay tappable; below songbook (5200) and bible fullscreen (5300). */
 .mini-sermon-player {
     position: fixed;
     left: 50%;
     transform: translateX(-50%);
     bottom: calc(max(12px, env(safe-area-inset-bottom)) + 108px);
     width: var(--app-content-width);
-    z-index: 2500;
+    z-index: 5150;
     display: grid;
     grid-template-columns: 1fr auto auto;
     align-items: center;
     gap: 8px;
     padding: 10px;
+    padding-right: max(10px, calc(env(safe-area-inset-right) + 68px));
     border-radius: 16px;
     border: 1px solid #efc7c7;
     background: rgba(255, 245, 245, 0.97);
@@ -3772,7 +3774,7 @@ body.bible-fullscreen-open .offline-badge {
 }
 
 .mini-bible-player {
-    z-index: 2499;
+    z-index: 5150;
 }
 
 .bible-card.bible-card-fullscreen {
