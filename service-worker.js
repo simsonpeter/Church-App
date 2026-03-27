@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v197";
-const RUNTIME_CACHE = "njc-runtime-cache-v197";
+const APP_CACHE = "njc-app-cache-v198";
+const RUNTIME_CACHE = "njc-runtime-cache-v198";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260408main1",
+    "./styles.css?v=20260410ab1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260408u2",
+    "./app-shell.js?v=20260410u1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260403perf1",
     "./events-page.js?v=20260318de",
@@ -26,7 +26,7 @@ const CORE_ASSETS = [
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
     "./reading-plan-banner.jpg?v=20260407b1",
-    "./announcements-banner.jpg?v=20260409ab3",
+    "./announcements-banner.svg?v=20260410ab1",
     "./announcements.json"
 ];
 
