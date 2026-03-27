@@ -1,50 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 220" role="img" aria-hidden="true">
   <defs>
-    <linearGradient id="ab-paper" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#f4ead8"/>
-      <stop offset="50%" stop-color="#e8dcc4"/>
-      <stop offset="100%" stop-color="#dcc9ae"/>
+    <linearGradient id="ab-bg" x1="0%" y1="0%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#fff8f5"/>
+      <stop offset="35%" stop-color="#ffefeb"/>
+      <stop offset="70%" stop-color="#ffe4df"/>
+      <stop offset="100%" stop-color="#ffd8d2"/>
     </linearGradient>
-    <linearGradient id="ab-ink" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#2a1f14"/>
-      <stop offset="100%" stop-color="#1a120c"/>
+    <radialGradient id="ab-glow-l" cx="22%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.95)"/>
+      <stop offset="45%" stop-color="rgba(255,236,232,0.4)"/>
+      <stop offset="100%" stop-color="rgba(255,200,190,0)"/>
+    </radialGradient>
+    <radialGradient id="ab-glow-r" cx="78%" cy="35%" r="50%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.75)"/>
+      <stop offset="100%" stop-color="rgba(255,180,170,0)"/>
+    </radialGradient>
+    <linearGradient id="ab-horn" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ef5350"/>
+      <stop offset="50%" stop-color="#e53935"/>
+      <stop offset="100%" stop-color="#c62828"/>
     </linearGradient>
-    <filter id="ab-grain" x="0" y="0" width="100%" height="100%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch" result="n"/>
-      <feColorMatrix type="matrix" values="0 0 0 0 .92 0 0 0 0 .88 0 0 0 0 .78 0 0 0 .08 0" in="n" result="g"/>
-      <feBlend in="SourceGraphic" in2="g" mode="multiply"/>
-    </filter>
+    <linearGradient id="ab-horn-body" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b71c1c"/>
+      <stop offset="100%" stop-color="#8e1616"/>
+    </linearGradient>
   </defs>
-  <!-- Frame -->
-  <rect x="4" y="4" width="952" height="212" rx="4" fill="#c9b89a" stroke="#5c4a38" stroke-width="3"/>
-  <path fill="none" stroke="#5c4a38" stroke-width="1.5" d="M12 12h936v196H12z"/>
-  <!-- Corner crosses -->
-  <g fill="#3d2e22" stroke="none">
-    <path d="M24 20h4v8h8v4h-8v8h-4v-8h-8v-4h8z"/>
-    <path d="M924 20h4v8h8v4h-8v8h-4v-8h-8v-4h8z"/>
-    <path d="M24 188h4v8h8v4h-8v8h-4v-8h-8v-4h8z"/>
-    <path d="M924 188h4v8h8v4h-8v8h-4v-8h-8v-4h8z"/>
+  <rect width="960" height="220" rx="12" fill="url(#ab-bg)"/>
+  <rect width="960" height="220" rx="12" fill="url(#ab-glow-l)"/>
+  <rect width="960" height="220" rx="12" fill="url(#ab-glow-r)"/>
+  <circle cx="140" cy="160" r="38" fill="rgba(255,255,255,0.35)"/>
+  <circle cx="820" cy="175" r="28" fill="rgba(255,200,195,0.25)"/>
+  <circle cx="680" cy="48" r="22" fill="rgba(255,255,255,0.4)"/>
+  <path fill="rgba(229,57,53,0.06)" d="M0 175c120-18 240 18 360 8s240-28 360-18 240 22 360 10v45H0z"/>
+  <!-- Soft ground shadow -->
+  <ellipse cx="498" cy="168" rx="120" ry="14" fill="rgba(90,20,20,0.08)"/>
+  <g transform="translate(380 42)">
+    <ellipse cx="118" cy="88" rx="14" ry="22" fill="url(#ab-horn-body)"/>
+    <path fill="url(#ab-horn)" d="M24 28c0-8 6-14 14-14h8l132-18c12-2 22 6 24 18l28 108c2 12-6 22-18 24L52 188c-8 2-16-2-20-10L26 42c-2-6-2-10-2-14z"/>
+    <path fill="rgba(0,0,0,0.1)" d="M38 44l118 132 4-8L42 36z"/>
+    <ellipse cx="178" cy="78" rx="36" ry="52" fill="url(#ab-horn)" opacity="0.92"/>
+    <path fill="rgba(255,255,255,0.28)" d="M52 48c48 8 88 28 118 52l-8 6c-32-28-72-46-118-54z"/>
   </g>
-  <!-- Side wheat ticks -->
-  <path fill="none" stroke="#6b5a45" stroke-width="1.2" stroke-linecap="round" d="M480 8v8M480 204v8M8 110h8M944 110h8"/>
-  <!-- Parchment -->
-  <rect x="48" y="36" width="420" height="148" rx="3" fill="url(#ab-paper)" stroke="#7a6548" stroke-width="2" transform="rotate(-0.8 258 110)"/>
-  <circle cx="62" cy="48" r="5" fill="#4a3a2a"/>
-  <circle cx="454" cy="48" r="5" fill="#4a3a2a"/>
-  <path fill="none" stroke="#5c4a38" stroke-width="1" opacity="0.5" d="M72 130h360"/>
-  <path fill="url(#ab-ink)" opacity="0.85" d="M240 168c-8-4-14-12-16-22 4 8 12 14 22 16-6 4-4 6-6 6z"/>
-  <!-- Megaphone -->
-  <g transform="translate(520 44)">
-    <path fill="url(#ab-ink)" d="M180 20 L280 8 L300 100 L200 112 Z"/>
-    <path fill="#3d2e22" d="M160 100c0-30 25-55 55-60l20 8-8 72-22-4c-28 5-45-6-45-16z"/>
-    <path fill="none" stroke="#5c4a45" stroke-width="2" d="M200 28l60-6"/>
+  <g fill="#e57373" opacity="0.4">
+    <circle cx="280" cy="52" r="2.5"/>
+    <circle cx="720" cy="58" r="2"/>
+    <circle cx="520" cy="38" r="1.8"/>
   </g>
-  <!-- Medallion -->
-  <circle cx="480" cy="178" r="18" fill="#a68b5c" stroke="#4a3a2a" stroke-width="2"/>
-  <path fill="#2a1f14" d="M480 166v24M468 178h24" stroke="#2a1f14" stroke-width="2"/>
-  <circle cx="480" cy="178" r="6" fill="none" stroke="#2a1f14" stroke-width="1.5"/>
-  <!-- Books stack hint -->
-  <rect x="820" y="48" width="100" height="18" rx="2" fill="#4a3528"/>
-  <rect x="825" y="68" width="100" height="18" rx="2" fill="#2d4a38"/>
-  <rect x="830" y="88" width="100" height="18" rx="2" fill="#8b7355"/>
 </svg>
