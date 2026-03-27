@@ -1427,10 +1427,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260404u1";
-    var APP_VERSION = "2026.4.4";
+    var SW_VERSION = "20260408u1";
+    var APP_VERSION = "2026.4.8";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Solid white page background (no gradient); cards unchanged; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Home banners: vintage announcements graphic and open-book reading strip; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

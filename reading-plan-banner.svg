@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 220" role="img" aria-hidden="true">
+  <defs>
+    <linearGradient id="rb-sky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff5f5"/>
+      <stop offset="55%" stop-color="#ffe8e6"/>
+      <stop offset="100%" stop-color="#ffd6d2"/>
+    </linearGradient>
+    <linearGradient id="rb-paper" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#faf7f2"/>
+      <stop offset="100%" stop-color="#e8dfd4"/>
+    </linearGradient>
+    <linearGradient id="rb-leather" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#b71c1c"/>
+      <stop offset="100%" stop-color="#7f1010"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="220" fill="url(#rb-sky)"/>
+  <ellipse cx="480" cy="198" rx="380" ry="22" fill="rgba(183,28,28,0.07)"/>
+  <!-- Centered open book -->
+  <g transform="translate(480 40)">
+    <path fill="url(#rb-leather)" d="M0 8c-120 0-200 32-200 88v76h400v-76c0-56-80-88-200-88z"/>
+    <path fill="url(#rb-paper)" d="M0 16c-100 0-168 24-184 68v76h368v-76c-16-44-84-68-184-68z"/>
+    <path fill="none" stroke="rgba(127,16,16,0.4)" stroke-width="1.5" d="M0 28v132"/>
+    <path fill="rgba(90,30,30,0.1)" d="M-160 52h140v3h-140zm0 18h120v3h-120zm0 18h132v3h-132zm0 18h100v3h-100z"/>
+    <path fill="rgba(90,30,30,0.1)" d="M20 52h140v3h-140zm0 18h120v3h-120zm0 18h132v3h-132zm0 18h100v3h-100z"/>
+  </g>
+  <circle cx="780" cy="50" r="48" fill="rgba(255,255,255,0.5)"/>
+</svg>

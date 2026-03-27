@@ -3790,6 +3790,28 @@ body.bible-fullscreen-open .offline-badge {
     color: var(--muted);
 }
 
+.announcements-banner,
+.reading-plan-banner {
+    margin: 4px -18px 10px;
+    width: calc(100% + 36px);
+    max-width: none;
+    border-radius: 12px;
+    overflow: hidden;
+    line-height: 0;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.announcements-banner img,
+.reading-plan-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 120px;
+    object-fit: cover;
+    object-position: center;
+}
+
 .reading-progress-wrap {
     margin: 8px 0 10px;
     display: grid;
