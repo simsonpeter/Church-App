@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v196";
-const RUNTIME_CACHE = "njc-runtime-cache-v196";
+const APP_CACHE = "njc-app-cache-v197";
+const RUNTIME_CACHE = "njc-runtime-cache-v197";
 
 const CORE_ASSETS = [
     "./",
@@ -26,7 +26,7 @@ const CORE_ASSETS = [
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
     "./reading-plan-banner.jpg?v=20260407b1",
-    "./announcements-banner.jpg?v=20260409ab2",
+    "./announcements-banner.jpg?v=20260409ab3",
     "./announcements.json"
 ];
 
