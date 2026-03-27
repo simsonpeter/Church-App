@@ -21,9 +21,9 @@
         0 34px 72px rgba(62, 14, 22, 0.12),
         0 16px 38px rgba(90, 22, 28, 0.1),
         0 6px 18px rgba(48, 12, 18, 0.075);
-    --bg-top: #ffe8ec;
-    --bg-mid: #fff5f5;
-    --bg-bottom: #fffbfb;
+    --bg-top: #ffffff;
+    --bg-mid: #ffffff;
+    --bg-bottom: #ffffff;
     --surface: #ffffff;
     --surface-soft: #fff7f7;
     --text: #1c2141;
@@ -40,8 +40,8 @@
     --card-gradient-bottom: #fff3f0;
     --card-border-width: 2px;
     --card-border-color: rgba(158, 52, 52, 0.52);
-    --body-glow-top: rgba(255, 180, 180, 0.35);
-    --body-glow-corner: rgba(229, 57, 53, 0.1);
+    --body-glow-top: transparent;
+    --body-glow-corner: transparent;
 }
 
 * {
@@ -78,13 +78,8 @@ body {
     font-size: 1rem;
     color: var(--text);
     background-color: var(--bg-bottom);
-    background-image:
-        radial-gradient(ellipse 120% 100% at 0% 0%, var(--body-glow-top), transparent 55%),
-        radial-gradient(ellipse 90% 80% at 100% 100%, var(--body-glow-corner), transparent 52%),
-        linear-gradient(165deg, var(--bg-top) 0%, var(--bg-mid) 48%, var(--bg-bottom) 100%);
-    background-size: 140% 140%, 140% 140%, 100% 100%;
-    background-repeat: no-repeat;
-    animation: background-flow 28s ease infinite;
+    background-image: none;
+    animation: none;
 }
 
 [hidden] {
@@ -5550,9 +5545,9 @@ html[data-theme="dark"] .button-link:not(.button-secondary):not(.bible-lang-btn)
 }
 
 html[data-theme="light"] {
-    --bg-top: #ffe8ec;
-    --bg-mid: #fff5f5;
-    --bg-bottom: #fffbfb;
+    --bg-top: #ffffff;
+    --bg-mid: #ffffff;
+    --bg-bottom: #ffffff;
     --surface: #ffffff;
     --surface-soft: #fff7f7;
     --text: #1c2141;
@@ -5581,8 +5576,8 @@ html[data-theme="light"] {
         0 34px 72px rgba(62, 14, 22, 0.12),
         0 16px 38px rgba(90, 22, 28, 0.1),
         0 6px 18px rgba(48, 12, 18, 0.075);
-    --body-glow-top: rgba(255, 180, 180, 0.35);
-    --body-glow-corner: rgba(229, 57, 53, 0.1);
+    --body-glow-top: transparent;
+    --body-glow-corner: transparent;
     color-scheme: light;
 }
 
