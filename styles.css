@@ -9,9 +9,9 @@
     /* Matches .app-shell inner width (column minus horizontal padding) */
     --app-content-width: calc(min(var(--app-shell-max), 100vw) - 2 * var(--app-inline-pad));
     color-scheme: light dark;
-    --bg-top: #ffe3e3;
-    --bg-mid: #fff1f1;
-    --bg-bottom: #fff8f8;
+    --bg-top: #ffffff;
+    --bg-mid: #ffffff;
+    --bg-bottom: #ffffff;
     --surface: #ffffff;
     --surface-soft: #fff7f7;
     --text: #1c2141;
@@ -25,8 +25,8 @@
     --accent-warm: #e8a054;
     --card-gradient-top: #ffffff;
     --card-gradient-bottom: #fff6f4;
-    --body-glow-top: rgba(255, 206, 168, 0.38);
-    --body-glow-corner: rgba(229, 57, 53, 0.08);
+    --body-glow-top: transparent;
+    --body-glow-corner: transparent;
 }
 
 * {
@@ -63,13 +63,8 @@ body {
     font-size: 1rem;
     color: var(--text);
     background-color: var(--bg-bottom);
-    background-image:
-        radial-gradient(ellipse 110% 90% at 50% -12%, var(--body-glow-top), transparent 54%),
-        radial-gradient(ellipse 70% 55% at 0% 100%, var(--body-glow-corner), transparent 48%),
-        radial-gradient(circle at top right, var(--bg-top), var(--bg-mid) 45%, var(--bg-bottom) 100%);
-    background-size: 100% 100%, 100% 100%, 145% 145%;
-    background-repeat: no-repeat;
-    animation: background-flow 24s ease infinite;
+    background-image: none;
+    animation: none;
 }
 
 [hidden] {
@@ -5259,9 +5254,9 @@ html[data-theme="dark"] .button-link:not(.button-secondary):not(.bible-lang-btn)
 }
 
 html[data-theme="light"] {
-    --bg-top: #ffe3e3;
-    --bg-mid: #fff1f1;
-    --bg-bottom: #fff8f8;
+    --bg-top: #ffffff;
+    --bg-mid: #ffffff;
+    --bg-bottom: #ffffff;
     --surface: #ffffff;
     --surface-soft: #fff7f7;
     --text: #1c2141;
@@ -5275,8 +5270,8 @@ html[data-theme="light"] {
     --accent-warm: #e8a054;
     --card-gradient-top: #ffffff;
     --card-gradient-bottom: #fff6f4;
-    --body-glow-top: rgba(255, 206, 168, 0.38);
-    --body-glow-corner: rgba(229, 57, 53, 0.08);
+    --body-glow-top: transparent;
+    --body-glow-corner: transparent;
     color-scheme: light;
 }
 
