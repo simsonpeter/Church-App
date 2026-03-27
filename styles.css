@@ -456,20 +456,20 @@ body.splash-active {
         background-image:
             radial-gradient(
                 ellipse 115% 80% at var(--ann-gold-x) var(--ann-gold-y),
-                rgba(201, 162, 39, calc(var(--ann-gold-a) * 0.85)),
+                rgba(255, 255, 255, calc(var(--ann-gold-a) * 0.9)),
                 transparent 52%
             ),
             radial-gradient(
                 ellipse 100% 70% at var(--ann-red-x) var(--ann-red-y),
-                rgba(129, 140, 248, calc(var(--ann-red-a) * 1.15)),
+                rgba(255, 255, 255, calc(var(--ann-red-a) * 1.1)),
                 transparent 50%
             ),
             linear-gradient(
                 var(--ann-angle),
-                #1e1b4b 0%,
-                #1e293b 30%,
-                rgba(15, 23, 42, 0.98) var(--ann-mix),
-                #0f172a 100%
+                #1a1a1a 0%,
+                #141414 30%,
+                rgba(10, 10, 10, 0.98) var(--ann-mix),
+                #0a0a0a 100%
             );
     }
 }
@@ -482,20 +482,20 @@ html[data-theme="dark"] .card.announcements-card::before {
     background-image:
         radial-gradient(
             ellipse 115% 80% at var(--ann-gold-x) var(--ann-gold-y),
-            rgba(201, 162, 39, calc(var(--ann-gold-a) * 0.85)),
+            rgba(255, 255, 255, calc(var(--ann-gold-a) * 0.9)),
             transparent 52%
         ),
         radial-gradient(
             ellipse 100% 70% at var(--ann-red-x) var(--ann-red-y),
-            rgba(129, 140, 248, calc(var(--ann-red-a) * 1.15)),
+            rgba(255, 255, 255, calc(var(--ann-red-a) * 1.1)),
             transparent 50%
         ),
         linear-gradient(
             var(--ann-angle),
-            #1e1b4b 0%,
-            #1e293b 30%,
-            rgba(15, 23, 42, 0.98) var(--ann-mix),
-            #0f172a 100%
+            #1a1a1a 0%,
+            #141414 30%,
+            rgba(10, 10, 10, 0.98) var(--ann-mix),
+            #0a0a0a 100%
         );
 }
 
@@ -968,52 +968,42 @@ a.card:hover > h2:not(:first-child) i {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
-        background: linear-gradient(
-            148deg,
-            hsl(var(--dv-h1), 22%, 22%) 0%,
-            hsl(var(--dv-h2), 18%, 18%) 45%,
-            hsl(var(--dv-h3), 16%, 14%) 100%
-        );
+        background: linear-gradient(148deg, #2a2a2a 0%, #1f1f1f 45%, #141414 100%);
     }
 
     :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
     :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
-        color: #f4f4f5;
+        color: #ffffff;
     }
 
     :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
-        color: rgba(228, 228, 231, 0.78);
+        color: rgba(255, 255, 255, 0.65);
     }
 
     :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
         border-color: rgba(255, 255, 255, 0.22);
         background: rgba(255, 255, 255, 0.08);
-        color: #f4f4f5;
+        color: #ffffff;
     }
 }
 
 html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
-    background: linear-gradient(
-        148deg,
-        hsl(var(--dv-h1), 22%, 22%) 0%,
-        hsl(var(--dv-h2), 18%, 18%) 45%,
-        hsl(var(--dv-h3), 16%, 14%) 100%
-    );
+    background: linear-gradient(148deg, #2a2a2a 0%, #1f1f1f 45%, #141414 100%);
 }
 
 html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
 html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
-    color: #f4f4f5;
+    color: #ffffff;
 }
 
 html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
-    color: rgba(228, 228, 231, 0.78);
+    color: rgba(255, 255, 255, 0.65);
 }
 
 html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
     border-color: rgba(255, 255, 255, 0.22);
     background: rgba(255, 255, 255, 0.08);
-    color: #f4f4f5;
+    color: #ffffff;
 }
 
 .trivia-stats {
@@ -4649,7 +4639,7 @@ html[data-theme="dark"] .prayer-list-translated-note {
     }
 
     html[data-theme="dark"] .prayer-wall-list > .prayer-list-item-urgent:hover {
-        background-color: rgba(127, 29, 29, 0.45);
+        background-color: rgba(255, 255, 255, 0.12);
     }
 }
 
@@ -4670,7 +4660,7 @@ html[data-theme="dark"] .prayer-list-translated-note {
     }
 
     html:not([data-theme="light"]) .prayer-wall-list > .prayer-list-item-urgent:hover {
-        background-color: rgba(127, 29, 29, 0.45);
+        background-color: rgba(255, 255, 255, 0.12);
     }
 }
 
@@ -5054,10 +5044,10 @@ body.prayer-detail-open {
 @keyframes urgent-row-pulse-dark {
     0%,
     100% {
-        background-color: rgba(127, 29, 29, 0.16);
+        background-color: rgba(255, 255, 255, 0.04);
     }
     50% {
-        background-color: rgba(127, 29, 29, 0.36);
+        background-color: rgba(255, 255, 255, 0.1);
     }
 }
 
@@ -5110,21 +5100,21 @@ body.prayer-detail-open {
 
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) {
-        --bg-top: #0a0a0a;
-        --bg-mid: #111111;
-        --bg-bottom: #1a1a1a;
+        --bg-top: #000000;
+        --bg-mid: #0a0a0a;
+        --bg-bottom: #111111;
         --surface: #1a1a1a;
         --surface-soft: #252525;
         --text: #ffffff;
-        --muted: #a0a0a0;
-        --primary: #e0e0e0;
-        --primary-soft: #333333;
-        --line: #333333;
+        --muted: #a3a3a3;
+        --primary: #e5e5e5;
+        --primary-soft: #2a2a2a;
+        --line: #404040;
         --header-start: #000000;
-        --header-mid: #c62828;
-        --header-end: #e53935;
+        --header-mid: #2a2a2a;
+        --header-end: #3a3a3a;
         --shadow: 0 22px 55px rgba(0, 0, 0, 0.55);
-        --accent-warm: #c9a227;
+        --accent-warm: #737373;
         --card-gradient-top: #262626;
         --card-gradient-bottom: #141414;
         --card-border-width: 2px;
@@ -5141,8 +5131,8 @@ body.prayer-detail-open {
             0 30px 70px rgba(0, 0, 0, 0.62),
             0 14px 36px rgba(0, 0, 0, 0.5),
             0 6px 18px rgba(0, 0, 0, 0.4);
-        --body-glow-top: rgba(180, 120, 60, 0.12);
-        --body-glow-corner: rgba(224, 224, 224, 0.04);
+        --body-glow-top: transparent;
+        --body-glow-corner: transparent;
     }
 
     :root:not([data-theme="light"]) .tab-nav {
@@ -5188,7 +5178,7 @@ body.prayer-detail-open {
     }
 
     :root:not([data-theme="light"]) .card.card-v-featured {
-        background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
+        background: linear-gradient(168deg, #2a2a2a 0%, #1f1f1f 50%, #1a1a1a 100%);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.06) inset,
             0 16px 42px rgba(0, 0, 0, 0.5),
@@ -5196,26 +5186,26 @@ body.prayer-detail-open {
     }
 
     :root:not([data-theme="light"]) .card.card-v-featured::before {
-        background: linear-gradient(90deg, #c9a227, #e57373, #b71c1c);
+        background: linear-gradient(90deg, #525252, #737373, #525252);
     }
 
     :root:not([data-theme="light"]) .card.verse-card.card-v-featured {
-        background: linear-gradient(165deg, #2a2424 0%, #1e1a1a 45%, #221e1e 100%);
+        background: linear-gradient(165deg, #262626 0%, #1a1a1a 45%, #141414 100%);
     }
 
     :root:not([data-theme="light"]) .card.card-v-ink {
-        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        background: linear-gradient(180deg, #242424 0%, #141414 100%);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.04) inset,
             0 10px 28px rgba(0, 0, 0, 0.4);
     }
 
     :root:not([data-theme="light"]) .card.card-v-ink > h2:not(:first-child) i {
-        color: #cbd5e1;
+        color: #d4d4d4;
     }
 
     :root:not([data-theme="light"]) .card.card-v-playful {
-        background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
+        background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 50%, #1a1a1a 100%);
         box-shadow:
             0 1px 0 rgba(255, 255, 255, 0.05) inset,
             0 12px 32px rgba(0, 0, 0, 0.42),
@@ -5223,7 +5213,7 @@ body.prayer-detail-open {
     }
 
     :root:not([data-theme="light"]) .card.card-v-playful > h2:not(:first-child) i {
-        color: #c4b5fd;
+        color: #e5e5e5;
     }
 
     :root:not([data-theme="light"]) .card.card-v-minimal {
@@ -5239,12 +5229,12 @@ body.prayer-detail-open {
     }
 
     :root:not([data-theme="light"]) .card.location-map-card.card-v-map {
-        background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
+        background: linear-gradient(180deg, #242424 0%, #1a1a1a 55%, #0f0f0f 100%);
     }
 
     :root:not([data-theme="light"]) .card.location-map-card.card-v-map > h2:not(:first-child) i,
     :root:not([data-theme="light"]) .card.location-map-card.card-v-map .location-map-cta {
-        color: #5eead4;
+        color: #e5e5e5;
     }
 
     :root:not([data-theme="light"]) .sermon-player-sheet {
@@ -5277,8 +5267,8 @@ body.prayer-detail-open {
     }
 
     :root:not([data-theme="light"]) .prayer-list-item-urgent {
-        border-bottom-color: rgba(248, 113, 113, 0.35);
-        background: rgba(127, 29, 29, 0.22);
+        border-bottom-color: rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
         box-shadow: none;
         animation: urgent-row-pulse-dark 2.2s ease-in-out infinite;
     }
@@ -5289,21 +5279,21 @@ body.prayer-detail-open {
 }
 
 html[data-theme="dark"] {
-    --bg-top: #0a0a0a;
-    --bg-mid: #111111;
-    --bg-bottom: #1a1a1a;
+    --bg-top: #000000;
+    --bg-mid: #0a0a0a;
+    --bg-bottom: #111111;
     --surface: #1a1a1a;
     --surface-soft: #252525;
     --text: #ffffff;
-    --muted: #a0a0a0;
-    --primary: #e0e0e0;
-    --primary-soft: #333333;
-    --line: #333333;
+    --muted: #a3a3a3;
+    --primary: #e5e5e5;
+    --primary-soft: #2a2a2a;
+    --line: #404040;
     --header-start: #000000;
-    --header-mid: #c62828;
-    --header-end: #e53935;
+    --header-mid: #2a2a2a;
+    --header-end: #3a3a3a;
     --shadow: 0 22px 55px rgba(0, 0, 0, 0.55);
-    --accent-warm: #c9a227;
+    --accent-warm: #737373;
     --card-gradient-top: #262626;
     --card-gradient-bottom: #141414;
     --card-border-width: 2px;
@@ -5320,8 +5310,8 @@ html[data-theme="dark"] {
         0 30px 70px rgba(0, 0, 0, 0.62),
         0 14px 36px rgba(0, 0, 0, 0.5),
         0 6px 18px rgba(0, 0, 0, 0.4);
-    --body-glow-top: rgba(180, 120, 60, 0.12);
-    --body-glow-corner: rgba(224, 224, 224, 0.04);
+    --body-glow-top: transparent;
+    --body-glow-corner: transparent;
     color-scheme: dark;
 }
 
@@ -5368,7 +5358,7 @@ html[data-theme="dark"] .card.card-v-mesh::before {
 }
 
 html[data-theme="dark"] .card.card-v-featured {
-    background: linear-gradient(168deg, #2a2222 0%, #1f1a1a 50%, #221c1c 100%);
+    background: linear-gradient(168deg, #2a2a2a 0%, #1f1f1f 50%, #1a1a1a 100%);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.06) inset,
         0 16px 42px rgba(0, 0, 0, 0.5),
@@ -5376,26 +5366,26 @@ html[data-theme="dark"] .card.card-v-featured {
 }
 
 html[data-theme="dark"] .card.card-v-featured::before {
-    background: linear-gradient(90deg, #c9a227, #e57373, #b71c1c);
+    background: linear-gradient(90deg, #525252, #737373, #525252);
 }
 
 html[data-theme="dark"] .card.verse-card.card-v-featured {
-    background: linear-gradient(165deg, #2a2424 0%, #1e1a1a 45%, #221e1e 100%);
+    background: linear-gradient(165deg, #262626 0%, #1a1a1a 45%, #141414 100%);
 }
 
 html[data-theme="dark"] .card.card-v-ink {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+    background: linear-gradient(180deg, #242424 0%, #141414 100%);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.04) inset,
         0 10px 28px rgba(0, 0, 0, 0.4);
 }
 
 html[data-theme="dark"] .card.card-v-ink > h2:not(:first-child) i {
-    color: #cbd5e1;
+    color: #d4d4d4;
 }
 
 html[data-theme="dark"] .card.card-v-playful {
-    background: linear-gradient(145deg, #241f2e 0%, #221a22 50%, #261f1c 100%);
+    background: linear-gradient(145deg, #2a2a2a 0%, #1f1f1f 50%, #1a1a1a 100%);
     box-shadow:
         0 1px 0 rgba(255, 255, 255, 0.05) inset,
         0 12px 32px rgba(0, 0, 0, 0.42),
@@ -5403,7 +5393,7 @@ html[data-theme="dark"] .card.card-v-playful {
 }
 
 html[data-theme="dark"] .card.card-v-playful > h2:not(:first-child) i {
-    color: #c4b5fd;
+    color: #e5e5e5;
 }
 
 html[data-theme="dark"] .card.card-v-minimal {
@@ -5419,12 +5409,12 @@ html[data-theme="dark"] .card.hero-card.card-v-elevated {
 }
 
 html[data-theme="dark"] .card.location-map-card.card-v-map {
-    background: linear-gradient(180deg, #1e293b 0%, #0f172a 55%, #0c1222 100%);
+    background: linear-gradient(180deg, #242424 0%, #1a1a1a 55%, #0f0f0f 100%);
 }
 
 html[data-theme="dark"] .card.location-map-card.card-v-map > h2:not(:first-child) i,
 html[data-theme="dark"] .card.location-map-card.card-v-map .location-map-cta {
-    color: #5eead4;
+    color: #e5e5e5;
 }
 
 html[data-theme="dark"] .sermon-player-sheet {
@@ -5462,8 +5452,8 @@ html[data-theme="dark"] .prayer-wall-tab.active {
 }
 
 html[data-theme="dark"] .prayer-list-item-urgent {
-    border-bottom-color: rgba(248, 113, 113, 0.35);
-    background: rgba(127, 29, 29, 0.22);
+    border-bottom-color: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.06);
     box-shadow: none;
     animation: urgent-row-pulse-dark 2.2s ease-in-out infinite;
 }
@@ -5516,32 +5506,32 @@ html[data-theme="dark"] .prayer-detail-urgent-badge {
 }
 
 html[data-theme="dark"] .reading-progress-fill {
-    background: linear-gradient(90deg, #505050, #707070);
+    background: linear-gradient(90deg, #525252, #737373);
 }
 
-/* Primary CTAs stay clearly “action” colored in dark mode (semantic --primary is neutral gray). */
+/* Primary CTAs: monochrome in dark mode (black / white / gray only). */
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .button-link:not(.button-secondary):not(.bible-lang-btn) {
-        background: linear-gradient(155deg, #ef5350 0%, #c62828 48%, #8e1616 100%);
+        background: linear-gradient(155deg, #3a3a3a 0%, #2a2a2a 48%, #1a1a1a 100%);
         color: #ffffff;
-        border-color: rgba(255, 255, 255, 0.18);
-        box-shadow: 0 2px 0 rgba(255, 255, 255, 0.12) inset, 0 6px 18px rgba(0, 0, 0, 0.45);
+        border-color: rgba(255, 255, 255, 0.22);
+        box-shadow: 0 2px 0 rgba(255, 255, 255, 0.08) inset, 0 6px 18px rgba(0, 0, 0, 0.45);
     }
 
     :root:not([data-theme="light"]) .button-link:not(.button-secondary):not(.bible-lang-btn):hover {
-        box-shadow: 0 2px 0 rgba(255, 255, 255, 0.16) inset, 0 12px 26px rgba(0, 0, 0, 0.55);
+        box-shadow: 0 2px 0 rgba(255, 255, 255, 0.12) inset, 0 12px 26px rgba(0, 0, 0, 0.55);
     }
 }
 
 html[data-theme="dark"] .button-link:not(.button-secondary):not(.bible-lang-btn) {
-    background: linear-gradient(155deg, #ef5350 0%, #c62828 48%, #8e1616 100%);
+    background: linear-gradient(155deg, #3a3a3a 0%, #2a2a2a 48%, #1a1a1a 100%);
     color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.18);
-    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.12) inset, 0 6px 18px rgba(0, 0, 0, 0.45);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.08) inset, 0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 html[data-theme="dark"] .button-link:not(.button-secondary):not(.bible-lang-btn):hover {
-    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.16) inset, 0 12px 26px rgba(0, 0, 0, 0.55);
+    box-shadow: 0 2px 0 rgba(255, 255, 255, 0.12) inset, 0 12px 26px rgba(0, 0, 0, 0.55);
 }
 
 html[data-theme="light"] {
