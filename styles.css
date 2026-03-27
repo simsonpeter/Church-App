@@ -4058,6 +4058,26 @@ body.bible-fullscreen-open .offline-badge {
     color: var(--muted);
 }
 
+.reading-plan-banner {
+    margin: 4px calc(-1 * var(--card-pad)) 10px;
+    width: calc(100% + 2 * var(--card-pad));
+    max-width: none;
+    border-radius: 12px;
+    overflow: hidden;
+    line-height: 0;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.reading-plan-banner img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 120px;
+    object-fit: cover;
+    object-position: center;
+}
+
 .reading-progress-wrap {
     margin: 8px 0 10px;
     display: grid;
