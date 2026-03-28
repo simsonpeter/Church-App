@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v202";
-const RUNTIME_CACHE = "njc-runtime-cache-v202";
+const APP_CACHE = "njc-app-cache-v203";
+const RUNTIME_CACHE = "njc-runtime-cache-v203";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260412ph1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260412u2",
+    "./app-shell.js?v=20260413u1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260403perf1",
     "./events-page.js?v=20260318de",
@@ -34,7 +34,7 @@ const CORE_ASSETS = [
     "./contact-banner.jpg?v=20260411cb1",
     "./contact-form-banner.jpg?v=20260411cb1",
     "./daily-verse-banner.jpg?v=20260411cb1",
-    "./events-banner.jpg?v=20260411cb1",
+    "./events-banner.jpg?v=20260413ev1",
     "./mailbox-banner.jpg?v=20260411cb1",
     "./prayer-banner.jpg?v=20260412ph1",
     "./profile-banner.jpg?v=20260411cb1",
