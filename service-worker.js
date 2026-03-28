@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v204";
-const RUNTIME_CACHE = "njc-runtime-cache-v204";
+const APP_CACHE = "njc-app-cache-v205";
+const RUNTIME_CACHE = "njc-runtime-cache-v205";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260412ph1",
+    "./styles.css?v=20260414an1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260414u1",
+    "./app-shell.js?v=20260414u2",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260414u1",
     "./events-page.js?v=20260414u1",
@@ -27,7 +27,7 @@ const CORE_ASSETS = [
     "./logo.png?v=20260318de",
     "./achievements-banner.jpg?v=20260411cb1",
     "./admin-banner.jpg?v=20260411cb1",
-    "./announcements-banner.jpg?v=20260411cb1",
+    "./announcements-banner.jpg?v=20260414an1",
     "./archive-banner.jpg?v=20260411cb1",
     "./bible-reader-banner.jpg?v=20260411cb1",
     "./chat-banner.jpg?v=20260411cb1",

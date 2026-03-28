@@ -168,7 +168,7 @@
         "home.triviaNoQuestion": "கேள்வி இல்லை",
         "home.loadEventsErrorTitle": "இந்த வார சபை நிகழ்வுகளை ஏற்ற முடியவில்லை",
         "home.loadEventsErrorBody": "புதுப்பிக்க சபை நிகழ்வுகள் தாவலைத் திறக்கவும்.",
-        "actions.events": "நிகழ்வு",
+        "actions.events": "சபை நிகழ்வுகள்",
         "actions.sermons": "பிரசங்கம்",
         "actions.contact": "தொடர்பு",
         "actions.calendar": "காலண்டர்",
@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260414u1";
+    var SW_VERSION = "20260414u2";
     var APP_VERSION = "2026.4.14";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Label Events as church events (EN + TA); PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Announcements banner: white church at sunset; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
