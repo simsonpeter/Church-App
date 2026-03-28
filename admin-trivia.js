@@ -137,8 +137,8 @@
         if (!cachedTrivia.length) {
             triviaList.innerHTML = "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(T("admin.triviaEmptyTitle", "No trivia yet")) + "</h3>" +
-                "  <p>" + escapeHtml(T("admin.triviaEmptyBody", "Add Bible trivia questions in Tamil. They will appear on the home page by scheduled date.")) + "</p>" +
+                "  <h3>" + escapeHtml(T("admin.triviaEmptyTitle", "No Bible Quiz yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.triviaEmptyBody", "Add Tamil Bible Quiz questions. They will appear on the home page by scheduled date.")) + "</p>" +
                 "</li>";
             return;
         }
@@ -166,7 +166,7 @@
                 : (answerTa ? answerTa.slice(0, 80) + (answerTa.length > 80 ? "…" : "") : "");
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(question || T("admin.triviaTitle", "Bible Trivia")) + "</h3>" +
+                "  <h3>" + escapeHtml(question || T("admin.triviaTitle", "Bible Quiz (Tamil)")) + "</h3>" +
                 "  <p class=\"page-note\">" + escapeHtml(showDate || "-") + (reference ? (" • " + escapeHtml(reference)) : "") + "</p>" +
                 (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
@@ -186,8 +186,8 @@
             cachedTrivia = Array.isArray(entries) ? entries : [];
             renderTriviaList();
         }).catch(function () {
-            showTriviaNote("error", "admin.syncError", "Could not load trivia.");
-            triviaList.innerHTML = "<li><h3>" + escapeHtml(T("admin.syncError", "Could not load trivia.")) + "</h3><p>" + escapeHtml(T("admin.syncErrorBody", "Check your connection and try again.")) + "</p></li>";
+            showTriviaNote("error", "admin.syncError", "Could not load Bible Quiz.");
+            triviaList.innerHTML = "<li><h3>" + escapeHtml(T("admin.syncError", "Could not load Bible Quiz.")) + "</h3><p>" + escapeHtml(T("admin.syncErrorBody", "Check your connection and try again.")) + "</p></li>";
         }).finally(function () {
             setTriviaBusy(false);
         });
@@ -199,7 +199,7 @@
             return;
         }
         if (!isAdminUser()) {
-            showTriviaNote("validation", "admin.accessDenied", "Please sign in as admin to add trivia.");
+            showTriviaNote("validation", "admin.accessDenied", "Please sign in as admin to add Bible Quiz.");
             return;
         }
         var question = String(triviaQuestionInput && triviaQuestionInput.value || "").trim();
@@ -244,7 +244,7 @@
             if (triviaReferenceInput) triviaReferenceInput.value = "";
             if (triviaShowDateInput) triviaShowDateInput.value = "";
             renderTriviaList();
-            showTriviaNote("success", "admin.triviaSaved", "Bible trivia added.");
+            showTriviaNote("success", "admin.triviaSaved", "Bible Quiz added.");
             document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
         }).catch(function () {
             showTriviaNote("error", "admin.syncError", "Could not save. Check your connection.");
@@ -268,7 +268,7 @@
             return String(entry && entry.id || "").trim() === triviaId;
         });
         if (targetIndex < 0) {
-            showTriviaNote("error", "admin.syncError", "Could not load trivia data.");
+            showTriviaNote("error", "admin.syncError", "Could not load Bible Quiz data.");
             return;
         }
         if (action === "delete") {
@@ -282,7 +282,7 @@
             }).then(function (entries) {
                 cachedTrivia = Array.isArray(entries) ? entries : [];
                 renderTriviaList();
-                showTriviaNote("success", "admin.triviaDeleted", "Trivia deleted.");
+                showTriviaNote("success", "admin.triviaDeleted", "Bible Quiz deleted.");
                 document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
             }).catch(function () {
                 showTriviaNote("error", "admin.syncError", "Could not save.");
@@ -337,7 +337,7 @@
         }).then(function (entries) {
             cachedTrivia = Array.isArray(entries) ? entries : [];
             renderTriviaList();
-            showTriviaNote("success", "admin.triviaUpdated", "Trivia updated.");
+            showTriviaNote("success", "admin.triviaUpdated", "Bible Quiz updated.");
             document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
         }).catch(function () {
             showTriviaNote("error", "admin.syncError", "Could not save.");

@@ -122,13 +122,13 @@
             badges.push({ icon: "book-open", label: T("profile.badgeReader10", "Dedicated reader (10+ reading points)") });
         }
         if (tr >= 10) {
-            badges.push({ icon: "question-circle", label: T("profile.badgeTrivia10", "Trivia champion (10+ trivia points)") });
+            badges.push({ icon: "question-circle", label: T("profile.badgeTrivia10", "Bible Quiz champion (10+ quiz points)") });
         }
         if (sum >= 25) {
             badges.push({ icon: "star", label: T("profile.badgeAllStar", "All-star (25+ total points)") });
         }
         if (!badges.length) {
-            profileBadgesList.innerHTML = "<li class=\"page-note profile-badge-empty\">" + escapeHtmlLite(T("profile.badgesEmpty", "Keep reading and playing trivia to earn badges.")) + "</li>";
+            profileBadgesList.innerHTML = "<li class=\"page-note profile-badge-empty\">" + escapeHtmlLite(T("profile.badgesEmpty", "Keep reading and playing Bible Quiz to earn badges.")) + "</li>";
             return;
         }
         profileBadgesList.innerHTML = badges.map(function (b) {

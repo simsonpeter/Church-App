@@ -162,7 +162,7 @@
         }
         var rankLabel = T("userAchievements.colRank", "#");
         var nameLabel = T("userAchievements.colName", "Name");
-        var triviaLabel = T("userAchievements.colTrivia", "Trivia");
+        var triviaLabel = T("userAchievements.colTrivia", "Bible Quiz");
         var readingLabel = T("userAchievements.colReading", "Reading");
         var totalLabel = T("userAchievements.colTotal", "Total");
         var updatedHint = T("userAchievements.colUpdatedHint", "Synced");
