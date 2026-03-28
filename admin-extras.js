@@ -170,7 +170,7 @@
             if (statusEl) {
                 var baseMsg = T("admin.triviaInsightsLoaded", "{n} users").replace("{n}", String(uids.length));
                 if (reportsDenied) {
-                    baseMsg += " — " + T("admin.triviaInsightsRulesHint", "Trivia columns need new Firestore rules: publish adminTriviaReports read for your admin email, then reload.");
+                    baseMsg += " — " + T("admin.triviaInsightsRulesHint", "Bible Quiz columns need new Firestore rules: publish adminTriviaReports read for your admin email, then reload.");
                 }
                 statusEl.textContent = baseMsg;
                 statusEl.dataset.state = reportsDenied ? "warning" : "";
@@ -294,7 +294,7 @@
                 { label: "Events", v: "#events" },
                 { label: "Sermons", v: "#sermons" },
                 { label: "Contact", v: "#contact" },
-                { label: "Trivia", v: "#trivia" },
+                { label: "Bible Quiz", v: "#trivia" },
                 { label: "Bible", v: "#bible" },
                 { label: "Songbook", v: "#songbook" },
                 { label: "Profile", v: "#profile" },

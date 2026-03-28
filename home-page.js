@@ -2237,7 +2237,7 @@
             }
 
             function shareTriviaResult(card) {
-                var text = T("home.triviaShareText", "I got today's Bible trivia correct! +1 point");
+                var text = T("home.triviaShareText", "I got today's Bible Quiz correct! +1 point");
                 if (navigator.share && navigator.canShare && navigator.canShare({ text: text })) {
                     navigator.share({ text: text }).catch(function () {
                         copyTriviaShareToClipboard(text);
@@ -2270,7 +2270,7 @@
                 var hasHome = triviaLoadingHome && triviaQuestionWrapHome && triviaQuestionTextHome && triviaOptionsHome && triviaEmptyHome;
                 if (!hasPage && !hasHome) return;
                 function setLoading(loading, wrap, empty, card) {
-                    if (loading) { loading.hidden = false; loading.textContent = T("home.triviaLoading", "Loading trivia...", card); }
+                    if (loading) { loading.hidden = false; loading.textContent = T("home.triviaLoading", "Loading Bible Quiz...", card); }
                     if (wrap) wrap.hidden = true;
                     if (empty) empty.hidden = true;
                 }
@@ -2282,8 +2282,8 @@
                     if (!match) {
                         empty.hidden = false;
                         empty.textContent = isTriviaWeekday(effectiveDate)
-                            ? T("home.triviaEmpty", "No trivia for today. Check back tomorrow from 8 AM.", card)
-                            : T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", card);
+                            ? T("home.triviaEmpty", "No Bible Quiz for today. Check back tomorrow from 8 AM.", card)
+                            : T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", card);
                         return;
                     }
                     var question = String(match.question || "").trim();
@@ -2351,19 +2351,19 @@
                 }
                 function setError(loading, empty, card) {
                     if (loading) loading.hidden = true;
-                    if (empty) { empty.hidden = false; empty.textContent = T("home.triviaError", "Could not load trivia. Try again later.", card); }
+                    if (empty) { empty.hidden = false; empty.textContent = T("home.triviaError", "Could not load Bible Quiz. Try again later.", card); }
                 }
                 var effectiveDate = getLocalEffectiveDate();
                 if (!isTriviaWeekday(effectiveDate)) {
                     if (hasPage) {
                         triviaLoading.hidden = true;
                         triviaEmpty.hidden = false;
-                        triviaEmpty.textContent = T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", triviaCard);
+                        triviaEmpty.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", triviaCard);
                     }
                     if (hasHome) {
                         triviaLoadingHome.hidden = true;
                         triviaEmptyHome.hidden = false;
-                        triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Trivia is available Monday to Friday from 8 AM.", triviaCardHome);
+                        triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", triviaCardHome);
                         renderTriviaWeeklySummary(triviaCardHome);
                     }
                     return;
@@ -2372,7 +2372,7 @@
                 if (hasHome) setLoading(triviaLoadingHome, triviaQuestionWrapHome, triviaEmptyHome, triviaCardHome);
                 var timeoutMs = 15000;
                 var timeoutPromise = new Promise(function (_, reject) {
-                    setTimeout(function () { reject(new Error("Trivia load timeout")); }, timeoutMs);
+                    setTimeout(function () { reject(new Error("Bible Quiz load timeout")); }, timeoutMs);
                 });
                 Promise.race([
                     fetch(adminTriviaUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
@@ -2381,7 +2381,7 @@
                                 return { entries: [] };
                             }
                             if (!response.ok) {
-                                throw new Error("Trivia load failed");
+                                throw new Error("Bible Quiz load failed");
                             }
                             return response.json();
                         }),

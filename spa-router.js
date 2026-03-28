@@ -59,9 +59,9 @@
         trivia: {
             icon: "fa-question-circle",
             eyebrowKey: "trivia.eyebrow",
-            eyebrowText: "Trivia",
+            eyebrowText: "Bible Quiz",
             titleKey: "trivia.title",
-            titleText: "Bible Trivia",
+            titleText: "Today's Bible Quiz",
             subtitleKey: "",
             subtitleText: ""
         },
@@ -72,7 +72,7 @@
             titleKey: "userAchievements.title",
             titleText: "User achievements",
             subtitleKey: "userAchievements.subtitle",
-            subtitleText: "Trivia and Bible reading points"
+            subtitleText: "Bible Quiz and Bible reading points"
         },
         chat: {
             icon: "fa-comments",

@@ -4079,11 +4079,6 @@ body.bible-fullscreen-open .offline-badge {
     object-position: center;
 }
 
-/* Vertical praying-hands photo: keep hands in frame in the strip */
-.card-banner-prayer img {
-    object-position: center 35%;
-}
-
 .reading-progress-wrap {
     margin: 8px 0 10px;
     display: grid;
