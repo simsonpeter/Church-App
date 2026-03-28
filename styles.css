@@ -4084,11 +4084,6 @@ body.bible-fullscreen-open .offline-badge {
     object-position: center 35%;
 }
 
-/* Tall church / sunset photo: show steeple + sky in the strip */
-.announcements-card .card-banner img {
-    object-position: center 28%;
-}
-
 .reading-progress-wrap {
     margin: 8px 0 10px;
     display: grid;
