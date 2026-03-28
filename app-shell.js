@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329m1";
+    var SW_VERSION = "20260329m2";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily verse resume fix; Bible Quiz rename; prayer wall banner (Imgur); PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Contact Get in Touch banner: Imgur album lY8EMTe; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
