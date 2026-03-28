@@ -23,9 +23,9 @@
         events: {
             icon: "fa-calendar-days",
             eyebrowKey: "events.eyebrow",
-            eyebrowText: "Events",
+            eyebrowText: "Church events",
             titleKey: "events.title",
-            titleText: "Church calendar",
+            titleText: "Church events",
             subtitleKey: "",
             subtitleText: ""
         },

@@ -1819,8 +1819,8 @@
                 if (eventsError) {
                     thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load this week events", thisWeekCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Events tab to refresh.", thisWeekCard)) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadEventsErrorTitle", "Could not load church events for this week", thisWeekCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.loadEventsErrorBody", "Please open the Church events tab to refresh.", thisWeekCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -1839,8 +1839,8 @@
                 if (eventsToShow.length === 0) {
                     thisWeekEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No events available right now", thisWeekCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Events page for updates.", thisWeekCard)) + "</p>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("home.noEventsTitle", "No church events available right now", thisWeekCard)) + "</h3>" +
+                        "  <p>" + NjcEvents.escapeHtml(T("home.noEventsBody", "Please check the Church events tab for updates.", thisWeekCard)) + "</p>" +
                         "</li>";
                     return;
                 }
