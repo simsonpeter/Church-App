@@ -654,6 +654,8 @@
                 if (!dailyVerseText || !dailyVerseReference) {
                     return;
                 }
+                /* Calendar must be current: otherwise VOTD cache dateKey never advances while the tab stays open. */
+                todayYmd = getBrusselsYmd();
                 var dayNum = getDayOfYear(todayYmd);
                 dailyVerseRenderToken += 1;
                 var renderToken = dailyVerseRenderToken;
@@ -2561,6 +2563,30 @@
                     renderDailyVerse();
                 });
             }
+
+            function ymdKey(ymd) {
+                return String(ymd.year) + "-" + String(ymd.month).padStart(2, "0") + "-" + String(ymd.day).padStart(2, "0");
+            }
+
+            function maybeRefreshDailyVerseForNewCalendarDay() {
+                var fresh = getBrusselsYmd();
+                if (ymdKey(fresh) !== ymdKey(todayYmd)) {
+                    todayYmd = fresh;
+                    renderDailyVerse();
+                }
+            }
+
+            document.addEventListener("visibilitychange", function () {
+                if (document.visibilityState === "visible") {
+                    maybeRefreshDailyVerseForNewCalendarDay();
+                }
+            });
+            window.addEventListener("pageshow", function (ev) {
+                if (ev && ev.persisted) {
+                    maybeRefreshDailyVerseForNewCalendarDay();
+                }
+            });
+            window.setInterval(maybeRefreshDailyVerseForNewCalendarDay, 60000);
 
             updateReadingPlanMeta();
             renderReadingProgress();

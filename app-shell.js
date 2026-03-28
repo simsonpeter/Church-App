@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260428u2";
-    var APP_VERSION = "2026.3.28";
+    var SW_VERSION = "20260429u1";
+    var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Events banner: Imgur album aoFuRbS; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily verse: refresh Brussels date when app resumes (fix stale VOTD); PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
