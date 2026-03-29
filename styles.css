@@ -818,7 +818,11 @@ a.card:hover > h2:not(:first-child) i {
     --dv-h3: 200;
     --dv-panel-radius: 16px;
     position: relative;
-    margin: -4px -6px 0;
+    /* Match .card-banner full-bleed — avoid double inset (card pad + panel margin). */
+    margin: 0 calc(-1 * var(--card-pad)) 0;
+    width: calc(100% + 2 * var(--card-pad));
+    max-width: none;
+    box-sizing: border-box;
     border-radius: var(--dv-panel-radius);
     overflow: hidden;
     isolation: isolate;
