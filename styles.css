@@ -812,18 +812,24 @@ a.card:hover > h2:not(:first-child) i {
     overflow: hidden;
 }
 
+/* One visual block with the panel: no mesh stripe between banner and verse, and panel bleeds to card bottom like other full-bleed bodies. */
+.daily-verse-card .card-banner {
+    margin-bottom: 0;
+}
+
 .daily-verse-panel {
     --dv-h1: 350;
     --dv-h2: 28;
     --dv-h3: 200;
-    --dv-panel-radius: 16px;
+    /* Align with .card-banner (12px) where the panel meets the image strip */
+    --dv-panel-radius: 12px;
     position: relative;
-    /* Match .card-banner full-bleed — avoid double inset (card pad + panel margin). */
-    margin: 0 calc(-1 * var(--card-pad)) 0;
+    /* Match .card-banner: full-bleed horizontally and vertically within the card padding box. */
+    margin: 0 calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad));
     width: calc(100% + 2 * var(--card-pad));
     max-width: none;
     box-sizing: border-box;
-    border-radius: var(--dv-panel-radius);
+    border-radius: 0 0 var(--card-radius) var(--card-radius);
     overflow: hidden;
     isolation: isolate;
 }
