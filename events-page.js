@@ -187,7 +187,7 @@
                 if (!Array.isArray(events) || events.length === 0) {
                     upcomingEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("events.noUpcomingTitle", "No upcoming church events", upcomingCard)) + "</h3>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.noUpcomingTitle", "No upcoming events", upcomingCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("events.noUpcomingBody", "Please check back for new dates.", upcomingCard)) + "</p>" +
                         "</li>";
                     return;
@@ -277,7 +277,7 @@
                     stopSpecialCarousel();
                     upcomingSpecialEventsList.innerHTML = "" +
                         "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("events.noSpecialTitle", "No upcoming special church events", specialCard)) + "</h3>" +
+                        "  <h3>" + NjcEvents.escapeHtml(T("events.noSpecialTitle", "No upcoming special events", specialCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("events.noSpecialBody", "We will show them here once dates are announced.", specialCard)) + "</p>" +
                         "</li>";
                     return;
@@ -372,12 +372,12 @@
                         stopSpecialCarousel();
                         upcomingEventsList.innerHTML = "" +
                             "<li>" +
-                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming church events", upcomingCard)) + "</h3>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorTitle", "Could not calculate upcoming events", upcomingCard)) + "</h3>" +
                             "  <p>" + NjcEvents.escapeHtml(T("events.loadUpcomingErrorBody", "Please refresh and try again.", upcomingCard)) + "</p>" +
                             "</li>";
                         upcomingSpecialEventsList.innerHTML = "" +
                             "<li>" +
-                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorTitle", "Could not load special church events", specialCard)) + "</h3>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorTitle", "Could not load special events", specialCard)) + "</h3>" +
                             "  <p>" + NjcEvents.escapeHtml(T("events.loadSpecialErrorBody", "Please refresh and try again.", specialCard)) + "</p>" +
                             "</li>";
                     });

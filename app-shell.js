@@ -32,7 +32,7 @@
         "nav.home": "முகப்பு",
         "nav.about": "பற்றி",
         "nav.prayer": "ஜெபம்",
-        "nav.events": "சபை நிகழ்வுகள்",
+        "nav.events": "நிகழ்வுகள்",
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.contact": "தொடர்பு",
@@ -137,11 +137,11 @@
         "home.noReadingBody": "உங்கள் Readingplan செயலியை பார்க்கவும்.",
         "home.loadReadingErrorTitle": "இன்றைய வாசிப்பு திட்டத்தை ஏற்ற முடியவில்லை",
         "home.loadReadingErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
-        "home.thisWeekTitle": "இந்த வார சபை நிகழ்வுகள்",
-        "home.loadingWeekTitle": "சபை நிகழ்வுகள் ஏற்றப்படுகின்றன...",
+        "home.thisWeekTitle": "இந்த வார நிகழ்வுகள்",
+        "home.loadingWeekTitle": "நிகழ்வுகள் ஏற்றப்படுகின்றன...",
         "home.loadingWeekBody": "அடுத்த தேதிகளை கணக்கிட காத்திருக்கவும்.",
-        "home.noEventsTitle": "இப்போது சபை நிகழ்வுகள் இல்லை",
-        "home.noEventsBody": "புதுப்பிப்புகளுக்கு சபை நிகழ்வுகள் தாவலை பார்க்கவும்.",
+        "home.noEventsTitle": "இப்போது நிகழ்வுகள் இல்லை",
+        "home.noEventsBody": "புதுப்பிப்புகளுக்கு நிகழ்வுகள் தாவலை பார்க்கவும்.",
         "home.triviaTitle": "இன்றைய வேதாகமக் கேள்விகள்",
         "home.triviaSubtitle": "தமிழ் வேதாகமக் கேள்விகள். காலை 8 மணிக்கு புதிய கேள்வி.",
         "home.triviaLoading": "வேதாகமக் கேள்விகள் ஏற்றப்படுகிறது...",
@@ -166,9 +166,9 @@
         "home.triviaShareCopied": "நகலெடுக்கப்பட்டது",
         "home.triviaWeeklySummary": "இந்த வாரம்: {correct} சரி, {wrong} தவறு",
         "home.triviaNoQuestion": "கேள்வி இல்லை",
-        "home.loadEventsErrorTitle": "இந்த வார சபை நிகழ்வுகளை ஏற்ற முடியவில்லை",
-        "home.loadEventsErrorBody": "புதுப்பிக்க சபை நிகழ்வுகள் தாவலைத் திறக்கவும்.",
-        "actions.events": "சபை நிகழ்வுகள்",
+        "home.loadEventsErrorTitle": "இந்த வார நிகழ்வுகளை ஏற்ற முடியவில்லை",
+        "home.loadEventsErrorBody": "புதுப்பிக்க நிகழ்வுகள் தாவலைத் திறக்கவும்.",
+        "actions.events": "நிகழ்வுகள்",
         "actions.sermons": "பிரசங்கம்",
         "actions.contact": "தொடர்பு",
         "actions.calendar": "காலண்டர்",
@@ -199,26 +199,26 @@
         "prayer.eyebrow": "ஜெபம்",
         "prayer.title": "ஜெப சுவர்",
         "prayer.subtitle": "சபை குடும்பமாக ஒன்றிணைந்து ஜெபிக்க வேண்டுதல்களை பகிருங்கள்.",
-        "events.eyebrow": "சபை நிகழ்வுகள்",
-        "events.title": "சபை நிகழ்வுகள்",
+        "events.eyebrow": "நிகழ்வுகள்",
+        "events.title": "நிகழ்வுகள்",
         "events.subtitle": "ஆராதனை, ஜெப இரவுகள், சகோதரத்துவ தருணங்களுடன் இணைந்திருங்கள்.",
-        "events.upcomingTitle": "வரவிருக்கும் சபை நிகழ்வுகள்",
-        "events.loadingUpcomingTitle": "வரவிருக்கும் சபை நிகழ்வுகள் ஏற்றப்படுகின்றன...",
+        "events.upcomingTitle": "வரவிருக்கும் நிகழ்வுகள்",
+        "events.loadingUpcomingTitle": "வரவிருக்கும் நிகழ்வுகள் ஏற்றப்படுகின்றன...",
         "events.loadingUpcomingBody": "அடுத்த தேதிகளை கணக்கிட காத்திருக்கவும்.",
-        "events.seeMore": "மேலும் சபை நிகழ்வுகள் காண்க",
+        "events.seeMore": "மேலும் நிகழ்வுகள் காண்க",
         "events.scheduleRules": "அட்டவணை விதிகள்",
         "events.holyServiceTitle": "பரிசுத்த ஆராதனையும் திருவிருந்தும்",
         "events.holyServiceTime": "ஒவ்வொரு ஞாயிறும் 14:30 (பெல்ஜியம் நேரம்)",
         "events.specialPrayerTitle": "விசேட ஜெபக்கூடுகை",
         "events.specialPrayerTime": "2வது மற்றும் 4வது சனிக்கிழமை 17:00 (பெல்ஜியம் நேரம்)",
-        "events.upcomingSpecialTitle": "வரவிருக்கும் சிறப்பு சபை நிகழ்வுகள்",
-        "events.loadingSpecialTitle": "சிறப்பு சபை நிகழ்வுகள் ஏற்றப்படுகின்றன...",
-        "events.loadingSpecialBody": "வரவிருக்கும் சிறப்பு சபை நிகழ்வுகளை ஏற்ற காத்திருக்கவும்.",
-        "events.noUpcomingTitle": "வரவிருக்கும் சபை நிகழ்வுகள் இல்லை",
+        "events.upcomingSpecialTitle": "வரவிருக்கும் சிறப்பு நிகழ்வுகள்",
+        "events.loadingSpecialTitle": "சிறப்பு நிகழ்வுகள் ஏற்றப்படுகின்றன...",
+        "events.loadingSpecialBody": "வரவிருக்கும் சிறப்பு நிகழ்வுகளை ஏற்ற காத்திருக்கவும்.",
+        "events.noUpcomingTitle": "வரவிருக்கும் நிகழ்வுகள் இல்லை",
         "events.noUpcomingBody": "புதிய தேதிகளுக்காக பின்னர் பார்க்கவும்.",
-        "events.noSpecialTitle": "வரவிருக்கும் சிறப்பு சபை நிகழ்வுகள் இல்லை",
+        "events.noSpecialTitle": "வரவிருக்கும் சிறப்பு நிகழ்வுகள் இல்லை",
         "events.noSpecialBody": "தேதிகள் அறிவிக்கப்பட்டவுடன் இங்கே காட்டப்படும்.",
-        "events.loadUpcomingErrorTitle": "வரவிருக்கும் சபை நிகழ்வுகளை கணக்கிட முடியவில்லை",
+        "events.loadUpcomingErrorTitle": "வரவிருக்கும் நிகழ்வுகளை கணக்கிட முடியவில்லை",
         "events.loadUpcomingErrorBody": "புதுப்பித்து மீண்டும் முயற்சிக்கவும்.",
         "events.loadSpecialErrorTitle": "சிறப்பு நிகழ்வுகளை ஏற்ற முடியவில்லை",
         "events.loadSpecialErrorBody": "புதுப்பித்து மீண்டும் முயற்சிக்கவும்.",
@@ -471,7 +471,7 @@
         "admin.info": "கோடு இல்லாமல் உள்ளடக்கத்தை நிர்வகிக்கவும்.",
         "admin.refresh": "தரவை புதுப்பி",
         "admin.statsNotices": "அறிவிப்புகள்",
-        "admin.statsEvents": "சபை நிகழ்வுகள்",
+        "admin.statsEvents": "நிகழ்வுகள்",
         "admin.statsSermons": "பிரசங்கங்கள்",
         "admin.statsUrgent": "அவசர ஜெபங்கள்",
         "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
@@ -507,7 +507,7 @@
         "admin.broadcastRecentTitle": "சமீப ஒலிபரப்புகள்",
         "admin.broadcastRecentInfo": "பயனர்களுக்கு அனுப்பிய சமீப செய்திகள்.",
         "admin.broadcastCategoryGeneral": "பொது",
-        "admin.broadcastCategoryEvents": "சபை நிகழ்வுகள்",
+        "admin.broadcastCategoryEvents": "நிகழ்வுகள்",
         "admin.broadcastCategorySermons": "பிரசங்கங்கள்",
         "admin.broadcastCategoryPrayer": "ஜெபம்",
         "admin.broadcastCategoryContact": "தொடர்பு",
@@ -526,14 +526,14 @@
         "admin.broadcastEditPromptUrl": "இலக்கு இணைப்பை திருத்து",
         "admin.broadcastUpdated": "ஒலிபரப்பு புதுப்பிக்கப்பட்டது.",
         "admin.broadcastDeleted": "ஒலிபரப்பு நீக்கப்பட்டது.",
-        "admin.eventTitle": "சபை நிகழ்வு சேர்க்க",
+        "admin.eventTitle": "நிகழ்வு சேர்க்க",
         "admin.eventTitlePlaceholder": "நிகழ்வு தலைப்பு",
         "admin.eventDescriptionPlaceholder": "விளக்கம்",
         "admin.eventTypeSpecial": "சிறப்பு",
         "admin.eventTypeRecurring": "மறுமுறை",
-        "admin.eventPublish": "சபை நிகழ்வு சேர்க்க",
-        "admin.eventManageTitle": "சமீப சபை நிகழ்வுகள்",
-        "admin.eventManageInfo": "நீங்கள் சேர்த்த சபை நிகழ்வுகளை திருத்த அல்லது நீக்கவும்.",
+        "admin.eventPublish": "நிகழ்வு சேர்க்க",
+        "admin.eventManageTitle": "சமீப நிகழ்வுகள்",
+        "admin.eventManageInfo": "நீங்கள் சேர்த்த நிகழ்வுகளை திருத்த அல்லது நீக்கவும்.",
         "admin.eventEdit": "திருத்து",
         "admin.eventDelete": "நீக்கு",
         "admin.eventDeleteConfirm": "இந்த நிகழ்வை நீக்கவா?",
@@ -803,7 +803,7 @@
         "admin.triviaInsightsDays": "நாட்கள்",
         "admin.scheduleHintsTitle": "உள்ளடக்க அட்டவணை குறிப்புகள்",
         "admin.scheduleHintTrivia": "வேதாகமக் கேள்விகள்: காட்டு தேதியை அமைத்தால் அன்று காலை 8 மணி முதல் புதிய கேள்வி.",
-        "admin.scheduleHintEvents": "சபை நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் சபை நிகழ்வுகள் தாவலில் தோன்றும்.",
+        "admin.scheduleHintEvents": "நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் நிகழ்வுகள் தாவலில் தோன்றும்.",
         "admin.scheduleHintNotices": "அறிவிப்புகள்: MantleDB-க்கு வெளியிடவும்; நிலையான பட்டியலுடன் இணைகின்றன.",
         "admin.noticeLinkPresets": "செயலி இணைப்பு முன்னமைவுகள்",
         "admin.linkPresetsTitle": "செயலி இணைப்பை சேர்",
@@ -1426,10 +1426,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329m5";
+    var SW_VERSION = "20260329m6";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily verse: panel bleeds to card bottom (no mesh stripe); PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Rename Church events to Events (EN + TA); PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -2099,7 +2099,7 @@
     function getBroadcastCategoryLabel(category) {
         var key = normalizeBroadcastCategory(category);
         if (key === "events") {
-            return t("admin.broadcastCategoryEvents", "Church events");
+            return t("admin.broadcastCategoryEvents", "Events");
         }
         if (key === "sermons") {
             return t("admin.broadcastCategorySermons", "Sermons");
