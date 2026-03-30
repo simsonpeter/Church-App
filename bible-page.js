@@ -1847,6 +1847,38 @@
         if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
             requestWakeLock();
         }
+        if (document.visibilityState !== "visible") {
+            return;
+        }
+        if (!speechState.active || speechState.paused || speechSynthUserPaused) {
+            return;
+        }
+        if (speechState.mode !== "speech") {
+            return;
+        }
+        var synthVis = getSpeechSynthesisApi();
+        if (!synthVis || synthVis.speaking || synthVis.pending) {
+            return;
+        }
+        if (speechSynthSegmentIndex >= speechSynthSegments.length) {
+            return;
+        }
+        window.setTimeout(function () {
+            if (document.visibilityState !== "visible" || !speechState.active || speechState.paused || speechSynthUserPaused) {
+                return;
+            }
+            if (speechState.mode !== "speech") {
+                return;
+            }
+            var s2 = getSpeechSynthesisApi();
+            if (!s2 || s2.speaking || s2.pending) {
+                return;
+            }
+            if (speechSynthSegmentIndex >= speechSynthSegments.length) {
+                return;
+            }
+            speakNextSpeechSynthSegment();
+        }, 80);
     });
 
     document.addEventListener("njc:langchange", function () {

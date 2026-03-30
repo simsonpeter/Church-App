@@ -35,6 +35,8 @@
     var speakingUtterance = null;
     var currentReadLang = "en";
     var currentReadPlain = "";
+    var currentSpeechTitle = "";
+    var mediaSessionBound = false;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -300,6 +302,84 @@
         }
     }
 
+    function syncDailyBreadMediaSession() {
+        if (typeof navigator === "undefined" || !navigator.mediaSession) {
+            return;
+        }
+        try {
+            var title = String(currentSpeechTitle || "").trim() || T("dailyBread.title", "Daily bread");
+            if (typeof window.MediaMetadata === "function") {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: title,
+                    artist: T("dailyBread.mediaSessionArtist", "NJC Daily bread"),
+                    album: "NJC App"
+                });
+            }
+            navigator.mediaSession.playbackState = speechState.active
+                ? (speechState.paused ? "paused" : "playing")
+                : "none";
+        } catch (e) {
+            return;
+        }
+    }
+
+    function setupDailyBreadMediaSession() {
+        if (mediaSessionBound || typeof navigator === "undefined" || !navigator.mediaSession) {
+            return;
+        }
+        mediaSessionBound = true;
+        try {
+            navigator.mediaSession.setActionHandler("play", function () {
+                toggleSpeech();
+            });
+            navigator.mediaSession.setActionHandler("pause", function () {
+                var synth = getSynth();
+                if (speechState.active && !speechState.paused && synth) {
+                    if (synth.speaking && !synth.paused) {
+                        synth.pause();
+                    }
+                    speechState.paused = true;
+                    updateTtsUi();
+                    syncDailyBreadMediaSession();
+                }
+            });
+            navigator.mediaSession.setActionHandler("stop", function () {
+                stopSpeechPlayback();
+            });
+        } catch (e) {
+            return;
+        }
+    }
+
+    function maybeResumeDailyBreadAfterBackground() {
+        if (document.visibilityState !== "visible") {
+            return;
+        }
+        var synth = getSynth();
+        if (!speechState.active || speechState.paused || !synth) {
+            return;
+        }
+        if (synth.speaking || synth.pending) {
+            return;
+        }
+        if (speechSegmentIndex >= speechSegments.length) {
+            return;
+        }
+        window.setTimeout(function () {
+            if (!speechState.active || speechState.paused || document.visibilityState !== "visible") {
+                return;
+            }
+            var s2 = getSynth();
+            if (!s2 || s2.speaking || s2.pending) {
+                return;
+            }
+            if (speechSegmentIndex >= speechSegments.length) {
+                return;
+            }
+            speakNextSegment();
+        }, 80);
+    }
+
     function stopSpeechPlayback() {
         clearSpeechTimers();
         var synth = getSynth();
@@ -314,6 +394,7 @@
         speechState.active = false;
         speechState.paused = false;
         updateTtsUi();
+        syncDailyBreadMediaSession();
     }
 
     function speakNextSegment() {
@@ -415,7 +496,7 @@
             updateTtsUi();
             return;
         }
-        var segments = splitIntoSegments(text);
+        var segments = splitIntoSegments(currentReadPlain);
         if (!segments.length) {
             return;
         }
@@ -425,7 +506,9 @@
         speechSegmentIndex = 0;
         speechState.active = true;
         speechState.paused = false;
+        setupDailyBreadMediaSession();
         updateTtsUi();
+        syncDailyBreadMediaSession();
         ensureVoicesThen(function () {
             if (!speechState.active || speechState.paused) {
                 return;
@@ -503,6 +586,7 @@
         }
         ttsStop.setAttribute("aria-label", stopAria);
         ttsStop.title = stopLabel;
+        syncDailyBreadMediaSession();
     }
 
     function toggleSpeech() {
@@ -517,12 +601,14 @@
             synth.pause();
             speechState.paused = true;
             updateTtsUi();
+            syncDailyBreadMediaSession();
             return;
         }
         if (speechState.paused) {
             synth.resume();
             speechState.paused = false;
             updateTtsUi();
+            syncDailyBreadMediaSession();
             return;
         }
         startSpeechFromPlain(currentReadPlain, currentReadLang);
@@ -577,6 +663,7 @@
         var lang = getAppLanguage();
         var picked = pickContent(entry, lang);
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
+        currentSpeechTitle = String(picked.title || "").trim() || T("dailyBread.title", "Daily bread");
         var authorText = String(picked.author || "").trim();
         if (authorLineEl) {
             if (authorText) {
@@ -661,9 +748,8 @@
         var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (route === "daily-bread") {
             loadDailyBread();
-        } else {
-            stopSpeechPlayback();
         }
+        /* Keep read-aloud running when switching tabs (background listen). User stops with Stop. */
     }
 
     if (ttsToggle) {
@@ -688,8 +774,6 @@
         var route = event && event.detail && event.detail.route;
         if (String(route || "").toLowerCase() === "daily-bread") {
             loadDailyBread();
-        } else {
-            stopSpeechPlayback();
         }
     });
     document.addEventListener("njc:langchange", function () {
@@ -703,7 +787,12 @@
             loadDailyBread();
         }
     });
+    document.addEventListener("visibilitychange", function () {
+        maybeResumeDailyBreadAfterBackground();
+    });
+
     document.addEventListener("DOMContentLoaded", function () {
+        setupDailyBreadMediaSession();
         updateTtsUi();
         onRoute();
     });
