@@ -35,7 +35,7 @@
         "nav.events": "நிகழ்வுகள்",
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
-        "nav.dailyBread": "அன்றன்றுள்ள அப்பம்",
+        "nav.dailyBread": "அப்பம்",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
