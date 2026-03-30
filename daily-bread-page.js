@@ -9,6 +9,7 @@
     var statusEl = document.getElementById("daily-bread-status");
     var contentWrap = document.getElementById("daily-bread-content");
     var headingEl = document.getElementById("daily-bread-heading");
+    var authorLineEl = document.getElementById("daily-bread-author-line");
     var bodyEl = document.getElementById("daily-bread-body");
     var pageCard = document.querySelector(".daily-bread-page-card");
     var ttsToggle = document.getElementById("daily-bread-tts-toggle");
@@ -24,7 +25,10 @@
         typeof window.SpeechSynthesisUtterance === "function"
     );
 
-    var speechState = { active: false, paused: false };
+    var speechState = {
+        active: false,
+        paused: false
+    };
     var speechSegments = [];
     var speechSegmentIndex = 0;
     var speechPendingTimerId = null;
@@ -113,6 +117,8 @@
             date: toYmd(source.date || source.showDate || ""),
             title: String(source.title || "").trim(),
             titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
             bodyTa: String(source.bodyTa || "").trim()
         };
@@ -124,90 +130,25 @@
             var bodyEn = String(entry.body || "").trim();
             var titleTa = String(entry.titleTa || "").trim();
             var titleEn = String(entry.title || "").trim();
+            var authorTa = String(entry.authorTa || "").trim();
+            var authorEn = String(entry.author || "").trim();
             return {
                 title: titleTa || titleEn,
+                author: authorTa || authorEn,
                 body: bodyTa || bodyEn,
                 readLang: bodyTa ? "ta" : "en"
             };
         }
         var bodyEn = String(entry.body || "").trim();
         var bodyTa = String(entry.bodyTa || "").trim();
+        var authorEn = String(entry.author || "").trim();
+        var authorTa = String(entry.authorTa || "").trim();
         return {
             title: String(entry.title || "").trim() || String(entry.titleTa || "").trim(),
+            author: authorEn || authorTa,
             body: bodyEn || bodyTa,
             readLang: bodyEn ? "en" : "ta"
         };
-    }
-
-    /**
-     * Remove inline decoration (====, ----, ***, …) anywhere in the string.
-     */
-    function stripDecorRuns(str) {
-        return String(str || "")
-            .replace(/={2,}/g, " ")
-            .replace(/\uFF1D{2,}/g, " ")
-            .replace(/\*{2,}/g, " ")
-            .replace(/#{2,}/g, " ")
-            .replace(/(?:[-_\u2013\u2014\u2500-\u257F]){3,}/g, " ")
-            .replace(/\.{4,}/g, " ")
-            .replace(/\s+/g, " ")
-            .trim();
-    }
-
-    /**
-     * Strip decorative lines and soften chapter:verse so TTS does not read "3 16" as a clock.
-     */
-    function sanitizeTextForSpeech(raw) {
-        var s = String(raw || "");
-        s = s.replace(/\u00a0/g, " ");
-        var lines = s.split(/\r\n|\r|\n/);
-        var kept = lines.map(function (line) {
-            var t = String(line || "").replace(/^\s+|\s+$/g, "");
-            if (!t) {
-                return "";
-            }
-            t = stripDecorRuns(t);
-            if (!t) {
-                return "";
-            }
-            var compact = t.replace(/\s/g, "");
-            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*＝]+/g, "");
-            if (onlyDots.length === 0 && compact.length >= 4) {
-                return "";
-            }
-            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*＝]+/g, "");
-            if (onlyDecor.length === 0 && t.length >= 3) {
-                return "";
-            }
-            if (/^[=\-_·\.•\u2013\u2014~*＝]{4,}$/.test(compact)) {
-                return "";
-            }
-            return t;
-        }).filter(Boolean);
-        s = kept.join(" ");
-        s = stripDecorRuns(s);
-
-        s = s.replace(/(\d{1,3})\s*:\s*(\d{1,3})/g, function (full, a, b, offset) {
-            var na = parseInt(a, 10);
-            var nb = parseInt(b, 10);
-            if (na < 1 || na > 150 || nb < 1 || nb > 176) {
-                return full;
-            }
-            var before = offset > 0 ? s.charAt(offset - 1) : "";
-            var afterIdx = offset + full.length;
-            var after = afterIdx < s.length ? s.charAt(afterIdx) : "";
-            if (/\d/.test(before) || /\d/.test(after)) {
-                return full;
-            }
-            var plausibleClock = na <= 23 && nb <= 59;
-            if (plausibleClock) {
-                return full;
-            }
-            return a + ", " + b;
-        });
-
-        s = s.replace(/\s+/g, " ").trim();
-        return s;
     }
 
     function getSynth() {
@@ -267,6 +208,57 @@
             }
         });
         return best;
+    }
+
+    /**
+     * Strip decorative lines (====, ----, …) and soften chapter:verse so TTS does not read "45 22" as a clock time.
+     */
+    function sanitizeTextForSpeech(raw) {
+        var s = String(raw || "");
+        s = s.replace(/\u00a0/g, " ");
+        var lines = s.split(/\r\n|\r|\n/);
+        var kept = lines.map(function (line) {
+            var t = String(line || "").replace(/^\s+|\s+$/g, "");
+            if (!t) {
+                return "";
+            }
+            var compact = t.replace(/\s/g, "");
+            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*]+/g, "");
+            if (onlyDots.length === 0 && compact.length >= 4) {
+                return "";
+            }
+            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*]+/g, "");
+            if (onlyDecor.length === 0 && t.length >= 3) {
+                return "";
+            }
+            if (/^[=\-_·\.•\u2013\u2014~*]{4,}$/.test(compact)) {
+                return "";
+            }
+            return t;
+        }).filter(Boolean);
+        s = kept.join(" ");
+
+        s = s.replace(/(\d{1,3})\s*:\s*(\d{1,3})/g, function (full, a, b, offset) {
+            var na = parseInt(a, 10);
+            var nb = parseInt(b, 10);
+            if (na < 1 || na > 150 || nb < 1 || nb > 176) {
+                return full;
+            }
+            var before = offset > 0 ? s.charAt(offset - 1) : "";
+            var afterIdx = offset + full.length;
+            var after = afterIdx < s.length ? s.charAt(afterIdx) : "";
+            if (/\d/.test(before) || /\d/.test(after)) {
+                return full;
+            }
+            var plausibleClock = na <= 23 && nb <= 59;
+            if (plausibleClock) {
+                return full;
+            }
+            return a + ", " + b;
+        });
+
+        s = s.replace(/\s+/g, " ").trim();
+        return s;
     }
 
     function splitIntoSegments(text) {
@@ -415,7 +407,6 @@
         }
         var text = String(plain || "").replace(/\s+/g, " ").trim();
         if (!text) {
-            updateTtsUi();
             return;
         }
         currentReadLang = readLang === "ta" ? "ta" : "en";
@@ -424,7 +415,7 @@
             updateTtsUi();
             return;
         }
-        var segments = splitIntoSegments(currentReadPlain);
+        var segments = splitIntoSegments(text);
         if (!segments.length) {
             return;
         }
@@ -515,7 +506,7 @@
     }
 
     function toggleSpeech() {
-        if (!speechSupported || !String(currentReadPlain || "").trim()) {
+        if (!speechSupported || !currentReadPlain) {
             return;
         }
         var synth = getSynth();
@@ -534,9 +525,7 @@
             updateTtsUi();
             return;
         }
-        var titlePart = String(headingEl.textContent || "").trim();
-        var bodyPart = String(bodyEl.textContent || "").trim();
-        startSpeechFromPlain([titlePart, bodyPart].filter(Boolean).join(". "), currentReadLang);
+        startSpeechFromPlain(currentReadPlain, currentReadLang);
     }
 
     var loadToken = 0;
@@ -548,6 +537,10 @@
         statusEl.textContent = T("dailyBread.loading", "Loading…");
         statusEl.dataset.state = "";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -558,6 +551,10 @@
         statusEl.textContent = T("dailyBread.empty", "No content for today yet.");
         statusEl.dataset.state = "empty";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -568,6 +565,10 @@
         statusEl.textContent = T("dailyBread.error", "Could not load. Try again later.");
         statusEl.dataset.state = "error";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -576,11 +577,22 @@
         var lang = getAppLanguage();
         var picked = pickContent(entry, lang);
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
+        var authorText = String(picked.author || "").trim();
+        if (authorLineEl) {
+            if (authorText) {
+                authorLineEl.hidden = false;
+                authorLineEl.textContent = T("dailyBread.byAuthor", "By {author}").replace(/\{author\}/g, authorText);
+            } else {
+                authorLineEl.hidden = true;
+                authorLineEl.textContent = "";
+            }
+        }
         bodyEl.innerHTML = escapeHtml(picked.body || "");
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
+        var authorPart = authorText;
         var bodyPart = String(picked.body || "").trim();
-        currentReadPlain = sanitizeTextForSpeech([titlePart, bodyPart].filter(Boolean).join(". "));
+        currentReadPlain = sanitizeTextForSpeech([titlePart, authorPart, bodyPart].filter(Boolean).join(". "));
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();

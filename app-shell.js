@@ -35,48 +35,7 @@
         "nav.events": "நிகழ்வுகள்",
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
-        "nav.contact": "தொடர்பு",
-        "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
-        "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
-        "dailyBread.subtitle": "இன்றைய தேதிக்கு (பெல்ஜியம் நாள்காட்டி)",
-        "dailyBread.headerSubtitle": "இன்றைய வசனம் · தியானம்",
-        "dailyBread.subtitleVerse": "இன்றைய வசனம்",
-        "dailyBread.subtitleMeditation": "தியானம்",
-        "dailyBread.dateLine": "தேதி: {date}",
-        "dailyBread.loading": "ஏற்றுகிறது...",
-        "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
-        "dailyBread.error": "ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
-        "dailyBread.ttsListen": "கேட்க",
-        "dailyBread.ttsPause": "இடைநிறுத்து",
-        "dailyBread.ttsResume": "தொடரவும்",
-        "dailyBread.ttsStop": "நிறுத்து",
-        "dailyBread.ttsPlayAria": "அன்றன்றுள்ள அப்பத்தை கேட்க",
-        "dailyBread.ttsStopAria": "ஒலியை நிறுத்து",
-        "dailyBread.ttsUnsupported": "இந்த உலாவியில் பேச்சு ஒலி ஆதரவு இல்லை.",
-        "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
-        "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; பட்டியலில் Daily bread பக்கம் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB njc-belgium-admin-daily-bread.",
-        "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
-        "admin.dailyBreadInfo": "ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
-        "admin.dailyBreadTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
-        "admin.dailyBreadTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
-        "admin.dailyBreadBodyEnPlaceholder": "உள்ளடக்கம் (ஆங்கிலம்). வரிகள் வைக்கப்படும்.",
-        "admin.dailyBreadBodyTaPlaceholder": "உள்ளடக்கம் (தமிழ், விருப்பம்)",
-        "admin.dailyBreadPublish": "அன்றன்றுள்ள அப்பம் சேமி",
-        "admin.dailyBreadManageTitle": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம்",
-        "admin.dailyBreadManageInfo": "தேதியால் திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
-        "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
-        "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
-        "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
-        "admin.dailyBreadNeedBody": "உள்ளடக்கத்தை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
-        "admin.dailyBreadSaved": "அன்றன்றுள்ள அப்பம் சேமிக்கப்பட்டது.",
-        "admin.dailyBreadDeleted": "நீக்கப்பட்டது.",
-        "admin.dailyBreadUpdated": "புதுப்பிக்கப்பட்டது.",
-        "admin.dailyBreadDeleteConfirm": "இந்த தேதியின் பதிவை நீக்கவா?",
-        "admin.dailyBreadEditPromptDate": "தேதியை திருத்து (YYYY-MM-DD)",
-        "admin.dailyBreadEditPromptTitleEn": "தலைப்பை திருத்து (EN)",
-        "admin.dailyBreadEditPromptTitleTa": "தலைப்பை திருத்து (TA, விருப்பம்)",
-        "admin.dailyBreadEditPromptBodyEn": "உள்ளடக்கத்தை திருத்து (EN)",
-        "admin.dailyBreadEditPromptBodyTa": "உள்ளடக்கத்தை திருத்து (TA, விருப்பம்)",
+        "nav.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
@@ -90,6 +49,7 @@
         "menu.mailbox": "அஞ்சல் பெட்டி",
         "menu.admin": "நிர்வாக பலகை",
         "menu.settings": "அமைப்புகள்",
+        "menu.contact": "தொடர்பு",
         "menu.login": "உள்நுழை / பதிவு",
         "menu.logout": "வெளியேறு",
         "auth.loginTitle": "உள்நுழை",
@@ -137,6 +97,50 @@
         "home.dailyVerseVersionTamil": "BSI (பழைய)",
         "home.dailyVerseEmptyBody": "இன்றைய வசனம் கிடைக்கவில்லை.",
         "home.dailyVerseLoading": "இன்றைய வசனம் ஏற்றப்படுகிறது...",
+        "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
+        "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
+        "dailyBread.dateLine": "தேதி: {date}",
+        "dailyBread.loading": "ஏற்றுகிறது...",
+        "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
+        "dailyBread.error": "ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "dailyBread.ttsListen": "கேட்க",
+        "dailyBread.ttsPause": "இடைநிறுத்து",
+        "dailyBread.ttsResume": "தொடரவும்",
+        "dailyBread.ttsStop": "நிறுத்து",
+        "dailyBread.ttsPlayAria": "அன்றன்றுள்ள அப்பத்தை கேட்க",
+        "dailyBread.ttsStopAria": "ஒலியை நிறுத்து",
+        "dailyBread.ttsUnsupported": "இந்த உலாவியில் பேச்சு ஒலி ஆதரவு இல்லை.",
+        "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
+        "dailyBread.byAuthor": "எழுத்தாளர்: {author}",
+        "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
+        "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; Daily bread தாவல் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB பெட்டி njc-belgium-admin-daily-bread தேவை.",
+        "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
+        "admin.dailyBreadInfo": "முன்கூட்டியே உள்ளடக்கம் சேர்க்கவும். ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
+        "admin.dailyBreadTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
+        "admin.dailyBreadTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.dailyBreadAuthorEnPlaceholder": "ஆசிரியர் (ஆங்கிலம், விருப்பம்)",
+        "admin.dailyBreadAuthorTaPlaceholder": "ஆசிரியர் (தமிழ், விருப்பம்)",
+        "admin.dailyBreadBodyEnPlaceholder": "உள்ளடக்கம் (ஆங்கிலம்). வரிகள் வைக்கப்படும்.",
+        "admin.dailyBreadBodyTaPlaceholder": "உள்ளடக்கம் (தமிழ், விருப்பம்)",
+        "admin.dailyBreadPublish": "அன்றன்றுள்ள அப்பம் சேமி",
+        "admin.dailyBreadManageTitle": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம்",
+        "admin.dailyBreadManageInfo": "தேதியால் திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
+        "admin.dailyBreadScheduledToggleAria": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம் பட்டியலை காட்டு அல்லது மறை",
+        "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
+        "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
+        "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
+        "admin.dailyBreadNeedBody": "உள்ளடக்கத்தை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
+        "admin.dailyBreadSaved": "அன்றன்றுள்ள அப்பம் சேமிக்கப்பட்டது.",
+        "admin.dailyBreadDeleted": "நீக்கப்பட்டது.",
+        "admin.dailyBreadUpdated": "புதுப்பிக்கப்பட்டது.",
+        "admin.dailyBreadDeleteConfirm": "இந்த தேதியின் பதிவை நீக்கவா?",
+        "admin.dailyBreadEditPromptDate": "தேதியை திருத்து (YYYY-MM-DD)",
+        "admin.dailyBreadEditPromptTitleEn": "தலைப்பை திருத்து (EN)",
+        "admin.dailyBreadEditPromptTitleTa": "தலைப்பை திருத்து (TA, விருப்பம்)",
+        "admin.dailyBreadEditPromptAuthorEn": "ஆசிரியரை திருத்து (EN, விருப்பம்)",
+        "admin.dailyBreadEditPromptAuthorTa": "ஆசிரியரை திருத்து (TA, விருப்பம்)",
+        "admin.dailyBreadEditPromptBodyEn": "உள்ளடக்கத்தை திருத்து (EN)",
+        "admin.dailyBreadEditPromptBodyTa": "உள்ளடக்கத்தை திருத்து (TA, விருப்பம்)",
         "home.announcementsTitle": "அறிவிப்புகள்",
         "home.announcementsSubtitle": "இந்த வாரத்தின் சமீபத்திய புதுப்பிப்புகள்.",
         "home.loadingAnnouncementsTitle": "அறிவிப்புகள் ஏற்றப்படுகின்றன...",
@@ -806,6 +810,13 @@
         "profile.badgeTrivia10": "வேதாகமக் கேள்வி வீரர் (10+ புள்ளிகள்)",
         "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
         "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
+        "app.installBannerRegionAria": "செயலியை நிறுவு",
+        "app.installBannerTitle": "NJC செயலியை நிறுவவும்",
+        "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
+        "app.installBannerCta": "நிறுவு",
+        "app.installBannerDismiss": "இப்போது வேண்டாம்",
+        "app.installBannerIos": "iPhone/iPad: பகிர் ஐகானைத் தட்டி \"Add to Home Screen\" தேர்ந்தெடுக்கவும்.",
+        "app.installBannerAndroid": "Android Chrome: மெனு (⋮) ஐ தட்டி \"Install app\" அல்லது \"Add to Home screen\" தேர்ந்தெடுக்கவும்.",
         "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
         "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
         "app.updateNotesPrefix": "புதியவை:",
@@ -1467,10 +1478,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330db6";
+    var SW_VERSION = "20260330bf6";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily bread: verse + devotion subtitle pills; header subtitle TA; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Bible fullscreen: fix verse list scroll (card overflow + jump-to-verse).";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -1615,6 +1626,185 @@
         sync();
         window.addEventListener("online", sync);
         window.addEventListener("offline", sync);
+    }
+
+    var PWA_INSTALL_DISMISS_KEY = "njc_pwa_install_banner_dismissed_v1";
+
+    function isRunningAsInstalledPwa() {
+        try {
+            return Boolean(
+                (window.matchMedia && (
+                    window.matchMedia("(display-mode: standalone)").matches ||
+                    window.matchMedia("(display-mode: fullscreen)").matches ||
+                    window.matchMedia("(display-mode: minimal-ui)").matches
+                )) ||
+                window.navigator.standalone === true ||
+                String(document.referrer || "").indexOf("android-app://") === 0
+            );
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function setupPwaInstallBanner() {
+        var banner = document.getElementById("pwa-install-banner");
+        var cta = document.getElementById("pwa-install-cta");
+        var dismissBtn = document.getElementById("pwa-install-dismiss");
+        var iosHint = document.getElementById("pwa-install-ios-hint");
+        var androidHint = document.getElementById("pwa-install-android-hint");
+        if (!banner) {
+            return;
+        }
+        if (isRunningAsInstalledPwa()) {
+            return;
+        }
+        try {
+            if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                return;
+            }
+        } catch (err) {
+            return;
+        }
+
+        var deferredPrompt = null;
+
+        function hideBanner() {
+            banner.hidden = true;
+        }
+
+        function isLikelyIos() {
+            var ua = String(navigator.userAgent || "");
+            if (/iPad|iPhone|iPod/.test(ua)) {
+                return true;
+            }
+            try {
+                if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function isLikelyAndroid() {
+            return /Android/i.test(String(navigator.userAgent || ""));
+        }
+
+        function hideInstallHints() {
+            if (iosHint) {
+                iosHint.hidden = true;
+            }
+            if (androidHint) {
+                androidHint.hidden = true;
+            }
+        }
+
+        function showBannerForIosHint() {
+            hideInstallHints();
+            if (iosHint) {
+                iosHint.hidden = false;
+            }
+            if (cta) {
+                cta.hidden = true;
+            }
+            banner.hidden = false;
+        }
+
+        function showBannerForAndroidHint() {
+            hideInstallHints();
+            if (androidHint) {
+                androidHint.hidden = false;
+            }
+            if (cta) {
+                cta.hidden = true;
+            }
+            banner.hidden = false;
+        }
+
+        window.addEventListener("beforeinstallprompt", function (event) {
+            event.preventDefault();
+            deferredPrompt = event;
+            try {
+                if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                    return;
+                }
+            } catch (e2) {
+                return;
+            }
+            if (isRunningAsInstalledPwa()) {
+                return;
+            }
+            hideInstallHints();
+            if (cta) {
+                cta.hidden = false;
+            }
+            banner.hidden = false;
+        });
+
+        window.setTimeout(function () {
+            if (deferredPrompt) {
+                return;
+            }
+            if (isRunningAsInstalledPwa()) {
+                return;
+            }
+            try {
+                if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                    return;
+                }
+            } catch (e3) {
+                return;
+            }
+            if (isLikelyIos()) {
+                showBannerForIosHint();
+                return;
+            }
+            if (isLikelyAndroid()) {
+                showBannerForAndroidHint();
+            }
+        }, 800);
+
+        if (dismissBtn) {
+            dismissBtn.addEventListener("click", function () {
+                try {
+                    window.localStorage.setItem(PWA_INSTALL_DISMISS_KEY, "1");
+                } catch (e4) {}
+                hideBanner();
+            });
+        }
+
+        if (cta) {
+            cta.addEventListener("click", function () {
+                if (!deferredPrompt) {
+                    if (isLikelyIos() && iosHint) {
+                        iosHint.hidden = false;
+                        if (androidHint) {
+                            androidHint.hidden = true;
+                        }
+                    }
+                    if (isLikelyAndroid() && androidHint) {
+                        androidHint.hidden = false;
+                        if (iosHint) {
+                            iosHint.hidden = true;
+                        }
+                    }
+                    return;
+                }
+                deferredPrompt.prompt();
+                var choice = deferredPrompt.userChoice;
+                if (choice && typeof choice.then === "function") {
+                    choice.then(function () {
+                        deferredPrompt = null;
+                        hideBanner();
+                    }).catch(function () {
+                        deferredPrompt = null;
+                        hideBanner();
+                    });
+                } else {
+                    deferredPrompt = null;
+                    hideBanner();
+                }
+            });
+        }
     }
 
     function registerServiceWorker() {
@@ -3114,6 +3304,12 @@
         adminLink.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\"></i><span></span>";
         utilityLinksContainer.appendChild(adminLink);
 
+        var contactMenuLink = document.createElement("a");
+        contactMenuLink.className = "header-menu-link";
+        contactMenuLink.href = "#contact";
+        contactMenuLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span></span>";
+        utilityLinksContainer.appendChild(contactMenuLink);
+
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
         settingsLink.href = "#settings";
@@ -3163,7 +3359,7 @@
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact"];
+            var allowedRoutes = ["home", "prayer", "events", "sermons", "daily-bread"];
             var routeMap = {};
             primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
@@ -3302,6 +3498,7 @@
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
+            var contactMenuLabel = t("menu.contact", "Contact us");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var profile = getProfileForUser(activeUser);
@@ -3369,6 +3566,10 @@
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
             }
+            var contactMenuNode = contactMenuLink.querySelector("span");
+            if (contactMenuNode) {
+                contactMenuNode.textContent = contactMenuLabel;
+            }
             var mailboxNode = mailboxLink.querySelector("span");
             if (mailboxNode) {
                 mailboxNode.textContent = mailboxLabel;
@@ -3398,6 +3599,7 @@
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
+            var isContact = getCurrentRoute() === "contact";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
@@ -3408,6 +3610,7 @@
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
+            contactMenuLink.classList.toggle("active", isContact);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
@@ -4427,6 +4630,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
         setupOfflineBanner();
+        setupPwaInstallBanner();
         activeLanguage = getActiveLanguage();
         try {
             var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";

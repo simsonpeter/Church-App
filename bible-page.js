@@ -1717,7 +1717,18 @@
             node.classList.remove("highlight");
         });
         target.classList.add("highlight");
-        target.scrollIntoView({ block: "center", behavior: "smooth" });
+        if (document.body.classList.contains("bible-fullscreen-open") && verseList) {
+            var listRect = verseList.getBoundingClientRect();
+            var targetRect = target.getBoundingClientRect();
+            var delta = targetRect.top - listRect.top - listRect.height / 2 + targetRect.height / 2;
+            try {
+                verseList.scrollTo({ top: verseList.scrollTop + delta, behavior: "smooth" });
+            } catch (e1) {
+                verseList.scrollTop = verseList.scrollTop + delta;
+            }
+        } else {
+            target.scrollIntoView({ block: "center", behavior: "smooth" });
+        }
         window.setTimeout(function () {
             target.classList.remove("highlight");
         }, 1600);

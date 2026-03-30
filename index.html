@@ -14,12 +14,26 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260330db6">
+    <link rel="stylesheet" href="styles.css?v=20260330bf6">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="offline-banner" id="offline-banner" hidden role="status" aria-live="polite">
         <span data-i18n="app.offlineBanner">You’re offline — showing saved content. Some features may be limited.</span>
+    </div>
+    <div class="pwa-install-banner" id="pwa-install-banner" hidden role="region" data-i18n-aria-label="app.installBannerRegionAria" data-i18n-aria-fallback="Install app">
+        <div class="pwa-install-banner-inner">
+            <span class="pwa-install-banner-text">
+                <strong data-i18n="app.installBannerTitle">Install NJC app</strong>
+                <span data-i18n="app.installBannerBody">Add to your home screen for quick access and offline use.</span>
+            </span>
+            <span class="pwa-install-banner-actions">
+                <button type="button" class="button-link pwa-install-cta" id="pwa-install-cta" data-i18n="app.installBannerCta">Install</button>
+                <button type="button" class="button-link button-secondary pwa-install-dismiss" id="pwa-install-dismiss" data-i18n="app.installBannerDismiss">Not now</button>
+            </span>
+        </div>
+        <p class="pwa-install-ios-hint page-note" id="pwa-install-ios-hint" hidden data-i18n="app.installBannerIos">On iPhone/iPad: tap Share, then “Add to Home Screen”.</p>
+        <p class="pwa-install-android-hint page-note" id="pwa-install-android-hint" hidden data-i18n="app.installBannerAndroid">On Android Chrome: tap the menu (⋮), then “Install app” or “Add to Home screen”.</p>
     </div>
     <div class="app-shell">
         <header class="app-header home-header" id="spa-header">
@@ -213,7 +227,7 @@
                     <span class="action-icon"><i class="fa-solid fa-house"></i></span>
                     <span class="action-label" data-i18n="actions.dashboard">Dashboard</span>
                 </a>
-                <a class="action-pill" href="#contact">
+                <a class="action-pill" href="#settings">
                     <span class="action-icon"><i class="fa-solid fa-user-plus"></i></span>
                     <span class="action-label" data-i18n="actions.rsvp">RSVP</span>
                 </a>
@@ -326,76 +340,31 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="contact">
+        <section class="page-view" data-route="daily-bread">
             <main class="app-content">
-<section class="card contact-block card-v-glass">
-                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
-                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
-                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
-            </section>
-
-            <section class="quick-actions">
-                <a class="action-pill" href="mailto:simsonpeter@gmail.com">
-                    <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
-                    <span class="action-label" data-i18n="actions.email">Email</span>
-                </a>
-                <a class="action-pill" href="tel:+32483116484">
-                    <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
-                    <span class="action-label" data-i18n="actions.call">Call</span>
-                </a>
-                <a class="action-pill" href="#events">
-                    <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
-                    <span class="action-label" data-i18n="actions.visit">Visit</span>
-                </a>
-            </section>
-
-            <section class="card card-v-mesh">
-                <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
-                <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
-                <form class="prayer-form" id="prayer-request-form">
-                    <input
-                        id="prayer-name"
-                        class="search-input"
-                        type="text"
-                        data-i18n-placeholder="contact.prayerNamePlaceholder"
-                        placeholder="Your name (optional)">
-                    <textarea
-                        id="prayer-message"
-                        class="search-input prayer-textarea"
-                        rows="4"
-                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
-                        placeholder="Write your message"></textarea>
-                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
-                </form>
-                <p class="page-note" id="prayer-form-note" hidden></p>
-            </section>
-
-            <a class="card location-map-card card-v-map" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
-                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
+            <section class="card card-v-featured daily-bread-page-card">
+                <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="dailyBread.title">Daily bread</span></h2>
                 <div class="card-banner">
-                    <img src="events-banner.jpg?v=20260428ev1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
+                    <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
-                <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
-                <p class="location-transit">
-                    <i class="fa-solid fa-bus" aria-hidden="true"></i>
-                    <span data-i18n="contact.transitByBus">By bus:</span> 19, 23, 33
-                    <span data-i18n="contact.transitStopBus">(stop Deurne Van Deynsestraat)</span><br>
-                    <i class="fa-solid fa-train-tram" aria-hidden="true"></i>
-                    <span data-i18n="contact.transitByTram">By tram:</span> 5
-                    <span data-i18n="contact.transitStopTram">(stop Ten Eekhove)</span>,
-                    2, 3, 6 <span data-i18n="contact.transitStopSport">(stop Sport)</span>
-                </p>
-                <div class="location-map-frame-wrap" aria-hidden="true">
-                    <iframe
-                        class="location-map-frame"
-                        title="Map to New Jerusalem Church Belgium"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+                <p class="page-note daily-bread-date-line" id="daily-bread-date-line" aria-live="polite"></p>
+                <p class="page-note" id="daily-bread-status" aria-live="polite" hidden></p>
+                <div id="daily-bread-content" class="daily-bread-content" hidden>
+                    <div class="daily-bread-tts-row" role="group" aria-label="Listen to daily bread">
+                        <button type="button" class="button-link button-secondary daily-bread-tts-toggle" id="daily-bread-tts-toggle" disabled data-i18n-aria-label="dailyBread.ttsPlayAria" data-i18n-aria-fallback="Listen" aria-label="Listen">
+                            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                            <span data-i18n="dailyBread.ttsListen">Listen</span>
+                        </button>
+                        <button type="button" class="button-link button-secondary daily-bread-tts-stop" id="daily-bread-tts-stop" disabled data-i18n-aria-label="dailyBread.ttsStopAria" data-i18n-aria-fallback="Stop" aria-label="Stop">
+                            <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                            <span data-i18n="dailyBread.ttsStop">Stop</span>
+                        </button>
+                    </div>
+                    <h3 id="daily-bread-heading" class="daily-bread-heading"></h3>
+                    <p id="daily-bread-author-line" class="daily-bread-author-line" hidden></p>
+                    <div id="daily-bread-body" class="daily-bread-body"></div>
                 </div>
-                <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
-            </a>
+            </section>
             </main>
         </section>
 
@@ -529,46 +498,6 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="daily-bread">
-            <main class="app-content">
-            <section class="card card-v-featured daily-bread-page-card">
-                <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="dailyBread.title">Daily bread</span></h2>
-                <div class="card-banner">
-                    <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
-                </div>
-                <p class="page-note daily-bread-subtitle" data-i18n="dailyBread.subtitle">Shown for today’s date (Brussels calendar).</p>
-                <div class="daily-bread-subtitle-row" role="group" aria-label="Daily bread sections">
-                    <span class="daily-bread-subtitle-pill daily-bread-subtitle-pill--verse">
-                        <i class="fa-solid fa-book-bible" aria-hidden="true"></i>
-                        <span data-i18n="dailyBread.subtitleVerse">Today’s verse</span>
-                    </span>
-                    <span class="daily-bread-subtitle-pill daily-bread-subtitle-pill--meditation">
-                        <i class="fa-solid fa-hands-praying" aria-hidden="true"></i>
-                        <span data-i18n="dailyBread.subtitleMeditation">Devotion</span>
-                    </span>
-                </div>
-                <p class="page-note daily-bread-date-line" id="daily-bread-date-line" aria-live="polite"></p>
-                <p class="page-note" id="daily-bread-status" aria-live="polite" hidden></p>
-                <div id="daily-bread-content" class="daily-bread-content" hidden>
-                    <div class="daily-bread-tts-row" role="group" aria-label="Listen to daily bread">
-                        <button type="button" class="button-link button-secondary daily-bread-tts-toggle" id="daily-bread-tts-toggle" disabled data-i18n-aria-label="dailyBread.ttsPlayAria" data-i18n-aria-fallback="Listen" aria-label="Listen">
-                            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
-                            <span data-i18n="dailyBread.ttsListen">Listen</span>
-                        </button>
-                        <button type="button" class="button-link button-secondary daily-bread-tts-stop" id="daily-bread-tts-stop" disabled data-i18n-aria-label="dailyBread.ttsStopAria" data-i18n-aria-fallback="Stop" aria-label="Stop">
-                            <i class="fa-solid fa-stop" aria-hidden="true"></i>
-                            <span data-i18n="dailyBread.ttsStop">Stop</span>
-                        </button>
-                    </div>
-                    <div class="daily-bread-reading">
-                        <h3 id="daily-bread-heading" class="daily-bread-heading"></h3>
-                        <div id="daily-bread-body" class="daily-bread-body"></div>
-                    </div>
-                </div>
-            </section>
-            </main>
-        </section>
-
         <section class="page-view" data-route="trivia">
             <main class="app-content">
             <section class="card trivia-card card-v-glass" id="trivia-card">
@@ -621,6 +550,79 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="contact">
+            <main class="app-content">
+            <section class="card contact-block card-v-glass">
+                <h2><i class="fa-solid fa-address-book"></i><span data-i18n="contact.getInTouch">Get in Touch</span></h2>
+                <p><span data-i18n="contact.emailLabel">Email:</span> <a href="mailto:simsonpeter@gmail.com">simsonpeter@gmail.com</a></p>
+                <p><span data-i18n="contact.phoneLabel">Phone:</span> <a href="tel:+32483116484">+32 483 11 64 84</a></p>
+            </section>
+
+            <section class="quick-actions">
+                <a class="action-pill" href="mailto:simsonpeter@gmail.com">
+                    <span class="action-icon"><i class="fa-solid fa-envelope"></i></span>
+                    <span class="action-label" data-i18n="actions.email">Email</span>
+                </a>
+                <a class="action-pill" href="tel:+32483116484">
+                    <span class="action-icon"><i class="fa-solid fa-phone-volume"></i></span>
+                    <span class="action-label" data-i18n="actions.call">Call</span>
+                </a>
+                <a class="action-pill" href="#events">
+                    <span class="action-icon"><i class="fa-solid fa-map-location-dot"></i></span>
+                    <span class="action-label" data-i18n="actions.visit">Visit</span>
+                </a>
+            </section>
+
+            <section class="card card-v-mesh">
+                <h2><i class="fa-solid fa-comments"></i><span data-i18n="contact.prayerTitle">Share with Us / Contact Us</span></h2>
+                <p class="page-note" data-i18n="contact.prayerSubtitle">Share with us or contact us. We are happy to hear from you.</p>
+                <form class="prayer-form" id="prayer-request-form">
+                    <input
+                        id="prayer-name"
+                        class="search-input"
+                        type="text"
+                        data-i18n-placeholder="contact.prayerNamePlaceholder"
+                        placeholder="Your name (optional)">
+                    <textarea
+                        id="prayer-message"
+                        class="search-input prayer-textarea"
+                        rows="4"
+                        data-i18n-placeholder="contact.prayerMessagePlaceholder"
+                        placeholder="Write your message"></textarea>
+                    <button class="button-link" type="submit" data-i18n="contact.sendPrayer">Send Message</button>
+                </form>
+                <p class="page-note" id="prayer-form-note" hidden></p>
+            </section>
+
+            <a class="card location-map-card card-v-map" href="https://maps.google.com/?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen" target="_blank" rel="noopener noreferrer">
+                <h2><i class="fa-solid fa-location-dot"></i><span data-i18n="contact.location">Location</span></h2>
+                <div class="card-banner">
+                    <img src="events-banner.jpg?v=20260428ev1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
+                </div>
+                <p data-i18n="contact.locationName">New Jerusalem Church Belgium</p>
+                <p>Ten Eekhovelei 292,<br>2100 Antwerpen</p>
+                <p class="location-transit">
+                    <i class="fa-solid fa-bus" aria-hidden="true"></i>
+                    <span data-i18n="contact.transitByBus">By bus:</span> 19, 23, 33
+                    <span data-i18n="contact.transitStopBus">(stop Deurne Van Deynsestraat)</span><br>
+                    <i class="fa-solid fa-train-tram" aria-hidden="true"></i>
+                    <span data-i18n="contact.transitByTram">By tram:</span> 5
+                    <span data-i18n="contact.transitStopTram">(stop Ten Eekhove)</span>,
+                    2, 3, 6 <span data-i18n="contact.transitStopSport">(stop Sport)</span>
+                </p>
+                <div class="location-map-frame-wrap" aria-hidden="true">
+                    <iframe
+                        class="location-map-frame"
+                        title="Map to New Jerusalem Church Belgium"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        src="https://maps.google.com/maps?q=New%20Jerusalem%20Church%20Belgium%2C%20Ten%20Eekhovelei%20292%2C%202100%20Antwerpen&z=16&output=embed"></iframe>
+                </div>
+                <p class="location-map-cta"><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="contact.openMap">Open in Google Maps</span></p>
+            </a>
+            </main>
+        </section>
+
         <section class="page-view" data-route="settings">
             <main class="app-content">
             <section class="card settings-card card-v-minimal">
@@ -659,9 +661,6 @@
             <main class="app-content">
             <section class="card profile-card card-v-ink">
                 <h2><i class="fa-solid fa-user"></i><span data-i18n="profile.title">Your profile</span></h2>
-                <div class="card-banner">
-                    <img src="profile-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
-                </div>
                 <p class="page-note" data-i18n="profile.info">Update your personal details.</p>
                 <div class="profile-card-top">
                     <div class="profile-avatar">
@@ -815,7 +814,7 @@
                     <li data-i18n="admin.scheduleHintTrivia">Bible Quiz: set the show date in the Bible Quiz form so a new question unlocks from 8 AM that day (weekdays in the app).</li>
                     <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
                     <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
-                    <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread page (side menu) shows the entry for today (Brussels date). MantleDB bucket njc-belgium-admin-daily-bread.</li>
+                    <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread tab shows the entry for today (Brussels date). Create the MantleDB bucket njc-belgium-admin-daily-bread if needed.</li>
                 </ul>
             </section>
 
@@ -824,26 +823,40 @@
                 <div class="card-banner">
                     <img src="daily-verse-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="admin.dailyBreadInfo">One entry per calendar day (YYYY-MM-DD). Tamil optional.</p>
+                <p class="page-note" data-i18n="admin.dailyBreadInfo">Schedule content in advance. One entry per calendar day (YYYY-MM-DD). Tamil optional.</p>
                 <form class="prayer-form" id="admin-daily-bread-form">
                     <input id="admin-daily-bread-date" class="search-input" type="date" required aria-required="true">
                     <input id="admin-daily-bread-title" class="search-input" type="text" placeholder="Title (English)" data-i18n-placeholder="admin.dailyBreadTitleEnPlaceholder">
                     <input id="admin-daily-bread-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadTitleTaPlaceholder">
+                    <input id="admin-daily-bread-author" class="search-input" type="text" placeholder="Author (English, optional)" data-i18n-placeholder="admin.dailyBreadAuthorEnPlaceholder">
+                    <input id="admin-daily-bread-author-ta" class="search-input" type="text" placeholder="Author (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadAuthorTaPlaceholder">
                     <textarea id="admin-daily-bread-body" class="search-input prayer-textarea" rows="5" placeholder="Body (English). Line breaks kept." data-i18n-placeholder="admin.dailyBreadBodyEnPlaceholder"></textarea>
                     <textarea id="admin-daily-bread-body-ta" class="search-input prayer-textarea" rows="4" placeholder="Body (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadBodyTaPlaceholder"></textarea>
                     <button class="button-link" id="admin-daily-bread-submit" type="submit" data-i18n="admin.dailyBreadPublish">Save daily bread</button>
                 </form>
             </section>
 
-            <section class="card card-v-ink">
-                <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.dailyBreadManageTitle">Scheduled daily bread</span></h2>
-                <p class="page-note" data-i18n="admin.dailyBreadManageInfo">Edit or delete by date. Refresh loads from MantleDB.</p>
-                <ul class="list" id="admin-daily-bread-list">
-                    <li>
-                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
-                        <p data-i18n="admin.loadingBody">Please wait.</p>
-                    </li>
-                </ul>
+            <section class="card card-v-ink admin-daily-bread-scheduled-card">
+                <details class="admin-daily-bread-scheduled-details">
+                    <summary
+                        class="admin-daily-bread-scheduled-summary"
+                        data-i18n-aria-label="admin.dailyBreadScheduledToggleAria"
+                        data-i18n-aria-fallback="Show or hide scheduled daily bread list">
+                        <span class="admin-daily-bread-scheduled-summary-inner">
+                            <i class="fa-solid fa-list" aria-hidden="true"></i>
+                            <span data-i18n="admin.dailyBreadManageTitle" data-i18n-fallback="Scheduled daily bread">Scheduled daily bread</span>
+                        </span>
+                    </summary>
+                    <div class="admin-daily-bread-scheduled-body">
+                        <p class="page-note" data-i18n="admin.dailyBreadManageInfo" data-i18n-fallback="Edit or delete by date. Refresh loads from MantleDB.">Edit or delete by date. Refresh loads from MantleDB.</p>
+                        <ul class="list" id="admin-daily-bread-list">
+                            <li>
+                                <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                                <p data-i18n="admin.loadingBody">Please wait.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </details>
             </section>
 
             <section class="card card-v-mesh">
@@ -856,7 +869,7 @@
                     <input id="admin-notice-title-ta" class="search-input" type="text" placeholder="Notice title in Tamil (optional)" data-i18n-placeholder="admin.noticeTitleTaPlaceholder">
                     <textarea id="admin-notice-body" class="search-input prayer-textarea" rows="3" placeholder="Notice message" data-i18n-placeholder="admin.noticeBodyPlaceholder"></textarea>
                     <textarea id="admin-notice-body-ta" class="search-input prayer-textarea" rows="2" placeholder="Notice message in Tamil (optional)" data-i18n-placeholder="admin.noticeBodyTaPlaceholder"></textarea>
-                    <input id="admin-notice-link" class="search-input" type="text" inputmode="url" autocomplete="off" placeholder="e.g. #sermons or full URL (https://…)" data-i18n-placeholder="admin.noticeLinkPlaceholder" title="In-app tabs: #home #prayer #events #sermons #contact #trivia #bible #songbook. Or paste any https:// link.">
+                    <input id="admin-notice-link" class="search-input" type="text" inputmode="url" autocomplete="off" placeholder="e.g. #sermons or full URL (https://…)" data-i18n-placeholder="admin.noticeLinkPlaceholder" title="In-app routes: #home #prayer #events #sermons #daily-bread #contact #settings #trivia #bible #songbook. Or paste any https:// link.">
                     <button type="button" class="button-link button-secondary" id="admin-notice-link-presets-btn" data-i18n="admin.noticeLinkPresets">App link presets</button>
                     <label class="prayer-wall-anon">
                         <input id="admin-notice-urgent" type="checkbox">
@@ -1052,7 +1065,7 @@
             <a class="tab" data-route="prayer" href="#prayer"><span class="tab-icon"><i class="fa-solid fa-hands-praying"></i></span><span class="tab-label" data-i18n="nav.prayer">Prayer</span></a>
             <a class="tab" data-route="events" href="#events"><span class="tab-icon"><i class="fa-solid fa-calendar-days"></i></span><span class="tab-label" data-i18n="nav.events">Events</span></a>
             <a class="tab" data-route="sermons" href="#sermons"><span class="tab-icon"><i class="fa-solid fa-microphone-lines"></i></span><span class="tab-label" data-i18n="nav.sermons">Sermons</span></a>
-            <a class="tab" data-route="contact" href="#contact"><span class="tab-icon"><i class="fa-solid fa-phone"></i></span><span class="tab-label" data-i18n="nav.contact">Contact</span></a>
+            <a class="tab" data-route="daily-bread" href="#daily-bread"><span class="tab-icon"><i class="fa-solid fa-bread-slice"></i></span><span class="tab-label" data-i18n="nav.dailyBread">Daily bread</span></a>
         </nav>
     </div>
 
@@ -1242,22 +1255,22 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260330db6"></script>
+    <script src="app-shell.js?v=20260330bf6"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
-    <script src="bible-page.js?v=20260324u1"></script>
+    <script src="bible-page.js?v=20260330bf6"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
-    <script src="contact-page.js?v=20260325pw2"></script>
-    <script src="daily-bread-page.js?v=20260330db3"></script>
+    <script src="contact-page.js?v=20260330pw1"></script>
+    <script src="daily-bread-page.js?v=20260330dbh1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260330db1"></script>
-    <script src="admin-extras.js?v=20260330db1"></script>
+    <script src="admin-dashboard-page.js?v=20260330dbh1"></script>
+    <script src="admin-extras.js?v=20260330ct1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
-    <script src="spa-router.js?v=20260330db6"></script>
+    <script src="spa-router.js?v=20260330bf4"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

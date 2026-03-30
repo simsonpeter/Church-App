@@ -38,6 +38,24 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "daily-bread": {
+            icon: "fa-bread-slice",
+            eyebrowKey: "dailyBread.eyebrow",
+            eyebrowText: "Daily bread",
+            titleKey: "dailyBread.title",
+            titleText: "Daily bread",
+            subtitleKey: "",
+            subtitleText: ""
+        },
+        contact: {
+            icon: "fa-address-book",
+            eyebrowKey: "contact.eyebrow",
+            eyebrowText: "Contact",
+            titleKey: "contact.title",
+            titleText: "Contact us",
+            subtitleKey: "contact.subtitle",
+            subtitleText: ""
+        },
         bible: {
             icon: "fa-book-bible",
             eyebrowKey: "bible.eyebrow",
@@ -91,15 +109,6 @@
             titleText: "Chat",
             subtitleKey: "chat.subtitle",
             subtitleText: "Text only, members only"
-        },
-        contact: {
-            icon: "fa-phone",
-            eyebrowKey: "contact.eyebrow",
-            eyebrowText: "Contact",
-            titleKey: "contact.title",
-            titleText: "Reach our team",
-            subtitleKey: "",
-            subtitleText: ""
         },
         profile: {
             icon: "fa-user",

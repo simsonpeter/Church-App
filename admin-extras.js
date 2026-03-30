@@ -293,6 +293,8 @@
                 { label: "Prayer", v: "#prayer" },
                 { label: "Events", v: "#events" },
                 { label: "Sermons", v: "#sermons" },
+                { label: "Daily bread", v: "#daily-bread" },
+                { label: "Settings", v: "#settings" },
                 { label: "Contact", v: "#contact" },
                 { label: "Bible Quiz", v: "#trivia" },
                 { label: "Bible", v: "#bible" },

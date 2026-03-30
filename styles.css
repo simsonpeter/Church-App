@@ -224,6 +224,8 @@ body.splash-active {
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
     transform: rotate(18deg);
     animation: shine 7.5s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
 }
 
 .app-header h1 {
@@ -231,7 +233,7 @@ body.splash-active {
     font-size: 1.42rem;
     line-height: 1.2;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -240,7 +242,7 @@ body.splash-active {
     font-size: 0.95rem;
     color: #ffe3e3;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -252,7 +254,7 @@ body.splash-active {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    z-index: 3;
+    z-index: 10;
 }
 
 .theme-toggle {
@@ -333,7 +335,7 @@ body.splash-active {
     align-items: center;
     gap: 6px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -808,223 +810,6 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
-/* Daily bread page — richer hierarchy + justified reading body */
-.daily-bread-page-card .daily-bread-subtitle {
-    margin-top: 2px;
-    margin-bottom: 8px;
-    font-size: 0.88rem;
-    font-weight: 600;
-    color: var(--header-end);
-    letter-spacing: 0.02em;
-    line-height: 1.45;
-}
-
-.daily-bread-subtitle-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    margin: 0 0 10px;
-}
-
-.daily-bread-subtitle-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 7px 14px;
-    border-radius: 999px;
-    font-size: 0.8rem;
-    font-weight: 750;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    border: 1px solid transparent;
-}
-
-.daily-bread-subtitle-pill i {
-    font-size: 0.88rem;
-    opacity: 0.95;
-}
-
-.daily-bread-subtitle-pill--verse {
-    color: #7c1d1d;
-    background: linear-gradient(135deg, rgba(255, 235, 238, 0.95), rgba(255, 205, 210, 0.55));
-    border-color: rgba(198, 40, 40, 0.22);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
-}
-
-.daily-bread-subtitle-pill--meditation {
-    color: #5d4037;
-    background: linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 224, 178, 0.55));
-    border-color: rgba(230, 126, 34, 0.25);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
-}
-
-.daily-bread-page-card .daily-bread-date-line {
-    margin-top: 0;
-    margin-bottom: 4px;
-    font-size: 0.78rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--accent-warm);
-}
-
-.daily-bread-content {
-    margin-top: 4px;
-}
-
-.daily-bread-reading {
-    margin-top: 6px;
-    padding: 16px 16px 18px;
-    border-radius: 16px;
-    border: 1px solid rgba(229, 57, 53, 0.18);
-    background: linear-gradient(
-        165deg,
-        rgba(255, 248, 246, 0.95) 0%,
-        rgba(255, 252, 250, 0.88) 45%,
-        rgba(255, 243, 240, 0.75) 100%
-    );
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
-}
-
-.daily-bread-page-card .daily-bread-heading {
-    margin: 0 0 14px;
-    padding-bottom: 12px;
-    border-bottom: 2px solid transparent;
-    border-image: linear-gradient(90deg, var(--header-start), var(--accent-warm), var(--header-end)) 1;
-    font-size: 1.22rem;
-    font-weight: 780;
-    line-height: 1.32;
-    letter-spacing: -0.02em;
-    color: var(--header-mid);
-}
-
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    .daily-bread-page-card .daily-bread-heading {
-        background: linear-gradient(120deg, var(--header-start) 0%, var(--header-mid) 45%, var(--header-end) 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-    }
-}
-
-.daily-bread-page-card .daily-bread-heading:empty {
-    display: none;
-}
-
-.daily-bread-body {
-    color: var(--text);
-    font-size: 0.96rem;
-    line-height: 1.72;
-    text-align: justify;
-    text-justify: inter-word;
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-html[lang="ta"] .daily-bread-body {
-    text-align: start;
-}
-
-.daily-bread-body:empty {
-    min-height: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-subtitle {
-        color: #fca5a5;
-    }
-
-    :root:not([data-theme="light"]) .daily-bread-subtitle-pill--verse {
-        color: #fecaca;
-        background: linear-gradient(135deg, rgba(127, 29, 29, 0.45), rgba(153, 27, 27, 0.28));
-        border-color: rgba(248, 113, 113, 0.28);
-    }
-
-    :root:not([data-theme="light"]) .daily-bread-subtitle-pill--meditation {
-        color: #fde68a;
-        background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(146, 64, 14, 0.28));
-        border-color: rgba(251, 191, 36, 0.22);
-    }
-
-    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-date-line {
-        color: #fbbf77;
-    }
-
-    :root:not([data-theme="light"]) .daily-bread-reading {
-        border-color: rgba(248, 113, 113, 0.22);
-        background: linear-gradient(
-            165deg,
-            rgba(38, 24, 24, 0.55) 0%,
-            rgba(28, 22, 22, 0.42) 50%,
-            rgba(22, 18, 18, 0.38) 100%
-        );
-        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-    }
-
-    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
-        color: #fca5a5;
-    }
-
-    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
-        :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
-            background: linear-gradient(120deg, #fecaca 0%, #fca5a5 40%, #fdba74 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            -webkit-text-fill-color: transparent;
-        }
-    }
-}
-
-html[data-theme="dark"] .daily-bread-page-card .daily-bread-subtitle {
-    color: #fca5a5;
-}
-
-html[data-theme="dark"] .daily-bread-subtitle-pill--verse {
-    color: #fecaca;
-    background: linear-gradient(135deg, rgba(127, 29, 29, 0.45), rgba(153, 27, 27, 0.28));
-    border-color: rgba(248, 113, 113, 0.28);
-}
-
-html[data-theme="dark"] .daily-bread-subtitle-pill--meditation {
-    color: #fde68a;
-    background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(146, 64, 14, 0.28));
-    border-color: rgba(251, 191, 36, 0.22);
-}
-
-html[data-theme="dark"] .daily-bread-page-card .daily-bread-date-line {
-    color: #fbbf77;
-}
-
-html[data-theme="dark"] .daily-bread-reading {
-    border-color: rgba(248, 113, 113, 0.22);
-    background: linear-gradient(
-        165deg,
-        rgba(38, 24, 24, 0.55) 0%,
-        rgba(28, 22, 22, 0.42) 50%,
-        rgba(22, 18, 18, 0.38) 100%
-    );
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
-}
-
-html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
-    color: #fca5a5;
-}
-
-@supports ((-webkit-background-clip: text) or (background-clip: text)) {
-    html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
-        background: linear-gradient(120deg, #fecaca 0%, #fca5a5 40%, #fdba74 100%);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        -webkit-text-fill-color: transparent;
-    }
-}
-
 .daily-bread-tts-row {
     display: flex;
     flex-wrap: wrap;
@@ -1045,6 +830,63 @@ html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
 .daily-bread-tts-stop i {
     font-size: 1rem;
     opacity: 0.92;
+}
+
+.daily-bread-page-card .daily-bread-date-line {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.daily-bread-page-card .daily-bread-heading {
+    margin: 14px 0 6px;
+    font-size: 1.22rem;
+    font-weight: 780;
+    line-height: 1.32;
+    color: var(--header-mid);
+    letter-spacing: -0.01em;
+}
+
+.daily-bread-page-card .daily-bread-heading i {
+    display: none;
+}
+
+.daily-bread-author-line {
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--accent-warm);
+    line-height: 1.4;
+}
+
+.daily-bread-body {
+    color: var(--text);
+    font-size: 0.94rem;
+    line-height: 1.58;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
+        color: #f87171;
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-author-line {
+        color: #d4a574;
+    }
+}
+
+html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
+    color: #f87171;
+}
+
+html[data-theme="dark"] .daily-bread-author-line {
+    color: #d4a574;
 }
 
 .daily-verse-card {
@@ -1862,6 +1704,11 @@ body.app-update-open {
     overflow: visible;
 }
 
+/* Fullscreen Bible: must clip so the verse list can scroll inside fixed viewport */
+.card.bible-card.bible-card-fullscreen:has(ul.list) {
+    overflow: hidden;
+}
+
 @media (hover: hover) and (pointer: fine) {
     .card ul.list > li:hover {
         transform: translateY(-4px);
@@ -2267,7 +2114,7 @@ body.sermon-player-open {
 }
 
 /* Clear fixed tab bar (~72–88px) + safe area; Tamil/long labels need extra room */
-/* Above .home-global-fab (5100) so play/close stay tappable; below songbook (5200) and bible fullscreen (5300). */
+/* Below .home-global-fab (5600) so theme/lang FABs stay tappable; below songbook (5200) and bible fullscreen (5300). */
 .mini-sermon-player {
     position: fixed;
     left: 50%;
@@ -4044,6 +3891,7 @@ body.bible-fullscreen-open .offline-badge {
     flex-direction: column;
     gap: 10px;
     background: var(--bg-bottom);
+    overflow: hidden;
 }
 
 .bible-card.bible-card-fullscreen::before {
@@ -4057,6 +3905,11 @@ body.bible-fullscreen-open .offline-badge {
 
 .bible-card.bible-card-fullscreen h2,
 .bible-card.bible-card-fullscreen > .page-note:first-of-type {
+    display: none !important;
+}
+
+.bible-card.bible-card-fullscreen .card-banner,
+.bible-card.bible-card-fullscreen > p.page-note:first-of-type {
     display: none !important;
 }
 
@@ -4108,11 +3961,22 @@ body.bible-fullscreen-open .offline-badge {
     z-index: 2;
 }
 
+.bible-card.bible-card-fullscreen #bible-status-note {
+    flex-shrink: 0;
+}
+
 .bible-card.bible-card-fullscreen .bible-verse-list {
     margin-top: 0;
     max-height: none;
-    flex: 1 1 auto;
+    flex: 1 1 0%;
     min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    position: relative;
+    z-index: 1;
 }
 
 #admin-mailbox-refresh {
@@ -4238,7 +4102,7 @@ body.bible-fullscreen-open .offline-badge {
 .home-global-fab {
     position: fixed;
     right: max(14px, env(safe-area-inset-right));
-    z-index: 5100;
+    z-index: 5600;
     width: 52px;
     height: 52px;
     border-radius: 50%;
@@ -4599,6 +4463,92 @@ body.bible-fullscreen-open .offline-badge {
 
 .admin-item-actions .button-link {
     margin-top: 0;
+}
+
+/* Admin: scheduled daily bread list — collapsible so long lists don’t stretch the page */
+.admin-daily-bread-scheduled-card > .admin-daily-bread-scheduled-details {
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.admin-daily-bread-scheduled-summary {
+    margin: calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad-end)) 12px calc(-1 * var(--card-pad-start));
+    padding: 11px calc(var(--card-pad-end) + 22px) 11px var(--card-pad-start);
+    width: calc(100% + var(--card-pad-start) + var(--card-pad-end));
+    max-width: none;
+    box-sizing: border-box;
+    list-style: none;
+    cursor: pointer;
+    font-size: 1.06rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    color: #ffffff;
+    background: linear-gradient(150deg, var(--header-start) 0%, var(--header-mid) 42%, var(--header-end) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+    border-top-left-radius: var(--card-title-top-radius);
+    border-top-right-radius: var(--card-title-top-radius);
+}
+
+.admin-daily-bread-scheduled-summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-daily-bread-scheduled-summary::marker {
+    content: "";
+}
+
+.admin-daily-bread-scheduled-summary::after {
+    content: "";
+    position: absolute;
+    right: var(--card-pad-end);
+    top: 50%;
+    width: 0.45em;
+    height: 0.45em;
+    margin-top: -0.22em;
+    border-right: 2px solid rgba(255, 248, 248, 0.92);
+    border-bottom: 2px solid rgba(255, 248, 248, 0.92);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.admin-daily-bread-scheduled-details[open] > .admin-daily-bread-scheduled-summary::after {
+    transform: rotate(-135deg);
+    margin-top: 0.1em;
+}
+
+.admin-daily-bread-scheduled-summary-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.admin-daily-bread-scheduled-summary-inner i {
+    color: rgba(255, 248, 248, 0.95);
+    font-size: 1.05rem;
+}
+
+.admin-daily-bread-scheduled-body {
+    padding-bottom: 2px;
+}
+
+.admin-daily-bread-scheduled-body > .page-note:first-child {
+    margin-top: 0;
+}
+
+.admin-daily-bread-scheduled-body .list {
+    max-height: min(60vh, 520px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .admin-subtitle {
@@ -6228,6 +6178,88 @@ html[data-theme="light"] .mini-player-btn {
 
 body:has(.offline-banner:not([hidden])) .app-shell {
     padding-top: 36px;
+}
+
+/* PWA install prompt (browser tab only) */
+.pwa-install-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 19990;
+    padding: 10px 14px 10px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    background: linear-gradient(135deg, #1a237e 0%, #283593 45%, #3949ab 100%);
+    color: #f5f5ff;
+    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pwa-install-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 14px;
+    max-width: 100%;
+}
+
+.pwa-install-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.pwa-install-banner-text strong {
+    font-weight: 750;
+    font-size: 0.92rem;
+}
+
+.pwa-install-banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pwa-install-banner .button-link {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+}
+
+.pwa-install-banner .pwa-install-dismiss {
+    color: rgba(255, 255, 255, 0.88);
+    border-color: rgba(255, 255, 255, 0.28);
+    background: transparent;
+}
+
+.pwa-install-ios-hint,
+.pwa-install-android-hint {
+    margin: 8px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+body:has(.pwa-install-banner:not([hidden])) .app-shell {
+    padding-top: max(72px, calc(56px + env(safe-area-inset-top)));
+}
+
+body:has(.offline-banner:not([hidden])):has(.pwa-install-banner:not([hidden])) .pwa-install-banner {
+    top: 36px;
+    padding-top: 10px;
+}
+
+body:has(.offline-banner:not([hidden])):has(.pwa-install-banner:not([hidden])) .app-shell {
+    padding-top: max(108px, calc(92px + env(safe-area-inset-top)));
 }
 
 /* Update modal: third button + release notes */

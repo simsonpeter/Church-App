@@ -22,6 +22,16 @@
     var prayerList = document.getElementById("admin-prayer-list");
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaForm = document.getElementById("admin-trivia-form");
+    var dailyBreadForm = document.getElementById("admin-daily-bread-form");
+    var dailyBreadDateInput = document.getElementById("admin-daily-bread-date");
+    var dailyBreadTitleInput = document.getElementById("admin-daily-bread-title");
+    var dailyBreadTitleTaInput = document.getElementById("admin-daily-bread-title-ta");
+    var dailyBreadAuthorInput = document.getElementById("admin-daily-bread-author");
+    var dailyBreadAuthorTaInput = document.getElementById("admin-daily-bread-author-ta");
+    var dailyBreadBodyInput = document.getElementById("admin-daily-bread-body");
+    var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
+    var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
+    var dailyBreadList = document.getElementById("admin-daily-bread-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -70,15 +80,6 @@
     var triviaSubmit = document.getElementById("admin-trivia-submit");
     var triviaNote = document.getElementById("admin-trivia-note");
 
-    var dailyBreadForm = document.getElementById("admin-daily-bread-form");
-    var dailyBreadDateInput = document.getElementById("admin-daily-bread-date");
-    var dailyBreadTitleInput = document.getElementById("admin-daily-bread-title");
-    var dailyBreadTitleTaInput = document.getElementById("admin-daily-bread-title-ta");
-    var dailyBreadBodyInput = document.getElementById("admin-daily-bread-body");
-    var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
-    var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
-    var dailyBreadList = document.getElementById("admin-daily-bread-list");
-
     var cachedNotices = [];
     var cachedBroadcasts = [];
     var cachedEvents = [];
@@ -88,7 +89,7 @@
     var cachedDailyBread = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !dailyBreadList) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm) {
         return;
     }
 
@@ -168,9 +169,11 @@
                 button.disabled = busy;
             });
         }
-        dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
-            button.disabled = busy;
-        });
+        if (dailyBreadList) {
+            dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
+                button.disabled = busy;
+            });
+        }
     }
 
     function showNote(state, key, fallback) {
@@ -224,7 +227,7 @@
             return "#prayer";
         }
         if (key === "contact") {
-            return "#prayer";
+            return "#contact";
         }
         return "#home";
     }
@@ -279,6 +282,8 @@
             date: dateKey,
             title: String(source.title || "").trim(),
             titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
             bodyTa: String(source.bodyTa || "").trim(),
             createdAt: String(source.createdAt || ""),
@@ -288,6 +293,9 @@
     }
 
     function renderDailyBreadList() {
+        if (!dailyBreadList) {
+            return;
+        }
         var valid = cachedDailyBread.filter(function (e) {
             return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date);
         });
@@ -305,11 +313,14 @@
         dailyBreadList.innerHTML = sorted.map(function (entry) {
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
+            var authorLine = entry.author || entry.authorTa || "";
             var preview = (entry.body || entry.bodyTa || "").replace(/\s+/g, " ").trim().slice(0, 120);
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(entry.date) + "</h3>" +
-                "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong></p>" +
+                "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong>" +
+                (authorLine ? (" · <em>" + escapeHtml(authorLine) + "</em>") : "") +
+                "</p>" +
                 (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + (preview.length >= 120 ? "…" : "") + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-daily-bread-id=\"" + escapeHtml(id) + "\" data-admin-daily-bread-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
@@ -319,46 +330,6 @@
         }).join("");
         dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
             button.disabled = busy;
-        });
-    }
-
-    function upsertDailyBreadOnServer(entry) {
-        return fetchMantleEntries(ADMIN_DAILY_BREAD_URL).then(function (raw) {
-            var rows = Array.isArray(raw) ? raw : [];
-            var list = rows.map(function (row, idx) {
-                return normalizeDailyBreadEntry(row, idx);
-            }).filter(function (e) {
-                return Boolean(e && e.date);
-            });
-            var targetDate = String(entry && entry.date || "").trim();
-            var existingIdx = list.findIndex(function (e) {
-                return e.date === targetDate;
-            });
-            if (existingIdx >= 0) {
-                var cur = list[existingIdx];
-                list[existingIdx] = Object.assign({}, cur, {
-                    title: String(entry.title || "").trim(),
-                    titleTa: String(entry.titleTa || "").trim(),
-                    body: String(entry.body || "").trim(),
-                    bodyTa: String(entry.bodyTa || "").trim(),
-                    updatedAt: new Date().toISOString()
-                });
-            } else {
-                list.unshift({
-                    id: String(entry.id || makeEntryId("daily-bread")),
-                    date: targetDate,
-                    title: String(entry.title || "").trim(),
-                    titleTa: String(entry.titleTa || "").trim(),
-                    body: String(entry.body || "").trim(),
-                    bodyTa: String(entry.bodyTa || "").trim(),
-                    createdAt: new Date().toISOString(),
-                    createdByEmail: normalizeEmail(getUser() && getUser().email),
-                    updatedAt: ""
-                });
-            }
-            return saveMantleEntries(ADMIN_DAILY_BREAD_URL, list).then(function () {
-                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
-            });
         });
     }
 
@@ -672,10 +643,12 @@
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
         }
-        dailyBreadList.innerHTML = "" +
-            "<li>" +
-            "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
-            "</li>";
+        if (dailyBreadList) {
+            dailyBreadList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+                "</li>";
+        }
         statNotices.textContent = "0";
         statEvents.textContent = "0";
         statSermons.textContent = "0";
@@ -701,9 +674,11 @@
                 node.disabled = !active;
             });
         }
-        dailyBreadForm.querySelectorAll("input,textarea,button").forEach(function (node) {
-            node.disabled = !active;
-        });
+        if (dailyBreadForm) {
+            dailyBreadForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -755,8 +730,8 @@
             cachedTrivia = extract(5);
             cachedDailyBread = extract(6).map(function (row, idx) {
                 return normalizeDailyBreadEntry(row, idx);
-            }).filter(function (e) {
-                return Boolean(e && e.date);
+            }).filter(function (item) {
+                return Boolean(item && item.date);
             });
             renderStats();
             renderNoticeList();
@@ -987,6 +962,50 @@
         });
     });
 
+    function upsertDailyBreadOnServer(entry) {
+        return fetchMantleEntries(ADMIN_DAILY_BREAD_URL).then(function (raw) {
+            var rows = Array.isArray(raw) ? raw : [];
+            var list = rows.map(function (row, idx) {
+                return normalizeDailyBreadEntry(row, idx);
+            }).filter(function (e) {
+                return Boolean(e && e.date);
+            });
+            var targetDate = String(entry && entry.date || "").trim();
+            var existingIdx = list.findIndex(function (e) {
+                return e.date === targetDate;
+            });
+            if (existingIdx >= 0) {
+                var cur = list[existingIdx];
+                list[existingIdx] = Object.assign({}, cur, {
+                    title: String(entry.title || "").trim(),
+                    titleTa: String(entry.titleTa || "").trim(),
+                    author: String(entry.author || "").trim(),
+                    authorTa: String(entry.authorTa || "").trim(),
+                    body: String(entry.body || "").trim(),
+                    bodyTa: String(entry.bodyTa || "").trim(),
+                    updatedAt: new Date().toISOString()
+                });
+            } else {
+                list.unshift({
+                    id: String(entry.id || makeEntryId("daily-bread")),
+                    date: targetDate,
+                    title: String(entry.title || "").trim(),
+                    titleTa: String(entry.titleTa || "").trim(),
+                    author: String(entry.author || "").trim(),
+                    authorTa: String(entry.authorTa || "").trim(),
+                    body: String(entry.body || "").trim(),
+                    bodyTa: String(entry.bodyTa || "").trim(),
+                    createdAt: new Date().toISOString(),
+                    createdByEmail: normalizeEmail(getUser() && getUser().email),
+                    updatedAt: ""
+                });
+            }
+            return saveMantleEntries(ADMIN_DAILY_BREAD_URL, list).then(function () {
+                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+            });
+        });
+    }
+
     dailyBreadForm.addEventListener("submit", function (event) {
         event.preventDefault();
         if (busy || !isAdminUser()) {
@@ -999,6 +1018,8 @@
         }
         var titleEn = String(dailyBreadTitleInput && dailyBreadTitleInput.value || "").trim();
         var titleTa = String(dailyBreadTitleTaInput && dailyBreadTitleTaInput.value || "").trim();
+        var authorEn = String(dailyBreadAuthorInput && dailyBreadAuthorInput.value || "").trim();
+        var authorTa = String(dailyBreadAuthorTaInput && dailyBreadAuthorTaInput.value || "").trim();
         var bodyEn = String(dailyBreadBodyInput && dailyBreadBodyInput.value || "").trim();
         var bodyTa = String(dailyBreadBodyTaInput && dailyBreadBodyTaInput.value || "").trim();
         if (!bodyEn && !bodyTa) {
@@ -1011,6 +1032,8 @@
             date: dateKey,
             title: titleEn,
             titleTa: titleTa,
+            author: authorEn,
+            authorTa: authorTa,
             body: bodyEn,
             bodyTa: bodyTa
         }).then(function (entries) {
@@ -1023,6 +1046,8 @@
             dailyBreadDateInput.value = "";
             if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
             if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
+            if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = "";
+            if (dailyBreadAuthorTaInput) dailyBreadAuthorTaInput.value = "";
             if (dailyBreadBodyInput) dailyBreadBodyInput.value = "";
             if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = "";
             renderDailyBreadList();
@@ -1531,117 +1556,6 @@
         });
     });
 
-    dailyBreadList.addEventListener("click", function (event) {
-        var button = event.target.closest("button[data-admin-daily-bread-id][data-admin-daily-bread-action]");
-        if (!button || busy || !isAdminUser()) {
-            return;
-        }
-        var entryId = String(button.getAttribute("data-admin-daily-bread-id") || "").trim();
-        var action = String(button.getAttribute("data-admin-daily-bread-action") || "").trim();
-        if (!entryId || (action !== "edit" && action !== "delete")) {
-            return;
-        }
-        var source = cachedDailyBread.slice(0, MAX_ENTRIES);
-        var targetIndex = source.findIndex(function (entry) {
-            return String(entry && entry.id || "").trim() === entryId;
-        });
-        if (targetIndex < 0) {
-            showNote("error", "admin.syncError", "Could not load admin dashboard data.");
-            return;
-        }
-        if (action === "delete") {
-            if (!window.confirm(T("admin.dailyBreadDeleteConfirm", "Delete this daily bread entry?"))) {
-                return;
-            }
-            source.splice(targetIndex, 1);
-            setBusyState(true);
-            saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
-                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
-            }).then(function (entries) {
-                cachedDailyBread = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
-                    return normalizeDailyBreadEntry(row, idx);
-                }).filter(function (e) {
-                    return Boolean(e && e.date);
-                });
-                renderDailyBreadList();
-                showNote("success", "admin.dailyBreadDeleted", "Deleted.");
-                document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
-            }).catch(function () {
-                showNote("error", "admin.syncError", "Could not delete.");
-            }).finally(function () {
-                setBusyState(false);
-            });
-            return;
-        }
-        var current = source[targetIndex] || {};
-        var nextDate = window.prompt(T("admin.dailyBreadEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
-        if (nextDate === null) {
-            return;
-        }
-        var nextTitleEn = window.prompt(T("admin.dailyBreadEditPromptTitleEn", "Edit title (English)"), String(current.title || ""));
-        if (nextTitleEn === null) {
-            return;
-        }
-        var nextTitleTa = window.prompt(T("admin.dailyBreadEditPromptTitleTa", "Edit title (Tamil, optional)"), String(current.titleTa || ""));
-        if (nextTitleTa === null) {
-            return;
-        }
-        var nextBodyEn = window.prompt(T("admin.dailyBreadEditPromptBodyEn", "Edit body (English)"), String(current.body || ""));
-        if (nextBodyEn === null) {
-            return;
-        }
-        var nextBodyTa = window.prompt(T("admin.dailyBreadEditPromptBodyTa", "Edit body (Tamil, optional)"), String(current.bodyTa || ""));
-        if (nextBodyTa === null) {
-            return;
-        }
-        var cleanDate = toYmd(nextDate);
-        var cleanBodyEn = String(nextBodyEn || "").trim();
-        var cleanBodyTa = String(nextBodyTa || "").trim();
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
-            showNote("validation", "admin.dailyBreadNeedDate", "Invalid date.");
-            return;
-        }
-        if (!cleanBodyEn && !cleanBodyTa) {
-            showNote("validation", "admin.dailyBreadNeedBody", "Body required.");
-            return;
-        }
-        var oldDate = String(current.date || "");
-        if (cleanDate !== oldDate) {
-            var clash = source.some(function (e, i) {
-                return i !== targetIndex && e.date === cleanDate;
-            });
-            if (clash) {
-                showNote("validation", "admin.dailyBreadNeedDate", "That date already has an entry.");
-                return;
-            }
-        }
-        source[targetIndex] = Object.assign({}, current, {
-            date: cleanDate,
-            title: String(nextTitleEn || "").trim(),
-            titleTa: String(nextTitleTa || "").trim(),
-            body: cleanBodyEn,
-            bodyTa: cleanBodyTa,
-            updatedAt: new Date().toISOString()
-        });
-        setBusyState(true);
-        saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
-            return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
-        }).then(function (entries) {
-            cachedDailyBread = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
-                return normalizeDailyBreadEntry(row, idx);
-            }).filter(function (e) {
-                return Boolean(e && e.date);
-            });
-            renderDailyBreadList();
-            showNote("success", "admin.dailyBreadUpdated", "Updated.");
-            document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
-        }).catch(function () {
-            showNote("error", "admin.syncError", "Could not update.");
-        }).finally(function () {
-            setBusyState(false);
-        });
-    });
-
     if (triviaList) {
         triviaList.addEventListener("click", function (event) {
             var button = event.target.closest("button[data-admin-trivia-id][data-admin-trivia-action]");
@@ -1746,6 +1660,131 @@
                 document.dispatchEvent(new CustomEvent("njc:admin-trivia-updated"));
             }).catch(function () {
                 showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
+
+    if (dailyBreadList) {
+        dailyBreadList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-daily-bread-id][data-admin-daily-bread-action]");
+            if (!button || busy || !isAdminUser()) {
+                return;
+            }
+            var entryId = String(button.getAttribute("data-admin-daily-bread-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-daily-bread-action") || "").trim();
+            if (!entryId || (action !== "edit" && action !== "delete")) {
+                return;
+            }
+            var source = cachedDailyBread.slice(0, MAX_ENTRIES);
+            var targetIndex = source.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            if (targetIndex < 0) {
+                showNote("error", "admin.syncError", "Could not find entry.");
+                return;
+            }
+            if (action === "delete") {
+                if (!window.confirm(T("admin.dailyBreadDeleteConfirm", "Delete this daily bread entry?"))) {
+                    return;
+                }
+                source.splice(targetIndex, 1);
+                setBusyState(true);
+                saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+                }).then(function (entries) {
+                    var rows = Array.isArray(entries) ? entries : [];
+                    cachedDailyBread = rows.map(function (row, idx) {
+                        return normalizeDailyBreadEntry(row, idx);
+                    }).filter(function (e) {
+                        return Boolean(e && e.date);
+                    });
+                    renderDailyBreadList();
+                    showNote("success", "admin.dailyBreadDeleted", "Deleted.");
+                    document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.syncError", "Could not delete.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+                return;
+            }
+            var current = source[targetIndex] || {};
+            var nextDate = window.prompt(T("admin.dailyBreadEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
+            if (nextDate === null) {
+                return;
+            }
+            var nextTitleEn = window.prompt(T("admin.dailyBreadEditPromptTitleEn", "Edit title (English)"), String(current.title || ""));
+            if (nextTitleEn === null) {
+                return;
+            }
+            var nextTitleTa = window.prompt(T("admin.dailyBreadEditPromptTitleTa", "Edit title (Tamil, optional)"), String(current.titleTa || ""));
+            if (nextTitleTa === null) {
+                return;
+            }
+            var nextAuthorEn = window.prompt(T("admin.dailyBreadEditPromptAuthorEn", "Edit author (English, optional)"), String(current.author || ""));
+            if (nextAuthorEn === null) {
+                return;
+            }
+            var nextAuthorTa = window.prompt(T("admin.dailyBreadEditPromptAuthorTa", "Edit author (Tamil, optional)"), String(current.authorTa || ""));
+            if (nextAuthorTa === null) {
+                return;
+            }
+            var nextBodyEn = window.prompt(T("admin.dailyBreadEditPromptBodyEn", "Edit body (English)"), String(current.body || ""));
+            if (nextBodyEn === null) {
+                return;
+            }
+            var nextBodyTa = window.prompt(T("admin.dailyBreadEditPromptBodyTa", "Edit body (Tamil, optional)"), String(current.bodyTa || ""));
+            if (nextBodyTa === null) {
+                return;
+            }
+            var cleanDate = toYmd(nextDate);
+            var cleanBodyEn = String(nextBodyEn || "").trim();
+            var cleanBodyTa = String(nextBodyTa || "").trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+                showNote("validation", "admin.dailyBreadNeedDate", "Invalid date.");
+                return;
+            }
+            if (!cleanBodyEn && !cleanBodyTa) {
+                showNote("validation", "admin.dailyBreadNeedBody", "Body required.");
+                return;
+            }
+            var oldDate = String(current.date || "");
+            if (cleanDate !== oldDate) {
+                var clash = source.some(function (e, i) {
+                    return i !== targetIndex && e.date === cleanDate;
+                });
+                if (clash) {
+                    showNote("validation", "admin.dailyBreadNeedDate", "That date already has an entry.");
+                    return;
+                }
+            }
+            source[targetIndex] = Object.assign({}, current, {
+                date: cleanDate,
+                title: String(nextTitleEn || "").trim(),
+                titleTa: String(nextTitleTa || "").trim(),
+                author: String(nextAuthorEn || "").trim(),
+                authorTa: String(nextAuthorTa || "").trim(),
+                body: cleanBodyEn,
+                bodyTa: cleanBodyTa,
+                updatedAt: new Date().toISOString()
+            });
+            setBusyState(true);
+            saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+            }).then(function (entries) {
+                var rows = Array.isArray(entries) ? entries : [];
+                cachedDailyBread = rows.map(function (row, idx) {
+                    return normalizeDailyBreadEntry(row, idx);
+                }).filter(function (e) {
+                    return Boolean(e && e.date);
+                });
+                renderDailyBreadList();
+                showNote("success", "admin.dailyBreadUpdated", "Updated.");
+                document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not update.");
             }).finally(function () {
                 setBusyState(false);
             });
