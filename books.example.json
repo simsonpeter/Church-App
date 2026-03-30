@@ -1,11 +1,11 @@
 [
   {
     "id": "sample-1",
-    "title": "Sample booklet",
+    "title": "Sample booklet (books.json fallback)",
     "titleTa": "மாதிரி நூல்",
     "author": "Church library",
     "category": "Devotional",
-    "description": "Replace this file or edit books.json with your own HTTPS links to PDF or text files.",
+    "description": "The app lists Library items from MantleDB (Admin → Library) when the bucket has entries. If the feed is empty or unreachable, it falls back to books.json in the site root. Use https:// links only for the public page.",
     "url": "https://example.org/path/to/your-file.pdf",
     "format": "pdf"
   }

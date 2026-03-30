@@ -1,5 +1,6 @@
 (function () {
-    var LIST_URL = "./books.json?v=20260330lib1";
+    var MANTLE_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
+    var FALLBACK_JSON = "./books.json?v=20260330lib2";
     var listEl = document.getElementById("library-books-list");
     var statusEl = document.getElementById("library-books-status");
     var pageCard = document.querySelector(".library-page-card");
@@ -47,8 +48,56 @@
             category: String(source.category || "").trim(),
             categoryTa: String(source.categoryTa || "").trim(),
             url: url,
-            format: String(source.format || "").trim().toLowerCase() || guessFormat(url)
+            format: String(source.format || "").trim().toLowerCase() || guessFormat(url),
+            sortOrder: Number(source.sortOrder) || 0,
+            updatedAt: String(source.updatedAt || ""),
+            createdAt: String(source.createdAt || "")
         };
+    }
+
+    function isValidHttpsUrl(url) {
+        return /^https:\/\//i.test(String(url || "").trim());
+    }
+
+    function sortLibraryRows(rows) {
+        return rows.slice().sort(function (a, b) {
+            var ae = normalizeEntry(a, 0);
+            var be = normalizeEntry(b, 0);
+            var ao = ae.sortOrder;
+            var bo = be.sortOrder;
+            if (ao !== bo) {
+                return ao - bo;
+            }
+            var at = String(ae.updatedAt || ae.createdAt || "");
+            var bt = String(be.updatedAt || be.createdAt || "");
+            return bt.localeCompare(at);
+        });
+    }
+
+    function parseEntriesPayload(payload) {
+        if (Array.isArray(payload)) {
+            return payload;
+        }
+        return payload && Array.isArray(payload.entries) ? payload.entries : [];
+    }
+
+    function loadFromJson(url) {
+        return fetch(url, { cache: "no-store" }).then(function (res) {
+            if (!res.ok) {
+                throw new Error("json");
+            }
+            return res.json().then(parseEntriesPayload);
+        });
+    }
+
+    function loadFromMantle() {
+        return fetch(MANTLE_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (res) {
+                if (!res.ok) {
+                    throw new Error("mantle");
+                }
+                return res.json().then(parseEntriesPayload);
+            });
     }
 
     function pickLang(entry, lang) {
@@ -127,16 +176,30 @@
         statusEl.hidden = false;
         statusEl.textContent = T("library.loading", "Loading…");
         listEl.innerHTML = "";
-        fetch(LIST_URL, { cache: "no-store" })
-            .then(function (res) {
-                if (!res.ok) {
-                    throw new Error("bad");
+        loadFromMantle()
+            .then(function (rows) {
+                var valid = sortLibraryRows(rows).filter(function (raw) {
+                    var e = normalizeEntry(raw, 0);
+                    return isValidHttpsUrl(e.url);
+                });
+                if (valid.length) {
+                    renderList(valid);
+                    return;
                 }
-                return res.json();
+                return loadFromJson(FALLBACK_JSON).then(function (fallbackRows) {
+                    renderList(sortLibraryRows(fallbackRows).filter(function (raw) {
+                        var e = normalizeEntry(raw, 0);
+                        return Boolean(e.url);
+                    }));
+                });
             })
-            .then(function (payload) {
-                var rows = Array.isArray(payload) ? payload : [];
-                renderList(rows);
+            .catch(function () {
+                return loadFromJson(FALLBACK_JSON).then(function (rows) {
+                    renderList(sortLibraryRows(rows).filter(function (raw) {
+                        var e = normalizeEntry(raw, 0);
+                        return Boolean(e.url);
+                    }));
+                });
             })
             .catch(function () {
                 statusEl.hidden = false;
@@ -160,6 +223,11 @@
         }
     });
     document.addEventListener("njc:langchange", function () {
+        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "library") {
+            loadBooks();
+        }
+    });
+    document.addEventListener("njc:admin-library-updated", function () {
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "library") {
             loadBooks();
         }

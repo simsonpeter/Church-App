@@ -7,6 +7,7 @@
     var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
     var ADMIN_DAILY_BREAD_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
+    var ADMIN_LIBRARY_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
     var MAX_ENTRIES = 250;
 
     var refreshButton = document.getElementById("admin-dashboard-refresh");
@@ -32,6 +33,19 @@
     var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
     var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
     var dailyBreadList = document.getElementById("admin-daily-bread-list");
+    var libraryForm = document.getElementById("admin-library-form");
+    var libraryTitleInput = document.getElementById("admin-library-title");
+    var libraryTitleTaInput = document.getElementById("admin-library-title-ta");
+    var libraryAuthorInput = document.getElementById("admin-library-author");
+    var libraryAuthorTaInput = document.getElementById("admin-library-author-ta");
+    var libraryUrlInput = document.getElementById("admin-library-url");
+    var libraryFormatInput = document.getElementById("admin-library-format");
+    var libraryCategoryInput = document.getElementById("admin-library-category");
+    var libraryCategoryTaInput = document.getElementById("admin-library-category-ta");
+    var libraryDescriptionInput = document.getElementById("admin-library-description");
+    var libraryDescriptionTaInput = document.getElementById("admin-library-description-ta");
+    var librarySubmit = document.getElementById("admin-library-submit");
+    var libraryList = document.getElementById("admin-library-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -88,9 +102,10 @@
     var cachedPrayers = [];
     var cachedTrivia = [];
     var cachedDailyBread = [];
+    var cachedLibrary = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !libraryList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !libraryForm) {
         return;
     }
 
@@ -150,6 +165,9 @@
         if (dailyBreadSubmit) {
             dailyBreadSubmit.disabled = busy;
         }
+        if (librarySubmit) {
+            librarySubmit.disabled = busy;
+        }
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
             button.disabled = busy;
         });
@@ -172,6 +190,11 @@
         }
         if (dailyBreadList) {
             dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
+                button.disabled = busy;
+            });
+        }
+        if (libraryList) {
+            libraryList.querySelectorAll("button[data-admin-library-id]").forEach(function (button) {
                 button.disabled = busy;
             });
         }
@@ -275,6 +298,27 @@
         };
     }
 
+    function normalizeLibraryEntry(entry, index) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var url = String(source.url || source.fileUrl || source.href || "").trim();
+        return {
+            id: String(source.id || "").trim() || ("library-" + index),
+            title: String(source.title || "").trim(),
+            titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
+            description: String(source.description || "").trim(),
+            descriptionTa: String(source.descriptionTa || "").trim(),
+            category: String(source.category || "").trim(),
+            categoryTa: String(source.categoryTa || "").trim(),
+            url: url,
+            format: String(source.format || "").trim().toLowerCase(),
+            sortOrder: Number(source.sortOrder) || 0,
+            createdAt: String(source.createdAt || ""),
+            updatedAt: String(source.updatedAt || "")
+        };
+    }
+
     function normalizeDailyBreadEntry(entry, index) {
         var source = entry && typeof entry === "object" ? entry : {};
         var dateKey = toYmd(source.date || source.showDate || "");
@@ -330,6 +374,50 @@
                 "</li>";
         }).join("");
         dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
+    }
+
+    function renderLibraryList() {
+        if (!libraryList) {
+            return;
+        }
+        var valid = cachedLibrary.filter(function (e) {
+            return e && /^https?:\/\//i.test(String(e.url || "").trim());
+        });
+        if (!valid.length) {
+            libraryList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.libraryEmptyTitle", "No items yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.libraryEmptyBody", "Add a title and file URL above.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = valid.slice().sort(function (a, b) {
+            var ao = Number(a.sortOrder) || 0;
+            var bo = Number(b.sortOrder) || 0;
+            if (ao !== bo) {
+                return ao - bo;
+            }
+            var at = String(a.updatedAt || a.createdAt || "");
+            var bt = String(b.updatedAt || b.createdAt || "");
+            return bt.localeCompare(at);
+        }).slice(0, 120);
+        libraryList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry.id || "").trim();
+            var titleLine = entry.title || entry.titleTa || "—";
+            var urlShort = String(entry.url || "").replace(/^https?:\/\//, "").slice(0, 72);
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(titleLine) + "</h3>" +
+                "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.url || "").length > 72 ? "…" : "")) + "</a></p>" +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-library-id=\"" + escapeHtml(id) + "\" data-admin-library-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-library-id=\"" + escapeHtml(id) + "\" data-admin-library-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        libraryList.querySelectorAll("button[data-admin-library-id]").forEach(function (button) {
             button.disabled = busy;
         });
     }
@@ -658,6 +746,12 @@
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
         }
+        if (libraryList) {
+            libraryList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+                "</li>";
+        }
         statNotices.textContent = "0";
         statEvents.textContent = "0";
         statSermons.textContent = "0";
@@ -688,6 +782,11 @@
                 node.disabled = !active;
             });
         }
+        if (libraryForm) {
+            libraryForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -701,7 +800,7 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedLibrary.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -710,6 +809,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
+            renderLibraryList();
             return;
         }
         setBusyState(true);
@@ -721,7 +821,8 @@
             fetchMantleEntries(ADMIN_SERMONS_URL),
             fetchMantleEntries(PRAYER_WALL_URL),
             fetchMantleEntries(TRIVIA_URL),
-            fetchMantleEntries(ADMIN_DAILY_BREAD_URL)
+            fetchMantleEntries(ADMIN_DAILY_BREAD_URL),
+            fetchMantleEntries(ADMIN_LIBRARY_URL)
         ]).then(function (results) {
             function extract(idx) {
                 var r = results[idx];
@@ -742,6 +843,9 @@
             }).filter(function (item) {
                 return Boolean(item && item.date);
             });
+            cachedLibrary = extract(7).map(function (row, idx) {
+                return normalizeLibraryEntry(row, idx);
+            });
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -750,6 +854,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
+            renderLibraryList();
             var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
             if (failed > 0) {
                 showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
@@ -763,6 +868,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
+            renderLibraryList();
         }).finally(function () {
             setBusyState(false);
         });
@@ -1072,6 +1178,184 @@
             setBusyState(false);
         });
     });
+
+    libraryForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var titleEn = String(libraryTitleInput && libraryTitleInput.value || "").trim();
+        var titleTa = String(libraryTitleTaInput && libraryTitleTaInput.value || "").trim();
+        var fileUrl = String(libraryUrlInput && libraryUrlInput.value || "").trim();
+        if (!titleEn) {
+            showNote("validation", "admin.libraryNeedTitle", "Please enter a title.");
+            return;
+        }
+        if (!/^https:\/\//i.test(fileUrl)) {
+            showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
+            return;
+        }
+        setBusyState(true);
+        fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
+            var list = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                return normalizeLibraryEntry(row, idx);
+            });
+            var newEntry = {
+                id: makeEntryId("library"),
+                title: titleEn,
+                titleTa: String(libraryTitleTaInput && libraryTitleTaInput.value || "").trim(),
+                author: String(libraryAuthorInput && libraryAuthorInput.value || "").trim(),
+                authorTa: String(libraryAuthorTaInput && libraryAuthorTaInput.value || "").trim(),
+                url: fileUrl,
+                format: String(libraryFormatInput && libraryFormatInput.value || "").trim().toLowerCase(),
+                category: String(libraryCategoryInput && libraryCategoryInput.value || "").trim(),
+                categoryTa: String(libraryCategoryTaInput && libraryCategoryTaInput.value || "").trim(),
+                description: String(libraryDescriptionInput && libraryDescriptionInput.value || "").trim(),
+                descriptionTa: String(libraryDescriptionTaInput && libraryDescriptionTaInput.value || "").trim(),
+                sortOrder: 0,
+                createdAt: new Date().toISOString(),
+                updatedAt: ""
+            };
+            return saveMantleEntries(ADMIN_LIBRARY_URL, [newEntry].concat(list)).then(function () {
+                return fetchMantleEntries(ADMIN_LIBRARY_URL);
+            });
+        }).then(function (entries) {
+            cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                return normalizeLibraryEntry(row, idx);
+            });
+            libraryForm.reset();
+            renderLibraryList();
+            showNote("success", "admin.librarySaved", "Library item added.");
+            document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-admin-library if needed.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    if (libraryList) {
+        libraryList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-library-id][data-admin-library-action]");
+            if (!button || busy || !isAdminUser()) {
+                return;
+            }
+            var entryId = String(button.getAttribute("data-admin-library-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-library-action") || "").trim();
+            if (!entryId || (action !== "edit" && action !== "delete")) {
+                return;
+            }
+            var source = cachedLibrary.slice(0, MAX_ENTRIES);
+            var targetIndex = source.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            if (targetIndex < 0) {
+                showNote("error", "admin.syncError", "Could not find entry.");
+                return;
+            }
+            if (action === "delete") {
+                if (!window.confirm(T("admin.libraryDeleteConfirm", "Remove this item from the library?"))) {
+                    return;
+                }
+                source.splice(targetIndex, 1);
+                setBusyState(true);
+                saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_LIBRARY_URL);
+                }).then(function (entries) {
+                    cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                        return normalizeLibraryEntry(row, idx);
+                    });
+                    renderLibraryList();
+                    showNote("success", "admin.libraryDeleted", "Removed.");
+                    document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.syncError", "Could not delete.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+                return;
+            }
+            var current = source[targetIndex] || {};
+            var nextTitle = window.prompt(T("admin.libraryEditPromptTitle", "Title (English)"), String(current.title || ""));
+            if (nextTitle === null) {
+                return;
+            }
+            var nextTitleTa = window.prompt(T("admin.libraryEditPromptTitleTa", "Title (Tamil, optional)"), String(current.titleTa || ""));
+            if (nextTitleTa === null) {
+                return;
+            }
+            var nextAuthor = window.prompt(T("admin.libraryEditPromptAuthor", "Author (optional)"), String(current.author || ""));
+            if (nextAuthor === null) {
+                return;
+            }
+            var nextAuthorTa = window.prompt(T("admin.libraryEditPromptAuthorTa", "Author Tamil (optional)"), String(current.authorTa || ""));
+            if (nextAuthorTa === null) {
+                return;
+            }
+            var nextUrl = window.prompt(T("admin.libraryEditPromptUrl", "File URL (https)"), String(current.url || ""));
+            if (nextUrl === null) {
+                return;
+            }
+            var nextFormat = window.prompt(T("admin.libraryEditPromptFormat", "Format (optional, e.g. pdf)"), String(current.format || ""));
+            if (nextFormat === null) {
+                return;
+            }
+            var nextCategory = window.prompt(T("admin.libraryEditPromptCategory", "Category (optional)"), String(current.category || ""));
+            if (nextCategory === null) {
+                return;
+            }
+            var nextCategoryTa = window.prompt(T("admin.libraryEditPromptCategoryTa", "Category Tamil (optional)"), String(current.categoryTa || ""));
+            if (nextCategoryTa === null) {
+                return;
+            }
+            var nextDesc = window.prompt(T("admin.libraryEditPromptDesc", "Description (optional)"), String(current.description || ""));
+            if (nextDesc === null) {
+                return;
+            }
+            var nextDescTa = window.prompt(T("admin.libraryEditPromptDescTa", "Description Tamil (optional)"), String(current.descriptionTa || ""));
+            if (nextDescTa === null) {
+                return;
+            }
+            var cleanTitle = String(nextTitle || "").trim();
+            var cleanUrl = String(nextUrl || "").trim();
+            if (!cleanTitle) {
+                showNote("validation", "admin.libraryNeedTitle", "Please enter a title.");
+                return;
+            }
+            if (!/^https:\/\//i.test(cleanUrl)) {
+                showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
+                return;
+            }
+            source[targetIndex] = Object.assign({}, current, {
+                title: cleanTitle,
+                titleTa: String(nextTitleTa || "").trim(),
+                author: String(nextAuthor || "").trim(),
+                authorTa: String(nextAuthorTa || "").trim(),
+                url: cleanUrl,
+                format: String(nextFormat || "").trim().toLowerCase(),
+                category: String(nextCategory || "").trim(),
+                categoryTa: String(nextCategoryTa || "").trim(),
+                description: String(nextDesc || "").trim(),
+                descriptionTa: String(nextDescTa || "").trim(),
+                updatedAt: new Date().toISOString()
+            });
+            setBusyState(true);
+            saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_LIBRARY_URL);
+            }).then(function (entries) {
+                cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                    return normalizeLibraryEntry(row, idx);
+                });
+                renderLibraryList();
+                showNote("success", "admin.libraryUpdated", "Updated.");
+                document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not update.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
 
     if (triviaForm) {
         triviaForm.addEventListener("submit", function (event) {
