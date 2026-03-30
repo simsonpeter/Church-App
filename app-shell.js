@@ -1464,7 +1464,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330db2";
+    var SW_VERSION = "20260330db3";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
     var UPDATE_NOTES_SUMMARY = "Daily bread: listen (speech) with verse-friendly TTS; PWA bump.";
