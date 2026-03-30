@@ -99,7 +99,6 @@
         "home.dailyVerseLoading": "இன்றைய வசனம் ஏற்றப்படுகிறது...",
         "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
         "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
-        "dailyBread.subtitle": "இன்றைய தேதிக்கு (பெல்ஜியம் நாள்காட்டி)",
         "dailyBread.dateLine": "தேதி: {date}",
         "dailyBread.loading": "ஏற்றுகிறது...",
         "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
@@ -1478,10 +1477,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bf3";
+    var SW_VERSION = "20260330bf4";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Profile: removed decorative banner image; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: drop Brussels-calendar explainer line; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

@@ -44,8 +44,8 @@
             eyebrowText: "Daily bread",
             titleKey: "dailyBread.title",
             titleText: "Daily bread",
-            subtitleKey: "dailyBread.subtitle",
-            subtitleText: "அன்றன்றுள்ள அப்பம்"
+            subtitleKey: "",
+            subtitleText: ""
         },
         contact: {
             icon: "fa-address-book",
