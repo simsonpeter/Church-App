@@ -18,7 +18,8 @@
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
-            var dailyVerseLanguageToggle = document.getElementById("daily-verse-language-toggle");
+            var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
+            var CARD_LANG_MAP_KEY = "njc_card_language_map_v1";
             var announcementsList = document.getElementById("home-announcements-list");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var kjvBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/englishbible.json";
@@ -87,7 +88,38 @@
             var announcementTranslationCache = getAnnouncementTranslationCache();
             var announcementTranslationPending = {};
             var announcementTranslationSaveTimerId = null;
-            var verseLanguage = getStoredVerseLanguage();
+            function readCardLanguageMap() {
+                try {
+                    var raw = window.localStorage.getItem(CARD_LANG_MAP_KEY);
+                    var parsed = raw ? JSON.parse(raw) : {};
+                    return parsed && typeof parsed === "object" ? parsed : {};
+                } catch (e) {
+                    return {};
+                }
+            }
+
+            function writeCardLanguageMap(map) {
+                try {
+                    window.localStorage.setItem(CARD_LANG_MAP_KEY, JSON.stringify(map && typeof map === "object" ? map : {}));
+                } catch (e) {
+                    return null;
+                }
+                return null;
+            }
+
+            function getInitialVerseLanguage() {
+                var map = readCardLanguageMap();
+                var fromCard = map[DAILY_VERSE_CARD_LANG_ID];
+                if (fromCard === "en" || fromCard === "ta") {
+                    return fromCard;
+                }
+                var legacy = getStoredVerseLanguage();
+                map[DAILY_VERSE_CARD_LANG_ID] = legacy;
+                writeCardLanguageMap(map);
+                return legacy;
+            }
+
+            var verseLanguage = getInitialVerseLanguage();
             var dailyVerseRenderToken = 0;
             var kjvBiblePromise = null;
             var tamilBiblePromise = null;
@@ -256,6 +288,9 @@
                 } catch (err) {
                     return null;
                 }
+                var map = readCardLanguageMap();
+                map[DAILY_VERSE_CARD_LANG_ID] = language;
+                writeCardLanguageMap(map);
                 return null;
             }
 
@@ -455,16 +490,25 @@
             }
 
             function setDailyVerseToggleLabel() {
-                if (!dailyVerseLanguageToggle) {
+                var toggle = verseCard ? verseCard.querySelector(".card-lang-toggle") : null;
+                if (!toggle) {
                     return;
                 }
                 var nextLanguage = verseLanguage === "ta" ? "en" : "ta";
                 var label = nextLanguage === "ta"
                     ? T("home.dailyVerseToggleToTamil", "Switch verse to Tamil", verseCard)
                     : T("home.dailyVerseToggleToEnglish", "Switch verse to English", verseCard);
-                dailyVerseLanguageToggle.textContent = nextLanguage.toUpperCase();
-                dailyVerseLanguageToggle.setAttribute("aria-label", label);
-                dailyVerseLanguageToggle.title = label;
+                toggle.textContent = nextLanguage.toUpperCase();
+                toggle.setAttribute("aria-label", label);
+                toggle.title = label;
+            }
+
+            function syncVerseLanguageFromCardMap() {
+                var map = readCardLanguageMap();
+                var c = map[DAILY_VERSE_CARD_LANG_ID];
+                if (c === "en" || c === "ta") {
+                    verseLanguage = c;
+                }
             }
 
             function getVerseVersionLabel(showTamil) {
@@ -624,36 +668,11 @@
                 });
             }
 
-            function applyDailyVerseBackdrop(dayNumber, verseIndex) {
-                var panel = document.getElementById("daily-verse-panel");
-                if (!panel) {
-                    return;
-                }
-                var day = Number(dayNumber) || 1;
-                var vIdx = Number(verseIndex) || 0;
-                var seed = day * 10007 + vIdx * 9181 + 2025;
-                var usePhoto = seed % 3 !== 0;
-                var h1 = seed % 360;
-                var h2 = (h1 + 38 + (seed % 80)) % 360;
-                var h3 = (h1 + 150 + (seed % 60)) % 360;
-                panel.style.setProperty("--dv-h1", String(h1));
-                panel.style.setProperty("--dv-h2", String(h2));
-                panel.style.setProperty("--dv-h3", String(h3));
-                if (usePhoto) {
-                    panel.setAttribute("data-daily-verse-backdrop", "photo");
-                    var picId = 1 + (Math.abs(seed * 7919) % 999);
-                    var url = "https://picsum.photos/id/" + picId + "/900/600";
-                    panel.style.setProperty("--daily-verse-bg-image", "url(\"" + url + "\")");
-                } else {
-                    panel.setAttribute("data-daily-verse-backdrop", "gradient");
-                    panel.style.removeProperty("--daily-verse-bg-image");
-                }
-            }
-
             function renderDailyVerse() {
                 if (!dailyVerseText || !dailyVerseReference) {
                     return;
                 }
+                syncVerseLanguageFromCardMap();
                 /* Calendar must be current: otherwise VOTD cache dateKey never advances while the tab stays open. */
                 todayYmd = getBrusselsYmd();
                 var dayNum = getDayOfYear(todayYmd);
@@ -664,14 +683,12 @@
 
                 function renderDailyVerseFallback() {
                     if (!Array.isArray(dailyVersePool) || dailyVersePool.length === 0) {
-                        applyDailyVerseBackdrop(dayNum, 0);
                         dailyVerseText.textContent = T("home.dailyVerseEmptyBody", "Daily verse is unavailable.", verseCard);
                         dailyVerseReference.textContent = "";
                         setDailyVerseToggleLabel();
                         return;
                     }
                     var verseIndex = (dayNum - 1) % dailyVersePool.length;
-                    applyDailyVerseBackdrop(dayNum, verseIndex);
                     var verseItem = dailyVersePool[verseIndex];
                     dailyVerseText.textContent = showTamil ? (verseItem.textTa || verseItem.textEn) : verseItem.textEn;
                     dailyVerseReference.textContent = (verseItem.reference || "") + " • " + getVerseVersionLabel(showTamil);
@@ -687,12 +704,6 @@
                 }
 
                 function applyVerseOfTheDay(entry) {
-                    var hash = 0;
-                    var refStr = String(entry.reference || "");
-                    for (var i = 0; i < refStr.length; i += 1) {
-                        hash = (hash * 31 + refStr.charCodeAt(i)) >>> 0;
-                    }
-                    applyDailyVerseBackdrop(dayNum, hash % 1000);
                     dailyVerseReference.textContent = entry.reference + " • " + getVerseVersionLabel(showTamil);
                     setDailyVerseToggleLabel();
                     dailyVerseText.textContent = T("home.dailyVerseLoading", "Loading daily verse...", verseCard);
@@ -714,7 +725,6 @@
                     return;
                 }
 
-                applyDailyVerseBackdrop(dayNum, 0);
                 dailyVerseText.textContent = T("home.dailyVerseLoading", "Loading daily verse...", verseCard);
                 dailyVerseReference.textContent = "";
                 setDailyVerseToggleLabel();
@@ -1880,7 +1890,13 @@
                 renderThisWeekEvents();
             });
 
-            document.addEventListener("njc:cardlangchange", function () {
+            document.addEventListener("njc:cardlangchange", function (ev) {
+                var d = ev && ev.detail;
+                if (d && d.cardId === DAILY_VERSE_CARD_LANG_ID) {
+                    verseLanguage = d.language === "ta" ? "ta" : "en";
+                    saveVerseLanguage(verseLanguage);
+                    renderDailyVerse();
+                }
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderAnnouncements();
@@ -2552,14 +2568,6 @@
                 });
             }
 
-            if (dailyVerseLanguageToggle) {
-                dailyVerseLanguageToggle.addEventListener("click", function () {
-                    verseLanguage = verseLanguage === "ta" ? "en" : "ta";
-                    saveVerseLanguage(verseLanguage);
-                    renderDailyVerse();
-                });
-            }
-
             function ymdKey(ymd) {
                 return String(ymd.year) + "-" + String(ymd.month).padStart(2, "0") + "-" + String(ymd.day).padStart(2, "0");
             }
@@ -2586,7 +2594,10 @@
 
             updateReadingPlanMeta();
             renderReadingProgress();
-            renderDailyVerse();
+            window.requestAnimationFrame(function () {
+                setDailyVerseToggleLabel();
+                renderDailyVerse();
+            });
             applyAnnouncementsCardGradient();
             loadTodayReadingPlan();
             loadAnnouncements();

@@ -810,6 +810,14 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
+.card-lang-top .mini-toggle {
+    border-color: rgba(255, 255, 255, 0.38);
+    background: rgba(255, 255, 255, 0.14);
+    color: #ffffff;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
 .daily-bread-tts-row {
     display: flex;
     flex-wrap: wrap;
@@ -897,130 +905,9 @@ html[data-theme="dark"] .daily-bread-author-line {
     color: #d4a574;
 }
 
-.daily-verse-card {
-    overflow: hidden;
-}
-
-/* One visual block with the panel: no mesh stripe between banner and verse, and panel bleeds to card bottom like other full-bleed bodies. */
-.daily-verse-card .card-banner {
-    margin-bottom: 0;
-}
-
-.daily-verse-panel {
-    --dv-h1: 350;
-    --dv-h2: 28;
-    --dv-h3: 200;
-    /* Align with .card-banner (12px) where the panel meets the image strip */
-    --dv-panel-radius: 12px;
-    position: relative;
-    /* Match .card-banner: full-bleed horizontally and vertically within the card padding box. */
-    margin: 0 calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad));
-    width: calc(100% + 2 * var(--card-pad));
-    max-width: none;
-    box-sizing: border-box;
-    border-radius: 0 0 var(--card-radius) var(--card-radius);
-    overflow: hidden;
-    isolation: isolate;
-}
-
-.daily-verse-panel-inner {
-    position: relative;
-    z-index: 2;
-    padding: 14px 14px 12px;
-}
-
-.daily-verse-panel::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    background-image: var(--daily-verse-bg-image, none);
-    background-size: cover;
-    background-position: center;
-    transform: scale(1.03);
-}
-
-.daily-verse-panel::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    background: linear-gradient(
-        142deg,
-        hsla(var(--dv-h1), 58%, 36%, 0.9) 0%,
-        hsla(var(--dv-h2), 52%, 32%, 0.82) 48%,
-        hsla(var(--dv-h3), 45%, 18%, 0.88) 100%
-    );
-}
-
-/* Soft gradient only (no photo) — readable on light text colors */
-.daily-verse-panel[data-daily-verse-backdrop="gradient"]::before {
-    display: none;
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
-    background: linear-gradient(
-        148deg,
-        hsl(var(--dv-h1), 42%, 94%) 0%,
-        hsl(var(--dv-h2), 38%, 90%) 42%,
-        hsl(var(--dv-h3), 36%, 86%) 100%
-    );
-    opacity: 1;
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-panel-inner {
-    color: #ffffff;
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top h2 {
-    color: #ffffff;
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top h2 i {
-    color: rgba(255, 248, 248, 0.95);
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-reference {
-    color: rgba(255, 255, 255, 0.82);
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-text {
-    color: #ffffff;
-}
-
-.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top .mini-toggle {
-    border-color: rgba(255, 255, 255, 0.38);
-    background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-}
-
-/* Match .card > h2:first-child — daily verse h2 is nested in .daily-verse-panel, not a direct .card child, so it does not inherit that rule and would otherwise use the UA h2 size. */
-.daily-verse-top h2 {
-    margin-bottom: 0;
-    margin-top: 0;
-    color: #ffffff;
-    font-size: 1.06rem;
-    font-weight: 750;
-    letter-spacing: 0.02em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.daily-verse-top h2 i {
-    color: rgba(255, 248, 248, 0.95);
-    font-size: 1.05rem;
-}
-
-.daily-verse-panel > .daily-verse-top .mini-toggle {
-    border-color: rgba(255, 255, 255, 0.38);
-    background: rgba(255, 255, 255, 0.14);
-    color: #ffffff;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+/* Same layout as Today's Bible Reading: featured card, red title row via .card-lang-top, then .card-banner */
+.daily-verse-body {
+    margin-top: 2px;
 }
 
 .mini-toggle {
@@ -1047,43 +934,21 @@ html[data-theme="dark"] .daily-bread-author-line {
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
-        background: linear-gradient(148deg, #2a2a2a 0%, #1f1f1f 45%, #141414 100%);
-    }
-
-    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
-    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
+    :root:not([data-theme="light"]) .daily-verse-card .daily-verse-text {
         color: #ffffff;
     }
 
-    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
+    :root:not([data-theme="light"]) .daily-verse-card .daily-verse-reference {
         color: rgba(255, 255, 255, 0.65);
     }
-
-    :root:not([data-theme="light"]) .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
-        border-color: rgba(255, 255, 255, 0.22);
-        background: rgba(255, 255, 255, 0.08);
-        color: #ffffff;
-    }
 }
 
-html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"]::after {
-    background: linear-gradient(148deg, #2a2a2a 0%, #1f1f1f 45%, #141414 100%);
-}
-
-html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-panel-inner,
-html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-text {
+html[data-theme="dark"] .daily-verse-card .daily-verse-text {
     color: #ffffff;
 }
 
-html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .daily-verse-reference {
+html[data-theme="dark"] .daily-verse-card .daily-verse-reference {
     color: rgba(255, 255, 255, 0.65);
-}
-
-html[data-theme="dark"] .daily-verse-panel[data-daily-verse-backdrop="gradient"] .mini-toggle {
-    border-color: rgba(255, 255, 255, 0.22);
-    background: rgba(255, 255, 255, 0.08);
-    color: #ffffff;
 }
 
 .trivia-stats {
