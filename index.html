@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260329m7">
+    <link rel="stylesheet" href="styles.css?v=20260330db1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -529,6 +529,24 @@
             </main>
         </section>
 
+        <section class="page-view" data-route="daily-bread">
+            <main class="app-content">
+            <section class="card card-v-featured daily-bread-page-card">
+                <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="dailyBread.title">Daily bread</span></h2>
+                <div class="card-banner">
+                    <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                </div>
+                <p class="page-note" data-i18n="dailyBread.subtitle">Shown for today’s date (Brussels calendar).</p>
+                <p class="page-note" id="daily-bread-date-line" aria-live="polite"></p>
+                <p class="page-note" id="daily-bread-status" aria-live="polite" hidden></p>
+                <div id="daily-bread-content" class="daily-bread-content" hidden>
+                    <h3 id="daily-bread-heading" class="daily-bread-heading"></h3>
+                    <div id="daily-bread-body" class="daily-bread-body"></div>
+                </div>
+            </section>
+            </main>
+        </section>
+
         <section class="page-view" data-route="trivia">
             <main class="app-content">
             <section class="card trivia-card card-v-glass" id="trivia-card">
@@ -775,6 +793,34 @@
                     <li data-i18n="admin.scheduleHintTrivia">Bible Quiz: set the show date in the Bible Quiz form so a new question unlocks from 8 AM that day (weekdays in the app).</li>
                     <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
                     <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
+                    <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread page (side menu) shows the entry for today (Brussels date). MantleDB bucket njc-belgium-admin-daily-bread.</li>
+                </ul>
+            </section>
+
+            <section class="card card-v-mesh">
+                <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="admin.dailyBreadTitle">Daily bread (dated)</span></h2>
+                <div class="card-banner">
+                    <img src="daily-verse-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                </div>
+                <p class="page-note" data-i18n="admin.dailyBreadInfo">One entry per calendar day (YYYY-MM-DD). Tamil optional.</p>
+                <form class="prayer-form" id="admin-daily-bread-form">
+                    <input id="admin-daily-bread-date" class="search-input" type="date" required aria-required="true">
+                    <input id="admin-daily-bread-title" class="search-input" type="text" placeholder="Title (English)" data-i18n-placeholder="admin.dailyBreadTitleEnPlaceholder">
+                    <input id="admin-daily-bread-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadTitleTaPlaceholder">
+                    <textarea id="admin-daily-bread-body" class="search-input prayer-textarea" rows="5" placeholder="Body (English). Line breaks kept." data-i18n-placeholder="admin.dailyBreadBodyEnPlaceholder"></textarea>
+                    <textarea id="admin-daily-bread-body-ta" class="search-input prayer-textarea" rows="4" placeholder="Body (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadBodyTaPlaceholder"></textarea>
+                    <button class="button-link" id="admin-daily-bread-submit" type="submit" data-i18n="admin.dailyBreadPublish">Save daily bread</button>
+                </form>
+            </section>
+
+            <section class="card card-v-ink">
+                <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.dailyBreadManageTitle">Scheduled daily bread</span></h2>
+                <p class="page-note" data-i18n="admin.dailyBreadManageInfo">Edit or delete by date. Refresh loads from MantleDB.</p>
+                <ul class="list" id="admin-daily-bread-list">
+                    <li>
+                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                        <p data-i18n="admin.loadingBody">Please wait.</p>
+                    </li>
                 </ul>
             </section>
 
@@ -1174,7 +1220,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260329m6"></script>
+    <script src="app-shell.js?v=20260330db1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1182,13 +1228,14 @@
     <script src="bible-page.js?v=20260324u1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260325pw2"></script>
+    <script src="daily-bread-page.js?v=20260330db1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260327bq1"></script>
-    <script src="admin-extras.js?v=20260327bq1"></script>
+    <script src="admin-dashboard-page.js?v=20260330db1"></script>
+    <script src="admin-extras.js?v=20260330db1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
-    <script src="spa-router.js?v=20260329ev1"></script>
+    <script src="spa-router.js?v=20260330db1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

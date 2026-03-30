@@ -36,6 +36,37 @@
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.contact": "தொடர்பு",
+        "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
+        "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
+        "dailyBread.subtitle": "இன்றைய தேதிக்கு (பெல்ஜியம் நாள்காட்டி)",
+        "dailyBread.dateLine": "தேதி: {date}",
+        "dailyBread.loading": "ஏற்றுகிறது...",
+        "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
+        "dailyBread.error": "ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
+        "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; பட்டியலில் Daily bread பக்கம் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB njc-belgium-admin-daily-bread.",
+        "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
+        "admin.dailyBreadInfo": "ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
+        "admin.dailyBreadTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
+        "admin.dailyBreadTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.dailyBreadBodyEnPlaceholder": "உள்ளடக்கம் (ஆங்கிலம்). வரிகள் வைக்கப்படும்.",
+        "admin.dailyBreadBodyTaPlaceholder": "உள்ளடக்கம் (தமிழ், விருப்பம்)",
+        "admin.dailyBreadPublish": "அன்றன்றுள்ள அப்பம் சேமி",
+        "admin.dailyBreadManageTitle": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம்",
+        "admin.dailyBreadManageInfo": "தேதியால் திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
+        "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
+        "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
+        "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
+        "admin.dailyBreadNeedBody": "உள்ளடக்கத்தை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
+        "admin.dailyBreadSaved": "அன்றன்றுள்ள அப்பம் சேமிக்கப்பட்டது.",
+        "admin.dailyBreadDeleted": "நீக்கப்பட்டது.",
+        "admin.dailyBreadUpdated": "புதுப்பிக்கப்பட்டது.",
+        "admin.dailyBreadDeleteConfirm": "இந்த தேதியின் பதிவை நீக்கவா?",
+        "admin.dailyBreadEditPromptDate": "தேதியை திருத்து (YYYY-MM-DD)",
+        "admin.dailyBreadEditPromptTitleEn": "தலைப்பை திருத்து (EN)",
+        "admin.dailyBreadEditPromptTitleTa": "தலைப்பை திருத்து (TA, விருப்பம்)",
+        "admin.dailyBreadEditPromptBodyEn": "உள்ளடக்கத்தை திருத்து (EN)",
+        "admin.dailyBreadEditPromptBodyTa": "உள்ளடக்கத்தை திருத்து (TA, விருப்பம்)",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
@@ -1426,10 +1457,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329m7";
+    var SW_VERSION = "20260330db1";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Full-width layout: less side margin, no tablet column cap; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: side menu + dated MantleDB page; admin CRUD; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -3030,6 +3061,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var dailyBreadMenuLink = document.createElement("a");
+        dailyBreadMenuLink.className = "header-menu-link";
+        dailyBreadMenuLink.href = "#daily-bread";
+        dailyBreadMenuLink.innerHTML = "<i class=\"fa-solid fa-bread-slice\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(dailyBreadMenuLink);
+
         var triviaLink = document.createElement("a");
         triviaLink.className = "header-menu-link";
         triviaLink.href = "#trivia";
@@ -3248,6 +3285,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
             var chatLabel = t("menu.chat", "Chat");
@@ -3301,6 +3339,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
+            if (dailyBreadNode) {
+                dailyBreadNode.textContent = dailyBreadMenuLabel;
+            }
             var triviaNode = triviaLink.querySelector("span");
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
@@ -3342,6 +3384,7 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
@@ -3351,6 +3394,7 @@
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);

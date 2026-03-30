@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v216";
-const RUNTIME_CACHE = "njc-runtime-cache-v216";
+const APP_CACHE = "njc-app-cache-v217";
+const RUNTIME_CACHE = "njc-runtime-cache-v217";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260329m7",
+    "./styles.css?v=20260330db1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260329m6",
+    "./app-shell.js?v=20260330db1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260429dv2",
     "./events-page.js?v=20260414u2",
@@ -14,13 +14,14 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260324u1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260325pw2",
+    "./daily-bread-page.js?v=20260330db1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260327bq1",
-    "./admin-extras.js?v=20260327bq1",
+    "./admin-dashboard-page.js?v=20260330db1",
+    "./admin-extras.js?v=20260330db1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260327bq1",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260329ev1",
+    "./spa-router.js?v=20260330db1",
     "./achievement-bonus.js?v=20260324u1",
     "./user-achievements-page.js?v=20260327bq1",
     "./site.webmanifest?v=20260329m1",

@@ -56,6 +56,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "daily-bread": {
+            icon: "fa-bread-slice",
+            eyebrowKey: "dailyBread.eyebrow",
+            eyebrowText: "Daily bread",
+            titleKey: "dailyBread.title",
+            titleText: "Daily bread",
+            subtitleKey: "dailyBread.subtitle",
+            subtitleText: ""
+        },
         trivia: {
             icon: "fa-question-circle",
             eyebrowKey: "trivia.eyebrow",

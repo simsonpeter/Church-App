@@ -808,6 +808,22 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
+.daily-bread-page-card .daily-bread-heading {
+    margin: 12px 0 8px;
+    font-size: 1.12rem;
+    font-weight: 750;
+    color: var(--header-mid);
+    line-height: 1.35;
+}
+
+.daily-bread-body {
+    color: var(--text);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
 .daily-verse-card {
     overflow: hidden;
 }
