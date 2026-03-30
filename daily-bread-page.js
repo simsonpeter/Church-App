@@ -1,6 +1,9 @@
 (function () {
     var FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
     var BRUSSELS_TZ = "Europe/Brussels";
+    var SPEECH_CHAIN_GAP_MS = 55;
+    var SPEECH_CHAIN_GAP_MS_TA = 95;
+    var SEGMENT_MAX_CHARS = 320;
 
     var dateLine = document.getElementById("daily-bread-date-line");
     var statusEl = document.getElementById("daily-bread-status");
@@ -8,10 +11,26 @@
     var headingEl = document.getElementById("daily-bread-heading");
     var bodyEl = document.getElementById("daily-bread-body");
     var pageCard = document.querySelector(".daily-bread-page-card");
+    var ttsToggle = document.getElementById("daily-bread-tts-toggle");
+    var ttsStop = document.getElementById("daily-bread-tts-stop");
 
     if (!dateLine || !statusEl || !contentWrap || !headingEl || !bodyEl) {
         return;
     }
+
+    var speechSupported = Boolean(
+        typeof window !== "undefined" &&
+        typeof window.speechSynthesis !== "undefined" &&
+        typeof window.SpeechSynthesisUtterance === "function"
+    );
+
+    var speechState = { active: false, paused: false };
+    var speechSegments = [];
+    var speechSegmentIndex = 0;
+    var speechPendingTimerId = null;
+    var speakingUtterance = null;
+    var currentReadLang = "en";
+    var currentReadPlain = "";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -107,47 +126,444 @@
             var titleEn = String(entry.title || "").trim();
             return {
                 title: titleTa || titleEn,
-                body: bodyTa || bodyEn
+                body: bodyTa || bodyEn,
+                readLang: bodyTa ? "ta" : "en"
             };
         }
         var bodyEn = String(entry.body || "").trim();
         var bodyTa = String(entry.bodyTa || "").trim();
         return {
             title: String(entry.title || "").trim() || String(entry.titleTa || "").trim(),
-            body: bodyEn || bodyTa
+            body: bodyEn || bodyTa,
+            readLang: bodyEn ? "en" : "ta"
         };
+    }
+
+    /**
+     * Strip decorative lines and soften chapter:verse so TTS does not read "3 16" as a clock.
+     */
+    function sanitizeTextForSpeech(raw) {
+        var s = String(raw || "");
+        s = s.replace(/\u00a0/g, " ");
+        var lines = s.split(/\r\n|\r|\n/);
+        var kept = lines.map(function (line) {
+            var t = String(line || "").replace(/^\s+|\s+$/g, "");
+            if (!t) {
+                return "";
+            }
+            var compact = t.replace(/\s/g, "");
+            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*]+/g, "");
+            if (onlyDots.length === 0 && compact.length >= 4) {
+                return "";
+            }
+            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*]+/g, "");
+            if (onlyDecor.length === 0 && t.length >= 3) {
+                return "";
+            }
+            if (/^[=\-_·\.•\u2013\u2014~*]{4,}$/.test(compact)) {
+                return "";
+            }
+            return t;
+        }).filter(Boolean);
+        s = kept.join(" ");
+
+        s = s.replace(/(\d{1,3})\s*:\s*(\d{1,3})/g, function (full, a, b, offset) {
+            var na = parseInt(a, 10);
+            var nb = parseInt(b, 10);
+            if (na < 1 || na > 150 || nb < 1 || nb > 176) {
+                return full;
+            }
+            var before = offset > 0 ? s.charAt(offset - 1) : "";
+            var afterIdx = offset + full.length;
+            var after = afterIdx < s.length ? s.charAt(afterIdx) : "";
+            if (/\d/.test(before) || /\d/.test(after)) {
+                return full;
+            }
+            var plausibleClock = na <= 23 && nb <= 59;
+            if (plausibleClock) {
+                return full;
+            }
+            return a + ", " + b;
+        });
+
+        s = s.replace(/\s+/g, " ").trim();
+        return s;
+    }
+
+    function getSynth() {
+        if (!speechSupported) {
+            return null;
+        }
+        return window.speechSynthesis || null;
+    }
+
+    function getVoices() {
+        var synth = getSynth();
+        if (!synth || typeof synth.getVoices !== "function") {
+            return [];
+        }
+        var v = synth.getVoices();
+        return Array.isArray(v) ? v : [];
+    }
+
+    function pickVoice(langKey) {
+        var prefix = langKey === "ta" ? "ta" : "en";
+        var voices = getVoices();
+        if (!voices.length) {
+            return null;
+        }
+        var candidates = voices.filter(function (voice) {
+            return String(voice && voice.lang || "").toLowerCase().indexOf(prefix) === 0;
+        });
+        if (!candidates.length && langKey === "ta") {
+            candidates = voices.filter(function (voice) {
+                return String(voice && voice.name || "").toLowerCase().indexOf("tamil") >= 0;
+            });
+        }
+        if (!candidates.length) {
+            candidates = voices;
+        }
+        var best = null;
+        var bestScore = -1;
+        candidates.forEach(function (voice) {
+            var l = String(voice && voice.lang || "").toLowerCase();
+            var n = String(voice && voice.name || "").toLowerCase();
+            var score = 0;
+            if (l.indexOf(prefix) === 0) {
+                score += 30;
+            }
+            if (/natural|neural|premium/.test(n)) {
+                score += 16;
+            }
+            if (/google|microsoft|samantha|alex|daniel|zira|enhanced/.test(n)) {
+                score += 8;
+            }
+            if (voice && voice.default) {
+                score += 4;
+            }
+            if (score > bestScore) {
+                bestScore = score;
+                best = voice;
+            }
+        });
+        return best;
+    }
+
+    function splitIntoSegments(text) {
+        var clean = String(text || "").replace(/\s+/g, " ").trim();
+        if (!clean) {
+            return [];
+        }
+        var maxLen = Math.max(120, SEGMENT_MAX_CHARS);
+        if (clean.length <= maxLen) {
+            return [clean];
+        }
+        var out = [];
+        var rest = clean;
+        while (rest.length > maxLen) {
+            var slice = rest.slice(0, maxLen);
+            var breakAt = Math.max(slice.lastIndexOf(". "), slice.lastIndexOf("? "), slice.lastIndexOf("! "), slice.lastIndexOf(", "));
+            if (breakAt < maxLen * 0.45) {
+                breakAt = slice.lastIndexOf(" ");
+            }
+            if (breakAt < 24) {
+                breakAt = maxLen;
+            }
+            var part = rest.slice(0, breakAt + 1).trim();
+            if (part) {
+                out.push(part);
+            }
+            rest = rest.slice(breakAt + 1).trim();
+        }
+        if (rest) {
+            out.push(rest);
+        }
+        return out;
+    }
+
+    function clearSpeechTimers() {
+        if (speechPendingTimerId !== null) {
+            window.clearTimeout(speechPendingTimerId);
+            speechPendingTimerId = null;
+        }
+    }
+
+    function stopSpeechPlayback() {
+        clearSpeechTimers();
+        var synth = getSynth();
+        if (synth) {
+            try {
+                synth.cancel();
+            } catch (e) {}
+        }
+        speakingUtterance = null;
+        speechSegments = [];
+        speechSegmentIndex = 0;
+        speechState.active = false;
+        speechState.paused = false;
+        updateTtsUi();
+    }
+
+    function speakNextSegment() {
+        var synth = getSynth();
+        if (!synth || !speechState.active || speechState.paused) {
+            return;
+        }
+        if (speechSegmentIndex >= speechSegments.length) {
+            stopSpeechPlayback();
+            return;
+        }
+        var text = String(speechSegments[speechSegmentIndex] || "").trim();
+        if (!text) {
+            speechSegmentIndex += 1;
+            speakNextSegment();
+            return;
+        }
+        var utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = currentReadLang === "ta" ? "ta-IN" : "en-GB";
+        utterance.rate = currentReadLang === "ta" ? 0.88 : 0.95;
+        utterance.pitch = 1;
+        var voice = pickVoice(currentReadLang);
+        if (voice) {
+            utterance.voice = voice;
+        }
+        var gap = currentReadLang === "ta" ? SPEECH_CHAIN_GAP_MS_TA : SPEECH_CHAIN_GAP_MS;
+        utterance.onend = function () {
+            if (speakingUtterance !== utterance || speechState.paused) {
+                return;
+            }
+            speechSegmentIndex += 1;
+            speakingUtterance = null;
+            clearSpeechTimers();
+            speechPendingTimerId = window.setTimeout(function () {
+                speechPendingTimerId = null;
+                speakNextSegment();
+            }, gap);
+        };
+        utterance.onerror = function () {
+            if (speakingUtterance !== utterance || speechState.paused) {
+                return;
+            }
+            speechSegmentIndex += 1;
+            speakingUtterance = null;
+            clearSpeechTimers();
+            speechPendingTimerId = window.setTimeout(function () {
+                speechPendingTimerId = null;
+                speakNextSegment();
+            }, gap);
+        };
+        speakingUtterance = utterance;
+        synth.speak(utterance);
+    }
+
+    function ensureVoicesThen(run) {
+        var synth = getSynth();
+        if (!synth) {
+            if (typeof run === "function") {
+                run();
+            }
+            return;
+        }
+        if (getVoices().length) {
+            if (typeof run === "function") {
+                run();
+            }
+            return;
+        }
+        function onVoices() {
+            synth.removeEventListener("voiceschanged", onVoices);
+            if (typeof run === "function") {
+                run();
+            }
+        }
+        synth.addEventListener("voiceschanged", onVoices);
+        window.setTimeout(function () {
+            synth.removeEventListener("voiceschanged", onVoices);
+            if (typeof run === "function") {
+                run();
+            }
+        }, 800);
+    }
+
+    function startSpeechFromPlain(plain, readLang) {
+        if (!speechSupported) {
+            return;
+        }
+        var synth = getSynth();
+        if (!synth) {
+            return;
+        }
+        var text = String(plain || "").replace(/\s+/g, " ").trim();
+        if (!text) {
+            updateTtsUi();
+            return;
+        }
+        currentReadLang = readLang === "ta" ? "ta" : "en";
+        currentReadPlain = sanitizeTextForSpeech(text);
+        if (!currentReadPlain) {
+            updateTtsUi();
+            return;
+        }
+        var segments = splitIntoSegments(currentReadPlain);
+        if (!segments.length) {
+            return;
+        }
+        clearSpeechTimers();
+        synth.cancel();
+        speechSegments = segments;
+        speechSegmentIndex = 0;
+        speechState.active = true;
+        speechState.paused = false;
+        updateTtsUi();
+        ensureVoicesThen(function () {
+            if (!speechState.active || speechState.paused) {
+                return;
+            }
+            speakNextSegment();
+        });
+    }
+
+    function updateTtsUi() {
+        if (!ttsToggle || !ttsStop) {
+            return;
+        }
+        var hasText = Boolean(String(currentReadPlain || "").trim());
+        var labelSpan = ttsToggle.querySelector("span");
+        var icon = ttsToggle.querySelector("i");
+        if (!speechSupported) {
+            ttsToggle.disabled = true;
+            ttsStop.disabled = true;
+            ttsToggle.title = T("dailyBread.ttsUnsupported", "Read-aloud is not supported in this browser.");
+            ttsToggle.setAttribute("aria-label", ttsToggle.title);
+            if (labelSpan) {
+                labelSpan.textContent = T("dailyBread.ttsListen", "Listen");
+            }
+            if (icon) {
+                icon.className = "fa-solid fa-volume-xmark";
+            }
+            return;
+        }
+        ttsToggle.title = "";
+        var playAria = T("dailyBread.ttsPlayAria", "Listen to daily bread");
+        var pauseLabel = T("dailyBread.ttsPause", "Pause");
+        var resumeLabel = T("dailyBread.ttsResume", "Resume");
+        var listenLabel = T("dailyBread.ttsListen", "Listen");
+        var stopLabel = T("dailyBread.ttsStop", "Stop");
+        var stopAria = T("dailyBread.ttsStopAria", "Stop");
+        if (!hasText) {
+            ttsToggle.disabled = true;
+            ttsStop.disabled = true;
+            if (labelSpan) {
+                labelSpan.textContent = listenLabel;
+            }
+            if (icon) {
+                icon.className = "fa-solid fa-volume-high";
+            }
+            ttsToggle.setAttribute("aria-label", playAria);
+            ttsStop.setAttribute("aria-label", stopAria);
+            return;
+        }
+        ttsToggle.disabled = false;
+        ttsStop.disabled = !speechState.active && !speechState.paused;
+        if (speechState.active && !speechState.paused) {
+            if (labelSpan) {
+                labelSpan.textContent = pauseLabel;
+            }
+            if (icon) {
+                icon.className = "fa-solid fa-pause";
+            }
+            ttsToggle.setAttribute("aria-label", pauseLabel);
+        } else if (speechState.paused) {
+            if (labelSpan) {
+                labelSpan.textContent = resumeLabel;
+            }
+            if (icon) {
+                icon.className = "fa-solid fa-play";
+            }
+            ttsToggle.setAttribute("aria-label", resumeLabel);
+        } else {
+            if (labelSpan) {
+                labelSpan.textContent = listenLabel;
+            }
+            if (icon) {
+                icon.className = "fa-solid fa-volume-high";
+            }
+            ttsToggle.setAttribute("aria-label", playAria);
+        }
+        ttsStop.setAttribute("aria-label", stopAria);
+        ttsStop.title = stopLabel;
+    }
+
+    function toggleSpeech() {
+        if (!speechSupported || !String(currentReadPlain || "").trim()) {
+            return;
+        }
+        var synth = getSynth();
+        if (!synth) {
+            return;
+        }
+        if (speechState.active && !speechState.paused) {
+            synth.pause();
+            speechState.paused = true;
+            updateTtsUi();
+            return;
+        }
+        if (speechState.paused) {
+            synth.resume();
+            speechState.paused = false;
+            updateTtsUi();
+            return;
+        }
+        var titlePart = String(headingEl.textContent || "").trim();
+        var bodyPart = String(bodyEl.textContent || "").trim();
+        startSpeechFromPlain([titlePart, bodyPart].filter(Boolean).join(". "), currentReadLang);
     }
 
     var loadToken = 0;
 
     function setLoadingState() {
+        stopSpeechPlayback();
+        currentReadPlain = "";
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.loading", "Loading…");
         statusEl.dataset.state = "";
         contentWrap.hidden = true;
+        updateTtsUi();
     }
 
     function setEmptyState() {
+        stopSpeechPlayback();
+        currentReadPlain = "";
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.empty", "No content for today yet.");
         statusEl.dataset.state = "empty";
         contentWrap.hidden = true;
+        updateTtsUi();
     }
 
     function setErrorState() {
+        stopSpeechPlayback();
+        currentReadPlain = "";
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.error", "Could not load. Try again later.");
         statusEl.dataset.state = "error";
         contentWrap.hidden = true;
+        updateTtsUi();
     }
 
     function renderEntry(entry) {
+        stopSpeechPlayback();
         var lang = getAppLanguage();
         var picked = pickContent(entry, lang);
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
         bodyEl.innerHTML = escapeHtml(picked.body || "");
+        currentReadLang = picked.readLang === "ta" ? "ta" : "en";
+        var titlePart = String(picked.title || "").trim();
+        var bodyPart = String(picked.body || "").trim();
+        currentReadPlain = sanitizeTextForSpeech([titlePart, bodyPart].filter(Boolean).join(". "));
         statusEl.hidden = true;
         contentWrap.hidden = false;
+        updateTtsUi();
     }
 
     function updateDateLine(ymdKey) {
@@ -213,7 +629,26 @@
         var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (route === "daily-bread") {
             loadDailyBread();
+        } else {
+            stopSpeechPlayback();
         }
+    }
+
+    if (ttsToggle) {
+        ttsToggle.addEventListener("click", function () {
+            if (!speechSupported) {
+                return;
+            }
+            if (!String(currentReadPlain || "").trim()) {
+                return;
+            }
+            toggleSpeech();
+        });
+    }
+    if (ttsStop) {
+        ttsStop.addEventListener("click", function () {
+            stopSpeechPlayback();
+        });
     }
 
     window.addEventListener("hashchange", onRoute);
@@ -221,9 +656,12 @@
         var route = event && event.detail && event.detail.route;
         if (String(route || "").toLowerCase() === "daily-bread") {
             loadDailyBread();
+        } else {
+            stopSpeechPlayback();
         }
     });
     document.addEventListener("njc:langchange", function () {
+        stopSpeechPlayback();
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
             loadDailyBread();
         }
@@ -233,5 +671,8 @@
             loadDailyBread();
         }
     });
-    document.addEventListener("DOMContentLoaded", onRoute);
+    document.addEventListener("DOMContentLoaded", function () {
+        updateTtsUi();
+        onRoute();
+    });
 })();
