@@ -225,7 +225,7 @@
             return "#prayer";
         }
         if (key === "contact") {
-            return "#settings";
+            return "#contact";
         }
         return "#home";
     }

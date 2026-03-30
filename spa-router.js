@@ -47,6 +47,15 @@
             subtitleKey: "dailyBread.subtitle",
             subtitleText: "அன்றன்றுள்ள அப்பம்"
         },
+        contact: {
+            icon: "fa-address-book",
+            eyebrowKey: "contact.eyebrow",
+            eyebrowText: "Contact",
+            titleKey: "contact.title",
+            titleText: "Contact us",
+            subtitleKey: "contact.subtitle",
+            subtitleText: ""
+        },
         bible: {
             icon: "fa-book-bible",
             eyebrowKey: "bible.eyebrow",
@@ -213,9 +222,6 @@
         var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (raw === "about") {
             return "prayer";
-        }
-        if (raw === "contact") {
-            return "settings";
         }
         if ((raw === "mailbox" || raw === "admin") && !isAdminUser()) {
             return "home";
