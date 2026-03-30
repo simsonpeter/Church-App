@@ -14,6 +14,21 @@
     var pageCard = document.querySelector(".daily-bread-page-card");
     var ttsToggle = document.getElementById("daily-bread-tts-toggle");
     var ttsStop = document.getElementById("daily-bread-tts-stop");
+    var themeRibbon = document.getElementById("daily-bread-theme-ribbon");
+    var spotlightBlock = document.getElementById("daily-bread-spotlight");
+    var spotlightPhoto = document.getElementById("daily-bread-spotlight-photo");
+    var spotlightName = document.getElementById("daily-bread-spotlight-name");
+    var spotlightBio = document.getElementById("daily-bread-spotlight-bio");
+    var readingLine = document.getElementById("daily-bread-reading-line");
+    var readingLink = document.getElementById("daily-bread-reading-link");
+    var guestBlock = document.getElementById("daily-bread-guest");
+    var guestPhoto = document.getElementById("daily-bread-guest-photo");
+    var guestBio = document.getElementById("daily-bread-guest-bio");
+    var archivePanel = document.getElementById("daily-bread-archive-panel");
+    var archiveMonthSelect = document.getElementById("daily-bread-archive-month");
+    var archiveApplyBtn = document.getElementById("daily-bread-archive-apply");
+    var archiveTodayBtn = document.getElementById("daily-bread-archive-today");
+    var archiveList = document.getElementById("daily-bread-archive-list");
 
     if (!dateLine || !statusEl || !contentWrap || !headingEl || !bodyEl) {
         return;
@@ -122,8 +137,175 @@
             author: String(source.author || "").trim(),
             authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
-            bodyTa: String(source.bodyTa || "").trim()
+            bodyTa: String(source.bodyTa || "").trim(),
+            theme: String(source.theme || "").trim(),
+            themeTa: String(source.themeTa || "").trim(),
+            readingBook: String(source.readingBook || "").trim(),
+            readingChapter: Number(source.readingChapter) || 0,
+            readingVerse: Number(source.readingVerse) || 0,
+            readingLabel: String(source.readingLabel || "").trim(),
+            readingLabelTa: String(source.readingLabelTa || "").trim(),
+            authorPhotoUrl: String(source.authorPhotoUrl || "").trim(),
+            authorBio: String(source.authorBio || "").trim(),
+            authorBioTa: String(source.authorBioTa || "").trim(),
+            spotlightAuthor: Boolean(source.spotlightAuthor)
         };
+    }
+
+    function getDailyBreadHashQuery() {
+        var full = String(window.location.hash || "").replace(/^#/, "").trim();
+        var q = full.indexOf("?");
+        return q >= 0 ? full.slice(q + 1) : "";
+    }
+
+    function setDailyBreadHashQuery(queryString) {
+        var base = "daily-bread";
+        var q = String(queryString || "").replace(/^\?/, "");
+        var next = q ? "#" + base + "?" + q : "#" + base;
+        if (String(window.location.hash || "") !== next) {
+            window.history.replaceState(null, "", next);
+        }
+    }
+
+    function parseYmdParts(key) {
+        var parts = String(key || "").split("-");
+        return {
+            y: Number(parts[0]) || 0,
+            m: Number(parts[1]) || 0,
+            d: Number(parts[2]) || 0
+        };
+    }
+
+    function addDaysToYmd(ymdKey, deltaDays) {
+        var p = parseYmdParts(ymdKey);
+        var t = Date.UTC(p.y, p.m - 1, p.d + deltaDays, 12, 0, 0);
+        var d = new Date(t);
+        var y = d.getUTCFullYear();
+        var m = String(d.getUTCMonth() + 1).padStart(2, "0");
+        var day = String(d.getUTCDate()).padStart(2, "0");
+        return String(y) + "-" + m + "-" + day;
+    }
+
+    function getBrusselsWeekdaySun0(ymdKey) {
+        var p = parseYmdParts(ymdKey);
+        var d = new Date(Date.UTC(p.y, p.m - 1, p.d, 12, 0, 0));
+        var parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: BRUSSELS_TZ,
+            weekday: "short"
+        }).formatToParts(d);
+        var w = "";
+        parts.forEach(function (part) {
+            if (part.type === "weekday") {
+                w = String(part.value || "");
+            }
+        });
+        var map = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+        return map[w] !== undefined ? map[w] : 0;
+    }
+
+    function getWeekRangeMondayStart(ymdKey) {
+        var dow = getBrusselsWeekdaySun0(ymdKey);
+        var daysFromMonday = (dow + 6) % 7;
+        var startKey = addDaysToYmd(ymdKey, -daysFromMonday);
+        var endKey = addDaysToYmd(startKey, 6);
+        return { startKey: startKey, endKey: endKey };
+    }
+
+    function ymdCompare(a, b) {
+        return String(a).localeCompare(String(b));
+    }
+
+    function entryInWeek(entry, startKey, endKey) {
+        var d = entry && entry.date;
+        return d && ymdCompare(d, startKey) >= 0 && ymdCompare(d, endKey) <= 0;
+    }
+
+    function hashString(str) {
+        var s = String(str || "");
+        var h = 0;
+        for (var i = 0; i < s.length; i++) {
+            h = ((h << 5) - h) + s.charCodeAt(i);
+            h |= 0;
+        }
+        return h;
+    }
+
+    function pickSpotlightEntry(list, weekStartKey) {
+        var candidates = list.filter(function (e) {
+            return e && e.spotlightAuthor && String(e.authorPhotoUrl || "").trim()
+                && (String(e.author || "").trim() || String(e.authorTa || "").trim());
+        });
+        if (!candidates.length) {
+            return null;
+        }
+        candidates.sort(function (a, b) {
+            return ymdCompare(a.date, b.date);
+        });
+        var seed = hashString(weekStartKey);
+        var idx = Math.abs(seed) % candidates.length;
+        return candidates[idx];
+    }
+
+    function monthKeysFromList(list, y, m) {
+        var prefix = String(y) + "-" + String(m).padStart(2, "0") + "-";
+        return list.filter(function (e) {
+            return e && String(e.date || "").indexOf(prefix) === 0;
+        }).map(function (e) {
+            return e.date;
+        }).sort(function (a, b) {
+            return ymdCompare(b, a);
+        });
+    }
+
+    function fillArchiveMonthOptions(list) {
+        if (!archiveMonthSelect) {
+            return;
+        }
+        var seen = {};
+        list.forEach(function (e) {
+            var d = String(e && e.date || "");
+            if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                seen[d.slice(0, 7)] = true;
+            }
+        });
+        var keys = Object.keys(seen).sort(function (a, b) {
+            return b.localeCompare(a);
+        });
+        var current = archiveMonthSelect.value;
+        archiveMonthSelect.innerHTML = keys.map(function (k) {
+            return "<option value=\"" + escapeHtml(k) + "\">" + escapeHtml(k) + "</option>";
+        }).join("");
+        if (keys.length && keys.indexOf(current) >= 0) {
+            archiveMonthSelect.value = current;
+        } else if (keys.length) {
+            archiveMonthSelect.value = keys[0];
+        }
+    }
+
+    function renderArchiveListForMonth(list, monthYyyyMm) {
+        if (!archiveList) {
+            return;
+        }
+        var parts = String(monthYyyyMm || "").split("-");
+        var y = Number(parts[0]);
+        var m = Number(parts[1]);
+        if (!y || !m) {
+            archiveList.hidden = true;
+            archiveList.innerHTML = "";
+            return;
+        }
+        var days = monthKeysFromList(list, y, m);
+        if (!days.length) {
+            archiveList.hidden = true;
+            archiveList.innerHTML = "";
+            return;
+        }
+        archiveList.hidden = false;
+        archiveList.innerHTML = days.map(function (dayKey) {
+            return "" +
+                "<li><button type=\"button\" class=\"button-link daily-bread-archive-day\" data-daily-bread-date=\"" +
+                escapeHtml(dayKey) + "\">" + escapeHtml(dayKey) + "</button></li>";
+        }).join("");
     }
 
     function pickContent(entry, lang) {
@@ -616,9 +798,37 @@
 
     var loadToken = 0;
 
+    function clearDailyBreadChrome() {
+        if (themeRibbon) {
+            themeRibbon.hidden = true;
+            themeRibbon.textContent = "";
+        }
+        if (spotlightBlock) {
+            spotlightBlock.hidden = true;
+        }
+        if (spotlightPhoto) {
+            spotlightPhoto.removeAttribute("src");
+            spotlightPhoto.alt = "";
+        }
+        if (spotlightName) spotlightName.textContent = "";
+        if (spotlightBio) spotlightBio.textContent = "";
+        if (readingLine) readingLine.hidden = true;
+        if (readingLink) {
+            readingLink.removeAttribute("href");
+            readingLink.textContent = "";
+        }
+        if (guestBlock) guestBlock.hidden = true;
+        if (guestPhoto) {
+            guestPhoto.hidden = true;
+            guestPhoto.removeAttribute("src");
+        }
+        if (guestBio) guestBio.textContent = "";
+    }
+
     function setLoadingState() {
         stopSpeechPlayback();
         currentReadPlain = "";
+        clearDailyBreadChrome();
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.loading", "Loading…");
         statusEl.dataset.state = "";
@@ -633,6 +843,7 @@
     function setEmptyState() {
         stopSpeechPlayback();
         currentReadPlain = "";
+        clearDailyBreadChrome();
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.empty", "No content for today yet.");
         statusEl.dataset.state = "empty";
@@ -647,6 +858,7 @@
     function setErrorState() {
         stopSpeechPlayback();
         currentReadPlain = "";
+        clearDailyBreadChrome();
         statusEl.hidden = false;
         statusEl.textContent = T("dailyBread.error", "Could not load. Try again later.");
         statusEl.dataset.state = "error";
@@ -658,10 +870,14 @@
         updateTtsUi();
     }
 
-    function renderEntry(entry) {
+    function renderEntry(entry, listForSpotlight) {
         stopSpeechPlayback();
         var lang = getAppLanguage();
         var picked = pickContent(entry, lang);
+        if (themeRibbon) {
+            themeRibbon.hidden = true;
+            themeRibbon.textContent = "";
+        }
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
         currentSpeechTitle = String(picked.title || "").trim() || T("dailyBread.title", "Daily bread");
         var authorText = String(picked.author || "").trim();
@@ -674,6 +890,84 @@
                 authorLineEl.textContent = "";
             }
         }
+        var photoUrl = String(entry.authorPhotoUrl || "").trim();
+        var bioText = lang === "ta"
+            ? (String(entry.authorBioTa || "").trim() || String(entry.authorBio || "").trim())
+            : (String(entry.authorBio || "").trim() || String(entry.authorBioTa || "").trim());
+        if (guestBlock && guestPhoto && guestBio) {
+            if (photoUrl || bioText) {
+                guestBlock.hidden = false;
+                if (photoUrl) {
+                    guestPhoto.hidden = false;
+                    guestPhoto.src = photoUrl;
+                    guestPhoto.alt = authorText || T("dailyBread.guestPhotoAlt", "Author photo");
+                } else {
+                    guestPhoto.hidden = true;
+                    guestPhoto.removeAttribute("src");
+                    guestPhoto.alt = "";
+                }
+                guestBio.textContent = bioText;
+                guestBio.hidden = !bioText;
+            } else {
+                guestBlock.hidden = true;
+                guestBio.textContent = "";
+            }
+        }
+        var rb = String(entry.readingBook || "").trim();
+        var rc = Number(entry.readingChapter) || 0;
+        var rv = Number(entry.readingVerse) || 0;
+        var rlEn = String(entry.readingLabel || "").trim();
+        var rlTa = String(entry.readingLabelTa || "").trim();
+        var linkLabel = lang === "ta" ? (rlTa || rlEn) : (rlEn || rlTa);
+        if (readingLine && readingLink) {
+            if (rb && rc > 0) {
+                var href = "#bible?book=" + encodeURIComponent(rb)
+                    + "&chapter=" + encodeURIComponent(String(rc))
+                    + (rv > 0 ? "&verse=" + encodeURIComponent(String(rv)) : "");
+                readingLink.href = href;
+                readingLink.textContent = linkLabel || T("dailyBread.readingLinkDefault", "Today’s Bible reading");
+                readingLine.hidden = false;
+            } else {
+                readingLine.hidden = true;
+                readingLink.removeAttribute("href");
+                readingLink.textContent = "";
+            }
+        }
+        var weekRange = getWeekRangeMondayStart(entry.date || getBrusselsYmd().key);
+        var weeklyTheme = "";
+        if (listForSpotlight && listForSpotlight.length) {
+            var weekEntries = listForSpotlight.filter(function (e) {
+                return e && entryInWeek(e, weekRange.startKey, weekRange.endKey);
+            });
+            var tSet = {};
+            weekEntries.forEach(function (e) {
+                var t = lang === "ta"
+                    ? (String(e.themeTa || "").trim() || String(e.theme || "").trim())
+                    : (String(e.theme || "").trim() || String(e.themeTa || "").trim());
+                if (t) {
+                    tSet[t] = true;
+                }
+            });
+            var labels = Object.keys(tSet).sort();
+            if (labels.length === 1) {
+                weeklyTheme = T("dailyBread.themeThisWeek", "This week: {theme}").replace("{theme}", labels[0]);
+            } else if (labels.length > 1) {
+                weeklyTheme = T("dailyBread.themeThisWeekMany", "This week: {themes}").replace("{themes}", labels.join(" · "));
+            }
+        }
+        var entryTheme = lang === "ta"
+            ? (String(entry.themeTa || "").trim() || String(entry.theme || "").trim())
+            : (String(entry.theme || "").trim() || String(entry.themeTa || "").trim());
+        var ribbonText = weeklyTheme || entryTheme;
+        if (themeRibbon) {
+            if (ribbonText) {
+                themeRibbon.hidden = false;
+                themeRibbon.textContent = ribbonText;
+            } else {
+                themeRibbon.hidden = true;
+                themeRibbon.textContent = "";
+            }
+        }
         bodyEl.innerHTML = escapeHtml(picked.body || "");
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
@@ -683,6 +977,31 @@
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();
+
+        var spot = listForSpotlight ? pickSpotlightEntry(listForSpotlight, weekRange.startKey) : null;
+        if (spotlightBlock && spotlightPhoto && spotlightName && spotlightBio) {
+            if (spot) {
+                var sLang = getAppLanguage();
+                var sName = sLang === "ta"
+                    ? (String(spot.authorTa || "").trim() || String(spot.author || "").trim())
+                    : (String(spot.author || "").trim() || String(spot.authorTa || "").trim());
+                var sBio = sLang === "ta"
+                    ? (String(spot.authorBioTa || "").trim() || String(spot.authorBio || "").trim())
+                    : (String(spot.authorBio || "").trim() || String(spot.authorBioTa || "").trim());
+                spotlightBlock.hidden = false;
+                spotlightPhoto.src = String(spot.authorPhotoUrl || "").trim();
+                spotlightPhoto.alt = sName || T("dailyBread.guestPhotoAlt", "Author photo");
+                spotlightName.textContent = sName;
+                spotlightBio.textContent = sBio;
+                spotlightBio.hidden = !sBio;
+            } else {
+                spotlightBlock.hidden = true;
+                spotlightPhoto.removeAttribute("src");
+                spotlightPhoto.alt = "";
+                spotlightName.textContent = "";
+                spotlightBio.textContent = "";
+            }
+        }
     }
 
     function updateDateLine(ymdKey) {
@@ -704,7 +1023,14 @@
 
     function loadDailyBread() {
         var ymd = getBrusselsYmd();
-        updateDateLine(ymd.key);
+        var params = new URLSearchParams(getDailyBreadHashQuery());
+        var monthParam = String(params.get("month") || "").trim();
+        var dateParam = String(params.get("date") || "").trim();
+        var targetKey = /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : ymd.key;
+        if (/^\d{4}-\d{2}$/.test(monthParam)) {
+            targetKey = monthParam + "-01";
+        }
+        updateDateLine(targetKey);
         loadToken += 1;
         var token = loadToken;
         setLoadingState();
@@ -725,16 +1051,46 @@
                 }).filter(function (e) {
                     return /^\d{4}-\d{2}-\d{2}$/.test(e.date);
                 });
-                var match = list.filter(function (e) {
-                    return e.date === ymd.key;
-                }).sort(function (a, b) {
-                    return String(b.id).localeCompare(String(a.id));
-                })[0];
+                fillArchiveMonthOptions(list);
+                if (/^\d{4}-\d{2}$/.test(monthParam) && archiveMonthSelect) {
+                    archiveMonthSelect.value = monthParam;
+                }
+                if (/^\d{4}-\d{2}$/.test(monthParam)) {
+                    renderArchiveListForMonth(list, monthParam);
+                } else {
+                    renderArchiveListForMonth(list, "");
+                }
+                var match = null;
+                if (/^\d{4}-\d{2}-\d{2}$/.test(dateParam)) {
+                    match = list.filter(function (e) {
+                        return e.date === dateParam;
+                    }).sort(function (a, b) {
+                        return String(b.id).localeCompare(String(a.id));
+                    })[0];
+                } else if (/^\d{4}-\d{2}$/.test(monthParam)) {
+                    var monthDays = monthKeysFromList(list, Number(monthParam.slice(0, 4)), Number(monthParam.slice(5, 7)));
+                    var pick = monthDays.filter(function (d) {
+                        return ymdCompare(d, ymd.key) <= 0;
+                    })[0] || monthDays[0];
+                    if (pick) {
+                        match = list.filter(function (e) {
+                            return e.date === pick;
+                        }).sort(function (a, b) {
+                            return String(b.id).localeCompare(String(a.id));
+                        })[0];
+                    }
+                } else {
+                    match = list.filter(function (e) {
+                        return e.date === ymd.key;
+                    }).sort(function (a, b) {
+                        return String(b.id).localeCompare(String(a.id));
+                    })[0];
+                }
                 if (!match) {
                     setEmptyState();
                     return;
                 }
-                renderEntry(match);
+                renderEntry(match, list);
             })
             .catch(function () {
                 if (token !== loadToken) {
@@ -790,6 +1146,36 @@
     document.addEventListener("visibilitychange", function () {
         maybeResumeDailyBreadAfterBackground();
     });
+
+    if (archiveApplyBtn && archiveMonthSelect) {
+        archiveApplyBtn.addEventListener("click", function () {
+            var v = String(archiveMonthSelect.value || "").trim();
+            if (/^\d{4}-\d{2}$/.test(v)) {
+                setDailyBreadHashQuery("month=" + v);
+                loadDailyBread();
+            }
+        });
+    }
+    if (archiveTodayBtn) {
+        archiveTodayBtn.addEventListener("click", function () {
+            setDailyBreadHashQuery("");
+            loadDailyBread();
+        });
+    }
+    if (archiveList) {
+        archiveList.addEventListener("click", function (event) {
+            var btn = event.target.closest("button.daily-bread-archive-day[data-daily-bread-date]");
+            if (!btn) {
+                return;
+            }
+            var d = String(btn.getAttribute("data-daily-bread-date") || "").trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                return;
+            }
+            setDailyBreadHashQuery("date=" + d);
+            loadDailyBread();
+        });
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
         setupDailyBreadMediaSession();

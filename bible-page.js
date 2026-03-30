@@ -55,6 +55,67 @@
         ta: null
     };
     var state = getStoredState();
+    var pendingBibleDeepLink = null;
+
+    function getHashPathAndQuery() {
+        var full = String(window.location.hash || "").replace(/^#/, "").trim();
+        var q = full.indexOf("?");
+        var path = (q >= 0 ? full.slice(0, q) : full).toLowerCase();
+        return { path: path, query: q >= 0 ? full.slice(q + 1) : "" };
+    }
+
+    function queueBibleDeepLinkFromHash() {
+        var hq = getHashPathAndQuery();
+        if (hq.path !== "bible") {
+            pendingBibleDeepLink = null;
+            return;
+        }
+        var params = new URLSearchParams(hq.query);
+        var bookRaw = String(params.get("book") || "").trim();
+        if (!bookRaw) {
+            pendingBibleDeepLink = null;
+            return;
+        }
+        var ch = Number(params.get("chapter"));
+        var vs = Number(params.get("verse"));
+        pendingBibleDeepLink = {
+            book: bookRaw,
+            chapter: Number.isFinite(ch) && ch >= 1 ? Math.floor(ch) : 1,
+            verse: Number.isFinite(vs) && vs >= 1 ? Math.floor(vs) : 0
+        };
+    }
+
+    function applyPendingBibleDeepLink(data) {
+        if (!pendingBibleDeepLink || !data || !Array.isArray(data.Book)) {
+            return;
+        }
+        var link = pendingBibleDeepLink;
+        pendingBibleDeepLink = null;
+        var norm = String(link.book || "").trim().toLowerCase();
+        var bookIdx = -1;
+        for (var i = 0; i < ENGLISH_BOOKS.length; i++) {
+            if (String(ENGLISH_BOOKS[i] || "").toLowerCase() === norm) {
+                bookIdx = i;
+                break;
+            }
+        }
+        if (bookIdx < 0) {
+            return;
+        }
+        var books = data.Book;
+        var chapters = books[bookIdx] && Array.isArray(books[bookIdx].Chapter) ? books[bookIdx].Chapter : [];
+        var chIdx = Math.min(Math.max(0, link.chapter - 1), Math.max(0, chapters.length - 1));
+        state.en = { book: bookIdx, chapter: chIdx };
+        state.ta = { book: bookIdx, chapter: chIdx };
+        saveState();
+        renderVerses(data, { resetPosition: true });
+        if (link.verse > 0 && verseInput) {
+            verseInput.value = String(link.verse);
+            window.setTimeout(function () {
+                jumpToVerse();
+            }, 0);
+        }
+    }
     var streamSupported = Boolean(typeof window !== "undefined" && typeof window.Audio === "function");
     var speechSupported = Boolean(
         typeof window !== "undefined" &&
@@ -1655,10 +1716,15 @@
     }
 
     function renderBible() {
+        queueBibleDeepLinkFromHash();
         setLanguageButtons();
         renderLoading();
         loadBible(state.language).then(function (data) {
-            renderVerses(data, { resetPosition: true });
+            if (pendingBibleDeepLink) {
+                applyPendingBibleDeepLink(data);
+            } else {
+                renderVerses(data, { resetPosition: true });
+            }
         }).catch(function () {
             renderLoadError();
         });
@@ -1842,6 +1908,15 @@
     });
     window.addEventListener("hashchange", function () {
         exitFullScreenIfNeeded();
+        if (isBibleRouteActive()) {
+            renderBible();
+        }
+    });
+    document.addEventListener("njc:routechange", function (event) {
+        var route = event && event.detail && event.detail.route;
+        if (String(route || "").toLowerCase() === "bible") {
+            renderBible();
+        }
     });
     document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
