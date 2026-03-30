@@ -140,6 +140,21 @@
     }
 
     /**
+     * Remove inline decoration (====, ----, ***, …) anywhere in the string.
+     */
+    function stripDecorRuns(str) {
+        return String(str || "")
+            .replace(/={2,}/g, " ")
+            .replace(/\uFF1D{2,}/g, " ")
+            .replace(/\*{2,}/g, " ")
+            .replace(/#{2,}/g, " ")
+            .replace(/(?:[-_\u2013\u2014\u2500-\u257F]){3,}/g, " ")
+            .replace(/\.{4,}/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+    }
+
+    /**
      * Strip decorative lines and soften chapter:verse so TTS does not read "3 16" as a clock.
      */
     function sanitizeTextForSpeech(raw) {
@@ -151,21 +166,26 @@
             if (!t) {
                 return "";
             }
+            t = stripDecorRuns(t);
+            if (!t) {
+                return "";
+            }
             var compact = t.replace(/\s/g, "");
-            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*]+/g, "");
+            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*＝]+/g, "");
             if (onlyDots.length === 0 && compact.length >= 4) {
                 return "";
             }
-            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*]+/g, "");
+            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*＝]+/g, "");
             if (onlyDecor.length === 0 && t.length >= 3) {
                 return "";
             }
-            if (/^[=\-_·\.•\u2013\u2014~*]{4,}$/.test(compact)) {
+            if (/^[=\-_·\.•\u2013\u2014~*＝]{4,}$/.test(compact)) {
                 return "";
             }
             return t;
         }).filter(Boolean);
         s = kept.join(" ");
+        s = stripDecorRuns(s);
 
         s = s.replace(/(\d{1,3})\s*:\s*(\d{1,3})/g, function (full, a, b, offset) {
             var na = parseInt(a, 10);
