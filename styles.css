@@ -3886,6 +3886,7 @@ body.bible-fullscreen-open .offline-badge {
     flex-direction: column;
     gap: 10px;
     background: var(--bg-bottom);
+    overflow: hidden;
 }
 
 .bible-card.bible-card-fullscreen::before {
@@ -3950,11 +3951,19 @@ body.bible-fullscreen-open .offline-badge {
     z-index: 2;
 }
 
+.bible-card.bible-card-fullscreen #bible-status-note {
+    flex-shrink: 0;
+}
+
 .bible-card.bible-card-fullscreen .bible-verse-list {
     margin-top: 0;
     max-height: none;
     flex: 1 1 auto;
     min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
 }
 
 #admin-mailbox-refresh {
