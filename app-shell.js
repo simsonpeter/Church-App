@@ -804,6 +804,12 @@
         "profile.badgeTrivia10": "வேதாகமக் கேள்வி வீரர் (10+ புள்ளிகள்)",
         "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
         "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
+        "app.installBannerRegionAria": "செயலியை நிறுவு",
+        "app.installBannerTitle": "NJC செயலியை நிறுவவும்",
+        "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
+        "app.installBannerCta": "நிறுவு",
+        "app.installBannerDismiss": "இப்போது வேண்டாம்",
+        "app.installBannerIos": "iPhone/iPad: பகிர் ஐகானைத் தட்டி \"Add to Home Screen\" தேர்ந்தெடுக்கவும்.",
         "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
         "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
         "app.updateNotesPrefix": "புதியவை:",
@@ -1465,7 +1471,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330db3";
+    var SW_VERSION = "20260330db4";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
     var UPDATE_NOTES_SUMMARY = "Daily bread: listen (speech) controls; PWA bump.";
@@ -1613,6 +1619,148 @@
         sync();
         window.addEventListener("online", sync);
         window.addEventListener("offline", sync);
+    }
+
+    var PWA_INSTALL_DISMISS_KEY = "njc_pwa_install_banner_dismissed_v1";
+
+    function isRunningAsInstalledPwa() {
+        try {
+            return Boolean(
+                (window.matchMedia && (
+                    window.matchMedia("(display-mode: standalone)").matches ||
+                    window.matchMedia("(display-mode: fullscreen)").matches ||
+                    window.matchMedia("(display-mode: minimal-ui)").matches
+                )) ||
+                window.navigator.standalone === true ||
+                String(document.referrer || "").indexOf("android-app://") === 0
+            );
+        } catch (err) {
+            return false;
+        }
+    }
+
+    function setupPwaInstallBanner() {
+        var banner = document.getElementById("pwa-install-banner");
+        var cta = document.getElementById("pwa-install-cta");
+        var dismissBtn = document.getElementById("pwa-install-dismiss");
+        var iosHint = document.getElementById("pwa-install-ios-hint");
+        if (!banner) {
+            return;
+        }
+        if (isRunningAsInstalledPwa()) {
+            return;
+        }
+        try {
+            if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                return;
+            }
+        } catch (err) {
+            return;
+        }
+
+        var deferredPrompt = null;
+
+        function hideBanner() {
+            banner.hidden = true;
+        }
+
+        function isLikelyIos() {
+            var ua = String(navigator.userAgent || "");
+            if (/iPad|iPhone|iPod/.test(ua)) {
+                return true;
+            }
+            try {
+                if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function showBannerForIosHint() {
+            if (iosHint) {
+                iosHint.hidden = false;
+            }
+            if (cta) {
+                cta.hidden = true;
+            }
+            banner.hidden = false;
+        }
+
+        window.addEventListener("beforeinstallprompt", function (event) {
+            event.preventDefault();
+            deferredPrompt = event;
+            try {
+                if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                    return;
+                }
+            } catch (e2) {
+                return;
+            }
+            if (isRunningAsInstalledPwa()) {
+                return;
+            }
+            if (iosHint) {
+                iosHint.hidden = true;
+            }
+            if (cta) {
+                cta.hidden = false;
+            }
+            banner.hidden = false;
+        });
+
+        window.setTimeout(function () {
+            if (deferredPrompt) {
+                return;
+            }
+            if (isRunningAsInstalledPwa()) {
+                return;
+            }
+            try {
+                if (window.localStorage.getItem(PWA_INSTALL_DISMISS_KEY) === "1") {
+                    return;
+                }
+            } catch (e3) {
+                return;
+            }
+            if (!isLikelyIos()) {
+                return;
+            }
+            showBannerForIosHint();
+        }, 2000);
+
+        if (dismissBtn) {
+            dismissBtn.addEventListener("click", function () {
+                try {
+                    window.localStorage.setItem(PWA_INSTALL_DISMISS_KEY, "1");
+                } catch (e4) {}
+                hideBanner();
+            });
+        }
+
+        if (cta) {
+            cta.addEventListener("click", function () {
+                if (!deferredPrompt) {
+                    if (isLikelyIos() && iosHint) {
+                        iosHint.hidden = false;
+                    }
+                    return;
+                }
+                deferredPrompt.prompt();
+                var choice = deferredPrompt.userChoice;
+                if (choice && typeof choice.then === "function") {
+                    choice.then(function () {
+                        deferredPrompt = null;
+                        hideBanner();
+                    }).catch(function () {
+                        deferredPrompt = null;
+                        hideBanner();
+                    });
+                } else {
+                    deferredPrompt = null;
+                    hideBanner();
+                }
+            });
     }
 
     function registerServiceWorker() {
@@ -4425,6 +4573,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
         setupOfflineBanner();
+        setupPwaInstallBanner();
         activeLanguage = getActiveLanguage();
         try {
             var lt = window.localStorage.getItem("njc_larger_text_v1") === "1";

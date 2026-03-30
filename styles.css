@@ -6029,6 +6029,87 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     padding-top: 36px;
 }
 
+/* PWA install prompt (browser tab only) */
+.pwa-install-banner {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 19990;
+    padding: 10px 14px 10px;
+    padding-top: max(10px, env(safe-area-inset-top));
+    background: linear-gradient(135deg, #1a237e 0%, #283593 45%, #3949ab 100%);
+    color: #f5f5ff;
+    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.35);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.pwa-install-banner-inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 14px;
+    max-width: 100%;
+}
+
+.pwa-install-banner-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.84rem;
+    line-height: 1.4;
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.pwa-install-banner-text strong {
+    font-weight: 750;
+    font-size: 0.92rem;
+}
+
+.pwa-install-banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.pwa-install-banner .button-link {
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.45);
+    background: rgba(255, 255, 255, 0.12);
+    padding: 8px 14px;
+    font-size: 0.82rem;
+}
+
+.pwa-install-banner .pwa-install-dismiss {
+    color: rgba(255, 255, 255, 0.88);
+    border-color: rgba(255, 255, 255, 0.28);
+    background: transparent;
+}
+
+.pwa-install-ios-hint {
+    margin: 8px 0 0;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.78rem;
+    line-height: 1.35;
+}
+
+body:has(.pwa-install-banner:not([hidden])) .app-shell {
+    padding-top: max(72px, calc(56px + env(safe-area-inset-top)));
+}
+
+body:has(.offline-banner:not([hidden])):has(.pwa-install-banner:not([hidden])) .pwa-install-banner {
+    top: 36px;
+    padding-top: 10px;
+}
+
+body:has(.offline-banner:not([hidden])):has(.pwa-install-banner:not([hidden])) .app-shell {
+    padding-top: max(108px, calc(92px + env(safe-area-inset-top)));
+}
+
 /* Update modal: third button + release notes */
 .app-update-actions {
     flex-direction: column;

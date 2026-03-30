@@ -14,12 +14,25 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260330db3">
+    <link rel="stylesheet" href="styles.css?v=20260330db4">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
     <div class="offline-banner" id="offline-banner" hidden role="status" aria-live="polite">
         <span data-i18n="app.offlineBanner">You’re offline — showing saved content. Some features may be limited.</span>
+    </div>
+    <div class="pwa-install-banner" id="pwa-install-banner" hidden role="region" data-i18n-aria-label="app.installBannerRegionAria" data-i18n-aria-fallback="Install app">
+        <div class="pwa-install-banner-inner">
+            <span class="pwa-install-banner-text">
+                <strong data-i18n="app.installBannerTitle">Install NJC app</strong>
+                <span data-i18n="app.installBannerBody">Add to your home screen for quick access and offline use.</span>
+            </span>
+            <span class="pwa-install-banner-actions">
+                <button type="button" class="button-link pwa-install-cta" id="pwa-install-cta" data-i18n="app.installBannerCta">Install</button>
+                <button type="button" class="button-link button-secondary pwa-install-dismiss" id="pwa-install-dismiss" data-i18n="app.installBannerDismiss">Not now</button>
+            </span>
+        </div>
+        <p class="pwa-install-ios-hint page-note" id="pwa-install-ios-hint" hidden data-i18n="app.installBannerIos">On iPhone/iPad: tap Share, then “Add to Home Screen”.</p>
     </div>
     <div class="app-shell">
         <header class="app-header home-header" id="spa-header">
@@ -1223,7 +1236,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260330db3"></script>
+    <script src="app-shell.js?v=20260330db4"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1231,7 +1244,7 @@
     <script src="bible-page.js?v=20260324u1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260330pw1"></script>
-    <script src="daily-bread-page.js?v=20260330db2"></script>
+    <script src="daily-bread-page.js?v=20260330db3"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260330ad1"></script>
     <script src="admin-extras.js?v=20260330ae1"></script>

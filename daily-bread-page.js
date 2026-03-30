@@ -201,6 +201,57 @@
         return best;
     }
 
+    /**
+     * Strip decorative lines (====, ----, …) and soften chapter:verse so TTS does not read "45 22" as a clock time.
+     */
+    function sanitizeTextForSpeech(raw) {
+        var s = String(raw || "");
+        s = s.replace(/\u00a0/g, " ");
+        var lines = s.split(/\r\n|\r|\n/);
+        var kept = lines.map(function (line) {
+            var t = String(line || "").replace(/^\s+|\s+$/g, "");
+            if (!t) {
+                return "";
+            }
+            var compact = t.replace(/\s/g, "");
+            var onlyDots = compact.replace(/[.\u00b7\u2022\u2024\u2025\u2026·•\-_=~*]+/g, "");
+            if (onlyDots.length === 0 && compact.length >= 4) {
+                return "";
+            }
+            var onlyDecor = t.replace(/[\s=_\-·\.•\u2013\u2014~*]+/g, "");
+            if (onlyDecor.length === 0 && t.length >= 3) {
+                return "";
+            }
+            if (/^[=\-_·\.•\u2013\u2014~*]{4,}$/.test(compact)) {
+                return "";
+            }
+            return t;
+        }).filter(Boolean);
+        s = kept.join(" ");
+
+        s = s.replace(/(\d{1,3})\s*:\s*(\d{1,3})/g, function (full, a, b, offset) {
+            var na = parseInt(a, 10);
+            var nb = parseInt(b, 10);
+            if (na < 1 || na > 150 || nb < 1 || nb > 176) {
+                return full;
+            }
+            var before = offset > 0 ? s.charAt(offset - 1) : "";
+            var afterIdx = offset + full.length;
+            var after = afterIdx < s.length ? s.charAt(afterIdx) : "";
+            if (/\d/.test(before) || /\d/.test(after)) {
+                return full;
+            }
+            var plausibleClock = na <= 23 && nb <= 59;
+            if (plausibleClock) {
+                return full;
+            }
+            return a + ", " + b;
+        });
+
+        s = s.replace(/\s+/g, " ").trim();
+        return s;
+    }
+
     function splitIntoSegments(text) {
         var clean = String(text || "").replace(/\s+/g, " ").trim();
         if (!clean) {
@@ -350,7 +401,11 @@
             return;
         }
         currentReadLang = readLang === "ta" ? "ta" : "en";
-        currentReadPlain = text;
+        currentReadPlain = sanitizeTextForSpeech(text);
+        if (!currentReadPlain) {
+            updateTtsUi();
+            return;
+        }
         var segments = splitIntoSegments(text);
         if (!segments.length) {
             return;
@@ -505,7 +560,7 @@
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
         var bodyPart = String(picked.body || "").trim();
-        currentReadPlain = [titlePart, bodyPart].filter(Boolean).join(". ");
+        currentReadPlain = sanitizeTextForSpeech([titlePart, bodyPart].filter(Boolean).join(". "));
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();
