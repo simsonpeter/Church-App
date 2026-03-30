@@ -96,6 +96,10 @@
         "home.dailyVerseVersionTamil": "BSI (பழைய)",
         "home.dailyVerseEmptyBody": "இன்றைய வசனம் கிடைக்கவில்லை.",
         "home.dailyVerseLoading": "இன்றைய வசனம் ஏற்றப்படுகிறது...",
+        "home.dailyBreadTitle": "இன்றைய அப்பம்",
+        "home.dailyBreadCredit": "WordOfGod.in — அன்றன்றுள்ள அப்பம் (தமிழ்). அவர்கள் வெளியிடும்போது தானாக புதுப்படும்.",
+        "home.dailyBreadIframeTitle": "WordOfGod.in — அன்றன்றுள்ள அப்பம்",
+        "home.dailyBreadOpenFull": "முழு பக்கத்தில் திற",
         "home.announcementsTitle": "அறிவிப்புகள்",
         "home.announcementsSubtitle": "இந்த வாரத்தின் சமீபத்திய புதுப்பிப்புகள்.",
         "home.loadingAnnouncementsTitle": "அறிவிப்புகள் ஏற்றப்படுகின்றன...",
@@ -1426,10 +1430,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260329m7";
+    var SW_VERSION = "20260330db1";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Full-width layout: less side margin, no tablet column cap; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Home: embed WordOfGod.in Tamil daily bread (அன்றன்றுள்ள அப்பம்); PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

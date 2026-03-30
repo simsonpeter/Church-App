@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260329m7">
+    <link rel="stylesheet" href="styles.css?v=20260330db1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -76,6 +76,24 @@
                     </li>
                 </ul>
                 <ul class="list reading-unread-list" id="reading-unread-list" hidden></ul>
+            </section>
+
+            <section class="card card-v-mesh daily-bread-card" id="daily-bread-card" aria-label="Daily bread devotion">
+                <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="home.dailyBreadTitle">Today’s bread</span></h2>
+                <p class="page-note daily-bread-credit" data-i18n="home.dailyBreadCredit">From WordOfGod.in — அன்றன்றுள்ள அப்பம் (Tamil). Updates when they publish.</p>
+                <div class="daily-bread-frame-wrap">
+                    <iframe
+                        class="daily-bread-iframe"
+                        title="அன்றன்றுள்ள அப்பம் — WordOfGod.in"
+                        data-i18n-title="home.dailyBreadIframeTitle"
+                        data-i18n-title-fallback="Antantulla Appam devotion on WordOfGod.in"
+                        src="https://wordofgod.in/bible-devotions/antantulla-appam/?mode=latest&amp;lang=%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+                <p class="daily-bread-open-wrap">
+                    <a class="inline-link" href="https://wordofgod.in/bible-devotions/antantulla-appam/?mode=latest&amp;lang=%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D" target="_blank" rel="noopener noreferrer" data-i18n="home.dailyBreadOpenFull">Open full page</a>
+                </p>
             </section>
 
             <section class="card card-v-mesh daily-verse-card" id="daily-verse-card">
@@ -1174,7 +1192,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260329m6"></script>
+    <script src="app-shell.js?v=20260330db1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
