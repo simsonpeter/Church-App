@@ -6228,7 +6228,8 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     background: transparent;
 }
 
-.pwa-install-ios-hint {
+.pwa-install-ios-hint,
+.pwa-install-android-hint {
     margin: 8px 0 0;
     color: rgba(255, 255, 255, 0.82);
     font-size: 0.78rem;

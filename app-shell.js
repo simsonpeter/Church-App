@@ -816,6 +816,7 @@
         "app.installBannerCta": "நிறுவு",
         "app.installBannerDismiss": "இப்போது வேண்டாம்",
         "app.installBannerIos": "iPhone/iPad: பகிர் ஐகானைத் தட்டி \"Add to Home Screen\" தேர்ந்தெடுக்கவும்.",
+        "app.installBannerAndroid": "Android Chrome: மெனு (⋮) ஐ தட்டி \"Install app\" அல்லது \"Add to Home screen\" தேர்ந்தெடுக்கவும்.",
         "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
         "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
         "app.updateNotesPrefix": "புதியவை:",
@@ -1477,10 +1478,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bf4";
+    var SW_VERSION = "20260330bf5";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily bread: drop Brussels-calendar explainer line; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "PWA: show install banner on open for Android & iOS when not installed; fix install CTA handler.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -1650,6 +1651,7 @@
         var cta = document.getElementById("pwa-install-cta");
         var dismissBtn = document.getElementById("pwa-install-dismiss");
         var iosHint = document.getElementById("pwa-install-ios-hint");
+        var androidHint = document.getElementById("pwa-install-android-hint");
         if (!banner) {
             return;
         }
@@ -1683,9 +1685,34 @@
             return false;
         }
 
+        function isLikelyAndroid() {
+            return /Android/i.test(String(navigator.userAgent || ""));
+        }
+
+        function hideInstallHints() {
+            if (iosHint) {
+                iosHint.hidden = true;
+            }
+            if (androidHint) {
+                androidHint.hidden = true;
+            }
+        }
+
         function showBannerForIosHint() {
+            hideInstallHints();
             if (iosHint) {
                 iosHint.hidden = false;
+            }
+            if (cta) {
+                cta.hidden = true;
+            }
+            banner.hidden = false;
+        }
+
+        function showBannerForAndroidHint() {
+            hideInstallHints();
+            if (androidHint) {
+                androidHint.hidden = false;
             }
             if (cta) {
                 cta.hidden = true;
@@ -1706,9 +1733,7 @@
             if (isRunningAsInstalledPwa()) {
                 return;
             }
-            if (iosHint) {
-                iosHint.hidden = true;
-            }
+            hideInstallHints();
             if (cta) {
                 cta.hidden = false;
             }
@@ -1729,11 +1754,14 @@
             } catch (e3) {
                 return;
             }
-            if (!isLikelyIos()) {
+            if (isLikelyIos()) {
+                showBannerForIosHint();
                 return;
             }
-            showBannerForIosHint();
-        }, 2000);
+            if (isLikelyAndroid()) {
+                showBannerForAndroidHint();
+            }
+        }, 800);
 
         if (dismissBtn) {
             dismissBtn.addEventListener("click", function () {
@@ -1749,6 +1777,15 @@
                 if (!deferredPrompt) {
                     if (isLikelyIos() && iosHint) {
                         iosHint.hidden = false;
+                        if (androidHint) {
+                            androidHint.hidden = true;
+                        }
+                    }
+                    if (isLikelyAndroid() && androidHint) {
+                        androidHint.hidden = false;
+                        if (iosHint) {
+                            iosHint.hidden = true;
+                        }
                     }
                     return;
                 }
@@ -1767,6 +1804,7 @@
                     hideBanner();
                 }
             });
+        }
     }
 
     function registerServiceWorker() {
