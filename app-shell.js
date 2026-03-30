@@ -50,7 +50,6 @@
         "dailyBread.ttsPlayAria": "அன்றன்றுள்ள அப்பத்தை கேட்க",
         "dailyBread.ttsStopAria": "ஒலியை நிறுத்து",
         "dailyBread.ttsUnsupported": "இந்த உலாவியில் பேச்சு ஒலி ஆதரவு இல்லை.",
-        "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; பட்டியலில் Daily bread பக்கம் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB njc-belgium-admin-daily-bread.",
         "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
