@@ -1016,6 +1016,19 @@ html[data-theme="dark"] .daily-bread-author-line {
     gap: 6px;
 }
 
+.library-book-download-icon {
+    justify-content: center;
+    min-width: 40px;
+    min-height: 40px;
+    padding: 0 10px;
+    flex-shrink: 0;
+}
+
+.library-book-download-icon i {
+    font-size: 1rem;
+    margin: 0;
+}
+
 /* Same layout as Today's Bible Reading: featured card, red title row via .card-lang-top, then .card-banner */
 .daily-verse-body {
     margin-top: 2px;

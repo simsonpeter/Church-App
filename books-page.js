@@ -1,6 +1,6 @@
 (function () {
     var MANTLE_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
-    var FALLBACK_JSON = "./books.json?v=20260330lib3";
+    var FALLBACK_JSON = "./books.json?v=20260330lib4";
     var listEl = document.getElementById("library-books-list");
     var statusEl = document.getElementById("library-books-status");
     var pageCard = document.querySelector(".library-page-card");
@@ -176,8 +176,8 @@
                 "        <a class=\"button-link button-secondary\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" +
                 "          <i class=\"fa-solid fa-book-open\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.read", "Read")) +
                 "        </a>" +
-                "        <a class=\"button-link\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\">" +
-                "          <i class=\"fa-solid fa-download\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.download", "Download")) +
+                "        <a class=\"button-link button-secondary library-book-download-icon\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\" aria-label=\"" + escapeHtml(T("library.download", "Download")) + "\" title=\"" + escapeHtml(T("library.download", "Download")) + "\">" +
+                "          <i class=\"fa-solid fa-download\" aria-hidden=\"true\"></i>" +
                 "        </a>" +
                 "      </div>" +
                 "    </div>" +
