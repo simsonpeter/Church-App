@@ -103,6 +103,14 @@
         "dailyBread.loading": "ஏற்றுகிறது...",
         "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
         "dailyBread.error": "ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "dailyBread.ttsListen": "கேட்க",
+        "dailyBread.ttsPause": "இடைநிறுத்து",
+        "dailyBread.ttsResume": "தொடரவும்",
+        "dailyBread.ttsStop": "நிறுத்து",
+        "dailyBread.ttsPlayAria": "அன்றன்றுள்ள அப்பத்தை கேட்க",
+        "dailyBread.ttsStopAria": "ஒலியை நிறுத்து",
+        "dailyBread.ttsUnsupported": "இந்த உலாவியில் பேச்சு ஒலி ஆதரவு இல்லை.",
+        "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; Daily bread தாவல் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB பெட்டி njc-belgium-admin-daily-bread தேவை.",
         "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
@@ -1457,10 +1465,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330db2";
+    var SW_VERSION = "20260330db3";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily bread tab (admin-dated MantleDB); contact moved to Settings; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: listen (speech) controls; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

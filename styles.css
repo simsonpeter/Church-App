@@ -808,6 +808,28 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
+.daily-bread-tts-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+}
+
+.daily-bread-tts-toggle,
+.daily-bread-tts-stop {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+}
+
+.daily-bread-tts-toggle i,
+.daily-bread-tts-stop i {
+    font-size: 1rem;
+    opacity: 0.92;
+}
+
 .daily-bread-page-card .daily-bread-heading {
     margin: 12px 0 8px;
     font-size: 1.12rem;
