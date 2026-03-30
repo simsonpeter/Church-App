@@ -3,9 +3,9 @@
     --fs-root: clamp(15px, calc(12px + 1.6vw), 18px);
     --font-stack-en: "DM Sans", "Inter", "Segoe UI", system-ui, sans-serif;
     --font-stack-ta: "Noto Sans Tamil", "Latha", "Tamil MN", "Nirmala UI", system-ui, sans-serif;
-    /* Full width on phones; cap width on larger screens so lines do not sprawl */
+    /* Full width; horizontal inset = safe area + small gutter (not a wide phone margin) */
     --app-shell-max: 100%;
-    --app-inline-pad: max(18px, env(safe-area-inset-left), env(safe-area-inset-right));
+    --app-inline-pad: max(8px, env(safe-area-inset-left), env(safe-area-inset-right));
     /* Matches .app-shell inner width (column minus horizontal padding) */
     --app-content-width: calc(min(var(--app-shell-max), 100vw) - 2 * var(--app-inline-pad));
     color-scheme: light dark;
@@ -182,7 +182,7 @@ body.splash-active {
     max-width: var(--app-shell-max);
     min-height: 100vh;
     margin: 0 auto;
-    padding: 22px var(--app-inline-pad) 128px;
+    padding: 18px var(--app-inline-pad) 120px;
     position: relative;
 }
 
@@ -199,13 +199,13 @@ body.splash-active {
         radial-gradient(ellipse 120% 80% at 20% 0%, rgba(255, 255, 255, 0.14), transparent 52%),
         linear-gradient(150deg, var(--header-start) 0%, var(--header-mid) 42%, var(--header-end) 100%);
     color: #ffffff;
-    padding: 18px 18px;
+    padding: 14px 14px;
     min-height: 118px;
     border-radius: 24px;
     border: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: var(--shadow), 0 1px 0 rgba(255, 255, 255, 0.14) inset;
     position: sticky;
-    top: max(10px, env(safe-area-inset-top));
+    top: max(6px, env(safe-area-inset-top));
     z-index: 1400;
     overflow: hidden;
     display: flex;
@@ -246,8 +246,8 @@ body.splash-active {
 
 .header-controls {
     position: absolute;
-    top: 14px;
-    right: 14px;
+    top: 10px;
+    right: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -368,7 +368,7 @@ body.splash-active {
 }
 
 .card {
-    --card-pad: 18px;
+    --card-pad: 15px;
     --card-pad-start: var(--card-pad);
     --card-pad-end: var(--card-pad);
     --card-radius: 20px;
@@ -5891,36 +5891,36 @@ html[data-theme="light"] .mini-player-btn {
     }
 }
 
-/* Tablet and larger screens – scale up from mobile */
+/* Tablet and larger – stay full viewport width; only safe-area + modest gutter */
 @media (min-width: 600px) {
     :root {
-        --app-shell-max: 540px;
-        --app-inline-pad: max(24px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --app-shell-max: 100%;
+        --app-inline-pad: max(14px, env(safe-area-inset-left), env(safe-area-inset-right));
     }
     .app-shell {
-        padding: 28px var(--app-inline-pad) 140px;
+        padding: 22px var(--app-inline-pad) 132px;
     }
     .card {
-        --card-pad: 22px;
-        padding: 22px;
+        --card-pad: 18px;
+        padding: 18px;
     }
 }
 
 @media (min-width: 768px) {
     :root {
-        --app-shell-max: 640px;
-        --app-inline-pad: max(28px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --app-shell-max: 100%;
+        --app-inline-pad: max(18px, env(safe-area-inset-left), env(safe-area-inset-right));
     }
     .app-shell {
-        padding: 32px var(--app-inline-pad) 160px;
+        padding: 26px var(--app-inline-pad) 148px;
     }
     .app-header {
-        padding: 24px 24px;
-        min-height: 130px;
+        padding: 18px 18px;
+        min-height: 126px;
     }
     .card {
-        --card-pad: 26px;
-        padding: 26px;
+        --card-pad: 20px;
+        padding: 20px;
         --card-radius: 20px;
         border-radius: var(--card-radius);
     }
@@ -5963,11 +5963,11 @@ html[data-theme="light"] .mini-player-btn {
 
 @media (min-width: 1024px) {
     :root {
-        --app-shell-max: 720px;
-        --app-inline-pad: max(32px, env(safe-area-inset-left), env(safe-area-inset-right));
+        --app-shell-max: 100%;
+        --app-inline-pad: max(22px, env(safe-area-inset-left), env(safe-area-inset-right));
     }
     .app-shell {
-        padding: 36px var(--app-inline-pad) 180px;
+        padding: 28px var(--app-inline-pad) 160px;
     }
 }
 
