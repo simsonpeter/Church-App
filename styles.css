@@ -224,6 +224,8 @@ body.splash-active {
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
     transform: rotate(18deg);
     animation: shine 7.5s ease-in-out infinite;
+    z-index: 0;
+    pointer-events: none;
 }
 
 .app-header h1 {
@@ -231,7 +233,7 @@ body.splash-active {
     font-size: 1.42rem;
     line-height: 1.2;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -240,7 +242,7 @@ body.splash-active {
     font-size: 0.95rem;
     color: #ffe3e3;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -252,7 +254,7 @@ body.splash-active {
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    z-index: 3;
+    z-index: 10;
 }
 
 .theme-toggle {
@@ -333,7 +335,7 @@ body.splash-active {
     align-items: center;
     gap: 6px;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     padding-right: 0;
 }
 
@@ -2107,7 +2109,7 @@ body.sermon-player-open {
 }
 
 /* Clear fixed tab bar (~72–88px) + safe area; Tamil/long labels need extra room */
-/* Above .home-global-fab (5100) so play/close stay tappable; below songbook (5200) and bible fullscreen (5300). */
+/* Below .home-global-fab (5600) so theme/lang FABs stay tappable; below songbook (5200) and bible fullscreen (5300). */
 .mini-sermon-player {
     position: fixed;
     left: 50%;
@@ -4078,7 +4080,7 @@ body.bible-fullscreen-open .offline-badge {
 .home-global-fab {
     position: fixed;
     right: max(14px, env(safe-area-inset-right));
-    z-index: 5100;
+    z-index: 5600;
     width: 52px;
     height: 52px;
     border-radius: 50%;
