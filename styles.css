@@ -1704,6 +1704,11 @@ body.app-update-open {
     overflow: visible;
 }
 
+/* Fullscreen Bible: must clip so the verse list can scroll inside fixed viewport */
+.card.bible-card.bible-card-fullscreen:has(ul.list) {
+    overflow: hidden;
+}
+
 @media (hover: hover) and (pointer: fine) {
     .card ul.list > li:hover {
         transform: translateY(-4px);
@@ -3903,6 +3908,11 @@ body.bible-fullscreen-open .offline-badge {
     display: none !important;
 }
 
+.bible-card.bible-card-fullscreen .card-banner,
+.bible-card.bible-card-fullscreen > p.page-note:first-of-type {
+    display: none !important;
+}
+
 .bible-card.bible-card-fullscreen .bible-toolbar {
     margin: 0;
     justify-content: flex-end;
@@ -3958,12 +3968,15 @@ body.bible-fullscreen-open .offline-badge {
 .bible-card.bible-card-fullscreen .bible-verse-list {
     margin-top: 0;
     max-height: none;
-    flex: 1 1 auto;
+    flex: 1 1 0%;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    position: relative;
+    z-index: 1;
 }
 
 #admin-mailbox-refresh {
