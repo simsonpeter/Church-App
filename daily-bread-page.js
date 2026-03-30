@@ -213,7 +213,7 @@
     }
 
     /**
-     * Strip decorative lines (====, ----, …) and soften chapter:verse so TTS does not read "45 22" as a clock time.
+     * Strip decorative lines (====, ----, …) and rewrite chapter:verse so TTS does not read references like "3:16" as clock time.
      */
     function sanitizeTextForSpeech(raw) {
         var s = String(raw || "");
@@ -250,10 +250,6 @@
             var afterIdx = offset + full.length;
             var after = afterIdx < s.length ? s.charAt(afterIdx) : "";
             if (/\d/.test(before) || /\d/.test(after)) {
-                return full;
-            }
-            var plausibleClock = na <= 23 && nb <= 59;
-            if (plausibleClock) {
                 return full;
             }
             return a + ", " + b;
