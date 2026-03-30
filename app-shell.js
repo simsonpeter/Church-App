@@ -1479,10 +1479,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bf8";
+    var SW_VERSION = "20260330bf9";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Bible & daily bread: background TTS + lock screen controls; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Menu: one Daily bread; Contact after Sermons; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -3262,12 +3262,6 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
-        var dailyBreadMenuLink = document.createElement("a");
-        dailyBreadMenuLink.className = "header-menu-link";
-        dailyBreadMenuLink.href = "#daily-bread";
-        dailyBreadMenuLink.innerHTML = "<i class=\"fa-solid fa-bread-slice\"></i><span></span>";
-        bibleSongLinksContainer.appendChild(dailyBreadMenuLink);
-
         var triviaLink = document.createElement("a");
         triviaLink.className = "header-menu-link";
         triviaLink.href = "#trivia";
@@ -3304,12 +3298,6 @@
         adminLink.href = "#admin";
         adminLink.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\"></i><span></span>";
         utilityLinksContainer.appendChild(adminLink);
-
-        var contactMenuLink = document.createElement("a");
-        contactMenuLink.className = "header-menu-link";
-        contactMenuLink.href = "#contact";
-        contactMenuLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span></span>";
-        utilityLinksContainer.appendChild(contactMenuLink);
 
         var settingsLink = document.createElement("a");
         settingsLink.className = "header-menu-link";
@@ -3360,7 +3348,7 @@
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons", "daily-bread"];
+            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact", "daily-bread"];
             var routeMap = {};
             primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
@@ -3375,6 +3363,16 @@
                 routeMap[route] = anchor;
             });
             allowedRoutes.forEach(function (route) {
+                if (route === "contact") {
+                    var contactLabel = t("menu.contact", "Contact us");
+                    var contactLink = document.createElement("a");
+                    contactLink.className = "header-menu-link header-menu-tab-link";
+                    contactLink.href = "#settings";
+                    contactLink.setAttribute("data-route", "contact");
+                    contactLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span>" + escapeHtml(contactLabel) + "</span>";
+                    primaryLinksContainer.appendChild(contactLink);
+                    return;
+                }
                 var anchor = routeMap[route];
                 if (!anchor) {
                     return;
@@ -3492,14 +3490,12 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
-            var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
             var chatLabel = t("menu.chat", "Chat");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
-            var contactMenuLabel = t("menu.contact", "Contact us");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var profile = getProfileForUser(activeUser);
@@ -3547,10 +3543,6 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
-            var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
-            if (dailyBreadNode) {
-                dailyBreadNode.textContent = dailyBreadMenuLabel;
-            }
             var triviaNode = triviaLink.querySelector("span");
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
@@ -3566,10 +3558,6 @@
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
-            }
-            var contactMenuNode = contactMenuLink.querySelector("span");
-            if (contactMenuNode) {
-                contactMenuNode.textContent = contactMenuLabel;
             }
             var mailboxNode = mailboxLink.querySelector("span");
             if (mailboxNode) {
@@ -3591,27 +3579,27 @@
             var currentRoute = getCurrentRoute();
             primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
-                link.classList.toggle("active", Boolean(route) && route === currentRoute);
+                var active = Boolean(route) && route === currentRoute;
+                if (route === "contact" && currentRoute === "settings") {
+                    active = true;
+                }
+                link.classList.toggle("active", active);
             });
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
-            var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
-            var isContact = getCurrentRoute() === "contact";
             var isSettings = getCurrentRoute() === "settings";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
-            dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
-            contactMenuLink.classList.toggle("active", isContact);
             settingsLink.classList.toggle("active", isSettings);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
