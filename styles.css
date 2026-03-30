@@ -909,6 +909,20 @@ html[data-theme="dark"] .daily-bread-author-line {
     margin-top: 12px;
 }
 
+.admin-library-thumb-wrap {
+    margin: 6px 0 0;
+}
+
+.admin-library-thumb {
+    width: 72px;
+    height: auto;
+    max-height: 108px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+    display: block;
+}
+
 .library-book-card {
     padding: 14px 0;
     border-bottom: 1px solid var(--line, rgba(0, 0, 0, 0.08));
@@ -916,6 +930,32 @@ html[data-theme="dark"] .daily-bread-author-line {
 
 .library-book-card:last-child {
     border-bottom: none;
+}
+
+.library-book-main {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.library-book-cover-wrap {
+    flex-shrink: 0;
+}
+
+.library-book-cover {
+    width: 96px;
+    height: auto;
+    max-height: 144px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--line, rgba(0, 0, 0, 0.12));
+    display: block;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.library-book-text {
+    flex: 1;
+    min-width: 0;
 }
 
 .library-book-top {

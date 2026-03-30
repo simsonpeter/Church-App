@@ -39,6 +39,7 @@
     var libraryAuthorInput = document.getElementById("admin-library-author");
     var libraryAuthorTaInput = document.getElementById("admin-library-author-ta");
     var libraryUrlInput = document.getElementById("admin-library-url");
+    var libraryCoverInput = document.getElementById("admin-library-cover");
     var libraryFormatInput = document.getElementById("admin-library-format");
     var libraryCategoryInput = document.getElementById("admin-library-category");
     var libraryCategoryTaInput = document.getElementById("admin-library-category-ta");
@@ -312,6 +313,7 @@
             category: String(source.category || "").trim(),
             categoryTa: String(source.categoryTa || "").trim(),
             url: url,
+            coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase(),
             sortOrder: Number(source.sortOrder) || 0,
             createdAt: String(source.createdAt || ""),
@@ -407,9 +409,14 @@
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
             var urlShort = String(entry.url || "").replace(/^https?:\/\//, "").slice(0, 72);
+            var cover = String(entry.coverImageUrl || "").trim();
+            var thumb = /^https:\/\//i.test(cover)
+                ? ("<p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(cover) + "\" alt=\"\" width=\"72\" height=\"108\" loading=\"lazy\" decoding=\"async\"></p>")
+                : "";
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(titleLine) + "</h3>" +
+                thumb +
                 "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.url || "").length > 72 ? "…" : "")) + "</a></p>" +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-library-id=\"" + escapeHtml(id) + "\" data-admin-library-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
@@ -1195,6 +1202,11 @@
             showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
             return;
         }
+        var coverUrl = String(libraryCoverInput && libraryCoverInput.value || "").trim();
+        if (coverUrl && !/^https:\/\//i.test(coverUrl)) {
+            showNote("validation", "admin.libraryNeedCoverUrl", "Cover image must be a secure URL (https://…) or leave it empty.");
+            return;
+        }
         setBusyState(true);
         fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
             var list = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
@@ -1207,6 +1219,7 @@
                 author: String(libraryAuthorInput && libraryAuthorInput.value || "").trim(),
                 authorTa: String(libraryAuthorTaInput && libraryAuthorTaInput.value || "").trim(),
                 url: fileUrl,
+                coverImageUrl: coverUrl,
                 format: String(libraryFormatInput && libraryFormatInput.value || "").trim().toLowerCase(),
                 category: String(libraryCategoryInput && libraryCategoryInput.value || "").trim(),
                 categoryTa: String(libraryCategoryTaInput && libraryCategoryTaInput.value || "").trim(),
@@ -1296,6 +1309,10 @@
             if (nextUrl === null) {
                 return;
             }
+            var nextCover = window.prompt(T("admin.libraryEditPromptCover", "Cover image URL (https, optional)"), String(current.coverImageUrl || ""));
+            if (nextCover === null) {
+                return;
+            }
             var nextFormat = window.prompt(T("admin.libraryEditPromptFormat", "Format (optional, e.g. pdf)"), String(current.format || ""));
             if (nextFormat === null) {
                 return;
@@ -1318,6 +1335,7 @@
             }
             var cleanTitle = String(nextTitle || "").trim();
             var cleanUrl = String(nextUrl || "").trim();
+            var cleanCover = String(nextCover || "").trim();
             if (!cleanTitle) {
                 showNote("validation", "admin.libraryNeedTitle", "Please enter a title.");
                 return;
@@ -1326,12 +1344,17 @@
                 showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
                 return;
             }
+            if (cleanCover && !/^https:\/\//i.test(cleanCover)) {
+                showNote("validation", "admin.libraryNeedCoverUrl", "Cover image must be https:// or empty.");
+                return;
+            }
             source[targetIndex] = Object.assign({}, current, {
                 title: cleanTitle,
                 titleTa: String(nextTitleTa || "").trim(),
                 author: String(nextAuthor || "").trim(),
                 authorTa: String(nextAuthorTa || "").trim(),
                 url: cleanUrl,
+                coverImageUrl: cleanCover,
                 format: String(nextFormat || "").trim().toLowerCase(),
                 category: String(nextCategory || "").trim(),
                 categoryTa: String(nextCategoryTa || "").trim(),

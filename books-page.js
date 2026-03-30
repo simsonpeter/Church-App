@@ -1,6 +1,6 @@
 (function () {
     var MANTLE_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
-    var FALLBACK_JSON = "./books.json?v=20260330lib2";
+    var FALLBACK_JSON = "./books.json?v=20260330lib3";
     var listEl = document.getElementById("library-books-list");
     var statusEl = document.getElementById("library-books-status");
     var pageCard = document.querySelector(".library-page-card");
@@ -48,6 +48,7 @@
             category: String(source.category || "").trim(),
             categoryTa: String(source.categoryTa || "").trim(),
             url: url,
+            coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase() || guessFormat(url),
             sortOrder: Number(source.sortOrder) || 0,
             updatedAt: String(source.updatedAt || ""),
@@ -151,22 +152,35 @@
             var desc = p.description
                 ? ("<p class=\"library-book-desc page-note\">" + escapeHtml(p.description) + "</p>")
                 : "";
+            var coverUrl = String(entry.coverImageUrl || "").trim();
+            var coverBlock = "";
+            if (isValidHttpsUrl(coverUrl)) {
+                coverBlock = "" +
+                    "<div class=\"library-book-cover-wrap\">" +
+                    "  <img class=\"library-book-cover\" src=\"" + escapeHtml(coverUrl) + "\" alt=\"\" width=\"96\" height=\"144\" loading=\"lazy\" decoding=\"async\">" +
+                    "</div>";
+            }
             return "" +
                 "<li class=\"library-book-card\">" +
-                "  <div class=\"library-book-top\">" +
-                "    <h3 class=\"library-book-title\">" + escapeHtml(title) + "</h3>" +
-                "    <span class=\"library-book-format\">" + escapeHtml(fmt) + "</span>" +
-                "  </div>" +
+                "  <div class=\"library-book-main\">" +
+                coverBlock +
+                "    <div class=\"library-book-text\">" +
+                "      <div class=\"library-book-top\">" +
+                "        <h3 class=\"library-book-title\">" + escapeHtml(title) + "</h3>" +
+                "        <span class=\"library-book-format\">" + escapeHtml(fmt) + "</span>" +
+                "      </div>" +
                 catLine +
                 authorLine +
                 desc +
-                "  <div class=\"library-book-actions\">" +
-                "    <a class=\"button-link button-secondary\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" +
-                "      <i class=\"fa-solid fa-book-open\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.read", "Read")) +
-                "    </a>" +
-                "    <a class=\"button-link\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\">" +
-                "      <i class=\"fa-solid fa-download\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.download", "Download")) +
-                "    </a>" +
+                "      <div class=\"library-book-actions\">" +
+                "        <a class=\"button-link button-secondary\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" +
+                "          <i class=\"fa-solid fa-book-open\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.read", "Read")) +
+                "        </a>" +
+                "        <a class=\"button-link\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\">" +
+                "          <i class=\"fa-solid fa-download\" aria-hidden=\"true\"></i> " + escapeHtml(T("library.download", "Download")) +
+                "        </a>" +
+                "      </div>" +
+                "    </div>" +
                 "  </div>" +
                 "</li>";
         }).filter(Boolean).join("");
