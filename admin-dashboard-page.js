@@ -6,6 +6,7 @@
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
     var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
+    var ADMIN_DAILY_BREAD_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
     var MAX_ENTRIES = 250;
 
     var refreshButton = document.getElementById("admin-dashboard-refresh");
@@ -21,6 +22,14 @@
     var prayerList = document.getElementById("admin-prayer-list");
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaForm = document.getElementById("admin-trivia-form");
+    var dailyBreadForm = document.getElementById("admin-daily-bread-form");
+    var dailyBreadDateInput = document.getElementById("admin-daily-bread-date");
+    var dailyBreadTitleInput = document.getElementById("admin-daily-bread-title");
+    var dailyBreadTitleTaInput = document.getElementById("admin-daily-bread-title-ta");
+    var dailyBreadBodyInput = document.getElementById("admin-daily-bread-body");
+    var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
+    var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
+    var dailyBreadList = document.getElementById("admin-daily-bread-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -75,9 +84,10 @@
     var cachedSermons = [];
     var cachedPrayers = [];
     var cachedTrivia = [];
+    var cachedDailyBread = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !noticeForm || !broadcastForm || !eventForm || !sermonForm) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm) {
         return;
     }
 
@@ -134,6 +144,9 @@
         if (triviaSubmit) {
             triviaSubmit.disabled = busy;
         }
+        if (dailyBreadSubmit) {
+            dailyBreadSubmit.disabled = busy;
+        }
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
             button.disabled = busy;
         });
@@ -151,6 +164,11 @@
         });
         if (triviaList) {
             triviaList.querySelectorAll("button[data-admin-trivia-id]").forEach(function (button) {
+                button.disabled = busy;
+            });
+        }
+        if (dailyBreadList) {
+            dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
                 button.disabled = busy;
             });
         }
@@ -207,7 +225,7 @@
             return "#prayer";
         }
         if (key === "contact") {
-            return "#prayer";
+            return "#settings";
         }
         return "#home";
     }
@@ -252,6 +270,60 @@
             urgent: Boolean(source.urgent),
             createdAt: String(source.createdAt || "")
         };
+    }
+
+    function normalizeDailyBreadEntry(entry, index) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var dateKey = toYmd(source.date || source.showDate || "");
+        return {
+            id: String(source.id || "").trim() || ("daily-bread-" + index),
+            date: dateKey,
+            title: String(source.title || "").trim(),
+            titleTa: String(source.titleTa || "").trim(),
+            body: String(source.body || "").trim(),
+            bodyTa: String(source.bodyTa || "").trim(),
+            createdAt: String(source.createdAt || ""),
+            updatedAt: String(source.updatedAt || ""),
+            createdByEmail: String(source.createdByEmail || "").trim()
+        };
+    }
+
+    function renderDailyBreadList() {
+        if (!dailyBreadList) {
+            return;
+        }
+        var valid = cachedDailyBread.filter(function (e) {
+            return e && /^\d{4}-\d{2}-\d{2}$/.test(e.date);
+        });
+        if (!valid.length) {
+            dailyBreadList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.dailyBreadEmptyTitle", "No entries yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.dailyBreadEmptyBody", "Add one using the form above.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = valid.slice().sort(function (a, b) {
+            return String(b.date).localeCompare(String(a.date));
+        }).slice(0, 120);
+        dailyBreadList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry.id || "").trim();
+            var titleLine = entry.title || entry.titleTa || "—";
+            var preview = (entry.body || entry.bodyTa || "").replace(/\s+/g, " ").trim().slice(0, 120);
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(entry.date) + "</h3>" +
+                "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong></p>" +
+                (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + (preview.length >= 120 ? "…" : "") + "</p>") : "") +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-daily-bread-id=\"" + escapeHtml(id) + "\" data-admin-daily-bread-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-daily-bread-id=\"" + escapeHtml(id) + "\" data-admin-daily-bread-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        dailyBreadList.querySelectorAll("button[data-admin-daily-bread-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
     }
 
     function fetchMantleEntries(url) {
@@ -564,6 +636,12 @@
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
         }
+        if (dailyBreadList) {
+            dailyBreadList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+                "</li>";
+        }
         statNotices.textContent = "0";
         statEvents.textContent = "0";
         statSermons.textContent = "0";
@@ -589,6 +667,11 @@
                 node.disabled = !active;
             });
         }
+        if (dailyBreadForm) {
+            dailyBreadForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -602,7 +685,7 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -610,6 +693,7 @@
             renderSermonList();
             renderPrayerList();
             renderTriviaList();
+            renderDailyBreadList();
             return;
         }
         setBusyState(true);
@@ -620,7 +704,8 @@
             fetchMantleEntries(ADMIN_EVENTS_URL),
             fetchMantleEntries(ADMIN_SERMONS_URL),
             fetchMantleEntries(PRAYER_WALL_URL),
-            fetchMantleEntries(TRIVIA_URL)
+            fetchMantleEntries(TRIVIA_URL),
+            fetchMantleEntries(ADMIN_DAILY_BREAD_URL)
         ]).then(function (results) {
             function extract(idx) {
                 var r = results[idx];
@@ -636,6 +721,11 @@
                 return Boolean(item && item.id);
             });
             cachedTrivia = extract(5);
+            cachedDailyBread = extract(6).map(function (row, idx) {
+                return normalizeDailyBreadEntry(row, idx);
+            }).filter(function (item) {
+                return Boolean(item && item.date);
+            });
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -643,6 +733,7 @@
             renderSermonList();
             renderPrayerList();
             renderTriviaList();
+            renderDailyBreadList();
             var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
             if (failed > 0) {
                 showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
@@ -655,6 +746,7 @@
             renderSermonList();
             renderPrayerList();
             renderTriviaList();
+            renderDailyBreadList();
         }).finally(function () {
             setBusyState(false);
         });
@@ -858,6 +950,94 @@
             var msg = T("admin.syncError", "Could not save. Try again.");
             if (sermonNote) { sermonNote.textContent = msg; sermonNote.dataset.state = "error"; }
             showNote("error", "admin.syncError", msg);
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    function upsertDailyBreadOnServer(entry) {
+        return fetchMantleEntries(ADMIN_DAILY_BREAD_URL).then(function (raw) {
+            var rows = Array.isArray(raw) ? raw : [];
+            var list = rows.map(function (row, idx) {
+                return normalizeDailyBreadEntry(row, idx);
+            }).filter(function (e) {
+                return Boolean(e && e.date);
+            });
+            var targetDate = String(entry && entry.date || "").trim();
+            var existingIdx = list.findIndex(function (e) {
+                return e.date === targetDate;
+            });
+            if (existingIdx >= 0) {
+                var cur = list[existingIdx];
+                list[existingIdx] = Object.assign({}, cur, {
+                    title: String(entry.title || "").trim(),
+                    titleTa: String(entry.titleTa || "").trim(),
+                    body: String(entry.body || "").trim(),
+                    bodyTa: String(entry.bodyTa || "").trim(),
+                    updatedAt: new Date().toISOString()
+                });
+            } else {
+                list.unshift({
+                    id: String(entry.id || makeEntryId("daily-bread")),
+                    date: targetDate,
+                    title: String(entry.title || "").trim(),
+                    titleTa: String(entry.titleTa || "").trim(),
+                    body: String(entry.body || "").trim(),
+                    bodyTa: String(entry.bodyTa || "").trim(),
+                    createdAt: new Date().toISOString(),
+                    createdByEmail: normalizeEmail(getUser() && getUser().email),
+                    updatedAt: ""
+                });
+            }
+            return saveMantleEntries(ADMIN_DAILY_BREAD_URL, list).then(function () {
+                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+            });
+        });
+    }
+
+    dailyBreadForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var dateKey = toYmd(dailyBreadDateInput && dailyBreadDateInput.value);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateKey)) {
+            showNote("validation", "admin.dailyBreadNeedDate", "Please pick a valid date.");
+            return;
+        }
+        var titleEn = String(dailyBreadTitleInput && dailyBreadTitleInput.value || "").trim();
+        var titleTa = String(dailyBreadTitleTaInput && dailyBreadTitleTaInput.value || "").trim();
+        var bodyEn = String(dailyBreadBodyInput && dailyBreadBodyInput.value || "").trim();
+        var bodyTa = String(dailyBreadBodyTaInput && dailyBreadBodyTaInput.value || "").trim();
+        if (!bodyEn && !bodyTa) {
+            showNote("validation", "admin.dailyBreadNeedBody", "Please enter body text (English or Tamil).");
+            return;
+        }
+        setBusyState(true);
+        upsertDailyBreadOnServer({
+            id: makeEntryId("daily-bread"),
+            date: dateKey,
+            title: titleEn,
+            titleTa: titleTa,
+            body: bodyEn,
+            bodyTa: bodyTa
+        }).then(function (entries) {
+            var rows = Array.isArray(entries) ? entries : [];
+            cachedDailyBread = rows.map(function (row, idx) {
+                return normalizeDailyBreadEntry(row, idx);
+            }).filter(function (e) {
+                return Boolean(e && e.date);
+            });
+            dailyBreadDateInput.value = "";
+            if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
+            if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
+            if (dailyBreadBodyInput) dailyBreadBodyInput.value = "";
+            if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = "";
+            renderDailyBreadList();
+            showNote("success", "admin.dailyBreadSaved", "Daily bread saved.");
+            document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not save. Check MantleDB bucket exists.");
         }).finally(function () {
             setBusyState(false);
         });
@@ -1469,6 +1649,121 @@
         });
     }
 
+    if (dailyBreadList) {
+        dailyBreadList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-daily-bread-id][data-admin-daily-bread-action]");
+            if (!button || busy || !isAdminUser()) {
+                return;
+            }
+            var entryId = String(button.getAttribute("data-admin-daily-bread-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-daily-bread-action") || "").trim();
+            if (!entryId || (action !== "edit" && action !== "delete")) {
+                return;
+            }
+            var source = cachedDailyBread.slice(0, MAX_ENTRIES);
+            var targetIndex = source.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            if (targetIndex < 0) {
+                showNote("error", "admin.syncError", "Could not find entry.");
+                return;
+            }
+            if (action === "delete") {
+                if (!window.confirm(T("admin.dailyBreadDeleteConfirm", "Delete this daily bread entry?"))) {
+                    return;
+                }
+                source.splice(targetIndex, 1);
+                setBusyState(true);
+                saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+                }).then(function (entries) {
+                    var rows = Array.isArray(entries) ? entries : [];
+                    cachedDailyBread = rows.map(function (row, idx) {
+                        return normalizeDailyBreadEntry(row, idx);
+                    }).filter(function (e) {
+                        return Boolean(e && e.date);
+                    });
+                    renderDailyBreadList();
+                    showNote("success", "admin.dailyBreadDeleted", "Deleted.");
+                    document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.syncError", "Could not delete.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+                return;
+            }
+            var current = source[targetIndex] || {};
+            var nextDate = window.prompt(T("admin.dailyBreadEditPromptDate", "Edit date (YYYY-MM-DD)"), String(current.date || ""));
+            if (nextDate === null) {
+                return;
+            }
+            var nextTitleEn = window.prompt(T("admin.dailyBreadEditPromptTitleEn", "Edit title (English)"), String(current.title || ""));
+            if (nextTitleEn === null) {
+                return;
+            }
+            var nextTitleTa = window.prompt(T("admin.dailyBreadEditPromptTitleTa", "Edit title (Tamil, optional)"), String(current.titleTa || ""));
+            if (nextTitleTa === null) {
+                return;
+            }
+            var nextBodyEn = window.prompt(T("admin.dailyBreadEditPromptBodyEn", "Edit body (English)"), String(current.body || ""));
+            if (nextBodyEn === null) {
+                return;
+            }
+            var nextBodyTa = window.prompt(T("admin.dailyBreadEditPromptBodyTa", "Edit body (Tamil, optional)"), String(current.bodyTa || ""));
+            if (nextBodyTa === null) {
+                return;
+            }
+            var cleanDate = toYmd(nextDate);
+            var cleanBodyEn = String(nextBodyEn || "").trim();
+            var cleanBodyTa = String(nextBodyTa || "").trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
+                showNote("validation", "admin.dailyBreadNeedDate", "Invalid date.");
+                return;
+            }
+            if (!cleanBodyEn && !cleanBodyTa) {
+                showNote("validation", "admin.dailyBreadNeedBody", "Body required.");
+                return;
+            }
+            var oldDate = String(current.date || "");
+            if (cleanDate !== oldDate) {
+                var clash = source.some(function (e, i) {
+                    return i !== targetIndex && e.date === cleanDate;
+                });
+                if (clash) {
+                    showNote("validation", "admin.dailyBreadNeedDate", "That date already has an entry.");
+                    return;
+                }
+            }
+            source[targetIndex] = Object.assign({}, current, {
+                date: cleanDate,
+                title: String(nextTitleEn || "").trim(),
+                titleTa: String(nextTitleTa || "").trim(),
+                body: cleanBodyEn,
+                bodyTa: cleanBodyTa,
+                updatedAt: new Date().toISOString()
+            });
+            setBusyState(true);
+            saveMantleEntries(ADMIN_DAILY_BREAD_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_DAILY_BREAD_URL);
+            }).then(function (entries) {
+                var rows = Array.isArray(entries) ? entries : [];
+                cachedDailyBread = rows.map(function (row, idx) {
+                    return normalizeDailyBreadEntry(row, idx);
+                }).filter(function (e) {
+                    return Boolean(e && e.date);
+                });
+                renderDailyBreadList();
+                showNote("success", "admin.dailyBreadUpdated", "Updated.");
+                document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not update.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
+
     refreshButton.addEventListener("click", function () {
         loadDashboard(true);
     });
@@ -1491,6 +1786,7 @@
             renderSermonList();
             renderPrayerList();
             renderTriviaList();
+            renderDailyBreadList();
         }
     });
 

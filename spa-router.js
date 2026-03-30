@@ -38,6 +38,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "daily-bread": {
+            icon: "fa-bread-slice",
+            eyebrowKey: "dailyBread.eyebrow",
+            eyebrowText: "Daily bread",
+            titleKey: "dailyBread.title",
+            titleText: "Daily bread",
+            subtitleKey: "dailyBread.subtitle",
+            subtitleText: "அன்றன்றுள்ள அப்பம்"
+        },
         bible: {
             icon: "fa-book-bible",
             eyebrowKey: "bible.eyebrow",
@@ -82,15 +91,6 @@
             titleText: "Chat",
             subtitleKey: "chat.subtitle",
             subtitleText: "Text only, members only"
-        },
-        contact: {
-            icon: "fa-phone",
-            eyebrowKey: "contact.eyebrow",
-            eyebrowText: "Contact",
-            titleKey: "contact.title",
-            titleText: "Reach our team",
-            subtitleKey: "",
-            subtitleText: ""
         },
         profile: {
             icon: "fa-user",
@@ -213,6 +213,9 @@
         var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (raw === "about") {
             return "prayer";
+        }
+        if (raw === "contact") {
+            return "settings";
         }
         if ((raw === "mailbox" || raw === "admin") && !isAdminUser()) {
             return "home";

@@ -808,44 +808,20 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
-/* WordOfGod.in “அன்றன்றுள்ள அப்பம்” — embedded latest Tamil devotion (their site sets the daily content). */
-.daily-bread-card {
-    overflow: hidden;
+.daily-bread-page-card .daily-bread-heading {
+    margin: 12px 0 8px;
+    font-size: 1.12rem;
+    font-weight: 750;
+    color: var(--text);
+    line-height: 1.35;
 }
 
-.daily-bread-credit {
-    margin-bottom: 10px;
-}
-
-.daily-bread-frame-wrap {
-    margin: 0 calc(-1 * var(--card-pad)) 12px;
-    width: calc(100% + var(--card-pad-start) + var(--card-pad-end));
-    max-width: none;
-    box-sizing: border-box;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--line);
-    background: var(--surface-soft);
-    line-height: 0;
-}
-
-.daily-bread-iframe {
-    display: block;
-    width: 100%;
-    height: min(58vh, 480px);
-    border: 0;
-    background: #fff;
-}
-
-.daily-bread-open-wrap {
-    margin: 0;
-    text-align: center;
-}
-
-@media (min-width: 600px) {
-    .daily-bread-iframe {
-        height: min(52vh, 520px);
-    }
+.daily-bread-body {
+    color: var(--text);
+    font-size: 0.94rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
 }
 
 .daily-verse-card {
