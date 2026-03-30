@@ -808,20 +808,157 @@ a.card:hover > h2:not(:first-child) i {
     flex: 0 0 auto;
 }
 
+/* Daily bread page — richer hierarchy + justified reading body */
+.daily-bread-page-card .daily-bread-subtitle {
+    margin-top: 2px;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--header-end);
+    letter-spacing: 0.02em;
+    line-height: 1.45;
+}
+
+.daily-bread-page-card .daily-bread-date-line {
+    margin-top: 0;
+    margin-bottom: 4px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-warm);
+}
+
+.daily-bread-content {
+    margin-top: 4px;
+}
+
+.daily-bread-reading {
+    margin-top: 6px;
+    padding: 16px 16px 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(229, 57, 53, 0.18);
+    background: linear-gradient(
+        165deg,
+        rgba(255, 248, 246, 0.95) 0%,
+        rgba(255, 252, 250, 0.88) 45%,
+        rgba(255, 243, 240, 0.75) 100%
+    );
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.85) inset;
+}
+
 .daily-bread-page-card .daily-bread-heading {
-    margin: 12px 0 8px;
-    font-size: 1.12rem;
-    font-weight: 750;
+    margin: 0 0 14px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid transparent;
+    border-image: linear-gradient(90deg, var(--header-start), var(--accent-warm), var(--header-end)) 1;
+    font-size: 1.22rem;
+    font-weight: 780;
+    line-height: 1.32;
+    letter-spacing: -0.02em;
     color: var(--header-mid);
-    line-height: 1.35;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    .daily-bread-page-card .daily-bread-heading {
+        background: linear-gradient(120deg, var(--header-start) 0%, var(--header-mid) 45%, var(--header-end) 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
+}
+
+.daily-bread-page-card .daily-bread-heading:empty {
+    display: none;
 }
 
 .daily-bread-body {
     color: var(--text);
-    font-size: 0.94rem;
-    line-height: 1.55;
+    font-size: 0.96rem;
+    line-height: 1.72;
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    -webkit-hyphens: auto;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+html[lang="ta"] .daily-bread-body {
+    text-align: start;
+}
+
+.daily-bread-body:empty {
+    min-height: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-subtitle {
+        color: #fca5a5;
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-date-line {
+        color: #fbbf77;
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-reading {
+        border-color: rgba(248, 113, 113, 0.22);
+        background: linear-gradient(
+            165deg,
+            rgba(38, 24, 24, 0.55) 0%,
+            rgba(28, 22, 22, 0.42) 50%,
+            rgba(22, 18, 18, 0.38) 100%
+        );
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
+        color: #fca5a5;
+    }
+
+    @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+        :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
+            background: linear-gradient(120deg, #fecaca 0%, #fca5a5 40%, #fdba74 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-fill-color: transparent;
+        }
+    }
+}
+
+html[data-theme="dark"] .daily-bread-page-card .daily-bread-subtitle {
+    color: #fca5a5;
+}
+
+html[data-theme="dark"] .daily-bread-page-card .daily-bread-date-line {
+    color: #fbbf77;
+}
+
+html[data-theme="dark"] .daily-bread-reading {
+    border-color: rgba(248, 113, 113, 0.22);
+    background: linear-gradient(
+        165deg,
+        rgba(38, 24, 24, 0.55) 0%,
+        rgba(28, 22, 22, 0.42) 50%,
+        rgba(22, 18, 18, 0.38) 100%
+    );
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
+    color: #fca5a5;
+}
+
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
+        background: linear-gradient(120deg, #fecaca 0%, #fca5a5 40%, #fdba74 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        -webkit-text-fill-color: transparent;
+    }
 }
 
 .daily-bread-tts-row {
