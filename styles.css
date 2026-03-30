@@ -811,12 +811,52 @@ a.card:hover > h2:not(:first-child) i {
 /* Daily bread page — richer hierarchy + justified reading body */
 .daily-bread-page-card .daily-bread-subtitle {
     margin-top: 2px;
-    margin-bottom: 6px;
+    margin-bottom: 8px;
     font-size: 0.88rem;
     font-weight: 600;
     color: var(--header-end);
     letter-spacing: 0.02em;
     line-height: 1.45;
+}
+
+.daily-bread-subtitle-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+}
+
+.daily-bread-subtitle-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 750;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+}
+
+.daily-bread-subtitle-pill i {
+    font-size: 0.88rem;
+    opacity: 0.95;
+}
+
+.daily-bread-subtitle-pill--verse {
+    color: #7c1d1d;
+    background: linear-gradient(135deg, rgba(255, 235, 238, 0.95), rgba(255, 205, 210, 0.55));
+    border-color: rgba(198, 40, 40, 0.22);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
+}
+
+.daily-bread-subtitle-pill--meditation {
+    color: #5d4037;
+    background: linear-gradient(135deg, rgba(255, 248, 225, 0.95), rgba(255, 224, 178, 0.55));
+    border-color: rgba(230, 126, 34, 0.25);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.7) inset;
 }
 
 .daily-bread-page-card .daily-bread-date-line {
@@ -898,6 +938,18 @@ html[lang="ta"] .daily-bread-body {
         color: #fca5a5;
     }
 
+    :root:not([data-theme="light"]) .daily-bread-subtitle-pill--verse {
+        color: #fecaca;
+        background: linear-gradient(135deg, rgba(127, 29, 29, 0.45), rgba(153, 27, 27, 0.28));
+        border-color: rgba(248, 113, 113, 0.28);
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-subtitle-pill--meditation {
+        color: #fde68a;
+        background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(146, 64, 14, 0.28));
+        border-color: rgba(251, 191, 36, 0.22);
+    }
+
     :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-date-line {
         color: #fbbf77;
     }
@@ -930,6 +982,18 @@ html[lang="ta"] .daily-bread-body {
 
 html[data-theme="dark"] .daily-bread-page-card .daily-bread-subtitle {
     color: #fca5a5;
+}
+
+html[data-theme="dark"] .daily-bread-subtitle-pill--verse {
+    color: #fecaca;
+    background: linear-gradient(135deg, rgba(127, 29, 29, 0.45), rgba(153, 27, 27, 0.28));
+    border-color: rgba(248, 113, 113, 0.28);
+}
+
+html[data-theme="dark"] .daily-bread-subtitle-pill--meditation {
+    color: #fde68a;
+    background: linear-gradient(135deg, rgba(120, 53, 15, 0.42), rgba(146, 64, 14, 0.28));
+    border-color: rgba(251, 191, 36, 0.22);
 }
 
 html[data-theme="dark"] .daily-bread-page-card .daily-bread-date-line {

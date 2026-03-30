@@ -62,8 +62,8 @@
             eyebrowText: "Daily bread",
             titleKey: "dailyBread.title",
             titleText: "Daily bread",
-            subtitleKey: "dailyBread.subtitle",
-            subtitleText: ""
+            subtitleKey: "dailyBread.headerSubtitle",
+            subtitleText: "Today’s verse · Devotion"
         },
         trivia: {
             icon: "fa-question-circle",

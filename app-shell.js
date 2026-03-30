@@ -39,6 +39,9 @@
         "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
         "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
         "dailyBread.subtitle": "இன்றைய தேதிக்கு (பெல்ஜியம் நாள்காட்டி)",
+        "dailyBread.headerSubtitle": "இன்றைய வசனம் · தியானம்",
+        "dailyBread.subtitleVerse": "இன்றைய வசனம்",
+        "dailyBread.subtitleMeditation": "தியானம்",
         "dailyBread.dateLine": "தேதி: {date}",
         "dailyBread.loading": "ஏற்றுகிறது...",
         "dailyBread.empty": "இன்றைக்கு உள்ளடக்கம் இல்லை.",
@@ -1464,10 +1467,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330db5";
+    var SW_VERSION = "20260330db6";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily bread: richer typography, justified body, colored subtitles; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: verse + devotion subtitle pills; header subtitle TA; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
