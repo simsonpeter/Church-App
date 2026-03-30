@@ -4452,6 +4452,92 @@ body.bible-fullscreen-open .offline-badge {
     margin-top: 0;
 }
 
+/* Admin: scheduled daily bread list — collapsible so long lists don’t stretch the page */
+.admin-daily-bread-scheduled-card > .admin-daily-bread-scheduled-details {
+    margin: 0;
+    border: 0;
+    padding: 0;
+}
+
+.admin-daily-bread-scheduled-summary {
+    margin: calc(-1 * var(--card-pad)) calc(-1 * var(--card-pad-end)) 12px calc(-1 * var(--card-pad-start));
+    padding: 11px calc(var(--card-pad-end) + 22px) 11px var(--card-pad-start);
+    width: calc(100% + var(--card-pad-start) + var(--card-pad-end));
+    max-width: none;
+    box-sizing: border-box;
+    list-style: none;
+    cursor: pointer;
+    font-size: 1.06rem;
+    font-weight: 750;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+    color: #ffffff;
+    background: linear-gradient(150deg, var(--header-start) 0%, var(--header-mid) 42%, var(--header-end) 100%);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
+    border-top-left-radius: var(--card-title-top-radius);
+    border-top-right-radius: var(--card-title-top-radius);
+}
+
+.admin-daily-bread-scheduled-summary::-webkit-details-marker {
+    display: none;
+}
+
+.admin-daily-bread-scheduled-summary::marker {
+    content: "";
+}
+
+.admin-daily-bread-scheduled-summary::after {
+    content: "";
+    position: absolute;
+    right: var(--card-pad-end);
+    top: 50%;
+    width: 0.45em;
+    height: 0.45em;
+    margin-top: -0.22em;
+    border-right: 2px solid rgba(255, 248, 248, 0.92);
+    border-bottom: 2px solid rgba(255, 248, 248, 0.92);
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.admin-daily-bread-scheduled-details[open] > .admin-daily-bread-scheduled-summary::after {
+    transform: rotate(-135deg);
+    margin-top: 0.1em;
+}
+
+.admin-daily-bread-scheduled-summary-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.admin-daily-bread-scheduled-summary-inner i {
+    color: rgba(255, 248, 248, 0.95);
+    font-size: 1.05rem;
+}
+
+.admin-daily-bread-scheduled-body {
+    padding-bottom: 2px;
+}
+
+.admin-daily-bread-scheduled-body > .page-note:first-child {
+    margin-top: 0;
+}
+
+.admin-daily-bread-scheduled-body .list {
+    max-height: min(60vh, 520px);
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
 .admin-subtitle {
     margin: 12px 0 6px;
     font-size: 0.92rem;

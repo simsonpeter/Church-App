@@ -126,6 +126,7 @@
         "admin.dailyBreadPublish": "அன்றன்றுள்ள அப்பம் சேமி",
         "admin.dailyBreadManageTitle": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம்",
         "admin.dailyBreadManageInfo": "தேதியால் திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
+        "admin.dailyBreadScheduledToggleAria": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம் பட்டியலை காட்டு அல்லது மறை",
         "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
         "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
         "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
@@ -1477,10 +1478,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bf1";
+    var SW_VERSION = "20260330bf2";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Bible reader: fullscreen verse list scrolls; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Admin: scheduled daily bread list is collapsible (closed by default).";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

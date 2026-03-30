@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260330bf1">
+    <link rel="stylesheet" href="styles.css?v=20260330bf2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -839,15 +839,27 @@
                 </form>
             </section>
 
-            <section class="card card-v-ink">
-                <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.dailyBreadManageTitle">Scheduled daily bread</span></h2>
-                <p class="page-note" data-i18n="admin.dailyBreadManageInfo">Edit or delete by date. Refresh loads from MantleDB.</p>
-                <ul class="list" id="admin-daily-bread-list">
-                    <li>
-                        <h3 data-i18n="admin.loading">Loading dashboard...</h3>
-                        <p data-i18n="admin.loadingBody">Please wait.</p>
-                    </li>
-                </ul>
+            <section class="card card-v-ink admin-daily-bread-scheduled-card">
+                <details class="admin-daily-bread-scheduled-details">
+                    <summary
+                        class="admin-daily-bread-scheduled-summary"
+                        data-i18n-aria-label="admin.dailyBreadScheduledToggleAria"
+                        data-i18n-aria-fallback="Show or hide scheduled daily bread list">
+                        <span class="admin-daily-bread-scheduled-summary-inner">
+                            <i class="fa-solid fa-list" aria-hidden="true"></i>
+                            <span data-i18n="admin.dailyBreadManageTitle" data-i18n-fallback="Scheduled daily bread">Scheduled daily bread</span>
+                        </span>
+                    </summary>
+                    <div class="admin-daily-bread-scheduled-body">
+                        <p class="page-note" data-i18n="admin.dailyBreadManageInfo" data-i18n-fallback="Edit or delete by date. Refresh loads from MantleDB.">Edit or delete by date. Refresh loads from MantleDB.</p>
+                        <ul class="list" id="admin-daily-bread-list">
+                            <li>
+                                <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                                <p data-i18n="admin.loadingBody">Please wait.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </details>
             </section>
 
             <section class="card card-v-mesh">
@@ -1246,7 +1258,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260330bf1"></script>
+    <script src="app-shell.js?v=20260330bf2"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
