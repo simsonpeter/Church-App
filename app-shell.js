@@ -189,10 +189,10 @@
         "home.noEventsTitle": "இப்போது நிகழ்வுகள் இல்லை",
         "home.noEventsBody": "புதுப்பிப்புகளுக்கு நிகழ்வுகள் தாவலை பார்க்கவும்.",
         "home.triviaTitle": "இன்றைய வேதாகமக் கேள்விகள்",
-        "home.triviaSubtitle": "தமிழ் வேதாகமக் கேள்விகள். காலை 8 மணிக்கு புதிய கேள்வி.",
+        "home.triviaSubtitle": "தமிழ் வேதாகமக் கேள்விகள். பெல்ஜியம் நேரத்தில் நள்ளிரவு முதல் புதிய கேள்வி.",
         "home.triviaLoading": "வேதாகமக் கேள்விகள் ஏற்றப்படுகிறது...",
-        "home.triviaEmpty": "இன்று வேதாகமக் கேள்விகள் இல்லை. நாளை காலை 8 மணிக்கு பார்க்கவும்.",
-        "home.triviaEmptyWeekend": "வேதாகமக் கேள்விகள் திங்கள் முதல் வெள்ளி காலை 8 மணி வரை கிடைக்கும்.",
+        "home.triviaEmpty": "இன்று வேதாகமக் கேள்விகள் இல்லை. நாளை பெல்ஜியம் நேரத்தில் நள்ளிரவு முதல் பார்க்கவும்.",
+        "home.triviaEmptyWeekend": "வேதாகமக் கேள்விகள் திங்கள் முதல் வெள்ளி பெல்ஜியம் நேர நள்ளிரவு முதல் கிடைக்கும்.",
         "home.triviaError": "வேதாகமக் கேள்விகளை ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
         "home.triviaCorrect": "சரி! நல்லது.",
         "home.triviaWrong": "சரியல்ல. நாளை மீண்டும் முயற்சிக்கவும்.",
@@ -593,7 +593,7 @@
         "admin.eventEmptyTitle": "நிகழ்வுகள் இல்லை",
         "admin.eventEmptyBody": "நீங்கள் சேர்த்த நிகழ்வுகள் இங்கே தோன்றும்.",
         "admin.triviaTitle": "வேதாகமக் கேள்விகள் (தமிழ்)",
-        "admin.triviaInfo": "தமிழில் வேதாகமக் கேள்விகளை சேர்க்கவும். 4 விடை விருப்பங்கள் தேவை. திங்கள்–வெள்ளி காலை 8 மணிக்கு காண்பிக்கப்படும்.",
+        "admin.triviaInfo": "தமிழில் வேதாகமக் கேள்விகளை சேர்க்கவும். 4 விடை விருப்பங்கள் தேவை. திங்கள்–வெள்ளி பெல்ஜியம் நேர நள்ளிரவு முதல் காண்பிக்கப்படும்.",
         "admin.triviaQuestionPlaceholder": "வினா தமிழில்",
         "admin.triviaOption1": "விருப்பம் 1",
         "admin.triviaOption2": "விருப்பம் 2",
@@ -645,7 +645,7 @@
         "admin.sermonEmptyTitle": "பிரசங்கங்கள் இல்லை",
         "admin.sermonEmptyBody": "நீங்கள் சேர்த்த பிரசங்கங்கள் இங்கே தோன்றும்.",
         "admin.triviaTitle": "வேதாகமக் கேள்விகள் (தமிழ்)",
-        "admin.triviaInfo": "தமிழ் வேதாகமக் கேள்விகளை சேர்க்கவும். திங்கள்–வெள்ளி திட்டமிடப்பட்ட தேதியில் காலை 8 மணிக்கு காண்பிக்கப்படும்.",
+        "admin.triviaInfo": "தமிழ் வேதாகமக் கேள்விகளை சேர்க்கவும். திங்கள்–வெள்ளி திட்டமிடப்பட்ட தேதியில் பெல்ஜியம் நேர நள்ளிரவு முதல் காண்பிக்கப்படும்.",
         "admin.triviaQuestionPlaceholder": "கேள்வி (தமிழ்)",
         "admin.triviaOptionsPlaceholder": "விருப்பங்கள் (ஒரு வரியில் ஒன்று)",
         "admin.triviaCorrectPlaceholder": "சரியான விருப்ப குறியீடு (0 முதல்)",
@@ -653,7 +653,7 @@
         "admin.triviaAdd": "வேதாகமக் கேள்வி சேர்க்க",
         "admin.triviaManageTitle": "திட்டமிடப்பட்ட வேதாகமக் கேள்விகள்",
         "admin.triviaEmptyTitle": "வேதாகமக் கேள்விகள் இல்லை",
-        "admin.triviaEmptyBody": "தமிழ் வேதாகமக் கேள்விகளை சேர்க்கவும். திட்டமிடப்பட்ட தேதியில் காலை 8 மணிக்கு காண்பிக்கப்படும்.",
+        "admin.triviaEmptyBody": "தமிழ் வேதாகமக் கேள்விகளை சேர்க்கவும். திட்டமிடப்பட்ட தேதியில் பெல்ஜியம் நேர நள்ளிரவு முதல் காண்பிக்கப்படும்.",
         "admin.triviaQuestion": "கேள்வி",
         "admin.triviaEdit": "திருத்து",
         "admin.triviaDelete": "நீக்கு",
@@ -855,7 +855,7 @@
         "admin.triviaInsightsAgo": "முன்",
         "admin.triviaInsightsDays": "நாட்கள்",
         "admin.scheduleHintsTitle": "உள்ளடக்க அட்டவணை குறிப்புகள்",
-        "admin.scheduleHintTrivia": "வேதாகமக் கேள்விகள்: காட்டு தேதியை அமைத்தால் அன்று காலை 8 மணி முதல் புதிய கேள்வி.",
+        "admin.scheduleHintTrivia": "வேதாகமக் கேள்விகள்: காட்டு தேதியை அமைத்தால் அன்று பெல்ஜியம் நேர நள்ளிரவு முதல் புதிய கேள்வி.",
         "admin.scheduleHintEvents": "நிகழ்வுகள்: தேதிகள் இங்கு சேர்க்கப்பட்டால் முகப்பு மற்றும் நிகழ்வுகள் தாவலில் தோன்றும்.",
         "admin.scheduleHintNotices": "அறிவிப்புகள்: MantleDB-க்கு வெளியிடவும்; நிலையான பட்டியலுடன் இணைகின்றன.",
         "admin.noticeLinkPresets": "செயலி இணைப்பு முன்னமைவுகள்",
@@ -1479,10 +1479,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bfb";
+    var SW_VERSION = "20260330mid";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily bread: new banner image; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Bible Quiz: new day at Brussels midnight; trivia reminder aligned.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -2815,8 +2815,9 @@
         var brussels = new Date(now.toLocaleString("en-US", { timeZone: "Europe/Brussels" }));
         var dow = brussels.getDay();
         var hour = brussels.getHours();
+        var minute = brussels.getMinutes();
         if (dow === 0 || dow === 6) return;
-        if (hour !== 8) return;
+        if (hour !== 0 || minute >= 10) return;
         var y = brussels.getFullYear();
         var m = String(brussels.getMonth() + 1).padStart(2, "0");
         var d = String(brussels.getDate()).padStart(2, "0");

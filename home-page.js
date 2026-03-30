@@ -900,17 +900,10 @@
                 };
             }
 
-            function getLocalEffectiveDate() {
-                var now = new Date();
-                var hour = now.getHours();
-                var localDate = new Date(now);
-                if (hour < 8) {
-                    localDate.setDate(localDate.getDate() - 1);
-                }
-                var y = localDate.getFullYear();
-                var m = String(localDate.getMonth() + 1).padStart(2, "0");
-                var d = String(localDate.getDate()).padStart(2, "0");
-                return String(y) + "-" + m + "-" + d;
+            /** Bible Quiz "today" matches Brussels calendar date (midnight), same as daily verse & reading plan. */
+            function getTriviaEffectiveDate() {
+                var ymd = getBrusselsYmd();
+                return String(ymd.year) + "-" + String(ymd.month).padStart(2, "0") + "-" + String(ymd.day).padStart(2, "0");
             }
 
             function isTriviaWeekday(ymd) {
@@ -919,8 +912,8 @@
                 var year = parseInt(parts[0], 10);
                 var month = parseInt(parts[1], 10) - 1;
                 var day = parseInt(parts[2], 10);
-                var date = new Date(year, month, day);
-                var dow = date.getDay();
+                var date = new Date(Date.UTC(year, month, day));
+                var dow = date.getUTCDay();
                 return dow >= 1 && dow <= 5;
             }
 
@@ -2109,7 +2102,7 @@
                     }
                 } catch (e) {}
                 var streak = 0;
-                var today = getLocalEffectiveDate();
+                var today = getTriviaEffectiveDate();
                 for (var daysAgo = 0; daysAgo < 365; daysAgo++) {
                     var d = getDateDaysAgo(today, daysAgo);
                     if (byDate[d] === "correct") streak++;
@@ -2124,11 +2117,11 @@
                     var y = parseInt(parts[0], 10);
                     var m = parseInt(parts[1], 10) - 1;
                     var d = parseInt(parts[2], 10);
-                    var dt = new Date(y, m, d);
-                    dt.setDate(dt.getDate() - daysAgo);
-                    var yy = dt.getFullYear();
-                    var mm = String(dt.getMonth() + 1).padStart(2, "0");
-                    var dd = String(dt.getDate()).padStart(2, "0");
+                    var dt = new Date(Date.UTC(y, m, d));
+                    dt.setUTCDate(dt.getUTCDate() - daysAgo);
+                    var yy = dt.getUTCFullYear();
+                    var mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+                    var dd = String(dt.getUTCDate()).padStart(2, "0");
                     return yy + "-" + mm + "-" + dd;
                 } catch (e) {
                     return "";
@@ -2137,7 +2130,7 @@
 
             function getTriviaWeeklyStats() {
                 var s = getTriviaStats();
-                var today = getLocalEffectiveDate();
+                var today = getTriviaEffectiveDate();
                 var weekCorrect = 0;
                 var weekWrong = 0;
                 try {
@@ -2282,8 +2275,8 @@
                     if (!match) {
                         empty.hidden = false;
                         empty.textContent = isTriviaWeekday(effectiveDate)
-                            ? T("home.triviaEmpty", "No Bible Quiz for today. Check back tomorrow from 8 AM.", card)
-                            : T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", card);
+                            ? T("home.triviaEmpty", "No Bible Quiz for today. Check back tomorrow from midnight (Belgium time).", card)
+                            : T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from midnight (Belgium time).", card);
                         return;
                     }
                     var question = String(match.question || "").trim();
@@ -2353,17 +2346,17 @@
                     if (loading) loading.hidden = true;
                     if (empty) { empty.hidden = false; empty.textContent = T("home.triviaError", "Could not load Bible Quiz. Try again later.", card); }
                 }
-                var effectiveDate = getLocalEffectiveDate();
+                var effectiveDate = getTriviaEffectiveDate();
                 if (!isTriviaWeekday(effectiveDate)) {
                     if (hasPage) {
                         triviaLoading.hidden = true;
                         triviaEmpty.hidden = false;
-                        triviaEmpty.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", triviaCard);
+                        triviaEmpty.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from midnight (Belgium time).", triviaCard);
                     }
                     if (hasHome) {
                         triviaLoadingHome.hidden = true;
                         triviaEmptyHome.hidden = false;
-                        triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from 8 AM.", triviaCardHome);
+                        triviaEmptyHome.textContent = T("home.triviaEmptyWeekend", "Bible Quiz is available Monday to Friday from midnight (Belgium time).", triviaCardHome);
                         renderTriviaWeeklySummary(triviaCardHome);
                     }
                     return;
@@ -2409,7 +2402,7 @@
                     var feedback = opts && opts.parentElement ? opts.parentElement.querySelector(".trivia-feedback") : null;
                     var card = opts && opts.closest(".card") ? opts.closest(".card") : null;
                     if (!opts || !feedback) return;
-                    var effectiveDate = getLocalEffectiveDate();
+                    var effectiveDate = getTriviaEffectiveDate();
                     if (getTriviaAnswered(effectiveDate)) return;
                     var isCorrect = btn.getAttribute("data-trivia-correct") === "1";
                     var correctAnswer = opts.dataset.triviaCorrectAnswer || "";
