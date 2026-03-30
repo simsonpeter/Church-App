@@ -112,12 +112,15 @@
         "dailyBread.ttsStopAria": "ஒலியை நிறுத்து",
         "dailyBread.ttsUnsupported": "இந்த உலாவியில் பேச்சு ஒலி ஆதரவு இல்லை.",
         "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
+        "dailyBread.byAuthor": "ஆசிரியர்: {author}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; Daily bread தாவல் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB பெட்டி njc-belgium-admin-daily-bread தேவை.",
         "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
         "admin.dailyBreadInfo": "முன்கூட்டியே உள்ளடக்கம் சேர்க்கவும். ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
         "admin.dailyBreadTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
         "admin.dailyBreadTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.dailyBreadAuthorEnPlaceholder": "ஆசிரியர் (ஆங்கிலம், விருப்பம்)",
+        "admin.dailyBreadAuthorTaPlaceholder": "ஆசிரியர் (தமிழ், விருப்பம்)",
         "admin.dailyBreadBodyEnPlaceholder": "உள்ளடக்கம் (ஆங்கிலம்). வரிகள் வைக்கப்படும்.",
         "admin.dailyBreadBodyTaPlaceholder": "உள்ளடக்கம் (தமிழ், விருப்பம்)",
         "admin.dailyBreadPublish": "அன்றன்றுள்ள அப்பம் சேமி",
@@ -134,6 +137,8 @@
         "admin.dailyBreadEditPromptDate": "தேதியை திருத்து (YYYY-MM-DD)",
         "admin.dailyBreadEditPromptTitleEn": "தலைப்பை திருத்து (EN)",
         "admin.dailyBreadEditPromptTitleTa": "தலைப்பை திருத்து (TA, விருப்பம்)",
+        "admin.dailyBreadEditPromptAuthorEn": "ஆசிரியரை திருத்து (EN, விருப்பம்)",
+        "admin.dailyBreadEditPromptAuthorTa": "ஆசிரியரை திருத்து (TA, விருப்பம்)",
         "admin.dailyBreadEditPromptBodyEn": "உள்ளடக்கத்தை திருத்து (EN)",
         "admin.dailyBreadEditPromptBodyTa": "உள்ளடக்கத்தை திருத்து (TA, விருப்பம்)",
         "home.announcementsTitle": "அறிவிப்புகள்",
@@ -1472,10 +1477,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330ct1";
+    var SW_VERSION = "20260330dbh1";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Contact: dedicated screen and side menu link (no bottom tab); PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: featured card + banner; entry title/author styling; optional author in admin; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

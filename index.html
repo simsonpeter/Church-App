@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260330ct1">
+    <link rel="stylesheet" href="styles.css?v=20260330dbh1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -341,10 +341,13 @@
 
         <section class="page-view" data-route="daily-bread">
             <main class="app-content">
-            <section class="card card-v-mesh daily-bread-page-card">
+            <section class="card card-v-featured daily-bread-page-card">
                 <h2><i class="fa-solid fa-bread-slice"></i><span data-i18n="dailyBread.title">Daily bread</span></h2>
+                <div class="card-banner">
+                    <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                </div>
                 <p class="page-note" data-i18n="dailyBread.subtitle">அன்றன்றுள்ள அப்பம் — shown for today’s date (Brussels calendar).</p>
-                <p class="page-note" id="daily-bread-date-line" aria-live="polite"></p>
+                <p class="page-note daily-bread-date-line" id="daily-bread-date-line" aria-live="polite"></p>
                 <p class="page-note" id="daily-bread-status" aria-live="polite" hidden></p>
                 <div id="daily-bread-content" class="daily-bread-content" hidden>
                     <div class="daily-bread-tts-row" role="group" aria-label="Listen to daily bread">
@@ -358,6 +361,7 @@
                         </button>
                     </div>
                     <h3 id="daily-bread-heading" class="daily-bread-heading"></h3>
+                    <p id="daily-bread-author-line" class="daily-bread-author-line" hidden></p>
                     <div id="daily-bread-body" class="daily-bread-body"></div>
                 </div>
             </section>
@@ -827,6 +831,8 @@
                     <input id="admin-daily-bread-date" class="search-input" type="date" required aria-required="true">
                     <input id="admin-daily-bread-title" class="search-input" type="text" placeholder="Title (English)" data-i18n-placeholder="admin.dailyBreadTitleEnPlaceholder">
                     <input id="admin-daily-bread-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadTitleTaPlaceholder">
+                    <input id="admin-daily-bread-author" class="search-input" type="text" placeholder="Author (English, optional)" data-i18n-placeholder="admin.dailyBreadAuthorEnPlaceholder">
+                    <input id="admin-daily-bread-author-ta" class="search-input" type="text" placeholder="Author (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadAuthorTaPlaceholder">
                     <textarea id="admin-daily-bread-body" class="search-input prayer-textarea" rows="5" placeholder="Body (English). Line breaks kept." data-i18n-placeholder="admin.dailyBreadBodyEnPlaceholder"></textarea>
                     <textarea id="admin-daily-bread-body-ta" class="search-input prayer-textarea" rows="4" placeholder="Body (Tamil, optional)" data-i18n-placeholder="admin.dailyBreadBodyTaPlaceholder"></textarea>
                     <button class="button-link" id="admin-daily-bread-submit" type="submit" data-i18n="admin.dailyBreadPublish">Save daily bread</button>
@@ -1240,7 +1246,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260330ct1"></script>
+    <script src="app-shell.js?v=20260330dbh1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260429dv2"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1248,9 +1254,9 @@
     <script src="bible-page.js?v=20260324u1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260330pw1"></script>
-    <script src="daily-bread-page.js?v=20260330db3"></script>
+    <script src="daily-bread-page.js?v=20260330dbh1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260330ct1"></script>
+    <script src="admin-dashboard-page.js?v=20260330dbh1"></script>
     <script src="admin-extras.js?v=20260330ct1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>

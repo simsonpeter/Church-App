@@ -26,6 +26,8 @@
     var dailyBreadDateInput = document.getElementById("admin-daily-bread-date");
     var dailyBreadTitleInput = document.getElementById("admin-daily-bread-title");
     var dailyBreadTitleTaInput = document.getElementById("admin-daily-bread-title-ta");
+    var dailyBreadAuthorInput = document.getElementById("admin-daily-bread-author");
+    var dailyBreadAuthorTaInput = document.getElementById("admin-daily-bread-author-ta");
     var dailyBreadBodyInput = document.getElementById("admin-daily-bread-body");
     var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
     var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
@@ -280,6 +282,8 @@
             date: dateKey,
             title: String(source.title || "").trim(),
             titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
             bodyTa: String(source.bodyTa || "").trim(),
             createdAt: String(source.createdAt || ""),
@@ -309,11 +313,14 @@
         dailyBreadList.innerHTML = sorted.map(function (entry) {
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
+            var authorLine = entry.author || entry.authorTa || "";
             var preview = (entry.body || entry.bodyTa || "").replace(/\s+/g, " ").trim().slice(0, 120);
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(entry.date) + "</h3>" +
-                "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong></p>" +
+                "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong>" +
+                (authorLine ? (" · <em>" + escapeHtml(authorLine) + "</em>") : "") +
+                "</p>" +
                 (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + (preview.length >= 120 ? "…" : "") + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-daily-bread-id=\"" + escapeHtml(id) + "\" data-admin-daily-bread-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
@@ -972,6 +979,8 @@
                 list[existingIdx] = Object.assign({}, cur, {
                     title: String(entry.title || "").trim(),
                     titleTa: String(entry.titleTa || "").trim(),
+                    author: String(entry.author || "").trim(),
+                    authorTa: String(entry.authorTa || "").trim(),
                     body: String(entry.body || "").trim(),
                     bodyTa: String(entry.bodyTa || "").trim(),
                     updatedAt: new Date().toISOString()
@@ -982,6 +991,8 @@
                     date: targetDate,
                     title: String(entry.title || "").trim(),
                     titleTa: String(entry.titleTa || "").trim(),
+                    author: String(entry.author || "").trim(),
+                    authorTa: String(entry.authorTa || "").trim(),
                     body: String(entry.body || "").trim(),
                     bodyTa: String(entry.bodyTa || "").trim(),
                     createdAt: new Date().toISOString(),
@@ -1007,6 +1018,8 @@
         }
         var titleEn = String(dailyBreadTitleInput && dailyBreadTitleInput.value || "").trim();
         var titleTa = String(dailyBreadTitleTaInput && dailyBreadTitleTaInput.value || "").trim();
+        var authorEn = String(dailyBreadAuthorInput && dailyBreadAuthorInput.value || "").trim();
+        var authorTa = String(dailyBreadAuthorTaInput && dailyBreadAuthorTaInput.value || "").trim();
         var bodyEn = String(dailyBreadBodyInput && dailyBreadBodyInput.value || "").trim();
         var bodyTa = String(dailyBreadBodyTaInput && dailyBreadBodyTaInput.value || "").trim();
         if (!bodyEn && !bodyTa) {
@@ -1019,6 +1032,8 @@
             date: dateKey,
             title: titleEn,
             titleTa: titleTa,
+            author: authorEn,
+            authorTa: authorTa,
             body: bodyEn,
             bodyTa: bodyTa
         }).then(function (entries) {
@@ -1031,6 +1046,8 @@
             dailyBreadDateInput.value = "";
             if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
             if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
+            if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = "";
+            if (dailyBreadAuthorTaInput) dailyBreadAuthorTaInput.value = "";
             if (dailyBreadBodyInput) dailyBreadBodyInput.value = "";
             if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = "";
             renderDailyBreadList();
@@ -1706,6 +1723,14 @@
             if (nextTitleTa === null) {
                 return;
             }
+            var nextAuthorEn = window.prompt(T("admin.dailyBreadEditPromptAuthorEn", "Edit author (English, optional)"), String(current.author || ""));
+            if (nextAuthorEn === null) {
+                return;
+            }
+            var nextAuthorTa = window.prompt(T("admin.dailyBreadEditPromptAuthorTa", "Edit author (Tamil, optional)"), String(current.authorTa || ""));
+            if (nextAuthorTa === null) {
+                return;
+            }
             var nextBodyEn = window.prompt(T("admin.dailyBreadEditPromptBodyEn", "Edit body (English)"), String(current.body || ""));
             if (nextBodyEn === null) {
                 return;
@@ -1739,6 +1764,8 @@
                 date: cleanDate,
                 title: String(nextTitleEn || "").trim(),
                 titleTa: String(nextTitleTa || "").trim(),
+                author: String(nextAuthorEn || "").trim(),
+                authorTa: String(nextAuthorTa || "").trim(),
                 body: cleanBodyEn,
                 bodyTa: cleanBodyTa,
                 updatedAt: new Date().toISOString()

@@ -9,6 +9,7 @@
     var statusEl = document.getElementById("daily-bread-status");
     var contentWrap = document.getElementById("daily-bread-content");
     var headingEl = document.getElementById("daily-bread-heading");
+    var authorLineEl = document.getElementById("daily-bread-author-line");
     var bodyEl = document.getElementById("daily-bread-body");
     var pageCard = document.querySelector(".daily-bread-page-card");
     var ttsToggle = document.getElementById("daily-bread-tts-toggle");
@@ -116,6 +117,8 @@
             date: toYmd(source.date || source.showDate || ""),
             title: String(source.title || "").trim(),
             titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
             bodyTa: String(source.bodyTa || "").trim()
         };
@@ -127,16 +130,22 @@
             var bodyEn = String(entry.body || "").trim();
             var titleTa = String(entry.titleTa || "").trim();
             var titleEn = String(entry.title || "").trim();
+            var authorTa = String(entry.authorTa || "").trim();
+            var authorEn = String(entry.author || "").trim();
             return {
                 title: titleTa || titleEn,
+                author: authorTa || authorEn,
                 body: bodyTa || bodyEn,
                 readLang: bodyTa ? "ta" : "en"
             };
         }
         var bodyEn = String(entry.body || "").trim();
         var bodyTa = String(entry.bodyTa || "").trim();
+        var authorEn = String(entry.author || "").trim();
+        var authorTa = String(entry.authorTa || "").trim();
         return {
             title: String(entry.title || "").trim() || String(entry.titleTa || "").trim(),
+            author: authorEn || authorTa,
             body: bodyEn || bodyTa,
             readLang: bodyEn ? "en" : "ta"
         };
@@ -528,6 +537,10 @@
         statusEl.textContent = T("dailyBread.loading", "Loading…");
         statusEl.dataset.state = "";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -538,6 +551,10 @@
         statusEl.textContent = T("dailyBread.empty", "No content for today yet.");
         statusEl.dataset.state = "empty";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -548,6 +565,10 @@
         statusEl.textContent = T("dailyBread.error", "Could not load. Try again later.");
         statusEl.dataset.state = "error";
         contentWrap.hidden = true;
+        if (authorLineEl) {
+            authorLineEl.hidden = true;
+            authorLineEl.textContent = "";
+        }
         updateTtsUi();
     }
 
@@ -556,11 +577,22 @@
         var lang = getAppLanguage();
         var picked = pickContent(entry, lang);
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
+        var authorText = String(picked.author || "").trim();
+        if (authorLineEl) {
+            if (authorText) {
+                authorLineEl.hidden = false;
+                authorLineEl.textContent = T("dailyBread.byAuthor", "By {author}").replace(/\{author\}/g, authorText);
+            } else {
+                authorLineEl.hidden = true;
+                authorLineEl.textContent = "";
+            }
+        }
         bodyEl.innerHTML = escapeHtml(picked.body || "");
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
+        var authorPart = authorText;
         var bodyPart = String(picked.body || "").trim();
-        currentReadPlain = sanitizeTextForSpeech([titlePart, bodyPart].filter(Boolean).join(". "));
+        currentReadPlain = sanitizeTextForSpeech([titlePart, authorPart, bodyPart].filter(Boolean).join(". "));
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();

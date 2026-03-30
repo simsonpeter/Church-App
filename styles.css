@@ -830,20 +830,61 @@ a.card:hover > h2:not(:first-child) i {
     opacity: 0.92;
 }
 
+.daily-bread-page-card .daily-bread-date-line {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
 .daily-bread-page-card .daily-bread-heading {
-    margin: 12px 0 8px;
-    font-size: 1.12rem;
-    font-weight: 750;
-    color: var(--text);
-    line-height: 1.35;
+    margin: 14px 0 6px;
+    font-size: 1.22rem;
+    font-weight: 780;
+    line-height: 1.32;
+    color: var(--header-mid);
+    letter-spacing: -0.01em;
+}
+
+.daily-bread-page-card .daily-bread-heading i {
+    display: none;
+}
+
+.daily-bread-author-line {
+    margin: 0 0 12px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    font-style: italic;
+    color: var(--accent-warm);
+    line-height: 1.4;
 }
 
 .daily-bread-body {
     color: var(--text);
     font-size: 0.94rem;
-    line-height: 1.55;
+    line-height: 1.58;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
+        color: #f87171;
+    }
+
+    :root:not([data-theme="light"]) .daily-bread-author-line {
+        color: #d4a574;
+    }
+}
+
+html[data-theme="dark"] .daily-bread-page-card .daily-bread-heading {
+    color: #f87171;
+}
+
+html[data-theme="dark"] .daily-bread-author-line {
+    color: #d4a574;
 }
 
 .daily-verse-card {
