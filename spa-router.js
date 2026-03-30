@@ -227,15 +227,8 @@
         return firstName ? (baseText + " " + firstName) : baseText;
     }
 
-    function getHashPathAndQuery() {
-        var full = String(window.location.hash || "").replace(/^#/, "").trim();
-        var q = full.indexOf("?");
-        var path = (q >= 0 ? full.slice(0, q) : full).toLowerCase();
-        return { path: path, query: q >= 0 ? full.slice(q + 1) : "" };
-    }
-
     function getRouteFromHash() {
-        var raw = getHashPathAndQuery().path;
+        var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (raw === "about") {
             return "prayer";
         }
@@ -277,8 +270,7 @@
             subtitle.hidden = !subtitleValue;
         }
 
-        var hashPath = getHashPathAndQuery().path;
-        if (hashPath !== current) {
+        if (window.location.hash.replace(/^#/, "") !== current) {
             window.history.replaceState(null, "", "#" + current);
         }
 

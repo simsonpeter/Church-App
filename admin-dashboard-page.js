@@ -32,19 +32,6 @@
     var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
     var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
     var dailyBreadList = document.getElementById("admin-daily-bread-list");
-    var dailyBreadThemeInput = document.getElementById("admin-daily-bread-theme");
-    var dailyBreadThemeTaInput = document.getElementById("admin-daily-bread-theme-ta");
-    var dailyBreadReadingBookInput = document.getElementById("admin-daily-bread-reading-book");
-    var dailyBreadReadingChapterInput = document.getElementById("admin-daily-bread-reading-chapter");
-    var dailyBreadReadingVerseInput = document.getElementById("admin-daily-bread-reading-verse");
-    var dailyBreadReadingLabelInput = document.getElementById("admin-daily-bread-reading-label");
-    var dailyBreadReadingLabelTaInput = document.getElementById("admin-daily-bread-reading-label-ta");
-    var dailyBreadPhotoInput = document.getElementById("admin-daily-bread-photo");
-    var dailyBreadBioInput = document.getElementById("admin-daily-bread-bio");
-    var dailyBreadBioTaInput = document.getElementById("admin-daily-bread-bio-ta");
-    var dailyBreadSpotlightFlagInput = document.getElementById("admin-daily-bread-spotlight-flag");
-    var dailyBreadLoadDateInput = document.getElementById("admin-daily-bread-load-date");
-    var dailyBreadLoadBtn = document.getElementById("admin-daily-bread-load-btn");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -300,87 +287,9 @@
             authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
             bodyTa: String(source.bodyTa || "").trim(),
-            theme: String(source.theme || "").trim(),
-            themeTa: String(source.themeTa || "").trim(),
-            readingBook: String(source.readingBook || "").trim(),
-            readingChapter: Number(source.readingChapter) || 0,
-            readingVerse: Number(source.readingVerse) || 0,
-            readingLabel: String(source.readingLabel || "").trim(),
-            readingLabelTa: String(source.readingLabelTa || "").trim(),
-            authorPhotoUrl: String(source.authorPhotoUrl || "").trim(),
-            authorBio: String(source.authorBio || "").trim(),
-            authorBioTa: String(source.authorBioTa || "").trim(),
-            spotlightAuthor: Boolean(source.spotlightAuthor),
             createdAt: String(source.createdAt || ""),
             updatedAt: String(source.updatedAt || ""),
             createdByEmail: String(source.createdByEmail || "").trim()
-        };
-    }
-
-    function fillDailyBreadFormFromEntry(entry) {
-        if (!entry) {
-            return;
-        }
-        if (dailyBreadDateInput) dailyBreadDateInput.value = String(entry.date || "");
-        if (dailyBreadTitleInput) dailyBreadTitleInput.value = String(entry.title || "");
-        if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = String(entry.titleTa || "");
-        if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = String(entry.author || "");
-        if (dailyBreadAuthorTaInput) dailyBreadAuthorTaInput.value = String(entry.authorTa || "");
-        if (dailyBreadBodyInput) dailyBreadBodyInput.value = String(entry.body || "");
-        if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = String(entry.bodyTa || "");
-        if (dailyBreadThemeInput) dailyBreadThemeInput.value = String(entry.theme || "");
-        if (dailyBreadThemeTaInput) dailyBreadThemeTaInput.value = String(entry.themeTa || "");
-        if (dailyBreadReadingBookInput) dailyBreadReadingBookInput.value = String(entry.readingBook || "");
-        if (dailyBreadReadingChapterInput) {
-            dailyBreadReadingChapterInput.value = entry.readingChapter > 0 ? String(entry.readingChapter) : "";
-        }
-        if (dailyBreadReadingVerseInput) {
-            dailyBreadReadingVerseInput.value = entry.readingVerse > 0 ? String(entry.readingVerse) : "";
-        }
-        if (dailyBreadReadingLabelInput) dailyBreadReadingLabelInput.value = String(entry.readingLabel || "");
-        if (dailyBreadReadingLabelTaInput) dailyBreadReadingLabelTaInput.value = String(entry.readingLabelTa || "");
-        if (dailyBreadPhotoInput) dailyBreadPhotoInput.value = String(entry.authorPhotoUrl || "");
-        if (dailyBreadBioInput) dailyBreadBioInput.value = String(entry.authorBio || "");
-        if (dailyBreadBioTaInput) dailyBreadBioTaInput.value = String(entry.authorBioTa || "");
-        if (dailyBreadSpotlightFlagInput) dailyBreadSpotlightFlagInput.checked = Boolean(entry.spotlightAuthor);
-    }
-
-    function clearDailyBreadFormFields() {
-        if (dailyBreadDateInput) dailyBreadDateInput.value = "";
-        if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
-        if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
-        if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = "";
-        if (dailyBreadAuthorTaInput) dailyBreadAuthorTaInput.value = "";
-        if (dailyBreadBodyInput) dailyBreadBodyInput.value = "";
-        if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = "";
-        if (dailyBreadThemeInput) dailyBreadThemeInput.value = "";
-        if (dailyBreadThemeTaInput) dailyBreadThemeTaInput.value = "";
-        if (dailyBreadReadingBookInput) dailyBreadReadingBookInput.value = "";
-        if (dailyBreadReadingChapterInput) dailyBreadReadingChapterInput.value = "";
-        if (dailyBreadReadingVerseInput) dailyBreadReadingVerseInput.value = "";
-        if (dailyBreadReadingLabelInput) dailyBreadReadingLabelInput.value = "";
-        if (dailyBreadReadingLabelTaInput) dailyBreadReadingLabelTaInput.value = "";
-        if (dailyBreadPhotoInput) dailyBreadPhotoInput.value = "";
-        if (dailyBreadBioInput) dailyBreadBioInput.value = "";
-        if (dailyBreadBioTaInput) dailyBreadBioTaInput.value = "";
-        if (dailyBreadSpotlightFlagInput) dailyBreadSpotlightFlagInput.checked = false;
-    }
-
-    function readDailyBreadFormPayload() {
-        var ch = Number(dailyBreadReadingChapterInput && dailyBreadReadingChapterInput.value);
-        var vs = Number(dailyBreadReadingVerseInput && dailyBreadReadingVerseInput.value);
-        return {
-            theme: String(dailyBreadThemeInput && dailyBreadThemeInput.value || "").trim(),
-            themeTa: String(dailyBreadThemeTaInput && dailyBreadThemeTaInput.value || "").trim(),
-            readingBook: String(dailyBreadReadingBookInput && dailyBreadReadingBookInput.value || "").trim(),
-            readingChapter: Number.isFinite(ch) && ch > 0 ? Math.floor(ch) : 0,
-            readingVerse: Number.isFinite(vs) && vs > 0 ? Math.floor(vs) : 0,
-            readingLabel: String(dailyBreadReadingLabelInput && dailyBreadReadingLabelInput.value || "").trim(),
-            readingLabelTa: String(dailyBreadReadingLabelTaInput && dailyBreadReadingLabelTaInput.value || "").trim(),
-            authorPhotoUrl: String(dailyBreadPhotoInput && dailyBreadPhotoInput.value || "").trim(),
-            authorBio: String(dailyBreadBioInput && dailyBreadBioInput.value || "").trim(),
-            authorBioTa: String(dailyBreadBioTaInput && dailyBreadBioTaInput.value || "").trim(),
-            spotlightAuthor: Boolean(dailyBreadSpotlightFlagInput && dailyBreadSpotlightFlagInput.checked)
         };
     }
 
@@ -406,16 +315,12 @@
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
             var authorLine = entry.author || entry.authorTa || "";
-            var themeLine = entry.theme || entry.themeTa || "";
-            var spotNote = entry.spotlightAuthor ? (" · " + T("admin.dailyBreadListSpotlight", "Spotlight")) : "";
             var preview = (entry.body || entry.bodyTa || "").replace(/\s+/g, " ").trim().slice(0, 120);
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(entry.date) + "</h3>" +
                 "  <p class=\"page-note\"><strong>" + escapeHtml(titleLine) + "</strong>" +
                 (authorLine ? (" · <em>" + escapeHtml(authorLine) + "</em>") : "") +
-                (themeLine ? (" · <span class=\"admin-daily-bread-theme\">" + escapeHtml(themeLine) + "</span>") : "") +
-                spotNote +
                 "</p>" +
                 (preview ? ("  <p class=\"admin-item-body\">" + escapeHtml(preview) + (preview.length >= 120 ? "…" : "") + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
@@ -1091,17 +996,6 @@
                     authorTa: String(entry.authorTa || "").trim(),
                     body: String(entry.body || "").trim(),
                     bodyTa: String(entry.bodyTa || "").trim(),
-                    theme: String(entry.theme || "").trim(),
-                    themeTa: String(entry.themeTa || "").trim(),
-                    readingBook: String(entry.readingBook || "").trim(),
-                    readingChapter: Number(entry.readingChapter) || 0,
-                    readingVerse: Number(entry.readingVerse) || 0,
-                    readingLabel: String(entry.readingLabel || "").trim(),
-                    readingLabelTa: String(entry.readingLabelTa || "").trim(),
-                    authorPhotoUrl: String(entry.authorPhotoUrl || "").trim(),
-                    authorBio: String(entry.authorBio || "").trim(),
-                    authorBioTa: String(entry.authorBioTa || "").trim(),
-                    spotlightAuthor: Boolean(entry.spotlightAuthor),
                     updatedAt: new Date().toISOString()
                 });
             } else {
@@ -1114,17 +1008,6 @@
                     authorTa: String(entry.authorTa || "").trim(),
                     body: String(entry.body || "").trim(),
                     bodyTa: String(entry.bodyTa || "").trim(),
-                    theme: String(entry.theme || "").trim(),
-                    themeTa: String(entry.themeTa || "").trim(),
-                    readingBook: String(entry.readingBook || "").trim(),
-                    readingChapter: Number(entry.readingChapter) || 0,
-                    readingVerse: Number(entry.readingVerse) || 0,
-                    readingLabel: String(entry.readingLabel || "").trim(),
-                    readingLabelTa: String(entry.readingLabelTa || "").trim(),
-                    authorPhotoUrl: String(entry.authorPhotoUrl || "").trim(),
-                    authorBio: String(entry.authorBio || "").trim(),
-                    authorBioTa: String(entry.authorBioTa || "").trim(),
-                    spotlightAuthor: Boolean(entry.spotlightAuthor),
                     createdAt: new Date().toISOString(),
                     createdByEmail: normalizeEmail(getUser() && getUser().email),
                     updatedAt: ""
@@ -1156,12 +1039,6 @@
             showNote("validation", "admin.dailyBreadNeedBody", "Please enter body text (English or Tamil).");
             return;
         }
-        var extra = readDailyBreadFormPayload();
-        var rb = extra.readingBook;
-        if (rb && !extra.readingChapter) {
-            showNote("validation", "admin.dailyBreadNeedReadingChapter", "Enter a chapter number for the reading plan link.");
-            return;
-        }
         setBusyState(true);
         upsertDailyBreadOnServer({
             id: makeEntryId("daily-bread"),
@@ -1171,18 +1048,7 @@
             author: authorEn,
             authorTa: authorTa,
             body: bodyEn,
-            bodyTa: bodyTa,
-            theme: extra.theme,
-            themeTa: extra.themeTa,
-            readingBook: extra.readingBook,
-            readingChapter: extra.readingChapter,
-            readingVerse: extra.readingVerse,
-            readingLabel: extra.readingLabel,
-            readingLabelTa: extra.readingLabelTa,
-            authorPhotoUrl: extra.authorPhotoUrl,
-            authorBio: extra.authorBio,
-            authorBioTa: extra.authorBioTa,
-            spotlightAuthor: extra.spotlightAuthor
+            bodyTa: bodyTa
         }).then(function (entries) {
             var rows = Array.isArray(entries) ? entries : [];
             cachedDailyBread = rows.map(function (row, idx) {
@@ -1190,7 +1056,13 @@
             }).filter(function (e) {
                 return Boolean(e && e.date);
             });
-            clearDailyBreadFormFields();
+            dailyBreadDateInput.value = "";
+            if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
+            if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
+            if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = "";
+            if (dailyBreadAuthorTaInput) dailyBreadAuthorTaInput.value = "";
+            if (dailyBreadBodyInput) dailyBreadBodyInput.value = "";
+            if (dailyBreadBodyTaInput) dailyBreadBodyTaInput.value = "";
             renderDailyBreadList();
             showNote("success", "admin.dailyBreadSaved", "Daily bread saved.");
             document.dispatchEvent(new CustomEvent("njc:admin-daily-bread-updated"));
@@ -1200,30 +1072,6 @@
             setBusyState(false);
         });
     });
-
-    if (dailyBreadLoadBtn && dailyBreadLoadDateInput) {
-        dailyBreadLoadBtn.addEventListener("click", function () {
-            if (busy || !isAdminUser()) {
-                return;
-            }
-            var loadKey = toYmd(dailyBreadLoadDateInput.value);
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(loadKey)) {
-                showNote("validation", "admin.dailyBreadLoadNeedDate", "Pick a date to load.");
-                return;
-            }
-            var found = cachedDailyBread.filter(function (e) {
-                return e && e.date === loadKey;
-            }).sort(function (a, b) {
-                return String(b.id).localeCompare(String(a.id));
-            })[0];
-            if (!found) {
-                showNote("validation", "admin.dailyBreadLoadNotFound", "No entry for that date.");
-                return;
-            }
-            fillDailyBreadFormFromEntry(found);
-            showNote("success", "admin.dailyBreadLoadedIntoForm", "Loaded into form. Save to update.");
-        });
-    }
 
     if (triviaForm) {
         triviaForm.addEventListener("submit", function (event) {
@@ -1919,61 +1767,9 @@
             if (nextBodyTa === null) {
                 return;
             }
-            var nextTheme = window.prompt(T("admin.dailyBreadEditPromptTheme", "Theme tag (English, optional)"), String(current.theme || ""));
-            if (nextTheme === null) {
-                return;
-            }
-            var nextThemeTa = window.prompt(T("admin.dailyBreadEditPromptThemeTa", "Theme tag (Tamil, optional)"), String(current.themeTa || ""));
-            if (nextThemeTa === null) {
-                return;
-            }
-            var nextReadingBook = window.prompt(T("admin.dailyBreadEditPromptReadingBook", "Reading: Bible book (English, e.g. John), optional"), String(current.readingBook || ""));
-            if (nextReadingBook === null) {
-                return;
-            }
-            var nextReadingChapter = window.prompt(T("admin.dailyBreadEditPromptReadingChapter", "Reading: chapter (1-based), or empty"), current.readingChapter > 0 ? String(current.readingChapter) : "");
-            if (nextReadingChapter === null) {
-                return;
-            }
-            var nextReadingVerse = window.prompt(T("admin.dailyBreadEditPromptReadingVerse", "Reading: verse (optional), or empty"), current.readingVerse > 0 ? String(current.readingVerse) : "");
-            if (nextReadingVerse === null) {
-                return;
-            }
-            var nextReadingLabel = window.prompt(T("admin.dailyBreadEditPromptReadingLabel", "Reading link label (English, optional)"), String(current.readingLabel || ""));
-            if (nextReadingLabel === null) {
-                return;
-            }
-            var nextReadingLabelTa = window.prompt(T("admin.dailyBreadEditPromptReadingLabelTa", "Reading link label (Tamil, optional)"), String(current.readingLabelTa || ""));
-            if (nextReadingLabelTa === null) {
-                return;
-            }
-            var nextPhoto = window.prompt(T("admin.dailyBreadEditPromptPhoto", "Author photo URL (https, optional)"), String(current.authorPhotoUrl || ""));
-            if (nextPhoto === null) {
-                return;
-            }
-            var nextBio = window.prompt(T("admin.dailyBreadEditPromptBio", "Author bio (English, optional)"), String(current.authorBio || ""));
-            if (nextBio === null) {
-                return;
-            }
-            var nextBioTa = window.prompt(T("admin.dailyBreadEditPromptBioTa", "Author bio (Tamil, optional)"), String(current.authorBioTa || ""));
-            if (nextBioTa === null) {
-                return;
-            }
-            var nextSpotlight = window.confirm(T("admin.dailyBreadEditPromptSpotlight", "Feature this author in the weekly spotlight?"));
             var cleanDate = toYmd(nextDate);
             var cleanBodyEn = String(nextBodyEn || "").trim();
             var cleanBodyTa = String(nextBodyTa || "").trim();
-            var cleanTheme = String(nextTheme || "").trim();
-            var cleanThemeTa = String(nextThemeTa || "").trim();
-            var cleanRb = String(nextReadingBook || "").trim();
-            var cleanRc = Number(nextReadingChapter);
-            var cleanRv = Number(nextReadingVerse);
-            var cleanReadingChapter = Number.isFinite(cleanRc) && cleanRc > 0 ? Math.floor(cleanRc) : 0;
-            var cleanReadingVerse = Number.isFinite(cleanRv) && cleanRv > 0 ? Math.floor(cleanRv) : 0;
-            if (cleanRb && !cleanReadingChapter) {
-                showNote("validation", "admin.dailyBreadNeedReadingChapter", "Enter a chapter number for the reading plan link.");
-                return;
-            }
             if (!/^\d{4}-\d{2}-\d{2}$/.test(cleanDate)) {
                 showNote("validation", "admin.dailyBreadNeedDate", "Invalid date.");
                 return;
@@ -2000,17 +1796,6 @@
                 authorTa: String(nextAuthorTa || "").trim(),
                 body: cleanBodyEn,
                 bodyTa: cleanBodyTa,
-                theme: cleanTheme,
-                themeTa: cleanThemeTa,
-                readingBook: cleanRb,
-                readingChapter: cleanReadingChapter,
-                readingVerse: cleanReadingVerse,
-                readingLabel: String(nextReadingLabel || "").trim(),
-                readingLabelTa: String(nextReadingLabelTa || "").trim(),
-                authorPhotoUrl: String(nextPhoto || "").trim(),
-                authorBio: String(nextBio || "").trim(),
-                authorBioTa: String(nextBioTa || "").trim(),
-                spotlightAuthor: Boolean(nextSpotlight),
                 updatedAt: new Date().toISOString()
             });
             setBusyState(true);
