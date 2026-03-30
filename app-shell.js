@@ -1479,10 +1479,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bf9";
+    var SW_VERSION = "20260330bfa";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Menu: one Daily bread; Contact after Sermons; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Menu: Daily bread after Songbook; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -3262,6 +3262,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var dailyBreadMenuLink = document.createElement("a");
+        dailyBreadMenuLink.className = "header-menu-link";
+        dailyBreadMenuLink.href = "#daily-bread";
+        dailyBreadMenuLink.innerHTML = "<i class=\"fa-solid fa-bread-slice\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(dailyBreadMenuLink);
+
         var triviaLink = document.createElement("a");
         triviaLink.className = "header-menu-link";
         triviaLink.href = "#trivia";
@@ -3348,7 +3354,7 @@
                 return;
             }
             var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact", "daily-bread"];
+            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact"];
             var routeMap = {};
             primaryLinksContainer.innerHTML = "";
             tabAnchors.forEach(function (anchor) {
@@ -3490,6 +3496,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
             var chatLabel = t("menu.chat", "Chat");
@@ -3543,6 +3550,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
+            if (dailyBreadNode) {
+                dailyBreadNode.textContent = dailyBreadMenuLabel;
+            }
             var triviaNode = triviaLink.querySelector("span");
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
@@ -3588,6 +3599,7 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
@@ -3597,6 +3609,7 @@
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
