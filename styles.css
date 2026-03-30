@@ -973,11 +973,11 @@ html[data-theme="dark"] .daily-bread-author-line {
     color: #ffffff;
 }
 
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-top h2 {
+.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top h2 {
     color: #ffffff;
 }
 
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .daily-verse-top h2 i {
+.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top h2 i {
     color: rgba(255, 248, 248, 0.95);
 }
 
@@ -989,31 +989,12 @@ html[data-theme="dark"] .daily-bread-author-line {
     color: #ffffff;
 }
 
-.daily-verse-panel[data-daily-verse-backdrop="photo"] .mini-toggle {
+.daily-verse-panel[data-daily-verse-backdrop="photo"] > .daily-verse-top .mini-toggle {
     border-color: rgba(255, 255, 255, 0.38);
     background: rgba(255, 255, 255, 0.14);
     color: #ffffff;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-}
-
-.daily-verse-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin: -14px -14px 10px;
-    padding: 10px 14px;
-    width: calc(100% + 28px);
-    max-width: none;
-    box-sizing: border-box;
-    position: relative;
-    z-index: 3;
-    background: linear-gradient(150deg, var(--header-start) 0%, var(--header-mid) 42%, var(--header-end) 100%);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.22) inset;
-    border-top-left-radius: var(--dv-panel-radius);
-    border-top-right-radius: var(--dv-panel-radius);
 }
 
 /* Match .card > h2:first-child — daily verse h2 is nested in .daily-verse-panel, not a direct .card child, so it does not inherit that rule and would otherwise use the UA h2 size. */
@@ -1034,7 +1015,7 @@ html[data-theme="dark"] .daily-bread-author-line {
     font-size: 1.05rem;
 }
 
-.daily-verse-panel .daily-verse-top .mini-toggle {
+.daily-verse-panel > .daily-verse-top .mini-toggle {
     border-color: rgba(255, 255, 255, 0.38);
     background: rgba(255, 255, 255, 0.14);
     color: #ffffff;
@@ -1055,7 +1036,7 @@ html[data-theme="dark"] .daily-bread-author-line {
 }
 
 .daily-verse-text {
-    margin-top: 8px;
+    margin-top: 0;
     color: var(--text);
     font-size: 0.92rem;
     line-height: 1.52;
@@ -1452,6 +1433,10 @@ body.app-update-open {
     font-weight: 700;
     color: #ffffff;
     background: linear-gradient(145deg, #dc2626, #b91c1c);
+}
+
+.announcement-badge-important {
+    background: linear-gradient(145deg, #b45309, #92400e);
 }
 
 .announcement-carousel-item {
@@ -5078,6 +5063,21 @@ html[data-theme="dark"] .prayer-list-translated-note {
 
 .prayer-list-item-urgent .prayer-list-name {
     color: #b20f0f;
+}
+
+.admin-notice-important-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(145deg, #b45309, #92400e);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    vertical-align: middle;
 }
 
 .prayer-list-urgent-badge {

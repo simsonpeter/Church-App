@@ -40,6 +40,7 @@
     var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
     var noticeLinkInput = document.getElementById("admin-notice-link");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
+    var noticeImportantInput = document.getElementById("admin-notice-important");
     var noticeSubmit = document.getElementById("admin-notice-submit");
 
     var broadcastForm = document.getElementById("admin-broadcast-form");
@@ -481,10 +482,18 @@
             var bodyTa = String(entry && entry.bodyTa || "").trim();
             var link = String(entry && entry.link || "").trim();
             var urgent = Boolean(entry && entry.urgent);
-            var tagText = urgent ? ("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgent", "Mark as urgent")) + "</span>") : "";
+            var important = Boolean(entry && entry.important);
+            var tagParts = [];
+            if (important) {
+                tagParts.push("<span class=\"admin-notice-important-badge\">" + escapeHtml(T("admin.noticeImportantTag", "Important")) + "</span>");
+            }
+            if (urgent) {
+                tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgentTag", "Urgent")) + "</span>");
+            }
+            var tagText = tagParts.length ? (" " + tagParts.join(" ")) : "";
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + " " + tagText + "</h3>" +
+                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + tagText + "</h3>" +
                 "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
@@ -789,6 +798,7 @@
             bodyTa: bodyTa,
             link: link,
             urgent: Boolean(noticeUrgentInput.checked),
+            important: Boolean(noticeImportantInput && noticeImportantInput.checked),
             date: toYmd(new Date().toISOString()),
             createdAt: new Date().toISOString(),
             createdByEmail: normalizeEmail(getUser() && getUser().email)
@@ -804,6 +814,9 @@
             }
             noticeLinkInput.value = "";
             noticeUrgentInput.checked = false;
+            if (noticeImportantInput) {
+                noticeImportantInput.checked = false;
+            }
             renderStats();
             renderNoticeList();
             showNote("success", "admin.noticeSaved", "Notice published.");
@@ -1209,6 +1222,20 @@
         if (nextLink === null) {
             return;
         }
+        var nextImportantRaw = window.prompt(
+            T("admin.noticeEditPromptImportant", "Important tag on Home? Type y or n (blank = keep current)"),
+            Boolean(current.important) ? "y" : "n"
+        );
+        if (nextImportantRaw === null) {
+            return;
+        }
+        var nextImportant = current.important;
+        var impTrim = String(nextImportantRaw || "").trim().toLowerCase();
+        if (impTrim === "y" || impTrim === "yes") {
+            nextImportant = true;
+        } else if (impTrim === "n" || impTrim === "no") {
+            nextImportant = false;
+        }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
         if (!cleanTitle || !cleanBody) {
@@ -1221,6 +1248,7 @@
             titleTa: String(nextTitleTa || "").trim(),
             bodyTa: String(nextBodyTa || "").trim(),
             link: String(nextLink || "").trim(),
+            important: Boolean(nextImportant),
             updatedAt: new Date().toISOString()
         });
         setBusyState(true);

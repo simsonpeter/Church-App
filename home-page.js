@@ -1228,7 +1228,7 @@
                             item.titleTaAuto = translatedTitle;
                             var titleNode = announcementsList.querySelector(".announcement-title");
                             if (titleNode) {
-                                titleNode.innerHTML = urgentBadge + NjcEvents.escapeHtml(translatedTitle);
+                                titleNode.innerHTML = titleBadges + NjcEvents.escapeHtml(translatedTitle);
                             }
                         });
                     }
@@ -1304,6 +1304,9 @@
                         }
                         if (a.urgent !== b.urgent) {
                             return a.urgent ? -1 : 1;
+                        }
+                        if (a.important !== b.important) {
+                            return a.important ? -1 : 1;
                         }
                         return (b.date || "").localeCompare(a.date || "");
                     })

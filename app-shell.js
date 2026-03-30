@@ -150,7 +150,8 @@
         "home.noAnnouncementsBody": "புதிய தகவல்களுக்கு பின்னர் பார்க்கவும்.",
         "home.loadAnnouncementsErrorTitle": "அறிவிப்புகளை ஏற்ற முடியவில்லை",
         "home.loadAnnouncementsErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
-        "home.announcementUrgent": "முக்கியம்",
+        "home.announcementUrgent": "அவசரம்",
+        "home.announcementImportant": "முக்கியம்",
         "home.announcementPrev": "முந்தைய அறிவிப்பு",
         "home.announcementNext": "அடுத்த அறிவிப்பு",
         "home.announcementDot": "அறிவிப்பு",
@@ -527,6 +528,10 @@
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
         "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
+        "admin.noticeImportant": "முக்கியமாக குறிக்கவும் (முகப்பு அட்டை)",
+        "admin.noticeUrgentTag": "அவசரம்",
+        "admin.noticeImportantTag": "முக்கியம்",
+        "admin.noticeEditPromptImportant": "முக்கிய குறிச்சொல்? y அல்லது n (காலியாக விட்டால் மாறாது)",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
         "admin.noticeManageTitle": "சமீப அறிவிப்புகள்",
         "admin.noticeManageInfo": "நீங்கள் வெளியிட்ட அறிவிப்புகளை திருத்த அல்லது நீக்கவும்.",
@@ -1479,10 +1484,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260430pwa1";
+    var SW_VERSION = "20260430ann1";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "PWA install banner matches app header colors.";
+    var UPDATE_NOTES_SUMMARY = "Announcements: Important tag; daily verse image under title.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
