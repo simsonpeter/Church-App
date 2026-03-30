@@ -1479,10 +1479,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260330bfa";
+    var SW_VERSION = "20260330bfb";
     var APP_VERSION = "2026.3.29";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Menu: Daily bread after Songbook; PWA bump.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: new banner image; PWA bump.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
