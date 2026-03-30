@@ -74,6 +74,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        library: {
+            icon: "fa-book-open-reader",
+            eyebrowKey: "library.eyebrow",
+            eyebrowText: "Library",
+            titleKey: "library.title",
+            titleText: "Library",
+            subtitleKey: "library.subtitle",
+            subtitleText: "Read and download"
+        },
         "daily-bread": {
             icon: "fa-bread-slice",
             eyebrowKey: "dailyBread.eyebrow",

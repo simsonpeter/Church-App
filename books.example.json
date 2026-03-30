@@ -1,0 +1,12 @@
+[
+  {
+    "id": "sample-1",
+    "title": "Sample booklet",
+    "titleTa": "மாதிரி நூல்",
+    "author": "Church library",
+    "category": "Devotional",
+    "description": "Replace this file or edit books.json with your own HTTPS links to PDF or text files.",
+    "url": "https://example.org/path/to/your-file.pdf",
+    "format": "pdf"
+  }
+]

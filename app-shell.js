@@ -36,6 +36,17 @@
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.dailyBreadTab": "அப்பம்",
+        "menu.library": "நூலகம்",
+        "library.eyebrow": "நூலகம்",
+        "library.title": "நூலகம்",
+        "library.subtitle": "வாசித்தல் மற்றும் பதிவிறக்கம்",
+        "library.intro": "நூல்கள் மற்றும் ஆவணங்களை (PDF, உரை மற்றும் பிற) வாசிக்க அல்லது பதிவிறக்க. “வாசி” புதிய தாவலில் திறக்கும்; “பதிவிறக்க” நகலை சேமிக்கும்.",
+        "library.loading": "ஏற்றுகிறது...",
+        "library.empty": "இப்போது பட்டியலில் நூல்கள் இல்லை.",
+        "library.error": "பட்டியலை ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "library.read": "வாசி",
+        "library.download": "பதிவிறக்க",
+        "library.untitled": "தலைப்பில்லை",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
@@ -3264,6 +3275,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var libraryLink = document.createElement("a");
+        libraryLink.className = "header-menu-link";
+        libraryLink.href = "#library";
+        libraryLink.innerHTML = "<i class=\"fa-solid fa-book-open-reader\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(libraryLink);
+
         var dailyBreadMenuLink = document.createElement("a");
         dailyBreadMenuLink.className = "header-menu-link";
         dailyBreadMenuLink.href = "#daily-bread";
@@ -3498,6 +3515,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var libraryLabel = t("menu.library", "Library");
             var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
@@ -3552,6 +3570,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var libraryNode = libraryLink.querySelector("span");
+            if (libraryNode) {
+                libraryNode.textContent = libraryLabel;
+            }
             var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
             if (dailyBreadNode) {
                 dailyBreadNode.textContent = dailyBreadMenuLabel;
@@ -3601,6 +3623,7 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isLibrary = getCurrentRoute() === "library";
             var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
@@ -3611,6 +3634,7 @@
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            libraryLink.classList.toggle("active", isLibrary);
             dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
