@@ -6188,7 +6188,7 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     padding-top: 36px;
 }
 
-/* PWA install prompt (browser tab only) */
+/* PWA install prompt (browser tab only) — match app-header palette */
 .pwa-install-banner {
     position: fixed;
     top: 0;
@@ -6197,10 +6197,17 @@ body:has(.offline-banner:not([hidden])) .app-shell {
     z-index: 19990;
     padding: 10px 14px 10px;
     padding-top: max(10px, env(safe-area-inset-top));
-    background: linear-gradient(135deg, #1a237e 0%, #283593 45%, #3949ab 100%);
-    color: #f5f5ff;
-    box-shadow: 0 6px 20px rgba(26, 35, 126, 0.35);
+    background:
+        radial-gradient(ellipse 120% 80% at 20% 0%, rgba(255, 255, 255, 0.12), transparent 52%),
+        linear-gradient(150deg, var(--header-start) 0%, var(--header-mid) 42%, var(--header-end) 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 22px rgba(120, 10, 10, 0.28);
     border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .pwa-install-banner,
+:root:not([data-theme="light"]) .pwa-install-banner {
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45);
 }
 
 .pwa-install-banner-inner {
