@@ -848,6 +848,8 @@ a.card:hover > h2:not(:first-child) i {
     line-height: 1.32;
     color: var(--header-mid);
     letter-spacing: -0.01em;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .daily-bread-page-card .daily-bread-heading i {
@@ -861,6 +863,8 @@ a.card:hover > h2:not(:first-child) i {
     font-style: italic;
     color: var(--accent-warm);
     line-height: 1.4;
+    text-align: justify;
+    text-wrap: pretty;
 }
 
 .daily-bread-body {
@@ -869,6 +873,10 @@ a.card:hover > h2:not(:first-child) i {
     line-height: 1.58;
     white-space: pre-wrap;
     word-break: break-word;
+    text-align: justify;
+    text-wrap: pretty;
+    hyphens: auto;
+    -webkit-hyphens: auto;
 }
 
 @media (prefers-color-scheme: dark) {
