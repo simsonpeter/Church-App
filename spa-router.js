@@ -38,15 +38,6 @@
             subtitleKey: "",
             subtitleText: ""
         },
-        "daily-bread": {
-            icon: "fa-bread-slice",
-            eyebrowKey: "dailyBread.eyebrow",
-            eyebrowText: "Daily bread",
-            titleKey: "dailyBread.title",
-            titleText: "Daily bread",
-            subtitleKey: "",
-            subtitleText: ""
-        },
         contact: {
             icon: "fa-address-book",
             eyebrowKey: "contact.eyebrow",
