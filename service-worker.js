@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v254";
-const RUNTIME_CACHE = "njc-runtime-cache-v254";
+const APP_CACHE = "njc-app-cache-v255";
+const RUNTIME_CACHE = "njc-runtime-cache-v255";
 
 const CORE_ASSETS = [
     "./",
@@ -28,10 +28,10 @@ const CORE_ASSETS = [
     "./user-achievements-page.js?v=20260327bq1",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
-    "./achievements-banner.jpg?v=20260411cb1",
+    "./achievements-banner.jpg?v=20260331achimg1",
     "./admin-banner.jpg?v=20260411cb1",
     "./announcements-banner.jpg?v=20260428img1",
-    "./archive-banner.jpg?v=20260411cb1",
+    "./archive-banner.jpg?v=20260331achimg1",
     "./bible-reader-banner.jpg?v=20260411cb1",
     "./chat-banner.jpg?v=20260411cb1",
     "./daily-verse-banner.jpg?v=20260411cb1",
