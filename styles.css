@@ -973,6 +973,14 @@ html[data-theme="dark"] .daily-bread-author-line {
     min-width: 0;
 }
 
+.library-book-format-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px 10px;
+}
+
 .library-book-format {
     font-size: 0.72rem;
     font-weight: 700;
@@ -982,6 +990,13 @@ html[data-theme="dark"] .daily-bread-author-line {
     padding: 2px 8px;
     border-radius: 6px;
     background: var(--surface-soft, rgba(0, 0, 0, 0.05));
+}
+
+.library-book-filesize {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
 }
 
 .library-book-category {

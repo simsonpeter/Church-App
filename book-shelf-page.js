@@ -1,6 +1,6 @@
 (function () {
     var MANTLE_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
-    var FALLBACK_JSON = "./books.json?v=20260331libtabs1";
+    var FALLBACK_JSON = "./books.json?v=20260331bsfile1";
     var TAB_KEY = "njc_book_shelf_tab_v1";
 
     var listEl = document.getElementById("book-shelf-list");
@@ -43,9 +43,32 @@
         return s === "ta" ? "ta" : "en";
     }
 
+    function formatBytesHuman(bytes) {
+        var b = Number(bytes);
+        if (!isFinite(b) || b <= 0) {
+            return "";
+        }
+        if (b < 1024) {
+            return String(Math.round(b)) + " B";
+        }
+        if (b < 1048576) {
+            var kb = b / 1024;
+            return (kb >= 100 ? kb.toFixed(0) : kb.toFixed(1)) + " KB";
+        }
+        var mb = b / 1048576;
+        return (mb >= 100 ? mb.toFixed(1) : mb.toFixed(2)) + " MB";
+    }
+
     function normalizeEntry(row, index) {
         var source = row && typeof row === "object" ? row : {};
         var url = String(source.url || source.fileUrl || source.href || "").trim();
+        var sizeRaw = source.fileSizeBytes != null ? source.fileSizeBytes : source.fileSize;
+        var fileSizeBytes = Number(sizeRaw);
+        if (!isFinite(fileSizeBytes) || fileSizeBytes <= 0) {
+            fileSizeBytes = 0;
+        } else {
+            fileSizeBytes = Math.min(Math.floor(fileSizeBytes), 2147483647);
+        }
         return {
             id: String(source.id || "").trim() || ("book-" + index),
             title: String(source.title || "").trim(),
@@ -60,6 +83,7 @@
             coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase() || guessFormat(url),
             shelf: normalizeShelf(source.shelf),
+            fileSizeBytes: fileSizeBytes,
             sortOrder: Number(source.sortOrder) || 0,
             updatedAt: String(source.updatedAt || ""),
             createdAt: String(source.createdAt || "")
@@ -178,6 +202,10 @@
             var p = pickLang(entry, lang);
             var title = p.title || T("bookShelf.untitled", "Untitled");
             var fmt = entry.format ? entry.format.toUpperCase() : "FILE";
+            var sizeHuman = formatBytesHuman(entry.fileSizeBytes);
+            var sizeBadge = sizeHuman
+                ? ("<span class=\"library-book-filesize\" title=\"" + escapeHtml(T("bookShelf.fileSizeHint", "Approximate download size")) + "\">" + escapeHtml(T("bookShelf.fileSizeAbout", "≈ {size} download").replace("{size}", sizeHuman)) + "</span>")
+                : "";
             var catLine = p.category
                 ? ("<span class=\"library-book-category\">" + escapeHtml(p.category) + "</span>")
                 : "";
@@ -202,7 +230,10 @@
                 "    <div class=\"library-book-text\">" +
                 "      <div class=\"library-book-top\">" +
                 "        <h3 class=\"library-book-title\">" + escapeHtml(title) + "</h3>" +
-                "        <span class=\"library-book-format\">" + escapeHtml(fmt) + "</span>" +
+                "        <span class=\"library-book-format-row\">" +
+                "          <span class=\"library-book-format\">" + escapeHtml(fmt) + "</span>" +
+                sizeBadge +
+                "        </span>" +
                 "      </div>" +
                 catLine +
                 authorLine +

@@ -5,6 +5,7 @@
     "title": "Sample English shelf book",
     "url": "https://example.org/file.pdf",
     "format": "pdf",
+    "fileSizeBytes": 1258291,
     "coverImageUrl": "https://example.org/cover.jpg"
   },
   {
@@ -13,6 +14,7 @@
     "title": "Tamil shelf sample",
     "titleTa": "மாதிரி தமிழ் நூல்",
     "url": "https://example.org/tamil.pdf",
-    "format": "pdf"
+    "format": "pdf",
+    "fileSizeBytes": 524288
   }
 ]

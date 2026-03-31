@@ -47,6 +47,7 @@
     var bookShelfCategoryTaInput = document.getElementById("admin-book-shelf-category-ta");
     var bookShelfDescriptionInput = document.getElementById("admin-book-shelf-description");
     var bookShelfDescriptionTaInput = document.getElementById("admin-book-shelf-description-ta");
+    var bookShelfFileSizeInput = document.getElementById("admin-book-shelf-file-size");
     var bookShelfSubmit = document.getElementById("admin-book-shelf-submit");
     var bookShelfList = document.getElementById("admin-book-shelf-list");
 
@@ -341,11 +342,66 @@
         };
     }
 
+    function parseBookFileSizeBytes(raw) {
+        var t = String(raw || "").trim().replace(/,/g, "");
+        if (!t) {
+            return null;
+        }
+        var numMatch = t.match(/^(\d+(?:\.\d+)?)/);
+        if (!numMatch) {
+            return NaN;
+        }
+        var n = parseFloat(numMatch[1]);
+        if (!isFinite(n) || n < 0) {
+            return NaN;
+        }
+        var rest = t.slice(numMatch[0].length).replace(/\s+/g, "").toLowerCase();
+        if (!rest || rest === "b" || rest === "bytes") {
+            return Math.round(n);
+        }
+        if (rest === "kb" || rest === "k") {
+            return Math.round(n * 1024);
+        }
+        if (rest === "mb" || rest === "m") {
+            return Math.round(n * 1048576);
+        }
+        if (rest === "gb" || rest === "g") {
+            return Math.round(n * 1073741824);
+        }
+        if (rest === "") {
+            return Math.round(n);
+        }
+        return NaN;
+    }
+
+    function formatBookFileSizeBytes(bytes) {
+        var b = Number(bytes);
+        if (!isFinite(b) || b <= 0) {
+            return "";
+        }
+        if (b < 1024) {
+            return String(Math.round(b)) + " B";
+        }
+        if (b < 1048576) {
+            var kb = b / 1024;
+            return (kb >= 100 ? kb.toFixed(0) : kb.toFixed(1)) + " KB";
+        }
+        var mb = b / 1048576;
+        return (mb >= 100 ? mb.toFixed(1) : mb.toFixed(2)) + " MB";
+    }
+
     function normalizeBookShelfEntry(entry, index) {
         var source = entry && typeof entry === "object" ? entry : {};
         var url = String(source.url || source.fileUrl || source.href || "").trim();
         var shelfRaw = String(source.shelf || "").trim().toLowerCase();
         var shelf = shelfRaw === "ta" ? "ta" : "en";
+        var sizeRaw = source.fileSizeBytes != null ? source.fileSizeBytes : source.fileSize;
+        var fileSizeBytes = Number(sizeRaw);
+        if (!isFinite(fileSizeBytes) || fileSizeBytes <= 0) {
+            fileSizeBytes = 0;
+        } else {
+            fileSizeBytes = Math.min(Math.floor(fileSizeBytes), 2147483647);
+        }
         return {
             id: String(source.id || "").trim() || ("book-shelf-" + index),
             title: String(source.title || "").trim(),
@@ -360,6 +416,7 @@
             coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase(),
             shelf: shelf,
+            fileSizeBytes: fileSizeBytes,
             sortOrder: Number(source.sortOrder) || 0,
             createdAt: String(source.createdAt || ""),
             updatedAt: String(source.updatedAt || "")
@@ -398,6 +455,9 @@
                 ? T("admin.bookShelfBadgeTamil", "Tamil tab")
                 : T("admin.bookShelfBadgeEnglish", "English tab");
             var urlShort = String(entry.url || "").replace(/^https:\/\//, "").slice(0, 72);
+            var sizeLine = entry.fileSizeBytes > 0
+                ? ("<p class=\"page-note\">" + escapeHtml(T("admin.bookShelfListFileSize", "File size")) + ": " + escapeHtml(formatBookFileSizeBytes(entry.fileSizeBytes)) + "</p>")
+                : "";
             var cover = String(entry.coverImageUrl || "").trim();
             var thumb = /^https:\/\//i.test(cover)
                 ? ("<p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(cover) + "\" alt=\"\" width=\"72\" height=\"108\" loading=\"lazy\" decoding=\"async\"></p>")
@@ -407,6 +467,7 @@
                 "  <h3>" + escapeHtml(titleLine) + "</h3>" +
                 "  <p class=\"page-note\"><span class=\"admin-book-shelf-badge\">" + escapeHtml(shelfLabel) + "</span></p>" +
                 thumb +
+                sizeLine +
                 "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.url || "").length > 72 ? "…" : "")) + "</a></p>" +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-book-shelf-id=\"" + escapeHtml(id) + "\" data-admin-book-shelf-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
@@ -1287,6 +1348,13 @@
             showNote("validation", "admin.bookShelfNeedCoverUrl", "Cover image must be https:// or leave empty.");
             return;
         }
+        var sizeRaw = String(bookShelfFileSizeInput && bookShelfFileSizeInput.value || "").trim();
+        var parsedFileSize = parseBookFileSizeBytes(sizeRaw);
+        if (parsedFileSize !== null && (typeof parsedFileSize !== "number" || isNaN(parsedFileSize))) {
+            showNote("validation", "admin.bookShelfNeedFileSize", "File size: use e.g. 2.5 MB, 800 KB, or bytes. Leave empty if unknown.");
+            return;
+        }
+        var fileSizeBytes = parsedFileSize === null ? 0 : Math.min(Math.round(parsedFileSize), 2147483647);
         setBusyState(true);
         fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
             var list = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
@@ -1301,6 +1369,7 @@
                 authorTa: String(bookShelfAuthorTaInput && bookShelfAuthorTaInput.value || "").trim(),
                 url: fileUrl,
                 coverImageUrl: coverUrl,
+                fileSizeBytes: fileSizeBytes,
                 format: String(bookShelfFormatInput && bookShelfFormatInput.value || "").trim().toLowerCase(),
                 category: String(bookShelfCategoryInput && bookShelfCategoryInput.value || "").trim(),
                 categoryTa: String(bookShelfCategoryTaInput && bookShelfCategoryTaInput.value || "").trim(),
@@ -1400,6 +1469,17 @@
             if (nextCover === null) {
                 return;
             }
+            var sizeHint = current.fileSizeBytes > 0 ? formatBookFileSizeBytes(current.fileSizeBytes) : "";
+            var nextFileSize = window.prompt(T("admin.bookShelfEditPromptFileSize", "File size (e.g. 2.5 MB or 1200000 bytes, empty to clear)"), sizeHint);
+            if (nextFileSize === null) {
+                return;
+            }
+            var parsedEditSize = parseBookFileSizeBytes(nextFileSize);
+            if (parsedEditSize !== null && (typeof parsedEditSize !== "number" || isNaN(parsedEditSize))) {
+                showNote("validation", "admin.bookShelfNeedFileSize", "File size: use e.g. 2.5 MB, 800 KB, or bytes. Leave empty if unknown.");
+                return;
+            }
+            var nextFileSizeBytes = parsedEditSize === null ? 0 : Math.min(Math.round(parsedEditSize), 2147483647);
             var nextFormat = window.prompt(T("admin.bookShelfEditPromptFormat", "Format (optional, e.g. pdf)"), String(current.format || ""));
             if (nextFormat === null) {
                 return;
@@ -1443,6 +1523,7 @@
                 authorTa: String(nextAuthorTa || "").trim(),
                 url: cleanUrl,
                 coverImageUrl: cleanCover,
+                fileSizeBytes: nextFileSizeBytes,
                 format: String(nextFormat || "").trim().toLowerCase(),
                 category: String(nextCategory || "").trim(),
                 categoryTa: String(nextCategoryTa || "").trim(),
