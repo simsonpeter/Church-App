@@ -18,7 +18,10 @@
     var fullScreenToggleIcon = fullScreenToggleButton ? fullScreenToggleButton.querySelector("i") : null;
     var statusNote = document.getElementById("bible-status-note");
     var verseList = document.getElementById("bible-verse-list");
+    var verseListWrap = document.getElementById("bible-verse-list-wrap");
     var bibleCard = verseList ? verseList.closest(".card") : null;
+    var chapterTransitionToken = 0;
+    var chapterTransitionFallbackTimer = null;
 
     if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton) {
         return;
@@ -1442,6 +1445,7 @@
     function renderLoading() {
         setStatus(T("bible.loading", "Loading Bible..."), false);
         updateShareControls();
+        clearChapterTransitionClasses();
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.loading", "Loading Bible...")) + "</p>" +
@@ -1458,6 +1462,7 @@
         currentSpeechText = "";
         stopSpeechPlayback();
         updateShareControls();
+        clearChapterTransitionClasses();
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.error", "Could not load Bible right now.")) + "</p>" +
@@ -1636,6 +1641,7 @@
             return "<option value=\"" + String(index) + "\">" + String(index + 1) + "</option>";
         }).join("");
         chapterSelect.value = String(location.chapter);
+        chapterSelect.setAttribute("data-prev-chapter", String(location.chapter));
 
         prevChapterButton.disabled = (location.book === 0 && location.chapter === 0);
         var hasNextInBook = location.chapter < Math.max(0, chapters.length - 1);
@@ -1643,9 +1649,19 @@
         nextChapterButton.disabled = !(hasNextInBook || hasNextBook);
     }
 
+    function prefersChapterMotion() {
+        if (!window.matchMedia) {
+            return true;
+        }
+        return !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
     function resetChapterViewPosition() {
+        var scrollHost = verseListWrap || verseList;
+        if (scrollHost) {
+            scrollHost.scrollTop = 0;
+        }
         if (verseList) {
-            verseList.scrollTop = 0;
             verseList.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
                 node.classList.remove("highlight");
             });
@@ -1655,7 +1671,89 @@
         }
     }
 
-    function renderVerses(data, options) {
+    function clearChapterTransitionClasses() {
+        if (!verseList) {
+            return;
+        }
+        verseList.classList.remove(
+            "bible-chapter-exit-next",
+            "bible-chapter-exit-prev",
+            "bible-chapter-enter-setup-next",
+            "bible-chapter-enter-setup-prev"
+        );
+    }
+
+    function runChapterSlideTransition(direction, paintFn) {
+        if (!verseList) {
+            paintFn();
+            return;
+        }
+        if (!verseListWrap || !prefersChapterMotion()) {
+            clearChapterTransitionClasses();
+            paintFn();
+            return;
+        }
+        chapterTransitionToken += 1;
+        var token = chapterTransitionToken;
+        if (chapterTransitionFallbackTimer) {
+            window.clearTimeout(chapterTransitionFallbackTimer);
+            chapterTransitionFallbackTimer = null;
+        }
+        var exitClass = direction === "prev" ? "bible-chapter-exit-prev" : "bible-chapter-exit-next";
+        var enterClass = direction === "prev" ? "bible-chapter-enter-setup-prev" : "bible-chapter-enter-setup-next";
+        var finished = false;
+
+        function finishAndPaint() {
+            if (finished || token !== chapterTransitionToken) {
+                return;
+            }
+            finished = true;
+            if (chapterTransitionFallbackTimer) {
+                window.clearTimeout(chapterTransitionFallbackTimer);
+                chapterTransitionFallbackTimer = null;
+            }
+            verseList.removeEventListener("transitionend", onTransitionEnd);
+            verseList.classList.remove(exitClass);
+            verseList.classList.add(enterClass);
+            window.requestAnimationFrame(function () {
+                if (token !== chapterTransitionToken) {
+                    return;
+                }
+                paintFn();
+                window.requestAnimationFrame(function () {
+                    if (token !== chapterTransitionToken) {
+                        return;
+                    }
+                    verseList.classList.remove(enterClass);
+                    try {
+                        verseList.offsetHeight;
+                    } catch (eRef) {}
+                });
+            });
+        }
+
+        function onTransitionEnd(event) {
+            if (!event || event.target !== verseList) {
+                return;
+            }
+            if (event.propertyName !== "transform" && event.propertyName !== "opacity") {
+                return;
+            }
+            finishAndPaint();
+        }
+
+        clearChapterTransitionClasses();
+        verseList.addEventListener("transitionend", onTransitionEnd);
+        window.requestAnimationFrame(function () {
+            if (token !== chapterTransitionToken) {
+                return;
+            }
+            verseList.classList.add(exitClass);
+        });
+        chapterTransitionFallbackTimer = window.setTimeout(finishAndPaint, 320);
+    }
+
+    function paintVersesIntoDom(data, options) {
         var config = options && typeof options === "object" ? options : {};
         var resetPosition = Boolean(config.resetPosition);
         var language = normalizeLanguage(state.language);
@@ -1714,6 +1812,19 @@
         }
     }
 
+    function renderVerses(data, options) {
+        var config = options && typeof options === "object" ? options : {};
+        var slideDir = config.chapterTransition;
+        if (slideDir === "next" || slideDir === "prev") {
+            runChapterSlideTransition(slideDir, function () {
+                paintVersesIntoDom(data, config);
+            });
+            return;
+        }
+        clearChapterTransitionClasses();
+        paintVersesIntoDom(data, config);
+    }
+
     function renderBible() {
         setLanguageButtons();
         renderLoading();
@@ -1758,10 +1869,17 @@
                 }
             }
             state[language] = clampLocation(data, location);
-            renderVerses(data, { resetPosition: true });
+            renderVerses(data, { resetPosition: true, chapterTransition: step > 0 ? "next" : "prev" });
         }).catch(function () {
             renderLoadError();
         });
+    }
+
+    function getBibleVerseScrollHost() {
+        if (document.body.classList.contains("bible-fullscreen-open") && verseListWrap) {
+            return verseListWrap;
+        }
+        return null;
     }
 
     function jumpToVerse() {
@@ -1777,21 +1895,22 @@
             node.classList.remove("highlight");
         });
         target.classList.add("highlight");
-        if (document.body.classList.contains("bible-fullscreen-open") && verseList) {
-            var listRect = verseList.getBoundingClientRect();
+        var scrollHost = getBibleVerseScrollHost();
+        if (scrollHost) {
+            var listRect = scrollHost.getBoundingClientRect();
             var targetRect = target.getBoundingClientRect();
             var delta = targetRect.top - listRect.top - listRect.height / 2 + targetRect.height / 2;
             try {
-                verseList.scrollTo({ top: verseList.scrollTop + delta, behavior: "smooth" });
+                scrollHost.scrollTo({ top: scrollHost.scrollTop + delta, behavior: "smooth" });
             } catch (e1) {
-                verseList.scrollTop = verseList.scrollTop + delta;
+                scrollHost.scrollTop = scrollHost.scrollTop + delta;
             }
         } else {
             target.scrollIntoView({ block: "center", behavior: "smooth" });
         }
         window.setTimeout(function () {
             target.classList.remove("highlight");
-        }, 1600);
+        }, 2100);
         updateSpeechTextFromSelection();
     }
 
@@ -1816,12 +1935,23 @@
     });
     chapterSelect.addEventListener("change", function () {
         stopSpeechPlayback();
+        var prevChapter = normalizeNumber(chapterSelect.getAttribute("data-prev-chapter"), -1);
+        var nextChapter = normalizeNumber(chapterSelect.value, 0);
+        chapterSelect.setAttribute("data-prev-chapter", String(nextChapter));
+        var chapterSlide = "";
+        if (prevChapter >= 0 && nextChapter !== prevChapter) {
+            chapterSlide = nextChapter > prevChapter ? "next" : "prev";
+        }
         loadBible(state.language).then(function (data) {
             var language = normalizeLanguage(state.language);
             var location = clampLocation(data, getCurrentLangState());
             location.chapter = normalizeNumber(chapterSelect.value, location.chapter);
             state[language] = clampLocation(data, location);
-            renderVerses(data, { resetPosition: true });
+            var opts = { resetPosition: true };
+            if (chapterSlide) {
+                opts.chapterTransition = chapterSlide;
+            }
+            renderVerses(data, opts);
         }).catch(function () {
             renderLoadError();
         });
@@ -1866,7 +1996,7 @@
         target.classList.add("highlight");
         window.setTimeout(function () {
             target.classList.remove("highlight");
-        }, 1600);
+        }, 2100);
         if (!speechState.active) {
             updateSpeechTextFromSelection();
         } else {

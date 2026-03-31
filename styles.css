@@ -3868,18 +3868,52 @@ button.button-link.bible-lang-btn {
     display: none;
 }
 
-.bible-verse-list {
+.bible-verse-list-wrap {
     margin-top: 10px;
     flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.bible-verse-list {
+    margin-top: 0;
+    flex: 0 0 auto;
     min-height: 0;
     max-height: none;
     overflow: visible;
     -webkit-overflow-scrolling: touch;
+    transition:
+        transform 0.22s cubic-bezier(0.25, 0.85, 0.3, 1),
+        opacity 0.22s ease;
+    will-change: transform, opacity;
 }
 
 /* Entrance animation clips Tamil glyphs at list top; verse rows don't need it */
 .bible-card .bible-verse-list > li {
     animation: none !important;
+}
+
+.bible-verse-list.bible-chapter-exit-next {
+    transform: translate3d(-14px, 0, 0);
+    opacity: 0;
+}
+
+.bible-verse-list.bible-chapter-exit-prev {
+    transform: translate3d(14px, 0, 0);
+    opacity: 0;
+}
+
+.bible-verse-list.bible-chapter-enter-setup-next {
+    transition: none !important;
+    transform: translate3d(16px, 0, 0);
+    opacity: 0;
+}
+
+.bible-verse-list.bible-chapter-enter-setup-prev {
+    transition: none !important;
+    transform: translate3d(-16px, 0, 0);
+    opacity: 0;
 }
 
 .bible-verse-item {
@@ -3888,11 +3922,100 @@ button.button-link.bible-lang-btn {
     align-items: flex-start;
     cursor: pointer;
     scroll-margin-top: 12px;
+    position: relative;
+    isolation: isolate;
+}
+
+.bible-verse-item::after {
+    content: "";
+    position: absolute;
+    inset: 2px 4px;
+    border-radius: 10px;
+    background: linear-gradient(
+        105deg,
+        rgba(229, 57, 53, 0.2),
+        rgba(229, 57, 53, 0.06) 55%,
+        rgba(229, 57, 53, 0.12)
+    );
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+    box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.12);
+}
+
+.bible-verse-item .bible-verse-num,
+.bible-verse-item .bible-verse-text {
+    position: relative;
+    z-index: 1;
+}
+
+.bible-verse-item.highlight::after {
+    animation: bible-verse-highlight-glow 2s ease-out forwards;
 }
 
 .bible-verse-item.highlight {
-    background: var(--primary-soft);
-    border-color: var(--primary);
+    border-color: rgba(229, 57, 53, 0.2);
+}
+
+html[data-theme="dark"] .bible-verse-item::after {
+    background: linear-gradient(
+        105deg,
+        rgba(255, 120, 120, 0.16),
+        rgba(255, 120, 120, 0.05) 55%,
+        rgba(255, 120, 120, 0.1)
+    );
+    box-shadow: 0 0 0 1px rgba(255, 160, 160, 0.12);
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
+    html:not([data-theme="light"]) .bible-verse-item::after {
+        background: linear-gradient(
+            105deg,
+            rgba(255, 120, 120, 0.16),
+            rgba(255, 120, 120, 0.05) 55%,
+            rgba(255, 120, 120, 0.1)
+        );
+        box-shadow: 0 0 0 1px rgba(255, 160, 160, 0.12);
+    }
+}
+
+@keyframes bible-verse-highlight-glow {
+    0% {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+    14% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    55% {
+        opacity: 0.88;
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .bible-verse-list {
+        transition: none !important;
+    }
+
+    .bible-verse-list.bible-chapter-exit-next,
+    .bible-verse-list.bible-chapter-exit-prev {
+        transform: none;
+        opacity: 1;
+    }
+
+    .bible-verse-item.highlight::after {
+        animation: none;
+        opacity: 0.55;
+    }
+
+    .bible-verse-item.highlight {
+        background: var(--primary-soft);
+    }
 }
 
 .bible-verse-num {
@@ -4023,7 +4146,7 @@ body.bible-fullscreen-open .offline-badge {
     flex-shrink: 0;
 }
 
-.bible-card.bible-card-fullscreen .bible-verse-list {
+.bible-card.bible-card-fullscreen .bible-verse-list-wrap {
     margin-top: 0;
     max-height: none;
     flex: 1 1 0%;
@@ -4035,6 +4158,10 @@ body.bible-fullscreen-open .offline-badge {
     touch-action: pan-y;
     position: relative;
     z-index: 1;
+}
+
+.bible-card.bible-card-fullscreen .bible-verse-list {
+    overflow: visible;
 }
 
 #admin-mailbox-refresh {
