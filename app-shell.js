@@ -3441,7 +3441,7 @@
                     var contactLabel = t("menu.contact", "Contact us");
                     var contactLink = document.createElement("a");
                     contactLink.className = "header-menu-link header-menu-tab-link";
-                    contactLink.href = "#settings";
+                    contactLink.href = "#contact";
                     contactLink.setAttribute("data-route", "contact");
                     contactLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span>" + escapeHtml(contactLabel) + "</span>";
                     primaryLinksContainer.appendChild(contactLink);
