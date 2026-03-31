@@ -1,0 +1,18 @@
+[
+  {
+    "id": "example-en",
+    "shelf": "en",
+    "title": "Sample English shelf book",
+    "url": "https://example.org/file.pdf",
+    "format": "pdf",
+    "coverImageUrl": "https://example.org/cover.jpg"
+  },
+  {
+    "id": "example-ta",
+    "shelf": "ta",
+    "title": "Tamil shelf sample",
+    "titleTa": "மாதிரி தமிழ் நூல்",
+    "url": "https://example.org/tamil.pdf",
+    "format": "pdf"
+  }
+]

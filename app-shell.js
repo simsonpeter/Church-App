@@ -36,6 +36,19 @@
         "nav.sermons": "பிரசங்கம்",
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.dailyBread": "அப்பம்",
+        "nav.dailyBreadTab": "அப்பம்",
+        "menu.bookShelf": "புத்தக அலமாரி",
+        "bookShelf.eyebrow": "புத்தக அலமாரி",
+        "bookShelf.title": "புத்தக அலமாரி",
+        "bookShelf.subtitle": "ஆங்கிலம் மற்றும் தமிழ்",
+        "bookShelf.tabEnglish": "ஆங்கிலம்",
+        "bookShelf.tabTamil": "தமிழ்",
+        "bookShelf.loading": "ஏற்றுகிறது...",
+        "bookShelf.empty": "இந்த அலமாரியில் இன்னும் நூல்கள் இல்லை.",
+        "bookShelf.error": "பட்டியலை ஏற்ற முடியவில்லை. பின்னர் முயற்சிக்கவும்.",
+        "bookShelf.read": "வாசி",
+        "bookShelf.download": "பதிவிறக்க",
+        "bookShelf.untitled": "தலைப்பில்லை",
         "menu.open": "பட்டியலை திற",
         "menu.title": "பட்டியல்",
         "menu.close": "பட்டியலை மூடு",
@@ -114,6 +127,49 @@
         "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
         "dailyBread.byAuthor": "எழுத்தாளர்: {author}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
+        "admin.scheduleHintBookShelf": "புத்தக அலமாரி: ஆங்கிலம் அல்லது தமிழ் அலமாரியில் PDF இணைப்புகள்; மெனு → புத்தக அலமாரி. பெட்டி njc-belgium-admin-library.",
+        "admin.bookShelfTitle": "புத்தக அலமாரி",
+        "admin.bookShelfInfo": "ஆங்கிலம் அல்லது தமிழ் அலமாரி தேர்ந்தெடுத்து https:// கோப்பு மற்றும் விருப்ப முகப்பு பட URL ஒட்டவும்.",
+        "admin.bookShelfShelfLegend": "அலமாரி",
+        "admin.bookShelfShelfEnglish": "ஆங்கில அலமாரி",
+        "admin.bookShelfShelfTamil": "தமிழ் அலமாரி",
+        "admin.bookShelfTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
+        "admin.bookShelfTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.bookShelfAuthorPlaceholder": "ஆசிரியர் (விருப்பம்)",
+        "admin.bookShelfAuthorTaPlaceholder": "ஆசிரியர் (தமிழ், விருப்பம்)",
+        "admin.bookShelfUrlPlaceholder": "கோப்பு URL (https://…)",
+        "admin.bookShelfCoverPlaceholder": "முகப்பு பட URL (https://…, விருப்பம்)",
+        "admin.bookShelfFormatPlaceholder": "வடிவம் (விருப்பம்), எ.கா. pdf",
+        "admin.bookShelfCategoryPlaceholder": "வகை (விருப்பம்)",
+        "admin.bookShelfCategoryTaPlaceholder": "வகை (தமிழ், விருப்பம்)",
+        "admin.bookShelfDescriptionPlaceholder": "குறுகிய விளக்கம் (விருப்பம்)",
+        "admin.bookShelfDescriptionTaPlaceholder": "விளக்கம் (தமிழ், விருப்பம்)",
+        "admin.bookShelfPublish": "புத்தக அலமாரியில் சேர்",
+        "admin.bookShelfManageTitle": "புத்தக அலமாரி உருப்படிகள்",
+        "admin.bookShelfManageInfo": "திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
+        "admin.bookShelfEmptyTitle": "இன்னும் உருப்படிகள் இல்லை",
+        "admin.bookShelfEmptyBody": "மேலே தலைப்பு மற்றும் கோப்பு URL சேர்க்கவும்.",
+        "admin.bookShelfNeedTitle": "தலைப்பை உள்ளிடவும்.",
+        "admin.bookShelfNeedUrl": "பாதுகாப்பான கோப்பு URL (https://…) உள்ளிடவும்.",
+        "admin.bookShelfNeedCoverUrl": "முகப்பு படம் https:// அல்லது காலியாக விடவும்.",
+        "admin.bookShelfSaved": "புத்தக அலமாரி உருப்படி சேர்க்கப்பட்டது.",
+        "admin.bookShelfDeleted": "நீக்கப்பட்டது.",
+        "admin.bookShelfUpdated": "புதுப்பிக்கப்பட்டது.",
+        "admin.bookShelfDeleteConfirm": "இந்த உருப்படியை நீக்கவா?",
+        "admin.bookShelfBadgeEnglish": "ஆங்கில அலமாரி",
+        "admin.bookShelfBadgeTamil": "தமிழ் அலமாரி",
+        "admin.bookShelfEditPromptShelf": "அலமாரி: en (ஆங்கிலம்) அல்லது ta (தமிழ்)",
+        "admin.bookShelfEditPromptTitle": "தலைப்பு (EN)",
+        "admin.bookShelfEditPromptTitleTa": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.bookShelfEditPromptAuthor": "ஆசிரியர் (விருப்பம்)",
+        "admin.bookShelfEditPromptAuthorTa": "ஆசிரியர் தமிழ் (விருப்பம்)",
+        "admin.bookShelfEditPromptUrl": "கோப்பு URL (https)",
+        "admin.bookShelfEditPromptCover": "முகப்பு பட URL (https, விருப்பம்)",
+        "admin.bookShelfEditPromptFormat": "வடிவம் (விருப்பம், எ.கா. pdf)",
+        "admin.bookShelfEditPromptCategory": "வகை (விருப்பம்)",
+        "admin.bookShelfEditPromptCategoryTa": "வகை தமிழ் (விருப்பம்)",
+        "admin.bookShelfEditPromptDesc": "விளக்கம் (விருப்பம்)",
+        "admin.bookShelfEditPromptDescTa": "விளக்கம் தமிழ் (விருப்பம்)",
         "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; Daily bread தாவல் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB பெட்டி njc-belgium-admin-daily-bread தேவை.",
         "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
         "admin.dailyBreadInfo": "முன்கூட்டியே உள்ளடக்கம் சேர்க்கவும். ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
@@ -3264,6 +3320,12 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
+        var bookShelfLink = document.createElement("a");
+        bookShelfLink.className = "header-menu-link";
+        bookShelfLink.href = "#book-shelf";
+        bookShelfLink.innerHTML = "<i class=\"fa-solid fa-book-open-reader\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(bookShelfLink);
+
         var dailyBreadMenuLink = document.createElement("a");
         dailyBreadMenuLink.className = "header-menu-link";
         dailyBreadMenuLink.href = "#daily-bread";
@@ -3348,7 +3410,11 @@
         var unreadBadge = notificationsButton.querySelector(".header-menu-unread");
 
         function getCurrentRoute() {
-            return (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+            var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+            if (raw === "library") {
+                return "book-shelf";
+            }
+            return raw;
         }
 
         function buildTabLinksInMenu() {
@@ -3498,6 +3564,7 @@
             var profileLabel = t("menu.profile", "Profile");
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
+            var bookShelfLabel = t("menu.bookShelf", "Book shelf");
             var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
@@ -3552,6 +3619,10 @@
             if (labelNode) {
                 labelNode.textContent = songbookLabel;
             }
+            var bookShelfNode = bookShelfLink.querySelector("span");
+            if (bookShelfNode) {
+                bookShelfNode.textContent = bookShelfLabel;
+            }
             var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
             if (dailyBreadNode) {
                 dailyBreadNode.textContent = dailyBreadMenuLabel;
@@ -3601,6 +3672,7 @@
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
+            var isBookShelf = getCurrentRoute() === "book-shelf";
             var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
@@ -3611,6 +3683,7 @@
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
+            bookShelfLink.classList.toggle("active", isBookShelf);
             dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
