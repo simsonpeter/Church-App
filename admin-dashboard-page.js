@@ -33,20 +33,22 @@
     var dailyBreadBodyTaInput = document.getElementById("admin-daily-bread-body-ta");
     var dailyBreadSubmit = document.getElementById("admin-daily-bread-submit");
     var dailyBreadList = document.getElementById("admin-daily-bread-list");
-    var libraryForm = document.getElementById("admin-library-form");
-    var libraryTitleInput = document.getElementById("admin-library-title");
-    var libraryTitleTaInput = document.getElementById("admin-library-title-ta");
-    var libraryAuthorInput = document.getElementById("admin-library-author");
-    var libraryAuthorTaInput = document.getElementById("admin-library-author-ta");
-    var libraryUrlInput = document.getElementById("admin-library-url");
-    var libraryCoverInput = document.getElementById("admin-library-cover");
-    var libraryFormatInput = document.getElementById("admin-library-format");
-    var libraryCategoryInput = document.getElementById("admin-library-category");
-    var libraryCategoryTaInput = document.getElementById("admin-library-category-ta");
-    var libraryDescriptionInput = document.getElementById("admin-library-description");
-    var libraryDescriptionTaInput = document.getElementById("admin-library-description-ta");
-    var librarySubmit = document.getElementById("admin-library-submit");
-    var libraryList = document.getElementById("admin-library-list");
+    var bookShelfForm = document.getElementById("admin-book-shelf-form");
+    var bookShelfShelfEn = document.getElementById("admin-book-shelf-shelf-en");
+    var bookShelfShelfTa = document.getElementById("admin-book-shelf-shelf-ta");
+    var bookShelfTitleInput = document.getElementById("admin-book-shelf-title");
+    var bookShelfTitleTaInput = document.getElementById("admin-book-shelf-title-ta");
+    var bookShelfAuthorInput = document.getElementById("admin-book-shelf-author");
+    var bookShelfAuthorTaInput = document.getElementById("admin-book-shelf-author-ta");
+    var bookShelfUrlInput = document.getElementById("admin-book-shelf-url");
+    var bookShelfCoverInput = document.getElementById("admin-book-shelf-cover");
+    var bookShelfFormatInput = document.getElementById("admin-book-shelf-format");
+    var bookShelfCategoryInput = document.getElementById("admin-book-shelf-category");
+    var bookShelfCategoryTaInput = document.getElementById("admin-book-shelf-category-ta");
+    var bookShelfDescriptionInput = document.getElementById("admin-book-shelf-description");
+    var bookShelfDescriptionTaInput = document.getElementById("admin-book-shelf-description-ta");
+    var bookShelfSubmit = document.getElementById("admin-book-shelf-submit");
+    var bookShelfList = document.getElementById("admin-book-shelf-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -103,10 +105,10 @@
     var cachedPrayers = [];
     var cachedTrivia = [];
     var cachedDailyBread = [];
-    var cachedLibrary = [];
+    var cachedBookShelf = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !libraryList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !libraryForm) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !bookShelfList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !bookShelfForm) {
         return;
     }
 
@@ -166,8 +168,8 @@
         if (dailyBreadSubmit) {
             dailyBreadSubmit.disabled = busy;
         }
-        if (librarySubmit) {
-            librarySubmit.disabled = busy;
+        if (bookShelfSubmit) {
+            bookShelfSubmit.disabled = busy;
         }
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
             button.disabled = busy;
@@ -194,8 +196,8 @@
                 button.disabled = busy;
             });
         }
-        if (libraryList) {
-            libraryList.querySelectorAll("button[data-admin-library-id]").forEach(function (button) {
+        if (bookShelfList) {
+            bookShelfList.querySelectorAll("button[data-admin-book-shelf-id]").forEach(function (button) {
                 button.disabled = busy;
             });
         }
@@ -337,6 +339,84 @@
             updatedAt: String(source.updatedAt || ""),
             createdByEmail: String(source.createdByEmail || "").trim()
         };
+    }
+
+    function normalizeBookShelfEntry(entry, index) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var url = String(source.url || source.fileUrl || source.href || "").trim();
+        var shelfRaw = String(source.shelf || "").trim().toLowerCase();
+        var shelf = shelfRaw === "ta" ? "ta" : "en";
+        return {
+            id: String(source.id || "").trim() || ("book-shelf-" + index),
+            title: String(source.title || "").trim(),
+            titleTa: String(source.titleTa || "").trim(),
+            author: String(source.author || "").trim(),
+            authorTa: String(source.authorTa || "").trim(),
+            description: String(source.description || "").trim(),
+            descriptionTa: String(source.descriptionTa || "").trim(),
+            category: String(source.category || "").trim(),
+            categoryTa: String(source.categoryTa || "").trim(),
+            url: url,
+            coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
+            format: String(source.format || "").trim().toLowerCase(),
+            shelf: shelf,
+            sortOrder: Number(source.sortOrder) || 0,
+            createdAt: String(source.createdAt || ""),
+            updatedAt: String(source.updatedAt || "")
+        };
+    }
+
+    function renderBookShelfList() {
+        if (!bookShelfList) {
+            return;
+        }
+        var valid = cachedBookShelf.filter(function (e) {
+            return e && /^https:\/\//i.test(String(e.url || "").trim());
+        });
+        if (!valid.length) {
+            bookShelfList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.bookShelfEmptyTitle", "No items yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.bookShelfEmptyBody", "Add a title and file URL above.")) + "</p>" +
+                "</li>";
+            return;
+        }
+        var sorted = valid.slice().sort(function (a, b) {
+            var ao = Number(a.sortOrder) || 0;
+            var bo = Number(b.sortOrder) || 0;
+            if (ao !== bo) {
+                return ao - bo;
+            }
+            var at = String(a.updatedAt || a.createdAt || "");
+            var bt = String(b.updatedAt || b.createdAt || "");
+            return bt.localeCompare(at);
+        }).slice(0, 120);
+        bookShelfList.innerHTML = sorted.map(function (entry) {
+            var id = String(entry.id || "").trim();
+            var titleLine = entry.title || entry.titleTa || "—";
+            var shelfLabel = entry.shelf === "ta"
+                ? T("admin.bookShelfBadgeTamil", "Tamil shelf")
+                : T("admin.bookShelfBadgeEnglish", "English shelf");
+            var urlShort = String(entry.url || "").replace(/^https:\/\//, "").slice(0, 72);
+            var cover = String(entry.coverImageUrl || "").trim();
+            var thumb = /^https:\/\//i.test(cover)
+                ? ("<p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(cover) + "\" alt=\"\" width=\"72\" height=\"108\" loading=\"lazy\" decoding=\"async\"></p>")
+                : "";
+            return "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(titleLine) + "</h3>" +
+                "  <p class=\"page-note\"><span class=\"admin-book-shelf-badge\">" + escapeHtml(shelfLabel) + "</span></p>" +
+                thumb +
+                "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.url || "").length > 72 ? "…" : "")) + "</a></p>" +
+                "  <div class=\"admin-item-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-book-shelf-id=\"" + escapeHtml(id) + "\" data-admin-book-shelf-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-book-shelf-id=\"" + escapeHtml(id) + "\" data-admin-book-shelf-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+        bookShelfList.querySelectorAll("button[data-admin-book-shelf-id]").forEach(function (button) {
+            button.disabled = busy;
+        });
     }
 
     function renderDailyBreadList() {
@@ -753,8 +833,8 @@
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
         }
-        if (libraryList) {
-            libraryList.innerHTML = "" +
+        if (bookShelfList) {
+            bookShelfList.innerHTML = "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
@@ -789,8 +869,8 @@
                 node.disabled = !active;
             });
         }
-        if (libraryForm) {
-            libraryForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+        if (bookShelfForm) {
+            bookShelfForm.querySelectorAll("input,textarea,button").forEach(function (node) {
                 node.disabled = !active;
             });
         }
@@ -807,7 +887,7 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedLibrary.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -816,7 +896,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
-            renderLibraryList();
+            renderBookShelfList();
             return;
         }
         setBusyState(true);
@@ -850,8 +930,8 @@
             }).filter(function (item) {
                 return Boolean(item && item.date);
             });
-            cachedLibrary = extract(7).map(function (row, idx) {
-                return normalizeLibraryEntry(row, idx);
+            cachedBookShelf = extract(7).map(function (row, idx) {
+                return normalizeBookShelfEntry(row, idx);
             });
             renderStats();
             renderNoticeList();
@@ -861,7 +941,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
-            renderLibraryList();
+            renderBookShelfList();
             var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
             if (failed > 0) {
                 showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
@@ -875,7 +955,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
-            renderLibraryList();
+            renderBookShelfList();
         }).finally(function () {
             setBusyState(false);
         });
@@ -1186,45 +1266,46 @@
         });
     });
 
-    libraryForm.addEventListener("submit", function (event) {
+    bookShelfForm.addEventListener("submit", function (event) {
         event.preventDefault();
         if (busy || !isAdminUser()) {
             return;
         }
-        var titleEn = String(libraryTitleInput && libraryTitleInput.value || "").trim();
-        var titleTa = String(libraryTitleTaInput && libraryTitleTaInput.value || "").trim();
-        var fileUrl = String(libraryUrlInput && libraryUrlInput.value || "").trim();
+        var shelf = (bookShelfShelfTa && bookShelfShelfTa.checked) ? "ta" : "en";
+        var titleEn = String(bookShelfTitleInput && bookShelfTitleInput.value || "").trim();
+        var fileUrl = String(bookShelfUrlInput && bookShelfUrlInput.value || "").trim();
         if (!titleEn) {
-            showNote("validation", "admin.libraryNeedTitle", "Please enter a title.");
+            showNote("validation", "admin.bookShelfNeedTitle", "Please enter a title.");
             return;
         }
         if (!/^https:\/\//i.test(fileUrl)) {
-            showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
+            showNote("validation", "admin.bookShelfNeedUrl", "Please enter a secure file URL (https://…).");
             return;
         }
-        var coverUrl = String(libraryCoverInput && libraryCoverInput.value || "").trim();
+        var coverUrl = String(bookShelfCoverInput && bookShelfCoverInput.value || "").trim();
         if (coverUrl && !/^https:\/\//i.test(coverUrl)) {
-            showNote("validation", "admin.libraryNeedCoverUrl", "Cover image must be a secure URL (https://…) or leave it empty.");
+            showNote("validation", "admin.bookShelfNeedCoverUrl", "Cover image must be https:// or leave empty.");
             return;
         }
         setBusyState(true);
         fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
             var list = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
-                return normalizeLibraryEntry(row, idx);
+                return normalizeBookShelfEntry(row, idx);
             });
             var newEntry = {
-                id: makeEntryId("library"),
+                id: makeEntryId("book-shelf"),
+                shelf: shelf,
                 title: titleEn,
-                titleTa: String(libraryTitleTaInput && libraryTitleTaInput.value || "").trim(),
-                author: String(libraryAuthorInput && libraryAuthorInput.value || "").trim(),
-                authorTa: String(libraryAuthorTaInput && libraryAuthorTaInput.value || "").trim(),
+                titleTa: String(bookShelfTitleTaInput && bookShelfTitleTaInput.value || "").trim(),
+                author: String(bookShelfAuthorInput && bookShelfAuthorInput.value || "").trim(),
+                authorTa: String(bookShelfAuthorTaInput && bookShelfAuthorTaInput.value || "").trim(),
                 url: fileUrl,
                 coverImageUrl: coverUrl,
-                format: String(libraryFormatInput && libraryFormatInput.value || "").trim().toLowerCase(),
-                category: String(libraryCategoryInput && libraryCategoryInput.value || "").trim(),
-                categoryTa: String(libraryCategoryTaInput && libraryCategoryTaInput.value || "").trim(),
-                description: String(libraryDescriptionInput && libraryDescriptionInput.value || "").trim(),
-                descriptionTa: String(libraryDescriptionTaInput && libraryDescriptionTaInput.value || "").trim(),
+                format: String(bookShelfFormatInput && bookShelfFormatInput.value || "").trim().toLowerCase(),
+                category: String(bookShelfCategoryInput && bookShelfCategoryInput.value || "").trim(),
+                categoryTa: String(bookShelfCategoryTaInput && bookShelfCategoryTaInput.value || "").trim(),
+                description: String(bookShelfDescriptionInput && bookShelfDescriptionInput.value || "").trim(),
+                descriptionTa: String(bookShelfDescriptionTaInput && bookShelfDescriptionTaInput.value || "").trim(),
                 sortOrder: 0,
                 createdAt: new Date().toISOString(),
                 updatedAt: ""
@@ -1233,12 +1314,13 @@
                 return fetchMantleEntries(ADMIN_LIBRARY_URL);
             });
         }).then(function (entries) {
-            cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
-                return normalizeLibraryEntry(row, idx);
+            cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                return normalizeBookShelfEntry(row, idx);
             });
-            libraryForm.reset();
-            renderLibraryList();
-            showNote("success", "admin.librarySaved", "Library item added.");
+            bookShelfForm.reset();
+            if (bookShelfShelfEn) bookShelfShelfEn.checked = true;
+            renderBookShelfList();
+            showNote("success", "admin.bookShelfSaved", "Book shelf item added.");
             document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-admin-library if needed.");
@@ -1247,18 +1329,18 @@
         });
     });
 
-    if (libraryList) {
-        libraryList.addEventListener("click", function (event) {
-            var button = event.target.closest("button[data-admin-library-id][data-admin-library-action]");
+    if (bookShelfList) {
+        bookShelfList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-book-shelf-id][data-admin-book-shelf-action]");
             if (!button || busy || !isAdminUser()) {
                 return;
             }
-            var entryId = String(button.getAttribute("data-admin-library-id") || "").trim();
-            var action = String(button.getAttribute("data-admin-library-action") || "").trim();
+            var entryId = String(button.getAttribute("data-admin-book-shelf-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-book-shelf-action") || "").trim();
             if (!entryId || (action !== "edit" && action !== "delete")) {
                 return;
             }
-            var source = cachedLibrary.slice(0, MAX_ENTRIES);
+            var source = cachedBookShelf.slice(0, MAX_ENTRIES);
             var targetIndex = source.findIndex(function (entry) {
                 return String(entry && entry.id || "").trim() === entryId;
             });
@@ -1267,7 +1349,7 @@
                 return;
             }
             if (action === "delete") {
-                if (!window.confirm(T("admin.libraryDeleteConfirm", "Remove this item from the library?"))) {
+                if (!window.confirm(T("admin.bookShelfDeleteConfirm", "Remove this item?"))) {
                     return;
                 }
                 source.splice(targetIndex, 1);
@@ -1275,11 +1357,11 @@
                 saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
                     return fetchMantleEntries(ADMIN_LIBRARY_URL);
                 }).then(function (entries) {
-                    cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
-                        return normalizeLibraryEntry(row, idx);
+                    cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                        return normalizeBookShelfEntry(row, idx);
                     });
-                    renderLibraryList();
-                    showNote("success", "admin.libraryDeleted", "Removed.");
+                    renderBookShelfList();
+                    showNote("success", "admin.bookShelfDeleted", "Removed.");
                     document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
                 }).catch(function () {
                     showNote("error", "admin.syncError", "Could not delete.");
@@ -1289,47 +1371,52 @@
                 return;
             }
             var current = source[targetIndex] || {};
-            var nextTitle = window.prompt(T("admin.libraryEditPromptTitle", "Title (English)"), String(current.title || ""));
+            var nextShelfRaw = window.prompt(T("admin.bookShelfEditPromptShelf", "Shelf: en (English) or ta (Tamil)"), String(current.shelf || "en"));
+            if (nextShelfRaw === null) {
+                return;
+            }
+            var nextShelf = String(nextShelfRaw || "").trim().toLowerCase() === "ta" ? "ta" : "en";
+            var nextTitle = window.prompt(T("admin.bookShelfEditPromptTitle", "Title (English)"), String(current.title || ""));
             if (nextTitle === null) {
                 return;
             }
-            var nextTitleTa = window.prompt(T("admin.libraryEditPromptTitleTa", "Title (Tamil, optional)"), String(current.titleTa || ""));
+            var nextTitleTa = window.prompt(T("admin.bookShelfEditPromptTitleTa", "Title (Tamil, optional)"), String(current.titleTa || ""));
             if (nextTitleTa === null) {
                 return;
             }
-            var nextAuthor = window.prompt(T("admin.libraryEditPromptAuthor", "Author (optional)"), String(current.author || ""));
+            var nextAuthor = window.prompt(T("admin.bookShelfEditPromptAuthor", "Author (optional)"), String(current.author || ""));
             if (nextAuthor === null) {
                 return;
             }
-            var nextAuthorTa = window.prompt(T("admin.libraryEditPromptAuthorTa", "Author Tamil (optional)"), String(current.authorTa || ""));
+            var nextAuthorTa = window.prompt(T("admin.bookShelfEditPromptAuthorTa", "Author Tamil (optional)"), String(current.authorTa || ""));
             if (nextAuthorTa === null) {
                 return;
             }
-            var nextUrl = window.prompt(T("admin.libraryEditPromptUrl", "File URL (https)"), String(current.url || ""));
+            var nextUrl = window.prompt(T("admin.bookShelfEditPromptUrl", "File URL (https)"), String(current.url || ""));
             if (nextUrl === null) {
                 return;
             }
-            var nextCover = window.prompt(T("admin.libraryEditPromptCover", "Cover image URL (https, optional)"), String(current.coverImageUrl || ""));
+            var nextCover = window.prompt(T("admin.bookShelfEditPromptCover", "Cover image URL (https, optional)"), String(current.coverImageUrl || ""));
             if (nextCover === null) {
                 return;
             }
-            var nextFormat = window.prompt(T("admin.libraryEditPromptFormat", "Format (optional, e.g. pdf)"), String(current.format || ""));
+            var nextFormat = window.prompt(T("admin.bookShelfEditPromptFormat", "Format (optional, e.g. pdf)"), String(current.format || ""));
             if (nextFormat === null) {
                 return;
             }
-            var nextCategory = window.prompt(T("admin.libraryEditPromptCategory", "Category (optional)"), String(current.category || ""));
+            var nextCategory = window.prompt(T("admin.bookShelfEditPromptCategory", "Category (optional)"), String(current.category || ""));
             if (nextCategory === null) {
                 return;
             }
-            var nextCategoryTa = window.prompt(T("admin.libraryEditPromptCategoryTa", "Category Tamil (optional)"), String(current.categoryTa || ""));
+            var nextCategoryTa = window.prompt(T("admin.bookShelfEditPromptCategoryTa", "Category Tamil (optional)"), String(current.categoryTa || ""));
             if (nextCategoryTa === null) {
                 return;
             }
-            var nextDesc = window.prompt(T("admin.libraryEditPromptDesc", "Description (optional)"), String(current.description || ""));
+            var nextDesc = window.prompt(T("admin.bookShelfEditPromptDesc", "Description (optional)"), String(current.description || ""));
             if (nextDesc === null) {
                 return;
             }
-            var nextDescTa = window.prompt(T("admin.libraryEditPromptDescTa", "Description Tamil (optional)"), String(current.descriptionTa || ""));
+            var nextDescTa = window.prompt(T("admin.bookShelfEditPromptDescTa", "Description Tamil (optional)"), String(current.descriptionTa || ""));
             if (nextDescTa === null) {
                 return;
             }
@@ -1337,18 +1424,19 @@
             var cleanUrl = String(nextUrl || "").trim();
             var cleanCover = String(nextCover || "").trim();
             if (!cleanTitle) {
-                showNote("validation", "admin.libraryNeedTitle", "Please enter a title.");
+                showNote("validation", "admin.bookShelfNeedTitle", "Please enter a title.");
                 return;
             }
             if (!/^https:\/\//i.test(cleanUrl)) {
-                showNote("validation", "admin.libraryNeedUrl", "Please enter a secure file URL (https://…).");
+                showNote("validation", "admin.bookShelfNeedUrl", "Please enter a secure file URL (https://…).");
                 return;
             }
             if (cleanCover && !/^https:\/\//i.test(cleanCover)) {
-                showNote("validation", "admin.libraryNeedCoverUrl", "Cover image must be https:// or empty.");
+                showNote("validation", "admin.bookShelfNeedCoverUrl", "Cover image must be https:// or empty.");
                 return;
             }
             source[targetIndex] = Object.assign({}, current, {
+                shelf: nextShelf,
                 title: cleanTitle,
                 titleTa: String(nextTitleTa || "").trim(),
                 author: String(nextAuthor || "").trim(),
@@ -1366,11 +1454,11 @@
             saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
                 return fetchMantleEntries(ADMIN_LIBRARY_URL);
             }).then(function (entries) {
-                cachedLibrary = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
-                    return normalizeLibraryEntry(row, idx);
+                cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                    return normalizeBookShelfEntry(row, idx);
                 });
-                renderLibraryList();
-                showNote("success", "admin.libraryUpdated", "Updated.");
+                renderBookShelfList();
+                showNote("success", "admin.bookShelfUpdated", "Updated.");
                 document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
             }).catch(function () {
                 showNote("error", "admin.syncError", "Could not update.");

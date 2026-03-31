@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260330lib4">
+    <link rel="stylesheet" href="styles.css?v=20260331bs1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -363,15 +363,19 @@
             </main>
         </section>
 
-        <section class="page-view" data-route="library">
+        <section class="page-view" data-route="book-shelf">
             <main class="app-content">
-            <section class="card card-v-featured library-page-card">
-                <h2><i class="fa-solid fa-book-open-reader"></i><span data-i18n="library.title">Library</span></h2>
+            <section class="card card-v-featured book-shelf-page-card">
+                <h2><i class="fa-solid fa-book-open-reader"></i><span data-i18n="bookShelf.title">Book shelf</span></h2>
                 <div class="card-banner">
                     <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" id="library-books-status" aria-live="polite"></p>
-                <ul class="list library-books-list" id="library-books-list"></ul>
+                <div class="book-shelf-tabs bible-lang-switch" role="tablist" aria-label="Book shelf language">
+                    <button type="button" class="button-link button-secondary book-shelf-tab active" id="book-shelf-tab-en" role="tab" aria-selected="true" data-i18n="bookShelf.tabEnglish">English</button>
+                    <button type="button" class="button-link button-secondary book-shelf-tab" id="book-shelf-tab-ta" role="tab" aria-selected="false" data-i18n="bookShelf.tabTamil">Tamil</button>
+                </div>
+                <p class="page-note" id="book-shelf-status" aria-live="polite"></p>
+                <ul class="list library-books-list" id="book-shelf-list"></ul>
             </section>
             </main>
         </section>
@@ -823,36 +827,47 @@
                     <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
                     <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
                     <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread tab shows the entry for today (Brussels date). Create the MantleDB bucket njc-belgium-admin-daily-bread if needed.</li>
-                    <li data-i18n="admin.scheduleHintLibrary">Library: add PDF or document links; they appear on Menu → Library. Create the MantleDB bucket njc-belgium-admin-library if needed.</li>
+                    <li data-i18n="admin.scheduleHintBookShelf">Book shelf: add PDF links under English or Tamil shelf; they appear on Menu → Book shelf. Bucket njc-belgium-admin-library.</li>
                 </ul>
             </section>
 
             <section class="card card-v-mesh">
-                <h2><i class="fa-solid fa-book-open-reader"></i><span data-i18n="admin.libraryTitle">Library (books &amp; PDFs)</span></h2>
+                <h2><i class="fa-solid fa-book-open-reader"></i><span data-i18n="admin.bookShelfTitle">Book shelf</span></h2>
                 <div class="card-banner">
                     <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="admin.libraryInfo">Paste a public https:// link to each file (PDF, TXT, etc.). The app lists them under Menu → Library.</p>
-                <form class="prayer-form" id="admin-library-form">
-                    <input id="admin-library-title" class="search-input" type="text" required aria-required="true" placeholder="Title (English)" data-i18n-placeholder="admin.libraryTitleEnPlaceholder">
-                    <input id="admin-library-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.libraryTitleTaPlaceholder">
-                    <input id="admin-library-author" class="search-input" type="text" placeholder="Author (optional)" data-i18n-placeholder="admin.libraryAuthorPlaceholder">
-                    <input id="admin-library-author-ta" class="search-input" type="text" placeholder="Author (Tamil, optional)" data-i18n-placeholder="admin.libraryAuthorTaPlaceholder">
-                    <input id="admin-library-url" class="search-input" type="url" inputmode="url" required aria-required="true" autocomplete="off" placeholder="File URL (https://…)" data-i18n-placeholder="admin.libraryUrlPlaceholder">
-                    <input id="admin-library-cover" class="search-input" type="url" inputmode="url" autocomplete="off" placeholder="Cover image URL (https://…, optional)" data-i18n-placeholder="admin.libraryCoverPlaceholder">
-                    <input id="admin-library-format" class="search-input" type="text" placeholder="Format (optional), e.g. pdf" data-i18n-placeholder="admin.libraryFormatPlaceholder">
-                    <input id="admin-library-category" class="search-input" type="text" placeholder="Category (optional)" data-i18n-placeholder="admin.libraryCategoryPlaceholder">
-                    <input id="admin-library-category-ta" class="search-input" type="text" placeholder="Category (Tamil, optional)" data-i18n-placeholder="admin.libraryCategoryTaPlaceholder">
-                    <textarea id="admin-library-description" class="search-input prayer-textarea" rows="2" placeholder="Short description (optional)" data-i18n-placeholder="admin.libraryDescriptionPlaceholder"></textarea>
-                    <textarea id="admin-library-description-ta" class="search-input prayer-textarea" rows="2" placeholder="Description (Tamil, optional)" data-i18n-placeholder="admin.libraryDescriptionTaPlaceholder"></textarea>
-                    <button class="button-link" id="admin-library-submit" type="submit" data-i18n="admin.libraryPublish">Add to library</button>
+                <p class="page-note" data-i18n="admin.bookShelfInfo">Choose English or Tamil shelf, then paste https:// links to files and optional cover image.</p>
+                <form class="prayer-form" id="admin-book-shelf-form">
+                    <fieldset class="admin-book-shelf-shelf-fieldset">
+                        <legend class="page-note" data-i18n="admin.bookShelfShelfLegend">Shelf</legend>
+                        <label class="prayer-wall-anon">
+                            <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-en" value="en" checked>
+                            <span data-i18n="admin.bookShelfShelfEnglish">English shelf</span>
+                        </label>
+                        <label class="prayer-wall-anon">
+                            <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-ta" value="ta">
+                            <span data-i18n="admin.bookShelfShelfTamil">Tamil shelf</span>
+                        </label>
+                    </fieldset>
+                    <input id="admin-book-shelf-title" class="search-input" type="text" required aria-required="true" placeholder="Title (English)" data-i18n-placeholder="admin.bookShelfTitleEnPlaceholder">
+                    <input id="admin-book-shelf-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.bookShelfTitleTaPlaceholder">
+                    <input id="admin-book-shelf-author" class="search-input" type="text" placeholder="Author (optional)" data-i18n-placeholder="admin.bookShelfAuthorPlaceholder">
+                    <input id="admin-book-shelf-author-ta" class="search-input" type="text" placeholder="Author (Tamil, optional)" data-i18n-placeholder="admin.bookShelfAuthorTaPlaceholder">
+                    <input id="admin-book-shelf-url" class="search-input" type="url" inputmode="url" required aria-required="true" autocomplete="off" placeholder="File URL (https://…)" data-i18n-placeholder="admin.bookShelfUrlPlaceholder">
+                    <input id="admin-book-shelf-cover" class="search-input" type="url" inputmode="url" autocomplete="off" placeholder="Cover image URL (https://…, optional)" data-i18n-placeholder="admin.bookShelfCoverPlaceholder">
+                    <input id="admin-book-shelf-format" class="search-input" type="text" placeholder="Format (optional), e.g. pdf" data-i18n-placeholder="admin.bookShelfFormatPlaceholder">
+                    <input id="admin-book-shelf-category" class="search-input" type="text" placeholder="Category (optional)" data-i18n-placeholder="admin.bookShelfCategoryPlaceholder">
+                    <input id="admin-book-shelf-category-ta" class="search-input" type="text" placeholder="Category (Tamil, optional)" data-i18n-placeholder="admin.bookShelfCategoryTaPlaceholder">
+                    <textarea id="admin-book-shelf-description" class="search-input prayer-textarea" rows="2" placeholder="Short description (optional)" data-i18n-placeholder="admin.bookShelfDescriptionPlaceholder"></textarea>
+                    <textarea id="admin-book-shelf-description-ta" class="search-input prayer-textarea" rows="2" placeholder="Description (Tamil, optional)" data-i18n-placeholder="admin.bookShelfDescriptionTaPlaceholder"></textarea>
+                    <button class="button-link" id="admin-book-shelf-submit" type="submit" data-i18n="admin.bookShelfPublish">Add to book shelf</button>
                 </form>
             </section>
 
             <section class="card card-v-ink">
-                <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.libraryManageTitle">Library items</span></h2>
-                <p class="page-note" data-i18n="admin.libraryManageInfo">Edit or remove entries. Refresh reloads from MantleDB.</p>
-                <ul class="list" id="admin-library-list">
+                <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.bookShelfManageTitle">Book shelf items</span></h2>
+                <p class="page-note" data-i18n="admin.bookShelfManageInfo">Edit or remove. Refresh reloads from MantleDB.</p>
+                <ul class="list" id="admin-book-shelf-list">
                     <li>
                         <h3 data-i18n="admin.loading">Loading dashboard...</h3>
                         <p data-i18n="admin.loadingBody">Please wait.</p>
@@ -911,7 +926,7 @@
                     <input id="admin-notice-title-ta" class="search-input" type="text" placeholder="Notice title in Tamil (optional)" data-i18n-placeholder="admin.noticeTitleTaPlaceholder">
                     <textarea id="admin-notice-body" class="search-input prayer-textarea" rows="3" placeholder="Notice message" data-i18n-placeholder="admin.noticeBodyPlaceholder"></textarea>
                     <textarea id="admin-notice-body-ta" class="search-input prayer-textarea" rows="2" placeholder="Notice message in Tamil (optional)" data-i18n-placeholder="admin.noticeBodyTaPlaceholder"></textarea>
-                    <input id="admin-notice-link" class="search-input" type="text" inputmode="url" autocomplete="off" placeholder="e.g. #sermons or full URL (https://…)" data-i18n-placeholder="admin.noticeLinkPlaceholder" title="In-app routes: #home #prayer #events #sermons #daily-bread #contact #settings #trivia #bible #songbook. Or paste any https:// link.">
+                    <input id="admin-notice-link" class="search-input" type="text" inputmode="url" autocomplete="off" placeholder="e.g. #sermons or full URL (https://…)" data-i18n-placeholder="admin.noticeLinkPlaceholder" title="In-app routes: #home #prayer #events #sermons #daily-bread #book-shelf #contact #settings #trivia #bible #songbook. Or paste any https:// link.">
                     <button type="button" class="button-link button-secondary" id="admin-notice-link-presets-btn" data-i18n="admin.noticeLinkPresets">App link presets</button>
                     <label class="prayer-wall-anon">
                         <input id="admin-notice-urgent" type="checkbox">
@@ -1301,7 +1316,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260330lib5"></script>
+    <script src="app-shell.js?v=20260331contact2"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260430dvfeat"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1311,13 +1326,13 @@
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260330ttsverse"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260330lib3"></script>
-    <script src="admin-extras.js?v=20260330lib1"></script>
+    <script src="admin-dashboard-page.js?v=20260331bs1"></script>
+    <script src="admin-extras.js?v=20260331bs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
-    <script src="books-page.js?v=20260330lib4"></script>
-    <script src="spa-router.js?v=20260330lib1"></script>
+    <script src="book-shelf-page.js?v=20260331bs1"></script>
+    <script src="spa-router.js?v=20260331bs1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

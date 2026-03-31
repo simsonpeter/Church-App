@@ -1,13 +1,18 @@
 [
   {
-    "id": "sample-1",
-    "title": "Sample booklet (books.json fallback)",
-    "titleTa": "மாதிரி நூல்",
-    "author": "Church library",
-    "category": "Devotional",
-    "description": "The app lists Library items from MantleDB (Admin → Library) when the bucket has entries. If the feed is empty or unreachable, it falls back to books.json in the site root. Use https:// links only for the public page.",
-    "url": "https://example.org/path/to/your-file.pdf",
-    "coverImageUrl": "https://example.org/path/to/cover.jpg",
+    "id": "example-en",
+    "shelf": "en",
+    "title": "Sample English shelf book",
+    "url": "https://example.org/file.pdf",
+    "format": "pdf",
+    "coverImageUrl": "https://example.org/cover.jpg"
+  },
+  {
+    "id": "example-ta",
+    "shelf": "ta",
+    "title": "Tamil shelf sample",
+    "titleTa": "மாதிரி தமிழ் நூல்",
+    "url": "https://example.org/tamil.pdf",
     "format": "pdf"
   }
 ]

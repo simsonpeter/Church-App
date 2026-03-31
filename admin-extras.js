@@ -299,7 +299,7 @@
                 { label: "Bible Quiz", v: "#trivia" },
                 { label: "Bible", v: "#bible" },
                 { label: "Songbook", v: "#songbook" },
-                { label: "Library", v: "#library" },
+                { label: "Book shelf", v: "#book-shelf" },
                 { label: "Daily bread", v: "#daily-bread" },
                 { label: "Profile", v: "#profile" },
                 { label: "User achievements", v: "#user-achievements" },

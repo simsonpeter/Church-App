@@ -74,14 +74,14 @@
             subtitleKey: "",
             subtitleText: ""
         },
-        library: {
+        "book-shelf": {
             icon: "fa-book-open-reader",
-            eyebrowKey: "library.eyebrow",
-            eyebrowText: "Library",
-            titleKey: "library.title",
-            titleText: "Library",
-            subtitleKey: "library.subtitle",
-            subtitleText: "Read and download"
+            eyebrowKey: "bookShelf.eyebrow",
+            eyebrowText: "Book shelf",
+            titleKey: "bookShelf.title",
+            titleText: "Book shelf",
+            subtitleKey: "bookShelf.subtitle",
+            subtitleText: "English & Tamil"
         },
         "daily-bread": {
             icon: "fa-bread-slice",
@@ -241,6 +241,9 @@
         if (raw === "about") {
             return "prayer";
         }
+        if (raw === "library") {
+            return "book-shelf";
+        }
         if ((raw === "mailbox" || raw === "admin") && !isAdminUser()) {
             return "home";
         }
@@ -279,7 +282,8 @@
             subtitle.hidden = !subtitleValue;
         }
 
-        if (window.location.hash.replace(/^#/, "") !== current) {
+        var hashRaw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        if (hashRaw !== current) {
             window.history.replaceState(null, "", "#" + current);
         }
 
