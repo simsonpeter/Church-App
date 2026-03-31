@@ -260,6 +260,7 @@
         "home.announcementNext": "அடுத்த அறிவிப்பு",
         "home.announcementDot": "அறிவிப்பு",
         "home.readMore": "மேலும் பார்க்க",
+        "home.openInBible": "வேதாகமத்தில் திற",
         "home.personalWishFriend": "நண்பரே",
         "home.personalBirthdayTitle": "பிறந்தநாள் வாழ்த்துக்கள்!",
         "home.personalBirthdayBody": "உங்கள் சிறப்பு நாளில் அன்புடன் வாழ்த்துகிறோம், {name}. தேவன் உங்களை ஆசீர்வதிப்பார்!",

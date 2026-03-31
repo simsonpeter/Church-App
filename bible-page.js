@@ -1481,9 +1481,69 @@
         return state[language];
     }
 
+    function hashRouteSegment() {
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim();
+        var q = raw.indexOf("?");
+        return (q < 0 ? raw : raw.slice(0, q)).toLowerCase();
+    }
+
     function isBibleRouteActive() {
-        var route = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-        return route === "bible";
+        return hashRouteSegment() === "bible";
+    }
+
+    function getBibleDeepLinkFromHash() {
+        var raw = String(window.location.hash || "");
+        if (!/^#bible\?/i.test(raw)) {
+            return null;
+        }
+        var q = raw.indexOf("?");
+        var params;
+        try {
+            params = new URLSearchParams(raw.slice(q + 1));
+        } catch (e) {
+            return null;
+        }
+        var book = Number(params.get("b"));
+        var chapter = Number(params.get("c"));
+        var verse = Number(params.get("v"));
+        if (!Number.isInteger(book) || book < 0) {
+            return null;
+        }
+        if (!Number.isInteger(chapter) || chapter < 1) {
+            return null;
+        }
+        var verseNum = Number.isInteger(verse) && verse >= 1 ? verse : 1;
+        return { book: book, chapter0: chapter - 1, verse: verseNum };
+    }
+
+    function applyBibleDeepLinkFromHash() {
+        var deep = getBibleDeepLinkFromHash();
+        if (!deep || !isBibleRouteActive()) {
+            return Promise.resolve(false);
+        }
+        stopSpeechPlayback();
+        var language = normalizeLanguage(state.language);
+        if (!state[language]) {
+            state[language] = { book: 0, chapter: 0 };
+        }
+        state[language].book = deep.book;
+        state[language].chapter = deep.chapter0;
+        return loadBible(language).then(function (data) {
+            var clamped = clampLocation(data, { book: deep.book, chapter: deep.chapter0 });
+            state[language] = clamped;
+            renderVerses(data, { resetPosition: true });
+            if (verseInput) {
+                verseInput.value = String(deep.verse);
+            }
+            window.requestAnimationFrame(function () {
+                jumpToVerse();
+                refreshMiniBiblePlayer();
+            });
+            return true;
+        }).catch(function () {
+            renderLoadError();
+            return false;
+        });
     }
 
     function setFullScreenMode(open) {
@@ -1842,6 +1902,9 @@
     });
     window.addEventListener("hashchange", function () {
         exitFullScreenIfNeeded();
+        if (isBibleRouteActive() && getBibleDeepLinkFromHash()) {
+            applyBibleDeepLinkFromHash();
+        }
     });
     document.addEventListener("visibilitychange", function () {
         if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
@@ -1911,5 +1974,9 @@
     setFullScreenMode(false);
     updateTtsControls();
     refreshMiniBiblePlayer();
-    renderBible();
+    if (isBibleRouteActive() && getBibleDeepLinkFromHash()) {
+        applyBibleDeepLinkFromHash();
+    } else {
+        renderBible();
+    }
 })();

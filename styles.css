@@ -4229,6 +4229,18 @@ body.bible-fullscreen-open .offline-badge {
     color: var(--muted);
 }
 
+.reading-ref-link {
+    color: var(--accent, #b42323);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-weight: 600;
+}
+
+.reading-ref-link:hover,
+.reading-ref-link:focus-visible {
+    color: var(--primary, #8b1a1a);
+}
+
 /* Photo strip under card titles (home + all tab pages) */
 .card-banner {
     margin: 4px calc(-1 * var(--card-pad)) 10px;

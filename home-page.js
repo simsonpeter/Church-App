@@ -217,6 +217,76 @@
                 "psalms": 18,
                 "song of solomon": 21
             });
+
+            /** Raw plan ref (e.g. Mat.5:1-26) → { book, chapter0, verse } for Bible reader, or null. */
+            function readingRefToBibleOpen(rawRef) {
+                var value = String(rawRef || "").trim();
+                var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
+                if (!match) {
+                    return null;
+                }
+                var prefix = match[1] ? match[1].trim() + " " : "";
+                var shortBook = prefix + match[2] + ".";
+                var tail = String(match[3] || "").trim();
+                var fullBook = bookMapEnglish[shortBook];
+                if (!fullBook || !tail) {
+                    return null;
+                }
+                var bookIndex = bibleBookIndexMap[String(fullBook).toLowerCase()];
+                if (!Number.isInteger(bookIndex) || bookIndex < 0) {
+                    return null;
+                }
+                var rangeOnly = tail.match(/^(\d+)-(\d+)$/);
+                var chapter1;
+                var verse1;
+                if (rangeOnly) {
+                    chapter1 = Number(rangeOnly[1]);
+                    verse1 = 1;
+                } else {
+                    var cv = tail.match(/^(\d+)(?::(\d+)(?:-(\d+))?)?$/);
+                    if (!cv) {
+                        return null;
+                    }
+                    chapter1 = Number(cv[1]);
+                    verse1 = cv[2] ? Number(cv[2]) : 1;
+                }
+                if (!Number.isInteger(chapter1) || chapter1 < 1) {
+                    return null;
+                }
+                if (!Number.isInteger(verse1) || verse1 < 1) {
+                    verse1 = 1;
+                }
+                return {
+                    book: bookIndex,
+                    chapter0: chapter1 - 1,
+                    verse: verse1
+                };
+            }
+
+            function bibleHrefFromReadingRef(rawRef) {
+                var open = readingRefToBibleOpen(rawRef);
+                if (!open) {
+                    return "";
+                }
+                return "#bible?b=" + String(open.book) + "&c=" + String(open.chapter0 + 1) + "&v=" + String(open.verse);
+            }
+
+            function buildReadingRefsLinksHtml(refs, sourceElement) {
+                var list = Array.isArray(refs) ? refs.filter(Boolean) : [];
+                if (!list.length) {
+                    return "";
+                }
+                var openLabel = T("home.openInBible", "Open in Bible", sourceElement);
+                return list.map(function (ref) {
+                    var friendly = toFriendlyReference(ref, sourceElement);
+                    var esc = NjcEvents.escapeHtml(friendly);
+                    var href = bibleHrefFromReadingRef(ref);
+                    if (!href) {
+                        return esc;
+                    }
+                    return "<a class=\"reading-ref-link\" href=\"" + NjcEvents.escapeHtml(href) + "\" aria-label=\"" + NjcEvents.escapeHtml(openLabel + ": " + friendly) + "\">" + esc + "</a>";
+                }).join(", ");
+            }
             var dailyVersePool = [
                 { reference: "Psalm 23:1", textEn: "The Lord is my shepherd; I shall not want.", textTa: "கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; எனக்கு குறைவாயிருக்காது." },
                 { reference: "Proverbs 3:5", textEn: "Trust in the Lord with all your heart and lean not on your own understanding.", textTa: "உன் முழு இருதயத்தோடும் கர்த்தர்மேல் நம்பிக்கையாயிரு; உன் புத்தியின்மேல் சாய்ந்திருக்காதே." },
@@ -1474,7 +1544,7 @@
                 return "" +
                     "<div class=\"reading-compact-item\">" +
                     "  <h3 class=\"reading-item-title\">" + tick + NjcEvents.escapeHtml(T(titleKey, titleFallback, sourceElement)) + "</h3>" +
-                    "  <p class=\"reading-compact-ref\">" + NjcEvents.escapeHtml(cleanRefs.join(", ")) + "</p>" +
+                    "  <p class=\"reading-compact-ref\">" + buildReadingRefsLinksHtml(refs, sourceElement) + "</p>" +
                     "</div>";
             }
 
@@ -1697,7 +1767,7 @@
                         lines.push(
                             "<label class=\"reading-unread-line\">" +
                             "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"morning\">" +
-                            "  <span><strong>" + NjcEvents.escapeHtml(morningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.morningRefs.map(function (ref) { return toFriendlyReference(ref, readingCard); }).join(", ")) + "</span>" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(morningLabel) + ":</strong> " + buildReadingRefsLinksHtml(item.morningRefs, readingCard) + "</span>" +
                             "</label>"
                         );
                     }
@@ -1705,7 +1775,7 @@
                         lines.push(
                             "<label class=\"reading-unread-line\">" +
                             "  <input type=\"checkbox\" data-reading-date=\"" + NjcEvents.escapeHtml(item.dateKey) + "\" data-reading-part=\"evening\">" +
-                            "  <span><strong>" + NjcEvents.escapeHtml(eveningLabel) + ":</strong> " + NjcEvents.escapeHtml(item.eveningRefs.map(function (ref) { return toFriendlyReference(ref, readingCard); }).join(", ")) + "</span>" +
+                            "  <span><strong>" + NjcEvents.escapeHtml(eveningLabel) + ":</strong> " + buildReadingRefsLinksHtml(item.eveningRefs, readingCard) + "</span>" +
                             "</label>"
                         );
                     }
