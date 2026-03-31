@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260331merge1">
+    <link rel="stylesheet" href="styles.css?v=20260331libtabs1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -370,9 +370,9 @@
                 <div class="card-banner">
                     <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <div class="book-shelf-tabs bible-lang-switch" role="tablist" aria-label="Book shelf language">
-                    <button type="button" class="button-link button-secondary book-shelf-tab active" id="book-shelf-tab-en" role="tab" aria-selected="true" data-i18n="bookShelf.tabEnglish">English</button>
+                <div class="book-shelf-tabs bible-lang-switch" role="tablist" aria-label="Book shelf tabs">
                     <button type="button" class="button-link button-secondary book-shelf-tab" id="book-shelf-tab-ta" role="tab" aria-selected="false" data-i18n="bookShelf.tabTamil">Tamil</button>
+                    <button type="button" class="button-link button-secondary book-shelf-tab active" id="book-shelf-tab-en" role="tab" aria-selected="true" data-i18n="bookShelf.tabEnglish">English</button>
                 </div>
                 <p class="page-note" id="book-shelf-status" aria-live="polite"></p>
                 <ul class="list library-books-list" id="book-shelf-list"></ul>
@@ -827,7 +827,7 @@
                     <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
                     <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
                     <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread tab shows the entry for today (Brussels date). Create the MantleDB bucket njc-belgium-admin-daily-bread if needed.</li>
-                    <li data-i18n="admin.scheduleHintBookShelf">Book shelf: add PDF links under English or Tamil shelf; they appear on Menu → Book shelf. Bucket njc-belgium-admin-library.</li>
+                    <li data-i18n="admin.scheduleHintBookShelf">Book shelf: pick Tamil tab or English tab for each book; items show only on that tab. Bucket njc-belgium-admin-library.</li>
                 </ul>
             </section>
 
@@ -836,17 +836,17 @@
                 <div class="card-banner">
                     <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="admin.bookShelfInfo">Choose English or Tamil shelf, then paste https:// links to files and optional cover image.</p>
+                <p class="page-note" data-i18n="admin.bookShelfInfo">Choose Tamil tab or English tab for this book, then paste https:// links to the file and optional cover image.</p>
                 <form class="prayer-form" id="admin-book-shelf-form">
                     <fieldset class="admin-book-shelf-shelf-fieldset">
-                        <legend class="page-note" data-i18n="admin.bookShelfShelfLegend">Shelf</legend>
-                        <label class="prayer-wall-anon">
-                            <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-en" value="en" checked>
-                            <span data-i18n="admin.bookShelfShelfEnglish">English shelf</span>
-                        </label>
+                        <legend class="page-note" data-i18n="admin.bookShelfShelfLegend">Show on tab</legend>
                         <label class="prayer-wall-anon">
                             <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-ta" value="ta">
-                            <span data-i18n="admin.bookShelfShelfTamil">Tamil shelf</span>
+                            <span data-i18n="admin.bookShelfShelfTamil">Tamil tab</span>
+                        </label>
+                        <label class="prayer-wall-anon">
+                            <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-en" value="en" checked>
+                            <span data-i18n="admin.bookShelfShelfEnglish">English tab</span>
                         </label>
                     </fieldset>
                     <input id="admin-book-shelf-title" class="search-input" type="text" required aria-required="true" placeholder="Title (English)" data-i18n-placeholder="admin.bookShelfTitleEnPlaceholder">
@@ -1316,7 +1316,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260331merge1"></script>
+    <script src="app-shell.js?v=20260331libtabs1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260430dvfeat"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1326,13 +1326,13 @@
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260330ttsverse"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260331merge1"></script>
-    <script src="admin-extras.js?v=20260331merge1"></script>
+    <script src="admin-dashboard-page.js?v=20260331libtabs1"></script>
+    <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
-    <script src="book-shelf-page.js?v=20260331merge1"></script>
-    <script src="spa-router.js?v=20260331merge1"></script>
+    <script src="book-shelf-page.js?v=20260331libtabs1"></script>
+    <script src="spa-router.js?v=20260331libtabs1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

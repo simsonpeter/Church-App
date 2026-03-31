@@ -1,6 +1,6 @@
 (function () {
     var MANTLE_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
-    var FALLBACK_JSON = "./books.json?v=20260331bs1";
+    var FALLBACK_JSON = "./books.json?v=20260331libtabs1";
     var TAB_KEY = "njc_book_shelf_tab_v1";
 
     var listEl = document.getElementById("book-shelf-list");

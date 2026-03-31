@@ -395,8 +395,8 @@
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
             var shelfLabel = entry.shelf === "ta"
-                ? T("admin.bookShelfBadgeTamil", "Tamil shelf")
-                : T("admin.bookShelfBadgeEnglish", "English shelf");
+                ? T("admin.bookShelfBadgeTamil", "Tamil tab")
+                : T("admin.bookShelfBadgeEnglish", "English tab");
             var urlShort = String(entry.url || "").replace(/^https:\/\//, "").slice(0, 72);
             var cover = String(entry.coverImageUrl || "").trim();
             var thumb = /^https:\/\//i.test(cover)
@@ -1371,7 +1371,7 @@
                 return;
             }
             var current = source[targetIndex] || {};
-            var nextShelfRaw = window.prompt(T("admin.bookShelfEditPromptShelf", "Shelf: en (English) or ta (Tamil)"), String(current.shelf || "en"));
+            var nextShelfRaw = window.prompt(T("admin.bookShelfEditPromptShelf", "Tab: ta (Tamil) or en (English)"), String(current.shelf || "en"));
             if (nextShelfRaw === null) {
                 return;
             }
