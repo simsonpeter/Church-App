@@ -48,6 +48,7 @@
     var bookShelfDescriptionInput = document.getElementById("admin-book-shelf-description");
     var bookShelfDescriptionTaInput = document.getElementById("admin-book-shelf-description-ta");
     var bookShelfFileSizeInput = document.getElementById("admin-book-shelf-file-size");
+    var bookShelfDetectSizeBtn = document.getElementById("admin-book-shelf-detect-size");
     var bookShelfSubmit = document.getElementById("admin-book-shelf-submit");
     var bookShelfList = document.getElementById("admin-book-shelf-list");
 
@@ -171,6 +172,9 @@
         }
         if (bookShelfSubmit) {
             bookShelfSubmit.disabled = busy;
+        }
+        if (bookShelfDetectSizeBtn) {
+            bookShelfDetectSizeBtn.disabled = busy;
         }
         noticeList.querySelectorAll("button[data-admin-notice-id]").forEach(function (button) {
             button.disabled = busy;
@@ -388,6 +392,112 @@
         }
         var mb = b / 1048576;
         return (mb >= 100 ? mb.toFixed(1) : mb.toFixed(2)) + " MB";
+    }
+
+    /**
+     * Try to learn file size via HEAD or ranged GET. Only works when the file host sends
+     * CORS headers that expose Content-Length / Content-Range; many CDNs and storage buckets do not.
+     */
+    function probeRemoteFileSizeBytes(url) {
+        var u = String(url || "").trim();
+        if (!/^https:\/\//i.test(u)) {
+            return Promise.resolve(null);
+        }
+        var ctrl = new AbortController();
+        var tid = window.setTimeout(function () {
+            try {
+                ctrl.abort();
+            } catch (eAbort) {}
+        }, 15000);
+        function clearTimer() {
+            try {
+                window.clearTimeout(tid);
+            } catch (eClear) {}
+        }
+        function parseContentLength(res) {
+            var cl = res.headers.get("Content-Length");
+            if (cl == null) {
+                return null;
+            }
+            var n = parseInt(String(cl).trim(), 10);
+            if (!isFinite(n) || n <= 0) {
+                return null;
+            }
+            return Math.min(n, 2147483647);
+        }
+        function parseContentRangeTotal(res) {
+            if (res.status !== 206) {
+                return null;
+            }
+            var cr = res.headers.get("Content-Range");
+            if (!cr) {
+                return null;
+            }
+            var m = String(cr).match(/\/(\d+)\s*$/);
+            if (!m) {
+                return null;
+            }
+            var n = parseInt(m[1], 10);
+            if (!isFinite(n) || n <= 0) {
+                return null;
+            }
+            return Math.min(n, 2147483647);
+        }
+        function tryRangeGet() {
+            return fetch(u, {
+                method: "GET",
+                mode: "cors",
+                cache: "no-store",
+                signal: ctrl.signal,
+                headers: { Range: "bytes=0-0" }
+            }).then(function (r2) {
+                var fromRange = parseContentRangeTotal(r2);
+                if (fromRange) {
+                    if (r2.body && typeof r2.body.cancel === "function") {
+                        try {
+                            r2.body.cancel();
+                        } catch (eCan) {}
+                    }
+                    return fromRange;
+                }
+                if (r2.ok && r2.status === 200) {
+                    var cl = parseContentLength(r2);
+                    if (r2.body && typeof r2.body.cancel === "function") {
+                        try {
+                            r2.body.cancel();
+                        } catch (eCan2) {}
+                    }
+                    return cl;
+                }
+                if (r2.body && typeof r2.body.cancel === "function") {
+                    try {
+                        r2.body.cancel();
+                    } catch (eCan3) {}
+                }
+                return null;
+            });
+        }
+        return fetch(u, { method: "HEAD", mode: "cors", cache: "no-store", signal: ctrl.signal })
+            .then(function (res) {
+                if (res.ok) {
+                    var fromHead = parseContentLength(res);
+                    if (fromHead) {
+                        return fromHead;
+                    }
+                }
+                return tryRangeGet();
+            })
+            .catch(function () {
+                return tryRangeGet();
+            })
+            .then(function (result) {
+                clearTimer();
+                return result;
+            })
+            .catch(function () {
+                clearTimer();
+                return null;
+            });
     }
 
     function normalizeBookShelfEntry(entry, index) {
@@ -1326,6 +1436,36 @@
             setBusyState(false);
         });
     });
+
+    if (bookShelfDetectSizeBtn && bookShelfUrlInput && bookShelfFileSizeInput) {
+        bookShelfDetectSizeBtn.addEventListener("click", function () {
+            if (busy || !isAdminUser()) {
+                return;
+            }
+            var fileUrl = String(bookShelfUrlInput.value || "").trim();
+            if (!/^https:\/\//i.test(fileUrl)) {
+                showNote("validation", "admin.bookShelfNeedUrl", "Please enter a secure file URL (https://…) first.");
+                return;
+            }
+            bookShelfDetectSizeBtn.disabled = true;
+            var prevLabel = bookShelfDetectSizeBtn.textContent;
+            bookShelfDetectSizeBtn.textContent = T("admin.bookShelfDetectSizeWorking", "Detecting…");
+            probeRemoteFileSizeBytes(fileUrl).then(function (bytes) {
+                bookShelfDetectSizeBtn.textContent = prevLabel;
+                bookShelfDetectSizeBtn.disabled = busy;
+                if (bytes && bytes > 0) {
+                    bookShelfFileSizeInput.value = String(bytes);
+                    showNote("success", "admin.bookShelfDetectSizeOk", "File size detected. Save the book when ready.");
+                    return;
+                }
+                showNote("validation", "admin.bookShelfDetectSizeFail", "Could not detect size (server may block browsers). Enter it manually.");
+            }).catch(function () {
+                bookShelfDetectSizeBtn.textContent = prevLabel;
+                bookShelfDetectSizeBtn.disabled = busy;
+                showNote("validation", "admin.bookShelfDetectSizeFail", "Could not detect size (server may block browsers). Enter it manually.");
+            });
+        });
+    }
 
     bookShelfForm.addEventListener("submit", function (event) {
         event.preventDefault();

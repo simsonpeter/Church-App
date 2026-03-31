@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260331bsfile1">
+    <link rel="stylesheet" href="styles.css?v=20260331bsdetect1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -854,7 +854,11 @@
                     <input id="admin-book-shelf-author" class="search-input" type="text" placeholder="Author (optional)" data-i18n-placeholder="admin.bookShelfAuthorPlaceholder">
                     <input id="admin-book-shelf-author-ta" class="search-input" type="text" placeholder="Author (Tamil, optional)" data-i18n-placeholder="admin.bookShelfAuthorTaPlaceholder">
                     <input id="admin-book-shelf-url" class="search-input" type="url" inputmode="url" required aria-required="true" autocomplete="off" placeholder="File URL (https://…)" data-i18n-placeholder="admin.bookShelfUrlPlaceholder">
-                    <input id="admin-book-shelf-file-size" class="search-input" type="text" inputmode="decimal" autocomplete="off" placeholder="File size (e.g. 2.5 MB or 800 KB — optional)" data-i18n-placeholder="admin.bookShelfFileSizePlaceholder">
+                    <div class="admin-book-shelf-file-size-row">
+                        <input id="admin-book-shelf-file-size" class="search-input admin-book-shelf-file-size-input" type="text" inputmode="decimal" autocomplete="off" placeholder="File size (e.g. 2.5 MB or 800 KB — optional)" data-i18n-placeholder="admin.bookShelfFileSizePlaceholder">
+                        <button type="button" class="button-link button-secondary" id="admin-book-shelf-detect-size" data-i18n="admin.bookShelfDetectSize">Detect from URL</button>
+                    </div>
+                    <p class="page-note" data-i18n="admin.bookShelfDetectSizeHint">Auto-detect only works if the file server allows it (many block this); you can always type the size.</p>
                     <input id="admin-book-shelf-cover" class="search-input" type="url" inputmode="url" autocomplete="off" placeholder="Cover image URL (https://…, optional)" data-i18n-placeholder="admin.bookShelfCoverPlaceholder">
                     <input id="admin-book-shelf-format" class="search-input" type="text" placeholder="Format (optional), e.g. pdf" data-i18n-placeholder="admin.bookShelfFormatPlaceholder">
                     <input id="admin-book-shelf-category" class="search-input" type="text" placeholder="Category (optional)" data-i18n-placeholder="admin.bookShelfCategoryPlaceholder">
@@ -1317,7 +1321,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260331bsfile1"></script>
+    <script src="app-shell.js?v=20260331bsdetect1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260430dvfeat"></script>
     <script src="events-page.js?v=20260414u2"></script>
@@ -1327,7 +1331,7 @@
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260330ttsverse"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260331bsfile1"></script>
+    <script src="admin-dashboard-page.js?v=20260331bsdetect1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>
