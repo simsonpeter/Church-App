@@ -3664,9 +3664,6 @@
             primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
                 var active = Boolean(route) && route === currentRoute;
-                if (route === "contact" && currentRoute === "settings") {
-                    active = true;
-                }
                 link.classList.toggle("active", active);
             });
             var isProfile = getCurrentRoute() === "profile";
