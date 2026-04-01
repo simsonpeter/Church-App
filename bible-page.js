@@ -104,9 +104,11 @@
     var speechSynthPendingTimerId = null;
     var speechSynthUserPaused = false;
     var speechSynthWatchTimerId = null;
+    var streamStartWatchTimerId = null;
     var SPEECH_CHAIN_GAP_MS = 55;
     var SPEECH_CHAIN_GAP_MS_TA = 95;
     var SPEECH_START_WATCH_MS = 1200;
+    var STREAM_START_WATCH_MS = 2200;
     var prefetchedSegmentIndex = -1;
     var prefetchedSegmentUrl = "";
     var shareImageBusy = false;
@@ -406,6 +408,7 @@
         var playPromise = streamAudio.play();
         if (playPromise && typeof playPromise.catch === "function") {
             playPromise.catch(function () {
+                clearStreamStartWatch();
                 if (speechState.mode !== "stream") {
                     return;
                 }
@@ -417,6 +420,7 @@
                 stopSpeechPlayback();
             });
         }
+        armStreamStartWatch();
         prefetchStreamSegment(streamQueueIndex + 1);
         return true;
     }
@@ -510,11 +514,18 @@
             if (speechState.mode !== "stream") {
                 return;
             }
+            clearStreamStartWatch();
             speechState.active = true;
             speechState.paused = false;
             requestWakeLock();
             updateTtsControls();
             syncMediaSessionState();
+        });
+        streamAudio.addEventListener("playing", function () {
+            if (speechState.mode !== "stream") {
+                return;
+            }
+            clearStreamStartWatch();
         });
         streamAudio.addEventListener("pause", function () {
             if (speechState.mode !== "stream" || !speechState.active) {
@@ -547,6 +558,7 @@
             if (speechState.mode !== "stream" || !speechState.active) {
                 return;
             }
+            clearStreamStartWatch();
             streamErrorCount += 1;
             if (streamErrorCount <= 1) {
                 startSpeechSynthesisPlaybackQueued();
@@ -1018,6 +1030,51 @@
         }
     }
 
+    function clearStreamStartWatch() {
+        if (streamStartWatchTimerId !== null) {
+            window.clearTimeout(streamStartWatchTimerId);
+            streamStartWatchTimerId = null;
+        }
+    }
+
+    function trySpeechAfterStreamSilentFail() {
+        clearStreamStartWatch();
+        if (speechState.mode !== "stream" || !speechState.active) {
+            return;
+        }
+        if (streamAudio && !streamAudio.paused && streamAudio.currentTime > 0.02) {
+            return;
+        }
+        streamErrorCount += 1;
+        clearStreamAudioOnly();
+        speechState.mode = "none";
+        speechState.active = false;
+        speechState.paused = false;
+        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
+            setStatus("", false);
+            return;
+        }
+        stopSpeechPlayback();
+        setStatus(
+            T("bible.ttsBlockedOrMuted", "Could not play audio (network or browser blocked it). Try again or use English / another browser."),
+            true
+        );
+    }
+
+    function armStreamStartWatch() {
+        clearStreamStartWatch();
+        streamStartWatchTimerId = window.setTimeout(function () {
+            streamStartWatchTimerId = null;
+            if (speechState.mode !== "stream" || !speechState.active || speechState.paused) {
+                return;
+            }
+            if (streamAudio && !streamAudio.paused && streamAudio.currentTime > 0.02) {
+                return;
+            }
+            trySpeechAfterStreamSilentFail();
+        }, STREAM_START_WATCH_MS);
+    }
+
     function tryStreamFallbackAfterSpeechFail() {
         clearSpeechSynthWatch();
         if (!streamSupported) {
@@ -1054,6 +1111,7 @@
 
     function stopSpeechPlayback() {
         clearSpeechSynthWatch();
+        clearStreamStartWatch();
         var synth = getSpeechSynthesisApi();
         speechState.active = false;
         speechState.paused = false;
@@ -1276,10 +1334,7 @@
             updateTtsControls();
             return;
         }
-        var lang = normalizeLanguage(currentSpeechContext.language);
-        if (lang === "ta" && streamSupported && startStreamPlayback()) {
-            return;
-        }
+        /* Prefer Web Speech first: Google translate_tts is often blocked (CORS/referrer), especially on Tamil. */
         if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
             return;
         }
