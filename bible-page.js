@@ -620,6 +620,39 @@
         var v = speechSegmentVerseNumbers[segmentIndex];
         currentSpeechPlayingVerse = (v === null || v === undefined) ? null : Number(v);
         refreshMiniBiblePlayingInfo();
+        syncTtsReadingHighlight();
+    }
+
+    function syncTtsReadingHighlight() {
+        if (!verseList) {
+            return;
+        }
+        verseList.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
+            node.classList.remove("tts-reading");
+        });
+        if (!speechState.active && !speechState.paused) {
+            return;
+        }
+        var verseNum = currentSpeechPlayingVerse;
+        if (verseNum === null || verseNum === undefined || !Number.isFinite(Number(verseNum)) || verseNum < 1) {
+            return;
+        }
+        var ctx = currentSpeechContext;
+        var loc = ctx && ctx.location ? ctx.location : null;
+        if (!loc) {
+            return;
+        }
+        if (normalizeLanguage(ctx.language || state.language) !== normalizeLanguage(state.language)) {
+            return;
+        }
+        var langState = getCurrentLangState();
+        if (Number(loc.book) !== Number(langState.book) || Number(loc.chapter) !== Number(langState.chapter)) {
+            return;
+        }
+        var row = verseList.querySelector("#bible-verse-" + String(verseNum));
+        if (row) {
+            row.classList.add("tts-reading");
+        }
     }
 
     function refreshMiniBiblePlayingInfo() {
@@ -1074,6 +1107,7 @@
         ttsStopButton.disabled = !speechState.active && !speechState.paused;
         updateShareControls();
         refreshMiniBiblePlayer();
+        syncTtsReadingHighlight();
     }
 
     function clearSpeechSynthWatch() {
@@ -1200,6 +1234,7 @@
         }
         updateTtsControls();
         syncMediaSessionState();
+        syncTtsReadingHighlight();
     }
 
     function clearStreamAudioOnly() {
@@ -1781,6 +1816,9 @@
             verseList.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
                 node.classList.remove("highlight");
             });
+            verseList.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
+                node.classList.remove("tts-reading");
+            });
         }
         if (verseInput) {
             verseInput.value = "1";
@@ -1926,6 +1964,7 @@
             resetChapterViewPosition();
             updateSpeechTextFromSelection();
         }
+        syncTtsReadingHighlight();
     }
 
     function renderVerses(data, options) {

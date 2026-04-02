@@ -3957,6 +3957,41 @@ button.button-link.bible-lang-btn {
     border-color: rgba(229, 57, 53, 0.2);
 }
 
+/* Verse currently being read aloud (TTS / stream) */
+.bible-verse-item.tts-reading::after {
+    opacity: 1;
+    transform: scale(1);
+    animation: none;
+    background: linear-gradient(
+        105deg,
+        rgba(229, 57, 53, 0.26),
+        rgba(229, 57, 53, 0.1) 50%,
+        rgba(229, 57, 53, 0.18)
+    );
+    box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.28);
+}
+
+.bible-verse-item.tts-reading .bible-verse-num {
+    background: #ffd4d1;
+    box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.2);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bible-verse-item.tts-reading:hover::after {
+        background: linear-gradient(
+            105deg,
+            rgba(229, 57, 53, 0.34),
+            rgba(229, 57, 53, 0.14) 50%,
+            rgba(229, 57, 53, 0.24)
+        );
+        box-shadow: 0 0 0 1px rgba(229, 57, 53, 0.4);
+    }
+
+    .bible-verse-item.tts-reading:hover .bible-verse-num {
+        background: #ffc8c4;
+    }
+}
+
 html[data-theme="dark"] .bible-verse-item::after {
     background: linear-gradient(
         105deg,
@@ -3965,6 +4000,37 @@ html[data-theme="dark"] .bible-verse-item::after {
         rgba(255, 120, 120, 0.1)
     );
     box-shadow: 0 0 0 1px rgba(255, 160, 160, 0.12);
+}
+
+html[data-theme="dark"] .bible-verse-item.tts-reading::after {
+    background: linear-gradient(
+        105deg,
+        rgba(255, 140, 140, 0.22),
+        rgba(255, 140, 140, 0.08) 50%,
+        rgba(255, 140, 140, 0.16)
+    );
+    box-shadow: 0 0 0 1px rgba(255, 180, 180, 0.35);
+}
+
+html[data-theme="dark"] .bible-verse-item.tts-reading .bible-verse-num {
+    background: rgba(255, 120, 120, 0.22);
+    box-shadow: 0 0 0 1px rgba(255, 160, 160, 0.25);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html[data-theme="dark"] .bible-verse-item.tts-reading:hover::after {
+        background: linear-gradient(
+            105deg,
+            rgba(255, 150, 150, 0.3),
+            rgba(255, 150, 150, 0.12) 50%,
+            rgba(255, 150, 150, 0.22)
+        );
+        box-shadow: 0 0 0 1px rgba(255, 200, 200, 0.45);
+    }
+
+    html[data-theme="dark"] .bible-verse-item.tts-reading:hover .bible-verse-num {
+        background: rgba(255, 130, 130, 0.32);
+    }
 }
 
 @media (hover: hover) and (pointer: fine) and (prefers-color-scheme: dark) {
@@ -4014,6 +4080,15 @@ html[data-theme="dark"] .bible-verse-item::after {
     }
 
     .bible-verse-item.highlight {
+        background: var(--primary-soft);
+    }
+
+    .bible-verse-item.tts-reading::after {
+        opacity: 1;
+        animation: none;
+    }
+
+    .bible-verse-item.tts-reading {
         background: var(--primary-soft);
     }
 }
