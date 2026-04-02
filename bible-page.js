@@ -90,6 +90,7 @@
     }
     var currentSpeechText = "";
     var currentSpeechStartVerse = 1;
+    var currentSpeechPlayingVerse = null;
     var currentSpeechContext = {
         language: "en",
         location: { book: 0, chapter: 0 },
@@ -98,6 +99,7 @@
     var screenWakeLock = null;
     var streamQueue = [];
     var streamQueueIndex = 0;
+    var speechSegmentVerseNumbers = [];
     var streamErrorCount = 0;
     var speechSynthSegments = [];
     var speechSynthSegmentIndex = 0;
@@ -266,12 +268,14 @@
             : (getBookName(language, Number(location && location.book || 0)) + " chapter " + String(chapterNumber));
         var safeStartVerse = Math.max(1, Number(startVerseNumber || 1));
         var startIndex = safeStartVerse - 1;
-        var lines = [header];
+        var lines = [{ text: header, verseNumber: null }];
         if (safeStartVerse > 1) {
-            lines.push(activeLanguage === "ta"
-                ? ("வசனம் " + String(safeStartVerse) + " முதல் வாசிக்கப்படுகிறது")
-                : ("Starting from verse " + String(safeStartVerse))
-            );
+            lines.push({
+                text: activeLanguage === "ta"
+                    ? ("வசனம் " + String(safeStartVerse) + " முதல் வாசிக்கப்படுகிறது")
+                    : ("Starting from verse " + String(safeStartVerse)),
+                verseNumber: null
+            });
         }
         (Array.isArray(verses) ? verses : []).forEach(function (verseItem, index) {
             if (index < startIndex) {
@@ -282,36 +286,47 @@
             if (!text) {
                 return;
             }
-            if (activeLanguage === "ta") {
-                lines.push("வசனம் " + String(safeNumber) + ". " + text);
-                return;
-            }
-            lines.push("Verse " + String(safeNumber) + ". " + text);
+            var lineText = activeLanguage === "ta"
+                ? ("வசனம் " + String(safeNumber) + ". " + text)
+                : ("Verse " + String(safeNumber) + ". " + text);
+            lines.push({ text: lineText, verseNumber: safeNumber });
         });
 
         var pieces = [];
-        lines.forEach(function (line) {
-            splitLongSegment(line, 160).forEach(function (piece) {
-                pieces.push(piece);
+        lines.forEach(function (entry) {
+            splitLongSegment(entry.text, 160).forEach(function (piece) {
+                pieces.push({ text: piece, verseNumber: entry.verseNumber });
             });
         });
         var segments = [];
+        var segmentVerseNumbers = [];
         var chunk = "";
-        pieces.forEach(function (piece) {
+        var chunkVerse = null;
+        pieces.forEach(function (pieceObj) {
+            var piece = pieceObj.text;
+            var verseForPiece = pieceObj.verseNumber;
             var next = chunk ? (chunk + ". " + piece) : piece;
             if (next.length > 180) {
                 if (chunk) {
                     segments.push(chunk);
+                    segmentVerseNumbers.push(chunkVerse);
                 }
                 chunk = piece;
+                chunkVerse = verseForPiece;
                 return;
+            }
+            if (!chunk) {
+                chunkVerse = verseForPiece;
+            } else if (verseForPiece !== null && verseForPiece !== undefined) {
+                chunkVerse = verseForPiece;
             }
             chunk = next;
         });
         if (chunk) {
             segments.push(chunk);
+            segmentVerseNumbers.push(chunkVerse);
         }
-        return segments;
+        return { segments: segments, segmentVerseNumbers: segmentVerseNumbers };
     }
 
     function getRemoteTtsUrl(language, text) {
@@ -330,9 +345,10 @@
             var location = currentSpeechContext.location || { book: 0, chapter: 0 };
             var chapterNumber = Number(location.chapter || 0) + 1;
             var metaTitle = getBookName(activeLanguage, Number(location.book || 0));
+            var displayVerse = getDisplayVerseForMiniPlayer();
             var metaArtist = activeLanguage === "ta"
-                ? ("அதிகாரம் " + String(chapterNumber) + " · வசனம் " + String(currentSpeechStartVerse) + "+")
-                : ("Chapter " + String(chapterNumber) + " · Verse " + String(currentSpeechStartVerse) + "+");
+                ? ("அதிகாரம் " + String(chapterNumber) + " · வசனம் " + String(displayVerse))
+                : ("Chapter " + String(chapterNumber) + " · Verse " + String(displayVerse));
             if (typeof window.MediaMetadata === "function") {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: metaTitle,
@@ -468,12 +484,14 @@
         }
         var startVerse = getSelectedVerseStart(verses.length);
         currentSpeechStartVerse = startVerse;
-        streamQueue = buildChapterSpeechSegments(
+        var streamBuilt = buildChapterSpeechSegments(
             normalizeLanguage(currentSpeechContext.language),
             currentSpeechContext.location || { book: 0, chapter: 0 },
             verses,
             startVerse
         );
+        streamQueue = streamBuilt.segments;
+        speechSegmentVerseNumbers = streamBuilt.segmentVerseNumbers;
         if (!streamQueue.length) {
             return false;
         }
@@ -499,7 +517,11 @@
         updateTtsControls();
         syncMediaSessionState();
         requestWakeLock();
-        return startStreamSegment(0);
+        var streamStarted = startStreamSegment(0);
+        if (streamStarted) {
+            updateCurrentPlayingVerseFromSegments(streamQueueIndex);
+        }
+        return streamStarted;
     }
 
     function setupStreamAudio() {
@@ -526,6 +548,7 @@
                 return;
             }
             clearStreamStartWatch();
+            updateCurrentPlayingVerseFromSegments(streamQueueIndex);
         });
         streamAudio.addEventListener("pause", function () {
             if (speechState.mode !== "stream" || !speechState.active) {
@@ -572,13 +595,40 @@
         return speechState.mode !== "none" || speechState.active || speechState.paused;
     }
 
+    function getDisplayVerseForMiniPlayer() {
+        if (speechState.active || speechState.paused) {
+            if (currentSpeechPlayingVerse !== null && currentSpeechPlayingVerse !== undefined) {
+                return currentSpeechPlayingVerse;
+            }
+        }
+        return currentSpeechStartVerse;
+    }
+
     function getMiniBibleInfoText() {
         var activeLanguage = normalizeLanguage(currentSpeechContext.language);
         var location = currentSpeechContext.location || { book: 0, chapter: 0 };
         var chapterNumber = Number(location.chapter || 0) + 1;
         var bookTitle = getBookName(activeLanguage, Number(location.book || 0));
         var verseLabel = T("bible.verse", "Verse");
-        return bookTitle + " " + String(chapterNumber) + " • " + verseLabel + " " + String(currentSpeechStartVerse) + "+";
+        return bookTitle + " " + String(chapterNumber) + " • " + verseLabel + " " + String(getDisplayVerseForMiniPlayer());
+    }
+
+    function updateCurrentPlayingVerseFromSegments(segmentIndex) {
+        if (!Array.isArray(speechSegmentVerseNumbers) || segmentIndex < 0 || segmentIndex >= speechSegmentVerseNumbers.length) {
+            return;
+        }
+        var v = speechSegmentVerseNumbers[segmentIndex];
+        currentSpeechPlayingVerse = (v === null || v === undefined) ? null : Number(v);
+        refreshMiniBiblePlayingInfo();
+    }
+
+    function refreshMiniBiblePlayingInfo() {
+        ensureMiniBiblePlayer();
+        if (!miniBibleInfoNode || !isBiblePlaybackVisible()) {
+            return;
+        }
+        miniBibleInfoNode.textContent = getMiniBibleInfoText();
+        syncMediaSessionState();
     }
 
     function ensureMiniBiblePlayer() {
@@ -687,6 +737,9 @@
         }
         var startVerse = getSelectedVerseStart(verses.length);
         currentSpeechStartVerse = startVerse;
+        if (!speechState.active && !speechState.paused) {
+            currentSpeechPlayingVerse = null;
+        }
         currentSpeechText = buildChapterSpeechText(
             normalizeLanguage(currentSpeechContext.language),
             currentSpeechContext.location || { book: 0, chapter: 0 },
@@ -1133,6 +1186,8 @@
         speakingUtterance = null;
         streamQueue = [];
         streamQueueIndex = 0;
+        speechSegmentVerseNumbers = [];
+        currentSpeechPlayingVerse = null;
         streamErrorCount = 0;
         prefetchedSegmentIndex = -1;
         prefetchedSegmentUrl = "";
@@ -1183,6 +1238,8 @@
             speechState.mode = "none";
             speechSynthSegments = [];
             speechSynthSegmentIndex = 0;
+            speechSegmentVerseNumbers = [];
+            currentSpeechPlayingVerse = null;
             speechSynthUserPaused = false;
             updateTtsControls();
             syncMediaSessionState();
@@ -1206,6 +1263,7 @@
         var chainGap = activeLanguage === "ta" ? SPEECH_CHAIN_GAP_MS_TA : SPEECH_CHAIN_GAP_MS;
         utterance.onstart = function () {
             clearSpeechSynthWatch();
+            updateCurrentPlayingVerseFromSegments(speechSynthSegmentIndex);
         };
         utterance.onend = function () {
             if (speakingUtterance !== utterance) {
@@ -1292,12 +1350,14 @@
         }
         var startVerse = getSelectedVerseStart(verses.length);
         currentSpeechStartVerse = startVerse;
-        var segments = buildChapterSpeechSegments(
+        var speechBuilt = buildChapterSpeechSegments(
             normalizeLanguage(currentSpeechContext.language),
             currentSpeechContext.location || { book: 0, chapter: 0 },
             verses,
             startVerse
         );
+        var segments = speechBuilt.segments;
+        speechSegmentVerseNumbers = speechBuilt.segmentVerseNumbers;
         if (!segments.length) {
             updateTtsControls();
             return false;
@@ -1315,6 +1375,7 @@
         speechState.mode = "speech";
         speechState.active = true;
         speechState.paused = false;
+        updateCurrentPlayingVerseFromSegments(0);
         updateTtsControls();
         syncMediaSessionState();
         requestWakeLock();
