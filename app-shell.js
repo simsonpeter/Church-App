@@ -194,6 +194,7 @@
         "admin.dailyBreadManageTitle": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம்",
         "admin.dailyBreadManageInfo": "தேதியால் திருத்த அல்லது நீக்க. புதுப்பி MantleDB-யிலிருந்து ஏற்றும்.",
         "admin.dailyBreadScheduledToggleAria": "திட்டமிடப்பட்ட அன்றன்றுள்ள அப்பம் பட்டியலை காட்டு அல்லது மறை",
+        "admin.panelSectionToggleAria": "இந்தப் பகுதியை காட்டு அல்லது மறை",
         "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
         "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
         "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
