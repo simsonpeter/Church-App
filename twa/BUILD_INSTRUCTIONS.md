@@ -42,13 +42,36 @@ cd twa
 
 ## GitHub Actions (CI)
 
-The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or manual trigger.
+The workflow `.github/workflows/build-apk.yml` runs on **workflow_dispatch** (Actions tab → “Build NJC APK” → Run workflow) and when `main` changes under `twa/` or the workflow file.
 
-**For a signed APK**, add these repository secrets in GitHub:
-- `KEYSTORE_PASSWORD` – keystore password
-- `KEY_PASSWORD` – key password (optional if same as store)
+### From your phone (no PC)
 
-Without these secrets, the build produces an unsigned APK (usable for testing).
+1. Open the repo on GitHub in a mobile browser.  
+2. **Actions** → **Build NJC APK** → **Run workflow** → choose branch **main** → **Run workflow**.  
+3. When it finishes, open the run → **Artifacts** → download **njc-release-apk** or **njc-debug-apk**.
+
+### Signed release APK (Play Store / same key as before)
+
+Add these **repository secrets** (Settings → Secrets and variables → Actions):
+
+| Secret | Purpose |
+|--------|---------|
+| `KEYSTORE_BASE64` | Base64 of your `jayathasoft.keystore` file (see below) |
+| `KEYSTORE_PASSWORD` | Keystore password |
+| `KEY_PASSWORD` | Key password (optional if same as keystore) |
+
+**Encode the keystore as Base64** (on any machine where the file exists, or use an online base64 encoder locally on phone with the file in cloud storage — keep the secret private):
+
+```bash
+base64 -i jayathasoft.keystore | pbcopy   # macOS
+base64 -w 0 jayathasoft.keystore          # Linux (paste output into the secret)
+```
+
+If `KEYSTORE_BASE64` and `KEYSTORE_PASSWORD` are set, CI builds **assembleRelease** and uploads **njc-release-apk**.
+
+### Debug APK only (testing)
+
+If you do **not** add `KEYSTORE_BASE64` (or no password secret), CI builds **assembleDebug** and uploads **njc-debug-apk**. You can install it on your device for testing; it is not signed with your release key.
 
 ## App Details
 
