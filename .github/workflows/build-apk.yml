@@ -5,9 +5,13 @@ on:
   push:
     branches:
       - main
+      - cursor/apk-availability-070c
     paths:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -34,8 +38,36 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
           path: twa/app/build/outputs/apk/release/app-release.apk
+
+      - name: Rename APK for release
+        run: cp twa/app/build/outputs/apk/release/app-release.apk twa/app/build/outputs/apk/release/NJC.apk
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: NJC App – Latest APK
+          body: |
+            ## Download the NJC Android App
+
+            Tap the link below on your Android phone to download and install:
+
+            **[⬇ Download NJC.apk](https://github.com/${{ github.repository }}/releases/download/apk-latest/NJC.apk)**
+
+            > **How to install:**
+            > 1. Tap the download link above on your Android phone.
+            > 2. Open the downloaded file from your notification bar or Downloads folder.
+            > 3. If prompted, allow installation from unknown sources in your phone settings.
+            > 4. Tap Install.
+
+            _Built automatically from the latest code on `main`._
+          files: twa/app/build/outputs/apk/release/NJC.apk
+          make_latest: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
