@@ -44,6 +44,8 @@ cd twa
 
 The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or manual trigger.
 
+**Downloading without a computer:** After a successful run on `main`, the same APK is attached to the rolling GitHub release tagged [`njc-apk-latest`](https://github.com/simsonpeter/Church-App/releases/tag/njc-apk-latest). Open that page on a phone, download `njc-release.apk`, and install (you may need to allow installs from unknown sources).
+
 **For a signed APK**, add these repository secrets in GitHub:
 - `KEYSTORE_PASSWORD` – keystore password
 - `KEY_PASSWORD` – key password (optional if same as store)

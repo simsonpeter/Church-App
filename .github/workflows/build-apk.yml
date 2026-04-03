@@ -9,6 +9,9 @@ on:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,8 +37,47 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
+      - name: Stage APK for artifact and release
+        id: stage_apk
+        working-directory: twa/app/build/outputs/apk/release
+        run: |
+          shopt -s nullglob
+          files=(app-release.apk app-release-unsigned.apk)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No release APK found in $(pwd)" >&2
+            ls -la >&2 || true
+            exit 1
+          fi
+          cp "${files[0]}" "$GITHUB_WORKSPACE/njc-release.apk"
+          echo "source=${files[0]}" >> "$GITHUB_OUTPUT"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
-          path: twa/app/build/outputs/apk/release/app-release.apk
+          path: njc-release.apk
+
+      - name: Point release tag at current commit
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git tag -f njc-apk-latest "${{ github.sha }}"
+          git push -f origin refs/tags/njc-apk-latest
+
+      - name: Publish APK to GitHub Release
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: njc-apk-latest
+          name: NJC Android APK (latest)
+          body: |
+            Automatic build of the NJC Android wrapper from commit `${{ github.sha }}`.
+
+            Download **njc-release.apk** below and open it on your phone to install (you may need to allow installs from unknown sources).
+
+            **Signed vs unsigned:** If this repo has no signing secrets in GitHub Actions, the file is an unsigned release build (fine for sideload testing). For a signing key that matches [Digital Asset Links](https://simsonpeter.github.io/Church-App/.well-known/assetlinks.json), add secrets `KEYSTORE_PASSWORD` and `KEY_PASSWORD` and supply the keystore for CI as documented in `twa/BUILD_INSTRUCTIONS.md`.
+
+            **No computer needed:** On your phone, open this release in a browser, download the APK, and tap the file to install.
+          files: njc-release.apk
+          fail_on_unmatched_files: true
