@@ -1,6 +1,36 @@
 # NJC Android APK Build Instructions
 
-## Prerequisites
+## Build APK without a computer (phone only)
+
+You can generate APK files directly from GitHub Actions using only a browser.
+
+### 1) Optional: configure signing secrets
+
+If you only need a test APK, skip this section.
+
+For a signed release APK, add these repository secrets in GitHub (`Settings` -> `Secrets and variables` -> `Actions`):
+
+- `KEYSTORE_BASE64` - base64 content of `jayathasoft.keystore`
+- `KEYSTORE_PASSWORD` - keystore password
+- `KEY_ALIAS` - key alias (optional, defaults to `jayathasoft-keystore`)
+- `KEY_PASSWORD` - key password (optional, defaults to `KEYSTORE_PASSWORD`)
+
+### 2) Run the workflow
+
+1. Open the repository on GitHub.
+2. Go to `Actions` -> `Build NJC APK`.
+3. Tap `Run workflow`.
+
+### 3) Download the APK artifact
+
+When the run finishes:
+
+- `njc-debug-apk` is always generated (for testing).
+- `njc-release-apk` is generated only when signing secrets are configured.
+
+Open the workflow run, then download artifacts from the `Artifacts` section.
+
+## Prerequisites for local builds
 
 1. **Java Development Kit (JDK) 11 or higher**
 2. **Android SDK** (via Android Studio or command-line tools)
@@ -42,13 +72,13 @@ cd twa
 
 ## GitHub Actions (CI)
 
-The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or manual trigger.
+The workflow `.github/workflows/build-apk.yml` supports:
 
-**For a signed APK**, add these repository secrets in GitHub:
-- `KEYSTORE_PASSWORD` – keystore password
-- `KEY_PASSWORD` – key password (optional if same as store)
+- manual trigger (`workflow_dispatch`)
+- pull requests touching `twa/**`
+- pushes to `main` touching `twa/**`
 
-Without these secrets, the build produces an unsigned APK (usable for testing).
+It always uploads a debug APK artifact and uploads a release APK artifact when signing secrets are present.
 
 ## App Details
 
