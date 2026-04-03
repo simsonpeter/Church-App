@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - cursor/**
     paths:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
@@ -25,16 +26,29 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK
+      - name: Build debug APK
+        working-directory: twa
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: njc-debug-apk
+          path: twa/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Build signed release APK
+        if: ${{ secrets.KEYSTORE_PASSWORD != '' }}
         working-directory: twa
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        run: ./gradlew assembleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Upload signed release APK
+        if: ${{ secrets.KEYSTORE_PASSWORD != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
