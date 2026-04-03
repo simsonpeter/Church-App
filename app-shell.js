@@ -929,6 +929,7 @@
         "app.installBannerDismiss": "இப்போது வேண்டாம்",
         "app.installBannerIos": "iPhone/iPad: பகிர் ஐகானைத் தட்டி \"Add to Home Screen\" தேர்ந்தெடுக்கவும்.",
         "app.installBannerAndroid": "Android Chrome: மெனு (⋮) ஐ தட்டி \"Install app\" அல்லது \"Add to Home screen\" தேர்ந்தெடுக்கவும்.",
+        "app.installBannerApk": "கணினி இல்லையா? GitHub-ல் சமீபத்திய APK வெளியீட்டைத் திறந்து njc-release.apk பதிவிறக்கவும் (நிறுவ \"தெரியாத மூலங்கள்\" அனுமதி தேவைப்படலாம்).",
         "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
         "app.updateLater": "இப்போது வேண்டாம் (இந்த அமர்வு)",
         "app.updateNotesPrefix": "புதியவை:",
@@ -1760,6 +1761,7 @@
         var dismissBtn = document.getElementById("pwa-install-dismiss");
         var iosHint = document.getElementById("pwa-install-ios-hint");
         var androidHint = document.getElementById("pwa-install-android-hint");
+        var apkRow = document.getElementById("pwa-install-apk-row");
         if (!banner) {
             return;
         }
@@ -1804,6 +1806,9 @@
             if (androidHint) {
                 androidHint.hidden = true;
             }
+            if (apkRow) {
+                apkRow.hidden = true;
+            }
         }
 
         function showBannerForIosHint() {
@@ -1821,6 +1826,9 @@
             hideInstallHints();
             if (androidHint) {
                 androidHint.hidden = false;
+            }
+            if (apkRow) {
+                apkRow.hidden = false;
             }
             if (cta) {
                 cta.hidden = true;
@@ -1891,6 +1899,9 @@
                     }
                     if (isLikelyAndroid() && androidHint) {
                         androidHint.hidden = false;
+                        if (apkRow) {
+                            apkRow.hidden = false;
+                        }
                         if (iosHint) {
                             iosHint.hidden = true;
                         }
