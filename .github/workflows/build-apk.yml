@@ -9,6 +9,9 @@ on:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -25,17 +28,73 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Build APK
+      - name: Download signing keystore
+        if: ${{ secrets.KEYSTORE_PASSWORD != '' }}
+        continue-on-error: true
+        run: curl --fail --location --output twa/jayathasoft.keystore https://raw.githubusercontent.com/simsonpeter/Tcradios_new/main/twa/jayathasoft.keystore
+
+      - name: Build installable APK
+        id: build
         working-directory: twa
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
+          set -euo pipefail
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+
+          apk_variant="debug"
+          apk_glob="app/build/outputs/apk/debug/*.apk"
+
+          if [ -n "${KEYSTORE_PASSWORD:-}" ] && [ -s "jayathasoft.keystore" ]; then
+            echo "Signing inputs detected. Building release APK."
+            if ./gradlew clean assembleRelease --no-daemon; then
+              apk_variant="release"
+              apk_glob="app/build/outputs/apk/release/*.apk"
+            else
+              echo "Release build failed. Falling back to a debug APK."
+              ./gradlew clean assembleDebug --no-daemon
+            fi
+          else
+            echo "Signing inputs unavailable. Building a debug APK instead."
+            ./gradlew clean assembleDebug --no-daemon
+          fi
+
+          shopt -s nullglob
+          apks=($apk_glob)
+          if [ "${#apks[@]}" -eq 0 ]; then
+            echo "No APK found for pattern: $apk_glob" >&2
+            exit 1
+          fi
+
+          mkdir -p "$RUNNER_TEMP/apk"
+          cp "${apks[0]}" "$RUNNER_TEMP/apk/njc-latest.apk"
+
+          echo "apk_path=$RUNNER_TEMP/apk/njc-latest.apk" >> "$GITHUB_OUTPUT"
+          echo "apk_variant=$apk_variant" >> "$GITHUB_OUTPUT"
+          echo "apk_source=${apks[0]}" >> "$GITHUB_OUTPUT"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: njc-release-apk
-          path: twa/app/build/outputs/apk/release/app-release.apk
+          name: njc-${{ steps.build.outputs.apk_variant }}-apk
+          path: ${{ steps.build.outputs.apk_path }}
+
+      - name: Publish latest APK release
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest-apk
+          name: Latest NJC APK
+          body: |
+            Latest installable Android build for NJC.
+
+            - Build type: `${{ steps.build.outputs.apk_variant }}`
+            - Source file: `${{ steps.build.outputs.apk_source }}`
+            - Commit: `${{ github.sha }}`
+          allowUpdates: true
+          artifactErrorsFailBuild: true
+          artifacts: ${{ steps.build.outputs.apk_path }}
+          makeLatest: false
+          prerelease: true
+          removeArtifacts: true

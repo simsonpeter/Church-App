@@ -29,26 +29,33 @@ export KEY_ALIAS=jayathasoft-keystore  # optional
 export KEY_PASSWORD=your_key_password # optional, defaults to KEYSTORE_PASSWORD
 ```
 
-## Building the Signed APK
+## Building the APK locally
 
 ```bash
 cd twa
 
-# Build signed release APK
+# Build signed release APK when signing is configured
 ./gradlew assembleRelease
 
-# Output: app/build/outputs/apk/release/app-release.apk
+# Output: app/build/outputs/apk/release/*.apk
 ```
 
 ## GitHub Actions (CI)
 
-The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or manual trigger.
+The workflow `.github/workflows/build-apk.yml` builds an installable APK on push to `main` or manual trigger.
 
-**For a signed APK**, add these repository secrets in GitHub:
+**For a signed release APK**, add these repository secrets in GitHub:
 - `KEYSTORE_PASSWORD` – keystore password
 - `KEY_PASSWORD` – key password (optional if same as store)
 
-Without these secrets, the build produces an unsigned APK (usable for testing).
+Behavior:
+
+- If signing is available, CI builds a **signed release APK**.
+- If signing is not available, CI falls back to a **debug APK** so Android users can still install the app for testing.
+- Every `main` build also updates the public download URL:
+  `https://github.com/simsonpeter/Church-App/releases/download/latest-apk/njc-latest.apk`
+
+The workflow also uploads the APK as a GitHub Actions artifact for each run.
 
 ## App Details
 

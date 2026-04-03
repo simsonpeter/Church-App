@@ -1,5 +1,5 @@
-const APP_CACHE = "njc-app-cache-v260";
-const RUNTIME_CACHE = "njc-runtime-cache-v260";
+const APP_CACHE = "njc-app-cache-v261";
+const RUNTIME_CACHE = "njc-runtime-cache-v261";
 
 const CORE_ASSETS = [
     "./",
@@ -122,6 +122,12 @@ self.addEventListener("fetch", function (event) {
     const isSameOrigin = url.origin === self.location.origin;
     const isRemoteData = url.origin === "https://raw.githubusercontent.com";
     const isMantleDb = url.origin === "https://mantledb.sh";
+    const isLatestApk = /\/releases\/download\/latest-apk\/njc-latest\.apk(?:[?#].*)?$/i.test(url.href);
+
+    if (isLatestApk) {
+        event.respondWith(fetch(event.request, { cache: "no-store" }));
+        return;
+    }
 
     if (event.request.mode === "navigate") {
         event.respondWith(

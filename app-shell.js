@@ -25,6 +25,7 @@
     var ADMIN_NOTICES_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
     var ADMIN_BROADCASTS_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
+    var APK_DOWNLOAD_URL = "https://github.com/simsonpeter/Church-App/releases/download/latest-apk/njc-latest.apk";
     var activeLanguage = "en";
     var notificationIntervalId = null;
     var tamilTranslations = {
@@ -822,6 +823,13 @@
         "settings.updateUpToDate": "நீங்கள் புதுப்பிக்கப்பட்டுள்ளீர்கள்.",
         "settings.updateError": "சரிபார்க்க முடியவில்லை.",
         "settings.appVersion": "செயலி பதிப்பு",
+        "settings.apkTitle": "Android APK",
+        "settings.apkInfo": "Browser install prompt பயன்படுத்த முடியாவிட்டால் இந்த நேரடி Android installer இணைப்பைப் பயன்படுத்தவும்.",
+        "settings.apkStateAndroid": "Android தொலைபேசியில் நேரடியாக நிறுவலாம்",
+        "settings.apkStateIos": "iPhone/iPad-க்கு APK பொருந்தாது",
+        "settings.apkStateDesktop": "Android தொலைபேசியில் திறந்து நிறுவவும்",
+        "settings.apkHint": "Android-இல் பதிவிறக்கம் செய்த பிறகு, browser அனுமதி கேட்டால் install-ஐ ஒப்புக்கொள்ளவும்.",
+        "settings.apkDownload": "APK பதிவிறக்கு",
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
@@ -927,6 +935,8 @@
         "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
         "app.installBannerCta": "நிறுவு",
         "app.installBannerDismiss": "இப்போது வேண்டாம்",
+        "app.installBannerDownloadApk": "Android APK பதிவிறக்கு",
+        "app.installBannerAndroidApk": "Android APK பதிவிறக்கு",
         "app.installBannerIos": "iPhone/iPad: பகிர் ஐகானைத் தட்டி \"Add to Home Screen\" தேர்ந்தெடுக்கவும்.",
         "app.installBannerAndroid": "Android Chrome: மெனு (⋮) ஐ தட்டி \"Install app\" அல்லது \"Add to Home screen\" தேர்ந்தெடுக்கவும்.",
         "app.updateSnooze24h": "24 மணி நேரத்தில் நினைவூட்டு",
@@ -1757,6 +1767,7 @@
     function setupPwaInstallBanner() {
         var banner = document.getElementById("pwa-install-banner");
         var cta = document.getElementById("pwa-install-cta");
+        var apkLink = document.getElementById("pwa-apk-link");
         var dismissBtn = document.getElementById("pwa-install-dismiss");
         var iosHint = document.getElementById("pwa-install-ios-hint");
         var androidHint = document.getElementById("pwa-install-android-hint");
@@ -1775,6 +1786,10 @@
         }
 
         var deferredPrompt = null;
+
+        if (apkLink) {
+            apkLink.href = APK_DOWNLOAD_URL;
+        }
 
         function hideBanner() {
             banner.hidden = true;
@@ -1806,8 +1821,16 @@
             }
         }
 
+        function toggleApkLink(shouldShow) {
+            if (!apkLink) {
+                return;
+            }
+            apkLink.hidden = !shouldShow;
+        }
+
         function showBannerForIosHint() {
             hideInstallHints();
+            toggleApkLink(false);
             if (iosHint) {
                 iosHint.hidden = false;
             }
@@ -1819,6 +1842,7 @@
 
         function showBannerForAndroidHint() {
             hideInstallHints();
+            toggleApkLink(true);
             if (androidHint) {
                 androidHint.hidden = false;
             }
@@ -1842,6 +1866,7 @@
                 return;
             }
             hideInstallHints();
+            toggleApkLink(isLikelyAndroid());
             if (cta) {
                 cta.hidden = false;
             }
@@ -1868,7 +1893,9 @@
             }
             if (isLikelyAndroid()) {
                 showBannerForAndroidHint();
+                return;
             }
+            toggleApkLink(false);
         }, 800);
 
         if (dismissBtn) {
@@ -4309,6 +4336,56 @@
         if (versionValue) {
             versionValue.textContent = APP_VERSION;
         }
+        var apkCard = document.getElementById("settings-apk-card");
+        var apkState = document.getElementById("settings-apk-state");
+        var apkLink = document.getElementById("settings-apk-link");
+        var apkNote = document.getElementById("settings-apk-note");
+
+        function isLikelyIosForApk() {
+            var ua = String(navigator.userAgent || "");
+            if (/iPad|iPhone|iPod/.test(ua)) {
+                return true;
+            }
+            try {
+                if (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1) {
+                    return true;
+                }
+            } catch (e) {}
+            return false;
+        }
+
+        function isLikelyAndroidForApk() {
+            return /Android/i.test(String(navigator.userAgent || ""));
+        }
+
+        function refreshApkCard() {
+            if (!apkCard || !apkState || !apkLink || !apkNote) {
+                return;
+            }
+
+            apkCard.hidden = false;
+            apkLink.href = APK_DOWNLOAD_URL;
+
+            if (isLikelyIosForApk()) {
+                apkState.textContent = t("settings.apkStateIos", "APK is not supported on iPhone/iPad.");
+                apkLink.hidden = true;
+                apkNote.hidden = true;
+                return;
+            }
+
+            apkLink.hidden = false;
+
+            if (isLikelyAndroidForApk()) {
+                apkState.textContent = t("settings.apkStateAndroid", "Install directly on an Android phone.");
+                apkNote.textContent = t("settings.apkHint", "After download on Android, open the file and allow installs from your browser if asked.");
+                apkNote.hidden = false;
+                return;
+            }
+
+            apkState.textContent = t("settings.apkStateDesktop", "Open on an Android phone to install.");
+            apkNote.textContent = t("settings.apkInfo", "Use this direct Android installer link if you cannot use the browser install prompt.");
+            apkNote.hidden = false;
+        }
 
         function refreshSettingsItems() {
             items.forEach(function (item) {
@@ -4318,6 +4395,7 @@
             });
         }
         refreshSettingsItems();
+        refreshApkCard();
 
         var headerControls = document.querySelector(".app-header .header-controls");
         if (headerControls && headerControls.children.length === 0) {
@@ -4325,6 +4403,7 @@
         }
 
         document.addEventListener("njc:langchange", refreshSettingsItems);
+        document.addEventListener("njc:langchange", refreshApkCard);
         document.addEventListener("njc:themechange", refreshSettingsItems);
         document.addEventListener("njc:notificationstatus", refreshSettingsItems);
         document.addEventListener("njc:inapp-notifications-updated", refreshSettingsItems);

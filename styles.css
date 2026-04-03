@@ -3203,6 +3203,25 @@ body.auth-modal-open {
     gap: 10px;
 }
 
+.settings-apk-card {
+    margin-top: 14px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    background: var(--surface-soft);
+}
+
+.settings-apk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.settings-apk-actions .button-link {
+    margin-top: 0;
+}
+
 .settings-card .page-note {
     margin-bottom: 12px;
 }
@@ -6519,6 +6538,10 @@ html[data-theme="dark"] .pwa-install-banner,
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
+}
+
+.pwa-install-banner-actions .button-link {
+    margin-top: 0;
 }
 
 .pwa-install-banner .button-link {

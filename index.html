@@ -29,6 +29,7 @@
             </span>
             <span class="pwa-install-banner-actions">
                 <button type="button" class="button-link pwa-install-cta" id="pwa-install-cta" data-i18n="app.installBannerCta">Install</button>
+                <a class="button-link button-secondary pwa-apk-link" id="pwa-apk-link" href="https://github.com/simsonpeter/Church-App/releases/download/latest-apk/njc-latest.apk" target="_blank" rel="noopener noreferrer" hidden data-i18n="app.installBannerDownloadApk">Download APK</a>
                 <button type="button" class="button-link button-secondary pwa-install-dismiss" id="pwa-install-dismiss" data-i18n="app.installBannerDismiss">Not now</button>
             </span>
         </div>
@@ -646,6 +647,14 @@
                 </div>
                 <p class="page-note" data-i18n="settings.info">App settings and preferences.</p>
                 <div class="settings-controls" id="settings-card-controls"></div>
+                <section class="settings-apk-card" id="settings-apk-card" hidden>
+                    <h3 data-i18n="settings.apkTitle">Android APK</h3>
+                    <p class="page-note" id="settings-apk-state">Open on an Android phone to install directly.</p>
+                    <div class="settings-apk-actions">
+                        <a class="button-link" id="settings-apk-link" href="https://github.com/simsonpeter/Church-App/releases/download/latest-apk/njc-latest.apk" target="_blank" rel="noopener noreferrer" data-i18n="settings.apkDownload">Download APK</a>
+                    </div>
+                    <p class="page-note settings-apk-note" id="settings-apk-note" data-i18n="settings.apkHint">After download on Android, open the file and allow installs from your browser if asked.</p>
+                </section>
                 <p class="page-note settings-version" id="settings-version-note"><span data-i18n="settings.appVersion">App version</span>: <strong id="settings-version-value">–</strong></p>
             </section>
             </main>
