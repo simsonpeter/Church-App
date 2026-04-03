@@ -9,6 +9,9 @@ on:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,8 +37,37 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Prepare APK for upload
+        id: prepare
+        run: |
+          APK_DIR="twa/app/build/outputs/apk/release"
+          if [ -f "$APK_DIR/app-release.apk" ]; then
+            cp "$APK_DIR/app-release.apk" "$APK_DIR/NJC.apk"
+            echo "signed=true" >> "$GITHUB_OUTPUT"
+          elif [ -f "$APK_DIR/app-release-unsigned.apk" ]; then
+            cp "$APK_DIR/app-release-unsigned.apk" "$APK_DIR/NJC.apk"
+            echo "signed=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "apk_path=$APK_DIR/NJC.apk" >> "$GITHUB_OUTPUT"
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
-          path: twa/app/build/outputs/apk/release/app-release.apk
+          path: ${{ steps.prepare.outputs.apk_path }}
+
+      - name: Create Release with APK
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: NJC APK (Build ${{ github.run_number }})
+          body: |
+            Automated APK build from commit ${{ github.sha }}.
+
+            **Download `NJC.apk` below** and install it on your Android device.
+
+            > If the APK is unsigned, you may need to enable "Install from unknown sources" in your Android settings.
+          files: ${{ steps.prepare.outputs.apk_path }}
+          draft: false
+          prerelease: ${{ steps.prepare.outputs.signed == 'false' }}

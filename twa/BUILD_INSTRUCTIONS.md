@@ -50,6 +50,17 @@ The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or
 
 Without these secrets, the build produces an unsigned APK (usable for testing).
 
+### Getting the APK without a computer
+
+Every build on `main` automatically creates a **GitHub Release** with the APK attached.
+
+1. Go to the repository's **Releases** page on GitHub (from your phone's browser).
+2. Find the latest release (named "NJC APK (Build N)").
+3. Tap **NJC.apk** under "Assets" to download it directly to your phone.
+4. Open the downloaded file to install (you may need to allow "Install from unknown sources").
+
+You can also trigger a build manually from the **Actions** tab → "Build NJC APK" → "Run workflow".
+
 ## App Details
 
 - **App name**: NJC
