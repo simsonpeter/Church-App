@@ -12,6 +12,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,8 +36,24 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
+      - name: Prepare release artifact
+        run: cp twa/app/build/outputs/apk/release/app-release.apk twa/app/build/outputs/apk/release/njc-latest.apk
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
-          path: twa/app/build/outputs/apk/release/app-release.apk
+          path: twa/app/build/outputs/apk/release/njc-latest.apk
+
+      - name: Publish latest APK release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: latest-apk
+          name: NJC Latest APK
+          allowUpdates: true
+          replacesArtifacts: true
+          makeLatest: true
+          artifacts: twa/app/build/outputs/apk/release/njc-latest.apk
+          body: |
+            Latest auto-built NJC Android APK.
+            Download `njc-latest.apk` on your phone and install it.

@@ -50,6 +50,18 @@ The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or
 
 Without these secrets, the build produces an unsigned APK (usable for testing).
 
+### Get APK without a computer (phone-only)
+
+1. Open GitHub in your phone browser and go to:
+   - `https://github.com/simsonpeter/Church-App/actions/workflows/build-apk.yml`
+2. Tap **Run workflow** and run it on the branch you want.
+3. After it finishes, open:
+   - `https://github.com/simsonpeter/Church-App/releases/tag/latest-apk`
+4. Download `njc-latest.apk` from the release assets.
+5. On Android, allow install from browser/files app if prompted, then install.
+
+The release tag `latest-apk` is updated every successful build, so the link stays the same.
+
 ## App Details
 
 - **App name**: NJC
