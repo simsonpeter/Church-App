@@ -9,6 +9,9 @@ on:
       - 'twa/**'
       - '.github/workflows/build-apk.yml'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -34,8 +37,47 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
 
-      - name: Upload APK
+      - name: Determine APK path
+        id: apk
+        run: |
+          SIGNED="twa/app/build/outputs/apk/release/app-release.apk"
+          UNSIGNED="twa/app/build/outputs/apk/release/app-release-unsigned.apk"
+          if [ -f "$SIGNED" ]; then
+            echo "path=$SIGNED" >> "$GITHUB_OUTPUT"
+            echo "name=NJC.apk" >> "$GITHUB_OUTPUT"
+          elif [ -f "$UNSIGNED" ]; then
+            echo "path=$UNSIGNED" >> "$GITHUB_OUTPUT"
+            echo "name=NJC-unsigned.apk" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::No APK found"
+            exit 1
+          fi
+
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: njc-release-apk
-          path: twa/app/build/outputs/apk/release/app-release.apk
+          path: ${{ steps.apk.outputs.path }}
+
+      - name: Create GitHub Release with APK
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v1.0.0-build.${{ github.run_number }}"
+          cp "${{ steps.apk.outputs.path }}" "${{ steps.apk.outputs.name }}"
+          gh release create "$TAG" \
+            "${{ steps.apk.outputs.name }}" \
+            --title "NJC APK - Build #${{ github.run_number }}" \
+            --notes "Download the APK file below and install it on your Android device.
+
+          **Build:** #${{ github.run_number }}
+          **Commit:** ${{ github.sha }}
+          **Date:** $(date -u +'%Y-%m-%d %H:%M UTC')
+
+          ### How to install
+          1. Download **${{ steps.apk.outputs.name }}** below
+          2. Open the file on your Android phone
+          3. Allow installation from unknown sources if prompted
+          4. Tap Install" \
+            --latest

@@ -40,6 +40,16 @@ cd twa
 # Output: app/build/outputs/apk/release/app-release.apk
 ```
 
+## Download APK (no computer needed)
+
+Every push to `main` (that changes `twa/` files) automatically builds the APK and publishes it as a **GitHub Release**.
+
+1. Go to the repository's **Releases** page
+2. Download the latest **NJC.apk** (or **NJC-unsigned.apk**)
+3. Open the file on your Android phone and install
+
+You can also trigger a build manually from the **Actions** tab using "Run workflow".
+
 ## GitHub Actions (CI)
 
 The workflow `.github/workflows/build-apk.yml` builds the APK on push to main or manual trigger.
