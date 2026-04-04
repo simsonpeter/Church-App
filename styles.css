@@ -1055,6 +1055,20 @@ html[data-theme="dark"] .daily-bread-author-line {
     display: block;
 }
 
+.admin-notice-thumb-wrap {
+    margin: 6px 0 10px;
+}
+
+.admin-notice-thumb {
+    width: min(100%, 240px);
+    height: auto;
+    max-height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--line, rgba(0, 0, 0, 0.1));
+    display: block;
+}
+
 .admin-book-shelf-file-size-row {
     display: flex;
     flex-wrap: wrap;
@@ -1504,6 +1518,10 @@ body.app-update-open {
     background: linear-gradient(145deg, #b45309, #92400e);
 }
 
+.announcement-badges-row {
+    margin: 0 0 8px;
+}
+
 .announcement-carousel-item {
     animation: fade-up 0.28s ease both;
 }
@@ -1512,6 +1530,10 @@ body.app-update-open {
     border-left: 4px solid #c9a227;
     padding-left: 12px;
     margin-left: -2px;
+}
+
+.announcement-carousel-item.announcement-image-only .announcement-banner {
+    margin-bottom: 8px;
 }
 
 .announcement-carousel-controls {
@@ -4462,6 +4484,10 @@ body.bible-fullscreen-open .offline-badge {
     max-height: 120px;
     object-fit: cover;
     object-position: center;
+}
+
+.announcement-banner img {
+    max-height: min(34vh, 220px);
 }
 
 .reading-progress-wrap {

@@ -26,6 +26,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var defaultAnnouncementImageUrl = "announcements-banner.jpg?v=20260428img1";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -1056,6 +1057,8 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: String(source.imageUrl || source.bannerImageUrl || "").trim(),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1073,6 +1076,8 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: String(source.imageUrl || source.bannerImageUrl || "").trim(),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1258,6 +1263,26 @@
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
+                var importantBadge = item.important
+                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                    : "";
+                var titleBadges = urgentBadge + importantBadge;
+                var badgeLine = titleBadges
+                    ? ("<p class=\"announcement-badges-row\">" + titleBadges + "</p>")
+                    : "";
+                var bannerUrl = !item.personalWish
+                    ? String(item.imageUrl || defaultAnnouncementImageUrl).trim()
+                    : "";
+                var bannerAlt = titleText || T("home.announcementsTitle", "Announcements", announcementsCard);
+                var bannerLine = bannerUrl
+                    ? ("<div class=\"card-banner announcement-banner\"><img src=\"" + NjcEvents.escapeHtml(bannerUrl) + "\" alt=\"" + NjcEvents.escapeHtml(bannerAlt) + "\" width=\"1536\" height=\"1024\" loading=\"lazy\" decoding=\"async\"></div>")
+                    : "";
+                var titleLine = titleText
+                    ? ("<h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText) + "</h3>")
+                    : badgeLine;
+                var bodyLine = bodyText
+                    ? ("<p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText) + "</p>")
+                    : "";
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
                 var linkLine = item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
@@ -1280,11 +1305,12 @@
                         "</div>";
                 }
 
-                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
+                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "") + (!titleText && !bodyText && bannerUrl ? " announcement-image-only" : "");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    bannerLine +
+                    titleLine +
+                    bodyLine +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1429,7 +1455,7 @@
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
                             return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
+                                return item.title || item.body || item.imageUrl;
                             });
                         })
                         .catch(function () {
@@ -1449,7 +1475,7 @@
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
+                                    return item.title || item.body || item.imageUrl;
                                 });
                             });
                         })
