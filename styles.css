@@ -1514,6 +1514,31 @@ body.app-update-open {
     margin-left: -2px;
 }
 
+.announcement-carousel-item.announcement-image-only {
+    padding-top: 2px;
+}
+
+.announcement-image-wrap {
+    margin: 2px 0 8px;
+}
+
+.announcement-image-link {
+    display: block;
+    line-height: 0;
+}
+
+.announcement-slide-image {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 240px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
 .announcement-carousel-controls {
     margin-top: 10px;
     display: grid;
@@ -4727,6 +4752,23 @@ body.bible-fullscreen-open .offline-badge {
     margin-bottom: 6px;
 }
 
+.admin-notice-preview {
+    margin: 8px 0 10px;
+}
+
+.admin-notice-preview img {
+    display: block;
+    width: 100%;
+    max-width: 360px;
+    height: auto;
+    max-height: 180px;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
 .admin-item-actions {
     display: flex;
     flex-wrap: wrap;
@@ -5389,6 +5431,20 @@ html[data-theme="dark"] .prayer-list-translated-note {
     color: #ffffff;
     background: linear-gradient(145deg, #b45309, #92400e);
     border: 1px solid rgba(255, 255, 255, 0.28);
+    vertical-align: middle;
+}
+
+.admin-notice-image-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: linear-gradient(145deg, #2563eb, #1d4ed8);
     vertical-align: middle;
 }
 
