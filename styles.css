@@ -1531,6 +1531,25 @@ body.app-update-open {
     padding-top: 2px;
 }
 
+/* Full card inner width (same breakout as .card-banner): cancel card padding + list row padding */
+.announcement-carousel-item.announcement-image-only .announcement-image-wrap {
+    margin: 2px calc(-1 * var(--card-pad) - 10px) 8px;
+    width: calc(100% + 2 * var(--card-pad) + 20px);
+    max-width: none;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+    line-height: 0;
+    box-sizing: border-box;
+}
+
+.announcement-carousel-item.announcement-image-only .announcement-slide-image {
+    max-height: none;
+    border-radius: 0;
+    border: 0;
+}
+
 .announcement-image-wrap {
     margin: 2px 0 8px;
 }
