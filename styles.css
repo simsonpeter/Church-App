@@ -1508,6 +1508,22 @@ body.app-update-open {
     animation: fade-up 0.28s ease both;
 }
 
+.announcement-image-wrap {
+    margin: 0 0 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.announcement-image {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    object-position: center;
+}
+
 .announcement-carousel-item.announcement-personal-wish {
     border-left: 4px solid #c9a227;
     padding-left: 12px;
@@ -4765,11 +4781,13 @@ body.bible-fullscreen-open .offline-badge {
     margin-bottom: 6px;
 }
 
-.admin-notice-preview {
+.admin-notice-preview,
+.admin-notice-image-wrap {
     margin: 8px 0 10px;
 }
 
-.admin-notice-preview img {
+.admin-notice-preview img,
+.admin-notice-image {
     display: block;
     width: 100%;
     max-width: 360px;

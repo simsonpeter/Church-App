@@ -26,6 +26,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var defaultAnnouncementImageUrl = "announcements-banner.jpg?v=20260428img1";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -1026,6 +1027,23 @@
                 return raw;
             }
 
+            function normalizeAnnouncementImageUrl(value) {
+                var raw = String(value || "").trim();
+                if (!raw) {
+                    return "";
+                }
+                if (/^https?:\/\//i.test(raw)) {
+                    return raw;
+                }
+                if (/^data:image\//i.test(raw)) {
+                    return raw;
+                }
+                if (/^(\.?\/)?[A-Za-z0-9_@~%+=:,./-]+\.(png|jpe?g|gif|webp|avif|svg)(\?[A-Za-z0-9_@~%+=:,./&-]*)?$/i.test(raw)) {
+                    return raw;
+                }
+                return "";
+            }
+
             function formatYmdForLocale(ymdKey, sourceElement) {
                 if (!ymdKey) {
                     return "";
@@ -1334,20 +1352,15 @@
                     : "";
                 var titleBadges = urgentBadge + importantBadge;
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
+                var bodyLine = bodyText
+                    ? ("<p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText) + "</p>")
+                    : "";
                 var linkLine = !isImageOnly && item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
                 var dismissBtn = !item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
                     : "";
-                var imageAltText = titleText || bodyText || T("home.announcementBannerAlt", "Announcement banner", announcementsCard);
-                var imageHtml = "";
-                if (isImageOnly) {
-                    var imageTag = "<img class=\"announcement-slide-image\" src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(imageAltText) + "\" loading=\"lazy\" decoding=\"async\">";
-                    imageHtml = item.link
-                        ? ("<div class=\"announcement-image-wrap\"><a class=\"announcement-image-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + imageTag + "</a></div>")
-                        : ("<div class=\"announcement-image-wrap\">" + imageTag + "</div>");
-                }
 
                 var controls = "";
                 if (announcementCarouselItems.length > 1) {
@@ -1404,6 +1417,10 @@
                                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                                     : "";
                                 titleNode.innerHTML = ub + ib + NjcEvents.escapeHtml(translatedTitle);
+                            }
+                            var imgNode = announcementsList.querySelector(".announcement-image");
+                            if (imgNode && !imgNode.getAttribute("alt")) {
+                                imgNode.setAttribute("alt", translatedTitle);
                             }
                         });
                     }
@@ -1571,7 +1588,7 @@
                                 seen[pkey] = true;
                                 return true;
                             }
-                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body)).trim();
+                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body + "|" + item.imageUrl)).trim();
                             if (!key || seen[key]) {
                                 return false;
                             }

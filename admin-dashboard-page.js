@@ -139,16 +139,27 @@
         return String(value || "").trim().toLowerCase();
     }
 
-    function isHttpsUrl(value) {
-        return /^https:\/\//i.test(String(value || "").trim());
-    }
-
     function normalizeNoticeImageUrl(value) {
-        return String(value || "").trim();
+        var raw = String(value || "").trim();
+        if (!raw) {
+            return "";
+        }
+        if (/^https?:\/\//i.test(raw)) {
+            return raw;
+        }
+        if (/^data:image\//i.test(raw)) {
+            return raw;
+        }
+        if (/^(\.?\/)?[A-Za-z0-9_@~%+=:,./-]+\.(png|jpe?g|gif|webp|avif|svg)(\?[A-Za-z0-9_@~%+=:,./&-]*)?$/i.test(raw)) {
+            return raw;
+        }
+        return "";
     }
 
     function isImageOnlyNotice(entry) {
-        return Boolean(entry && entry.imageOnly && String(entry.imageUrl || "").trim());
+        var source = entry && typeof entry === "object" ? entry : {};
+        var imageUrl = normalizeNoticeImageUrl(source.imageUrl || source.image || source.bannerImageUrl || source.coverImageUrl || "");
+        return Boolean(source.imageOnly && imageUrl);
     }
 
     function getUser() {
@@ -840,8 +851,8 @@
             var titleTa = String(entry && entry.titleTa || "").trim();
             var body = String(entry && entry.body || "").trim();
             var bodyTa = String(entry && entry.bodyTa || "").trim();
-            var imageUrl = normalizeNoticeImageUrl(entry && entry.imageUrl);
-            var imageOnly = isImageOnlyNotice(entry);
+            var imageUrl = normalizeNoticeImageUrl(entry && (entry.imageUrl || entry.image || entry.bannerImageUrl || entry.coverImageUrl || ""));
+            var imageOnly = isImageOnlyNotice(entry) || (!title && !body && Boolean(imageUrl));
             var link = String(entry && entry.link || "").trim();
             var urgent = Boolean(entry && entry.urgent);
             var important = Boolean(entry && entry.important);
@@ -863,7 +874,7 @@
                     ? ("  <p class=\"admin-item-body\">" + escapeHtml(T("admin.noticeImageOnlyBody", "Shown as a banner on Home.")) + "</p>")
                     : "  <p class=\"admin-item-body\">-</p>");
             var imagePreview = imageUrl
-                ? ("  <div class=\"admin-notice-preview\"><img src=\"" + escapeHtml(imageUrl) + "\" alt=\"" + escapeHtml(titleText) + "\" loading=\"lazy\" decoding=\"async\"></div>")
+                ? ("  <p class=\"page-note admin-notice-image-wrap\"><img class=\"admin-notice-image\" src=\"" + escapeHtml(imageUrl) + "\" alt=\"" + escapeHtml(titleText) + "\" loading=\"lazy\" decoding=\"async\"></p>")
                 : "";
             return "" +
                 "<li>" +
@@ -1177,11 +1188,12 @@
         var titleTa = String(noticeTitleTaInput && noticeTitleTaInput.value || "").trim();
         var body = String(noticeBodyInput.value || "").trim();
         var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
-        var imageUrl = normalizeNoticeImageUrl(noticeImageInput && noticeImageInput.value);
+        var imageRaw = String(noticeImageInput && noticeImageInput.value || "").trim();
+        var imageUrl = normalizeNoticeImageUrl(imageRaw);
         var link = String(noticeLinkInput.value || "").trim();
         var imageOnly = Boolean(noticeImageOnlyInput && noticeImageOnlyInput.checked);
-        if (imageUrl && !isHttpsUrl(imageUrl)) {
-            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be https:// or leave empty.");
+        if (imageRaw && !imageUrl) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must be https:// or a valid image path.");
             return;
         }
         if (imageOnly && !imageUrl) {
@@ -1881,7 +1893,7 @@
         if (nextBodyTa === null) {
             return;
         }
-        var nextImage = window.prompt(T("admin.noticeEditPromptImage", "Edit banner image URL (https, optional)"), String(current.imageUrl || ""));
+        var nextImage = window.prompt(T("admin.noticeEditPromptImage", "Edit banner image URL (optional)"), String(current.imageUrl || current.image || current.bannerImageUrl || current.coverImageUrl || ""));
         if (nextImage === null) {
             return;
         }
@@ -1919,9 +1931,10 @@
         }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
-        var cleanImage = normalizeNoticeImageUrl(nextImage);
-        if (cleanImage && !isHttpsUrl(cleanImage)) {
-            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be https:// or leave empty.");
+        var cleanImageRaw = String(nextImage || "").trim();
+        var cleanImage = normalizeNoticeImageUrl(cleanImageRaw);
+        if (cleanImageRaw && !cleanImage) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must be https:// or a valid image path.");
             return;
         }
         if (nextImageOnly && !cleanImage) {

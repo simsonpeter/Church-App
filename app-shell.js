@@ -262,6 +262,8 @@
         "home.announcementNext": "அடுத்த அறிவிப்பு",
         "home.announcementDot": "அறிவிப்பு",
         "home.announcementBannerAlt": "அறிவிப்பு பதாகை",
+        "home.announcementImageAlt": "அறிவிப்பு படம்",
+        "home.announcementImageOnlyTitle": "பட அறிவிப்பு",
         "home.readMore": "மேலும் பார்க்க",
         "home.openInBible": "வேதாகமத்தில் திற",
         "home.personalWishFriend": "நண்பரே",
@@ -635,7 +637,8 @@
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
-        "admin.noticeImagePlaceholder": "பதாகை படம் URL (https://, விருப்பம்)",
+        "admin.noticeImagePlaceholder": "பேனர் பட URL (https://… அல்லது image பாதை, விருப்பம்)",
+        "admin.noticeTypeHint": "உரை அறிவிப்பு இயல்புநிலை பேனரை பயன்படுத்தும். படம் மட்டும் பேனருக்கு தலைப்பு/செய்தியை காலியாகவಿಟ್ಟು பட URL மட்டும் இடுங்கள்.",
         "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeImageOnly": "முகப்பில் படம் மட்டும் பதாகையாக காட்டு",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
@@ -644,11 +647,13 @@
         "admin.noticeImageOnlyLabel": "படம் மட்டும் பதாகை",
         "admin.noticeImageOnlyBody": "இது முகப்பில் பதாகையாக காட்டப்படும். தலைப்பும் செய்தியும் காலியாக இருந்தால் படம் மட்டும்.",
         "admin.noticeNeedImage": "படம் மட்டும் அறிவிப்புக்கு பதாகை படம் URL தேவை.",
-        "admin.noticeNeedImageUrl": "பதாகை படம் https:// ஆக இருக்க வேண்டும் அல்லது காலியாக விடவும்.",
+        "admin.noticeNeedImageUrl": "பேனர் பட URL https:// அல்லது செல்லுபடியாகும் image பாதையாக இருக்க வேண்டும்.",
         "admin.noticeUrgentTag": "அவசரம்",
         "admin.noticeImportantTag": "முக்கியம்",
-        "admin.noticeEditPromptImage": "பதாகை படம் URL-ஐ திருத்து (https, விருப்பம்)",
+        "admin.noticeEditPromptImage": "பேனர் பட URL-ஐ திருத்து (விருப்பம்)",
         "admin.noticeEditPromptImageOnly": "முகப்பில் படம் மட்டும் பதாகையா? y அல்லது n என்று type செய்யவும் (காலியாக விட்டால் மாறாது)",
+        "admin.noticeImageOnlyTitle": "படம் மட்டும் பேனர்",
+        "admin.noticeImageOnlyBody": "படம் மட்டும் அறிவிப்பு",
         "admin.noticeEditPromptImportant": "முக்கிய குறிச்சொல்? y அல்லது n (காலியாக விட்டால் மாறாது)",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
         "admin.noticeManageTitle": "சமீப அறிவிப்புகள்",
@@ -800,7 +805,9 @@
         "admin.loadingBody": "தயவுசெய்து காத்திருக்கவும்.",
         "admin.emptyPrayersTitle": "ஜெப வேண்டுதல்கள் இல்லை",
         "admin.emptyPrayersBody": "புதிய ஜெபங்கள் இங்கே தோன்றும்.",
-        "admin.noticeNeedFields": "தலைப்பும் செய்தியும் உள்ளிடவும்; அல்லது படம் மட்டும்: பதாகை URL சேர்த்து “படம் மட்டும்” ஐ தேர்ந்தெடுக்கவும்.",
+        "admin.noticeNeedFields": "அறிவிப்பு தலைப்பு மற்றும் செய்தியை உள்ளிடவும்.",
+        "admin.noticeNeedImageUrl": "பேனர் பட URL https:// அல்லது செல்லுபடியாகும் image பாதையாக இருக்க வேண்டும்.",
+        "admin.noticeNeedImage": "படம் மட்டும் அறிவிப்புக்கு பதாகை படம் URL தேவை.",
         "admin.eventNeedFields": "நிகழ்வு தலைப்பு மற்றும் தேதியை உள்ளிடவும்.",
         "admin.sermonNeedFields": "பிரசங்க தலைப்பு, தேதி மற்றும் ஆடியோ URL தேவை.",
         "admin.noticeSaved": "அறிவிப்பு வெளியிடப்பட்டது.",
@@ -2766,13 +2773,16 @@
                 var body = String(latest.body || "").trim();
                 var titleTa = String(latest.titleTa || "").trim();
                 var bodyTa = String(latest.bodyTa || "").trim();
+                var imageUrl = String(latest.imageUrl || latest.image || latest.bannerImageUrl || latest.coverImageUrl || "").trim();
                 var localizedTitle = activeLanguage === "ta" ? (titleTa || title) : title;
                 var localizedBody = activeLanguage === "ta" ? (bodyTa || body) : body;
+                var fallbackTitle = t("home.announcementImageOnlyTitle", "Image announcement");
                 var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
-                if (!latestTime || !title) {
+                var latestTitleForKey = title || body || titleTa || bodyTa || imageUrl || "notice";
+                if (!latestTime || !latestTitleForKey) {
                     return null;
                 }
-                var latestKey = latestTime + "|" + title.slice(0, 80);
+                var latestKey = latestTime + "|" + latestTitleForKey.slice(0, 80);
                 var previousKey = "";
                 try {
                     previousKey = window.localStorage.getItem(NOTIFICATION_LAST_NOTICE_KEY) || "";
@@ -2793,14 +2803,14 @@
                 if (hadPreviousKey && latestKey === previousKey) {
                     return null;
                 }
-                var bodyText = localizedBody || localizedTitle || body || title;
+                var bodyText = localizedBody || localizedTitle || body || title || (imageUrl ? fallbackTitle : "");
                 var compactBody = bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText;
                 var notifyKey = "notice:" + latestKey;
                 addInAppNotification({
                     id: notifyKey,
                     kind: "notice",
                     title: t("notify.newNoticeTitle", "New notice posted"),
-                    body: compactBody || title,
+                    body: compactBody || localizedTitle || fallbackTitle,
                     url: "#home",
                     createdAt: Date.now()
                 });
@@ -2815,7 +2825,7 @@
                 }
                 return showNotification({
                     title: t("notify.newNoticeTitle", "New notice posted"),
-                    body: compactBody || title,
+                    body: compactBody || localizedTitle || fallbackTitle,
                     tag: notifyKey,
                     url: "#home"
                 }).then(function (sent) {
