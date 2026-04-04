@@ -26,6 +26,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var DEFAULT_ANNOUNCEMENT_IMAGE = "announcements-banner.jpg?v=20260428img1";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -69,6 +70,7 @@
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
+            var announcementsCardBannerImg = announcementsCard ? announcementsCard.querySelector(".card-banner img") : null;
             var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
@@ -1056,6 +1058,8 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: String(source.imageUrl || "").trim(),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1073,6 +1077,8 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: String(source.imageUrl || "").trim(),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1255,8 +1261,23 @@
                         : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
                 }
                 var dateText = formatYmdForLocale(item.date, announcementsCard);
+                var bannerImageUrl = String(item.imageUrl || "").trim() || DEFAULT_ANNOUNCEMENT_IMAGE;
+                if (announcementsCardBannerImg) {
+                    announcementsCardBannerImg.src = bannerImageUrl;
+                    announcementsCardBannerImg.alt = titleText || T("home.announcementsTitle", "Announcements", announcementsCard);
+                }
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
+                    : "";
+                var importantBadge = item.important
+                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                    : "";
+                var titleBadges = urgentBadge + importantBadge;
+                var titleLine = titleText
+                    ? ("  <h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText) + "</h3>")
+                    : (titleBadges ? ("  <p class=\"page-note\">" + titleBadges + "</p>") : "");
+                var bodyLine = bodyText
+                    ? ("  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText) + "</p>")
                     : "";
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
                 var linkLine = item.link
@@ -1283,8 +1304,8 @@
                 var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    titleLine +
+                    bodyLine +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1352,6 +1373,10 @@
                 if (announcementsError) {
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
+                    if (announcementsCardBannerImg) {
+                        announcementsCardBannerImg.src = DEFAULT_ANNOUNCEMENT_IMAGE;
+                        announcementsCardBannerImg.alt = T("home.announcementsTitle", "Announcements", announcementsCard);
+                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
@@ -1395,6 +1420,10 @@
                 if (visibleItems.length === 0) {
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
+                    if (announcementsCardBannerImg) {
+                        announcementsCardBannerImg.src = DEFAULT_ANNOUNCEMENT_IMAGE;
+                        announcementsCardBannerImg.alt = T("home.announcementsTitle", "Announcements", announcementsCard);
+                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
@@ -1421,6 +1450,10 @@
                     });
                 }
 
+                function hasAnnouncementContent(item) {
+                    return Boolean(item && (item.title || item.body || item.imageUrl));
+                }
+
                 function fetchStaticAnnouncements() {
                     return fetchJson(announcementsUrl)
                         .catch(function () {
@@ -1428,9 +1461,7 @@
                         })
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
-                            return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
-                            });
+                            return items.map(normalizeAnnouncement).filter(hasAnnouncementContent);
                         })
                         .catch(function () {
                             return [];
@@ -1448,9 +1479,7 @@
                             }
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
-                                return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
-                                });
+                                return entries.map(normalizeAdminNotice).filter(hasAnnouncementContent);
                             });
                         })
                         .catch(function () {
@@ -1472,7 +1501,7 @@
                                 seen[pkey] = true;
                                 return true;
                             }
-                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body)).trim();
+                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body + "|" + item.imageUrl)).trim();
                             if (!key || seen[key]) {
                                 return false;
                             }
