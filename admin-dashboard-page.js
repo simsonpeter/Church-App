@@ -58,8 +58,10 @@
     var noticeBodyInput = document.getElementById("admin-notice-body");
     var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
     var noticeLinkInput = document.getElementById("admin-notice-link");
+    var noticeImageUrlInput = document.getElementById("admin-notice-image-url");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeImportantInput = document.getElementById("admin-notice-important");
+    var noticeImageOnlyInput = document.getElementById("admin-notice-image-only");
     var noticeSubmit = document.getElementById("admin-notice-submit");
 
     var broadcastForm = document.getElementById("admin-broadcast-form");
@@ -245,6 +247,42 @@
             return key;
         }
         return "general";
+    }
+
+    function normalizeNoticeImageUrl(value) {
+        var raw = String(value || "").trim();
+        if (!raw) {
+            return "";
+        }
+        if (!/^https:\/\//i.test(raw)) {
+            return "";
+        }
+        return raw;
+    }
+
+    function normalizeNoticeEntry(entry, index) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var title = String(source.title || "").trim();
+        var body = String(source.body || "").trim();
+        var imageUrl = normalizeNoticeImageUrl(source.imageUrl || source.bannerImageUrl || source.image || "");
+        var imageOnly = Boolean(source.imageOnly) || (!title && !body && Boolean(imageUrl));
+        return Object.assign({}, source, {
+            id: String(source.id || ("notice-" + index)),
+            title: title,
+            titleTa: String(source.titleTa || "").trim(),
+            body: body,
+            bodyTa: String(source.bodyTa || "").trim(),
+            link: String(source.link || "").trim(),
+            urgent: Boolean(source.urgent),
+            important: Boolean(source.important),
+            imageUrl: imageUrl,
+            imageOnly: imageOnly,
+            expires: toYmd(source.expires || ""),
+            date: toYmd(source.date || source.createdAt || source.updatedAt || ""),
+            createdAt: String(source.createdAt || ""),
+            updatedAt: String(source.updatedAt || ""),
+            createdByEmail: normalizeEmail(source.createdByEmail || "")
+        });
     }
 
     function getBroadcastDefaultUrl(category) {
@@ -827,6 +865,8 @@
             var body = String(entry && entry.body || "").trim();
             var bodyTa = String(entry && entry.bodyTa || "").trim();
             var link = String(entry && entry.link || "").trim();
+            var imageUrl = normalizeNoticeImageUrl(entry && entry.imageUrl);
+            var imageOnly = Boolean(entry && entry.imageOnly);
             var urgent = Boolean(entry && entry.urgent);
             var important = Boolean(entry && entry.important);
             var tagParts = [];
@@ -836,11 +876,19 @@
             if (urgent) {
                 tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgentTag", "Urgent")) + "</span>");
             }
+            if (imageOnly) {
+                tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeImageOnlyTag", "Image only")) + "</span>");
+            }
             var tagText = tagParts.length ? (" " + tagParts.join(" ")) : "";
+            var imagePreview = imageUrl
+                ? ("  <p class=\"page-note\"><img class=\"admin-notice-image-preview\" src=\"" + escapeHtml(imageUrl) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\"></p>")
+                : "";
+            var bodyPreview = body || (imageOnly ? T("admin.noticeImageOnlyTag", "Image only") : "-");
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + tagText + "</h3>" +
-                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                imagePreview +
+                "  <p class=\"admin-item-body\">" + escapeHtml(bodyPreview) + "</p>" +
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
@@ -1088,7 +1136,9 @@
                 if (r.status === "fulfilled" && Array.isArray(r.value)) return r.value;
                 return [];
             }
-            cachedNotices = extract(0);
+            cachedNotices = extract(0).map(function (row, idx) {
+                return normalizeNoticeEntry(row, idx);
+            });
             cachedBroadcasts = extract(1);
             cachedEvents = extract(2);
             cachedSermons = extract(3);
@@ -1149,7 +1199,18 @@
         var body = String(noticeBodyInput.value || "").trim();
         var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
         var link = String(noticeLinkInput.value || "").trim();
-        if (!title || !body) {
+        var imageUrlRaw = String(noticeImageUrlInput && noticeImageUrlInput.value || "").trim();
+        var imageUrl = normalizeNoticeImageUrl(imageUrlRaw);
+        var imageOnly = Boolean(noticeImageOnlyInput && noticeImageOnlyInput.checked);
+        if (imageUrlRaw && !imageUrl) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https://");
+            return;
+        }
+        if (imageOnly && !imageUrl) {
+            showNote("validation", "admin.noticeNeedImageOnly", "Image-only announcement needs a banner image URL.");
+            return;
+        }
+        if (!imageOnly && (!title || !body)) {
             showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
             return;
         }
@@ -1161,13 +1222,17 @@
             body: body,
             bodyTa: bodyTa,
             link: link,
+            imageUrl: imageUrl,
+            imageOnly: imageOnly,
             urgent: Boolean(noticeUrgentInput.checked),
             important: Boolean(noticeImportantInput && noticeImportantInput.checked),
             date: toYmd(new Date().toISOString()),
             createdAt: new Date().toISOString(),
             createdByEmail: normalizeEmail(getUser() && getUser().email)
         }).then(function (entries) {
-            cachedNotices = entries;
+            cachedNotices = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                return normalizeNoticeEntry(row, idx);
+            });
             noticeTitleInput.value = "";
             if (noticeTitleTaInput) {
                 noticeTitleTaInput.value = "";
@@ -1177,9 +1242,15 @@
                 noticeBodyTaInput.value = "";
             }
             noticeLinkInput.value = "";
+            if (noticeImageUrlInput) {
+                noticeImageUrlInput.value = "";
+            }
             noticeUrgentInput.checked = false;
             if (noticeImportantInput) {
                 noticeImportantInput.checked = false;
+            }
+            if (noticeImageOnlyInput) {
+                noticeImageOnlyInput.checked = false;
             }
             renderStats();
             renderNoticeList();
@@ -1805,7 +1876,9 @@
             saveMantleEntries(ADMIN_NOTICES_URL, source).then(function () {
                 return fetchMantleEntries(ADMIN_NOTICES_URL);
             }).then(function (entries) {
-                cachedNotices = Array.isArray(entries) ? entries : [];
+                cachedNotices = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                    return normalizeNoticeEntry(row, idx);
+                });
                 renderStats();
                 renderNoticeList();
                 showNote("success", "admin.noticeDeleted", "Announcement deleted.");
@@ -1818,11 +1891,18 @@
             return;
         }
         var current = source[targetIndex] || {};
-        var nextTitle = window.prompt(T("admin.noticeEditPromptTitle", "Edit title"), String(current.title || ""));
+        var currentImageOnly = Boolean(current.imageOnly);
+        var nextTitle = window.prompt(
+            T("admin.noticeEditPromptTitle", "Edit title"),
+            currentImageOnly ? String(current.title || T("admin.noticeImageOnlyTag", "Image only")) : String(current.title || "")
+        );
         if (nextTitle === null) {
             return;
         }
-        var nextBody = window.prompt(T("admin.noticeEditPromptBody", "Edit message"), String(current.body || ""));
+        var nextBody = window.prompt(
+            T("admin.noticeEditPromptBody", "Edit message"),
+            currentImageOnly ? String(current.body || T("admin.noticeImageOnlyTag", "Image only")) : String(current.body || "")
+        );
         if (nextBody === null) {
             return;
         }
@@ -1838,12 +1918,30 @@
         if (nextLink === null) {
             return;
         }
+        var nextImageUrl = window.prompt(T("admin.noticeEditPromptImageUrl", "Edit banner image URL (https, optional)"), String(current.imageUrl || ""));
+        if (nextImageUrl === null) {
+            return;
+        }
+        var nextImageOnlyRaw = window.prompt(
+            T("admin.noticeEditPromptImageOnly", "Image-only announcement? Type y or n (blank = keep current)"),
+            Boolean(current.imageOnly) ? "y" : "n"
+        );
+        if (nextImageOnlyRaw === null) {
+            return;
+        }
         var nextImportantRaw = window.prompt(
             T("admin.noticeEditPromptImportant", "Important tag on Home? Type y or n (blank = keep current)"),
             Boolean(current.important) ? "y" : "n"
         );
         if (nextImportantRaw === null) {
             return;
+        }
+        var nextImageOnly = current.imageOnly;
+        var imgOnlyTrim = String(nextImageOnlyRaw || "").trim().toLowerCase();
+        if (imgOnlyTrim === "y" || imgOnlyTrim === "yes") {
+            nextImageOnly = true;
+        } else if (imgOnlyTrim === "n" || imgOnlyTrim === "no") {
+            nextImageOnly = false;
         }
         var nextImportant = current.important;
         var impTrim = String(nextImportantRaw || "").trim().toLowerCase();
@@ -1854,7 +1952,25 @@
         }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
-        if (!cleanTitle || !cleanBody) {
+        if (currentImageOnly) {
+            if (cleanTitle === T("admin.noticeImageOnlyTag", "Image only")) {
+                cleanTitle = "";
+            }
+            if (cleanBody === T("admin.noticeImageOnlyTag", "Image only")) {
+                cleanBody = "";
+            }
+        }
+        var cleanImageUrlRaw = String(nextImageUrl || "").trim();
+        var cleanImageUrl = normalizeNoticeImageUrl(cleanImageUrlRaw);
+        if (cleanImageUrlRaw && !cleanImageUrl) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https://");
+            return;
+        }
+        if (nextImageOnly && !cleanImageUrl) {
+            showNote("validation", "admin.noticeNeedImageOnly", "Image-only announcement needs a banner image URL.");
+            return;
+        }
+        if (!nextImageOnly && (!cleanTitle || !cleanBody)) {
             showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
             return;
         }
@@ -1864,6 +1980,8 @@
             titleTa: String(nextTitleTa || "").trim(),
             bodyTa: String(nextBodyTa || "").trim(),
             link: String(nextLink || "").trim(),
+            imageUrl: cleanImageUrl,
+            imageOnly: Boolean(nextImageOnly),
             important: Boolean(nextImportant),
             updatedAt: new Date().toISOString()
         });
@@ -1871,7 +1989,9 @@
         saveMantleEntries(ADMIN_NOTICES_URL, source).then(function () {
             return fetchMantleEntries(ADMIN_NOTICES_URL);
         }).then(function (entries) {
-            cachedNotices = Array.isArray(entries) ? entries : [];
+            cachedNotices = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                return normalizeNoticeEntry(row, idx);
+            });
             renderStats();
             renderNoticeList();
             showNote("success", "admin.noticeUpdated", "Announcement updated.");
