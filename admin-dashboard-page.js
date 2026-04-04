@@ -57,6 +57,7 @@
     var noticeTitleTaInput = document.getElementById("admin-notice-title-ta");
     var noticeBodyInput = document.getElementById("admin-notice-body");
     var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
+    var noticeImageInput = document.getElementById("admin-notice-image");
     var noticeLinkInput = document.getElementById("admin-notice-link");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeImportantInput = document.getElementById("admin-notice-important");
@@ -276,6 +277,23 @@
             return raw;
         }
         return getBroadcastDefaultUrl(category);
+    }
+
+    function normalizeNoticeImageUrl(value) {
+        var raw = String(value || "").trim();
+        if (!raw) {
+            return "";
+        }
+        if (/^https?:\/\//i.test(raw)) {
+            return raw;
+        }
+        if (/^data:image\//i.test(raw)) {
+            return raw;
+        }
+        if (/^(\.?\/)?[A-Za-z0-9_@~%+=:,./-]+\.(png|jpe?g|gif|webp|avif|svg)(\?[A-Za-z0-9_@~%+=:,./&-]*)?$/i.test(raw)) {
+            return raw;
+        }
+        return "";
     }
 
     function getBroadcastCategoryLabel(category) {
@@ -826,6 +844,7 @@
             var titleTa = String(entry && entry.titleTa || "").trim();
             var body = String(entry && entry.body || "").trim();
             var bodyTa = String(entry && entry.bodyTa || "").trim();
+            var imageUrl = normalizeNoticeImageUrl(entry && (entry.imageUrl || entry.image || entry.bannerImageUrl || entry.coverImageUrl || ""));
             var link = String(entry && entry.link || "").trim();
             var urgent = Boolean(entry && entry.urgent);
             var important = Boolean(entry && entry.important);
@@ -837,10 +856,16 @@
                 tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgentTag", "Urgent")) + "</span>");
             }
             var tagText = tagParts.length ? (" " + tagParts.join(" ")) : "";
+            var titleLine = title || (imageUrl ? T("admin.noticeImageOnlyTitle", "Image-only banner") : T("admin.noticeTitle", "Send Notice"));
+            var bodyLine = body || (imageUrl ? T("admin.noticeImageOnlyBody", "Image-only announcement") : "-");
+            var imageLine = imageUrl
+                ? ("  <p class=\"page-note admin-notice-image-wrap\"><img class=\"admin-notice-image\" src=\"" + escapeHtml(imageUrl) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\"></p>")
+                : "";
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + tagText + "</h3>" +
-                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                "  <h3>" + escapeHtml(titleLine) + tagText + "</h3>" +
+                "  <p class=\"admin-item-body\">" + escapeHtml(bodyLine) + "</p>" +
+                imageLine +
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
@@ -1148,9 +1173,15 @@
         var titleTa = String(noticeTitleTaInput && noticeTitleTaInput.value || "").trim();
         var body = String(noticeBodyInput.value || "").trim();
         var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
+        var imageRaw = String(noticeImageInput && noticeImageInput.value || "").trim();
+        var imageUrl = normalizeNoticeImageUrl(imageRaw);
         var link = String(noticeLinkInput.value || "").trim();
-        if (!title || !body) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        if (imageRaw && !imageUrl) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must be https:// or a valid image path.");
+            return;
+        }
+        if ((!title || !body) && !imageUrl) {
+            showNote("validation", "admin.noticeNeedContentOrImage", "Please enter title and message, or add an image URL for image-only banner.");
             return;
         }
         setBusyState(true);
@@ -1160,6 +1191,7 @@
             titleTa: titleTa,
             body: body,
             bodyTa: bodyTa,
+            imageUrl: imageUrl,
             link: link,
             urgent: Boolean(noticeUrgentInput.checked),
             important: Boolean(noticeImportantInput && noticeImportantInput.checked),
@@ -1175,6 +1207,9 @@
             noticeBodyInput.value = "";
             if (noticeBodyTaInput) {
                 noticeBodyTaInput.value = "";
+            }
+            if (noticeImageInput) {
+                noticeImageInput.value = "";
             }
             noticeLinkInput.value = "";
             noticeUrgentInput.checked = false;
@@ -1834,6 +1869,10 @@
         if (nextBodyTa === null) {
             return;
         }
+        var nextImage = window.prompt(T("admin.noticeEditPromptImage", "Edit banner image URL (optional)"), String(current.imageUrl || current.image || current.bannerImageUrl || current.coverImageUrl || ""));
+        if (nextImage === null) {
+            return;
+        }
         var nextLink = window.prompt(T("admin.noticeEditPromptLink", "Edit link (optional)"), String(current.link || ""));
         if (nextLink === null) {
             return;
@@ -1854,8 +1893,14 @@
         }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
-        if (!cleanTitle || !cleanBody) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        var cleanImageRaw = String(nextImage || "").trim();
+        var cleanImage = normalizeNoticeImageUrl(cleanImageRaw);
+        if (cleanImageRaw && !cleanImage) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must be https:// or a valid image path.");
+            return;
+        }
+        if ((!cleanTitle || !cleanBody) && !cleanImage) {
+            showNote("validation", "admin.noticeNeedContentOrImage", "Please enter title and message, or add an image URL for image-only banner.");
             return;
         }
         source[targetIndex] = Object.assign({}, current, {
@@ -1863,6 +1908,7 @@
             body: cleanBody,
             titleTa: String(nextTitleTa || "").trim(),
             bodyTa: String(nextBodyTa || "").trim(),
+            imageUrl: cleanImage,
             link: String(nextLink || "").trim(),
             important: Boolean(nextImportant),
             updatedAt: new Date().toISOString()

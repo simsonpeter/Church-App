@@ -260,6 +260,8 @@
         "home.announcementPrev": "முந்தைய அறிவிப்பு",
         "home.announcementNext": "அடுத்த அறிவிப்பு",
         "home.announcementDot": "அறிவிப்பு",
+        "home.announcementImageAlt": "அறிவிப்பு படம்",
+        "home.announcementImageOnlyTitle": "பட அறிவிப்பு",
         "home.readMore": "மேலும் பார்க்க",
         "home.openInBible": "வேதாகமத்தில் திற",
         "home.personalWishFriend": "நண்பரே",
@@ -633,12 +635,17 @@
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
         "admin.noticeBodyPlaceholder": "அறிவிப்பு செய்தி",
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
+        "admin.noticeImagePlaceholder": "பேனர் பட URL (https://… அல்லது image பாதை, விருப்பம்)",
+        "admin.noticeTypeHint": "உரை அறிவிப்பு இயல்புநிலை பேனரை பயன்படுத்தும். படம் மட்டும் பேனருக்கு தலைப்பு/செய்தியை காலியாகவಿಟ್ಟು பட URL மட்டும் இடுங்கள்.",
         "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
         "admin.noticeImportant": "முக்கியமாக குறிக்கவும் (முகப்பு அட்டை)",
         "admin.noticeUrgentTag": "அவசரம்",
         "admin.noticeImportantTag": "முக்கியம்",
+        "admin.noticeImageOnlyTitle": "படம் மட்டும் பேனர்",
+        "admin.noticeImageOnlyBody": "படம் மட்டும் அறிவிப்பு",
         "admin.noticeEditPromptImportant": "முக்கிய குறிச்சொல்? y அல்லது n (காலியாக விட்டால் மாறாது)",
+        "admin.noticeEditPromptImage": "பேனர் பட URL-ஐ திருத்து (விருப்பம்)",
         "admin.noticePublish": "அறிவிப்பை வெளியிடு",
         "admin.noticeManageTitle": "சமீப அறிவிப்புகள்",
         "admin.noticeManageInfo": "நீங்கள் வெளியிட்ட அறிவிப்புகளை திருத்த அல்லது நீக்கவும்.",
@@ -790,6 +797,8 @@
         "admin.emptyPrayersTitle": "ஜெப வேண்டுதல்கள் இல்லை",
         "admin.emptyPrayersBody": "புதிய ஜெபங்கள் இங்கே தோன்றும்.",
         "admin.noticeNeedFields": "அறிவிப்பு தலைப்பு மற்றும் செய்தியை உள்ளிடவும்.",
+        "admin.noticeNeedImageUrl": "பேனர் பட URL https:// அல்லது செல்லுபடியாகும் image பாதையாக இருக்க வேண்டும்.",
+        "admin.noticeNeedContentOrImage": "தலைப்பு மற்றும் செய்தியை உள்ளிடவும், அல்லது படம் மட்டும் பேனருக்கு image URL சேர்க்கவும்.",
         "admin.eventNeedFields": "நிகழ்வு தலைப்பு மற்றும் தேதியை உள்ளிடவும்.",
         "admin.sermonNeedFields": "பிரசங்க தலைப்பு, தேதி மற்றும் ஆடியோ URL தேவை.",
         "admin.noticeSaved": "அறிவிப்பு வெளியிடப்பட்டது.",
@@ -2755,13 +2764,16 @@
                 var body = String(latest.body || "").trim();
                 var titleTa = String(latest.titleTa || "").trim();
                 var bodyTa = String(latest.bodyTa || "").trim();
+                var imageUrl = String(latest.imageUrl || latest.image || latest.bannerImageUrl || latest.coverImageUrl || "").trim();
                 var localizedTitle = activeLanguage === "ta" ? (titleTa || title) : title;
                 var localizedBody = activeLanguage === "ta" ? (bodyTa || body) : body;
+                var fallbackTitle = t("home.announcementImageOnlyTitle", "Image announcement");
                 var latestTime = String(latest.updatedAt || latest.createdAt || latest.date || "").trim();
-                if (!latestTime || !title) {
+                var latestTitleForKey = title || body || titleTa || bodyTa || imageUrl || "notice";
+                if (!latestTime || !latestTitleForKey) {
                     return null;
                 }
-                var latestKey = latestTime + "|" + title.slice(0, 80);
+                var latestKey = latestTime + "|" + latestTitleForKey.slice(0, 80);
                 var previousKey = "";
                 try {
                     previousKey = window.localStorage.getItem(NOTIFICATION_LAST_NOTICE_KEY) || "";
@@ -2782,14 +2794,14 @@
                 if (hadPreviousKey && latestKey === previousKey) {
                     return null;
                 }
-                var bodyText = localizedBody || localizedTitle || body || title;
+                var bodyText = localizedBody || localizedTitle || body || title || (imageUrl ? fallbackTitle : "");
                 var compactBody = bodyText.length > 120 ? (bodyText.slice(0, 117) + "...") : bodyText;
                 var notifyKey = "notice:" + latestKey;
                 addInAppNotification({
                     id: notifyKey,
                     kind: "notice",
                     title: t("notify.newNoticeTitle", "New notice posted"),
-                    body: compactBody || title,
+                    body: compactBody || localizedTitle || fallbackTitle,
                     url: "#home",
                     createdAt: Date.now()
                 });
@@ -2804,7 +2816,7 @@
                 }
                 return showNotification({
                     title: t("notify.newNoticeTitle", "New notice posted"),
-                    body: compactBody || title,
+                    body: compactBody || localizedTitle || fallbackTitle,
                     tag: notifyKey,
                     url: "#home"
                 }).then(function (sent) {

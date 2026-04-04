@@ -26,6 +26,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
+            var defaultAnnouncementImageUrl = "announcements-banner.jpg?v=20260428img1";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -1022,6 +1023,23 @@
                 return raw;
             }
 
+            function normalizeAnnouncementImageUrl(value) {
+                var raw = String(value || "").trim();
+                if (!raw) {
+                    return "";
+                }
+                if (/^https?:\/\//i.test(raw)) {
+                    return raw;
+                }
+                if (/^data:image\//i.test(raw)) {
+                    return raw;
+                }
+                if (/^(\.?\/)?[A-Za-z0-9_@~%+=:,./-]+\.(png|jpe?g|gif|webp|avif|svg)(\?[A-Za-z0-9_@~%+=:,./&-]*)?$/i.test(raw)) {
+                    return raw;
+                }
+                return "";
+            }
+
             function formatYmdForLocale(ymdKey, sourceElement) {
                 if (!ymdKey) {
                     return "";
@@ -1056,6 +1074,8 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: normalizeAnnouncementImageUrl(source.imageUrl || source.image || source.bannerImageUrl || source.coverImageUrl || ""),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1073,6 +1093,8 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
+                    important: Boolean(source.important),
+                    imageUrl: normalizeAnnouncementImageUrl(source.imageUrl || source.image || source.bannerImageUrl || source.coverImageUrl || ""),
                     link: String(source.link || "").trim()
                 };
             }
@@ -1258,7 +1280,26 @@
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
+                var importantBadge = item.important
+                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                    : "";
+                var titleBadges = urgentBadge + importantBadge;
+                var announcementImageUrl = !item.personalWish
+                    ? (normalizeAnnouncementImageUrl(item.imageUrl) || defaultAnnouncementImageUrl)
+                    : "";
+                var imageAltText = titleText
+                    || T("home.announcementImageAlt", "Announcement image", announcementsCard);
+                var resolvedTitle = titleText
+                    || (announcementImageUrl
+                        ? T("home.announcementImageOnlyTitle", "Image announcement", announcementsCard)
+                        : T("home.announcementsTitle", "Announcements", announcementsCard));
+                var imageLine = announcementImageUrl
+                    ? ("<p class=\"announcement-image-wrap\"><img class=\"announcement-image\" src=\"" + NjcEvents.escapeHtml(announcementImageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(imageAltText) + "\" loading=\"lazy\" decoding=\"async\"></p>")
+                    : "";
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
+                var bodyLine = bodyText
+                    ? ("<p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText) + "</p>")
+                    : "";
                 var linkLine = item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
@@ -1283,8 +1324,9 @@
                 var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    imageLine +
+                    "  <h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(resolvedTitle) + "</h3>" +
+                    bodyLine +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1309,6 +1351,10 @@
                             var titleNode = announcementsList.querySelector(".announcement-title");
                             if (titleNode) {
                                 titleNode.innerHTML = titleBadges + NjcEvents.escapeHtml(translatedTitle);
+                            }
+                            var imgNode = announcementsList.querySelector(".announcement-image");
+                            if (imgNode && !imgNode.getAttribute("alt")) {
+                                imgNode.setAttribute("alt", translatedTitle);
                             }
                         });
                     }
@@ -1429,7 +1475,7 @@
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
                             return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
+                                return item.title || item.body || item.imageUrl;
                             });
                         })
                         .catch(function () {
@@ -1449,7 +1495,7 @@
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
+                                    return item.title || item.body || item.imageUrl;
                                 });
                             });
                         })
@@ -1472,7 +1518,7 @@
                                 seen[pkey] = true;
                                 return true;
                             }
-                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body)).trim();
+                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body + "|" + item.imageUrl)).trim();
                             if (!key || seen[key]) {
                                 return false;
                             }
