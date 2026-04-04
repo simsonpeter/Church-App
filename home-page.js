@@ -69,6 +69,8 @@
             var readingCard = todayReadingPlanList ? todayReadingPlanList.closest(".card") : null;
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
+            var announcementsBannerImg = announcementsCard ? announcementsCard.querySelector(".card-banner img") : null;
+            var DEFAULT_ANNOUNCEMENTS_BANNER_SRC = "announcements-banner.jpg?v=20260428img1";
             var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
             var brusselsTimeZone = "Europe/Brussels";
@@ -1043,6 +1045,40 @@
                 }).format(dateUtc);
             }
 
+            function pickAnnouncementImageUrl(source) {
+                var obj = source && typeof source === "object" ? source : {};
+                var keys = ["imageUrl", "image", "bannerUrl", "bannerImage"];
+                for (var i = 0; i < keys.length; i++) {
+                    var v = String(obj[keys[i]] || "").trim();
+                    if (v) {
+                        return v;
+                    }
+                }
+                return "";
+            }
+
+            function isImageOnlyAnnouncement(item) {
+                if (!item || item.personalWish) {
+                    return false;
+                }
+                if (!pickAnnouncementImageUrl(item)) {
+                    return false;
+                }
+                var t = String(item.title || "").trim();
+                var b = String(item.body || "").trim();
+                return !t && !b;
+            }
+
+            function syncAnnouncementsBanner(imageSrc) {
+                if (!announcementsBannerImg) {
+                    return;
+                }
+                var next = String(imageSrc || "").trim() || DEFAULT_ANNOUNCEMENTS_BANNER_SRC;
+                if (announcementsBannerImg.getAttribute("src") !== next) {
+                    announcementsBannerImg.setAttribute("src", next);
+                }
+            }
+
             function normalizeAnnouncement(item, index) {
                 var source = item && typeof item === "object" ? item : {};
                 var title = String(source.title || "").trim();
@@ -1056,7 +1092,9 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    important: Boolean(source.important),
+                    link: String(source.link || "").trim(),
+                    imageUrl: pickAnnouncementImageUrl(source)
                 };
             }
 
@@ -1073,7 +1111,9 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    important: Boolean(source.important),
+                    link: String(source.link || "").trim(),
+                    imageUrl: pickAnnouncementImageUrl(source)
                 };
             }
 
@@ -1237,6 +1277,12 @@
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
+                var imageOnly = isImageOnlyAnnouncement(item);
+                if (imageOnly) {
+                    syncAnnouncementsBanner(item.imageUrl);
+                } else {
+                    syncAnnouncementsBanner("");
+                }
                 var titleText;
                 var bodyText;
                 var pname = String(item.personalDisplayName || "").trim() || T("home.personalWishFriend", "friend", announcementsCard);
@@ -1258,8 +1304,12 @@
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
+                var importantBadge = !item.personalWish && item.important
+                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                    : "";
+                var titleBadges = urgentBadge + importantBadge;
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
-                var linkLine = item.link
+                var linkLine = item.link && !imageOnly
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
                 var dismissBtn = !item.personalWish
@@ -1280,11 +1330,27 @@
                         "</div>";
                 }
 
-                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
+                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "") + (imageOnly ? " announcement-image-only" : "");
+                var bodyHtml;
+                if (imageOnly) {
+                    var imgSrc = NjcEvents.escapeHtml(String(item.imageUrl || "").trim());
+                    var imgAlt = NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard));
+                    var innerImg = "<img class=\"announcement-banner-inline-img\" src=\"" + imgSrc + "\" alt=\"" + imgAlt + "\" width=\"1536\" height=\"1024\" loading=\"lazy\" decoding=\"async\" />";
+                    if (item.link) {
+                        bodyHtml = "<div class=\"announcement-banner-inline\"><a class=\"announcement-banner-inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + innerImg + "</a></div>";
+                    } else {
+                        bodyHtml = "<div class=\"announcement-banner-inline\">" + innerImg + "</div>";
+                    }
+                } else {
+                    bodyHtml = "<p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>";
+                }
+                var titleHeadingHtml = imageOnly
+                    ? ("<h3 class=\"announcement-title announcement-title-sr-only\">" + NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard)) + "</h3>")
+                    : ("<h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    titleHeadingHtml +
+                    bodyHtml +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1308,7 +1374,13 @@
                             item.titleTaAuto = translatedTitle;
                             var titleNode = announcementsList.querySelector(".announcement-title");
                             if (titleNode) {
-                                titleNode.innerHTML = titleBadges + NjcEvents.escapeHtml(translatedTitle);
+                                var ib = item.important
+                                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                                    : "";
+                                var ub = item.urgent
+                                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
+                                    : "";
+                                titleNode.innerHTML = ub + ib + NjcEvents.escapeHtml(translatedTitle);
                             }
                         });
                     }
@@ -1350,6 +1422,7 @@
                 }
 
                 if (announcementsError) {
+                    syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
@@ -1393,6 +1466,7 @@
                     .slice(0, 5);
 
                 if (visibleItems.length === 0) {
+                    syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     announcementsList.innerHTML = "" +
@@ -1429,7 +1503,7 @@
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
                             return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
+                                return item.title || item.body || isImageOnlyAnnouncement(item);
                             });
                         })
                         .catch(function () {
@@ -1449,7 +1523,7 @@
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
+                                    return item.title || item.body || isImageOnlyAnnouncement(item);
                                 });
                             });
                         })
