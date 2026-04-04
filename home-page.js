@@ -85,6 +85,7 @@
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
+            var MAX_VISIBLE_ANNOUNCEMENTS = 12;
             var announcementCarouselItems = [];
             var announcementCarouselIndex = 0;
             var announcementCarouselTimerId = null;
@@ -1314,12 +1315,18 @@
                     return;
                 }
                 if (!announcementCarouselItems.length) {
+                    if (announcementsCard) {
+                        announcementsCard.classList.remove("announcements-card-image-only-slide");
+                    }
                     return;
                 }
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
                 var isImageOnly = Boolean(item.imageOnly && String(item.imageUrl || "").trim() && !item.personalWish);
+                if (announcementsCard) {
+                    announcementsCard.classList.toggle("announcements-card-image-only-slide", isImageOnly);
+                }
                 if (isImageOnly) {
                     setAnnouncementsStandardMediaVisible(false);
                 } else {
@@ -1361,6 +1368,14 @@
                 var dismissBtn = !item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
                     : "";
+                var imageAltText = titleText || bodyText || T("home.announcementBannerAlt", "Announcement banner", announcementsCard);
+                var imageHtml = "";
+                if (isImageOnly) {
+                    var imageTag = "<img class=\"announcement-slide-image announcement-image\" src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(imageAltText) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\">";
+                    imageHtml = item.link
+                        ? ("<div class=\"announcement-image-wrap\"><a class=\"announcement-image-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + imageTag + "</a></div>")
+                        : ("<div class=\"announcement-image-wrap\">" + imageTag + "</div>");
+                }
 
                 var controls = "";
                 if (announcementCarouselItems.length > 1) {
@@ -1383,7 +1398,7 @@
                 var mainBlock = isImageOnly
                     ? (srHeading + imageHtml)
                     : ("  <h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                        "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>");
+                        bodyLine);
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
                     mainBlock +
@@ -1466,6 +1481,9 @@
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
+                    if (announcementsCard) {
+                        announcementsCard.classList.remove("announcements-card-image-only-slide");
+                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
@@ -1504,13 +1522,16 @@
                         }
                         return (b.date || "").localeCompare(a.date || "");
                     })
-                    .slice(0, 5);
+                    .slice(0, MAX_VISIBLE_ANNOUNCEMENTS);
 
                 if (visibleItems.length === 0) {
                     syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
+                    if (announcementsCard) {
+                        announcementsCard.classList.remove("announcements-card-image-only-slide");
+                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
