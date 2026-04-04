@@ -57,6 +57,7 @@
     var noticeTitleTaInput = document.getElementById("admin-notice-title-ta");
     var noticeBodyInput = document.getElementById("admin-notice-body");
     var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
+    var noticeImageInput = document.getElementById("admin-notice-image");
     var noticeLinkInput = document.getElementById("admin-notice-link");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeImportantInput = document.getElementById("admin-notice-important");
@@ -826,6 +827,7 @@
             var titleTa = String(entry && entry.titleTa || "").trim();
             var body = String(entry && entry.body || "").trim();
             var bodyTa = String(entry && entry.bodyTa || "").trim();
+            var image = String(entry && entry.image || "").trim();
             var link = String(entry && entry.link || "").trim();
             var urgent = Boolean(entry && entry.urgent);
             var important = Boolean(entry && entry.important);
@@ -836,11 +838,15 @@
             if (urgent) {
                 tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgentTag", "Urgent")) + "</span>");
             }
+            if (image && !title && !body) {
+                tagParts.push("<span class=\"admin-notice-image-badge\">Image only</span>");
+            }
             var tagText = tagParts.length ? (" " + tagParts.join(" ")) : "";
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + tagText + "</h3>" +
-                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                (image ? ("  <div class=\"admin-notice-image-preview\"><img src=\"" + escapeHtml(image) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" /></div>") : "") +
+                "  <h3>" + escapeHtml(title || (image ? T("admin.noticeImageOnly", "Image Announcement") : T("admin.noticeTitle", "Send Notice"))) + tagText + "</h3>" +
+                "  <p class=\"admin-item-body\">" + escapeHtml(body || (image ? "" : "-")) + "</p>" +
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
@@ -1148,9 +1154,10 @@
         var titleTa = String(noticeTitleTaInput && noticeTitleTaInput.value || "").trim();
         var body = String(noticeBodyInput.value || "").trim();
         var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
+        var image = String(noticeImageInput && noticeImageInput.value || "").trim();
         var link = String(noticeLinkInput.value || "").trim();
-        if (!title || !body) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        if (!image && (!title || !body)) {
+            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message, or provide an image URL.");
             return;
         }
         setBusyState(true);
@@ -1160,6 +1167,7 @@
             titleTa: titleTa,
             body: body,
             bodyTa: bodyTa,
+            image: image,
             link: link,
             urgent: Boolean(noticeUrgentInput.checked),
             important: Boolean(noticeImportantInput && noticeImportantInput.checked),
@@ -1175,6 +1183,9 @@
             noticeBodyInput.value = "";
             if (noticeBodyTaInput) {
                 noticeBodyTaInput.value = "";
+            }
+            if (noticeImageInput) {
+                noticeImageInput.value = "";
             }
             noticeLinkInput.value = "";
             noticeUrgentInput.checked = false;
@@ -1834,6 +1845,10 @@
         if (nextBodyTa === null) {
             return;
         }
+        var nextImage = window.prompt(T("admin.noticeEditPromptImage", "Edit image URL (optional — for banner/image-only)"), String(current.image || ""));
+        if (nextImage === null) {
+            return;
+        }
         var nextLink = window.prompt(T("admin.noticeEditPromptLink", "Edit link (optional)"), String(current.link || ""));
         if (nextLink === null) {
             return;
@@ -1854,8 +1869,9 @@
         }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
-        if (!cleanTitle || !cleanBody) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        var cleanImage = String(nextImage || "").trim();
+        if (!cleanImage && (!cleanTitle || !cleanBody)) {
+            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message, or provide an image URL.");
             return;
         }
         source[targetIndex] = Object.assign({}, current, {
@@ -1863,6 +1879,7 @@
             body: cleanBody,
             titleTa: String(nextTitleTa || "").trim(),
             bodyTa: String(nextBodyTa || "").trim(),
+            image: cleanImage,
             link: String(nextLink || "").trim(),
             important: Boolean(nextImportant),
             updatedAt: new Date().toISOString()

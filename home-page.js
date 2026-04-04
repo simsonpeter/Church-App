@@ -1056,7 +1056,8 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    image: String(source.image || "").trim()
                 };
             }
 
@@ -1073,7 +1074,8 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    image: String(source.image || "").trim()
                 };
             }
 
@@ -1280,16 +1282,33 @@
                         "</div>";
                 }
 
-                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
-                announcementsList.innerHTML = "" +
-                    "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
-                    metaLine +
-                    linkLine +
-                    dismissBtn +
-                    controls +
-                    "</li>";
+                var isImageOnly = Boolean(item.image) && !titleText && !bodyText;
+                var imageLine = item.image
+                    ? ("<div class=\"announcement-image-wrap\"><img class=\"announcement-image\" src=\"" + NjcEvents.escapeHtml(item.image) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" /></div>")
+                    : "";
+
+                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "") + (isImageOnly ? " announcement-image-only" : "");
+                if (isImageOnly) {
+                    announcementsList.innerHTML = "" +
+                        "<li class=\"" + liClass + "\">" +
+                        imageLine +
+                        metaLine +
+                        linkLine +
+                        dismissBtn +
+                        controls +
+                        "</li>";
+                } else {
+                    announcementsList.innerHTML = "" +
+                        "<li class=\"" + liClass + "\">" +
+                        imageLine +
+                        "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
+                        "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                        metaLine +
+                        linkLine +
+                        dismissBtn +
+                        controls +
+                        "</li>";
+                }
 
                 var activeAnnouncementId = String(item.id || "");
                 var activeIndex = announcementCarouselIndex;
