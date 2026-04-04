@@ -419,11 +419,6 @@ body.splash-active {
     box-shadow: var(--card-shadow-ambient);
 }
 
-/* Let image-only banners break out to full viewport width (default .card is overflow:hidden) */
-.card.announcements-card.announcements-card-image-only-slide {
-    overflow-x: visible;
-}
-
 .card.announcements-card::before {
     content: "";
     position: absolute;
@@ -1523,8 +1518,8 @@ body.app-update-open {
 }
 
 .announcement-image-wrap {
-    margin: 0 0 10px;
-    border-radius: 10px;
+    margin: 2px 0 10px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--line);
     background: var(--surface-soft);
@@ -1561,34 +1556,30 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Full viewport width: center relative to list row, respect safe-area (matches .app-shell horizontal inset) */
+/* Image-only: full width inside the card (same breakout as .card-banner), stays within rounded card */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
-    margin: 2px 0 8px;
-    margin-left: calc(50% - 50vw + env(safe-area-inset-left, 0px));
-    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
+    width: calc(100% + 2 * var(--card-pad) + 20px);
     max-width: none;
-    border-radius: 0;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--line);
-    border-left: 0;
-    border-right: 0;
     background: var(--surface-soft);
     line-height: 0;
     box-sizing: border-box;
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
-.announcement-carousel-item.announcement-image-only .announcement-slide-image {
-    max-height: none;
+.announcement-carousel-item.announcement-image-only .announcement-slide-image,
+.announcement-carousel-item.announcement-image-only .announcement-image {
+    display: block;
+    width: 100%;
+    max-height: min(52vh, 380px);
+    min-height: 140px;
     border-radius: 0;
     border: 0;
-    width: 100%;
-    min-height: 120px;
     object-fit: cover;
     object-position: center;
-}
-
-.announcement-image-wrap {
-    margin: 2px 0 8px;
 }
 
 .announcement-image-link {
