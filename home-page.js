@@ -84,6 +84,7 @@
             var allUpcomingEvents = [];
             var allAnnouncements = [];
             var announcementsError = false;
+            var MAX_VISIBLE_ANNOUNCEMENTS = 12;
             var announcementCarouselItems = [];
             var announcementCarouselIndex = 0;
             var announcementCarouselTimerId = null;
@@ -1343,7 +1344,7 @@
                 var imageAltText = titleText || bodyText || T("home.announcementBannerAlt", "Announcement banner", announcementsCard);
                 var imageHtml = "";
                 if (isImageOnly) {
-                    var imageTag = "<img class=\"announcement-slide-image\" src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(imageAltText) + "\" loading=\"lazy\" decoding=\"async\">";
+                    var imageTag = "<img class=\"announcement-slide-image\" src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(imageAltText) + "\" loading=\"eager\" fetchpriority=\"high\" decoding=\"async\">";
                     imageHtml = item.link
                         ? ("<div class=\"announcement-image-wrap\"><a class=\"announcement-image-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + imageTag + "</a></div>")
                         : ("<div class=\"announcement-image-wrap\">" + imageTag + "</div>");
@@ -1487,7 +1488,7 @@
                         }
                         return (b.date || "").localeCompare(a.date || "");
                     })
-                    .slice(0, 5);
+                    .slice(0, MAX_VISIBLE_ANNOUNCEMENTS);
 
                 if (visibleItems.length === 0) {
                     syncAnnouncementsBanner("");

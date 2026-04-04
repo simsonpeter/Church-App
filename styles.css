@@ -410,6 +410,11 @@ body.splash-active {
     box-shadow: var(--card-shadow-ambient);
 }
 
+/* Let image-only banners break out to full viewport width (default .card is overflow:hidden) */
+.card.announcements-card:has(.announcement-carousel-item.announcement-image-only) {
+    overflow-x: visible;
+}
+
 .card.announcements-card::before {
     content: "";
     position: absolute;
@@ -1531,14 +1536,17 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Full card inner width (same breakout as .card-banner): cancel card padding + list row padding */
+/* Full viewport width: center relative to list row, respect safe-area (matches .app-shell horizontal inset) */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
-    margin: 2px calc(-1 * var(--card-pad) - 10px) 8px;
-    width: calc(100% + 2 * var(--card-pad) + 20px);
+    margin: 2px 0 8px;
+    margin-left: calc(50% - 50vw + env(safe-area-inset-left, 0px));
+    width: calc(100vw - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
     max-width: none;
-    border-radius: 12px;
+    border-radius: 0;
     overflow: hidden;
     border: 1px solid var(--line);
+    border-left: 0;
+    border-right: 0;
     background: var(--surface-soft);
     line-height: 0;
     box-sizing: border-box;
@@ -1548,6 +1556,10 @@ body.app-update-open {
     max-height: none;
     border-radius: 0;
     border: 0;
+    width: 100%;
+    min-height: 120px;
+    object-fit: cover;
+    object-position: center;
 }
 
 .announcement-image-wrap {
@@ -4799,6 +4811,54 @@ body.bible-fullscreen-open .offline-badge {
     border-radius: 12px;
     border: 1px solid var(--line);
     background: var(--surface-soft);
+}
+
+.admin-notice-inline-note {
+    margin: 8px 0 0;
+    padding: 8px 10px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    line-height: 1.35;
+}
+
+.admin-notice-inline-note[hidden] {
+    display: none !important;
+}
+
+.admin-notice-inline-note[data-state="success"] {
+    background: rgba(34, 197, 94, 0.12);
+    color: #166534;
+    border: 1px solid rgba(34, 197, 94, 0.35);
+}
+
+.admin-notice-inline-note[data-state="error"] {
+    background: rgba(239, 68, 68, 0.1);
+    color: #991b1b;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.admin-notice-inline-note[data-state="validation"] {
+    background: rgba(234, 179, 8, 0.12);
+    color: #854d0e;
+    border: 1px solid rgba(234, 179, 8, 0.35);
+}
+
+html[data-theme="dark"] .admin-notice-inline-note[data-state="success"] {
+    background: rgba(34, 197, 94, 0.15);
+    color: #bbf7d0;
+    border-color: rgba(34, 197, 94, 0.4);
+}
+
+html[data-theme="dark"] .admin-notice-inline-note[data-state="error"] {
+    background: rgba(239, 68, 68, 0.14);
+    color: #fecaca;
+    border-color: rgba(239, 68, 68, 0.4);
+}
+
+html[data-theme="dark"] .admin-notice-inline-note[data-state="validation"] {
+    background: rgba(234, 179, 8, 0.14);
+    color: #fef08a;
+    border-color: rgba(234, 179, 8, 0.4);
 }
 
 .admin-item-actions {

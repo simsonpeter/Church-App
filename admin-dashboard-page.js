@@ -63,6 +63,7 @@
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeImportantInput = document.getElementById("admin-notice-important");
     var noticeSubmit = document.getElementById("admin-notice-submit");
+    var noticeFormNote = document.getElementById("admin-notice-form-note");
 
     var broadcastForm = document.getElementById("admin-broadcast-form");
     var broadcastTitleInput = document.getElementById("admin-broadcast-title");
@@ -141,6 +142,10 @@
 
     function isHttpsUrl(value) {
         return /^https:\/\//i.test(String(value || "").trim());
+    }
+
+    function isHttpOrHttpsUrl(value) {
+        return /^https?:\/\//i.test(String(value || "").trim());
     }
 
     function normalizeNoticeImageUrl(value) {
@@ -226,6 +231,24 @@
         note.hidden = false;
         note.dataset.state = state || "";
         note.textContent = T(key, fallback);
+    }
+
+    function showNoticeFormNote(state, key, fallback) {
+        if (!noticeFormNote) {
+            return;
+        }
+        noticeFormNote.hidden = false;
+        noticeFormNote.dataset.state = state || "";
+        noticeFormNote.textContent = T(key, fallback);
+    }
+
+    function clearNoticeFormNote() {
+        if (!noticeFormNote) {
+            return;
+        }
+        noticeFormNote.hidden = true;
+        noticeFormNote.dataset.state = "";
+        noticeFormNote.textContent = "";
     }
 
     function clearNote() {
@@ -1173,6 +1196,7 @@
         if (busy || !isAdminUser()) {
             return;
         }
+        clearNoticeFormNote();
         var title = String(noticeTitleInput.value || "").trim();
         var titleTa = String(noticeTitleTaInput && noticeTitleTaInput.value || "").trim();
         var body = String(noticeBodyInput.value || "").trim();
@@ -1180,16 +1204,19 @@
         var imageUrl = normalizeNoticeImageUrl(noticeImageInput && noticeImageInput.value);
         var link = String(noticeLinkInput.value || "").trim();
         var imageOnly = Boolean(noticeImageOnlyInput && noticeImageOnlyInput.checked);
-        if (imageUrl && !isHttpsUrl(imageUrl)) {
-            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be https:// or leave empty.");
+        if (imageUrl && !isHttpOrHttpsUrl(imageUrl)) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https:// or http://, or leave empty.");
+            showNoticeFormNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https:// or http://, or leave empty.");
             return;
         }
         if (imageOnly && !imageUrl) {
             showNote("validation", "admin.noticeNeedImage", "Add a banner image URL for image-only announcements.");
+            showNoticeFormNote("validation", "admin.noticeNeedImage", "Add a banner image URL for image-only announcements.");
             return;
         }
         if (!imageOnly && (!title || !body)) {
             showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+            showNoticeFormNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
             return;
         }
         setBusyState(true);
@@ -1231,9 +1258,11 @@
             renderStats();
             renderNoticeList();
             showNote("success", "admin.noticeSaved", "Notice published.");
+            showNoticeFormNote("success", "admin.noticeSaved", "Notice published.");
             document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            showNoticeFormNote("error", "admin.noticePublishFailed", "Could not publish. Check connection and try again.");
         }).finally(function () {
             setBusyState(false);
         });
@@ -1920,16 +1949,19 @@
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
         var cleanImage = normalizeNoticeImageUrl(nextImage);
-        if (cleanImage && !isHttpsUrl(cleanImage)) {
-            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be https:// or leave empty.");
+        if (cleanImage && !isHttpOrHttpsUrl(cleanImage)) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https:// or http://, or leave empty.");
+            showNoticeFormNote("validation", "admin.noticeNeedImageUrl", "Banner image URL must start with https:// or http://, or leave empty.");
             return;
         }
         if (nextImageOnly && !cleanImage) {
             showNote("validation", "admin.noticeNeedImage", "Add a banner image URL for image-only announcements.");
+            showNoticeFormNote("validation", "admin.noticeNeedImage", "Add a banner image URL for image-only announcements.");
             return;
         }
         if (!nextImageOnly && (!cleanTitle || !cleanBody)) {
             showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+            showNoticeFormNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
             return;
         }
         source[targetIndex] = Object.assign({}, current, {
@@ -1951,9 +1983,11 @@
             renderStats();
             renderNoticeList();
             showNote("success", "admin.noticeUpdated", "Announcement updated.");
+            showNoticeFormNote("success", "admin.noticeUpdated", "Announcement updated.");
             document.dispatchEvent(new CustomEvent("njc:admin-notices-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
+            showNoticeFormNote("error", "admin.noticePublishFailed", "Could not save. Check connection and try again.");
         }).finally(function () {
             setBusyState(false);
         });
