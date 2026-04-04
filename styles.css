@@ -411,7 +411,7 @@ body.splash-active {
 }
 
 /* Let image-only banners break out to full viewport width (default .card is overflow:hidden) */
-.card.announcements-card:has(.announcement-carousel-item.announcement-image-only) {
+.card.announcements-card.announcements-card-image-only-slide {
     overflow-x: visible;
 }
 
