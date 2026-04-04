@@ -361,6 +361,15 @@ body.splash-active {
     gap: 22px;
 }
 
+/* Admin: <details> bodies extend below the card box; default .card overflow:hidden clips them */
+.page-view[data-route="admin"] .admin-route-content {
+    padding-bottom: max(100px, calc(72px + env(safe-area-inset-bottom)));
+}
+
+.page-view[data-route="admin"] .admin-route-content > .card {
+    overflow: visible;
+}
+
 .app-content > .card:nth-child(odd) {
     animation-name: card-enter-ltr;
 }
