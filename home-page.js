@@ -1141,7 +1141,12 @@
                 if (item.imageOnly) {
                     return Boolean(String(item.imageUrl || "").trim());
                 }
-                return Boolean(String(item.title || "").trim() || String(item.body || "").trim());
+                return Boolean(
+                    String(item.title || "").trim()
+                    || String(item.body || "").trim()
+                    || String(item.titleTa || "").trim()
+                    || String(item.bodyTa || "").trim()
+                );
             }
 
             function setAnnouncementsStandardMediaVisible(visible) {
@@ -1499,7 +1504,8 @@
                         if (item.personalWish) {
                             return true;
                         }
-                        if (dismissed[String(item.id || "")]) {
+                        var sid = String(item.id || "");
+                        if (sid && dismissed[sid] && !item.urgent && !item.important) {
                             return false;
                         }
                         return !item.expires || item.expires >= todayKey;
@@ -1574,6 +1580,28 @@
                         });
                 }
 
+                function extractNoticeArray(payload) {
+                    if (!payload) {
+                        return [];
+                    }
+                    if (Array.isArray(payload)) {
+                        return payload;
+                    }
+                    if (Array.isArray(payload.entries)) {
+                        return payload.entries;
+                    }
+                    if (Array.isArray(payload.items)) {
+                        return payload.items;
+                    }
+                    if (payload.data && Array.isArray(payload.data.entries)) {
+                        return payload.data.entries;
+                    }
+                    if (payload.data && Array.isArray(payload.data)) {
+                        return payload.data;
+                    }
+                    return [];
+                }
+
                 function fetchAdminNotices() {
                     return fetch(adminNoticesUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
                         .then(function (response) {
@@ -1584,7 +1612,7 @@
                                 throw new Error("Failed to load admin notices");
                             }
                             return response.json().then(function (payload) {
-                                var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                                var entries = extractNoticeArray(payload);
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
                                     return isRenderableAnnouncement(item);
                                 });
