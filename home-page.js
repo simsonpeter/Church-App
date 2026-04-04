@@ -1047,6 +1047,7 @@
                 var source = item && typeof item === "object" ? item : {};
                 var title = String(source.title || "").trim();
                 var body = String(source.body || "").trim();
+                var imageOnly = Boolean(source.imageOnly);
                 return {
                     id: String(source.id || ("announcement-" + index)),
                     title: title,
@@ -1056,7 +1057,9 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    imageUrl: String(source.imageUrl || "").trim(),
+                    imageOnly: imageOnly
                 };
             }
 
@@ -1064,6 +1067,7 @@
                 var source = item && typeof item === "object" ? item : {};
                 var createdAt = String(source.createdAt || source.updatedAt || "").trim();
                 var createdYmd = toYmdKey(createdAt.slice(0, 10));
+                var imageOnly = Boolean(source.imageOnly);
                 return {
                     id: String(source.id || ("admin-notice-" + index)),
                     title: String(source.title || "").trim(),
@@ -1073,7 +1077,9 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    imageUrl: String(source.imageUrl || "").trim(),
+                    imageOnly: imageOnly
                 };
             }
 
@@ -1236,6 +1242,44 @@
                 }
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
+                var cardBanner = announcementsCard ? announcementsCard.querySelector(".card-banner") : null;
+
+                var controls = "";
+                if (announcementCarouselItems.length > 1) {
+                    var dots = announcementCarouselItems.map(function (_, index) {
+                        var activeClass = index === announcementCarouselIndex ? " active" : "";
+                        return "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-announcement-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementDot", "Announcement", announcementsCard)) + " " + String(index + 1) + "\"></button>";
+                    }).join("");
+                    controls = "" +
+                        "<div class=\"announcement-carousel-controls\">" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementPrev", "Previous announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
+                        "  <div class=\"announcement-dots\">" + dots + "</div>" +
+                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementNext", "Next announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
+                        "</div>";
+                }
+
+                if (item.imageOnly && item.imageUrl) {
+                    if (cardBanner) {
+                        cardBanner.hidden = true;
+                    }
+                    var dismissBtnImgOnly = "<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>";
+                    var imgContent = "<img class=\"announcement-banner-img\" src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"" + NjcEvents.escapeHtml(item.title || T("home.announcementsTitle", "Announcement", announcementsCard)) + "\" loading=\"lazy\" />";
+                    var imgWrapped = item.link
+                        ? ("<a class=\"announcement-banner-img-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + imgContent + "</a>")
+                        : imgContent;
+                    announcementsList.innerHTML = "" +
+                        "<li class=\"announcement-carousel-item announcement-image-only\">" +
+                        imgWrapped +
+                        dismissBtnImgOnly +
+                        controls +
+                        "</li>";
+                    return;
+                }
+
+                if (cardBanner) {
+                    cardBanner.hidden = false;
+                }
+
                 var isTamil = isTamilLanguage(announcementsCard);
                 var titleText;
                 var bodyText;
@@ -1265,26 +1309,16 @@
                 var dismissBtn = !item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
                     : "";
-
-                var controls = "";
-                if (announcementCarouselItems.length > 1) {
-                    var dots = announcementCarouselItems.map(function (_, index) {
-                        var activeClass = index === announcementCarouselIndex ? " active" : "";
-                        return "<button type=\"button\" class=\"announcement-dot" + activeClass + "\" data-announcement-index=\"" + String(index) + "\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementDot", "Announcement", announcementsCard)) + " " + String(index + 1) + "\"></button>";
-                    }).join("");
-                    controls = "" +
-                        "<div class=\"announcement-carousel-controls\">" +
-                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"prev\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementPrev", "Previous announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-left\"></i></button>" +
-                        "  <div class=\"announcement-dots\">" + dots + "</div>" +
-                        "  <button type=\"button\" class=\"announcement-nav-btn\" data-announcement-action=\"next\" aria-label=\"" + NjcEvents.escapeHtml(T("home.announcementNext", "Next announcement", announcementsCard)) + "\"><i class=\"fa-solid fa-chevron-right\"></i></button>" +
-                        "</div>";
-                }
+                var itemImageLine = item.imageUrl
+                    ? ("<div class=\"announcement-item-image\"><img src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"\" loading=\"lazy\" /></div>")
+                    : "";
 
                 var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
                     "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
                     "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    itemImageLine +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1308,7 +1342,10 @@
                             item.titleTaAuto = translatedTitle;
                             var titleNode = announcementsList.querySelector(".announcement-title");
                             if (titleNode) {
-                                titleNode.innerHTML = titleBadges + NjcEvents.escapeHtml(translatedTitle);
+                                var urgentBadgeInner = item.urgent
+                                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
+                                    : "";
+                                titleNode.innerHTML = urgentBadgeInner + NjcEvents.escapeHtml(translatedTitle);
                             }
                         });
                     }
@@ -1429,7 +1466,7 @@
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
                             return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
+                                return item.title || item.body || (item.imageOnly && item.imageUrl);
                             });
                         })
                         .catch(function () {
@@ -1449,7 +1486,7 @@
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
+                                    return item.title || item.body || (item.imageOnly && item.imageUrl);
                                 });
                             });
                         })
