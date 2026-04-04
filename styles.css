@@ -4808,6 +4808,18 @@ body.bible-fullscreen-open .offline-badge {
     gap: 8px;
 }
 
+.admin-schedule-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.admin-schedule-field .page-note {
+    margin: 0;
+    font-size: 0.82rem;
+}
+
 .admin-item-body {
     margin-bottom: 6px;
 }

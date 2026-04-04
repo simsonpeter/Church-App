@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260404anninset1">
+    <link rel="stylesheet" href="styles.css?v=20260404annsched1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -995,6 +995,11 @@
                         <input id="admin-notice-important" type="checkbox">
                         <span data-i18n="admin.noticeImportant">Mark as important</span>
                     </label>
+                    <p class="page-note" data-i18n="admin.noticeScheduleHint">Schedule (optional): leave dates empty to show until you remove the notice. End date is the last day the notice appears.</p>
+                    <div class="admin-inline-fields">
+                        <label class="admin-schedule-field"><span class="page-note" data-i18n="admin.noticeVisibleFrom">Show from</span><input id="admin-notice-visible-from" class="search-input" type="date"></label>
+                        <label class="admin-schedule-field"><span class="page-note" data-i18n="admin.noticeVisibleUntil">Show through</span><input id="admin-notice-visible-until" class="search-input" type="date"></label>
+                    </div>
                     <button class="button-link" id="admin-notice-submit" type="submit" data-i18n="admin.noticePublish">Publish notice</button>
                         <p class="page-note admin-notice-inline-note" id="admin-notice-form-note" hidden aria-live="polite"></p>
                         </form>
@@ -1432,9 +1437,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260404announce2"></script>
+    <script src="app-shell.js?v=20260404annsched1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260404anninset1"></script>
+    <script src="home-page.js?v=20260404annsched1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260402biblettsread1"></script>
@@ -1442,7 +1447,7 @@
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260330ttsverse"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260404announce2"></script>
+    <script src="admin-dashboard-page.js?v=20260404annsched1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260327bq1"></script>

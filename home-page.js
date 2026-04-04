@@ -1088,12 +1088,39 @@
                 }
             }
 
+            function pickAnnouncementScheduleStart(source) {
+                var obj = source && typeof source === "object" ? source : {};
+                var keys = ["visibleFrom", "showFrom", "startDate", "validFrom"];
+                for (var i = 0; i < keys.length; i++) {
+                    var y = toYmdKey(obj[keys[i]]);
+                    if (y) {
+                        return y;
+                    }
+                }
+                return "";
+            }
+
+            function pickAnnouncementScheduleEnd(source) {
+                var obj = source && typeof source === "object" ? source : {};
+                var keys = ["visibleUntil", "endDate", "hideAfter", "validUntil"];
+                for (var i = 0; i < keys.length; i++) {
+                    var y = toYmdKey(obj[keys[i]]);
+                    if (y) {
+                        return y;
+                    }
+                }
+                return "";
+            }
+
             function normalizeAnnouncement(item, index) {
                 var source = item && typeof item === "object" ? item : {};
                 var title = String(source.title || "").trim();
                 var body = String(source.body || "").trim();
                 var imageUrl = pickAnnouncementImageUrl(source);
                 var imageOnly = Boolean(source.imageOnly) || (!title && !body && Boolean(imageUrl));
+                var visibleFromYmd = pickAnnouncementScheduleStart(source);
+                var visibleUntilYmd = pickAnnouncementScheduleEnd(source);
+                var expiresLegacy = toYmdKey(source.expires);
                 return {
                     id: String(source.id || ("announcement-" + index)),
                     title: title,
@@ -1101,7 +1128,9 @@
                     body: body,
                     bodyTa: String(source.bodyTa || "").trim(),
                     date: toYmdKey(source.date),
-                    expires: toYmdKey(source.expires),
+                    expires: expiresLegacy,
+                    visibleFromYmd: visibleFromYmd,
+                    visibleUntilYmd: visibleUntilYmd,
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
                     link: String(source.link || "").trim(),
@@ -1118,6 +1147,9 @@
                 var body = String(source.body || "").trim();
                 var imageUrl = pickAnnouncementImageUrl(source);
                 var imageOnly = Boolean(source.imageOnly) || (!title && !body && Boolean(imageUrl));
+                var visibleFromYmd = pickAnnouncementScheduleStart(source);
+                var visibleUntilYmd = pickAnnouncementScheduleEnd(source);
+                var expiresLegacy = toYmdKey(source.expires);
                 return {
                     id: String(source.id || ("admin-notice-" + index)),
                     title: title,
@@ -1125,13 +1157,33 @@
                     body: body,
                     bodyTa: String(source.bodyTa || "").trim(),
                     date: toYmdKey(source.date) || createdYmd,
-                    expires: toYmdKey(source.expires),
+                    expires: expiresLegacy,
+                    visibleFromYmd: visibleFromYmd,
+                    visibleUntilYmd: visibleUntilYmd,
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
                     link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
                     imageOnly: imageOnly
                 };
+            }
+
+            function announcementVisibleBySchedule(item, todayKey) {
+                if (!item || item.personalWish) {
+                    return true;
+                }
+                var start = String(item.visibleFromYmd || "").trim();
+                if (start && start > todayKey) {
+                    return false;
+                }
+                var end = String(item.visibleUntilYmd || "").trim();
+                if (!end) {
+                    end = String(item.expires || "").trim();
+                }
+                if (end && end < todayKey) {
+                    return false;
+                }
+                return true;
             }
 
             function isRenderableAnnouncement(item) {
@@ -1499,7 +1551,7 @@
                         if (sid && dismissed[sid] && !item.urgent && !item.important) {
                             return false;
                         }
-                        return !item.expires || item.expires >= todayKey;
+                        return announcementVisibleBySchedule(item, todayKey);
                     })
                     .sort(function (a, b) {
                         var ap = Boolean(a.personalWish);

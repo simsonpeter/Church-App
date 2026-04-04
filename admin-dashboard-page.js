@@ -64,6 +64,8 @@
     var noticeImportantInput = document.getElementById("admin-notice-important");
     var noticeSubmit = document.getElementById("admin-notice-submit");
     var noticeFormNote = document.getElementById("admin-notice-form-note");
+    var noticeVisibleFromInput = document.getElementById("admin-notice-visible-from");
+    var noticeVisibleUntilInput = document.getElementById("admin-notice-visible-until");
 
     var broadcastForm = document.getElementById("admin-broadcast-form");
     var broadcastTitleInput = document.getElementById("admin-broadcast-title");
@@ -281,6 +283,62 @@
         var m = String(date.getMonth() + 1).padStart(2, "0");
         var d = String(date.getDate()).padStart(2, "0");
         return String(y) + "-" + m + "-" + d;
+    }
+
+    function readNoticeScheduleFromForm() {
+        var fromY = noticeVisibleFromInput ? toYmd(noticeVisibleFromInput.value) : "";
+        var untilY = noticeVisibleUntilInput ? toYmd(noticeVisibleUntilInput.value) : "";
+        return { fromY: fromY, untilY: untilY };
+    }
+
+    function clearNoticeScheduleForm() {
+        if (noticeVisibleFromInput) {
+            noticeVisibleFromInput.value = "";
+        }
+        if (noticeVisibleUntilInput) {
+            noticeVisibleUntilInput.value = "";
+        }
+    }
+
+    function pickNoticeVisibleFrom(entry) {
+        var e = entry && typeof entry === "object" ? entry : {};
+        var keys = ["visibleFrom", "showFrom", "startDate", "validFrom"];
+        for (var i = 0; i < keys.length; i++) {
+            var y = toYmd(e[keys[i]]);
+            if (y) {
+                return y;
+            }
+        }
+        return "";
+    }
+
+    function pickNoticeVisibleUntil(entry) {
+        var e = entry && typeof entry === "object" ? entry : {};
+        var keys = ["visibleUntil", "endDate", "hideAfter", "validUntil", "expires"];
+        for (var i = 0; i < keys.length; i++) {
+            var y = toYmd(e[keys[i]]);
+            if (y) {
+                return y;
+            }
+        }
+        return "";
+    }
+
+    function formatNoticeScheduleLine(entry) {
+        var fromY = pickNoticeVisibleFrom(entry);
+        var untilY = pickNoticeVisibleUntil(entry);
+        if (!fromY && !untilY) {
+            return "";
+        }
+        if (fromY && untilY) {
+            return T("admin.noticeScheduleLine", "Show: {from} – {until}")
+                .replace("{from}", fromY)
+                .replace("{until}", untilY);
+        }
+        if (fromY) {
+            return T("admin.noticeScheduleFrom", "From {date}").replace("{date}", fromY);
+        }
+        return T("admin.noticeScheduleUntil", "Through {date}").replace("{date}", untilY);
     }
 
     function normalizeBroadcastCategory(value) {
@@ -895,6 +953,7 @@
             var imagePreview = imageUrl
                 ? ("  <p class=\"page-note admin-notice-image-wrap\"><img class=\"admin-notice-image\" src=\"" + escapeHtml(imageUrl) + "\" alt=\"" + escapeHtml(titleText) + "\" loading=\"lazy\" decoding=\"async\"></p>")
                 : "";
+            var scheduleNoteLine = formatNoticeScheduleLine(entry);
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(titleText) + tagText + "</h3>" +
@@ -903,6 +962,7 @@
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
+                (scheduleNoteLine ? ("  <p class=\"page-note\">" + escapeHtml(scheduleNoteLine) + "</p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"edit\">" + escapeHtml(T("admin.noticeEdit", "Edit")) + "</button>" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"delete\">" + escapeHtml(T("admin.noticeDelete", "Delete")) + "</button>" +
@@ -1227,6 +1287,12 @@
             showNoticeFormNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
             return;
         }
+        var sched = readNoticeScheduleFromForm();
+        if (sched.fromY && sched.untilY && sched.fromY > sched.untilY) {
+            showNote("validation", "admin.noticeScheduleInvalid", "Start date must be on or before end date.");
+            showNoticeFormNote("validation", "admin.noticeScheduleInvalid", "Start date must be on or before end date.");
+            return;
+        }
         setBusyState(true);
         prependAndSave(ADMIN_NOTICES_URL, cachedNotices, {
             id: makeEntryId("notice"),
@@ -1240,6 +1306,9 @@
             urgent: Boolean(noticeUrgentInput.checked),
             important: Boolean(noticeImportantInput && noticeImportantInput.checked),
             date: toYmd(new Date().toISOString()),
+            visibleFrom: sched.fromY,
+            visibleUntil: sched.untilY,
+            expires: sched.untilY,
             createdAt: new Date().toISOString(),
             createdByEmail: normalizeEmail(getUser() && getUser().email)
         }).then(function (entries) {
@@ -1263,6 +1332,7 @@
             if (noticeImportantInput) {
                 noticeImportantInput.checked = false;
             }
+            clearNoticeScheduleForm();
             renderStats();
             renderNoticeList();
             showNote("success", "admin.noticeSaved", "Notice published.");
@@ -1940,6 +2010,27 @@
         if (nextImportantRaw === null) {
             return;
         }
+        var nextVisibleFromRaw = window.prompt(
+            T("admin.noticeEditPromptVisibleFrom", "Show from date (YYYY-MM-DD, blank = from today / no start limit)"),
+            pickNoticeVisibleFrom(current)
+        );
+        if (nextVisibleFromRaw === null) {
+            return;
+        }
+        var nextVisibleUntilRaw = window.prompt(
+            T("admin.noticeEditPromptVisibleUntil", "Show through date (YYYY-MM-DD, blank = no end / runs until removed)"),
+            pickNoticeVisibleUntil(current)
+        );
+        if (nextVisibleUntilRaw === null) {
+            return;
+        }
+        var nextFromY = toYmd(String(nextVisibleFromRaw || "").trim());
+        var nextUntilY = toYmd(String(nextVisibleUntilRaw || "").trim());
+        if (nextFromY && nextUntilY && nextFromY > nextUntilY) {
+            showNote("validation", "admin.noticeScheduleInvalid", "Start date must be on or before end date.");
+            showNoticeFormNote("validation", "admin.noticeScheduleInvalid", "Start date must be on or before end date.");
+            return;
+        }
         var nextImageOnly = isImageOnlyNotice(current);
         var imageOnlyTrim = String(nextImageOnlyRaw || "").trim().toLowerCase();
         if (imageOnlyTrim === "y" || imageOnlyTrim === "yes") {
@@ -1982,6 +2073,9 @@
             imageOnly: nextImageOnly,
             link: String(nextLink || "").trim(),
             important: Boolean(nextImportant),
+            visibleFrom: nextFromY,
+            visibleUntil: nextUntilY,
+            expires: nextUntilY,
             updatedAt: new Date().toISOString()
         });
         setBusyState(true);
