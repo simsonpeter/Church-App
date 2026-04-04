@@ -70,6 +70,8 @@
             var verseCard = dailyVerseText ? dailyVerseText.closest(".card") : null;
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
             var announcementsCardBanner = announcementsCard ? announcementsCard.querySelector(".card-banner") : null;
+            var announcementsBannerImg = announcementsCard ? announcementsCard.querySelector(".card-banner img") : null;
+            var DEFAULT_ANNOUNCEMENTS_BANNER_SRC = "announcements-banner.jpg?v=20260428img1";
             var announcementsSubtitle = announcementsCard ? announcementsCard.querySelector("[data-i18n='home.announcementsSubtitle']") : null;
             var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
@@ -1045,11 +1047,34 @@
                 }).format(dateUtc);
             }
 
+            function pickAnnouncementImageUrl(source) {
+                var obj = source && typeof source === "object" ? source : {};
+                var keys = ["imageUrl", "image", "bannerUrl", "bannerImage"];
+                for (var i = 0; i < keys.length; i++) {
+                    var v = String(obj[keys[i]] || "").trim();
+                    if (v) {
+                        return v;
+                    }
+                }
+                return "";
+            }
+
+            function syncAnnouncementsBanner(imageSrc) {
+                if (!announcementsBannerImg) {
+                    return;
+                }
+                var next = String(imageSrc || "").trim() || DEFAULT_ANNOUNCEMENTS_BANNER_SRC;
+                if (announcementsBannerImg.getAttribute("src") !== next) {
+                    announcementsBannerImg.setAttribute("src", next);
+                }
+            }
+
             function normalizeAnnouncement(item, index) {
                 var source = item && typeof item === "object" ? item : {};
                 var title = String(source.title || "").trim();
                 var body = String(source.body || "").trim();
-                var imageUrl = String(source.imageUrl || source.bannerUrl || "").trim();
+                var imageUrl = pickAnnouncementImageUrl(source);
+                var imageOnly = Boolean(source.imageOnly) || (!title && !body && Boolean(imageUrl));
                 return {
                     id: String(source.id || ("announcement-" + index)),
                     title: title,
@@ -1060,9 +1085,9 @@
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
+                    link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
-                    imageOnly: Boolean(source.imageOnly),
-                    link: String(source.link || "").trim()
+                    imageOnly: imageOnly
                 };
             }
 
@@ -1070,19 +1095,23 @@
                 var source = item && typeof item === "object" ? item : {};
                 var createdAt = String(source.createdAt || source.updatedAt || "").trim();
                 var createdYmd = toYmdKey(createdAt.slice(0, 10));
+                var title = String(source.title || "").trim();
+                var body = String(source.body || "").trim();
+                var imageUrl = pickAnnouncementImageUrl(source);
+                var imageOnly = Boolean(source.imageOnly) || (!title && !body && Boolean(imageUrl));
                 return {
                     id: String(source.id || ("admin-notice-" + index)),
-                    title: String(source.title || "").trim(),
+                    title: title,
                     titleTa: String(source.titleTa || "").trim(),
-                    body: String(source.body || "").trim(),
+                    body: body,
                     bodyTa: String(source.bodyTa || "").trim(),
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
-                    imageUrl: String(source.imageUrl || source.bannerUrl || "").trim(),
-                    imageOnly: Boolean(source.imageOnly),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    imageUrl: imageUrl,
+                    imageOnly: imageOnly
                 };
             }
 
@@ -1272,6 +1301,13 @@
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
+                var isImageOnly = Boolean(item.imageOnly && String(item.imageUrl || "").trim() && !item.personalWish);
+                if (isImageOnly) {
+                    setAnnouncementsStandardMediaVisible(false);
+                } else {
+                    syncAnnouncementsBanner("");
+                    setAnnouncementsStandardMediaVisible(true);
+                }
                 var titleText;
                 var bodyText;
                 var pname = String(item.personalDisplayName || "").trim() || T("home.personalWishFriend", "friend", announcementsCard);
@@ -1289,15 +1325,14 @@
                         ? (item.bodyTa || item.bodyTaAuto || item.body)
                         : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
                 }
-                var isImageOnly = Boolean(item.imageOnly && item.imageUrl && !item.personalWish);
                 var dateText = formatYmdForLocale(item.date, announcementsCard);
-                var importantBadge = item.important
+                var importantBadge = !item.personalWish && item.important
                     ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
                     : "";
                 var urgentBadge = item.urgent
                     ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
-                var titleBadges = importantBadge + urgentBadge;
+                var titleBadges = urgentBadge + importantBadge;
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
                 var linkLine = !isImageOnly && item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
@@ -1328,16 +1363,17 @@
                         "</div>";
                 }
 
-                setAnnouncementsStandardMediaVisible(!isImageOnly);
                 var liClass = "announcement-carousel-item" +
                     (item.personalWish ? " announcement-personal-wish" : "") +
                     (isImageOnly ? " announcement-image-only" : "");
+                var srHeading = "<h3 class=\"announcement-title announcement-title-sr-only\">" + NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard)) + "</h3>";
+                var mainBlock = isImageOnly
+                    ? (srHeading + imageHtml)
+                    : ("  <h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
+                        "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    (isImageOnly
-                        ? imageHtml
-                        : ("  <h3 class=\"announcement-title\">" + titleBadges + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                            "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>")) +
+                    mainBlock +
                     metaLine +
                     linkLine +
                     dismissBtn +
@@ -1361,7 +1397,13 @@
                             item.titleTaAuto = translatedTitle;
                             var titleNode = announcementsList.querySelector(".announcement-title");
                             if (titleNode) {
-                                titleNode.innerHTML = titleBadges + NjcEvents.escapeHtml(translatedTitle);
+                                var ib = item.important
+                                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
+                                    : "";
+                                var ub = item.urgent
+                                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
+                                    : "";
+                                titleNode.innerHTML = ub + ib + NjcEvents.escapeHtml(translatedTitle);
                             }
                         });
                     }
@@ -1403,6 +1445,7 @@
                 }
 
                 if (announcementsError) {
+                    syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
@@ -1447,6 +1490,7 @@
                     .slice(0, 5);
 
                 if (visibleItems.length === 0) {
+                    syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
