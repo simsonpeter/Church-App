@@ -58,6 +58,7 @@
     var noticeBodyInput = document.getElementById("admin-notice-body");
     var noticeBodyTaInput = document.getElementById("admin-notice-body-ta");
     var noticeLinkInput = document.getElementById("admin-notice-link");
+    var noticeImageUrlInput = document.getElementById("admin-notice-image-url");
     var noticeUrgentInput = document.getElementById("admin-notice-urgent");
     var noticeImportantInput = document.getElementById("admin-notice-important");
     var noticeSubmit = document.getElementById("admin-notice-submit");
@@ -827,6 +828,7 @@
             var body = String(entry && entry.body || "").trim();
             var bodyTa = String(entry && entry.bodyTa || "").trim();
             var link = String(entry && entry.link || "").trim();
+            var imageUrl = String(entry && entry.imageUrl || "").trim();
             var urgent = Boolean(entry && entry.urgent);
             var important = Boolean(entry && entry.important);
             var tagParts = [];
@@ -836,13 +838,18 @@
             if (urgent) {
                 tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeUrgentTag", "Urgent")) + "</span>");
             }
+            if (imageUrl) {
+                tagParts.push("<span class=\"prayer-list-urgent-badge\">" + escapeHtml(T("admin.noticeImageTag", "Image")) + "</span>");
+            }
             var tagText = tagParts.length ? (" " + tagParts.join(" ")) : "";
+            var imageThumb = imageUrl ? ("  <p class=\"page-note\"><img src=\"" + escapeHtml(imageUrl) + "\" alt=\"\" style=\"max-width:120px;max-height:60px;border-radius:6px;margin-top:4px;\" loading=\"lazy\" /></p>") : "";
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(title || T("admin.noticeTitle", "Send Notice")) + tagText + "</h3>" +
-                "  <p class=\"admin-item-body\">" + escapeHtml(body || "-") + "</p>" +
+                "  <h3>" + escapeHtml(title || (imageUrl ? T("admin.noticeImageOnly", "Image Banner") : T("admin.noticeTitle", "Send Notice"))) + tagText + "</h3>" +
+                "  <p class=\"admin-item-body\">" + escapeHtml(body || (imageUrl ? "" : "-")) + "</p>" +
                 (titleTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(titleTa) + "</p>") : "") +
                 (bodyTa ? ("  <p class=\"page-note\"><strong>TA:</strong> " + escapeHtml(bodyTa) + "</p>") : "") +
+                imageThumb +
                 (link ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(link) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(link) + "</a></p>") : "") +
                 "  <div class=\"admin-item-actions\">" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-notice-id=\"" + escapeHtml(id) + "\" data-admin-notice-action=\"edit\">" + escapeHtml(T("admin.noticeEdit", "Edit")) + "</button>" +
@@ -1149,8 +1156,13 @@
         var body = String(noticeBodyInput.value || "").trim();
         var bodyTa = String(noticeBodyTaInput && noticeBodyTaInput.value || "").trim();
         var link = String(noticeLinkInput.value || "").trim();
-        if (!title || !body) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        var imageUrl = String(noticeImageUrlInput && noticeImageUrlInput.value || "").trim();
+        if (imageUrl && !/^https?:\/\//i.test(imageUrl)) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be an https:// URL or leave empty.");
+            return;
+        }
+        if (!title && !body && !imageUrl) {
+            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message, or provide a banner image URL.");
             return;
         }
         setBusyState(true);
@@ -1161,6 +1173,7 @@
             body: body,
             bodyTa: bodyTa,
             link: link,
+            imageUrl: imageUrl,
             urgent: Boolean(noticeUrgentInput.checked),
             important: Boolean(noticeImportantInput && noticeImportantInput.checked),
             date: toYmd(new Date().toISOString()),
@@ -1177,6 +1190,9 @@
                 noticeBodyTaInput.value = "";
             }
             noticeLinkInput.value = "";
+            if (noticeImageUrlInput) {
+                noticeImageUrlInput.value = "";
+            }
             noticeUrgentInput.checked = false;
             if (noticeImportantInput) {
                 noticeImportantInput.checked = false;
@@ -1838,6 +1854,10 @@
         if (nextLink === null) {
             return;
         }
+        var nextImageUrl = window.prompt(T("admin.noticeEditPromptImageUrl", "Banner image URL (https://, optional)"), String(current.imageUrl || ""));
+        if (nextImageUrl === null) {
+            return;
+        }
         var nextImportantRaw = window.prompt(
             T("admin.noticeEditPromptImportant", "Important tag on Home? Type y or n (blank = keep current)"),
             Boolean(current.important) ? "y" : "n"
@@ -1854,8 +1874,13 @@
         }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanBody = String(nextBody || "").trim();
-        if (!cleanTitle || !cleanBody) {
-            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message.");
+        var cleanImageUrl = String(nextImageUrl || "").trim();
+        if (cleanImageUrl && !/^https?:\/\//i.test(cleanImageUrl)) {
+            showNote("validation", "admin.noticeNeedImageUrl", "Banner image must be an https:// URL or leave empty.");
+            return;
+        }
+        if (!cleanTitle && !cleanBody && !cleanImageUrl) {
+            showNote("validation", "admin.noticeNeedFields", "Please enter notice title and message, or provide a banner image URL.");
             return;
         }
         source[targetIndex] = Object.assign({}, current, {
@@ -1864,6 +1889,7 @@
             titleTa: String(nextTitleTa || "").trim(),
             bodyTa: String(nextBodyTa || "").trim(),
             link: String(nextLink || "").trim(),
+            imageUrl: cleanImageUrl,
             important: Boolean(nextImportant),
             updatedAt: new Date().toISOString()
         });

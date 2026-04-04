@@ -6698,6 +6698,31 @@ html[data-theme="dark"] .reading-share-icon-btn:hover {
     background: linear-gradient(180deg, #d85a5a, #b71c1c);
 }
 
+/* Announcement per-item image */
+.announcement-image {
+    margin: 0 calc(-1 * var(--card-pad)) 10px;
+    width: calc(100% + 2 * var(--card-pad));
+    max-width: none;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.announcement-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 280px;
+    object-fit: cover;
+}
+
+.announcement-image-link {
+    display: block;
+}
+
+.announcement-image-only .announcement-image {
+    margin-bottom: 6px;
+}
+
 /* Announcements dismiss */
 .announcement-dismiss-btn {
     margin-top: 4px;

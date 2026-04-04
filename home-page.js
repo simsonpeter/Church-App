@@ -1056,7 +1056,8 @@
                     date: toYmdKey(source.date),
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    imageUrl: String(source.imageUrl || "").trim()
                 };
             }
 
@@ -1073,7 +1074,8 @@
                     date: toYmdKey(source.date) || createdYmd,
                     expires: toYmdKey(source.expires),
                     urgent: Boolean(source.urgent),
-                    link: String(source.link || "").trim()
+                    link: String(source.link || "").trim(),
+                    imageUrl: String(source.imageUrl || "").trim()
                 };
             }
 
@@ -1280,13 +1282,25 @@
                         "</div>";
                 }
 
-                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "");
+                var announcementImage = "";
+                if (item.imageUrl) {
+                    var imgLink = item.link
+                        ? "<a href=\"" + NjcEvents.escapeHtml(item.link) + "\" class=\"announcement-image-link\">"
+                        : "";
+                    var imgLinkClose = item.link ? "</a>" : "";
+                    announcementImage = "<div class=\"announcement-image\">" + imgLink + "<img src=\"" + NjcEvents.escapeHtml(item.imageUrl) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" />" + imgLinkClose + "</div>";
+                }
+
+                var isImageOnly = item.imageUrl && !titleText && !bodyText;
+
+                var liClass = "announcement-carousel-item" + (item.personalWish ? " announcement-personal-wish" : "") + (isImageOnly ? " announcement-image-only" : "");
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>" +
-                    "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>" +
+                    announcementImage +
+                    (isImageOnly ? "" : "  <h3 class=\"announcement-title\">" + urgentBadge + NjcEvents.escapeHtml(titleText || T("home.announcementsTitle", "Announcements", announcementsCard)) + "</h3>") +
+                    (isImageOnly ? "" : "  <p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText || "") + "</p>") +
                     metaLine +
-                    linkLine +
+                    (isImageOnly ? "" : linkLine) +
                     dismissBtn +
                     controls +
                     "</li>";
@@ -1429,7 +1443,7 @@
                         .then(function (data) {
                             var items = data && Array.isArray(data.items) ? data.items : [];
                             return items.map(normalizeAnnouncement).filter(function (item) {
-                                return item.title || item.body;
+                                return item.title || item.body || item.imageUrl;
                             });
                         })
                         .catch(function () {
@@ -1449,7 +1463,7 @@
                             return response.json().then(function (payload) {
                                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
                                 return entries.map(normalizeAdminNotice).filter(function (item) {
-                                    return item.title || item.body;
+                                    return item.title || item.body || item.imageUrl;
                                 });
                             });
                         })
