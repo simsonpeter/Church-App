@@ -1496,15 +1496,31 @@ body.app-update-open {
     color: var(--text);
 }
 
-/* Announcement list item: slide-in only when changing slides (class set by JS); no extra wrappers */
+/* Announcements: disable generic list fade-up (it starts at opacity:0 and overrides slide — causes flash) */
+.app-content .card.announcements-card ul.list > li {
+    animation: none;
+}
+
+/* Slide transition only when JS adds direction class (translate only — no opacity dip = no flash) */
 @media (prefers-reduced-motion: no-preference) {
-    .announcement-carousel-item.announcement-slide-dir-next {
-        animation: announcement-slide-from-right 0.36s cubic-bezier(0.25, 0.82, 0.28, 1) both;
+    .app-content .card.announcements-card ul.list > li.announcement-carousel-item.announcement-slide-dir-next {
+        animation: announcement-slide-from-right 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
 
-    .announcement-carousel-item.announcement-slide-dir-prev {
-        animation: announcement-slide-from-left 0.36s cubic-bezier(0.25, 0.82, 0.28, 1) both;
+    .app-content .card.announcements-card ul.list > li.announcement-carousel-item.announcement-slide-dir-prev {
+        animation: announcement-slide-from-left 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
     }
+}
+
+/* Rounded top where list meets the red title row */
+.card.announcements-card ul.list > li:first-child {
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+}
+
+/* Clip full-bleed image-only banner to rounded top (avoid square corners under header) */
+.card.announcements-card ul.list > li.announcement-image-only:first-child {
+    overflow: hidden;
 }
 
 .announcement-badge {
@@ -1590,7 +1606,7 @@ body.app-update-open {
     width: 100%;
     height: auto;
     max-height: none;
-    border-radius: 0;
+    border-radius: 12px;
     border: 0;
 }
 
@@ -6396,23 +6412,19 @@ html[data-theme="light"] .mini-player-btn {
 
 @keyframes announcement-slide-from-right {
     from {
-        opacity: 0;
-        transform: translateX(22px);
+        transform: translate3d(18px, 0, 0);
     }
     to {
-        opacity: 1;
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
 @keyframes announcement-slide-from-left {
     from {
-        opacity: 0;
-        transform: translateX(-22px);
+        transform: translate3d(-18px, 0, 0);
     }
     to {
-        opacity: 1;
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
