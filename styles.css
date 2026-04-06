@@ -1514,7 +1514,8 @@ body.app-update-open {
 }
 
 .announcement-carousel-item {
-    animation: fade-up 0.28s ease both;
+    animation: announcement-carousel-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: center top;
 }
 
 .announcement-image-wrap {
@@ -1568,6 +1569,8 @@ body.app-update-open {
     line-height: 0;
     box-sizing: border-box;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+    animation: announcement-image-reveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
+    transform-origin: center top;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-image-link {
@@ -1609,6 +1612,7 @@ body.app-update-open {
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 8px;
+    animation: announcement-controls-fade 0.38s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
 .announcement-nav-btn {
@@ -1647,12 +1651,20 @@ body.app-update-open {
     border-radius: 50%;
     padding: 0;
     background: #e6b4b4;
+    cursor: pointer;
+    transition:
+        width 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.28s ease,
+        transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.28s ease;
 }
 
 .announcement-dot.active {
     width: 16px;
     border-radius: 999px;
     background: var(--primary);
+    transform: scale(1.06);
+    box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.2);
 }
 
 .hero-card {
@@ -6371,6 +6383,40 @@ html[data-theme="light"] .mini-player-btn {
     from {
         opacity: 0;
         transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Home announcements: slide change (respects global prefers-reduced-motion) */
+@keyframes announcement-carousel-enter {
+    from {
+        opacity: 0;
+        transform: translateY(14px) scale(0.988);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes announcement-image-reveal {
+    from {
+        opacity: 0;
+        transform: scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes announcement-controls-fade {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
     }
     to {
         opacity: 1;
