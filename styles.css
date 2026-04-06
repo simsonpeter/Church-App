@@ -1496,6 +1496,17 @@ body.app-update-open {
     color: var(--text);
 }
 
+/* Home announcements: carousel region wraps the rotating slide list */
+.announcement-carousel {
+    margin: 0;
+    min-width: 0;
+}
+
+.announcement-carousel-track {
+    margin: 0;
+    min-width: 0;
+}
+
 .announcement-badge {
     display: inline-flex;
     align-items: center;
