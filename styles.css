@@ -414,6 +414,8 @@ body.splash-active {
     --ann-red-y: 88%;
     --ann-gold-a: 0.11;
     --ann-red-a: 0.07;
+    /* Image-only slide: fixed slot height so every banner is the same size (photo is cropped) */
+    --announcement-image-only-height: clamp(176px, 34vw, 260px);
     isolation: isolate;
     background: transparent;
     box-shadow: var(--card-shadow-ambient);
@@ -1556,11 +1558,12 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Image-only: full width inside the card (same breakout as .card-banner), stays within rounded card */
+/* Image-only: full inner card width + fixed-height slot (same breakout as .card-banner); photos crop to fit */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
     margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
     width: calc(100% + 2 * var(--card-pad) + 20px);
     max-width: none;
+    height: var(--announcement-image-only-height, clamp(176px, 34vw, 260px));
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--line);
@@ -1570,12 +1573,19 @@ body.app-update-open {
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
 }
 
+.announcement-carousel-item.announcement-image-only .announcement-image-link {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
 .announcement-carousel-item.announcement-image-only .announcement-slide-image,
 .announcement-carousel-item.announcement-image-only .announcement-image {
     display: block;
     width: 100%;
-    max-height: min(52vh, 380px);
-    min-height: 140px;
+    height: 100%;
+    max-height: none;
+    min-height: 0;
     border-radius: 0;
     border: 0;
     object-fit: cover;
