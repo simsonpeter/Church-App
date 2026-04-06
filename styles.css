@@ -1498,13 +1498,53 @@ body.app-update-open {
 
 /* Home announcements: carousel region wraps the rotating slide list */
 .announcement-carousel {
-    margin: 0;
+    margin: 8px 0 0;
     min-width: 0;
+    padding: 12px 10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(229, 57, 53, 0.18);
+    background: linear-gradient(165deg, rgba(255, 252, 252, 0.95) 0%, rgba(255, 241, 241, 0.88) 50%, rgba(255, 248, 246, 0.92) 100%);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.75) inset,
+        0 10px 28px rgba(90, 28, 40, 0.06);
 }
 
 .announcement-carousel-track {
     margin: 0;
     min-width: 0;
+    gap: 0;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .announcement-carousel-item {
+        animation: announcement-carousel-enter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
+        animation: announcement-image-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+    }
+
+    .announcement-carousel-controls {
+        animation: announcement-controls-fade 0.45s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+    }
+}
+
+html[data-theme="dark"] .announcement-carousel {
+    border-color: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(165deg, rgba(28, 22, 22, 0.55) 0%, rgba(18, 14, 14, 0.72) 100%);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06) inset,
+        0 12px 32px rgba(0, 0, 0, 0.35);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .announcement-carousel {
+        border-color: rgba(255, 255, 255, 0.1);
+        background: linear-gradient(165deg, rgba(28, 22, 22, 0.55) 0%, rgba(18, 14, 14, 0.72) 100%);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.06) inset,
+            0 12px 32px rgba(0, 0, 0, 0.35);
+    }
 }
 
 .announcement-badge {
@@ -1525,7 +1565,6 @@ body.app-update-open {
 }
 
 .announcement-carousel-item {
-    animation: announcement-carousel-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
     transform-origin: center top;
 }
 
@@ -1580,7 +1619,6 @@ body.app-update-open {
     line-height: 0;
     box-sizing: border-box;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
-    animation: announcement-image-reveal 0.52s cubic-bezier(0.22, 1, 0.36, 1) 0.06s both;
     transform-origin: center top;
 }
 
@@ -1623,7 +1661,6 @@ body.app-update-open {
     grid-template-columns: auto 1fr auto;
     align-items: center;
     gap: 8px;
-    animation: announcement-controls-fade 0.38s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
 }
 
 .announcement-nav-btn {
@@ -6405,7 +6442,7 @@ html[data-theme="light"] .mini-player-btn {
 @keyframes announcement-carousel-enter {
     from {
         opacity: 0;
-        transform: translateY(14px) scale(0.988);
+        transform: translateY(22px) scale(0.97);
     }
     to {
         opacity: 1;
@@ -6416,7 +6453,7 @@ html[data-theme="light"] .mini-player-btn {
 @keyframes announcement-image-reveal {
     from {
         opacity: 0;
-        transform: scale(0.985);
+        transform: scale(0.96);
     }
     to {
         opacity: 1;
@@ -6427,7 +6464,7 @@ html[data-theme="light"] .mini-player-btn {
 @keyframes announcement-controls-fade {
     from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
