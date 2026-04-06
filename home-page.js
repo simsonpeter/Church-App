@@ -88,6 +88,7 @@
             var MAX_VISIBLE_ANNOUNCEMENTS = 12;
             var announcementCarouselItems = [];
             var announcementCarouselIndex = 0;
+            var announcementCarouselPreviousIndex = -1;
             var announcementCarouselTimerId = null;
             var eventsMeta = null;
             var eventsError = false;
@@ -1367,13 +1368,39 @@
                 return next;
             }
 
+            function announcementSlideDirectionClass(prevIndex, currIndex, total) {
+                if (total <= 1 || prevIndex < 0 || currIndex < 0) {
+                    return "announcement-slide-shell--same";
+                }
+                if (prevIndex === currIndex) {
+                    return "announcement-slide-shell--same";
+                }
+                var forwardSteps = (currIndex - prevIndex + total) % total;
+                var backwardSteps = (prevIndex - currIndex + total) % total;
+                if (forwardSteps < backwardSteps) {
+                    return "announcement-slide-shell--next";
+                }
+                if (backwardSteps < forwardSteps) {
+                    return "announcement-slide-shell--prev";
+                }
+                return currIndex > prevIndex
+                    ? "announcement-slide-shell--next"
+                    : "announcement-slide-shell--prev";
+            }
+
             function renderAnnouncementCarouselFrame() {
                 if (!announcementsList) {
                     return;
                 }
                 if (!announcementCarouselItems.length) {
+                    announcementCarouselPreviousIndex = -1;
                     return;
                 }
+
+                var totalSlides = announcementCarouselItems.length;
+                var currIdx = announcementCarouselIndex;
+                var slideShellClass = announcementSlideDirectionClass(announcementCarouselPreviousIndex, currIdx, totalSlides);
+                announcementCarouselPreviousIndex = currIdx;
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
@@ -1452,10 +1479,12 @@
                         bodyLine);
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
+                    "<div class=\"announcement-slide-shell " + slideShellClass + "\">" +
                     mainBlock +
                     metaLine +
                     linkLine +
                     dismissBtn +
+                    "</div>" +
                     controls +
                     "</li>";
 
@@ -1576,6 +1605,7 @@
                 if (visibleItems.length === 0) {
                     syncAnnouncementsBanner("");
                     announcementCarouselItems = [];
+                    announcementCarouselPreviousIndex = -1;
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
                     announcementsList.innerHTML = "" +
@@ -1590,6 +1620,7 @@
                 if (announcementCarouselIndex >= announcementCarouselItems.length) {
                     announcementCarouselIndex = 0;
                 }
+                announcementCarouselPreviousIndex = -1;
                 renderAnnouncementCarouselFrame();
                 startAnnouncementsCarousel();
             }
