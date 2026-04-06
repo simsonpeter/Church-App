@@ -1297,18 +1297,12 @@
                     return;
                 }
                 if (!announcementCarouselItems.length) {
-                    if (announcementsCard) {
-                        announcementsCard.classList.remove("announcements-card-image-only-slide");
-                    }
                     return;
                 }
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
                 var isImageOnly = Boolean(item.imageOnly && String(item.imageUrl || "").trim() && !item.personalWish);
-                if (announcementsCard) {
-                    announcementsCard.classList.toggle("announcements-card-image-only-slide", isImageOnly);
-                }
                 if (isImageOnly) {
                     setAnnouncementsStandardMediaVisible(false);
                 } else {
@@ -1456,9 +1450,6 @@
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
-                    if (announcementsCard) {
-                        announcementsCard.classList.remove("announcements-card-image-only-slide");
-                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
@@ -1504,9 +1495,6 @@
                     announcementCarouselItems = [];
                     stopAnnouncementsCarousel();
                     setAnnouncementsStandardMediaVisible(true);
-                    if (announcementsCard) {
-                        announcementsCard.classList.remove("announcements-card-image-only-slide");
-                    }
                     announcementsList.innerHTML = "" +
                         "<li>" +
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
