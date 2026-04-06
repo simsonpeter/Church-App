@@ -1496,38 +1496,14 @@ body.app-update-open {
     color: var(--text);
 }
 
-/* Home announcements: carousel region wraps the rotating slide list (no layout change vs plain list) */
-.announcement-carousel {
-    margin: 0;
-    min-width: 0;
-}
-
-.announcement-carousel-track {
-    margin: 0;
-    min-width: 0;
-}
-
-/* Animated block between slides only; controls stay outside this wrapper */
-.announcement-slide-shell {
-    overflow: hidden;
-    min-width: 0;
-}
-
+/* Announcement list item: slide-in only when changing slides (class set by JS); no extra wrappers */
 @media (prefers-reduced-motion: no-preference) {
-    .announcement-slide-shell--next {
-        animation: announcement-slide-from-right 0.38s cubic-bezier(0.25, 0.82, 0.28, 1) both;
+    .announcement-carousel-item.announcement-slide-dir-next {
+        animation: announcement-slide-from-right 0.36s cubic-bezier(0.25, 0.82, 0.28, 1) both;
     }
 
-    .announcement-slide-shell--prev {
-        animation: announcement-slide-from-left 0.38s cubic-bezier(0.25, 0.82, 0.28, 1) both;
-    }
-
-    .announcement-slide-shell--jump {
-        animation: announcement-slide-fade 0.34s cubic-bezier(0.25, 0.82, 0.28, 1) both;
-    }
-
-    .announcement-slide-shell--same {
-        animation: none;
+    .announcement-carousel-item.announcement-slide-dir-prev {
+        animation: announcement-slide-from-left 0.36s cubic-bezier(0.25, 0.82, 0.28, 1) both;
     }
 }
 
@@ -6437,17 +6413,6 @@ html[data-theme="light"] .mini-player-btn {
     to {
         opacity: 1;
         transform: translateX(0);
-    }
-}
-
-@keyframes announcement-slide-fade {
-    from {
-        opacity: 0;
-        transform: scale(0.99);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
     }
 }
 

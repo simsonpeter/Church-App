@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260404annslide1">
+    <link rel="stylesheet" href="styles.css?v=20260404annrevert1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -45,27 +45,17 @@
         <section class="page-view active" data-route="home">
             <main class="app-content">
             <section class="card announcements-card" id="announcements-section">
-                <h2 id="announcements-section-title"><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
+                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
                 <div class="card-banner">
                     <img src="announcements-banner.jpg?v=20260428img1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
                 </div>
                 <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
-                <div
-                    class="announcement-carousel"
-                    id="home-announcements-carousel"
-                    role="region"
-                    aria-labelledby="announcements-section-title"
-                    data-i18n-aria-label="home.announcementsCarouselRegionAria"
-                    data-i18n-aria-fallback="Announcements carousel"
-                    aria-label="Announcements carousel"
-                >
-                    <ul class="list announcement-carousel-track" id="home-announcements-list">
+                <ul class="list" id="home-announcements-list">
                     <li>
                         <h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3>
                         <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
                     </li>
-                    </ul>
-                </div>
+                </ul>
             </section>
 
             <section class="card verse-card reading-plan-card card-v-featured">
@@ -1447,9 +1437,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="user-auth.js?v=20260329u1"></script>
-    <script src="app-shell.js?v=20260404anncar1"></script>
+    <script src="app-shell.js?v=20260404annrevert1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260404annslide1"></script>
+    <script src="home-page.js?v=20260404annrevert1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260402biblettsread1"></script>

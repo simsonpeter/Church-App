@@ -249,7 +249,6 @@
         "admin.libraryEditPromptDescTa": "விளக்கம் தமிழ் (விருப்பம்)",
         "home.announcementsTitle": "அறிவிப்புகள்",
         "home.announcementsSubtitle": "இந்த வாரத்தின் சமீபத்திய புதுப்பிப்புகள்.",
-        "home.announcementsCarouselRegionAria": "அறிவிப்பு சுழல்",
         "home.loadingAnnouncementsTitle": "அறிவிப்புகள் ஏற்றப்படுகின்றன...",
         "home.loadingAnnouncementsBody": "புதுப்பிப்புகள் ஏற்றும் வரை காத்திருக்கவும்.",
         "home.noAnnouncementsTitle": "இப்போது அறிவிப்புகள் இல்லை",

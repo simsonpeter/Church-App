@@ -1368,24 +1368,19 @@
                 return next;
             }
 
-            function announcementSlideDirectionClass(prevIndex, currIndex, total) {
-                if (total <= 1 || prevIndex < 0 || currIndex < 0) {
-                    return "announcement-slide-shell--same";
-                }
-                if (prevIndex === currIndex) {
-                    return "announcement-slide-shell--same";
+            function announcementSlideAnimClass(prevIndex, currIndex, total) {
+                if (total <= 1 || prevIndex < 0 || currIndex < 0 || prevIndex === currIndex) {
+                    return "";
                 }
                 var forwardSteps = (currIndex - prevIndex + total) % total;
                 var backwardSteps = (prevIndex - currIndex + total) % total;
                 if (forwardSteps < backwardSteps) {
-                    return "announcement-slide-shell--next";
+                    return " announcement-slide-dir-next";
                 }
                 if (backwardSteps < forwardSteps) {
-                    return "announcement-slide-shell--prev";
+                    return " announcement-slide-dir-prev";
                 }
-                return currIndex > prevIndex
-                    ? "announcement-slide-shell--next"
-                    : "announcement-slide-shell--prev";
+                return currIndex > prevIndex ? " announcement-slide-dir-next" : " announcement-slide-dir-prev";
             }
 
             function renderAnnouncementCarouselFrame() {
@@ -1399,7 +1394,7 @@
 
                 var totalSlides = announcementCarouselItems.length;
                 var currIdx = announcementCarouselIndex;
-                var slideShellClass = announcementSlideDirectionClass(announcementCarouselPreviousIndex, currIdx, totalSlides);
+                var slideAnimClass = announcementSlideAnimClass(announcementCarouselPreviousIndex, currIdx, totalSlides);
                 announcementCarouselPreviousIndex = currIdx;
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
@@ -1471,7 +1466,8 @@
 
                 var liClass = "announcement-carousel-item" +
                     (item.personalWish ? " announcement-personal-wish" : "") +
-                    (isImageOnly ? " announcement-image-only" : "");
+                    (isImageOnly ? " announcement-image-only" : "") +
+                    slideAnimClass;
                 var srHeading = "<h3 class=\"announcement-title announcement-title-sr-only\">" + NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard)) + "</h3>";
                 var mainBlock = isImageOnly
                     ? (srHeading + imageHtml)
@@ -1479,12 +1475,10 @@
                         bodyLine);
                 announcementsList.innerHTML = "" +
                     "<li class=\"" + liClass + "\">" +
-                    "<div class=\"announcement-slide-shell " + slideShellClass + "\">" +
                     mainBlock +
                     metaLine +
                     linkLine +
                     dismissBtn +
-                    "</div>" +
                     controls +
                     "</li>";
 
