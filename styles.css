@@ -1498,28 +1498,24 @@ body.app-update-open {
 
 /* Announcements: disable generic list fade-up (it starts at opacity:0 and overrides slide — causes flash) */
 .app-content .card.announcements-card ul.list > li {
-    animation: none;
+    animation: none !important;
 }
 
-/* Slide transition only when JS adds direction class (translate only — no opacity dip = no flash) */
+/* Slide transition when JS adds direction class (translate only). !important wins over any other li animation. */
 @media (prefers-reduced-motion: no-preference) {
-    .app-content .card.announcements-card ul.list > li.announcement-carousel-item.announcement-slide-dir-next {
-        animation: announcement-slide-from-right 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    .app-content .card.announcements-card ul#home-announcements-list > li.announcement-carousel-item.announcement-slide-dir-next {
+        animation: announcement-slide-from-right 0.48s cubic-bezier(0.22, 1, 0.36, 1) both !important;
     }
 
-    .app-content .card.announcements-card ul.list > li.announcement-carousel-item.announcement-slide-dir-prev {
-        animation: announcement-slide-from-left 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+    .app-content .card.announcements-card ul#home-announcements-list > li.announcement-carousel-item.announcement-slide-dir-prev {
+        animation: announcement-slide-from-left 0.48s cubic-bezier(0.22, 1, 0.36, 1) both !important;
     }
 }
 
-/* Rounded top where list meets the red title row */
+/* Rounded top under red header + clip full-bleed images to curve (sharp corners were unclipped breakout) */
 .card.announcements-card ul.list > li:first-child {
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
-}
-
-/* Clip full-bleed image-only banner to rounded top (avoid square corners under header) */
-.card.announcements-card ul.list > li.announcement-image-only:first-child {
+    border-top-left-radius: max(14px, calc(var(--card-radius, 20px) - var(--card-pad, 15px)));
+    border-top-right-radius: max(14px, calc(var(--card-radius, 20px) - var(--card-pad, 15px)));
     overflow: hidden;
 }
 
@@ -1606,8 +1602,9 @@ body.app-update-open {
     width: 100%;
     height: auto;
     max-height: none;
-    border-radius: 12px;
+    border-radius: 0;
     border: 0;
+    vertical-align: top;
 }
 
 .announcement-image-link {
@@ -6412,7 +6409,7 @@ html[data-theme="light"] .mini-player-btn {
 
 @keyframes announcement-slide-from-right {
     from {
-        transform: translate3d(18px, 0, 0);
+        transform: translate3d(28px, 0, 0);
     }
     to {
         transform: translate3d(0, 0, 0);
@@ -6421,7 +6418,7 @@ html[data-theme="light"] .mini-player-btn {
 
 @keyframes announcement-slide-from-left {
     from {
-        transform: translate3d(-18px, 0, 0);
+        transform: translate3d(-28px, 0, 0);
     }
     to {
         transform: translate3d(0, 0, 0);

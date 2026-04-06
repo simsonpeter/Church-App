@@ -1394,17 +1394,29 @@
 
                 var totalSlides = announcementCarouselItems.length;
                 var currIdx = announcementCarouselIndex;
-                var slideAnimClass = announcementSlideAnimClass(announcementCarouselPreviousIndex, currIdx, totalSlides);
+                var prevIdxForAnim = announcementCarouselPreviousIndex;
+                var slideAnimClass = announcementSlideAnimClass(prevIdxForAnim, currIdx, totalSlides);
                 announcementCarouselPreviousIndex = currIdx;
 
                 var item = announcementCarouselItems[announcementCarouselIndex];
                 var isTamil = isTamilLanguage(announcementsCard);
                 var isImageOnly = Boolean(item.imageOnly && String(item.imageUrl || "").trim() && !item.personalWish);
+                var prevItemForBanner = prevIdxForAnim >= 0 ? announcementCarouselItems[prevIdxForAnim] : null;
+                var prevImageOnly = Boolean(
+                    prevItemForBanner
+                    && prevItemForBanner.imageOnly
+                    && String(prevItemForBanner.imageUrl || "").trim()
+                    && !prevItemForBanner.personalWish
+                );
                 if (isImageOnly) {
-                    setAnnouncementsStandardMediaVisible(false);
+                    if (!prevImageOnly) {
+                        setAnnouncementsStandardMediaVisible(false);
+                    }
                 } else {
-                    syncAnnouncementsBanner("");
-                    setAnnouncementsStandardMediaVisible(true);
+                    if (prevImageOnly || prevIdxForAnim < 0) {
+                        syncAnnouncementsBanner("");
+                        setAnnouncementsStandardMediaVisible(true);
+                    }
                 }
                 var titleText;
                 var bodyText;
