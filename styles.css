@@ -1576,13 +1576,16 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Image-only: fixed max frame + object-fit contain = full image visible, no crop; same slot for every slide */
+/*
+ * Image-only: same full-width breakout as .card-banner (edge-to-edge inside card).
+ * Fixed-height slot + object-fit:contain = full image visible (no crop), uniform height per slide.
+ */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
     --announcement-image-radius: 16px;
     --announcement-image-slot-h: min(48vh, 380px);
-    margin: 6px 0 10px;
-    width: 100%;
-    max-width: 100%;
+    margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
+    width: calc(100% + 2 * var(--card-pad) + 20px);
+    max-width: none;
     min-height: 220px;
     height: var(--announcement-image-slot-h);
     max-height: var(--announcement-image-slot-h);
@@ -1599,7 +1602,8 @@ body.app-update-open {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 6px;
+    padding: 0;
+    line-height: 0;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-image-link {
