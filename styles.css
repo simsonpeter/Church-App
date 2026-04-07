@@ -1512,10 +1512,10 @@ body.app-update-open {
     }
 }
 
-/* Rounded top under red header + clip full-bleed images to curve (sharp corners were unclipped breakout) */
+/* Rounded top under red header; clip content to curve */
 .card.announcements-card ul.list > li:first-child {
-    border-top-left-radius: max(14px, calc(var(--card-radius, 20px) - var(--card-pad, 15px)));
-    border-top-right-radius: max(14px, calc(var(--card-radius, 20px) - var(--card-pad, 15px)));
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
     overflow: hidden;
 }
 
@@ -1576,18 +1576,23 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Image-only: full inner card width; scale image to width (no crop — full picture visible, taller images scroll with the page) */
+/* Image-only: inside list padding so rounded corners clip reliably; clip-path helps WebKit */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
-    margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
-    width: calc(100% + 2 * var(--card-pad) + 20px);
-    max-width: none;
-    border-radius: 12px;
+    --announcement-image-radius: 16px;
+    margin: 6px 0 10px;
+    width: 100%;
+    max-width: 100%;
+    border-radius: var(--announcement-image-radius);
     overflow: hidden;
+    clip-path: inset(0 round var(--announcement-image-radius));
+    -webkit-clip-path: inset(0 round var(--announcement-image-radius));
     border: 1px solid var(--line);
     background: var(--surface-soft);
     line-height: 0;
     box-sizing: border-box;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
+    isolation: isolate;
+    transform: translateZ(0);
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-image-link {
@@ -1602,7 +1607,7 @@ body.app-update-open {
     width: 100%;
     height: auto;
     max-height: none;
-    border-radius: 0;
+    border-radius: var(--announcement-image-radius, 16px);
     border: 0;
     vertical-align: top;
 }
