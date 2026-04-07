@@ -2851,7 +2851,8 @@
             });
     }
 
-    function checkNewBroadcastNotification(status) {
+    function checkNewBroadcastNotification(status, options) {
+        var config = options && typeof options === "object" ? options : {};
         return fetch(ADMIN_BROADCASTS_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
                 if (response.status === 404) {
@@ -2891,15 +2892,18 @@
                 } catch (err) {
                     previousKey = "";
                 }
+                var hadPreviousKey = Boolean(previousKey);
                 if (!previousKey) {
                     try {
                         window.localStorage.setItem(NOTIFICATION_LAST_BROADCAST_KEY, latestKey);
                     } catch (err) {
                         return null;
                     }
-                    return null;
+                    if (!config.allowFirstNotification) {
+                        return null;
+                    }
                 }
-                if (latestKey === previousKey) {
+                if (hadPreviousKey && latestKey === previousKey) {
                     return null;
                 }
                 var category = normalizeBroadcastCategory(latest.category);
@@ -3085,7 +3089,10 @@
             runNotificationChecks();
         });
         document.addEventListener("njc:admin-broadcast-updated", function () {
-            runNotificationChecks();
+            var status = getNotificationStatus();
+            checkNewBroadcastNotification(status, { allowFirstNotification: true }).finally(function () {
+                runNotificationChecks();
+            });
         });
         document.addEventListener("njc:admin-notices-updated", function () {
             var status = getNotificationStatus();
