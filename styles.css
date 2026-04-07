@@ -1576,40 +1576,54 @@ body.app-update-open {
     padding-top: 2px;
 }
 
-/* Image-only: inside list padding so rounded corners clip reliably; clip-path helps WebKit */
+/* Image-only: fixed max frame + object-fit contain = full image visible, no crop; same slot for every slide */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
     --announcement-image-radius: 16px;
+    --announcement-image-slot-h: min(48vh, 380px);
     margin: 6px 0 10px;
     width: 100%;
     max-width: 100%;
+    min-height: 220px;
+    height: var(--announcement-image-slot-h);
+    max-height: var(--announcement-image-slot-h);
     border-radius: var(--announcement-image-radius);
     overflow: hidden;
     clip-path: inset(0 round var(--announcement-image-radius));
     -webkit-clip-path: inset(0 round var(--announcement-image-radius));
     border: 1px solid var(--line);
     background: var(--surface-soft);
-    line-height: 0;
     box-sizing: border-box;
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
     isolation: isolate;
     transform: translateZ(0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-image-link {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
+    height: 100%;
+    min-height: 0;
     line-height: 0;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-slide-image,
 .announcement-carousel-item.announcement-image-only .announcement-image {
     display: block;
-    width: 100%;
+    width: auto;
     height: auto;
-    max-height: none;
-    border-radius: var(--announcement-image-radius, 16px);
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    object-position: center;
+    border-radius: calc(var(--announcement-image-radius, 16px) - 2px);
     border: 0;
-    vertical-align: top;
+    vertical-align: middle;
 }
 
 .announcement-image-link {

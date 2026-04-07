@@ -1,12 +1,12 @@
-const APP_CACHE = "njc-app-cache-v278";
-const RUNTIME_CACHE = "njc-runtime-cache-v278";
+const APP_CACHE = "njc-app-cache-v279";
+const RUNTIME_CACHE = "njc-runtime-cache-v279";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260405annround1",
+    "./styles.css?v=20260405anncontain1",
     "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260405annpush1",
+    "./app-shell.js?v=20260405anncontain1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260405annflash1",
     "./events-page.js?v=20260414u2",

@@ -639,6 +639,7 @@
         "admin.noticeBodyTaPlaceholder": "அறிவிப்பு செய்தி (தமிழ், விருப்பம்)",
         "admin.noticeImagePlaceholder": "பேனர் பட URL (https://, http:// அல்லது image பாதை, விருப்பம்)",
         "admin.noticeTypeHint": "உரை அறிவிப்பு இயல்புநிலை பேனரை பயன்படுத்தும். படம் மட்டும் பேனருக்கு தலைப்பு/செய்தியை காலியாகவிட்டு பட URL மட்டும் இடுங்கள்.",
+        "admin.noticeImageSizeHint": "படம் மட்டும்: முழு படமும் ~1080×760 பகுதியில் (3:2 நன்றாக இருக்கும்). அகலமான/நீளமான படங்கள் சிறிதாக்கப்படும்—வெட்டப்படாது.",
         "admin.noticeLinkPlaceholder": "எ.கா. #sermons அல்லது முழு URL (https://…)",
         "admin.noticeImageOnly": "முகப்பில் படம் மட்டும் பதாகையாக காட்டு",
         "admin.noticeUrgent": "அவசரமாக குறிக்கவும்",
