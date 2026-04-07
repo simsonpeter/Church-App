@@ -1577,17 +1577,20 @@ body.app-update-open {
 }
 
 /*
- * Image-only: same full-width breakout as .card-banner (edge-to-edge inside card).
- * Fixed-height slot + object-fit:contain = full image visible (no crop), uniform height per slide.
+ * Image-only: full-width breakout like .card-banner.
+ * One fixed slot height for every slide (no “big banner / small banner” per image).
+ * object-fit:contain = entire image visible, never cropped; letterboxing if aspect ≠ slot.
  */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
     --announcement-image-radius: 16px;
-    --announcement-image-slot-h: min(48vh, 380px);
+    /* Same visual height on every device band; scales down only on very short viewports */
+    --announcement-image-slot-h: min(360px, 52vh);
     margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
     width: calc(100% + 2 * var(--card-pad) + 20px);
     max-width: none;
-    min-height: 220px;
+    flex-shrink: 0;
     height: var(--announcement-image-slot-h);
+    min-height: var(--announcement-image-slot-h);
     max-height: var(--announcement-image-slot-h);
     border-radius: var(--announcement-image-radius);
     overflow: hidden;
