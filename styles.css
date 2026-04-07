@@ -1578,20 +1578,14 @@ body.app-update-open {
 
 /*
  * Image-only: full-width breakout like .card-banner.
- * One fixed slot height for every slide (no “big banner / small banner” per image).
- * object-fit:contain = entire image visible, never cropped; letterboxing if aspect ≠ slot.
+ * Natural height from image aspect ratio (no fixed-height letterboxing).
+ * width:100% + height:auto = full image scaled to card width; max-height only caps very tall images (still proportional, not cropped).
  */
 .announcement-carousel-item.announcement-image-only .announcement-image-wrap {
     --announcement-image-radius: 16px;
-    /* Same visual height on every device band; scales down only on very short viewports */
-    --announcement-image-slot-h: min(360px, 52vh);
     margin: 4px calc(-1 * var(--card-pad) - 10px) 10px;
     width: calc(100% + 2 * var(--card-pad) + 20px);
     max-width: none;
-    flex-shrink: 0;
-    height: var(--announcement-image-slot-h);
-    min-height: var(--announcement-image-slot-h);
-    max-height: var(--announcement-image-slot-h);
     border-radius: var(--announcement-image-radius);
     overflow: hidden;
     clip-path: inset(0 round var(--announcement-image-radius));
@@ -1602,35 +1596,27 @@ body.app-update-open {
     box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5) inset;
     isolation: isolate;
     transform: translateZ(0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
     line-height: 0;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-image-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     width: 100%;
-    height: 100%;
-    min-height: 0;
     line-height: 0;
 }
 
 .announcement-carousel-item.announcement-image-only .announcement-slide-image,
 .announcement-carousel-item.announcement-image-only .announcement-image {
     display: block;
-    width: auto;
+    width: 100%;
     height: auto;
     max-width: 100%;
-    max-height: 100%;
+    max-height: min(78vh, 640px);
     object-fit: contain;
-    object-position: center;
-    border-radius: calc(var(--announcement-image-radius, 16px) - 2px);
+    object-position: center top;
+    border-radius: 0;
     border: 0;
-    vertical-align: middle;
+    vertical-align: top;
 }
 
 .announcement-image-link {
