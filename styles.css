@@ -1603,8 +1603,11 @@ body.app-update-open {
     display: block;
     width: 100%;
     line-height: 0;
+    border-radius: inherit;
+    overflow: hidden;
 }
 
+/* Explicit radius on img: some WebViews ignore parent clip-path alone */
 .announcement-carousel-item.announcement-image-only .announcement-slide-image,
 .announcement-carousel-item.announcement-image-only .announcement-image {
     display: block;
@@ -1614,7 +1617,7 @@ body.app-update-open {
     max-height: min(78vh, 640px);
     object-fit: contain;
     object-position: center top;
-    border-radius: 0;
+    border-radius: calc(var(--announcement-image-radius, 16px) - 2px);
     border: 0;
     vertical-align: top;
 }
