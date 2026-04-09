@@ -1,0 +1,13 @@
+{
+  "name": "church-app-functions",
+  "description": "Firebase Cloud Functions for NJC app (FCM broadcast fan-out)",
+  "engines": {
+    "node": "20"
+  },
+  "main": "index.js",
+  "private": true,
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "firebase-functions": "^6.1.0"
+  }
+}
