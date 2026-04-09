@@ -9,6 +9,7 @@
     var ADMIN_DAILY_BREAD_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
     var ADMIN_LIBRARY_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
     var MAX_ENTRIES = 250;
+    var NJC_BROADCAST_PUSH_REGION = "europe-west1";
 
     var refreshButton = document.getElementById("admin-dashboard-refresh");
     var note = document.getElementById("admin-dashboard-note");
@@ -175,6 +176,27 @@
     function isAdminUser() {
         var user = getUser();
         return normalizeEmail(user && user.email) === ADMIN_EMAIL;
+    }
+
+    function invokeBroadcastPushNotification(payload) {
+        var fb = window.firebase;
+        if (!fb || !fb.functions || !fb.auth || typeof fb.app !== "function") {
+            return Promise.resolve({ skipped: true });
+        }
+        var auth = fb.auth();
+        if (!auth || !auth.currentUser) {
+            return Promise.resolve({ skipped: true });
+        }
+        return auth.currentUser.getIdToken(true).then(function () {
+            var app = fb.app();
+            var region = app.functions(NJC_BROADCAST_PUSH_REGION);
+            var callable = region.httpsCallable("sendBroadcastPush");
+            return callable(payload);
+        }).then(function (result) {
+            return result && result.data ? result.data : result;
+        }).catch(function () {
+            return { error: true };
+        });
     }
 
     function currentRoute() {
@@ -1361,9 +1383,11 @@
             showNote("validation", "admin.broadcastNeedFields", "Please enter broadcast title and message.");
             return;
         }
+        var broadcastId = makeEntryId("broadcast");
+        var pushBody = body.length > 350 ? (body.slice(0, 347) + "...") : body;
         setBusyState(true);
         prependAndSave(ADMIN_BROADCASTS_URL, cachedBroadcasts, {
-            id: makeEntryId("broadcast"),
+            id: broadcastId,
             title: title,
             titleTa: titleTa,
             body: body,
@@ -1387,6 +1411,12 @@
             renderBroadcastList();
             showNote("success", "admin.broadcastSaved", "Broadcast sent.");
             document.dispatchEvent(new CustomEvent("njc:admin-broadcast-updated"));
+            invokeBroadcastPushNotification({
+                title: title,
+                body: pushBody,
+                url: url,
+                tag: "broadcast:" + broadcastId
+            });
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");
         }).finally(function () {

@@ -1,12 +1,45 @@
-const APP_CACHE = "njc-app-cache-v283";
-const RUNTIME_CACHE = "njc-runtime-cache-v283";
+importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.14.1/firebase-messaging-compat.js");
+
+firebase.initializeApp({
+    apiKey: "AIzaSyBw_fYOgz0WTrCNMdi8el0DPi3JfAxTr3E",
+    authDomain: "songbook-add54.firebaseapp.com",
+    projectId: "songbook-add54",
+    storageBucket: "songbook-add54.appspot.com",
+    messagingSenderId: "633087058549",
+    appId: "1:633087058549:web:a9a9a28836b059b6008e3c"
+});
+
+const messaging = firebase.messaging();
+
+messaging.onBackgroundMessage(function (payload) {
+    const data = (payload && payload.data) || {};
+    const notification = (payload && payload.notification) || {};
+    const title = String(notification.title || data.title || "NJC Belgium").trim() || "NJC Belgium";
+    const body = String(notification.body || data.body || "").trim();
+    let targetUrl = String(data.url || "./index.html").trim() || "./index.html";
+    if (targetUrl.charAt(0) === "#") {
+        targetUrl = "./index.html" + targetUrl;
+    }
+    const options = {
+        body: body,
+        icon: "logo.png",
+        badge: "logo.png",
+        data: { url: targetUrl },
+        tag: String(data.tag || "njc-push").slice(0, 120) || "njc-push"
+    };
+    return self.registration.showNotification(title, options);
+});
+
+const APP_CACHE = "njc-app-cache-v284fcm";
+const RUNTIME_CACHE = "njc-runtime-cache-v284fcm";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260405annround2",
-    "./user-auth.js?v=20260329u1",
-    "./app-shell.js?v=20260405annnatural1",
+    "./user-auth.js?v=20260407fcm1",
+    "./app-shell.js?v=20260407fcm1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260405annnatural1",
     "./events-page.js?v=20260414u2",
@@ -16,7 +49,7 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20260330pw1",
     "./daily-bread-page.js?v=20260330ttsverse",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260404annsched1",
+    "./admin-dashboard-page.js?v=20260407fcm1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260327bq1",
@@ -122,6 +155,7 @@ self.addEventListener("fetch", function (event) {
     const isSameOrigin = url.origin === self.location.origin;
     const isRemoteData = url.origin === "https://raw.githubusercontent.com";
     const isMantleDb = url.origin === "https://mantledb.sh";
+    const isFirebaseJs = url.origin === "https://www.gstatic.com" && url.pathname.indexOf("/firebasejs/") === 0;
 
     if (event.request.mode === "navigate") {
         event.respondWith(
@@ -143,7 +177,7 @@ self.addEventListener("fetch", function (event) {
         return;
     }
 
-    if (isSameOrigin || isRemoteData || isMantleDb) {
+    if (isSameOrigin || isRemoteData || isMantleDb || isFirebaseJs) {
         event.respondWith(staleWhileRevalidate(event.request));
     }
 });

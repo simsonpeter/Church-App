@@ -17,6 +17,8 @@
     var NOTIFICATION_LAST_NOTICE_KEY = "njc_notification_last_notice_v1";
     var NOTIFICATION_LAST_BROADCAST_KEY = "njc_notification_last_broadcast_v1";
     var INAPP_NOTIFICATION_KEY = "njc_inapp_notifications_v1";
+    var FCM_REG_STATE_KEY = "njc_fcm_reg_state_v1";
+    var NJC_BROADCAST_PUSH_REGION = "europe-west1";
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
@@ -1616,10 +1618,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260430dvfeat";
-    var APP_VERSION = "2026.3.29";
+    var SW_VERSION = "20260407fcm";
+    var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Daily Verse card matches Bible Reading layout (featured + banner).";
+    var UPDATE_NOTES_SUMMARY = "Real push notifications (FCM) when the app is in the background; register Web Push key in Firebase.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -1951,6 +1953,7 @@
         }
         navigator.serviceWorker.register("service-worker.js", { updateViaCache: "none" }).then(function (registration) {
             clearStoredUpdateDismissIfIdle(registration);
+            ensureFcmPushRegistration();
             registration.update();
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
@@ -2301,6 +2304,192 @@
         }).catch(function () {
             return false;
         });
+    }
+
+    function getFcmVapidKey() {
+        try {
+            var w = window;
+            var k = w && w.NJC_FCM_VAPID_KEY;
+            return String(k || "").trim();
+        } catch (err) {
+            return "";
+        }
+    }
+
+    function getStoredFcmToken() {
+        try {
+            var raw = window.localStorage.getItem(FCM_REG_STATE_KEY);
+            var parsed = raw ? JSON.parse(raw) : {};
+            return parsed && typeof parsed === "object" ? parsed : {};
+        } catch (err) {
+            return {};
+        }
+    }
+
+    function setStoredFcmToken(token) {
+        try {
+            window.localStorage.setItem(FCM_REG_STATE_KEY, JSON.stringify({
+                token: String(token || "").trim(),
+                updatedAt: Date.now()
+            }));
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function clearStoredFcmToken() {
+        try {
+            window.localStorage.removeItem(FCM_REG_STATE_KEY);
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function removeFcmTokenFromFirestore(token) {
+        var fb = window.firebase;
+        var auth = fb && fb.auth && fb.auth();
+        var db = fb && fb.firestore && fb.firestore();
+        var user = auth && auth.currentUser;
+        var t = String(token || "").trim();
+        if (!db || !user || !t) {
+            return Promise.resolve();
+        }
+        return db.collection("fcmTokens").doc(user.uid).delete().catch(function () {
+            return null;
+        });
+    }
+
+    function saveFcmTokenToFirestore(token) {
+        var fb = window.firebase;
+        var auth = fb && fb.auth && fb.auth();
+        var db = fb && fb.firestore && fb.firestore();
+        var FieldValue = fb && fb.firestore && fb.firestore.FieldValue;
+        var user = auth && auth.currentUser;
+        var t = String(token || "").trim();
+        if (!db || !user || !t || !FieldValue) {
+            return Promise.resolve();
+        }
+        return db.collection("fcmTokens").doc(user.uid).set({
+            token: t,
+            updatedAt: FieldValue.serverTimestamp()
+        }, { merge: true }).catch(function () {
+            return null;
+        });
+    }
+
+    function syncFcmTokenWithFirestore(token) {
+        return saveFcmTokenToFirestore(token);
+    }
+
+    var fcmForegroundUnsub = null;
+
+    function setupForegroundFcmListener() {
+        var fb = window.firebase;
+        if (!fb || !fb.messaging) {
+            return;
+        }
+        if (typeof fcmForegroundUnsub === "function") {
+            try {
+                fcmForegroundUnsub();
+            } catch (e1) {
+                return null;
+            }
+            fcmForegroundUnsub = null;
+        }
+        try {
+            var messaging = fb.messaging();
+            fcmForegroundUnsub = messaging.onMessage(function (payload) {
+                var note = (payload && payload.notification) || {};
+                var data = (payload && payload.data) || {};
+                var title = String(note.title || data.title || "NJC").trim() || "NJC";
+                var body = String(note.body || data.body || "").trim();
+                var url = String(data.url || "#home").trim() || "#home";
+                var tag = String(data.tag || "fcm-foreground").trim().slice(0, 120) || "fcm-foreground";
+                showNotification({
+                    title: title,
+                    body: body,
+                    tag: tag,
+                    url: url
+                });
+            });
+        } catch (e2) {
+            fcmForegroundUnsub = null;
+        }
+    }
+
+    function ensureFcmPushRegistration() {
+        var vapid = getFcmVapidKey();
+        if (!vapid) {
+            return Promise.resolve();
+        }
+        if (!notificationsSupported() || getNotificationPermission() !== "granted") {
+            return Promise.resolve();
+        }
+        var settings = getNotificationSettings();
+        if (!settings.enabled) {
+            return Promise.resolve();
+        }
+        var fb = window.firebase;
+        if (!fb || !fb.messaging) {
+            return Promise.resolve();
+        }
+        return navigator.serviceWorker.getRegistration().then(function (registration) {
+            if (!registration) {
+                return null;
+            }
+            var messaging;
+            try {
+                messaging = fb.messaging();
+                messaging.useServiceWorker(registration);
+            } catch (e3) {
+                return null;
+            }
+            setupForegroundFcmListener();
+            return messaging.getToken({ vapidKey: vapid }).then(function (token) {
+                var t = String(token || "").trim();
+                if (!t) {
+                    return null;
+                }
+                setStoredFcmToken(t);
+                return syncFcmTokenWithFirestore(t);
+            });
+        }).catch(function () {
+            return null;
+        });
+    }
+
+    function teardownFcmPushRegistration() {
+        var vapid = getFcmVapidKey();
+        if (typeof fcmForegroundUnsub === "function") {
+            try {
+                fcmForegroundUnsub();
+            } catch (e4) {
+                return null;
+            }
+            fcmForegroundUnsub = null;
+        }
+        var state = getStoredFcmToken();
+        var prev = String(state && state.token || "").trim();
+        clearStoredFcmToken();
+        if (!vapid || !prev) {
+            return Promise.resolve();
+        }
+        var fb = window.firebase;
+        if (!fb || !fb.messaging) {
+            return removeFcmTokenFromFirestore(prev);
+        }
+        try {
+            var messaging = fb.messaging();
+            return messaging.deleteToken({ vapidKey: vapid }).catch(function () {
+                return null;
+            }).then(function () {
+                return removeFcmTokenFromFirestore(prev);
+            });
+        } catch (e5) {
+            return removeFcmTokenFromFirestore(prev);
+        }
     }
 
     function isAdminUser() {
@@ -3031,9 +3220,12 @@
 
         if (status.enabled) {
             setNotificationSettings({ enabled: false, reminderMinutes: status.reminderMinutes });
-            syncNotificationLoop();
-            emitNotificationStatus();
-            return Promise.resolve(getNotificationStatus());
+            return teardownFcmPushRegistration().finally(function () {
+                syncNotificationLoop();
+                emitNotificationStatus();
+            }).then(function () {
+                return getNotificationStatus();
+            });
         }
 
         return requestNotificationPermission().then(function (permission) {
@@ -3044,7 +3236,9 @@
             }
             syncNotificationLoop();
             emitNotificationStatus();
-            return getNotificationStatus();
+            return ensureFcmPushRegistration().then(function () {
+                return getNotificationStatus();
+            });
         });
     }
 
@@ -3080,12 +3274,14 @@
         syncNotificationLoop();
         emitNotificationStatus();
         saveInAppNotificationItems(getInAppNotificationItems());
+        ensureFcmPushRegistration();
         document.addEventListener("visibilitychange", function () {
             if (!document.hidden) {
                 runNotificationChecks();
             }
         });
         document.addEventListener("njc:authchange", function () {
+            ensureFcmPushRegistration();
             runNotificationChecks();
         });
         document.addEventListener("njc:admin-broadcast-updated", function () {

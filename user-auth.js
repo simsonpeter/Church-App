@@ -3,6 +3,8 @@
         apiKey: "AIzaSyBw_fYOgz0WTrCNMdi8el0DPi3JfAxTr3E",
         authDomain: "songbook-add54.firebaseapp.com",
         projectId: "songbook-add54",
+        storageBucket: "songbook-add54.appspot.com",
+        messagingSenderId: "633087058549",
         appId: "1:633087058549:web:a9a9a28836b059b6008e3c",
         measurementId: "G-EKMD30J3GS"
     };
@@ -602,7 +604,18 @@
         if (!auth) {
             return Promise.resolve();
         }
-        return auth.signOut().catch(function () {
+        var user = auth.currentUser;
+        var tokenCleanup = Promise.resolve();
+        if (user && db) {
+            tokenCleanup = db.collection("fcmTokens").doc(user.uid).delete().catch(function () {
+                return null;
+            });
+        }
+        return tokenCleanup.then(function () {
+            return auth.signOut();
+        }).catch(function () {
+            return auth.signOut();
+        }).catch(function () {
             return null;
         });
     }
