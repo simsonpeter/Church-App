@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260405annround2">
+    <link rel="stylesheet" href="styles.css?v=20260407biblesearch1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -423,6 +423,15 @@
                     </label>
                     <button type="button" class="button-link button-secondary" id="bible-verse-go" data-i18n="bible.go">Go</button>
                 </div>
+                <div class="bible-search-row">
+                    <label class="bible-field bible-search-field">
+                        <span data-i18n="bible.searchLabel">Search all Bibles</span>
+                        <input id="bible-search-input" class="search-input" type="search" enterkeyhint="search" autocomplete="off" data-i18n-placeholder="bible.searchPlaceholder" placeholder="Search English and Tamil text…">
+                    </label>
+                    <button type="button" class="button-link button-secondary" id="bible-search-button" data-i18n="bible.searchButton">Search</button>
+                </div>
+                <p class="page-note bible-search-hint" data-i18n="bible.searchAllLanguagesHint">Searches both English and Tamil at once.</p>
+                <ul class="list bible-search-results" id="bible-search-results" hidden></ul>
                 <div class="bible-nav-row">
                     <button type="button" class="button-link button-secondary" id="bible-prev-chapter" data-i18n="bible.prev">Previous chapter</button>
                     <button type="button" class="button-link button-secondary" id="bible-next-chapter" data-i18n="bible.next">Next chapter</button>
@@ -1444,12 +1453,12 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260407fcm1"></script>
-    <script src="app-shell.js?v=20260407fcm1"></script>
+    <script src="app-shell.js?v=20260407biblesearch1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="home-page.js?v=20260405annnatural1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
-    <script src="bible-page.js?v=20260402biblettsread1"></script>
+    <script src="bible-page.js?v=20260407biblesearch1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260330ttsverse"></script>

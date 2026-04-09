@@ -421,6 +421,15 @@
         "bible.shareDownloaded": "வசன படம் பதிவிறங்கியது. WhatsApp/Instagram-இல் பகிருங்கள்.",
         "bible.shareCancelled": "பகிர்வு ரத்து செய்யப்பட்டது.",
         "bible.shareError": "இப்போது பகிர்வு படத்தை உருவாக்க முடியவில்லை.",
+        "bible.searchLabel": "அனைத்து வேதாகமங்களிலும் தேடு",
+        "bible.searchPlaceholder": "ஆங்கிலம் மற்றும் தமிழ் வசனங்களில் தேடு…",
+        "bible.searchButton": "தேடு",
+        "bible.searchAllLanguagesHint": "ஆங்கிலம் மற்றும் தமிழ் இரண்டிலும் ஒரே நேரத்தில் தேடுகிறது.",
+        "bible.searchTooShort": "தேட குறைந்தது 2 எழுத்துக்கள் தட்டச்சு செய்யவும்.",
+        "bible.searchNoResults": "ஆங்கிலம் அல்லது தமிழில் பொருந்துவது ஏதுமில்லை.",
+        "bible.searchMoreAvailable": "(ஒவ்வொரு மொழிக்கும் முதல் பொருத்தங்கள் மட்டும்.)",
+        "bible.searchResultCount": "பொருத்தம்(ங்கள்)",
+        "bible.searchRunning": "ஆங்கிலம் மற்றும் தமிழில் தேடுகிறது…",
         "sermons.eyebrow": "பிரசங்கம்",
         "sermons.title": "சமீபத்திய செய்திகள்",
         "sermons.subtitle": "மீண்டும் கேளுங்கள், குறிப்பெடுங்கள், வாரம் முழுவதும் வளருங்கள்.",
@@ -1618,10 +1627,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407fcm";
+    var SW_VERSION = "20260407biblesearch";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Real push notifications (FCM) when the app is in the background; register Web Push key in Firebase.";
+    var UPDATE_NOTES_SUMMARY = "Bible Reader: search English and Tamil at once; tap a result to open.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

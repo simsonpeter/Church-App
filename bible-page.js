@@ -20,12 +20,22 @@
     var verseList = document.getElementById("bible-verse-list");
     var verseListWrap = document.getElementById("bible-verse-list-wrap");
     var bibleCard = verseList ? verseList.closest(".card") : null;
+    var searchInput = document.getElementById("bible-search-input");
+    var searchButton = document.getElementById("bible-search-button");
+    var searchResults = document.getElementById("bible-search-results");
     var chapterTransitionToken = 0;
     var chapterTransitionFallbackTimer = null;
 
     if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton) {
         return;
     }
+
+    var BIBLE_SEARCH_LANGS = [
+        { id: "en", labelKey: "bible.languageEnglish", labelFallback: "English" },
+        { id: "ta", labelKey: "bible.languageTamil", labelFallback: "Tamil" }
+    ];
+    var BIBLE_SEARCH_MIN_LEN = 2;
+    var BIBLE_SEARCH_MAX_PER_LANG = 35;
 
     var ENGLISH_BOOKS = [
         "Genesis", "Exodus", "Leviticus", "Numbers", "Deuteronomy", "Joshua", "Judges", "Ruth",
@@ -1594,6 +1604,7 @@
     }
 
     function renderLoading() {
+        hideBibleSearchResults();
         setStatus(T("bible.loading", "Loading Bible..."), false);
         updateShareControls();
         clearChapterTransitionClasses();
@@ -1627,6 +1638,208 @@
             .replace(/>/g, "&gt;")
             .replace(/\"/g, "&quot;")
             .replace(/'/g, "&#39;");
+    }
+
+    function hideBibleSearchResults() {
+        if (searchResults) {
+            searchResults.hidden = true;
+            searchResults.innerHTML = "";
+        }
+    }
+
+    function formatBibleSearchSnippet(text, needle, radius) {
+        var raw = String(text || "");
+        var q = String(needle || "").trim().toLowerCase();
+        var r = Number(radius);
+        if (!Number.isFinite(r) || r < 20) {
+            r = 70;
+        }
+        var lower = raw.toLowerCase();
+        var idx = lower.indexOf(q);
+        if (idx < 0) {
+            var t = raw.slice(0, r * 2);
+            return t.length < raw.length ? (t + "…") : t;
+        }
+        var start = Math.max(0, idx - r);
+        var end = Math.min(raw.length, idx + q.length + r);
+        var prefix = start > 0 ? "…" : "";
+        var suffix = end < raw.length ? "…" : "";
+        return prefix + raw.slice(start, end) + suffix;
+    }
+
+    function getBibleSearchRegex(needle) {
+        var q = String(needle || "").trim();
+        if (q.length < BIBLE_SEARCH_MIN_LEN) {
+            return null;
+        }
+        try {
+            return new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+        } catch (err) {
+            return null;
+        }
+    }
+
+    function searchOneLanguageBible(data, langId, regex, maxHits) {
+        var out = [];
+        if (!data || !Array.isArray(data.Book) || !regex) {
+            return out;
+        }
+        var cap = Math.min(500, Math.max(1, Number(maxHits) || BIBLE_SEARCH_MAX_PER_LANG));
+        var books = data.Book;
+        for (var b = 0; b < books.length && out.length < cap; b += 1) {
+            var chapters = books[b] && Array.isArray(books[b].Chapter) ? books[b].Chapter : [];
+            for (var c = 0; c < chapters.length && out.length < cap; c += 1) {
+                var verses = chapters[c] && Array.isArray(chapters[c].Verse) ? chapters[c].Verse : [];
+                for (var v = 0; v < verses.length && out.length < cap; v += 1) {
+                    var verseObj = verses[v];
+                    var body = String(verseObj && verseObj.Verse || "").trim();
+                    if (!body || !regex.test(body)) {
+                        continue;
+                    }
+                    out.push({
+                        lang: langId,
+                        book: b,
+                        chapter: c,
+                        verse: v + 1,
+                        text: body
+                    });
+                }
+            }
+        }
+        return out;
+    }
+
+    function runBibleSearchAllLanguages(query) {
+        var q = String(query || "").trim();
+        if (q.length < BIBLE_SEARCH_MIN_LEN) {
+            return Promise.resolve({ query: q, results: [], error: "short" });
+        }
+        var regex = getBibleSearchRegex(q);
+        if (!regex) {
+            return Promise.resolve({ query: q, results: [], error: "bad" });
+        }
+        return Promise.all([
+            loadBible("en"),
+            loadBible("ta")
+        ]).then(function (pair) {
+            var enData = pair[0];
+            var taData = pair[1];
+            var enHits = searchOneLanguageBible(enData, "en", regex, BIBLE_SEARCH_MAX_PER_LANG);
+            var taHits = searchOneLanguageBible(taData, "ta", regex, BIBLE_SEARCH_MAX_PER_LANG);
+            return {
+                query: q,
+                results: enHits.concat(taHits),
+                truncated: enHits.length >= BIBLE_SEARCH_MAX_PER_LANG || taHits.length >= BIBLE_SEARCH_MAX_PER_LANG
+            };
+        }).catch(function () {
+            return { query: q, results: [], error: "load" };
+        });
+    }
+
+    function searchLangLabel(langId) {
+        for (var i = 0; i < BIBLE_SEARCH_LANGS.length; i += 1) {
+            if (BIBLE_SEARCH_LANGS[i].id === langId) {
+                return T(BIBLE_SEARCH_LANGS[i].labelKey, BIBLE_SEARCH_LANGS[i].labelFallback);
+            }
+        }
+        return langId;
+    }
+
+    function renderBibleSearchResults(payload) {
+        if (!searchResults) {
+            return;
+        }
+        var q = payload && payload.query ? String(payload.query) : "";
+        searchResults.innerHTML = "";
+        if (payload && payload.error === "short") {
+            setStatus(T("bible.searchTooShort", "Type at least 2 characters to search."), true);
+            searchResults.hidden = true;
+            return;
+        }
+        if (payload && payload.error === "load") {
+            setStatus(T("bible.error", "Could not load Bible right now."), true);
+            searchResults.hidden = true;
+            return;
+        }
+        var list = payload && Array.isArray(payload.results) ? payload.results : [];
+        if (!list.length) {
+            setStatus(T("bible.searchNoResults", "No matches in English or Tamil."), false);
+            searchResults.hidden = true;
+            return;
+        }
+        var truncatedNote = payload && payload.truncated
+            ? (" " + T("bible.searchMoreAvailable", "(Showing first matches per language.)"))
+            : "";
+        setStatus(
+            String(list.length) + " " + T("bible.searchResultCount", "match(es)") + truncatedNote,
+            false
+        );
+        searchResults.hidden = false;
+        list.forEach(function (hit) {
+            var li = document.createElement("li");
+            li.setAttribute("role", "button");
+            li.tabIndex = 0;
+            li.dataset.lang = hit.lang;
+            li.dataset.book = String(hit.book);
+            li.dataset.chapter = String(hit.chapter);
+            li.dataset.verse = String(hit.verse);
+            var meta = document.createElement("div");
+            meta.className = "bible-search-result-meta";
+            meta.textContent = searchLangLabel(hit.lang) + " · " +
+                getBookName(hit.lang, hit.book) + " " + String(hit.chapter + 1) + ":" + String(hit.verse);
+            var snippet = document.createElement("p");
+            snippet.className = "bible-search-result-snippet";
+            snippet.textContent = formatBibleSearchSnippet(hit.text, q, 80);
+            li.appendChild(meta);
+            li.appendChild(snippet);
+            searchResults.appendChild(li);
+        });
+    }
+
+    function applyBibleSearchHitFromDataset(ds) {
+        if (!ds) {
+            return;
+        }
+        var lang = normalizeLanguage(ds.lang);
+        var book = normalizeNumber(ds.book, 0);
+        var chapter = normalizeNumber(ds.chapter, 0);
+        var verse = normalizeNumber(ds.verse, 1);
+        hideBibleSearchResults();
+        stopSpeechPlayback();
+        state.language = lang;
+        setLanguageButtons();
+        setStatus(T("bible.loading", "Loading Bible..."), false);
+        loadBible(lang).then(function (data) {
+            var clamped = clampLocation(data, { book: book, chapter: chapter });
+            state[lang] = clamped;
+            saveState();
+            bookSelect.value = String(clamped.book);
+            chapterSelect.value = String(clamped.chapter);
+            chapterSelect.setAttribute("data-prev-chapter", String(clamped.chapter));
+            renderVerses(data, { resetPosition: true });
+            if (verseInput) {
+                verseInput.value = String(verse);
+            }
+            window.requestAnimationFrame(function () {
+                jumpToVerse();
+                refreshMiniBiblePlayer();
+            });
+        }).catch(function () {
+            renderLoadError();
+        });
+    }
+
+    function handleBibleSearchSubmit() {
+        var q = searchInput ? String(searchInput.value || "").trim() : "";
+        if (q.length < BIBLE_SEARCH_MIN_LEN) {
+            renderBibleSearchResults({ query: q, results: [], error: "short" });
+            return;
+        }
+        setStatus(T("bible.searchRunning", "Searching English and Tamil…"), false);
+        hideBibleSearchResults();
+        runBibleSearchAllLanguages(q).then(function (payload) {
+            renderBibleSearchResults(payload);
+        });
     }
 
     function getCurrentLangState() {
@@ -1678,6 +1891,7 @@
             return Promise.resolve(false);
         }
         stopSpeechPlayback();
+        hideBibleSearchResults();
         var language = normalizeLanguage(state.language);
         if (!state[language]) {
             state[language] = { book: 0, chapter: 0 };
@@ -1992,6 +2206,7 @@
 
     function setLanguage(language) {
         stopSpeechPlayback();
+        hideBibleSearchResults();
         state.language = normalizeLanguage(language);
         setLanguageButtons();
         renderBible();
@@ -1999,6 +2214,7 @@
 
     function moveChapter(step) {
         stopSpeechPlayback();
+        hideBibleSearchResults();
         loadBible(state.language).then(function (data) {
             var language = normalizeLanguage(state.language);
             var location = clampLocation(data, getCurrentLangState());
@@ -2077,6 +2293,7 @@
     });
     bookSelect.addEventListener("change", function () {
         stopSpeechPlayback();
+        hideBibleSearchResults();
         loadBible(state.language).then(function (data) {
             var language = normalizeLanguage(state.language);
             var location = clampLocation(data, getCurrentLangState());
@@ -2090,6 +2307,7 @@
     });
     chapterSelect.addEventListener("change", function () {
         stopSpeechPlayback();
+        hideBibleSearchResults();
         var prevChapter = normalizeNumber(chapterSelect.getAttribute("data-prev-chapter"), -1);
         var nextChapter = normalizeNumber(chapterSelect.value, 0);
         chapterSelect.setAttribute("data-prev-chapter", String(nextChapter));
@@ -2119,6 +2337,37 @@
     });
     if (verseGoButton) {
         verseGoButton.addEventListener("click", jumpToVerse);
+    }
+    if (searchButton && searchInput) {
+        searchButton.addEventListener("click", function () {
+            handleBibleSearchSubmit();
+        });
+        searchInput.addEventListener("keydown", function (event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                handleBibleSearchSubmit();
+            }
+        });
+    }
+    if (searchResults) {
+        searchResults.addEventListener("click", function (event) {
+            var li = event.target.closest("li[data-book][data-chapter][data-verse][data-lang]");
+            if (!li) {
+                return;
+            }
+            applyBibleSearchHitFromDataset(li.dataset);
+        });
+        searchResults.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+            var li = event.target.closest("li[data-book][data-chapter][data-verse][data-lang]");
+            if (!li) {
+                return;
+            }
+            event.preventDefault();
+            applyBibleSearchHitFromDataset(li.dataset);
+        });
     }
     if (verseInput) {
         verseInput.addEventListener("input", function () {
