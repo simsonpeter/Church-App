@@ -1305,6 +1305,41 @@
                         link: ""
                     });
                 }
+                var familyList = profile.familyMembers;
+                if (Array.isArray(familyList)) {
+                    familyList.forEach(function (member, fmIndex) {
+                        if (!member || typeof member !== "object") {
+                            return;
+                        }
+                        var dobStr = String(member.dob || "").trim();
+                        if (!monthDayMatchesStoredDate(dobStr, today)) {
+                            return;
+                        }
+                        var rawName = String(member.name || "").trim();
+                        var fmName = pickWishDisplayName(rawName, rawName, "");
+                        var fmToken = fmName || T("home.personalWishFriend", "friend", announcementsCard);
+                        var sid = String(member.id || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 72);
+                        if (!sid) {
+                            sid = "i" + String(fmIndex);
+                        }
+                        items.push({
+                            id: "njc-family-bday-" + sid,
+                            personalWish: "familyBirthday",
+                            personalDisplayName: fmToken,
+                            title: "",
+                            titleTa: "",
+                            body: "",
+                            bodyTa: "",
+                            date: getTodayKey(),
+                            expires: "",
+                            urgent: false,
+                            important: false,
+                            imageUrl: "",
+                            imageOnly: false,
+                            link: ""
+                        });
+                    });
+                }
                 return items;
             }
 
@@ -1427,6 +1462,9 @@
                 } else if (item.personalWish === "anniversary") {
                     titleText = T("home.personalAnniversaryTitle", "Happy anniversary!", announcementsCard);
                     bodyText = T("home.personalAnniversaryBody", "Celebrating your wedding anniversary today, {name}. God bless your marriage!").replace(/\{name\}/g, pname);
+                } else if (item.personalWish === "familyBirthday") {
+                    titleText = T("home.personalFamilyBirthdayTitle", "Birthday reminder", announcementsCard);
+                    bodyText = T("home.personalFamilyBirthdayBody", "Today is {name}'s birthday — take a moment to wish them well!").replace(/\{name\}/g, pname);
                 } else {
                     titleText = isTamil
                         ? (item.titleTa || item.titleTaAuto || item.title)
@@ -1595,7 +1633,7 @@
                             return ap ? -1 : 1;
                         }
                         if (ap && bp) {
-                            var order = { birthday: 0, anniversary: 1 };
+                            var order = { birthday: 0, anniversary: 1, familyBirthday: 2 };
                             return (order[a.personalWish] || 9) - (order[b.personalWish] || 9);
                         }
                         if (a.urgent !== b.urgent) {

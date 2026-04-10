@@ -271,6 +271,8 @@
         "home.personalWishFriend": "நண்பரே",
         "home.personalBirthdayTitle": "பிறந்தநாள் வாழ்த்துக்கள்!",
         "home.personalBirthdayBody": "உங்கள் சிறப்பு நாளில் அன்புடன் வாழ்த்துகிறோம், {name}. தேவன் உங்களை ஆசீர்வதிப்பார்!",
+        "home.personalFamilyBirthdayTitle": "பிறந்தநாள் நினைவூட்டல்",
+        "home.personalFamilyBirthdayBody": "இன்று {name} அவர்களின் பிறந்தநாள் - அவர்களுக்கு வாழ்த்துச் சொல்ல ஒரு நிமிடம் ஒதுக்குங்கள்!",
         "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
         "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
@@ -894,6 +896,12 @@
         "profile.dob": "பிறந்த தேதி",
         "profile.anniversary": "திருமண நாள்",
         "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
+        "profile.familyTitle": "குடும்ப பிறந்தநாட்கள்",
+        "profile.familyIntro": "நினைவில் கொள்ள விரும்பும் நபர்களைச் சேர்க்கவும். அவர்களின் பிறந்தநாளில் முகப்பில் வாழ்த்து தோன்றும்.",
+        "profile.familyAddMember": "குடும்ப உறுப்பினரைச் சேர்",
+        "profile.familyName": "பெயர்",
+        "profile.familyBirthday": "பிறந்தநாள்",
+        "profile.familyRemove": "நீக்கு",
         "profile.phone": "தொலைபேசி எண்",
         "profile.photo": "புகைப்படம் (விருப்பம்)",
         "profile.photoHelp": "உங்கள் சாதனத்தில் இருந்து புகைப்படம் தேர்ந்தெடுக்கவும்.",
@@ -1630,10 +1638,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407biblesearch2";
+    var SW_VERSION = "20260407familybd";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Bible Reader: compact search (magnifier icon); English + Tamil.";
+    var UPDATE_NOTES_SUMMARY = "Profile: family birthdays; Home shows reminders on their day.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

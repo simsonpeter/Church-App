@@ -25,6 +25,9 @@
     var profileBadgesList = document.getElementById("profile-badges-list");
     var profileAchievementsCard = document.querySelector(".profile-achievements-card");
     var profileCard = form ? form.closest(".card") : null;
+    var familyBlock = document.getElementById("profile-family-block");
+    var familyList = document.getElementById("profile-family-list");
+    var familyAddBtn = document.getElementById("profile-family-add");
     var busy = false;
     var noteState = "";
     var currentUid = "";
@@ -38,6 +41,8 @@
     var MAX_FIRESTORE_PHOTOURL_CHARS = 750000;
     /** Firebase Auth updateProfile rejects long or data: URLs; only sync http(s) links. */
     var MAX_AUTH_PHOTO_URL_LENGTH = 2048;
+    var MAX_FAMILY_MEMBERS = 20;
+    var FAMILY_DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && profileCard) {
@@ -196,12 +201,43 @@
         }
     }
 
+    function makeFamilyMemberId() {
+        return "fm-" + String(Date.now()) + "-" + Math.random().toString(36).slice(2, 10);
+    }
+
+    function normalizeFamilyMembersList(raw) {
+        if (!Array.isArray(raw)) {
+            return [];
+        }
+        var seen = {};
+        var out = [];
+        for (var i = 0; i < raw.length && out.length < MAX_FAMILY_MEMBERS; i += 1) {
+            var row = raw[i];
+            if (!row || typeof row !== "object") {
+                continue;
+            }
+            var id = String(row.id || "").trim() || makeFamilyMemberId();
+            if (seen[id]) {
+                id = makeFamilyMemberId();
+            }
+            seen[id] = true;
+            var name = String(row.name || "").trim().slice(0, 120);
+            var dob = String(row.dob || "").trim();
+            if (!name || !FAMILY_DOB_RE.test(dob)) {
+                continue;
+            }
+            out.push({ id: id, name: name, dob: dob });
+        }
+        return out;
+    }
+
     function profilePayloadForFirestore(profile) {
         var base = profile && typeof profile === "object" ? profile : {};
         var out = {
             fullName: base.fullName,
             dob: base.dob,
             anniversary: base.anniversary,
+            familyMembers: normalizeFamilyMembersList(base.familyMembers),
             phone: base.phone,
             groupId: base.groupId || "",
             leaderboardAnonymous: Boolean(base.leaderboardAnonymous),
@@ -264,6 +300,17 @@
                 node.disabled = disabled;
             }
         });
+        if (familyAddBtn) {
+            familyAddBtn.disabled = disabled;
+        }
+        if (familyList) {
+            familyList.querySelectorAll(".profile-family-name, .profile-family-dob").forEach(function (inp) {
+                inp.disabled = disabled;
+            });
+            familyList.querySelectorAll(".profile-family-remove").forEach(function (btn) {
+                btn.disabled = disabled;
+            });
+        }
         if (saveButton) {
             saveButton.disabled = disabled || busy;
         }
@@ -280,6 +327,7 @@
             fullName: String(source.fullName || activeUser.displayName || deriveNameFromEmail(activeUser.email || "")).trim(),
             dob: String(source.dob || "").trim(),
             anniversary: String(source.anniversary || "").trim(),
+            familyMembers: normalizeFamilyMembersList(source.familyMembers),
             phone: String(source.phone || activeUser.phoneNumber || "").trim(),
             groupId: sanitizeGroupIdInput(source.groupId),
             leaderboardAnonymous: Boolean(source.leaderboardAnonymous),
@@ -289,11 +337,31 @@
         };
     }
 
+    function collectFamilyMembersFromDom() {
+        if (!familyList) {
+            return [];
+        }
+        var rows = familyList.querySelectorAll(".profile-family-row");
+        var raw = [];
+        rows.forEach(function (li) {
+            var id = String(li.getAttribute("data-family-id") || "").trim() || makeFamilyMemberId();
+            var nameInput = li.querySelector(".profile-family-name");
+            var dobInputNode = li.querySelector(".profile-family-dob");
+            raw.push({
+                id: id,
+                name: String(nameInput && nameInput.value || "").trim(),
+                dob: String(dobInputNode && dobInputNode.value || "").trim()
+            });
+        });
+        return normalizeFamilyMembersList(raw);
+    }
+
     function getCurrentFormProfile() {
         return {
             fullName: String(fullNameInput && fullNameInput.value || "").trim(),
             dob: String(dobInput && dobInput.value || "").trim(),
             anniversary: String(anniversaryInput && anniversaryInput.value || "").trim(),
+            familyMembers: collectFamilyMembersFromDom(),
             phone: String(phoneInput && phoneInput.value || "").trim(),
             groupId: sanitizeGroupIdInput(groupIdInput && groupIdInput.value),
             leaderboardAnonymous: Boolean(leaderboardAnonymousInput && leaderboardAnonymousInput.checked),
@@ -301,6 +369,48 @@
             photoUrl: String(selectedPhotoDataUrl || savedPhotoDataUrl || "").trim(),
             updatedAt: Date.now()
         };
+    }
+
+    function buildFamilyRowHtml(member, disabled) {
+        var id = String(member && member.id || "").trim() || makeFamilyMemberId();
+        var name = String(member && member.name || "").trim();
+        var dob = String(member && member.dob || "").trim();
+        var dis = disabled ? " disabled" : "";
+        var removeLabel = escapeHtmlLite(T("profile.familyRemove", "Remove"));
+        var nameLabel = escapeHtmlLite(T("profile.familyName", "Name"));
+        var dobLabel = escapeHtmlLite(T("profile.familyBirthday", "Birthday"));
+        return "" +
+            "<li class=\"profile-family-row\" data-family-id=\"" + escapeHtmlLite(id) + "\">" +
+            "  <div class=\"profile-family-row-fields\">" +
+            "    <label class=\"profile-family-field\">" +
+            "      <span>" + nameLabel + "</span>" +
+            "      <input class=\"search-input profile-family-name\" type=\"text\" autocomplete=\"name\" maxlength=\"120\" value=\"" + escapeHtmlLite(name) + "\"" + dis + ">" +
+            "    </label>" +
+            "    <label class=\"profile-family-field\">" +
+            "      <span>" + dobLabel + "</span>" +
+            "      <input class=\"search-input profile-family-dob\" type=\"date\" autocomplete=\"bday\" value=\"" + escapeHtmlLite(dob) + "\"" + dis + ">" +
+            "    </label>" +
+            "  </div>" +
+            "  <button type=\"button\" class=\"button-link button-secondary profile-family-remove\"" + dis + " aria-label=\"" + removeLabel + "\">" + removeLabel + "</button>" +
+            "</li>";
+    }
+
+    function renderFamilyList(profile, formDisabled) {
+        if (!familyList) {
+            return;
+        }
+        var members = profile && Array.isArray(profile.familyMembers) ? profile.familyMembers : [];
+        familyList.innerHTML = members.map(function (m) {
+            return buildFamilyRowHtml(m, formDisabled);
+        }).join("");
+    }
+
+    function appendEmptyFamilyRow() {
+        if (!familyList || familyList.querySelectorAll(".profile-family-row").length >= MAX_FAMILY_MEMBERS) {
+            return;
+        }
+        var id = makeFamilyMemberId();
+        familyList.insertAdjacentHTML("beforeend", buildFamilyRowHtml({ id: id, name: "", dob: "" }, false));
     }
 
     function fileToDataUrl(file) {
@@ -416,6 +526,8 @@
         if (photoFileInput) {
             photoFileInput.value = "";
         }
+        var fam = normalizeProfile(profile, getCurrentUser() || {});
+        renderFamilyList(fam, !getCurrentUser());
     }
 
     function notifyProfileUpdated(uid, profile) {
@@ -463,7 +575,7 @@
         currentUid = String(user && user.uid || "");
         if (!currentUid) {
             setFormEnabled(false);
-            populateForm({ fullName: "", dob: "", anniversary: "", phone: "", groupId: "", leaderboardAnonymous: false, photoSkipCloud: false, photoUrl: "" });
+            populateForm({ fullName: "", dob: "", anniversary: "", familyMembers: [], phone: "", groupId: "", leaderboardAnonymous: false, photoSkipCloud: false, photoUrl: "" });
             renderAvatar({}, user);
             renderProfileAchievementPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
@@ -508,6 +620,11 @@
             var cloudAnn = String(cloudProfile.anniversary || "").trim();
             if (!cloudAnn && localAnn) {
                 cloudProfile = Object.assign({}, cloudProfile, { anniversary: localAnn });
+            }
+            var localFam = normalizeFamilyMembersList(localProfile.familyMembers);
+            var cloudFam = normalizeFamilyMembersList(cloudProfile.familyMembers);
+            if (!cloudFam.length && localFam.length) {
+                cloudProfile = Object.assign({}, cloudProfile, { familyMembers: localFam });
             }
             map[currentUid] = cloudProfile;
             saveProfileMap(map);
@@ -643,6 +760,35 @@
             window.setTimeout(function () {
                 URL.revokeObjectURL(url);
             }, 2000);
+        });
+    }
+
+    if (familyList) {
+        familyList.addEventListener("click", function (event) {
+            var btn = event.target.closest(".profile-family-remove");
+            if (!btn || btn.disabled) {
+                return;
+            }
+            var row = btn.closest(".profile-family-row");
+            if (row && row.parentNode) {
+                row.parentNode.removeChild(row);
+            }
+        });
+    }
+    if (familyAddBtn) {
+        familyAddBtn.addEventListener("click", function () {
+            if (familyAddBtn.disabled) {
+                return;
+            }
+            appendEmptyFamilyRow();
+            var rows = familyList ? familyList.querySelectorAll(".profile-family-row") : [];
+            var last = rows[rows.length - 1];
+            if (last) {
+                var nameEl = last.querySelector(".profile-family-name");
+                if (nameEl && typeof nameEl.focus === "function") {
+                    nameEl.focus();
+                }
+            }
         });
     }
 

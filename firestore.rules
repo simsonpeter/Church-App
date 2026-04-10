@@ -2,7 +2,7 @@ rules_version = '2';
 // Church-App Firestore paths:
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
-//   users/{uid}/profile/basic  — profile + triviaPoints (merge)
+//   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   chatMessages/{msgId} — church group chat: text only, signed-in users

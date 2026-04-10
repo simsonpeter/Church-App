@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260407biblesearch2">
+    <link rel="stylesheet" href="styles.css?v=20260407familybd1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -710,6 +710,12 @@
                         <input id="profile-anniversary" class="search-input" type="date" autocomplete="off">
                         <small class="page-note" data-i18n="profile.anniversaryHelp">Optional. If set, you’ll see a wish on your anniversary on Home.</small>
                     </label>
+                    <div class="profile-family-block" id="profile-family-block">
+                        <h3 class="profile-family-heading" data-i18n="profile.familyTitle">Family birthdays</h3>
+                        <p class="page-note profile-family-intro" data-i18n="profile.familyIntro">Add people you want to remember. On their birthday you’ll see a wish on Home.</p>
+                        <ul class="profile-family-list" id="profile-family-list" aria-label="Family members"></ul>
+                        <button type="button" class="button-link button-secondary profile-family-add" id="profile-family-add" data-i18n="profile.familyAddMember">Add family member</button>
+                    </div>
                     <label class="profile-field">
                         <span data-i18n="profile.phone">Phone number</span>
                         <input id="profile-phone" class="search-input" type="tel" autocomplete="tel" placeholder="+32 483 11 64 84">
@@ -1458,9 +1464,9 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260407fcm1"></script>
-    <script src="app-shell.js?v=20260407biblesearch2"></script>
+    <script src="app-shell.js?v=20260407familybd1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260405annnatural1"></script>
+    <script src="home-page.js?v=20260407familybd1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260407biblesearch2"></script>
@@ -1471,7 +1477,7 @@
     <script src="admin-dashboard-page.js?v=20260404annsched1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260327bq1"></script>
+    <script src="profile-page.js?v=20260407familybd1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
     <script src="spa-router.js?v=20260331readbible"></script>

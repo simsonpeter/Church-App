@@ -3869,6 +3869,77 @@ body.auth-modal-open {
     font-weight: 650;
 }
 
+.profile-family-block {
+    margin-top: 4px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+}
+
+.profile-family-heading {
+    margin: 0 0 4px;
+    font-size: 0.95rem;
+    font-weight: 750;
+}
+
+.profile-family-intro {
+    margin-bottom: 8px;
+}
+
+.profile-family-list {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.profile-family-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.profile-family-row-fields {
+    flex: 1 1 220px;
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 140px);
+    gap: 8px;
+    min-width: 0;
+}
+
+@media (max-width: 520px) {
+    .profile-family-row-fields {
+        grid-template-columns: 1fr;
+    }
+}
+
+.profile-family-field {
+    display: grid;
+    gap: 4px;
+    min-width: 0;
+}
+
+.profile-family-field > span {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-weight: 650;
+}
+
+.profile-family-remove {
+    flex: 0 0 auto;
+    align-self: center;
+}
+
+.profile-family-add {
+    width: 100%;
+    max-width: 280px;
+}
+
 /* Flex column so verse list grows with content (avoids clipped Tamil in nested scroll) */
 .bible-card {
     display: flex;
