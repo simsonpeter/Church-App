@@ -137,13 +137,14 @@
         var sid = "cw-" + String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8);
         rootEl.innerHTML = "" +
             "<div class=\"celebration-wish-thread\" data-celebration-wish-suffix=\"" + sid + "\">" +
-            "  <div class=\"celebration-wish-messages\" id=\"celebration-wish-messages-" + sid + "\" aria-live=\"polite\"></div>" +
             "  <p class=\"page-note celebration-wish-status\" id=\"celebration-wish-status-" + sid + "\" hidden></p>" +
             "  <form class=\"celebration-wish-form chat-form\" id=\"celebration-wish-form-" + sid + "\" hidden>" +
             "    <input type=\"text\" id=\"celebration-wish-input-" + sid + "\" class=\"search-input chat-input celebration-wish-input\" maxlength=\"" + String(MAX_TEXT) + "\" autocomplete=\"off\" placeholder=\"\">" +
             "    <button type=\"submit\" class=\"button-link\" id=\"celebration-wish-send-" + sid + "\"></button>" +
             "  </form>" +
             "  <p class=\"page-note celebration-wish-login\" id=\"celebration-wish-login-" + sid + "\" hidden></p>" +
+            "  <h3 class=\"celebration-wish-messages-heading\">" + escapeHtml(tLocal("celebrations.wishThreadMessagesTitle", "Wishes from everyone")) + "</h3>" +
+            "  <div class=\"celebration-wish-messages\" id=\"celebration-wish-messages-" + sid + "\" aria-live=\"polite\"></div>" +
             "</div>";
 
         var messagesEl = rootEl.querySelector("#celebration-wish-messages-" + sid);
@@ -172,6 +173,20 @@
             statusEl.dataset.state = isError ? "error" : "";
         }
 
+        function docCreatedMs(docSnap) {
+            var ts = docSnap && docSnap.data && (docSnap.data() || {}).createdAt;
+            if (!ts) {
+                return 0;
+            }
+            if (typeof ts.toMillis === "function") {
+                return ts.toMillis();
+            }
+            if (typeof ts.seconds === "number") {
+                return ts.seconds * 1000;
+            }
+            return 0;
+        }
+
         function scrollBottom() {
             if (!messagesEl) {
                 return;
@@ -179,6 +194,17 @@
             window.requestAnimationFrame(function () {
                 messagesEl.scrollTop = messagesEl.scrollHeight;
             });
+        }
+
+        function scrollThreadIntoView() {
+            var box = messagesEl;
+            if (box && typeof box.scrollIntoView === "function") {
+                try {
+                    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                } catch (se) {
+                    box.scrollIntoView(true);
+                }
+            }
         }
 
         function renderDocs(docs) {
@@ -253,14 +279,17 @@
             }
             try {
                 var db = window.firebase.firestore();
+                // Equality-only query: no composite index required (orderBy+where needs an index).
                 var q = db.collection(COLLECTION)
                     .where("threadId", "==", threadId)
-                    .orderBy("createdAt", "desc")
                     .limit(PAGE_LIMIT);
                 unsubscribe = q.onSnapshot(function (snap) {
                     var list = [];
                     snap.forEach(function (doc) {
                         list.push(doc);
+                    });
+                    list.sort(function (a, b) {
+                        return docCreatedMs(b) - docCreatedMs(a);
                     });
                     renderDocs(list);
                     setStatus("");
@@ -304,6 +333,12 @@
                     if (inputEl) {
                         inputEl.value = "";
                     }
+                    setStatus(tLocal("celebrations.wishThreadSent", "Sent!"), false);
+                    window.setTimeout(function () {
+                        setStatus("");
+                    }, 2200);
+                    scrollThreadIntoView();
+                    scrollBottom();
                 })
                 .catch(function (err) {
                     var code = err && err.code ? String(err.code) : "";
@@ -337,6 +372,10 @@
         };
         document.addEventListener("njc:authchange", onAuth);
         document.addEventListener("njc:langchange", function () {
+            var h3 = rootEl.querySelector(".celebration-wish-messages-heading");
+            if (h3) {
+                h3.textContent = tLocal("celebrations.wishThreadMessagesTitle", "Wishes from everyone");
+            }
             if (inputEl) {
                 inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a birthday wish…"));
             }

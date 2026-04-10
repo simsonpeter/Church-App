@@ -286,6 +286,8 @@
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
         "celebrations.emptyToday": "இன்று உங்கள் சுயவிவரத்தில் பிறந்தநாள்/திருமண நாள் இல்லை. மேலே உள்ள சமூக வாழ்த்துப் பெட்டியை இன்னும் பயன்படுத்தலாம்.",
         "celebrations.wishThreadTitle": "இன்றைய சமூக வாழ்த்துக்கள்",
+        "celebrations.wishThreadMessagesTitle": "அனைவரின் வாழ்த்துக்கள்",
+        "celebrations.wishThreadSent": "அனுப்பப்பட்டது!",
         "celebrations.wishThreadIntro": "இன்று பிறந்தநாள்/திருமண நாள் கொண்டாடுபவர்களுக்கு அன்புடன் எழுதுங்கள்.",
         "celebrations.wishThreadPlaceholder": "வாழ்த்துச் செய்தியை எழுதுங்கள்…",
         "celebrations.wishThreadSend": "அனுப்பு",
@@ -1678,10 +1680,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407wishfix";
+    var SW_VERSION = "20260407wishthread";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Fix celebration wishes send (Firestore rules) + header subtitle i18n.";
+    var UPDATE_NOTES_SUMMARY = "Celebration wishes: show thread below input; load without composite index.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

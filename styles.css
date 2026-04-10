@@ -4009,12 +4009,22 @@ body.auth-modal-open {
     font-weight: 750;
 }
 
+.celebration-wish-messages-heading {
+    margin: 0 0 8px;
+    font-size: 0.95rem;
+    font-weight: 750;
+}
+
 .celebration-wish-messages {
-    max-height: min(42vh, 280px);
+    min-height: 120px;
+    max-height: min(45vh, 320px);
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    margin-bottom: 8px;
-    padding: 4px 2px;
+    margin-bottom: 10px;
+    padding: 8px 6px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface-2, rgba(0, 0, 0, 0.02));
 }
 
 .celebration-wish-form.chat-form .button-link {

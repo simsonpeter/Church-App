@@ -31,17 +31,17 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v291wishfix";
-const RUNTIME_CACHE = "njc-runtime-cache-v291wishfix";
+const APP_CACHE = "njc-app-cache-v292wishthread";
+const RUNTIME_CACHE = "njc-runtime-cache-v292wishthread";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260407wishfix1",
+    "./styles.css?v=20260407wishthread2",
     "./user-auth.js?v=20260407fcm1",
-    "./app-shell.js?v=20260407wishfix1",
+    "./app-shell.js?v=20260407wishthread2",
     "./events-engine.js?v=20260318de",
-    "./home-page.js?v=20260407wishfix1",
+    "./home-page.js?v=20260407wishthread2",
     "./events-page.js?v=20260414u2",
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260407biblesearch2",
@@ -53,10 +53,10 @@ const CORE_ASSETS = [
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260407familybd1",
-    "./celebration-wish-thread.js?v=20260407wishfix1",
-    "./celebrations-page.js?v=20260407wishfix1",
+    "./celebration-wish-thread.js?v=20260407wishthread2",
+    "./celebrations-page.js?v=20260407wishthread2",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260407wishfix1",
+    "./spa-router.js?v=20260407wishthread2",
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
