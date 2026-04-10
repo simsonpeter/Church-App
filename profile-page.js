@@ -231,6 +231,27 @@
         return out;
     }
 
+    /** Keep local-only family rows when cloud list is older or partial (same id: cloud wins). */
+    function mergeFamilyMembersPreservingLocal(localRaw, cloudRaw) {
+        var localFam = normalizeFamilyMembersList(localRaw);
+        var cloudFam = normalizeFamilyMembersList(cloudRaw);
+        var byId = {};
+        var order = [];
+        cloudFam.forEach(function (m) {
+            byId[m.id] = m;
+            order.push(m.id);
+        });
+        localFam.forEach(function (m) {
+            if (!byId[m.id]) {
+                byId[m.id] = m;
+                order.push(m.id);
+            }
+        });
+        return order.map(function (id) {
+            return byId[id];
+        }).slice(0, MAX_FAMILY_MEMBERS);
+    }
+
     function profilePayloadForFirestore(profile) {
         var base = profile && typeof profile === "object" ? profile : {};
         var out = {
@@ -621,11 +642,8 @@
             if (!cloudAnn && localAnn) {
                 cloudProfile = Object.assign({}, cloudProfile, { anniversary: localAnn });
             }
-            var localFam = normalizeFamilyMembersList(localProfile.familyMembers);
-            var cloudFam = normalizeFamilyMembersList(cloudProfile.familyMembers);
-            if (!cloudFam.length && localFam.length) {
-                cloudProfile = Object.assign({}, cloudProfile, { familyMembers: localFam });
-            }
+            var mergedFam = mergeFamilyMembersPreservingLocal(localProfile.familyMembers, cloudProfile.familyMembers);
+            cloudProfile = Object.assign({}, cloudProfile, { familyMembers: mergedFam });
             map[currentUid] = cloudProfile;
             saveProfileMap(map);
             populateForm(cloudProfile);
