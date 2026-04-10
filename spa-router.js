@@ -119,6 +119,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        celebrations: {
+            icon: "fa-cake-candles",
+            eyebrowKey: "celebrations.eyebrow",
+            eyebrowText: "Celebrations",
+            titleKey: "celebrations.title",
+            titleText: "Celebrations today",
+            subtitleKey: "celebrations.subtitle",
+            subtitleText: ""
+        },
         settings: {
             icon: "fa-sliders",
             eyebrowKey: "settings.eyebrow",

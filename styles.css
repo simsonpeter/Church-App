@@ -3940,6 +3940,63 @@ body.auth-modal-open {
     max-width: 280px;
 }
 
+.celebrations-list {
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+}
+
+.celebrations-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.celebrations-row-main {
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.celebrations-kind {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 750;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    margin-bottom: 4px;
+}
+
+.celebrations-name {
+    display: block;
+    font-size: 1.05rem;
+    margin-bottom: 6px;
+}
+
+.celebrations-wish-preview {
+    margin-bottom: 4px !important;
+}
+
+.celebrations-wish-hint {
+    margin-bottom: 0 !important;
+}
+
+.celebrations-row-actions {
+    flex: 0 0 auto;
+    align-self: center;
+}
+
+.announcement-wish-cta {
+    display: inline-block;
+    margin-top: 8px;
+}
+
 /* Flex column so verse list grows with content (avoids clipped Tamil in nested scroll) */
 .bible-card {
     display: flex;

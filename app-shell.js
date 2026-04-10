@@ -61,6 +61,7 @@
         "menu.trivia": "வேதாகமக் கேள்விகள்",
         "menu.userAchievements": "பயனர் சாதனைகள்",
         "menu.chat": "அரட்டை",
+        "menu.celebrations": "இன்றைய விழாக்கள்",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
         "menu.mailbox": "அஞ்சல் பெட்டி",
@@ -277,6 +278,26 @@
         "home.personalCelebrationsLineBirthday": "பிறந்தநாள் வாழ்த்துக்கள், {name}! தேவன் உங்களை ஆசீர்வதிப்பார்.",
         "home.personalCelebrationsLineAnniversary": "திருமண நாள் வாழ்த்துக்கள், {name}! உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்.",
         "home.personalCelebrationsLineFamily": "இன்று {name} அவர்களின் பிறந்தநாள் — வாழ்த்துச் சொல்லுங்கள்!",
+        "home.personalWishCta": "வாழ்த்து சொல்",
+        "celebrations.eyebrow": "விழாக்கள்",
+        "celebrations.title": "இன்றைய விழாக்கள்",
+        "celebrations.subtitle": "உங்கள் சுயவிவரத்திலிருந்து பிறந்தநாட்கள் மற்றும் திருமண நாள் (பெல்ஜியம் தேதி). வாழ்த்து என்பதைத் தட்டி பகிரவும் அல்லது நகலெடுக்கவும்.",
+        "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
+        "celebrations.emptyToday": "இன்று பிறந்தநாள் அல்லது திருமண நாள் இல்லை (பெல்ஜியம் தேதி). சுயவிவரத்தில் தேதிகளைச் சேர்க்கவும்.",
+        "celebrations.wishButton": "வாழ்த்து சொல்",
+        "celebrations.wishedButton": "வாழ்த்தியது",
+        "celebrations.wishHint": "பகிர்வு திறக்கும், அல்லது WhatsApp/SMS/மின்னஞ்சலில் ஒட்ட உரையை நகலெடுக்கவும்.",
+        "celebrations.wishMessageBirthday": "பிறந்தநாள் வாழ்த்துக்கள், {name}! தேவன் உங்களை ஆசீர்வதிப்பார்.",
+        "celebrations.wishMessageAnniversary": "திருமண நாள் வாழ்த்துக்கள், {name}! உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்.",
+        "celebrations.wishMessageFamily": "பிறந்தநாள் வாழ்த்துக்கள், {name}! அருமையான நாளாக அமையட்டும்.",
+        "celebrations.wishMessageGeneric": "இன்று உங்களை நினைக்கிறோம் — தேவன் ஆசீர்வதிப்பார்!",
+        "celebrations.kindMyBirthday": "உங்கள் பிறந்தநாள்",
+        "celebrations.kindAnniversary": "உங்கள் திருமண நாள்",
+        "celebrations.kindFamilyBirthday": "குடும்ப பிறந்தநாள்",
+        "celebrations.kindEvent": "விழா",
+        "celebrations.copied": "செய்தி நகலெடுக்கப்பட்டது — உங்கள் செயலியில் ஒட்டவும்.",
+        "celebrations.copyFallback": "இந்தச் செய்தியை நகலெடுக்கவும்:",
+        "celebrations.wishError": "பகிர அல்லது நகலெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
         "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
@@ -900,7 +921,7 @@
         "profile.dob": "பிறந்த தேதி",
         "profile.anniversary": "திருமண நாள்",
         "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
-        "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: முகப்பு அறிவிப்புகளில் (பெல்ஜியம் நேரம்) ஒரு வாழ்த்து தோன்றும். தொலைபேசி/செய்தி மூலம் வாழ்த்துச் சொல்லுங்கள் — பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
+        "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: அன்று (பெல்ஜியம்) முகப்பில் வாழ்த்து தோன்றும்; பட்டியல் → இன்றைய விழாக்கள் என்பதில் சென்று செய்தி அனுப்பவும். பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
         "profile.familyTitle": "குடும்ப பிறந்தநாட்கள்",
         "profile.familyIntro": "நினைவில் கொள்ள விரும்பும் நபர்களைச் சேர்க்கவும். அவர்களின் பிறந்தநாளில் முகப்பில் வாழ்த்து தோன்றும்.",
         "profile.familyAddMember": "குடும்ப உறுப்பினரைச் சேர்",
@@ -1643,10 +1664,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407celecombo";
+    var SW_VERSION = "20260407celepage";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Home: combine same-day birthday & anniversary wishes in one slide.";
+    var UPDATE_NOTES_SUMMARY = "Celebrations page + Wish from Home announcements; side menu link.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -3686,6 +3707,13 @@
         settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
         utilityLinksContainer.appendChild(settingsLink);
 
+        var celebrationsLink = document.createElement("a");
+        celebrationsLink.className = "header-menu-link";
+        celebrationsLink.href = "#celebrations";
+        celebrationsLink.setAttribute("data-route", "celebrations");
+        celebrationsLink.innerHTML = "<i class=\"fa-solid fa-cake-candles\"></i><span></span>";
+        utilityLinksContainer.appendChild(celebrationsLink);
+
         var profileLink = document.createElement("a");
         profileLink.className = "header-menu-link";
         profileLink.href = "#profile";
@@ -3883,6 +3911,7 @@
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
+            var celebrationsLabel = t("menu.celebrations", "Celebrations");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var profile = getProfileForUser(activeUser);
@@ -3954,6 +3983,10 @@
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
             }
+            var celebrationsNode = celebrationsLink.querySelector("span");
+            if (celebrationsNode) {
+                celebrationsNode.textContent = celebrationsLabel;
+            }
             var mailboxNode = mailboxLink.querySelector("span");
             if (mailboxNode) {
                 mailboxNode.textContent = mailboxLabel;
@@ -3986,6 +4019,7 @@
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
             var isSettings = getCurrentRoute() === "settings";
+            var isCelebrations = getCurrentRoute() === "celebrations";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
             profileLink.classList.toggle("active", isProfile);
@@ -3997,6 +4031,7 @@
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
             settingsLink.classList.toggle("active", isSettings);
+            celebrationsLink.classList.toggle("active", isCelebrations);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
             mailboxLink.hidden = !isAdmin;

@@ -1309,7 +1309,8 @@
                     important: false,
                     imageUrl: "",
                     imageOnly: false,
-                    link: ""
+                    link: "",
+                    personalCelebrationCta: true
                 };
                 if (lines.length >= 2) {
                     return [Object.assign({}, baseMeta, {
@@ -1544,6 +1545,7 @@
                     mainBlock +
                     metaLine +
                     linkLine +
+                    wishCtaLine +
                     dismissBtn +
                     controls +
                     "</li>";
