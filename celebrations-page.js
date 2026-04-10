@@ -185,6 +185,11 @@
     var globalThreadMount = document.getElementById("celebrations-wish-thread-global");
     var celebrationsCard = document.querySelector(".celebrations-card");
 
+    function isCelebrationsViewActive() {
+        var view = document.querySelector(".page-view[data-route=\"celebrations\"]");
+        return Boolean(view && view.classList.contains("active"));
+    }
+
     function escapeHtml(s) {
         return String(s || "")
             .replace(/&/g, "&amp;")
@@ -274,6 +279,18 @@
         });
     }
 
+    function onCelebrationsRouteChange(ev) {
+        var route = ev && ev.detail && ev.detail.route;
+        if (route === "celebrations") {
+            mountGlobalWishThread();
+            renderCelebrationsPage();
+        } else {
+            unmountGlobalWishThread();
+        }
+    }
+
+    document.addEventListener("njc:routechange", onCelebrationsRouteChange);
+
     function onRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
         if (raw === "celebrations") {
@@ -287,18 +304,18 @@
     document.addEventListener("DOMContentLoaded", onRoute);
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:authchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
+        if (isCelebrationsViewActive()) {
             mountGlobalWishThread();
             renderCelebrationsPage();
         }
     });
     document.addEventListener("njc:profile-updated", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
+        if (isCelebrationsViewActive()) {
             renderCelebrationsPage();
         }
     });
     document.addEventListener("njc:langchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
+        if (isCelebrationsViewActive()) {
             renderCelebrationsPage();
         }
     });
