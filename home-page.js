@@ -21,6 +21,8 @@
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
             var CARD_LANG_MAP_KEY = "njc_card_language_map_v1";
             var announcementsList = document.getElementById("home-announcements-list");
+            var homeCelebrationWishSection = document.getElementById("home-celebration-wish-section");
+            var homeCelebrationWishMount = document.getElementById("home-celebration-wish-mount");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var kjvBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/englishbible.json";
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
@@ -1505,6 +1507,9 @@
                 var linkLine = !isImageOnly && item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
+                var wishCtaLine = item.personalWish && item.personalCelebrationCta
+                    ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-wish-scroll-btn\">" + NjcEvents.escapeHtml(T("home.personalWishScrollToThread", "Open wish thread", announcementsCard)) + "</button></p>")
+                    : "";
                 var dismissBtn = !item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
                     : "";
@@ -1613,6 +1618,23 @@
                 }, 5000);
             }
 
+            function toggleCelebrationWishSection(show) {
+                if (homeCelebrationWishSection) {
+                    homeCelebrationWishSection.hidden = !show;
+                }
+                if (!show) {
+                    if (window.NjcCelebrationWish && typeof window.NjcCelebrationWish.destroy === "function" && homeCelebrationWishMount) {
+                        window.NjcCelebrationWish.destroy(homeCelebrationWishMount);
+                    }
+                    return;
+                }
+                if (homeCelebrationWishMount && window.NjcCelebrationWish && typeof window.NjcCelebrationWish.mount === "function") {
+                    window.NjcCelebrationWish.mount(homeCelebrationWishMount, {
+                        i18nScope: announcementsCard || homeCelebrationWishSection
+                    });
+                }
+            }
+
             function renderAnnouncements() {
                 if (!announcementsList) {
                     return;
@@ -1628,6 +1650,7 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorBody", "Please try again shortly.", announcementsCard)) + "</p>" +
                         "</li>";
+                    toggleCelebrationWishSection(false);
                     return;
                 }
 
@@ -1675,6 +1698,7 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.noAnnouncementsBody", "Check back later for updates.", announcementsCard)) + "</p>" +
                         "</li>";
+                    toggleCelebrationWishSection(false);
                     return;
                 }
 
@@ -1685,6 +1709,10 @@
                 announcementCarouselPreviousIndex = -1;
                 renderAnnouncementCarouselFrame();
                 startAnnouncementsCarousel();
+                var hasPersonal = visibleItems.some(function (it) {
+                    return Boolean(it && it.personalWish);
+                });
+                toggleCelebrationWishSection(hasPersonal);
             }
 
             function loadAnnouncements() {
@@ -2923,16 +2951,26 @@
                         return;
                     }
                     var dotButton = event.target.closest("button[data-announcement-index]");
-                    if (!dotButton) {
+                    if (dotButton) {
+                        var nextIndex = Number(dotButton.getAttribute("data-announcement-index"));
+                        if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= announcementCarouselItems.length) {
+                            return;
+                        }
+                        announcementCarouselIndex = nextIndex;
+                        renderAnnouncementCarouselFrame();
+                        startAnnouncementsCarousel();
                         return;
                     }
-                    var nextIndex = Number(dotButton.getAttribute("data-announcement-index"));
-                    if (!Number.isInteger(nextIndex) || nextIndex < 0 || nextIndex >= announcementCarouselItems.length) {
-                        return;
+                    var scrollWishBtn = event.target.closest(".announcement-wish-scroll-btn");
+                    if (scrollWishBtn && homeCelebrationWishSection) {
+                        homeCelebrationWishSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                        var inp = document.querySelector(".home-celebration-wish-section .celebration-wish-input");
+                        if (inp && typeof inp.focus === "function") {
+                            window.setTimeout(function () {
+                                inp.focus();
+                            }, 350);
+                        }
                     }
-                    announcementCarouselIndex = nextIndex;
-                    renderAnnouncementCarouselFrame();
-                    startAnnouncementsCarousel();
                 });
             }
 

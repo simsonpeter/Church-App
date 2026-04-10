@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260407celepage1">
+    <link rel="stylesheet" href="styles.css?v=20260407wishchat1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -56,6 +56,11 @@
                         <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
                     </li>
                 </ul>
+                <div class="home-celebration-wish-section" id="home-celebration-wish-section" hidden>
+                    <h3 class="home-celebration-wish-heading" data-i18n="celebrations.wishThreadTitle">Today’s wishes</h3>
+                    <p class="page-note" data-i18n="celebrations.wishThreadIntro">Share encouragement with everyone celebrating a birthday or anniversary today.</p>
+                    <div id="home-celebration-wish-mount"></div>
+                </div>
             </section>
 
             <section class="card verse-card reading-plan-card card-v-featured">
@@ -658,7 +663,8 @@
                 <div class="card-banner">
                     <img src="announcements-banner.jpg?v=20260428img1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="celebrations.subtitle">Birthdays and anniversaries from your profile (Belgium date). Tap Wish to share or copy a message.</p>
+                <p class="page-note" data-i18n="celebrations.subtitle">Birthdays and anniversaries from your profile (Belgium date). Post a wish in the thread below — like chat.</p>
+                <div id="celebrations-wish-thread-global"></div>
                 <p class="page-note" id="celebrations-note" hidden></p>
                 <p class="page-note" id="celebrations-empty" hidden></p>
                 <ul class="list celebrations-list" id="celebrations-list"></ul>
@@ -1480,9 +1486,10 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260407fcm1"></script>
-    <script src="app-shell.js?v=20260407celepage1"></script>
+    <script src="app-shell.js?v=20260407wishchat1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="home-page.js?v=20260407celepage1"></script>
+    <script src="celebration-wish-thread.js?v=20260407wishchat1"></script>
+    <script src="home-page.js?v=20260407wishchat1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260407biblesearch2"></script>
@@ -1494,10 +1501,10 @@
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260407familybd1"></script>
-    <script src="celebrations-page.js?v=20260407celepage1"></script>
+    <script src="celebrations-page.js?v=20260407wishchat1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
-    <script src="spa-router.js?v=20260407celepage1"></script>
+    <script src="spa-router.js?v=20260407wishchat1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

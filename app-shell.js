@@ -279,14 +279,24 @@
         "home.personalCelebrationsLineAnniversary": "திருமண நாள் வாழ்த்துக்கள், {name}! உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்.",
         "home.personalCelebrationsLineFamily": "இன்று {name} அவர்களின் பிறந்தநாள் — வாழ்த்துச் சொல்லுங்கள்!",
         "home.personalWishCta": "வாழ்த்து சொல்",
+        "home.personalWishScrollToThread": "வாழ்த்துப் பெட்டியைத் திற",
         "celebrations.eyebrow": "விழாக்கள்",
         "celebrations.title": "இன்றைய விழாக்கள்",
-        "celebrations.subtitle": "உங்கள் சுயவிவரத்திலிருந்து பிறந்தநாட்கள் மற்றும் திருமண நாள் (பெல்ஜியம் தேதி). வாழ்த்து என்பதைத் தட்டி பகிரவும் அல்லது நகலெடுக்கவும்.",
+        "celebrations.subtitle": "உங்கள் சுயவிவரத்திலிருந்து பிறந்தநாட்கள் மற்றும் திருமண நாள் (பெல்ஜியம் தேதி). கீழே உள்ள உரையாடல் போன்ற பெட்டியில் வாழ்த்து இடுங்கள்.",
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
-        "celebrations.emptyToday": "இன்று பிறந்தநாள் அல்லது திருமண நாள் இல்லை (பெல்ஜியம் தேதி). சுயவிவரத்தில் தேதிகளைச் சேர்க்கவும்.",
-        "celebrations.wishButton": "வாழ்த்து சொல்",
-        "celebrations.wishedButton": "வாழ்த்தியது",
-        "celebrations.wishHint": "பகிர்வு திறக்கும், அல்லது WhatsApp/SMS/மின்னஞ்சலில் ஒட்ட உரையை நகலெடுக்கவும்.",
+        "celebrations.emptyToday": "இன்று உங்கள் சுயவிவரத்தில் பிறந்தநாள்/திருமண நாள் இல்லை. மேலே உள்ள சமூக வாழ்த்துப் பெட்டியை இன்னும் பயன்படுத்தலாம்.",
+        "celebrations.wishThreadTitle": "இன்றைய சமூக வாழ்த்துக்கள்",
+        "celebrations.wishThreadIntro": "இன்று பிறந்தநாள்/திருமண நாள் கொண்டாடுபவர்களுக்கு அன்புடன் எழுதுங்கள்.",
+        "celebrations.wishThreadPlaceholder": "வாழ்த்துச் செய்தியை எழுதுங்கள்…",
+        "celebrations.wishThreadSend": "அனுப்பு",
+        "celebrations.wishThreadLogin": "வாழ்த்து இடுவதற்கு உள்நுழையவும்.",
+        "celebrations.wishThreadEmpty": "இன்னும் வாழ்த்துக்கள் இல்லை — முதலில் நீங்கள்!",
+        "celebrations.wishThreadUnavailable": "வாழ்த்துக்கள் இப்போது கிடைக்கவில்லை.",
+        "celebrations.wishThreadLoadError": "வாழ்த்துக்களை ஏற்ற முடியவில்லை.",
+        "celebrations.wishThreadTooLong": "செய்தி மிக நீளமாக உள்ளது.",
+        "celebrations.wishThreadSendError": "அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "celebrations.useInThread": "பெட்டியில் பயன்படுத்து",
+        "celebrations.useInThreadHint": "கீழுள்ள பெட்டியை நிரப்பும் — திருத்தி அனுப்பவும்.",
         "celebrations.wishMessageBirthday": "பிறந்தநாள் வாழ்த்துக்கள், {name}! தேவன் உங்களை ஆசீர்வதிப்பார்.",
         "celebrations.wishMessageAnniversary": "திருமண நாள் வாழ்த்துக்கள், {name}! உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்.",
         "celebrations.wishMessageFamily": "பிறந்தநாள் வாழ்த்துக்கள், {name}! அருமையான நாளாக அமையட்டும்.",
@@ -297,7 +307,6 @@
         "celebrations.kindEvent": "விழா",
         "celebrations.copied": "செய்தி நகலெடுக்கப்பட்டது — உங்கள் செயலியில் ஒட்டவும்.",
         "celebrations.copyFallback": "இந்தச் செய்தியை நகலெடுக்கவும்:",
-        "celebrations.wishError": "பகிர அல்லது நகலெடுக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
         "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
@@ -1664,10 +1673,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407celepage";
+    var SW_VERSION = "20260407wishchat";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebrations page + Wish from Home announcements; side menu link.";
+    var UPDATE_NOTES_SUMMARY = "Celebration wishes: chat-style thread on Home + Firestore (deploy rules/indexes).";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

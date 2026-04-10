@@ -1,6 +1,5 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
-    var WISHED_STORAGE_KEY = "njc_celebration_wished_v1";
     var BRUSSELS_TZ = "Europe/Brussels";
 
     function getBrusselsYmd() {
@@ -137,53 +136,6 @@
         return events;
     }
 
-    function getWishedMap() {
-        try {
-            var raw = window.localStorage.getItem(WISHED_STORAGE_KEY);
-            var parsed = raw ? JSON.parse(raw) : {};
-            return parsed && typeof parsed === "object" ? parsed : {};
-        } catch (e1) {
-            return {};
-        }
-    }
-
-    function saveWishedMap(map) {
-        try {
-            window.localStorage.setItem(WISHED_STORAGE_KEY, JSON.stringify(map && typeof map === "object" ? map : {}));
-        } catch (e2) {
-            return null;
-        }
-        return null;
-    }
-
-    function isWishedToday(eventId) {
-        var day = brusselsTodayKey();
-        var map = getWishedMap();
-        var list = map[day];
-        return Array.isArray(list) && list.indexOf(String(eventId || "")) >= 0;
-    }
-
-    function markWishedToday(eventId) {
-        var day = brusselsTodayKey();
-        var id = String(eventId || "").trim();
-        if (!id) {
-            return;
-        }
-        var map = getWishedMap();
-        var list = Array.isArray(map[day]) ? map[day].slice() : [];
-        if (list.indexOf(id) < 0) {
-            list.push(id);
-        }
-        map[day] = list;
-        var keys = Object.keys(map).sort();
-        if (keys.length > 120) {
-            keys.slice(0, keys.length - 120).forEach(function (k) {
-                delete map[k];
-            });
-        }
-        saveWishedMap(map);
-    }
-
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
             return window.NjcI18n.t(key, fallback);
@@ -224,14 +176,14 @@
         hasEvents: function () {
             return buildCelebrationEvents().length > 0;
         },
-        wishMessageForEvent: wishMessageForEvent,
-        isWishedToday: isWishedToday,
-        markWishedToday: markWishedToday
+        wishMessageForEvent: wishMessageForEvent
     };
 
     var listEl = document.getElementById("celebrations-list");
     var emptyEl = document.getElementById("celebrations-empty");
     var noteEl = document.getElementById("celebrations-note");
+    var globalThreadMount = document.getElementById("celebrations-wish-thread-global");
+    var celebrationsCard = document.querySelector(".celebrations-card");
 
     function escapeHtml(s) {
         return String(s || "")
@@ -250,7 +202,24 @@
         noteEl.textContent = key ? T(key, fallback) : "";
     }
 
+    function mountGlobalWishThread() {
+        if (!globalThreadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.mount !== "function") {
+            return;
+        }
+        window.NjcCelebrationWish.mount(globalThreadMount, {
+            i18nScope: celebrationsCard || globalThreadMount
+        });
+    }
+
+    function unmountGlobalWishThread() {
+        if (!globalThreadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.destroy !== "function") {
+            return;
+        }
+        window.NjcCelebrationWish.destroy(globalThreadMount);
+    }
+
     function renderCelebrationsPage() {
+        showNote("", "", false);
         if (!listEl || !emptyEl) {
             return;
         }
@@ -265,96 +234,69 @@
         if (!events.length) {
             listEl.innerHTML = "";
             emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries today (Belgium date). Add dates in Profile.");
+            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today (Belgium date). You can still post in the community thread above.");
             return;
         }
         emptyEl.hidden = true;
+        var useLabel = T("celebrations.useInThread", "Use in thread");
+        var hint = T("celebrations.useInThreadHint", "Fills the box below — edit if you like, then Send.");
         listEl.innerHTML = events.map(function (evt) {
-            var wished = isWishedToday(evt.id);
             var msg = wishMessageForEvent(evt);
             var kindLabel = labelForKind(evt.kind);
-            var wishLabel = T("celebrations.wishButton", "Wish");
-            var wishedLabel = T("celebrations.wishedButton", "Wished");
-            var shareHint = T("celebrations.wishHint", "Opens share, or copy your message to paste in WhatsApp, SMS, or email.");
             return "" +
-                "<li class=\"celebrations-row\" data-celebration-id=\"" + escapeHtml(evt.id) + "\" data-wish-text=\"" + escapeHtml(msg) + "\">" +
+                "<li class=\"celebrations-row\" data-suggestion-text=\"" + escapeHtml(msg) + "\">" +
                 "  <div class=\"celebrations-row-main\">" +
                 "    <span class=\"celebrations-kind\">" + escapeHtml(kindLabel) + "</span>" +
                 "    <strong class=\"celebrations-name\">" + escapeHtml(evt.displayName) + "</strong>" +
                 "    <p class=\"page-note celebrations-wish-preview\">" + escapeHtml(msg) + "</p>" +
-                "    <p class=\"page-note celebrations-wish-hint\">" + escapeHtml(shareHint) + "</p>" +
+                "    <p class=\"page-note celebrations-wish-hint\">" + escapeHtml(hint) + "</p>" +
                 "  </div>" +
                 "  <div class=\"celebrations-row-actions\">" +
-                "    <button type=\"button\" class=\"button-link celebrations-wish-btn\"" + (wished ? " disabled" : "") + " data-celebration-wish=\"" + escapeHtml(evt.id) + "\">" + escapeHtml(wished ? wishedLabel : wishLabel) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary celebrations-use-thread-btn\" data-suggestion-text=\"" + escapeHtml(msg) + "\">" + escapeHtml(useLabel) + "</button>" +
                 "  </div>" +
                 "</li>";
         }).join("");
     }
 
-    async function handleWishClick(button) {
-        var row = button.closest(".celebrations-row");
-        if (!row) {
-            return;
-        }
-        var text = row.getAttribute("data-wish-text") || "";
-        if (!text) {
-            return;
-        }
-        var id = row.getAttribute("data-celebration-id") || "";
-        try {
-            if (navigator.share && typeof navigator.share === "function") {
-                await navigator.share({ text: text });
-            } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                await navigator.clipboard.writeText(text);
-                showNote("celebrations.copied", "Message copied — paste it in your chat app.", false);
-                window.setTimeout(function () {
-                    showNote("", "", false);
-                }, 2800);
-            } else {
-                window.prompt(T("celebrations.copyFallback", "Copy this message:"), text);
-            }
-        } catch (shareErr) {
-            if (String(shareErr && shareErr.name || "") === "AbortError") {
-                return;
-            }
-            try {
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(text);
-                    showNote("celebrations.copied", "Message copied — paste it in your chat app.", false);
-                }
-            } catch (clipErr) {
-                showNote("celebrations.wishError", "Could not share or copy. Try again.", true);
-                return;
-            }
-        }
-        markWishedToday(id);
-        button.textContent = T("celebrations.wishedButton", "Wished");
-        button.disabled = true;
-    }
-
     if (listEl) {
         listEl.addEventListener("click", function (event) {
-            var btn = event.target.closest("button[data-celebration-wish]");
-            if (!btn || btn.disabled) {
+            var btn = event.target.closest(".celebrations-use-thread-btn");
+            if (!btn) {
                 return;
             }
-            event.preventDefault();
-            handleWishClick(btn);
+            var text = btn.getAttribute("data-suggestion-text") || "";
+            if (window.NjcCelebrationWish && typeof window.NjcCelebrationWish.setComposerText === "function") {
+                window.NjcCelebrationWish.setComposerText(text);
+            }
+            if (globalThreadMount && typeof globalThreadMount.scrollIntoView === "function") {
+                globalThreadMount.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            }
         });
     }
 
     function onRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
-        if (raw !== "celebrations") {
-            return;
+        if (raw === "celebrations") {
+            mountGlobalWishThread();
+            renderCelebrationsPage();
+        } else {
+            unmountGlobalWishThread();
         }
-        renderCelebrationsPage();
     }
 
     document.addEventListener("DOMContentLoaded", onRoute);
     window.addEventListener("hashchange", onRoute);
-    document.addEventListener("njc:authchange", onRoute);
-    document.addEventListener("njc:profile-updated", onRoute);
+    document.addEventListener("njc:authchange", function () {
+        if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
+            mountGlobalWishThread();
+            renderCelebrationsPage();
+        }
+    });
+    document.addEventListener("njc:profile-updated", function () {
+        if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
+            renderCelebrationsPage();
+        }
+    });
     document.addEventListener("njc:langchange", function () {
         if (String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase() === "celebrations") {
             renderCelebrationsPage();
