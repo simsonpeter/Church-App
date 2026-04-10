@@ -639,14 +639,27 @@
         };
     }
 
+    function snapshotFromFirebaseUser(fu) {
+        if (!fu || !fu.uid) {
+            return null;
+        }
+        return {
+            uid: fu.uid,
+            email: fu.email || "",
+            displayName: fu.displayName || "",
+            photoURL: fu.photoURL || "",
+            phoneNumber: fu.phoneNumber || ""
+        };
+    }
+
     function getUser() {
-        return user ? {
-            uid: user.uid,
-            email: user.email || "",
-            displayName: user.displayName || "",
-            photoURL: user.photoURL || "",
-            phoneNumber: user.phoneNumber || ""
-        } : null;
+        if (user) {
+            return snapshotFromFirebaseUser(user);
+        }
+        if (auth && auth.currentUser) {
+            return snapshotFromFirebaseUser(auth.currentUser);
+        }
+        return null;
     }
 
     window.NjcAuth = {
