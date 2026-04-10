@@ -20,6 +20,8 @@
     var verseList = document.getElementById("bible-verse-list");
     var verseListWrap = document.getElementById("bible-verse-list-wrap");
     var bibleCard = verseList ? verseList.closest(".card") : null;
+    var searchPanel = document.getElementById("bible-search-panel");
+    var searchToggleButton = document.getElementById("bible-search-toggle");
     var searchInput = document.getElementById("bible-search-input");
     var searchButton = document.getElementById("bible-search-button");
     var searchResults = document.getElementById("bible-search-results");
@@ -1604,7 +1606,7 @@
     }
 
     function renderLoading() {
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         setStatus(T("bible.loading", "Loading Bible..."), false);
         updateShareControls();
         clearChapterTransitionClasses();
@@ -1644,6 +1646,65 @@
         if (searchResults) {
             searchResults.hidden = true;
             searchResults.innerHTML = "";
+        }
+    }
+
+    function syncBibleSearchToggleLabels() {
+        if (!searchToggleButton) {
+            return;
+        }
+        var open = searchToggleButton.getAttribute("aria-expanded") === "true";
+        var aria = T("bible.searchToggleAria", "Search Bible");
+        var titleOpen = T("bible.searchToggleCloseTitle", "Close Bible search");
+        var titleClosed = T("bible.searchToggleTitle", "Search Bible");
+        searchToggleButton.setAttribute("aria-label", open ? titleOpen : aria);
+        searchToggleButton.title = open ? titleOpen : titleClosed;
+    }
+
+    function isBibleSearchPanelOpen() {
+        return Boolean(searchPanel && !searchPanel.hidden);
+    }
+
+    function closeBibleSearchPanel() {
+        if (searchPanel) {
+            searchPanel.hidden = true;
+        }
+        if (searchToggleButton) {
+            searchToggleButton.setAttribute("aria-expanded", "false");
+            searchToggleButton.classList.remove("active");
+        }
+        hideBibleSearchResults();
+        syncBibleSearchToggleLabels();
+    }
+
+    function openBibleSearchPanel() {
+        if (searchPanel) {
+            searchPanel.hidden = false;
+        }
+        if (searchToggleButton) {
+            searchToggleButton.setAttribute("aria-expanded", "true");
+            searchToggleButton.classList.add("active");
+        }
+        syncBibleSearchToggleLabels();
+        if (searchInput && typeof searchInput.focus === "function") {
+            window.setTimeout(function () {
+                try {
+                    searchInput.focus();
+                    if (typeof searchInput.select === "function") {
+                        searchInput.select();
+                    }
+                } catch (focusErr) {
+                    return null;
+                }
+            }, 0);
+        }
+    }
+
+    function toggleBibleSearchPanel() {
+        if (isBibleSearchPanelOpen()) {
+            closeBibleSearchPanel();
+        } else {
+            openBibleSearchPanel();
         }
     }
 
@@ -1804,7 +1865,7 @@
         var book = normalizeNumber(ds.book, 0);
         var chapter = normalizeNumber(ds.chapter, 0);
         var verse = normalizeNumber(ds.verse, 1);
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         stopSpeechPlayback();
         state.language = lang;
         setLanguageButtons();
@@ -1891,7 +1952,7 @@
             return Promise.resolve(false);
         }
         stopSpeechPlayback();
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         var language = normalizeLanguage(state.language);
         if (!state[language]) {
             state[language] = { book: 0, chapter: 0 };
@@ -2206,7 +2267,7 @@
 
     function setLanguage(language) {
         stopSpeechPlayback();
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         state.language = normalizeLanguage(language);
         setLanguageButtons();
         renderBible();
@@ -2214,7 +2275,7 @@
 
     function moveChapter(step) {
         stopSpeechPlayback();
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         loadBible(state.language).then(function (data) {
             var language = normalizeLanguage(state.language);
             var location = clampLocation(data, getCurrentLangState());
@@ -2293,7 +2354,7 @@
     });
     bookSelect.addEventListener("change", function () {
         stopSpeechPlayback();
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         loadBible(state.language).then(function (data) {
             var language = normalizeLanguage(state.language);
             var location = clampLocation(data, getCurrentLangState());
@@ -2307,7 +2368,7 @@
     });
     chapterSelect.addEventListener("change", function () {
         stopSpeechPlayback();
-        hideBibleSearchResults();
+        closeBibleSearchPanel();
         var prevChapter = normalizeNumber(chapterSelect.getAttribute("data-prev-chapter"), -1);
         var nextChapter = normalizeNumber(chapterSelect.value, 0);
         chapterSelect.setAttribute("data-prev-chapter", String(nextChapter));
@@ -2338,6 +2399,30 @@
     if (verseGoButton) {
         verseGoButton.addEventListener("click", jumpToVerse);
     }
+    if (searchToggleButton) {
+        searchToggleButton.addEventListener("click", function (event) {
+            event.stopPropagation();
+            toggleBibleSearchPanel();
+        });
+    }
+    document.addEventListener("click", function (event) {
+        if (!isBibleSearchPanelOpen()) {
+            return;
+        }
+        window.setTimeout(function () {
+            if (!isBibleSearchPanelOpen()) {
+                return;
+            }
+            var t = event.target;
+            if (searchPanel && searchPanel.contains(t)) {
+                return;
+            }
+            if (searchToggleButton && searchToggleButton.contains(t)) {
+                return;
+            }
+            closeBibleSearchPanel();
+        }, 0);
+    });
     if (searchButton && searchInput) {
         searchButton.addEventListener("click", function () {
             handleBibleSearchSubmit();
@@ -2431,6 +2516,11 @@
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {
+            if (isBibleSearchPanelOpen() && isBibleRouteActive()) {
+                event.preventDefault();
+                closeBibleSearchPanel();
+                return;
+            }
             setFullScreenMode(false);
         }
     });
@@ -2513,4 +2603,5 @@
     } else {
         renderBible();
     }
+    syncBibleSearchToggleLabels();
 })();
