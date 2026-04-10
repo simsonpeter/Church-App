@@ -305,8 +305,15 @@
                         inputEl.value = "";
                     }
                 })
-                .catch(function () {
-                    setStatus(tLocal("celebrations.wishThreadSendError", "Could not send. Try again."), true);
+                .catch(function (err) {
+                    var code = err && err.code ? String(err.code) : "";
+                    if (code === "permission-denied") {
+                        setStatus(tLocal("celebrations.wishThreadSendDenied", "Could not send — check that Firestore rules are deployed for celebration wishes."), true);
+                    } else if (code === "failed-precondition" || (err && String(err.message || "").indexOf("index") >= 0)) {
+                        setStatus(tLocal("celebrations.wishThreadIndexError", "Could not send — Firestore index may still be building. Try again in a minute."), true);
+                    } else {
+                        setStatus(tLocal("celebrations.wishThreadSendError", "Could not send. Try again."), true);
+                    }
                 })
                 .finally(function () {
                     sending = false;

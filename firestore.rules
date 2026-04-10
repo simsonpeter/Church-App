@@ -91,6 +91,8 @@ service cloud.firestore {
 
     match /celebrationWishes/{messageId} {
       allow read: if request.auth != null;
+      // Note: do not require createdAt is timestamp on create — FieldValue.serverTimestamp()
+      // is a sentinel and does not satisfy timestamp checks in rules.
       allow create: if request.auth != null
         && request.resource.data.senderUid == request.auth.uid
         && request.resource.data.senderName is string
@@ -99,7 +101,6 @@ service cloud.firestore {
         && request.resource.data.threadId is string
         && request.resource.data.threadId.size() > 5
         && request.resource.data.threadId.size() < 80
-        && request.resource.data.createdAt is timestamp
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() < 2500;

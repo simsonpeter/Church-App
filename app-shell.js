@@ -295,6 +295,8 @@
         "celebrations.wishThreadLoadError": "வாழ்த்துக்களை ஏற்ற முடியவில்லை.",
         "celebrations.wishThreadTooLong": "செய்தி மிக நீளமாக உள்ளது.",
         "celebrations.wishThreadSendError": "அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "celebrations.wishThreadSendDenied": "அனுப்ப முடியவில்லை — celebration வாழ்த்துக்களுக்கான Firestore விதிகள் வெளியிடப்பட்டதா என சரிபார்க்கவும்.",
+        "celebrations.wishThreadIndexError": "அனுப்ப முடியவில்லை — Firestore குறியீடு உருவாக்கப்படுகிறது. ஒரு நிமிடம் கழித்து முயற்சிக்கவும்.",
         "celebrations.useInThread": "பெட்டியில் பயன்படுத்து",
         "celebrations.useInThreadHint": "கீழுள்ள பெட்டியை நிரப்பும் — திருத்தி அனுப்பவும்.",
         "celebrations.wishMessageBirthday": "பிறந்தநாள் வாழ்த்துக்கள், {name}! தேவன் உங்களை ஆசீர்வதிப்பார்.",
@@ -1095,7 +1097,10 @@
         if (language === "ta" && Object.prototype.hasOwnProperty.call(tamilTranslations, key)) {
             return tamilTranslations[key];
         }
-        return fallback || key;
+        if (fallback !== undefined && fallback !== null && String(fallback).length) {
+            return fallback;
+        }
+        return key;
     }
 
     function t(key, fallback) {
@@ -1673,10 +1678,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407wishchat";
+    var SW_VERSION = "20260407wishfix";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebration wishes: chat-style thread on Home + Firestore (deploy rules/indexes).";
+    var UPDATE_NOTES_SUMMARY = "Fix celebration wishes send (Firestore rules) + header subtitle i18n.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
