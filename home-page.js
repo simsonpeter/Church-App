@@ -1268,42 +1268,12 @@
                     String(auth.email || "").trim()
                 );
                 var nameToken = displayName || T("home.personalWishFriend", "friend", announcementsCard);
-                var items = [];
+                var lines = [];
                 if (monthDayMatchesStoredDate(String(profile.dob || "").trim(), today)) {
-                    items.push({
-                        id: "njc-personal-birthday",
-                        personalWish: "birthday",
-                        personalDisplayName: nameToken,
-                        title: "",
-                        titleTa: "",
-                        body: "",
-                        bodyTa: "",
-                        date: getTodayKey(),
-                        expires: "",
-                        urgent: false,
-                        important: false,
-                        imageUrl: "",
-                        imageOnly: false,
-                        link: ""
-                    });
+                    lines.push({ kind: "birthday", name: nameToken });
                 }
                 if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
-                    items.push({
-                        id: "njc-personal-anniversary",
-                        personalWish: "anniversary",
-                        personalDisplayName: nameToken,
-                        title: "",
-                        titleTa: "",
-                        body: "",
-                        bodyTa: "",
-                        date: getTodayKey(),
-                        expires: "",
-                        urgent: false,
-                        important: false,
-                        imageUrl: "",
-                        imageOnly: false,
-                        link: ""
-                    });
+                    lines.push({ kind: "anniversary", name: nameToken });
                 }
                 var familyList = profile.familyMembers;
                 if (Array.isArray(familyList)) {
@@ -1322,25 +1292,54 @@
                         if (!sid) {
                             sid = "i" + String(fmIndex);
                         }
-                        items.push({
-                            id: "njc-family-bday-" + sid,
-                            personalWish: "familyBirthday",
-                            personalDisplayName: fmToken,
-                            title: "",
-                            titleTa: "",
-                            body: "",
-                            bodyTa: "",
-                            date: getTodayKey(),
-                            expires: "",
-                            urgent: false,
-                            important: false,
-                            imageUrl: "",
-                            imageOnly: false,
-                            link: ""
-                        });
+                        lines.push({ kind: "familyBirthday", name: fmToken, index: fmIndex, memberId: sid });
                     });
                 }
-                return items;
+                if (!lines.length) {
+                    return [];
+                }
+                var baseMeta = {
+                    title: "",
+                    titleTa: "",
+                    body: "",
+                    bodyTa: "",
+                    date: getTodayKey(),
+                    expires: "",
+                    urgent: false,
+                    important: false,
+                    imageUrl: "",
+                    imageOnly: false,
+                    link: ""
+                };
+                if (lines.length >= 2) {
+                    return [Object.assign({}, baseMeta, {
+                        id: "njc-personal-celebrations-today",
+                        personalWish: "celebrationsCombo",
+                        personalDisplayName: nameToken,
+                        personalCelebrationLines: lines
+                    })];
+                }
+                var only = lines[0];
+                if (only.kind === "birthday") {
+                    return [Object.assign({}, baseMeta, {
+                        id: "njc-personal-birthday",
+                        personalWish: "birthday",
+                        personalDisplayName: nameToken
+                    })];
+                }
+                if (only.kind === "anniversary") {
+                    return [Object.assign({}, baseMeta, {
+                        id: "njc-personal-anniversary",
+                        personalWish: "anniversary",
+                        personalDisplayName: nameToken
+                    })];
+                }
+                var sid = String(only.memberId || "").trim() || (typeof only.index === "number" ? ("i" + String(only.index)) : "i0");
+                return [Object.assign({}, baseMeta, {
+                    id: "njc-family-bday-" + sid,
+                    personalWish: "familyBirthday",
+                    personalDisplayName: only.name
+                })];
             }
 
             function stopAnnouncementsCarousel() {
@@ -1465,6 +1464,23 @@
                 } else if (item.personalWish === "familyBirthday") {
                     titleText = T("home.personalFamilyBirthdayTitle", "Birthday reminder", announcementsCard);
                     bodyText = T("home.personalFamilyBirthdayBody", "Today is {name}'s birthday — take a moment to wish them well!").replace(/\{name\}/g, pname);
+                } else if (item.personalWish === "celebrationsCombo") {
+                    titleText = T("home.personalCelebrationsTitle", "Celebrations today", announcementsCard);
+                    var comboLines = Array.isArray(item.personalCelebrationLines) ? item.personalCelebrationLines : [];
+                    var parts = comboLines.map(function (line) {
+                        var n = String(line && line.name || "").trim() || pname;
+                        if (line && line.kind === "birthday") {
+                            return T("home.personalCelebrationsLineBirthday", "Happy birthday, {name}! God bless you.").replace(/\{name\}/g, n);
+                        }
+                        if (line && line.kind === "anniversary") {
+                            return T("home.personalCelebrationsLineAnniversary", "Happy anniversary, {name}! God bless your marriage.").replace(/\{name\}/g, n);
+                        }
+                        if (line && line.kind === "familyBirthday") {
+                            return T("home.personalCelebrationsLineFamily", "It's {name}'s birthday — send them your wishes!").replace(/\{name\}/g, n);
+                        }
+                        return "";
+                    }).filter(Boolean);
+                    bodyText = parts.join(" \u2022 ");
                 } else {
                     titleText = isTamil
                         ? (item.titleTa || item.titleTaAuto || item.title)
@@ -1633,7 +1649,7 @@
                             return ap ? -1 : 1;
                         }
                         if (ap && bp) {
-                            var order = { birthday: 0, anniversary: 1, familyBirthday: 2 };
+                            var order = { birthday: 0, celebrationsCombo: 0, anniversary: 1, familyBirthday: 2 };
                             return (order[a.personalWish] || 9) - (order[b.personalWish] || 9);
                         }
                         if (a.urgent !== b.urgent) {

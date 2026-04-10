@@ -273,6 +273,10 @@
         "home.personalBirthdayBody": "உங்கள் சிறப்பு நாளில் அன்புடன் வாழ்த்துகிறோம், {name}. தேவன் உங்களை ஆசீர்வதிப்பார்!",
         "home.personalFamilyBirthdayTitle": "பிறந்தநாள் நினைவூட்டல்",
         "home.personalFamilyBirthdayBody": "இன்று {name} அவர்களின் பிறந்தநாள் - அவர்களுக்கு வாழ்த்துச் சொல்ல ஒரு நிமிடம் ஒதுக்குங்கள்!",
+        "home.personalCelebrationsTitle": "இன்றைய விழாக்கள்",
+        "home.personalCelebrationsLineBirthday": "பிறந்தநாள் வாழ்த்துக்கள், {name}! தேவன் உங்களை ஆசீர்வதிப்பார்.",
+        "home.personalCelebrationsLineAnniversary": "திருமண நாள் வாழ்த்துக்கள், {name}! உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்.",
+        "home.personalCelebrationsLineFamily": "இன்று {name} அவர்களின் பிறந்தநாள் — வாழ்த்துச் சொல்லுங்கள்!",
         "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
         "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
@@ -896,6 +900,7 @@
         "profile.dob": "பிறந்த தேதி",
         "profile.anniversary": "திருமண நாள்",
         "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
+        "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: முகப்பு அறிவிப்புகளில் (பெல்ஜியம் நேரம்) ஒரு வாழ்த்து தோன்றும். தொலைபேசி/செய்தி மூலம் வாழ்த்துச் சொல்லுங்கள் — பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
         "profile.familyTitle": "குடும்ப பிறந்தநாட்கள்",
         "profile.familyIntro": "நினைவில் கொள்ள விரும்பும் நபர்களைச் சேர்க்கவும். அவர்களின் பிறந்தநாளில் முகப்பில் வாழ்த்து தோன்றும்.",
         "profile.familyAddMember": "குடும்ப உறுப்பினரைச் சேர்",
@@ -1638,10 +1643,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407familybd";
+    var SW_VERSION = "20260407celecombo";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Profile: family birthdays; Home shows reminders on their day.";
+    var UPDATE_NOTES_SUMMARY = "Home: combine same-day birthday & anniversary wishes in one slide.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
