@@ -169,6 +169,40 @@
         return Array.isArray(v) ? v : [];
     }
 
+    function scoreVoiceForTts(voice, prefix) {
+        var l = String(voice && voice.lang || "").toLowerCase();
+        var n = String(voice && voice.name || "").toLowerCase();
+        var score = 0;
+        if (l.indexOf(prefix) === 0) {
+            score += 35;
+        }
+        if (/espeak|festival|flite|pico|speech\s*hub|android\s*speech|tyts|robot\s*voice/.test(n)) {
+            score -= 120;
+        }
+        if (/compact|legacy|low\s*quality|basic\s*voice/.test(n)) {
+            score -= 28;
+        }
+        if (/neural|wavenet|natural\s*english|natural\s*pro|premium|enhanced\s*neural/.test(n)) {
+            score += 42;
+        }
+        if (/enhanced|improved|online\s*\(natural\)/.test(n)) {
+            score += 18;
+        }
+        if (/microsoft.*(aria|jenny|guy|ryan|sonia|libby|natasha|duncan|clara)/.test(n)) {
+            score += 22;
+        }
+        if (/google/.test(n) && !/translate/.test(n)) {
+            score += 14;
+        }
+        if (/samantha|allison|ava|karen|daniel|tom|fred|serena|amelie|marie|zira|hazel|susan|george/.test(n)) {
+            score += 10;
+        }
+        if (voice && voice.default) {
+            score += 2;
+        }
+        return score;
+    }
+
     function pickVoice(langKey) {
         var prefix = langKey === "ta" ? "ta" : "en";
         var voices = getVoices();
@@ -187,25 +221,11 @@
             candidates = voices;
         }
         var best = null;
-        var bestScore = -1;
+        var bestScore = -9999;
         candidates.forEach(function (voice) {
-            var l = String(voice && voice.lang || "").toLowerCase();
-            var n = String(voice && voice.name || "").toLowerCase();
-            var score = 0;
-            if (l.indexOf(prefix) === 0) {
-                score += 30;
-            }
-            if (/natural|neural|premium/.test(n)) {
-                score += 16;
-            }
-            if (/google|microsoft|samantha|alex|daniel|zira|enhanced/.test(n)) {
-                score += 8;
-            }
-            if (voice && voice.default) {
-                score += 4;
-            }
-            if (score > bestScore) {
-                bestScore = score;
+            var s = scoreVoiceForTts(voice, prefix);
+            if (s > bestScore) {
+                bestScore = s;
                 best = voice;
             }
         });
@@ -410,8 +430,8 @@
         }
         var utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = currentReadLang === "ta" ? "ta-IN" : "en-GB";
-        utterance.rate = currentReadLang === "ta" ? 0.88 : 0.95;
-        utterance.pitch = 1;
+        utterance.rate = currentReadLang === "ta" ? 0.9 : 0.92;
+        utterance.pitch = currentReadLang === "ta" ? 1 : 0.98;
         var voice = pickVoice(currentReadLang);
         if (voice) {
             utterance.voice = voice;

@@ -160,6 +160,40 @@
         return Array.isArray(voices) ? voices : [];
     }
 
+    function scoreSpeechVoice(voice, targetPrefix) {
+        var lang = String(voice && voice.lang || "").toLowerCase();
+        var name = String(voice && voice.name || "").toLowerCase();
+        var score = 0;
+        if (lang.indexOf(targetPrefix) === 0) {
+            score += 35;
+        }
+        if (/espeak|festival|flite|pico|speech\s*hub|android\s*speech|tyts|robot\s*voice/.test(name)) {
+            score -= 120;
+        }
+        if (/compact|legacy|low\s*quality|basic\s*voice/.test(name)) {
+            score -= 28;
+        }
+        if (/neural|wavenet|natural\s*english|natural\s*pro|premium|enhanced\s*neural/.test(name)) {
+            score += 42;
+        }
+        if (/enhanced|improved|online\s*\(natural\)/.test(name)) {
+            score += 18;
+        }
+        if (/microsoft.*(aria|jenny|guy|ryan|sonia|libby|natasha|duncan|clara)/.test(name)) {
+            score += 22;
+        }
+        if (/google/.test(name) && !/translate/.test(name)) {
+            score += 14;
+        }
+        if (/samantha|allison|ava|karen|daniel|tom|fred|serena|amelie|marie|zira|hazel|susan|george/.test(name)) {
+            score += 10;
+        }
+        if (voice && voice.default) {
+            score += 2;
+        }
+        return score;
+    }
+
     function pickNaturalVoice(language) {
         var targetLang = normalizeLanguage(language);
         var targetPrefix = targetLang === "ta" ? "ta" : "en";
@@ -183,25 +217,11 @@
             candidates = voices;
         }
         var bestVoice = null;
-        var bestScore = -1;
+        var bestScore = -9999;
         candidates.forEach(function (voice) {
-            var lang = String(voice && voice.lang || "").toLowerCase();
-            var name = String(voice && voice.name || "").toLowerCase();
-            var score = 0;
-            if (lang.indexOf(targetPrefix) === 0) {
-                score += 30;
-            }
-            if (/natural|neural|premium/.test(name)) {
-                score += 16;
-            }
-            if (/google|microsoft|samantha|alex|daniel|zira|enhanced/.test(name)) {
-                score += 8;
-            }
-            if (voice && voice.default) {
-                score += 4;
-            }
-            if (score > bestScore) {
-                bestScore = score;
+            var s = scoreSpeechVoice(voice, targetPrefix);
+            if (s > bestScore) {
+                bestScore = s;
                 bestVoice = voice;
             }
         });
@@ -1301,8 +1321,9 @@
         var utterance = new SpeechSynthesisUtterance(text);
         var activeLanguage = normalizeLanguage(currentSpeechContext.language);
         utterance.lang = activeLanguage === "ta" ? "ta-IN" : "en-GB";
-        utterance.rate = activeLanguage === "ta" ? 0.88 : 0.95;
-        utterance.pitch = 1;
+        /* Slightly slower rate + near-default pitch reads less “robotic” on many engines. */
+        utterance.rate = activeLanguage === "ta" ? 0.9 : 0.92;
+        utterance.pitch = activeLanguage === "ta" ? 1 : 0.98;
         var voice = pickNaturalVoice(activeLanguage);
         if (voice) {
             utterance.voice = voice;
