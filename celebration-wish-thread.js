@@ -323,7 +323,7 @@
                 wishFillBtn.disabled = !loggedIn;
             }
             if (clearBtn) {
-                clearBtn.hidden = !admin || !loggedIn;
+                clearBtn.hidden = !isAdminUser() || !loggedIn;
             }
         }
 
