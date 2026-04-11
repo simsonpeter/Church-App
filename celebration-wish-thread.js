@@ -335,12 +335,6 @@
                 }
                 return;
             }
-            var user = getUser();
-            if (!user || !user.uid) {
-                renderDocs([]);
-                updateGuestUi();
-                return;
-            }
             try {
                 var db = window.firebase.firestore();
                 var q = db.collection(COLLECTION)
@@ -359,6 +353,9 @@
                     updateGuestUi();
                 }, function () {
                     setStatus(tLocal("celebrations.wishThreadLoadError", "Could not load wishes."), true);
+                    if (messagesEl) {
+                        messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadLoadError", "Could not load wishes.")) + "</p>";
+                    }
                 });
             } catch (e3) {
                 setStatus(tLocal("celebrations.wishThreadLoadError", "Could not load wishes."), true);

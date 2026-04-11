@@ -285,6 +285,8 @@
         "celebrations.title": "இன்றைய விழாக்கள்",
         "celebrations.kindBirthdayOther": "பிறந்தநாள்",
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
+        "celebrations.guestIntro": "சுயவிவரத்திலிருந்து உங்கள் பிறந்தநாட்கள்/திருமண நாளைக் காண உள்நுழையவும். கீழே உள்ள வாழ்த்துக்களை அனைவரும் படிக்கலாம்.",
+        "celebrations.upcomingSignIn": "சுயவிவரத்திலிருந்து வரவிருப்ப தேதிகளைக் காண உள்நுழையவும்.",
         "celebrations.emptyToday": "இன்று உங்கள் சுயவிவரத்தில் பிறந்தநாள்/திருமண நாள் இல்லை. மேலே உள்ள சமூக வாழ்த்துப் பெட்டியை இன்னும் பயன்படுத்தலாம்.",
         "celebrations.wishThreadTitle": "இன்றைய சமூக வாழ்த்துக்கள்",
         "celebrations.wishThreadMessagesTitle": "அனைவரின் வாழ்த்துக்கள்",
@@ -1694,10 +1696,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260412upcomingyr";
+    var SW_VERSION = "20260412guestcele";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Upcoming celebrations: current calendar year only.";
+    var UPDATE_NOTES_SUMMARY = "Celebrations: guests can open page and read wishes (publish rules).";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

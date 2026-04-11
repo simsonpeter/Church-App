@@ -382,7 +382,7 @@
         }
         var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
         if (!auth || !auth.uid) {
-            upcomingList.innerHTML = "";
+            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingSignIn", "Sign in to see your upcoming dates from Profile.")) + "</li>";
             return;
         }
         var rows = buildUpcomingCelebrations();
@@ -418,7 +418,7 @@
         if (!auth || !auth.uid) {
             todayStack.innerHTML = "";
             emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.loginRequired", "Sign in to see birthdays and anniversaries from your profile.");
+            emptyEl.textContent = T("celebrations.guestIntro", "Sign in to see your birthdays and anniversaries from Profile. Everyone can read wishes below.");
             renderUpcoming();
             return;
         }

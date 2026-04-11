@@ -14,7 +14,7 @@ rules_version = '2';
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
-//   celebrationWishes/{msgId} — daily thread for birthday/anniversary wishes (threadId + createdAt)
+//   celebrationWishes/{msgId} — daily thread (public read; create/delete when signed in)
 //   chatMessages/{msgId} — church group chat: text only, signed-in users
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
@@ -99,7 +99,8 @@ service cloud.firestore {
     }
 
     match /celebrationWishes/{messageId} {
-      allow read: if request.auth != null;
+      // Public read so guests can open Celebrations and see the community thread; create/delete still require auth.
+      allow read: if true;
       // Note: do not require createdAt is timestamp on create — FieldValue.serverTimestamp()
       // is a sentinel and does not satisfy timestamp checks in rules.
       allow create: if request.auth != null
