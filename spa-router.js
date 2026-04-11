@@ -259,7 +259,12 @@
         if ((raw === "mailbox" || raw === "admin") && !isAdminUser()) {
             return "home";
         }
-        return routes[raw] ? raw : "home";
+        var resolved = routes[raw] ? raw : "home";
+        if (window.NjcAppModules && typeof window.NjcAppModules.isRouteEnabled === "function"
+            && !window.NjcAppModules.isRouteEnabled(resolved)) {
+            return "home";
+        }
+        return resolved;
     }
 
     function setActiveRoute(route) {

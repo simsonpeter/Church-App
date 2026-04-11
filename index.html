@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411celeui1">
+    <link rel="stylesheet" href="styles.css?v=20260411mod1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -836,6 +836,41 @@
                 </details>
             </section>
 
+            <section class="card admin-modules-card card-v-minimal">
+                <details class="admin-panel-section-details">
+                    <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
+                        <h2><i class="fa-solid fa-toggle-on"></i><span data-i18n="admin.modulesTitle">App modules</span></h2>
+                    </summary>
+                    <div class="admin-panel-section-body">
+                        <div class="card-banner">
+                            <img src="settings-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                        </div>
+                        <p class="page-note" data-i18n="admin.modulesInfo">Turn sections of the app on or off for everyone. Publish rules in Firebase for changes to apply (see firestore.rules).</p>
+                        <p class="page-note" id="admin-modules-status" hidden></p>
+                        <fieldset class="admin-modules-fieldset" id="admin-modules-fieldset" disabled>
+                            <legend class="page-note" data-i18n="admin.modulesLegend">Visible to members</legend>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="announcements" checked> <span data-i18n="admin.moduleAnnouncements">Announcements (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="bibleReading" checked> <span data-i18n="admin.moduleBibleReading">Today’s Bible reading (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="dailyVerse" checked> <span data-i18n="admin.moduleDailyVerse">Daily verse (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="trivia" checked> <span data-i18n="admin.moduleTrivia">Bible Quiz</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="eventsWeek" checked> <span data-i18n="admin.moduleEventsWeek">Events this week (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="dailyBread" checked> <span data-i18n="admin.moduleDailyBread">Daily bread</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="bookShelf" checked> <span data-i18n="admin.moduleBookShelf">Book shelf</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="bible" checked> <span data-i18n="admin.moduleBible">Bible reader</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="songbook" checked> <span data-i18n="admin.moduleSongbook">Songbook</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="prayer" checked> <span data-i18n="admin.modulePrayer">Prayer wall</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="events" checked> <span data-i18n="admin.moduleEvents">Events tab</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="sermons" checked> <span data-i18n="admin.moduleSermons">Sermons</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="contact" checked> <span data-i18n="admin.moduleContact">Contact</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                        </fieldset>
+                        <button type="button" class="button-link" id="admin-modules-save" data-i18n="admin.modulesSave">Save module settings</button>
+                    </div>
+                </details>
+            </section>
+
             <section class="card admin-leaderboard-preview-card card-v-glass">
                 <details class="admin-panel-section-details">
                     <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
@@ -1491,10 +1526,11 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260412commceleb1"></script>
-    <script src="app-shell.js?v=20260413dobmerge1"></script>
+    <script src="app-modules.js?v=20260411mod1"></script>
+    <script src="app-shell.js?v=20260411mod1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260412guestcele1"></script>
-    <script src="home-page.js?v=20260412annpartner1"></script>
+    <script src="home-page.js?v=20260411mod1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260413tts1"></script>
@@ -1502,14 +1538,15 @@
     <script src="contact-page.js?v=20260330pw1"></script>
     <script src="daily-bread-page.js?v=20260413tts1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260404annsched1"></script>
+    <script src="admin-dashboard-page.js?v=20260411mod1"></script>
+    <script src="admin-modules-page.js?v=20260411mod1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260413dobmerge1"></script>
     <script src="celebrations-page.js?v=20260412annpartner1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
-    <script src="spa-router.js?v=20260412celecopy1"></script>
+    <script src="spa-router.js?v=20260411mod1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>

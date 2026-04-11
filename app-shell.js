@@ -706,6 +706,31 @@
         "admin.statsEvents": "நிகழ்வுகள்",
         "admin.statsSermons": "பிரசங்கங்கள்",
         "admin.statsUrgent": "அவசர ஜெபங்கள்",
+        "admin.modulesTitle": "செயலி தொகுதிகள்",
+        "admin.modulesInfo": "அனைவருக்கும் செயலியின் பகுதிகளை இயக்க அல்லது நிறுத்த. மாற்றங்கள் Firebase firestore.rules வெளியீட்டிற்குப் பிறகு செல்லுபடியாகும்.",
+        "admin.modulesLegend": "உறுப்பினர்களுக்குத் தெரியும்",
+        "admin.moduleAnnouncements": "அறிவிப்புகள் (முகப்பு)",
+        "admin.moduleBibleReading": "இன்றைய வேத வாசிப்பு (முகப்பு)",
+        "admin.moduleDailyVerse": "இன்றைய வசனம் (முகப்பு)",
+        "admin.moduleTrivia": "வேதாகமக் கேள்விகள்",
+        "admin.moduleEventsWeek": "இந்த வார நிகழ்வுகள் (முகப்பு)",
+        "admin.moduleDailyBread": "அன்றன்றுள்ள அப்பம்",
+        "admin.moduleBookShelf": "நூலகம்",
+        "admin.moduleBible": "வேதாகம வாசிப்பாளர்",
+        "admin.moduleSongbook": "பாடல் தொகுப்பு",
+        "admin.modulePrayer": "ஜெபச் சுவர்",
+        "admin.moduleEvents": "நிகழ்வுகள் தாவல்",
+        "admin.moduleSermons": "பிரசங்கங்கள்",
+        "admin.moduleContact": "தொடர்பு",
+        "admin.moduleCelebrations": "விழாக்கள்",
+        "admin.moduleChat": "அரட்டை",
+        "admin.moduleUserAchievements": "பயனர் சாதனைகள்",
+        "admin.modulesSave": "தொகுப்பு அமைப்புகளைச் சேமி",
+        "admin.modulesSaved": "தொகுப்பு அமைப்புகள் சேமிக்கப்பட்டன.",
+        "admin.modulesLoadError": "தொகுப்பு அமைப்புகளை ஏற்ற முடியவில்லை.",
+        "admin.modulesSaveError": "சேமிக்க முடியவில்லை. Firestore விதிகளைச் சரிபார்க்கவும் (appConfig/modules).",
+        "admin.modulesNeedAdmin": "தொகுப்புகளைத் திருத்த நிர்வாகியாக உள்நுழையவும்.",
+        "admin.modulesNoFirebase": "Firebase தயாராக இல்லை.",
         "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
         "admin.noticeTitlePlaceholder": "அறிவிப்பு தலைப்பு",
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
@@ -3795,6 +3820,46 @@
             return raw;
         }
 
+        function applyModuleNavVisibility() {
+            var m = window.NjcAppModules;
+            if (!m || typeof m.isModuleEnabled !== "function" || typeof m.isRouteEnabled !== "function") {
+                return;
+            }
+            document.querySelectorAll(".tab-nav a.tab[href][data-route]").forEach(function (tab) {
+                var r = (tab.getAttribute("data-route") || "").trim().toLowerCase();
+                if (!r) {
+                    return;
+                }
+                tab.hidden = !m.isRouteEnabled(r);
+            });
+            bibleLink.hidden = !m.isModuleEnabled("bible");
+            songbookLink.hidden = !m.isModuleEnabled("songbook");
+            bookShelfLink.hidden = !m.isModuleEnabled("bookShelf");
+            dailyBreadMenuLink.hidden = !m.isModuleEnabled("dailyBread");
+            triviaLink.hidden = !m.isModuleEnabled("trivia");
+            achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
+            chatLink.hidden = !m.isModuleEnabled("chat");
+            celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
+        }
+
+        function sanitizeNotificationTargetUrl(rawUrl) {
+            var u = String(rawUrl || "#home").trim();
+            if (!u || u.charAt(0) !== "#") {
+                return u || "#home";
+            }
+            var path = u.slice(1);
+            var q = path.indexOf("?");
+            var route = (q < 0 ? path : path.slice(0, q)).trim().toLowerCase();
+            if (route === "library") {
+                route = "book-shelf";
+            }
+            if (window.NjcAppModules && typeof window.NjcAppModules.isRouteEnabled === "function"
+                && route && !window.NjcAppModules.isRouteEnabled(route)) {
+                return "#home";
+            }
+            return u;
+        }
+
         function buildTabLinksInMenu() {
             if (!primaryLinksContainer) {
                 return;
@@ -3815,6 +3880,10 @@
                 routeMap[route] = anchor;
             });
             allowedRoutes.forEach(function (route) {
+                if (window.NjcAppModules && typeof window.NjcAppModules.isRouteEnabled === "function"
+                    && !window.NjcAppModules.isRouteEnabled(route)) {
+                    return;
+                }
                 if (route === "contact") {
                     var contactLabel = t("menu.contact", "Contact us");
                     var contactLink = document.createElement("a");
@@ -3826,7 +3895,7 @@
                     return;
                 }
                 var anchor = routeMap[route];
-                if (!anchor) {
+                if (!anchor || anchor.hidden) {
                     return;
                 }
                 var href = anchor.getAttribute("href") || "";
@@ -3909,7 +3978,7 @@
             notificationCenterMarkAll.disabled = unreadCount === 0;
             notificationCenterClearRead.disabled = readCount === 0;
             var html = items.slice(0, 20).map(function (item) {
-                var route = String(item.url || "#home");
+                var route = sanitizeNotificationTargetUrl(item.url || "#home");
                 var iconClass = "fa-podcast";
                 if (item.kind === "prayer") {
                     iconClass = "fa-hands-praying";
@@ -4043,6 +4112,7 @@
                 authIcon.className = "fa-solid " + authIconClass;
             }
             buildTabLinksInMenu();
+            applyModuleNavVisibility();
             var currentRoute = getCurrentRoute();
             primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
@@ -4277,6 +4347,9 @@
             setLabels();
             positionPanel();
             positionNotificationCenter();
+        });
+        document.addEventListener("njc:modules-updated", function () {
+            setLabels();
         });
         document.addEventListener("njc:profile-updated", function () {
             setLabels();

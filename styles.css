@@ -5459,6 +5459,39 @@ html[data-theme="dark"] .admin-notice-inline-note[data-state="validation"] {
     margin-top: 0;
 }
 
+.admin-modules-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border: 0;
+    padding: 0;
+    margin: 12px 0 16px;
+}
+
+.admin-module-toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.admin-module-toggle input {
+    margin-top: 3px;
+    flex-shrink: 0;
+}
+
+#admin-modules-status[data-kind="success"] {
+    color: var(--success, #2e7d32);
+}
+
+#admin-modules-status[data-kind="error"] {
+    color: var(--danger, #c62828);
+}
+
+#admin-modules-status[data-kind="info"] {
+    opacity: 0.9;
+}
+
 /* Scheduled daily bread list — long list scrolls inside open section */
 .admin-daily-bread-scheduled-summary-inner {
     display: flex;

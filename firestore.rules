@@ -9,6 +9,7 @@ rules_version = '2';
 // =============================================================================
 //
 // Church-App Firestore paths:
+//   appConfig/modules          — feature toggles (public read; admin write): { flags: { ... }, updatedAt }
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
@@ -34,6 +35,23 @@ service cloud.firestore {
       return request.auth != null
         && request.auth.token.email != null
         && request.auth.token.email.lower() == "simsonpeter@gmail.com";
+    }
+
+    // App-wide feature toggles (hide routes/cards in the PWA). Public read; admin write only.
+    match /appConfig/{docId} {
+      allow read: if true;
+      allow create: if isAdmin()
+        && docId == "modules"
+        && request.resource.data.keys().hasOnly(["flags", "updatedAt"])
+        && request.resource.data.flags is map
+        && request.resource.data.flags.size() <= 40
+        && request.resource.data.updatedAt is timestamp;
+      allow update: if isAdmin()
+        && docId == "modules"
+        && request.resource.data.flags is map
+        && request.resource.data.flags.size() <= 40
+        && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
     }
 
     // Songbook (written from NJC Song / admin tools; church app loads with Firebase SDK).

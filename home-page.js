@@ -95,6 +95,15 @@
             var announcementTranslationCache = getAnnouncementTranslationCache();
             var announcementTranslationPending = {};
             var announcementTranslationSaveTimerId = null;
+
+            function modOn(moduleKey) {
+                var m = window.NjcAppModules;
+                if (!m || typeof m.isModuleEnabled !== "function") {
+                    return true;
+                }
+                return m.isModuleEnabled(moduleKey);
+            }
+
             function readCardLanguageMap() {
                 try {
                     var raw = window.localStorage.getItem(CARD_LANG_MAP_KEY);
@@ -747,6 +756,9 @@
 
             function renderDailyVerse() {
                 if (!dailyVerseText || !dailyVerseReference) {
+                    return;
+                }
+                if (!modOn("dailyVerse")) {
                     return;
                 }
                 syncVerseLanguageFromCardMap();
@@ -1703,6 +1715,16 @@
             }
 
             function loadAnnouncements() {
+                if (!modOn("announcements")) {
+                    stopAnnouncementsCarousel();
+                    if (announcementsCard) {
+                        announcementsCard.hidden = true;
+                    }
+                    return;
+                }
+                if (announcementsCard) {
+                    announcementsCard.hidden = false;
+                }
                 function fetchJson(url) {
                     return fetch(url).then(function (response) {
                         if (!response.ok) {
@@ -2194,6 +2216,15 @@
             }
 
             function loadTodayReadingPlan() {
+                if (!modOn("bibleReading")) {
+                    if (readingCard) {
+                        readingCard.hidden = true;
+                    }
+                    return;
+                }
+                if (readingCard) {
+                    readingCard.hidden = false;
+                }
                 var dayOfYear = getDayOfYear(todayYmd);
 
                 promiseWithTimeout(fetch(readingPlanUrl), 12000, "Reading plan timeout")
@@ -2266,6 +2297,15 @@
             }
 
             function loadThisWeekEvents() {
+                if (!modOn("eventsWeek")) {
+                    if (thisWeekCard) {
+                        thisWeekCard.hidden = true;
+                    }
+                    return;
+                }
+                if (thisWeekCard) {
+                    thisWeekCard.hidden = false;
+                }
                 NjcEvents.mergeUpcomingEvents({ eventsUrl: eventsUrl, horizonDays: 90 })
                     .then(function (result) {
                         eventsMeta = result;
@@ -2277,6 +2317,54 @@
                         renderThisWeekEvents();
                     });
             }
+
+            function applyHomeModulesFromFlags() {
+                if (announcementsCard) {
+                    announcementsCard.hidden = !modOn("announcements");
+                }
+                if (!modOn("announcements")) {
+                    stopAnnouncementsCarousel();
+                } else {
+                    loadAnnouncements();
+                }
+                if (readingCard) {
+                    readingCard.hidden = !modOn("bibleReading");
+                }
+                if (modOn("bibleReading")) {
+                    loadTodayReadingPlan();
+                    updateReadingPlanMeta();
+                    renderReadingProgress();
+                    renderReadingPlan();
+                }
+                if (verseCard) {
+                    verseCard.hidden = !modOn("dailyVerse");
+                }
+                if (modOn("dailyVerse")) {
+                    renderDailyVerse();
+                    window.requestAnimationFrame(function () {
+                        setDailyVerseToggleLabel();
+                    });
+                }
+                if (triviaCardHome) {
+                    triviaCardHome.hidden = !modOn("trivia");
+                }
+                if (triviaCard) {
+                    triviaCard.hidden = !modOn("trivia");
+                }
+                if (modOn("trivia")) {
+                    loadTrivia();
+                }
+                if (thisWeekCard) {
+                    thisWeekCard.hidden = !modOn("eventsWeek");
+                }
+                if (modOn("eventsWeek")) {
+                    loadThisWeekEvents();
+                }
+            }
+
+            document.addEventListener("njc:modules-updated", function () {
+                applyHomeModulesFromFlags();
+            });
 
             document.addEventListener("njc:langchange", function () {
                 updateReadingPlanMeta();
@@ -2675,6 +2763,21 @@
             });
 
             function loadTrivia() {
+                if (!modOn("trivia")) {
+                    if (triviaCardHome) {
+                        triviaCardHome.hidden = true;
+                    }
+                    if (triviaCard) {
+                        triviaCard.hidden = true;
+                    }
+                    return;
+                }
+                if (triviaCardHome) {
+                    triviaCardHome.hidden = false;
+                }
+                if (triviaCard) {
+                    triviaCard.hidden = false;
+                }
                 var hasPage = triviaLoading && triviaQuestionWrap && triviaQuestionText && triviaOptions && triviaEmpty;
                 var hasHome = triviaLoadingHome && triviaQuestionWrapHome && triviaQuestionTextHome && triviaOptionsHome && triviaEmptyHome;
                 if (!hasPage && !hasHome) return;
@@ -2993,20 +3096,11 @@
             });
             window.setInterval(maybeRefreshDailyVerseForNewCalendarDay, 60000);
 
-            updateReadingPlanMeta();
-            renderReadingProgress();
-            window.requestAnimationFrame(function () {
-                setDailyVerseToggleLabel();
-                renderDailyVerse();
-            });
             applyAnnouncementsCardGradient();
-            loadTodayReadingPlan();
-            loadAnnouncements();
             recalcAndStoreReadingPoints();
-            /* Trivia + events + cloud sync are not needed for first paint — defer to idle time. */
+            applyHomeModulesFromFlags();
+            /* Cloud trivia sync is not needed for first paint — defer to idle time. */
             runWhenIdle(function () {
-                loadTrivia();
                 syncTriviaPointsForUser();
-                loadThisWeekEvents();
             }, 2200);
         })();
