@@ -21,8 +21,6 @@
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
             var CARD_LANG_MAP_KEY = "njc_card_language_map_v1";
             var announcementsList = document.getElementById("home-announcements-list");
-            var homeCelebrationWishSection = document.getElementById("home-celebration-wish-section");
-            var homeCelebrationWishMount = document.getElementById("home-celebration-wish-mount");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
             var kjvBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/englishbible.json";
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
@@ -1254,95 +1252,98 @@
             }
 
             function buildPersonalWishAnnouncements() {
-                var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-                var uid = auth && auth.uid ? String(auth.uid) : "";
-                if (!uid) {
+                try {
+                    var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                    var uid = auth && auth.uid ? String(auth.uid) : "";
+                    if (!uid) {
+                        return [];
+                    }
+                    var profile = getSavedUserProfile(uid);
+                    if (!profile) {
+                        return [];
+                    }
+                    var today = todayYmd;
+                    var displayName = pickWishDisplayName(
+                        String(profile.fullName || "").trim(),
+                        String(auth.displayName || "").trim(),
+                        String(auth.email || "").trim()
+                    );
+                    var nameToken = displayName || T("home.personalWishFriend", "friend", announcementsCard);
+                    var lines = [];
+                    if (monthDayMatchesStoredDate(String(profile.dob || "").trim(), today)) {
+                        lines.push({ kind: "birthday", name: nameToken });
+                    }
+                    if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
+                        lines.push({ kind: "anniversary", name: nameToken });
+                    }
+                    var familyList = profile.familyMembers;
+                    if (Array.isArray(familyList)) {
+                        familyList.forEach(function (member, fmIndex) {
+                            if (!member || typeof member !== "object") {
+                                return;
+                            }
+                            var dobStr = String(member.dob || "").trim();
+                            if (!monthDayMatchesStoredDate(dobStr, today)) {
+                                return;
+                            }
+                            var rawName = String(member.name || "").trim();
+                            var fmName = pickWishDisplayName(rawName, rawName, "");
+                            var fmToken = fmName || T("home.personalWishFriend", "friend", announcementsCard);
+                            var sid = String(member.id || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 72);
+                            if (!sid) {
+                                sid = "i" + String(fmIndex);
+                            }
+                            lines.push({ kind: "familyBirthday", name: fmToken, index: fmIndex, memberId: sid });
+                        });
+                    }
+                    if (!lines.length) {
+                        return [];
+                    }
+                    var baseMeta = {
+                        title: "",
+                        titleTa: "",
+                        body: "",
+                        bodyTa: "",
+                        date: getTodayKey(),
+                        expires: "",
+                        urgent: false,
+                        important: false,
+                        imageUrl: "",
+                        imageOnly: false,
+                        link: ""
+                    };
+                    if (lines.length >= 2) {
+                        return [Object.assign({}, baseMeta, {
+                            id: "njc-personal-celebrations-today",
+                            personalWish: "celebrationsCombo",
+                            personalDisplayName: nameToken,
+                            personalCelebrationLines: lines
+                        })];
+                    }
+                    var only = lines[0];
+                    if (only.kind === "birthday") {
+                        return [Object.assign({}, baseMeta, {
+                            id: "njc-personal-birthday",
+                            personalWish: "birthday",
+                            personalDisplayName: nameToken
+                        })];
+                    }
+                    if (only.kind === "anniversary") {
+                        return [Object.assign({}, baseMeta, {
+                            id: "njc-personal-anniversary",
+                            personalWish: "anniversary",
+                            personalDisplayName: nameToken
+                        })];
+                    }
+                    var sid = String(only.memberId || "").trim() || (typeof only.index === "number" ? ("i" + String(only.index)) : "i0");
+                    return [Object.assign({}, baseMeta, {
+                        id: "njc-family-bday-" + sid,
+                        personalWish: "familyBirthday",
+                        personalDisplayName: only.name
+                    })];
+                } catch (ePw) {
                     return [];
                 }
-                var profile = getSavedUserProfile(uid);
-                if (!profile) {
-                    return [];
-                }
-                var today = todayYmd;
-                var displayName = pickWishDisplayName(
-                    String(profile.fullName || "").trim(),
-                    String(auth.displayName || "").trim(),
-                    String(auth.email || "").trim()
-                );
-                var nameToken = displayName || T("home.personalWishFriend", "friend", announcementsCard);
-                var lines = [];
-                if (monthDayMatchesStoredDate(String(profile.dob || "").trim(), today)) {
-                    lines.push({ kind: "birthday", name: nameToken });
-                }
-                if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
-                    lines.push({ kind: "anniversary", name: nameToken });
-                }
-                var familyList = profile.familyMembers;
-                if (Array.isArray(familyList)) {
-                    familyList.forEach(function (member, fmIndex) {
-                        if (!member || typeof member !== "object") {
-                            return;
-                        }
-                        var dobStr = String(member.dob || "").trim();
-                        if (!monthDayMatchesStoredDate(dobStr, today)) {
-                            return;
-                        }
-                        var rawName = String(member.name || "").trim();
-                        var fmName = pickWishDisplayName(rawName, rawName, "");
-                        var fmToken = fmName || T("home.personalWishFriend", "friend", announcementsCard);
-                        var sid = String(member.id || "").trim().replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 72);
-                        if (!sid) {
-                            sid = "i" + String(fmIndex);
-                        }
-                        lines.push({ kind: "familyBirthday", name: fmToken, index: fmIndex, memberId: sid });
-                    });
-                }
-                if (!lines.length) {
-                    return [];
-                }
-                var baseMeta = {
-                    title: "",
-                    titleTa: "",
-                    body: "",
-                    bodyTa: "",
-                    date: getTodayKey(),
-                    expires: "",
-                    urgent: false,
-                    important: false,
-                    imageUrl: "",
-                    imageOnly: false,
-                    link: "",
-                    personalCelebrationCta: true
-                };
-                if (lines.length >= 2) {
-                    return [Object.assign({}, baseMeta, {
-                        id: "njc-personal-celebrations-today",
-                        personalWish: "celebrationsCombo",
-                        personalDisplayName: nameToken,
-                        personalCelebrationLines: lines
-                    })];
-                }
-                var only = lines[0];
-                if (only.kind === "birthday") {
-                    return [Object.assign({}, baseMeta, {
-                        id: "njc-personal-birthday",
-                        personalWish: "birthday",
-                        personalDisplayName: nameToken
-                    })];
-                }
-                if (only.kind === "anniversary") {
-                    return [Object.assign({}, baseMeta, {
-                        id: "njc-personal-anniversary",
-                        personalWish: "anniversary",
-                        personalDisplayName: nameToken
-                    })];
-                }
-                var sid = String(only.memberId || "").trim() || (typeof only.index === "number" ? ("i" + String(only.index)) : "i0");
-                return [Object.assign({}, baseMeta, {
-                    id: "njc-family-bday-" + sid,
-                    personalWish: "familyBirthday",
-                    personalDisplayName: only.name
-                })];
             }
 
             function stopAnnouncementsCarousel() {
@@ -1507,8 +1508,8 @@
                 var linkLine = !isImageOnly && item.link
                     ? ("<p><a class=\"inline-link\" href=\"" + NjcEvents.escapeHtml(item.link) + "\">" + NjcEvents.escapeHtml(T("home.readMore", "Read more", announcementsCard)) + "</a></p>")
                     : "";
-                var wishCtaLine = item.personalWish && item.personalCelebrationCta
-                    ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-wish-scroll-btn\">" + NjcEvents.escapeHtml(T("home.personalWishScrollToThread", "Open wish thread", announcementsCard)) + "</button></p>")
+                var wishCtaLine = item.personalWish
+                    ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-wish-celebrations-btn\">" + NjcEvents.escapeHtml(T("home.personalWishGoToCelebrationsPage", "Wish on Celebrations page", announcementsCard)) + "</button></p>")
                     : "";
                 var dismissBtn = !item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
@@ -1618,23 +1619,6 @@
                 }, 5000);
             }
 
-            function toggleCelebrationWishSection(show) {
-                if (homeCelebrationWishSection) {
-                    homeCelebrationWishSection.hidden = !show;
-                }
-                if (!show) {
-                    if (window.NjcCelebrationWish && typeof window.NjcCelebrationWish.destroy === "function" && homeCelebrationWishMount) {
-                        window.NjcCelebrationWish.destroy(homeCelebrationWishMount);
-                    }
-                    return;
-                }
-                if (homeCelebrationWishMount && window.NjcCelebrationWish && typeof window.NjcCelebrationWish.mount === "function") {
-                    window.NjcCelebrationWish.mount(homeCelebrationWishMount, {
-                        i18nScope: announcementsCard || homeCelebrationWishSection
-                    });
-                }
-            }
-
             function renderAnnouncements() {
                 if (!announcementsList) {
                     return;
@@ -1650,7 +1634,6 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorTitle", "Could not load announcements", announcementsCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.loadAnnouncementsErrorBody", "Please try again shortly.", announcementsCard)) + "</p>" +
                         "</li>";
-                    toggleCelebrationWishSection(false);
                     return;
                 }
 
@@ -1698,7 +1681,6 @@
                         "  <h3>" + NjcEvents.escapeHtml(T("home.noAnnouncementsTitle", "No announcements right now", announcementsCard)) + "</h3>" +
                         "  <p>" + NjcEvents.escapeHtml(T("home.noAnnouncementsBody", "Check back later for updates.", announcementsCard)) + "</p>" +
                         "</li>";
-                    toggleCelebrationWishSection(false);
                     return;
                 }
 
@@ -1707,12 +1689,13 @@
                     announcementCarouselIndex = 0;
                 }
                 announcementCarouselPreviousIndex = -1;
-                renderAnnouncementCarouselFrame();
-                startAnnouncementsCarousel();
-                var hasPersonal = visibleItems.some(function (it) {
-                    return Boolean(it && it.personalWish);
-                });
-                toggleCelebrationWishSection(hasPersonal);
+                try {
+                    renderAnnouncementCarouselFrame();
+                    startAnnouncementsCarousel();
+                } catch (eAnn) {
+                    return null;
+                }
+                return null;
             }
 
             function loadAnnouncements() {
@@ -1784,10 +1767,17 @@
                         });
                 }
 
-                Promise.all([fetchStaticAnnouncements(), fetchAdminNotices()])
-                    .then(function (result) {
-                        var personal = buildPersonalWishAnnouncements();
-                        var merged = personal.concat((result[0] || []).concat(result[1] || []));
+                Promise.allSettled([fetchStaticAnnouncements(), fetchAdminNotices()])
+                    .then(function (results) {
+                        var staticList = results[0] && results[0].status === "fulfilled" ? results[0].value : [];
+                        var adminList = results[1] && results[1].status === "fulfilled" ? results[1].value : [];
+                        var personal = [];
+                        try {
+                            personal = buildPersonalWishAnnouncements();
+                        } catch (ePer) {
+                            personal = [];
+                        }
+                        var merged = personal.concat((staticList || []).concat(adminList || []));
                         var seen = {};
                         allAnnouncements = merged.filter(function (item) {
                             if (item.personalWish) {
@@ -1806,11 +1796,18 @@
                             return true;
                         });
                         announcementsError = false;
-                        renderAnnouncements();
-                    })
-                    .catch(function () {
-                        announcementsError = true;
-                        renderAnnouncements();
+                        try {
+                            renderAnnouncements();
+                        } catch (eRender) {
+                            try {
+                                allAnnouncements = (allAnnouncements || []).filter(function (it) {
+                                    return it && !it.personalWish;
+                                });
+                                renderAnnouncements();
+                            } catch (e2) {
+                                return null;
+                            }
+                        }
                     });
             }
 
@@ -2961,15 +2958,9 @@
                         startAnnouncementsCarousel();
                         return;
                     }
-                    var scrollWishBtn = event.target.closest(".announcement-wish-scroll-btn");
-                    if (scrollWishBtn && homeCelebrationWishSection) {
-                        homeCelebrationWishSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
-                        var inp = document.querySelector(".home-celebration-wish-section .celebration-wish-input");
-                        if (inp && typeof inp.focus === "function") {
-                            window.setTimeout(function () {
-                                inp.focus();
-                            }, 350);
-                        }
+                    var goCelebrationsBtn = event.target.closest(".announcement-wish-celebrations-btn");
+                    if (goCelebrationsBtn) {
+                        window.location.hash = "#celebrations";
                     }
                 });
             }

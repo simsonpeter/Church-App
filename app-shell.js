@@ -280,6 +280,7 @@
         "home.personalCelebrationsLineFamily": "இன்று {name} அவர்களின் பிறந்தநாள் — வாழ்த்துச் சொல்லுங்கள்!",
         "home.personalWishCta": "வாழ்த்து சொல்",
         "home.personalWishScrollToThread": "வாழ்த்துப் பெட்டியைத் திற",
+        "home.personalWishGoToCelebrationsPage": "விழாக்கள் பக்கத்தில் வாழ்த்து சொல்லுங்கள்",
         "celebrations.eyebrow": "விழாக்கள்",
         "celebrations.title": "இன்றைய விழாக்கள்",
         "celebrations.subtitle": "உங்கள் சுயவிவரத்திலிருந்து பிறந்தநாட்கள் மற்றும் திருமண நாள் (பெல்ஜியம் தேதி). கீழே உள்ள உரையாடல் போன்ற பெட்டியில் வாழ்த்து இடுங்கள்.",
@@ -1680,10 +1681,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260407wishthread";
+    var SW_VERSION = "20260411celehome";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebration wishes: show thread below input; load without composite index.";
+    var UPDATE_NOTES_SUMMARY = "Celebration wishes: use Celebrations page from Home announcement.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

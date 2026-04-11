@@ -3997,18 +3997,6 @@ body.auth-modal-open {
     margin-top: 8px;
 }
 
-.home-celebration-wish-section {
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
-}
-
-.home-celebration-wish-heading {
-    margin: 0 0 6px;
-    font-size: 1rem;
-    font-weight: 750;
-}
-
 .celebration-wish-messages-heading {
     margin: 0 0 8px;
     font-size: 0.95rem;
