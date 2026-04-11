@@ -15,7 +15,7 @@ rules_version = '2';
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   celebrationWishes/{msgId} — daily thread (public read; create/delete when signed in)
-//   celebrationProfiles/{uid} — public celebration fields (dob, anniversary, familyMembers) for community list
+//   celebrationProfiles/{uid} — public celebration fields (dob, anniversary, anniversaryPartnerName, familyMembers)
 //   chatMessages/{msgId} — church group chat: text only, signed-in users
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
@@ -104,13 +104,15 @@ service cloud.firestore {
       // Only celebration-related fields; written by app after profile save.
       allow create, update: if request.auth != null
         && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly(["fullName", "dob", "anniversary", "familyMembers", "updatedAt"])
+        && request.resource.data.keys().hasOnly(["fullName", "dob", "anniversary", "anniversaryPartnerName", "familyMembers", "updatedAt"])
         && request.resource.data.fullName is string
         && request.resource.data.fullName.size() <= 120
         && request.resource.data.dob is string
         && request.resource.data.dob.size() <= 12
         && request.resource.data.anniversary is string
         && request.resource.data.anniversary.size() <= 12
+        && request.resource.data.anniversaryPartnerName is string
+        && request.resource.data.anniversaryPartnerName.size() <= 120
         && request.resource.data.familyMembers is list
         && request.resource.data.familyMembers.size() <= 20;
       allow delete: if request.auth != null

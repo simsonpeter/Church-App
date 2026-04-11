@@ -1274,7 +1274,9 @@
                         lines.push({ kind: "birthday", name: nameToken });
                     }
                     if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
-                        lines.push({ kind: "anniversary", name: nameToken });
+                        var partnerN = pickWishDisplayName(String(profile.anniversaryPartnerName || "").trim(), String(profile.anniversaryPartnerName || "").trim(), "");
+                        var annivName = partnerN ? (nameToken + " & " + partnerN) : nameToken;
+                        lines.push({ kind: "anniversary", name: annivName, partnerName: partnerN });
                     }
                     var familyList = profile.familyMembers;
                     if (Array.isArray(familyList)) {
@@ -1332,7 +1334,7 @@
                         return [Object.assign({}, baseMeta, {
                             id: "njc-personal-anniversary",
                             personalWish: "anniversary",
-                            personalDisplayName: nameToken
+                            personalDisplayName: only.name || nameToken
                         })];
                     }
                     var sid = String(only.memberId || "").trim() || (typeof only.index === "number" ? ("i" + String(only.index)) : "i0");
@@ -1464,7 +1466,8 @@
                     bodyText = T("home.personalBirthdayBody", "Warm wishes on your special day, {name}. God bless you!").replace(/\{name\}/g, pname);
                 } else if (item.personalWish === "anniversary") {
                     titleText = T("home.personalAnniversaryTitle", "Happy anniversary!", announcementsCard);
-                    bodyText = T("home.personalAnniversaryBody", "Celebrating your wedding anniversary today, {name}. God bless your marriage!").replace(/\{name\}/g, pname);
+                    var annivPname = String(item.personalDisplayName || "").trim() || pname;
+                    bodyText = T("home.personalAnniversaryBody", "Celebrating your wedding anniversary today, {name}. God bless your marriage!").replace(/\{name\}/g, annivPname);
                 } else if (item.personalWish === "familyBirthday") {
                     titleText = T("home.personalFamilyBirthdayTitle", "Birthday reminder", announcementsCard);
                     bodyText = T("home.personalFamilyBirthdayBody", "Today is {name}'s birthday — take a moment to wish them well!").replace(/\{name\}/g, pname);
@@ -1477,7 +1480,8 @@
                             return T("home.personalCelebrationsLineBirthday", "Happy birthday, {name}! God bless you.").replace(/\{name\}/g, n);
                         }
                         if (line && line.kind === "anniversary") {
-                            return T("home.personalCelebrationsLineAnniversary", "Happy anniversary, {name}! God bless your marriage.").replace(/\{name\}/g, n);
+                            var annN = String(line && line.name || "").trim() || pname;
+                            return T("home.personalCelebrationsLineAnniversary", "Happy anniversary, {name}! God bless your marriage.").replace(/\{name\}/g, annN);
                         }
                         if (line && line.kind === "familyBirthday") {
                             return T("home.personalCelebrationsLineFamily", "It's {name}'s birthday — send them your wishes!").replace(/\{name\}/g, n);

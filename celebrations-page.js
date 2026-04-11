@@ -98,6 +98,16 @@
         return out;
     }
 
+    function partnerFirstName(raw) {
+        return pickWishDisplayName(String(raw || "").trim(), String(raw || "").trim(), "") || "";
+    }
+
+    function anniversaryCoupleDisplay(profile) {
+        var me = pickWishDisplayName(String(profile && profile.fullName || "").trim(), "", "") || "friend";
+        var partner = partnerFirstName(profile && profile.anniversaryPartnerName);
+        return partner ? (me + " & " + partner) : me;
+    }
+
     function profileFromFirestoreData(data) {
         if (!data || typeof data !== "object") {
             return null;
@@ -106,6 +116,7 @@
             fullName: String(data.fullName || "").trim(),
             dob: String(data.dob || "").trim(),
             anniversary: String(data.anniversary || "").trim(),
+            anniversaryPartnerName: String(data.anniversaryPartnerName || "").trim(),
             familyMembers: normalizeFamilyMembers(data.familyMembers)
         };
     }
@@ -136,7 +147,7 @@
             events.push({
                 id: "njc-cev-" + subjectUid + "-ann",
                 kind: isSelf ? "myAnniversary" : "anniversary",
-                displayName: nameToken,
+                displayName: anniversaryCoupleDisplay(profile),
                 subjectUid: String(subjectUid)
             });
         }
@@ -278,6 +289,7 @@
         var isSelf = Boolean(viewerUid && String(viewerUid) === String(subjectUid));
         var displayName = pickWishDisplayName(String(profile.fullName || "").trim(), "", "");
         var nameToken = displayName || "friend";
+        var annivCouple = anniversaryCoupleDisplay(profile);
 
         function pushRow(name, kind, dobStr) {
             var next = findNextOccurrenceFromStoredDate(dobStr);
@@ -315,7 +327,7 @@
         }
         var pAnn = String(profile.anniversary || "").trim();
         if (pAnn) {
-            pushRow(nameToken, isSelf ? "myAnniversary" : "anniversary", pAnn);
+            pushRow(annivCouple, isSelf ? "myAnniversary" : "anniversary", pAnn);
         }
         normalizeFamilyMembers(profile.familyMembers).forEach(function (member) {
             var n = pickWishDisplayName(member.name, member.name, "") || "friend";

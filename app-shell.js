@@ -954,6 +954,9 @@
         "profile.dob": "பிறந்த தேதி",
         "profile.anniversary": "திருமண நாள்",
         "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
+        "profile.anniversaryPartnerName": "திருமண நாளுக்கு மனைவி/கணவர் பெயர்",
+        "profile.anniversaryPartnerPlaceholder": "எ.கா. மரியா",
+        "profile.anniversaryPartnerHelp": "திருமண நாளன்று விழாக்கள் மற்றும் முகப்பில் காட்டப்படும்.",
         "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: அன்று முகப்பில் வாழ்த்து தோன்றும்; பட்டியல் → இன்றைய விழாக்கள் என்பதில் சென்று செய்தி அனுப்பவும். பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
         "profile.familyTitle": "குடும்ப பிறந்தநாட்கள்",
         "profile.familyIntro": "நினைவில் கொள்ள விரும்பும் நபர்களைச் சேர்க்கவும். அவர்களின் பிறந்தநாளில் முகப்பில் வாழ்த்து தோன்றும்.",
@@ -1700,10 +1703,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260412celebanner";
+    var SW_VERSION = "20260412annpartner";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebrations page: new banner image.";
+    var UPDATE_NOTES_SUMMARY = "Profile: spouse/partner name for anniversary on Celebrations & Home.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

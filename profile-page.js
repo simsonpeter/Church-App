@@ -9,6 +9,7 @@
     var fullNameInput = document.getElementById("profile-full-name");
     var dobInput = document.getElementById("profile-dob");
     var anniversaryInput = document.getElementById("profile-anniversary");
+    var anniversaryPartnerInput = document.getElementById("profile-anniversary-partner");
     var phoneInput = document.getElementById("profile-phone");
     var groupIdInput = document.getElementById("profile-group-id");
     var leaderboardAnonymousInput = document.getElementById("profile-leaderboard-anonymous");
@@ -264,6 +265,7 @@
                 fullName: String(p.fullName || "").trim().slice(0, 120),
                 dob: String(p.dob || "").trim().slice(0, 12),
                 anniversary: String(p.anniversary || "").trim().slice(0, 12),
+                anniversaryPartnerName: String(p.anniversaryPartnerName || "").trim().slice(0, 120),
                 familyMembers: fam
             };
             if (window.firebase.firestore && window.firebase.firestore.FieldValue) {
@@ -283,6 +285,7 @@
             fullName: base.fullName,
             dob: base.dob,
             anniversary: base.anniversary,
+            anniversaryPartnerName: String(base.anniversaryPartnerName || "").trim().slice(0, 120),
             familyMembers: normalizeFamilyMembersList(base.familyMembers),
             phone: base.phone,
             groupId: base.groupId || "",
@@ -341,7 +344,7 @@
 
     function setFormEnabled(enabled) {
         var disabled = !enabled;
-        [fullNameInput, dobInput, anniversaryInput, phoneInput, groupIdInput, leaderboardAnonymousInput, photoSkipCloudInput, photoFileInput].forEach(function (node) {
+        [fullNameInput, dobInput, anniversaryInput, anniversaryPartnerInput, phoneInput, groupIdInput, leaderboardAnonymousInput, photoSkipCloudInput, photoFileInput].forEach(function (node) {
             if (node) {
                 node.disabled = disabled;
             }
@@ -373,6 +376,7 @@
             fullName: String(source.fullName || activeUser.displayName || deriveNameFromEmail(activeUser.email || "")).trim(),
             dob: String(source.dob || "").trim(),
             anniversary: String(source.anniversary || "").trim(),
+            anniversaryPartnerName: String(source.anniversaryPartnerName || "").trim().slice(0, 120),
             familyMembers: normalizeFamilyMembersList(source.familyMembers),
             phone: String(source.phone || activeUser.phoneNumber || "").trim(),
             groupId: sanitizeGroupIdInput(source.groupId),
@@ -407,6 +411,7 @@
             fullName: String(fullNameInput && fullNameInput.value || "").trim(),
             dob: String(dobInput && dobInput.value || "").trim(),
             anniversary: String(anniversaryInput && anniversaryInput.value || "").trim(),
+            anniversaryPartnerName: String(anniversaryPartnerInput && anniversaryPartnerInput.value || "").trim().slice(0, 120),
             familyMembers: collectFamilyMembersFromDom(),
             phone: String(phoneInput && phoneInput.value || "").trim(),
             groupId: sanitizeGroupIdInput(groupIdInput && groupIdInput.value),
@@ -555,6 +560,9 @@
         if (anniversaryInput) {
             anniversaryInput.value = String(profile.anniversary || "");
         }
+        if (anniversaryPartnerInput) {
+            anniversaryPartnerInput.value = String(profile.anniversaryPartnerName || "");
+        }
         if (phoneInput) {
             phoneInput.value = String(profile.phone || "");
         }
@@ -621,7 +629,7 @@
         currentUid = String(user && user.uid || "");
         if (!currentUid) {
             setFormEnabled(false);
-            populateForm({ fullName: "", dob: "", anniversary: "", familyMembers: [], phone: "", groupId: "", leaderboardAnonymous: false, photoSkipCloud: false, photoUrl: "" });
+            populateForm({ fullName: "", dob: "", anniversary: "", anniversaryPartnerName: "", familyMembers: [], phone: "", groupId: "", leaderboardAnonymous: false, photoSkipCloud: false, photoUrl: "" });
             renderAvatar({}, user);
             renderProfileAchievementPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
@@ -666,6 +674,11 @@
             var cloudAnn = String(cloudProfile.anniversary || "").trim();
             if (!cloudAnn && localAnn) {
                 cloudProfile = Object.assign({}, cloudProfile, { anniversary: localAnn });
+            }
+            var localPartner = String(localProfile.anniversaryPartnerName || "").trim();
+            var cloudPartner = String(cloudProfile.anniversaryPartnerName || "").trim();
+            if (!cloudPartner && localPartner) {
+                cloudProfile = Object.assign({}, cloudProfile, { anniversaryPartnerName: localPartner });
             }
             var mergedFam = mergeFamilyMembersPreservingLocal(localProfile.familyMembers, cloudProfile.familyMembers);
             cloudProfile = Object.assign({}, cloudProfile, { familyMembers: mergedFam });
