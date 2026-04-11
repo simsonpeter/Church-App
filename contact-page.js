@@ -50,6 +50,9 @@
             var activePrayerTab = "urgent";
             var prayerTranslationCache = loadPrayerTranslationCache();
             var prayerActionState = loadPrayerActionState();
+            if (stripLegacyPrayToggleFromActionState(prayerActionState)) {
+                savePrayerActionState();
+            }
             var prayerClientId = getOrCreatePrayerClientId();
             var prayerTranslationPending = {};
             var prayerTranslationSaveTimerId = null;
@@ -121,6 +124,37 @@
                 } catch (err) {
                     return {};
                 }
+            }
+
+            /** Old app versions stored a per-user "pray" toggle; prayed count no longer uses it. */
+            function stripLegacyPrayToggleFromActionState(state) {
+                var map = state && typeof state === "object" ? state : {};
+                var changed = false;
+                Object.keys(map).forEach(function (actorKey) {
+                    var actorState = map[actorKey];
+                    if (!actorState || typeof actorState !== "object") {
+                        return;
+                    }
+                    Object.keys(actorState).forEach(function (prayerKey) {
+                        var prayerState = actorState[prayerKey];
+                        if (!prayerState || typeof prayerState !== "object") {
+                            return;
+                        }
+                        if (Object.prototype.hasOwnProperty.call(prayerState, "pray")) {
+                            delete prayerState.pray;
+                            changed = true;
+                        }
+                        if (!Object.keys(prayerState).length) {
+                            delete actorState[prayerKey];
+                            changed = true;
+                        }
+                    });
+                    if (!Object.keys(actorState).length) {
+                        delete map[actorKey];
+                        changed = true;
+                    }
+                });
+                return changed;
             }
 
             function savePrayerActionState() {
@@ -1002,7 +1036,11 @@
                     }
 
                     if (action === "pray") {
-                        targetEntry.prayed = Math.max(0, Number(targetEntry.prayed || 0) + 1);
+                        var prevPrayed = Number(targetEntry.prayed || 0);
+                        if (!Number.isFinite(prevPrayed) || prevPrayed < 0) {
+                            prevPrayed = 0;
+                        }
+                        targetEntry.prayed = Math.floor(prevPrayed) + 1;
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
                     } else if (action === "answer") {
