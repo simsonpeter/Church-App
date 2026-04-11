@@ -1694,10 +1694,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260412celecopy";
+    var SW_VERSION = "20260412upcomingyr";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebrations: cleaner title; Birthday label; less Belgium copy.";
+    var UPDATE_NOTES_SUMMARY = "Upcoming celebrations: current calendar year only.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

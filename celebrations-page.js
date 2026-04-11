@@ -271,6 +271,9 @@
             if (!next) {
                 return;
             }
+            if (next.year !== today.year) {
+                return;
+            }
             if (monthDayMatchesStoredDate(dobStr, today)) {
                 return;
             }
