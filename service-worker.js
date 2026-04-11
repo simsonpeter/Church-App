@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v299commceleb";
-const RUNTIME_CACHE = "njc-runtime-cache-v299commceleb";
+const APP_CACHE = "njc-app-cache-v300celebanner";
+const RUNTIME_CACHE = "njc-runtime-cache-v300celebanner";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260411celeui1",
     "./user-auth.js?v=20260412commceleb1",
-    "./app-shell.js?v=20260412commceleb1",
+    "./app-shell.js?v=20260412celebanner1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260411celehome1",
     "./events-page.js?v=20260414u2",
