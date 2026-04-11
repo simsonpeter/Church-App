@@ -1,4 +1,13 @@
 rules_version = '2';
+//
+// === PASTE INTO FIREBASE (whole file) =====================================
+// 1) GitHub → Church-App → firestore.rules → open file → Raw → Select all → Copy
+// 2) Firebase Console → Firestore Database → Rules → Select all → Paste → Publish
+// No need to search or edit snippets; this file is the full ruleset for this app.
+// Exception: if your Firebase project has EXTRA collections not listed below,
+// do not replace blindly — merge those matches in or you may break other tools.
+// =============================================================================
+//
 // Church-App Firestore paths:
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
