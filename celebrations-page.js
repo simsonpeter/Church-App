@@ -1,14 +1,15 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var BRUSSELS_TZ = "Europe/Brussels";
+    var lastWishSuggestion = "";
 
-    function getBrusselsYmd() {
+    function getBrusselsYmdForDate(dateValue) {
         var parts = new Intl.DateTimeFormat("en-GB", {
             timeZone: BRUSSELS_TZ,
             year: "numeric",
             month: "2-digit",
             day: "2-digit"
-        }).formatToParts(new Date());
+        }).formatToParts(dateValue);
 
         function partValue(type) {
             var found = parts.find(function (part) {
@@ -22,6 +23,10 @@
             month: partValue("month"),
             day: partValue("day")
         };
+    }
+
+    function getBrusselsYmd() {
+        return getBrusselsYmdForDate(new Date());
     }
 
     function brusselsTodayKey() {
@@ -170,19 +175,164 @@
         return T("celebrations.kindEvent", "Celebration");
     }
 
+    function isValidCalendarYmd(y, m, d) {
+        if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) {
+            return false;
+        }
+        if (m < 1 || m > 12 || d < 1 || d > 31) {
+            return false;
+        }
+        var dt = new Date(Date.UTC(y, m - 1, d));
+        return dt.getUTCFullYear() === y && dt.getUTCMonth() === m - 1 && dt.getUTCDate() === d;
+    }
+
+    function compareYmd(a, b) {
+        if (a.year !== b.year) {
+            return a.year < b.year ? -1 : 1;
+        }
+        if (a.month !== b.month) {
+            return a.month < b.month ? -1 : 1;
+        }
+        if (a.day !== b.day) {
+            return a.day < b.day ? -1 : 1;
+        }
+        return 0;
+    }
+
+    function findNextOccurrenceFromStoredDate(ymdStr) {
+        if (!ymdStr || !/^\d{4}-\d{2}-\d{2}$/.test(ymdStr)) {
+            return null;
+        }
+        var parts = ymdStr.split("-");
+        var mm = Number(parts[1]);
+        var dd = Number(parts[2]);
+        if (!mm || !dd || mm > 12) {
+            return null;
+        }
+        var today = getBrusselsYmd();
+        var addY;
+        for (addY = 0; addY <= 2; addY += 1) {
+            var y = today.year + addY;
+            if (!isValidCalendarYmd(y, mm, dd)) {
+                continue;
+            }
+            var cand = { year: y, month: mm, day: dd };
+            if (compareYmd(cand, today) > 0) {
+                return cand;
+            }
+        }
+        return null;
+    }
+
+    function daysUntilFromToday(targetYmd) {
+        var today = getBrusselsYmd();
+        var t0 = Date.UTC(today.year, today.month - 1, today.day);
+        var t1 = Date.UTC(targetYmd.year, targetYmd.month - 1, targetYmd.day);
+        return Math.round((t1 - t0) / 86400000);
+    }
+
+    function formatUpcomingDate(ymd) {
+        if (!ymd || !ymd.year) {
+            return "";
+        }
+        try {
+            var d = new Date(Date.UTC(ymd.year, ymd.month - 1, ymd.day, 12, 0, 0));
+            return new Intl.DateTimeFormat(undefined, {
+                weekday: "short",
+                month: "short",
+                day: "numeric"
+            }).format(d);
+        } catch (e) {
+            return String(ymd.year) + "-" + String(ymd.month).padStart(2, "0") + "-" + String(ymd.day).padStart(2, "0");
+        }
+    }
+
+    function buildUpcomingCelebrations() {
+        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        var uid = auth && auth.uid ? String(auth.uid) : "";
+        if (!uid) {
+            return [];
+        }
+        var profile = getSavedUserProfile(uid);
+        if (!profile) {
+            return [];
+        }
+        var today = getBrusselsYmd();
+        var displayName = pickWishDisplayName(
+            String(profile.fullName || "").trim(),
+            String(auth.displayName || "").trim(),
+            String(auth.email || "").trim()
+        );
+        var nameToken = displayName || "friend";
+        var rows = [];
+
+        function pushRow(name, kind, dobStr) {
+            var next = findNextOccurrenceFromStoredDate(dobStr);
+            if (!next) {
+                return;
+            }
+            if (monthDayMatchesStoredDate(dobStr, today)) {
+                return;
+            }
+            var days = daysUntilFromToday(next);
+            if (days <= 0) {
+                return;
+            }
+            rows.push({
+                name: name,
+                kind: kind,
+                label: labelForKind(kind),
+                whenYmd: next,
+                days: days,
+                sortKey: days
+            });
+        }
+
+        var pDob = String(profile.dob || "").trim();
+        if (pDob) {
+            pushRow(nameToken, "myBirthday", pDob);
+        }
+        var pAnn = String(profile.anniversary || "").trim();
+        if (pAnn) {
+            pushRow(nameToken, "myAnniversary", pAnn);
+        }
+        normalizeFamilyMembers(profile.familyMembers).forEach(function (member) {
+            var n = pickWishDisplayName(member.name, member.name, "") || "friend";
+            pushRow(n, "familyBirthday", member.dob);
+        });
+
+        rows.sort(function (a, b) {
+            return a.sortKey - b.sortKey;
+        });
+        return rows.slice(0, 12);
+    }
+
     window.NjcCelebrations = {
         getBrusselsTodayKey: brusselsTodayKey,
         getEvents: buildCelebrationEvents,
         hasEvents: function () {
             return buildCelebrationEvents().length > 0;
         },
-        wishMessageForEvent: wishMessageForEvent
+        wishMessageForEvent: wishMessageForEvent,
+        labelForKind: labelForKind,
+        getUpcoming: buildUpcomingCelebrations,
+        getLastWishSuggestion: function () {
+            return lastWishSuggestion;
+        },
+        getDefaultToolbarWishText: function () {
+            var evs = buildCelebrationEvents();
+            if (!evs.length) {
+                return T("celebrations.communityWishDefault", "Warm wishes to everyone celebrating today!");
+            }
+            return wishMessageForEvent(evs[0]);
+        }
     };
 
-    var listEl = document.getElementById("celebrations-list");
+    var todayStack = document.getElementById("celebrations-today-stack");
+    var threadMount = document.getElementById("celebrations-wish-thread-mount");
+    var upcomingList = document.getElementById("celebrations-upcoming-list");
     var emptyEl = document.getElementById("celebrations-empty");
     var noteEl = document.getElementById("celebrations-note");
-    var globalThreadMount = document.getElementById("celebrations-wish-thread-global");
     var celebrationsCard = document.querySelector(".celebrations-card");
 
     function isCelebrationsViewActive() {
@@ -207,74 +357,107 @@
         noteEl.textContent = key ? T(key, fallback) : "";
     }
 
-    function mountGlobalWishThread() {
-        if (!globalThreadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.mount !== "function") {
+    function mountWishThread() {
+        if (!threadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.mount !== "function") {
             return;
         }
-        window.NjcCelebrationWish.mount(globalThreadMount, {
-            i18nScope: celebrationsCard || globalThreadMount
+        window.NjcCelebrationWish.mount(threadMount, {
+            i18nScope: celebrationsCard || threadMount
         });
     }
 
-    function unmountGlobalWishThread() {
-        if (!globalThreadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.destroy !== "function") {
+    function unmountWishThread() {
+        if (!threadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.destroy !== "function") {
             return;
         }
-        window.NjcCelebrationWish.destroy(globalThreadMount);
+        window.NjcCelebrationWish.destroy(threadMount);
     }
 
-    function renderCelebrationsPage() {
-        showNote("", "", false);
-        if (!listEl || !emptyEl) {
+    function renderUpcoming() {
+        if (!upcomingList) {
             return;
         }
         var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
         if (!auth || !auth.uid) {
-            listEl.innerHTML = "";
-            emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.loginRequired", "Sign in to see birthdays and anniversaries from your profile.");
+            upcomingList.innerHTML = "";
             return;
         }
-        var events = buildCelebrationEvents();
-        if (!events.length) {
-            listEl.innerHTML = "";
-            emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today (Belgium date). You can still post in the community thread above.");
+        var rows = buildUpcomingCelebrations();
+        if (!rows.length) {
+            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingEmpty", "Add birthdays or your anniversary in Profile to see upcoming dates here.")) + "</li>";
             return;
         }
-        emptyEl.hidden = true;
-        var useLabel = T("celebrations.useInThread", "Use in thread");
-        var hint = T("celebrations.useInThreadHint", "Fills the box below — edit if you like, then Send.");
-        listEl.innerHTML = events.map(function (evt) {
-            var msg = wishMessageForEvent(evt);
-            var kindLabel = labelForKind(evt.kind);
+        var inDays = T("celebrations.upcomingInDays", "in {days} days");
+        upcomingList.innerHTML = rows.map(function (row) {
+            var dateStr = formatUpcomingDate(row.whenYmd);
+            var sub = inDays.replace(/\{days\}/g, String(row.days));
             return "" +
-                "<li class=\"celebrations-row\" data-suggestion-text=\"" + escapeHtml(msg) + "\">" +
-                "  <div class=\"celebrations-row-main\">" +
-                "    <span class=\"celebrations-kind\">" + escapeHtml(kindLabel) + "</span>" +
-                "    <strong class=\"celebrations-name\">" + escapeHtml(evt.displayName) + "</strong>" +
-                "    <p class=\"page-note celebrations-wish-preview\">" + escapeHtml(msg) + "</p>" +
-                "    <p class=\"page-note celebrations-wish-hint\">" + escapeHtml(hint) + "</p>" +
+                "<li class=\"celebrations-upcoming-item\">" +
+                "  <div class=\"celebrations-upcoming-main\">" +
+                "    <strong class=\"celebrations-upcoming-name\">" + escapeHtml(row.name) + "</strong>" +
+                "    <span class=\"celebrations-upcoming-type\">" + escapeHtml(row.label) + "</span>" +
                 "  </div>" +
-                "  <div class=\"celebrations-row-actions\">" +
-                "    <button type=\"button\" class=\"button-link button-secondary celebrations-use-thread-btn\" data-suggestion-text=\"" + escapeHtml(msg) + "\">" + escapeHtml(useLabel) + "</button>" +
+                "  <div class=\"celebrations-upcoming-meta\">" +
+                "    <span class=\"celebrations-upcoming-date\">" + escapeHtml(dateStr) + "</span>" +
+                "    <span class=\"celebrations-upcoming-countdown\">" + escapeHtml(sub) + "</span>" +
                 "  </div>" +
                 "</li>";
         }).join("");
     }
 
-    if (listEl) {
-        listEl.addEventListener("click", function (event) {
-            var btn = event.target.closest(".celebrations-use-thread-btn");
-            if (!btn) {
+    function renderCelebrationsPage() {
+        showNote("", "", false);
+        if (!todayStack || !emptyEl) {
+            return;
+        }
+        lastWishSuggestion = "";
+        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        if (!auth || !auth.uid) {
+            todayStack.innerHTML = "";
+            emptyEl.hidden = false;
+            emptyEl.textContent = T("celebrations.loginRequired", "Sign in to see birthdays and anniversaries from your profile.");
+            renderUpcoming();
+            return;
+        }
+        var events = buildCelebrationEvents();
+        if (!events.length) {
+            todayStack.innerHTML = "";
+            emptyEl.hidden = false;
+            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today (Belgium date). You can still wish everyone in the box below.");
+            renderUpcoming();
+            return;
+        }
+        emptyEl.hidden = true;
+        todayStack.innerHTML = events.map(function (evt) {
+            var msg = wishMessageForEvent(evt);
+            var kindLabel = labelForKind(evt.kind);
+            return "" +
+                "<div class=\"celebrations-today-card\" data-suggestion-text=\"" + escapeHtml(msg) + "\">" +
+                "  <div class=\"celebrations-today-line1\">" +
+                "    <span class=\"celebrations-today-name\">" + escapeHtml(evt.displayName) + "</span>" +
+                "    <span class=\"celebrations-today-dot\" aria-hidden=\"true\">·</span>" +
+                "    <span class=\"celebrations-today-type\">" + escapeHtml(kindLabel) + "</span>" +
+                "  </div>" +
+                "  <p class=\"celebrations-today-suggestion\">" + escapeHtml(msg) + "</p>" +
+                "</div>";
+        }).join("");
+
+        renderUpcoming();
+    }
+
+    if (todayStack) {
+        todayStack.addEventListener("click", function (event) {
+            var card = event.target.closest(".celebrations-today-card");
+            if (!card) {
                 return;
             }
-            var text = btn.getAttribute("data-suggestion-text") || "";
+            var text = card.getAttribute("data-suggestion-text") || "";
+            lastWishSuggestion = text;
             if (window.NjcCelebrationWish && typeof window.NjcCelebrationWish.setComposerText === "function") {
                 window.NjcCelebrationWish.setComposerText(text);
             }
-            if (globalThreadMount && typeof globalThreadMount.scrollIntoView === "function") {
-                globalThreadMount.scrollIntoView({ block: "nearest", behavior: "smooth" });
+            if (threadMount && typeof threadMount.scrollIntoView === "function") {
+                threadMount.scrollIntoView({ block: "nearest", behavior: "smooth" });
             }
         });
     }
@@ -282,10 +465,10 @@
     function onCelebrationsRouteChange(ev) {
         var route = ev && ev.detail && ev.detail.route;
         if (route === "celebrations") {
-            mountGlobalWishThread();
+            mountWishThread();
             renderCelebrationsPage();
         } else {
-            unmountGlobalWishThread();
+            unmountWishThread();
         }
     }
 
@@ -294,10 +477,10 @@
     function onRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
         if (raw === "celebrations") {
-            mountGlobalWishThread();
+            mountWishThread();
             renderCelebrationsPage();
         } else {
-            unmountGlobalWishThread();
+            unmountWishThread();
         }
     }
 
@@ -305,7 +488,7 @@
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:authchange", function () {
         if (isCelebrationsViewActive()) {
-            mountGlobalWishThread();
+            mountWishThread();
             renderCelebrationsPage();
         }
     });

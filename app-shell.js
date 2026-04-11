@@ -312,6 +312,20 @@
         "celebrations.kindEvent": "விழா",
         "celebrations.copied": "செய்தி நகலெடுக்கப்பட்டது — உங்கள் செயலியில் ஒட்டவும்.",
         "celebrations.copyFallback": "இந்தச் செய்தியை நகலெடுக்கவும்:",
+        "celebrations.celebratingTodayTitle": "இன்று கொண்டாடுபவர்கள்",
+        "celebrations.tapCardHint": "பரிந்துரைக்கப்பட்ட வாழ்த்தை கீழுள்ள பெட்டியில் நிரப்ப ஒரு வரிசையைத் தட்டுங்கள்.",
+        "celebrations.upcomingTitle": "வரவிருக்கும் விழாக்கள்",
+        "celebrations.upcomingInDays": "{days} நாட்களில்",
+        "celebrations.upcomingEmpty": "வரவிருப்பதைக் காண சுயவிவரத்தில் பிறந்தநாள்/திருமண நாளைச் சேர்க்கவும்.",
+        "celebrations.wishButton": "வாழ்த்து",
+        "celebrations.toggleThread": "வாழ்த்துக்களைக் காட்டு",
+        "celebrations.deleteWish": "நீக்கு",
+        "celebrations.deleteConfirm": "இந்தச் செய்தியை நீக்கவா?",
+        "celebrations.clearThread": "அனைத்தையும் நீக்கு",
+        "celebrations.clearConfirm": "இந்தப் பிரிவில் உள்ள அனைத்து செய்திகளையும் நீக்கவா?",
+        "celebrations.clearFailed": "நீக்க முடியவில்லை.",
+        "celebrations.deleteFailed": "நீக்க முடியவில்லை.",
+        "celebrations.communityWishDefault": "இன்று கொண்டாடுபவர்களுக்கு அன்புடன் வாழ்த்துக்கள்!",
         "home.personalAnniversaryTitle": "திருமண நாள் வாழ்த்துக்கள்!",
         "home.personalAnniversaryBody": "இன்று உங்கள் திருமண நாளை கொண்டாடுகிறோம், {name}. உங்கள் திருமணத்தை தேவன் ஆசீர்வதிப்பார்!",
         "home.readingDatePrefix": "இன்று:",
@@ -1681,10 +1695,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411celehome";
+    var SW_VERSION = "20260411celeui";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebration wishes: use Celebrations page from Home announcement.";
+    var UPDATE_NOTES_SUMMARY = "Celebrations page: layout, collapsible wishes, delete own / admin clear.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411celehome1">
+    <link rel="stylesheet" href="styles.css?v=20260411celeui1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -658,11 +658,17 @@
                 <div class="card-banner">
                     <img src="announcements-banner.jpg?v=20260428img1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="celebrations.subtitle">Birthdays and anniversaries from your profile (Belgium date). Post a wish in the thread below — like chat.</p>
-                <div id="celebrations-wish-thread-global"></div>
+                <p class="page-note" data-i18n="celebrations.subtitle">Today’s events from your profile (Belgium date). Tap a card to fill the wish box, or write your own. Open the arrow to read all messages.</p>
                 <p class="page-note" id="celebrations-note" hidden></p>
                 <p class="page-note" id="celebrations-empty" hidden></p>
-                <ul class="list celebrations-list" id="celebrations-list"></ul>
+                <h3 class="celebrations-section-title" data-i18n="celebrations.celebratingTodayTitle">Celebrating today</h3>
+                <p class="page-note celebrations-today-hint" data-i18n="celebrations.tapCardHint">Tap a row to copy the suggested wish into the box below.</p>
+                <div class="celebrations-today-stack" id="celebrations-today-stack"></div>
+                <div class="celebrations-thread-wrap" id="celebrations-wish-thread-mount"></div>
+                <div class="celebrations-upcoming-wrap">
+                    <h3 class="celebrations-section-title celebrations-upcoming-title" data-i18n="celebrations.upcomingTitle">Upcoming celebrations</h3>
+                    <ul class="list celebrations-upcoming-list" id="celebrations-upcoming-list"></ul>
+                </div>
             </section>
             </main>
         </section>
@@ -1481,9 +1487,9 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260407fcm1"></script>
-    <script src="app-shell.js?v=20260411celehome1"></script>
+    <script src="app-shell.js?v=20260411celeui1"></script>
     <script src="events-engine.js?v=20260318de"></script>
-    <script src="celebration-wish-thread.js?v=20260407wishthread2"></script>
+    <script src="celebration-wish-thread.js?v=20260411celeui1"></script>
     <script src="home-page.js?v=20260411celehome1"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
@@ -1496,7 +1502,7 @@
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260407familybd1"></script>
-    <script src="celebrations-page.js?v=20260407wishthread2"></script>
+    <script src="celebrations-page.js?v=20260411celeui1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
     <script src="spa-router.js?v=20260407wishthread2"></script>

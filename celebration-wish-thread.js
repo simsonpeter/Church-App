@@ -4,6 +4,7 @@
     var MAX_TEXT = 2000;
     var PAGE_LIMIT = 40;
     var PROFILE_KEY = "njc_user_profiles_v1";
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
 
     function getBrusselsTodayKey() {
         var parts = new Intl.DateTimeFormat("en-GB", {
@@ -50,6 +51,12 @@
             return window.NjcAuth.getUser();
         }
         return null;
+    }
+
+    function isAdminUser() {
+        var u = getUser();
+        var em = String(u && u.email || "").trim().toLowerCase();
+        return em === ADMIN_EMAIL;
     }
 
     function displayNameForUser(user) {
@@ -136,33 +143,58 @@
 
         var sid = "cw-" + String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8);
         rootEl.innerHTML = "" +
-            "<div class=\"celebration-wish-thread\" data-celebration-wish-suffix=\"" + sid + "\">" +
+            "<div class=\"celebration-wish-thread celebration-wish-thread--panel\" data-celebration-wish-suffix=\"" + sid + "\">" +
             "  <p class=\"page-note celebration-wish-status\" id=\"celebration-wish-status-" + sid + "\" hidden></p>" +
-            "  <form class=\"celebration-wish-form chat-form\" id=\"celebration-wish-form-" + sid + "\" hidden>" +
-            "    <input type=\"text\" id=\"celebration-wish-input-" + sid + "\" class=\"search-input chat-input celebration-wish-input\" maxlength=\"" + String(MAX_TEXT) + "\" autocomplete=\"off\" placeholder=\"\">" +
-            "    <button type=\"submit\" class=\"button-link\" id=\"celebration-wish-send-" + sid + "\"></button>" +
-            "  </form>" +
             "  <p class=\"page-note celebration-wish-login\" id=\"celebration-wish-login-" + sid + "\" hidden></p>" +
-            "  <h3 class=\"celebration-wish-messages-heading\">" + escapeHtml(tLocal("celebrations.wishThreadMessagesTitle", "Wishes from everyone")) + "</h3>" +
-            "  <div class=\"celebration-wish-messages\" id=\"celebration-wish-messages-" + sid + "\" aria-live=\"polite\"></div>" +
+            "  <div class=\"celebration-wish-toolbar\">" +
+            "    <input type=\"text\" id=\"celebration-wish-input-" + sid + "\" class=\"search-input celebration-wish-input\" maxlength=\"" + String(MAX_TEXT) + "\" autocomplete=\"off\" aria-label=\"\">" +
+            "    <button type=\"button\" class=\"celebration-wish-chevron\" id=\"celebration-wish-chevron-" + sid + "\" aria-expanded=\"false\" aria-controls=\"celebration-wish-dropdown-" + sid + "\" title=\"\"><i class=\"fa-solid fa-chevron-down\" aria-hidden=\"true\"></i></button>" +
+            "    <button type=\"button\" class=\"button-link button-secondary celebration-wish-wishfill\" id=\"celebration-wish-wishfill-" + sid + "\"></button>" +
+            "    <button type=\"button\" class=\"button-link celebration-wish-send\" id=\"celebration-wish-send-" + sid + "\"></button>" +
+            "  </div>" +
+            "  <div class=\"celebration-wish-dropdown\" id=\"celebration-wish-dropdown-" + sid + "\" hidden>" +
+            "    <div class=\"celebration-wish-dropdown-head\">" +
+            "      <span class=\"celebration-wish-dropdown-title\" id=\"celebration-wish-drop-title-" + sid + "\"></span>" +
+            "      <button type=\"button\" class=\"button-link button-secondary celebration-wish-clear-all\" id=\"celebration-wish-clear-" + sid + "\" hidden></button>" +
+            "    </div>" +
+            "    <div class=\"celebration-wish-messages\" id=\"celebration-wish-messages-" + sid + "\" aria-live=\"polite\"></div>" +
+            "  </div>" +
             "</div>";
 
         var messagesEl = rootEl.querySelector("#celebration-wish-messages-" + sid);
         var statusEl = rootEl.querySelector("#celebration-wish-status-" + sid);
-        var formEl = rootEl.querySelector("#celebration-wish-form-" + sid);
         var inputEl = rootEl.querySelector("#celebration-wish-input-" + sid);
         var sendBtn = rootEl.querySelector("#celebration-wish-send-" + sid);
+        var wishFillBtn = rootEl.querySelector("#celebration-wish-wishfill-" + sid);
         var loginEl = rootEl.querySelector("#celebration-wish-login-" + sid);
+        var chevronBtn = rootEl.querySelector("#celebration-wish-chevron-" + sid);
+        var dropdownEl = rootEl.querySelector("#celebration-wish-dropdown-" + sid);
+        var clearBtn = rootEl.querySelector("#celebration-wish-clear-" + sid);
+        var dropTitleEl = rootEl.querySelector("#celebration-wish-drop-title-" + sid);
 
         if (inputEl) {
-            inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a birthday wish…"));
+            inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a wish…"));
+            inputEl.setAttribute("aria-label", tLocal("celebrations.wishThreadPlaceholder", "Write a wish…"));
         }
         if (sendBtn) {
             sendBtn.textContent = tLocal("celebrations.wishThreadSend", "Send");
         }
+        if (wishFillBtn) {
+            wishFillBtn.textContent = tLocal("celebrations.wishButton", "Wish");
+        }
+        if (chevronBtn) {
+            chevronBtn.setAttribute("title", tLocal("celebrations.toggleThread", "Show wishes"));
+        }
+        if (dropTitleEl) {
+            dropTitleEl.textContent = tLocal("celebrations.wishThreadMessagesTitle", "Wishes & replies");
+        }
+        if (clearBtn) {
+            clearBtn.textContent = tLocal("celebrations.clearThread", "Clear all");
+        }
 
         var unsubscribe = null;
         var sending = false;
+        var dropdownOpen = false;
 
         function setStatus(msg, isError) {
             if (!statusEl) {
@@ -196,15 +228,36 @@
             });
         }
 
-        function scrollThreadIntoView() {
-            var box = messagesEl;
-            if (box && typeof box.scrollIntoView === "function") {
-                try {
-                    box.scrollIntoView({ block: "nearest", behavior: "smooth" });
-                } catch (se) {
-                    box.scrollIntoView(true);
-                }
+        function setDropdownOpen(open) {
+            dropdownOpen = Boolean(open);
+            if (dropdownEl) {
+                dropdownEl.hidden = !dropdownOpen;
             }
+            if (chevronBtn) {
+                chevronBtn.setAttribute("aria-expanded", dropdownOpen ? "true" : "false");
+                chevronBtn.classList.toggle("is-open", dropdownOpen);
+            }
+            if (dropdownOpen) {
+                scrollBottom();
+            }
+        }
+
+        function toolbarWishText() {
+            var sug = "";
+            try {
+                if (window.NjcCelebrations && typeof window.NjcCelebrations.getLastWishSuggestion === "function") {
+                    sug = String(window.NjcCelebrations.getLastWishSuggestion() || "").trim();
+                }
+            } catch (eS) {}
+            if (sug) {
+                return sug;
+            }
+            try {
+                if (window.NjcCelebrations && typeof window.NjcCelebrations.getDefaultToolbarWishText === "function") {
+                    return String(window.NjcCelebrations.getDefaultToolbarWishText() || "").trim();
+                }
+            } catch (eD) {}
+            return "";
         }
 
         function renderDocs(docs) {
@@ -213,26 +266,34 @@
             }
             var user = getUser();
             var uid = user && user.uid ? String(user.uid) : "";
+            var admin = isAdminUser();
             var rows = Array.isArray(docs) ? docs.slice().reverse() : [];
             if (!rows.length) {
                 messagesEl.innerHTML = "<p class=\"page-note celebration-wish-empty\">" + escapeHtml(tLocal("celebrations.wishThreadEmpty", "No wishes yet — be the first!")) + "</p>";
                 scrollBottom();
                 return;
             }
+            var delLabel = tLocal("celebrations.deleteWish", "Delete");
             messagesEl.innerHTML = rows.map(function (docSnap) {
                 var d = docSnap.data() || {};
-                var sid = String(d.senderUid || "");
-                var mine = uid && sid === uid;
+                var docId = docSnap.id;
+                var sidSend = String(d.senderUid || "");
+                var mine = uid && sidSend === uid;
                 var bubbleClass = mine ? "chat-bubble chat-bubble--mine" : "chat-bubble";
                 var name = escapeHtml(d.senderName || "");
                 var time = formatTime(d.createdAt);
                 var body = "<p class=\"chat-text\">" + escapeHtml(String(d.text || "")).replace(/\n/g, "<br>") + "</p>";
+                var showDel = (mine || admin) && docId;
+                var delBtn = showDel
+                    ? ("<button type=\"button\" class=\"button-link celebration-msg-delete\" data-del-id=\"" + escapeHtml(docId) + "\">" + escapeHtml(delLabel) + "</button>")
+                    : "";
                 return "" +
-                    "<div class=\"chat-row" + (mine ? " chat-row--mine" : "") + "\">" +
+                    "<div class=\"chat-row celebration-msg-row" + (mine ? " chat-row--mine" : "") + "\">" +
                     "  <div class=\"" + bubbleClass + "\">" +
                     "    <div class=\"chat-meta\"><span class=\"chat-name\">" + name + "</span>" +
                     (time ? "<span class=\"chat-time\">" + escapeHtml(time) + "</span>" : "") + "</div>" +
                     body +
+                    (delBtn ? ("<div class=\"celebration-msg-actions\">" + delBtn + "</div>") : "") +
                     "  </div>" +
                     "</div>";
             }).join("");
@@ -248,9 +309,6 @@
 
         function updateGuestUi() {
             var loggedIn = Boolean(getUser() && getUser().uid);
-            if (formEl) {
-                formEl.hidden = !loggedIn;
-            }
             if (loginEl) {
                 loginEl.hidden = loggedIn;
                 loginEl.textContent = tLocal("celebrations.wishThreadLogin", "Sign in to post a wish.");
@@ -260,6 +318,12 @@
             }
             if (sendBtn) {
                 sendBtn.disabled = !loggedIn || sending;
+            }
+            if (wishFillBtn) {
+                wishFillBtn.disabled = !loggedIn;
+            }
+            if (clearBtn) {
+                clearBtn.hidden = !admin || !loggedIn;
             }
         }
 
@@ -279,7 +343,6 @@
             }
             try {
                 var db = window.firebase.firestore();
-                // Equality-only query: no composite index required (orderBy+where needs an index).
                 var q = db.collection(COLLECTION)
                     .where("threadId", "==", threadId)
                     .limit(PAGE_LIMIT);
@@ -293,6 +356,7 @@
                     });
                     renderDocs(list);
                     setStatus("");
+                    updateGuestUi();
                 }, function () {
                     setStatus(tLocal("celebrations.wishThreadLoadError", "Could not load wishes."), true);
                 });
@@ -323,6 +387,7 @@
             var db = window.firebase.firestore();
             var payload = {
                 threadId: threadId,
+                eventKey: threadId,
                 text: text,
                 senderUid: user.uid,
                 senderName: displayNameForUser(user),
@@ -337,15 +402,15 @@
                     window.setTimeout(function () {
                         setStatus("");
                     }, 2200);
-                    scrollThreadIntoView();
+                    setDropdownOpen(true);
                     scrollBottom();
                 })
                 .catch(function (err) {
                     var code = err && err.code ? String(err.code) : "";
                     if (code === "permission-denied") {
-                        setStatus(tLocal("celebrations.wishThreadSendDenied", "Could not send — check that Firestore rules are deployed for celebration wishes."), true);
+                        setStatus(tLocal("celebrations.wishThreadSendDenied", "Could not send — check Firestore rules."), true);
                     } else if (code === "failed-precondition" || (err && String(err.message || "").indexOf("index") >= 0)) {
-                        setStatus(tLocal("celebrations.wishThreadIndexError", "Could not send — Firestore index may still be building. Try again in a minute."), true);
+                        setStatus(tLocal("celebrations.wishThreadIndexError", "Could not send — try again in a minute."), true);
                     } else {
                         setStatus(tLocal("celebrations.wishThreadSendError", "Could not send. Try again."), true);
                     }
@@ -356,10 +421,92 @@
                 });
         }
 
-        if (formEl) {
-            formEl.addEventListener("submit", function (event) {
-                event.preventDefault();
+        function deleteDoc(docId) {
+            if (!docId || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+                return;
+            }
+            var db = window.firebase.firestore();
+            db.collection(COLLECTION).doc(String(docId)).delete().catch(function () {
+                setStatus(tLocal("celebrations.deleteFailed", "Could not delete."), true);
+            });
+        }
+
+        function clearEntireThread() {
+            if (!isAdminUser() || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+                return;
+            }
+            var db = window.firebase.firestore();
+            db.collection(COLLECTION).where("threadId", "==", threadId).limit(PAGE_LIMIT).get()
+                .then(function (snap) {
+                    var batch = db.batch();
+                    var n = 0;
+                    snap.forEach(function (doc) {
+                        batch.delete(doc.ref);
+                        n += 1;
+                    });
+                    if (!n) {
+                        return null;
+                    }
+                    return batch.commit();
+                })
+                .catch(function () {
+                    setStatus(tLocal("celebrations.clearFailed", "Could not clear thread."), true);
+                });
+        }
+
+        if (chevronBtn && dropdownEl) {
+            chevronBtn.addEventListener("click", function () {
+                setDropdownOpen(!dropdownOpen);
+            });
+        }
+        if (wishFillBtn && inputEl) {
+            wishFillBtn.addEventListener("click", function () {
+                var t = toolbarWishText();
+                if (t) {
+                    inputEl.value = t;
+                    inputEl.focus();
+                    try {
+                        inputEl.setSelectionRange(t.length, t.length);
+                    } catch (e4) {}
+                }
+            });
+        }
+        if (sendBtn) {
+            sendBtn.addEventListener("click", function (ev) {
+                ev.preventDefault();
                 sendText();
+            });
+        }
+        if (inputEl) {
+            inputEl.addEventListener("keydown", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault();
+                    sendText();
+                }
+            });
+        }
+        if (messagesEl) {
+            messagesEl.addEventListener("click", function (event) {
+                var del = event.target.closest(".celebration-msg-delete");
+                if (!del) {
+                    return;
+                }
+                var id = del.getAttribute("data-del-id");
+                if (!id) {
+                    return;
+                }
+                if (!window.confirm(tLocal("celebrations.deleteConfirm", "Delete this message?"))) {
+                    return;
+                }
+                deleteDoc(id);
+            });
+        }
+        if (clearBtn) {
+            clearBtn.addEventListener("click", function () {
+                if (!window.confirm(tLocal("celebrations.clearConfirm", "Delete all messages in this thread?"))) {
+                    return;
+                }
+                clearEntireThread();
             });
         }
 
@@ -372,15 +519,24 @@
         };
         document.addEventListener("njc:authchange", onAuth);
         document.addEventListener("njc:langchange", function () {
-            var h3 = rootEl.querySelector(".celebration-wish-messages-heading");
-            if (h3) {
-                h3.textContent = tLocal("celebrations.wishThreadMessagesTitle", "Wishes from everyone");
-            }
             if (inputEl) {
-                inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a birthday wish…"));
+                inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a wish…"));
+                inputEl.setAttribute("aria-label", tLocal("celebrations.wishThreadPlaceholder", "Write a wish…"));
             }
             if (sendBtn) {
                 sendBtn.textContent = tLocal("celebrations.wishThreadSend", "Send");
+            }
+            if (wishFillBtn) {
+                wishFillBtn.textContent = tLocal("celebrations.wishButton", "Wish");
+            }
+            if (chevronBtn) {
+                chevronBtn.setAttribute("title", tLocal("celebrations.toggleThread", "Show wishes"));
+            }
+            if (dropTitleEl) {
+                dropTitleEl.textContent = tLocal("celebrations.wishThreadMessagesTitle", "Wishes & replies");
+            }
+            if (clearBtn) {
+                clearBtn.textContent = tLocal("celebrations.clearThread", "Clear all");
             }
             if (loginEl && !getUser()) {
                 loginEl.textContent = tLocal("celebrations.wishThreadLogin", "Sign in to post a wish.");

@@ -104,7 +104,8 @@ service cloud.firestore {
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() < 2500;
-      allow update, delete: if false;
+      allow delete: if request.auth != null
+        && (resource.data.senderUid == request.auth.uid || isAdmin());
     }
 
     match /chatMessages/{messageId} {
