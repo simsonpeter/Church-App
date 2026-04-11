@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v295celefix";
-const RUNTIME_CACHE = "njc-runtime-cache-v295celefix";
+const APP_CACHE = "njc-app-cache-v296celecopy";
+const RUNTIME_CACHE = "njc-runtime-cache-v296celecopy";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260411celeui1",
     "./user-auth.js?v=20260407fcm1",
-    "./app-shell.js?v=20260411celefix1",
+    "./app-shell.js?v=20260412celecopy1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260411celehome1",
     "./events-page.js?v=20260414u2",
@@ -54,9 +54,9 @@ const CORE_ASSETS = [
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260407familybd1",
     "./celebration-wish-thread.js?v=20260411celefix1",
-    "./celebrations-page.js?v=20260411celeui1",
+    "./celebrations-page.js?v=20260412celecopy1",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260407wishthread2",
+    "./spa-router.js?v=20260412celecopy1",
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

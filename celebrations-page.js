@@ -170,7 +170,7 @@
             return T("celebrations.kindAnniversary", "Your wedding anniversary");
         }
         if (kind === "familyBirthday") {
-            return T("celebrations.kindFamilyBirthday", "Family birthday");
+            return T("celebrations.kindBirthdayOther", "Birthday");
         }
         return T("celebrations.kindEvent", "Celebration");
     }
@@ -423,7 +423,7 @@
         if (!events.length) {
             todayStack.innerHTML = "";
             emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today (Belgium date). You can still wish everyone in the box below.");
+            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today. You can still wish everyone in the box below.");
             renderUpcoming();
             return;
         }

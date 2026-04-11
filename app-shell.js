@@ -283,7 +283,7 @@
         "home.personalWishGoToCelebrationsPage": "விழாக்கள் பக்கத்தில் வாழ்த்து சொல்லுங்கள்",
         "celebrations.eyebrow": "விழாக்கள்",
         "celebrations.title": "இன்றைய விழாக்கள்",
-        "celebrations.subtitle": "உங்கள் சுயவிவரத்திலிருந்து பிறந்தநாட்கள் மற்றும் திருமண நாள் (பெல்ஜியம் தேதி). கீழே உள்ள உரையாடல் போன்ற பெட்டியில் வாழ்த்து இடுங்கள்.",
+        "celebrations.kindBirthdayOther": "பிறந்தநாள்",
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
         "celebrations.emptyToday": "இன்று உங்கள் சுயவிவரத்தில் பிறந்தநாள்/திருமண நாள் இல்லை. மேலே உள்ள சமூக வாழ்த்துப் பெட்டியை இன்னும் பயன்படுத்தலாம்.",
         "celebrations.wishThreadTitle": "இன்றைய சமூக வாழ்த்துக்கள்",
@@ -308,7 +308,6 @@
         "celebrations.wishMessageGeneric": "இன்று உங்களை நினைக்கிறோம் — தேவன் ஆசீர்வதிப்பார்!",
         "celebrations.kindMyBirthday": "உங்கள் பிறந்தநாள்",
         "celebrations.kindAnniversary": "உங்கள் திருமண நாள்",
-        "celebrations.kindFamilyBirthday": "குடும்ப பிறந்தநாள்",
         "celebrations.kindEvent": "விழா",
         "celebrations.copied": "செய்தி நகலெடுக்கப்பட்டது — உங்கள் செயலியில் ஒட்டவும்.",
         "celebrations.copyFallback": "இந்தச் செய்தியை நகலெடுக்கவும்:",
@@ -949,7 +948,7 @@
         "profile.dob": "பிறந்த தேதி",
         "profile.anniversary": "திருமண நாள்",
         "profile.anniversaryHelp": "விருப்பம். அமைத்தால், முகப்பில் உங்கள் திருமண நாளில் வாழ்த்து காட்டப்படும்.",
-        "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: அன்று (பெல்ஜியம்) முகப்பில் வாழ்த்து தோன்றும்; பட்டியல் → இன்றைய விழாக்கள் என்பதில் சென்று செய்தி அனுப்பவும். பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
+        "profile.wishesHowItWorks": "பிறந்தநாள்/திருமண நாள்: அன்று முகப்பில் வாழ்த்து தோன்றும்; பட்டியல் → இன்றைய விழாக்கள் என்பதில் சென்று செய்தி அனுப்பவும். பல நிகழ்வுகள் ஒரே நாளில் இருந்தால் ஒரே அறிவிப்பில் சேர்க்கப்படும்.",
         "profile.familyTitle": "குடும்ப பிறந்தநாட்கள்",
         "profile.familyIntro": "நினைவில் கொள்ள விரும்பும் நபர்களைச் சேர்க்கவும். அவர்களின் பிறந்தநாளில் முகப்பில் வாழ்த்து தோன்றும்.",
         "profile.familyAddMember": "குடும்ப உறுப்பினரைச் சேர்",
@@ -1695,10 +1694,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411celefix";
+    var SW_VERSION = "20260412celecopy";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebrations: fix wish send (updateGuestUi admin check).";
+    var UPDATE_NOTES_SUMMARY = "Celebrations: cleaner title; Birthday label; less Belgium copy.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

@@ -125,8 +125,8 @@
             eyebrowText: "Celebrations",
             titleKey: "celebrations.title",
             titleText: "Celebrations today",
-            subtitleKey: "celebrations.subtitle",
-            subtitleText: "Birthdays and anniversaries from your profile (Belgium date). Post wishes in the thread below."
+            subtitleKey: "",
+            subtitleText: ""
         },
         settings: {
             icon: "fa-sliders",
