@@ -369,13 +369,36 @@
         return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 40);
     }
 
+    /** Profile dates are stored as YYYY-MM-DD strings; tolerate Firestore Timestamp in old data. */
+    function coerceProfileYmd(raw) {
+        if (raw == null || raw === "") {
+            return "";
+        }
+        if (typeof raw === "string") {
+            var t = raw.trim();
+            return /^\d{4}-\d{2}-\d{2}$/.test(t) ? t : "";
+        }
+        if (raw && typeof raw.toDate === "function") {
+            try {
+                var d = raw.toDate();
+                var y = d.getFullYear();
+                var m = String(d.getMonth() + 1).padStart(2, "0");
+                var day = String(d.getDate()).padStart(2, "0");
+                return y + "-" + m + "-" + day;
+            } catch (eY) {
+                return "";
+            }
+        }
+        return "";
+    }
+
     function normalizeProfile(profile, user) {
         var source = profile && typeof profile === "object" ? profile : {};
         var activeUser = user && typeof user === "object" ? user : {};
         return {
             fullName: String(source.fullName || activeUser.displayName || deriveNameFromEmail(activeUser.email || "")).trim(),
-            dob: String(source.dob || "").trim(),
-            anniversary: String(source.anniversary || "").trim(),
+            dob: coerceProfileYmd(source.dob),
+            anniversary: coerceProfileYmd(source.anniversary),
             anniversaryPartnerName: String(source.anniversaryPartnerName || "").trim().slice(0, 120),
             familyMembers: normalizeFamilyMembersList(source.familyMembers),
             phone: String(source.phone || activeUser.phoneNumber || "").trim(),
@@ -660,6 +683,11 @@
             var cloudPhoto = String(cloudProfile.photoUrl || "").trim();
             if (!cloudPhoto && localPhoto) {
                 cloudProfile = Object.assign({}, cloudProfile, { photoUrl: localPhoto });
+            }
+            var localDob = String(localProfile.dob || "").trim();
+            var cloudDob = String(cloudProfile.dob || "").trim();
+            if (!cloudDob && /^\d{4}-\d{2}-\d{2}$/.test(localDob)) {
+                cloudProfile = Object.assign({}, cloudProfile, { dob: localDob });
             }
             if (!String(cloudProfile.groupId || "").trim() && String(localProfile.groupId || "").trim()) {
                 cloudProfile = Object.assign({}, cloudProfile, { groupId: sanitizeGroupIdInput(localProfile.groupId) });

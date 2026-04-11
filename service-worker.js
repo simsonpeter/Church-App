@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v302tts";
-const RUNTIME_CACHE = "njc-runtime-cache-v302tts";
+const APP_CACHE = "njc-app-cache-v303dobmerge";
+const RUNTIME_CACHE = "njc-runtime-cache-v303dobmerge";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260411celeui1",
     "./user-auth.js?v=20260412commceleb1",
-    "./app-shell.js?v=20260413tts1",
+    "./app-shell.js?v=20260413dobmerge1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260412annpartner1",
     "./events-page.js?v=20260414u2",
@@ -52,7 +52,7 @@ const CORE_ASSETS = [
     "./admin-dashboard-page.js?v=20260407fcm1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260412annpartner1",
+    "./profile-page.js?v=20260413dobmerge1",
     "./celebration-wish-thread.js?v=20260412guestcele1",
     "./celebrations-page.js?v=20260412annpartner1",
     "./chat-page.js?v=20260330u1",
