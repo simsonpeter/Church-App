@@ -653,7 +653,6 @@
                 var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})", prayerCard), Number(entry.prayed || 0));
                 var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})", prayerCard), Number(entry.answered || 0));
                 var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})", prayerCard), Number(entry.thanked || 0));
-                var prayActive = isPrayerActionActive(entry.id, "pray");
                 var answerActive = isPrayerActionActive(entry.id, "answer");
                 var thankActive = isPrayerActionActive(entry.id, "thank");
                 if (prayerDetailName) {
@@ -686,7 +685,6 @@
                 }
                 if (prayerDetailPrayButton) {
                     prayerDetailPrayButton.textContent = prayedLabel;
-                    prayerDetailPrayButton.classList.toggle("active", prayActive);
                 }
                 if (prayerDetailAnsweredButton) {
                     prayerDetailAnsweredButton.textContent = answeredLabel;
@@ -1004,11 +1002,9 @@
                     }
 
                     if (action === "pray") {
-                        var nextPrayActive = !isPrayerActionActive(prayerId, "pray");
-                        targetEntry.prayed = Math.max(0, Number(targetEntry.prayed || 0) + (nextPrayActive ? 1 : -1));
+                        targetEntry.prayed = Math.max(0, Number(targetEntry.prayed || 0) + 1);
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
-                        setPrayerActionActive(prayerId, "pray", nextPrayActive);
                     } else if (action === "answer") {
                         var nextAnswerActive = !isPrayerActionActive(prayerId, "answer");
                         targetEntry.answered = Math.max(0, Number(targetEntry.answered || 0) + (nextAnswerActive ? 1 : -1));
