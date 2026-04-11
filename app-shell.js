@@ -287,6 +287,9 @@
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
         "celebrations.guestIntro": "சுயவிவரத்திலிருந்து உங்கள் பிறந்தநாட்கள்/திருமண நாளைக் காண உள்நுழையவும். கீழே உள்ள வாழ்த்துக்களை அனைவரும் படிக்கலாம்.",
         "celebrations.upcomingSignIn": "சுயவிவரத்திலிருந்து வரவிருப்ப தேதிகளைக் காண உள்நுழையவும்.",
+        "celebrations.upcomingEmptyCommunity": "இன்னும் வரவிருப்ப தேதிகள் இல்லை. சுயவிவரத்தில் சேர்த்து சேமிக்கவும்.",
+        "celebrations.emptyTodayCommunity": "இன்று சமூக விழாக்கள் இல்லை. சுயவிவரத்தில் பிறந்தநாள்/திருமண நாளைச் சேர்த்து சேமிக்கவும்.",
+        "celebrations.communityLoadError": "சமூக விழாப் பட்டியலை ஏற்ற முடியவில்லை.",
         "celebrations.emptyToday": "இன்று உங்கள் சுயவிவரத்தில் பிறந்தநாள்/திருமண நாள் இல்லை. மேலே உள்ள சமூக வாழ்த்துப் பெட்டியை இன்னும் பயன்படுத்தலாம்.",
         "celebrations.wishThreadTitle": "இன்றைய சமூக வாழ்த்துக்கள்",
         "celebrations.wishThreadMessagesTitle": "அனைவரின் வாழ்த்துக்கள்",
@@ -310,6 +313,7 @@
         "celebrations.wishMessageGeneric": "இன்று உங்களை நினைக்கிறோம் — தேவன் ஆசீர்வதிப்பார்!",
         "celebrations.kindMyBirthday": "உங்கள் பிறந்தநாள்",
         "celebrations.kindAnniversary": "உங்கள் திருமண நாள்",
+        "celebrations.kindAnniversaryPublic": "திருமண நாள்",
         "celebrations.kindEvent": "விழா",
         "celebrations.copied": "செய்தி நகலெடுக்கப்பட்டது — உங்கள் செயலியில் ஒட்டவும்.",
         "celebrations.copyFallback": "இந்தச் செய்தியை நகலெடுக்கவும்:",
@@ -1696,10 +1700,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260412guestcele";
+    var SW_VERSION = "20260412commceleb";
     var APP_VERSION = "2026.4.7";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Celebrations: guests can open page and read wishes (publish rules).";
+    var UPDATE_NOTES_SUMMARY = "Celebrations: community list from celebrationProfiles; publish rules.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

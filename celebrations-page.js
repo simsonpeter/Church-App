@@ -1,7 +1,11 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var BRUSSELS_TZ = "Europe/Brussels";
+    var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
+    var PUBLIC_PROFILE_LIMIT = 200;
     var lastWishSuggestion = "";
+    var communityProfilesCache = [];
+    var communityUnsubscribe = null;
 
     function getBrusselsYmdForDate(dateValue) {
         var parts = new Intl.DateTimeFormat("en-GB", {
@@ -94,51 +98,65 @@
         return out;
     }
 
-    function buildCelebrationEvents() {
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        var uid = auth && auth.uid ? String(auth.uid) : "";
-        if (!uid) {
-            return [];
+    function profileFromFirestoreData(data) {
+        if (!data || typeof data !== "object") {
+            return null;
         }
-        var profile = getSavedUserProfile(uid);
-        if (!profile) {
+        return {
+            fullName: String(data.fullName || "").trim(),
+            dob: String(data.dob || "").trim(),
+            anniversary: String(data.anniversary || "").trim(),
+            familyMembers: normalizeFamilyMembers(data.familyMembers)
+        };
+    }
+
+    /**
+     * Events for one profile snapshot. viewerUid === subjectUid → "Your birthday" etc.;
+     * otherwise public labels (Birthday / Anniversary).
+     */
+    function buildEventsFromProfile(profile, subjectUid, viewerUid) {
+        if (!profile || !subjectUid) {
             return [];
         }
         var today = getBrusselsYmd();
-        var displayName = pickWishDisplayName(
-            String(profile.fullName || "").trim(),
-            String(auth.displayName || "").trim(),
-            String(auth.email || "").trim()
-        );
+        var isSelf = Boolean(viewerUid && String(viewerUid) === String(subjectUid));
+        var displayName = pickWishDisplayName(String(profile.fullName || "").trim(), "", "");
         var nameToken = displayName || "friend";
         var events = [];
 
         if (monthDayMatchesStoredDate(String(profile.dob || "").trim(), today)) {
             events.push({
-                id: "njc-personal-birthday",
-                kind: "myBirthday",
-                displayName: nameToken
+                id: "njc-cev-" + subjectUid + "-bday",
+                kind: isSelf ? "myBirthday" : "birthday",
+                displayName: nameToken,
+                subjectUid: String(subjectUid)
             });
         }
         if (monthDayMatchesStoredDate(String(profile.anniversary || "").trim(), today)) {
             events.push({
-                id: "njc-personal-anniversary",
-                kind: "myAnniversary",
-                displayName: nameToken
+                id: "njc-cev-" + subjectUid + "-ann",
+                kind: isSelf ? "myAnniversary" : "anniversary",
+                displayName: nameToken,
+                subjectUid: String(subjectUid)
             });
         }
         normalizeFamilyMembers(profile.familyMembers).forEach(function (member) {
             if (monthDayMatchesStoredDate(member.dob, today)) {
-                var fmName = pickWishDisplayName(member.name, member.name, "");
+                var fmName = pickWishDisplayName(member.name, member.name, "") || "friend";
                 events.push({
-                    id: "njc-family-bday-" + member.id,
+                    id: "njc-cev-" + subjectUid + "-fam-" + member.id,
                     kind: "familyBirthday",
-                    displayName: fmName || "friend",
+                    displayName: fmName,
+                    subjectUid: String(subjectUid),
                     memberId: member.id
                 });
             }
         });
         return events;
+    }
+
+    function buildCelebrationEvents() {
+        return aggregateTodayEvents();
     }
 
     function T(key, fallback) {
@@ -150,10 +168,10 @@
 
     function wishMessageForEvent(evt) {
         var name = String(evt && evt.displayName || "").trim() || "friend";
-        if (evt && evt.kind === "myBirthday") {
+        if (evt && (evt.kind === "myBirthday" || evt.kind === "birthday")) {
             return T("celebrations.wishMessageBirthday", "Happy birthday, {name}! God bless you.").replace(/\{name\}/g, name);
         }
-        if (evt && evt.kind === "myAnniversary") {
+        if (evt && (evt.kind === "myAnniversary" || evt.kind === "anniversary")) {
             return T("celebrations.wishMessageAnniversary", "Happy anniversary, {name}! God bless your marriage.").replace(/\{name\}/g, name);
         }
         if (evt && evt.kind === "familyBirthday") {
@@ -166,8 +184,14 @@
         if (kind === "myBirthday") {
             return T("celebrations.kindMyBirthday", "Your birthday");
         }
+        if (kind === "birthday") {
+            return T("celebrations.kindBirthdayOther", "Birthday");
+        }
         if (kind === "myAnniversary") {
             return T("celebrations.kindAnniversary", "Your wedding anniversary");
+        }
+        if (kind === "anniversary") {
+            return T("celebrations.kindAnniversaryPublic", "Anniversary");
         }
         if (kind === "familyBirthday") {
             return T("celebrations.kindBirthdayOther", "Birthday");
@@ -247,31 +271,17 @@
         }
     }
 
-    function buildUpcomingCelebrations() {
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        var uid = auth && auth.uid ? String(auth.uid) : "";
-        if (!uid) {
-            return [];
-        }
-        var profile = getSavedUserProfile(uid);
+    function pushUpcomingRowsFromProfile(profile, subjectUid, viewerUid, today, rows) {
         if (!profile) {
-            return [];
+            return;
         }
-        var today = getBrusselsYmd();
-        var displayName = pickWishDisplayName(
-            String(profile.fullName || "").trim(),
-            String(auth.displayName || "").trim(),
-            String(auth.email || "").trim()
-        );
+        var isSelf = Boolean(viewerUid && String(viewerUid) === String(subjectUid));
+        var displayName = pickWishDisplayName(String(profile.fullName || "").trim(), "", "");
         var nameToken = displayName || "friend";
-        var rows = [];
 
         function pushRow(name, kind, dobStr) {
             var next = findNextOccurrenceFromStoredDate(dobStr);
-            if (!next) {
-                return;
-            }
-            if (next.year !== today.year) {
+            if (!next || next.year !== today.year) {
                 return;
             }
             if (monthDayMatchesStoredDate(dobStr, today)) {
@@ -281,33 +291,155 @@
             if (days <= 0) {
                 return;
             }
+            var labelKind = kind;
+            if (!isSelf && kind === "myBirthday") {
+                labelKind = "birthday";
+            }
+            if (!isSelf && kind === "myAnniversary") {
+                labelKind = "anniversary";
+            }
             rows.push({
                 name: name,
                 kind: kind,
-                label: labelForKind(kind),
+                label: labelForKind(labelKind),
                 whenYmd: next,
                 days: days,
-                sortKey: days
+                sortKey: days,
+                subjectUid: String(subjectUid)
             });
         }
 
         var pDob = String(profile.dob || "").trim();
         if (pDob) {
-            pushRow(nameToken, "myBirthday", pDob);
+            pushRow(nameToken, isSelf ? "myBirthday" : "birthday", pDob);
         }
         var pAnn = String(profile.anniversary || "").trim();
         if (pAnn) {
-            pushRow(nameToken, "myAnniversary", pAnn);
+            pushRow(nameToken, isSelf ? "myAnniversary" : "anniversary", pAnn);
         }
         normalizeFamilyMembers(profile.familyMembers).forEach(function (member) {
             var n = pickWishDisplayName(member.name, member.name, "") || "friend";
             pushRow(n, "familyBirthday", member.dob);
         });
+    }
+
+    function aggregateUpcomingEvents() {
+        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        var viewerUid = auth && auth.uid ? String(auth.uid) : "";
+        var today = getBrusselsYmd();
+        var rows = [];
+        var seen = {};
+
+        communityProfilesCache.forEach(function (entry) {
+            var sid = entry && entry.uid;
+            var prof = entry && entry.profile;
+            if (!sid || !prof) {
+                return;
+            }
+            pushUpcomingRowsFromProfile(prof, sid, viewerUid, today, rows);
+        });
+
+        if (viewerUid) {
+            var local = getSavedUserProfile(viewerUid);
+            if (local) {
+                pushUpcomingRowsFromProfile(local, viewerUid, viewerUid, today, rows);
+            }
+        }
+
+        rows = rows.filter(function (r) {
+            var k = r.subjectUid + "|" + r.name + "|" + r.whenYmd.year + "-" + r.whenYmd.month + "-" + r.whenYmd.day + "|" + r.kind;
+            if (seen[k]) {
+                return false;
+            }
+            seen[k] = true;
+            return true;
+        });
 
         rows.sort(function (a, b) {
             return a.sortKey - b.sortKey;
         });
-        return rows.slice(0, 12);
+        return rows.slice(0, 24);
+    }
+
+    function aggregateTodayEvents() {
+        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        var viewerUid = auth && auth.uid ? String(auth.uid) : "";
+        var all = [];
+        var seenId = {};
+
+        communityProfilesCache.forEach(function (entry) {
+            var sid = entry && entry.uid;
+            var prof = entry && entry.profile;
+            if (!sid || !prof) {
+                return;
+            }
+            buildEventsFromProfile(prof, sid, viewerUid).forEach(function (ev) {
+                if (!seenId[ev.id]) {
+                    seenId[ev.id] = true;
+                    all.push(ev);
+                }
+            });
+        });
+
+        if (viewerUid) {
+            var local = getSavedUserProfile(viewerUid);
+            if (local) {
+                buildEventsFromProfile(local, viewerUid, viewerUid).forEach(function (ev) {
+                    if (!seenId[ev.id]) {
+                        seenId[ev.id] = true;
+                        all.push(ev);
+                    }
+                });
+            }
+        }
+
+        all.sort(function (a, b) {
+            var o = { myBirthday: 0, birthday: 0, myAnniversary: 1, anniversary: 1, familyBirthday: 2 };
+            return (o[a.kind] != null ? o[a.kind] : 9) - (o[b.kind] != null ? o[b.kind] : 9);
+        });
+        return all;
+    }
+
+    function stopCommunityProfilesListen() {
+        if (typeof communityUnsubscribe === "function") {
+            communityUnsubscribe();
+            communityUnsubscribe = null;
+        }
+        communityProfilesCache = [];
+    }
+
+    function startCommunityProfilesListen() {
+        stopCommunityProfilesListen();
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return;
+        }
+        try {
+            var db = window.firebase.firestore();
+            communityUnsubscribe = db.collection(CELEBRATION_PROFILES_COLLECTION)
+                .limit(PUBLIC_PROFILE_LIMIT)
+                .onSnapshot(function (snap) {
+                    var list = [];
+                    snap.forEach(function (doc) {
+                        var uid = doc.id;
+                        var prof = profileFromFirestoreData(doc.data());
+                        if (prof) {
+                            list.push({ uid: uid, profile: prof });
+                        }
+                    });
+                    communityProfilesCache = list;
+                    if (isCelebrationsViewActive()) {
+                        renderCelebrationsPage();
+                    }
+                }, function () {
+                    communityProfilesCache = [];
+                    if (isCelebrationsViewActive()) {
+                        showNote("celebrations.communityLoadError", "Could not load community celebrations.", true);
+                        renderCelebrationsPage();
+                    }
+                });
+        } catch (eListen) {
+            communityProfilesCache = [];
+        }
     }
 
     window.NjcCelebrations = {
@@ -318,12 +450,12 @@
         },
         wishMessageForEvent: wishMessageForEvent,
         labelForKind: labelForKind,
-        getUpcoming: buildUpcomingCelebrations,
+        getUpcoming: aggregateUpcomingEvents,
         getLastWishSuggestion: function () {
             return lastWishSuggestion;
         },
         getDefaultToolbarWishText: function () {
-            var evs = buildCelebrationEvents();
+            var evs = aggregateTodayEvents();
             if (!evs.length) {
                 return T("celebrations.communityWishDefault", "Warm wishes to everyone celebrating today!");
             }
@@ -380,14 +512,9 @@
         if (!upcomingList) {
             return;
         }
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        if (!auth || !auth.uid) {
-            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingSignIn", "Sign in to see your upcoming dates from Profile.")) + "</li>";
-            return;
-        }
-        var rows = buildUpcomingCelebrations();
+        var rows = aggregateUpcomingEvents();
         if (!rows.length) {
-            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingEmpty", "Add birthdays or your anniversary in Profile to see upcoming dates here.")) + "</li>";
+            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingEmptyCommunity", "No upcoming dates in the community list yet. Add yours in Profile and save.")) + "</li>";
             return;
         }
         var inDays = T("celebrations.upcomingInDays", "in {days} days");
@@ -414,19 +541,11 @@
             return;
         }
         lastWishSuggestion = "";
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        if (!auth || !auth.uid) {
-            todayStack.innerHTML = "";
-            emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.guestIntro", "Sign in to see your birthdays and anniversaries from Profile. Everyone can read wishes below.");
-            renderUpcoming();
-            return;
-        }
-        var events = buildCelebrationEvents();
+        var events = aggregateTodayEvents();
         if (!events.length) {
             todayStack.innerHTML = "";
             emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.emptyToday", "No birthdays or anniversaries in your profile today. You can still wish everyone in the box below.");
+            emptyEl.textContent = T("celebrations.emptyTodayCommunity", "No community celebrations today yet. Add birthdays or anniversary in Profile and save.");
             renderUpcoming();
             return;
         }
@@ -468,9 +587,11 @@
     function onCelebrationsRouteChange(ev) {
         var route = ev && ev.detail && ev.detail.route;
         if (route === "celebrations") {
+            startCommunityProfilesListen();
             mountWishThread();
             renderCelebrationsPage();
         } else {
+            stopCommunityProfilesListen();
             unmountWishThread();
         }
     }
@@ -480,9 +601,11 @@
     function onRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
         if (raw === "celebrations") {
+            startCommunityProfilesListen();
             mountWishThread();
             renderCelebrationsPage();
         } else {
+            stopCommunityProfilesListen();
             unmountWishThread();
         }
     }
@@ -491,7 +614,6 @@
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:authchange", function () {
         if (isCelebrationsViewActive()) {
-            mountWishThread();
             renderCelebrationsPage();
         }
     });

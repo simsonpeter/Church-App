@@ -43,6 +43,7 @@
     var MAX_AUTH_PHOTO_URL_LENGTH = 2048;
     var MAX_FAMILY_MEMBERS = 20;
     var FAMILY_DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
+    var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && profileCard) {
@@ -250,6 +251,30 @@
         return order.map(function (id) {
             return byId[id];
         }).slice(0, MAX_FAMILY_MEMBERS);
+    }
+
+    function syncCelebrationProfilePublic(uid, profile) {
+        if (!uid || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.resolve(null);
+        }
+        try {
+            var p = profile && typeof profile === "object" ? profile : {};
+            var fam = normalizeFamilyMembersList(p.familyMembers || []);
+            var payload = {
+                fullName: String(p.fullName || "").trim().slice(0, 120),
+                dob: String(p.dob || "").trim().slice(0, 12),
+                anniversary: String(p.anniversary || "").trim().slice(0, 12),
+                familyMembers: fam
+            };
+            if (window.firebase.firestore && window.firebase.firestore.FieldValue) {
+                payload.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
+            }
+            return window.firebase.firestore().collection(CELEBRATION_PROFILES_COLLECTION).doc(String(uid)).set(payload, { merge: true }).catch(function () {
+                return null;
+            });
+        } catch (eSync) {
+            return Promise.resolve(null);
+        }
     }
 
     function profilePayloadForFirestore(profile) {
@@ -649,6 +674,7 @@
             populateForm(cloudProfile);
             renderAvatar(cloudProfile, user);
             notifyProfileUpdated(currentUid, cloudProfile);
+            syncCelebrationProfilePublic(currentUid, cloudProfile);
         } catch (err) {
             syncAchievementBoardIfPossible();
             return;
@@ -710,6 +736,7 @@
 
         if (cloudSaved) {
             setNote("saved", "profile.saved", "Profile saved.");
+            syncCelebrationProfilePublic(uid, profile);
         } else {
             var code = cloudError && cloudError.code ? String(cloudError.code) : "";
             if (code === "permission-denied") {
