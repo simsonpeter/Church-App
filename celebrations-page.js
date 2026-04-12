@@ -2,7 +2,8 @@
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var BRUSSELS_TZ = "Europe/Brussels";
     var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
-    var PUBLIC_PROFILE_LIMIT = 200;
+    /** Default query cap (Firestore allows up to ~batch size). Old 200 hid almost everyone. */
+    var PUBLIC_PROFILE_LIMIT = 2000;
     var lastWishSuggestion = "";
     var communityProfilesCache = [];
     var communityUnsubscribe = null;

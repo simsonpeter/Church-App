@@ -669,12 +669,14 @@
 
         var doc = getFirestoreProfileDoc(currentUid);
         if (!doc) {
+            syncCelebrationProfilePublic(currentUid, localProfile);
             syncAchievementBoardIfPossible();
             return;
         }
         try {
             var snapshot = await doc.get();
             if (!snapshot.exists) {
+                syncCelebrationProfilePublic(currentUid, localProfile);
                 syncAchievementBoardIfPossible();
                 return;
             }
