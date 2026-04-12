@@ -95,6 +95,8 @@
             var announcementTranslationCache = getAnnouncementTranslationCache();
             var announcementTranslationPending = {};
             var announcementTranslationSaveTimerId = null;
+            var cachedHomeStaticAnnouncements = [];
+            var cachedHomeAdminNotices = [];
 
             function modOn(moduleKey) {
                 var m = window.NjcAppModules;
@@ -1331,7 +1333,8 @@
                             id: "njc-personal-celebrations-today",
                             personalWish: "celebrationsCombo",
                             personalDisplayName: nameToken,
-                            personalCelebrationLines: lines
+                            personalCelebrationLines: lines,
+                            celebrationFromViewerProfile: true
                         })];
                     }
                     var only = lines[0];
@@ -1339,21 +1342,24 @@
                         return [Object.assign({}, baseMeta, {
                             id: "njc-personal-birthday",
                             personalWish: "birthday",
-                            personalDisplayName: nameToken
+                            personalDisplayName: nameToken,
+                            celebrationFromViewerProfile: true
                         })];
                     }
                     if (only.kind === "anniversary") {
                         return [Object.assign({}, baseMeta, {
                             id: "njc-personal-anniversary",
                             personalWish: "anniversary",
-                            personalDisplayName: only.name || nameToken
+                            personalDisplayName: only.name || nameToken,
+                            celebrationFromViewerProfile: true
                         })];
                     }
                     var sid = String(only.memberId || "").trim() || (typeof only.index === "number" ? ("i" + String(only.index)) : "i0");
                     return [Object.assign({}, baseMeta, {
                         id: "njc-family-bday-" + sid,
                         personalWish: "familyBirthday",
-                        personalDisplayName: only.name
+                        personalDisplayName: only.name,
+                        celebrationFromViewerProfile: true
                     })];
                 } catch (ePw) {
                     return [];
@@ -1714,6 +1720,56 @@
                 return null;
             }
 
+            function mergeHomeAnnouncements() {
+                if (!modOn("announcements")) {
+                    return;
+                }
+                var personal = [];
+                try {
+                    personal = buildPersonalWishAnnouncements();
+                } catch (eMergeP) {
+                    personal = [];
+                }
+                var community = [];
+                if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.getAnnouncementsForHome === "function") {
+                    var mergeAuth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                    var mergeUid = mergeAuth && mergeAuth.uid ? String(mergeAuth.uid) : "";
+                    community = window.NjcCommunityCelebrations.getAnnouncementsForHome(mergeUid, todayYmd) || [];
+                }
+                var merged = (personal || []).concat(community || []).concat(cachedHomeStaticAnnouncements || []).concat(cachedHomeAdminNotices || []);
+                var seen = {};
+                allAnnouncements = merged.filter(function (item) {
+                    if (item.personalWish) {
+                        var pkey = String(item.id || "").trim();
+                        if (!pkey || seen[pkey]) {
+                            return false;
+                        }
+                        seen[pkey] = true;
+                        return true;
+                    }
+                    var key = String(item.id || (item.title + "|" + item.date + "|" + item.body + "|" + item.imageUrl)).trim();
+                    if (!key || seen[key]) {
+                        return false;
+                    }
+                    seen[key] = true;
+                    return true;
+                });
+                announcementsError = false;
+                try {
+                    renderAnnouncements();
+                } catch (eMergeR) {
+                    try {
+                        allAnnouncements = (allAnnouncements || []).filter(function (it) {
+                            return it && !it.personalWish;
+                        });
+                        renderAnnouncements();
+                    } catch (eMergeR2) {
+                        return null;
+                    }
+                }
+                return null;
+            }
+
             function loadAnnouncements() {
                 if (!modOn("announcements")) {
                     stopAnnouncementsCarousel();
@@ -1795,45 +1851,9 @@
 
                 Promise.allSettled([fetchStaticAnnouncements(), fetchAdminNotices()])
                     .then(function (results) {
-                        var staticList = results[0] && results[0].status === "fulfilled" ? results[0].value : [];
-                        var adminList = results[1] && results[1].status === "fulfilled" ? results[1].value : [];
-                        var personal = [];
-                        try {
-                            personal = buildPersonalWishAnnouncements();
-                        } catch (ePer) {
-                            personal = [];
-                        }
-                        var merged = personal.concat((staticList || []).concat(adminList || []));
-                        var seen = {};
-                        allAnnouncements = merged.filter(function (item) {
-                            if (item.personalWish) {
-                                var pkey = String(item.id || "").trim();
-                                if (!pkey || seen[pkey]) {
-                                    return false;
-                                }
-                                seen[pkey] = true;
-                                return true;
-                            }
-                            var key = String(item.id || (item.title + "|" + item.date + "|" + item.body + "|" + item.imageUrl)).trim();
-                            if (!key || seen[key]) {
-                                return false;
-                            }
-                            seen[key] = true;
-                            return true;
-                        });
-                        announcementsError = false;
-                        try {
-                            renderAnnouncements();
-                        } catch (eRender) {
-                            try {
-                                allAnnouncements = (allAnnouncements || []).filter(function (it) {
-                                    return it && !it.personalWish;
-                                });
-                                renderAnnouncements();
-                            } catch (e2) {
-                                return null;
-                            }
-                        }
+                        cachedHomeStaticAnnouncements = results[0] && results[0].status === "fulfilled" ? results[0].value : [];
+                        cachedHomeAdminNotices = results[1] && results[1].status === "fulfilled" ? results[1].value : [];
+                        mergeHomeAnnouncements();
                     });
             }
 
@@ -2397,7 +2417,7 @@
                 loadAnnouncements();
             });
             document.addEventListener("njc:profile-updated", function () {
-                loadAnnouncements();
+                mergeHomeAnnouncements();
             });
             document.addEventListener("njc:admin-trivia-updated", function () {
                 loadTrivia();
@@ -3081,6 +3101,9 @@
                 if (ymdKey(fresh) !== ymdKey(todayYmd)) {
                     todayYmd = fresh;
                     renderDailyVerse();
+                    if (modOn("announcements")) {
+                        mergeHomeAnnouncements();
+                    }
                 }
             }
 
@@ -3099,6 +3122,13 @@
             applyAnnouncementsCardGradient();
             recalcAndStoreReadingPoints();
             applyHomeModulesFromFlags();
+            if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.startListen === "function") {
+                window.NjcCommunityCelebrations.startListen(function () {
+                    if (modOn("announcements")) {
+                        mergeHomeAnnouncements();
+                    }
+                });
+            }
             /* Cloud trivia sync is not needed for first paint — defer to idle time. */
             runWhenIdle(function () {
                 syncTriviaPointsForUser();

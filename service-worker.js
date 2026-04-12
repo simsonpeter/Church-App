@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v303dobmerge";
-const RUNTIME_CACHE = "njc-runtime-cache-v303dobmerge";
+const APP_CACHE = "njc-app-cache-v304commcel";
+const RUNTIME_CACHE = "njc-runtime-cache-v304commcel";
 
 const CORE_ASSETS = [
     "./",
@@ -41,7 +41,8 @@ const CORE_ASSETS = [
     "./user-auth.js?v=20260412commceleb1",
     "./app-shell.js?v=20260413dobmerge1",
     "./events-engine.js?v=20260318de",
-    "./home-page.js?v=20260412annpartner1",
+    "./community-celebrations.js?v=20260412commcel1",
+    "./home-page.js?v=20260412commcel1",
     "./events-page.js?v=20260414u2",
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",
