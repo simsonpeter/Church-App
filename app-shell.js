@@ -67,6 +67,8 @@
         "menu.mailbox": "அஞ்சல் பெட்டி",
         "menu.admin": "நிர்வாக பலகை",
         "menu.settings": "அமைப்புகள்",
+        "menu.quickLanguage": "மொழி",
+        "menu.quickTheme": "தீம்",
         "menu.contact": "தொடர்பு",
         "menu.login": "உள்நுழை / பதிவு",
         "menu.logout": "வெளியேறு",
@@ -3690,6 +3692,83 @@
         var userNameNode = userSummary.querySelector(".header-menu-user-name");
         var userEmailNode = userSummary.querySelector(".header-menu-user-email");
 
+        var quickPrefsCard = document.createElement("section");
+        quickPrefsCard.className = "header-menu-card header-menu-quick-prefs";
+        menuScroll.appendChild(quickPrefsCard);
+        var quickPrefsNav = document.createElement("nav");
+        quickPrefsNav.className = "header-menu-tabs";
+        quickPrefsCard.appendChild(quickPrefsNav);
+
+        var menuLanguageBtn = document.createElement("button");
+        menuLanguageBtn.type = "button";
+        menuLanguageBtn.className = "header-menu-link header-menu-action header-menu-quick-pref";
+        menuLanguageBtn.id = "header-menu-language-btn";
+        menuLanguageBtn.innerHTML = "<i class=\"fa-solid fa-language\" aria-hidden=\"true\"></i><span class=\"header-menu-quick-pref-label\"></span><span class=\"header-menu-quick-pref-value\"></span>";
+        quickPrefsNav.appendChild(menuLanguageBtn);
+
+        var menuThemeBtn = document.createElement("button");
+        menuThemeBtn.type = "button";
+        menuThemeBtn.className = "header-menu-link header-menu-action header-menu-quick-pref";
+        menuThemeBtn.id = "header-menu-theme-btn";
+        menuThemeBtn.innerHTML = "<span class=\"header-menu-theme-icon-wrap\"></span><span class=\"header-menu-quick-pref-label\"></span><span class=\"header-menu-quick-pref-value\"></span>";
+        quickPrefsNav.appendChild(menuThemeBtn);
+
+        menuLanguageBtn.addEventListener("click", function () {
+            var next = activeLanguage === "ta" ? "en" : "ta";
+            setLanguage(next, true, true);
+        });
+        menuThemeBtn.addEventListener("click", function () {
+            var nextTheme = (document.documentElement.getAttribute("data-theme") === "dark") ? "light" : "dark";
+            applyTheme(nextTheme);
+            persistTheme(nextTheme);
+            var headerThemeBtn = document.getElementById("theme-toggle-btn");
+            if (headerThemeBtn) {
+                setToggleIcon(headerThemeBtn, nextTheme);
+            }
+            refreshMenuQuickPrefs();
+            document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
+        });
+
+        function refreshMenuQuickPrefs() {
+            var langLabel = menuLanguageBtn.querySelector(".header-menu-quick-pref-label");
+            var langValue = menuLanguageBtn.querySelector(".header-menu-quick-pref-value");
+            var themeLabel = menuThemeBtn.querySelector(".header-menu-quick-pref-label");
+            var themeValue = menuThemeBtn.querySelector(".header-menu-quick-pref-value");
+            var iconWrap = menuThemeBtn.querySelector(".header-menu-theme-icon-wrap");
+            if (langLabel) {
+                langLabel.textContent = t("menu.quickLanguage", "Language");
+            }
+            if (langValue) {
+                langValue.textContent = activeLanguage === "ta"
+                    ? t("settings.languageTamil", "Tamil")
+                    : t("settings.languageEnglish", "English");
+            }
+            if (themeLabel) {
+                themeLabel.textContent = t("menu.quickTheme", "Theme");
+            }
+            var themeNow = document.documentElement.getAttribute("data-theme") || getActiveTheme();
+            if (themeValue) {
+                themeValue.textContent = themeNow === "dark"
+                    ? t("settings.themeDark", "Dark mode")
+                    : t("settings.themeLight", "Light mode");
+            }
+            if (iconWrap) {
+                var iconClass = themeNow === "dark" ? "fa-sun" : "fa-moon";
+                iconWrap.innerHTML = "<i class=\"fa-solid " + iconClass + "\" aria-hidden=\"true\"></i>";
+            }
+            var nextLang = activeLanguage === "ta" ? "en" : "ta";
+            var langToggleHint = nextLang === "ta"
+                ? t("toggle.language.toTamil", "Switch language to Tamil")
+                : t("toggle.language.toEnglish", "Switch language to English");
+            menuLanguageBtn.setAttribute("aria-label", langToggleHint);
+            menuLanguageBtn.title = langToggleHint;
+            var themeToggleHint = themeNow === "dark"
+                ? t("toggle.theme.toLight", "Switch to light mode")
+                : t("toggle.theme.toDark", "Switch to dark mode");
+            menuThemeBtn.setAttribute("aria-label", themeToggleHint);
+            menuThemeBtn.title = themeToggleHint;
+        }
+
         var primaryCard = document.createElement("section");
         primaryCard.className = "header-menu-card";
         menuScroll.appendChild(primaryCard);
@@ -4113,6 +4192,7 @@
             }
             buildTabLinksInMenu();
             applyModuleNavVisibility();
+            refreshMenuQuickPrefs();
             var currentRoute = getCurrentRoute();
             primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
                 var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
@@ -4340,11 +4420,13 @@
         });
         document.addEventListener("njc:langchange", function () {
             setLabels();
+            refreshMenuQuickPrefs();
             positionPanel();
             positionNotificationCenter();
         });
         document.addEventListener("njc:authchange", function () {
             setLabels();
+            refreshMenuQuickPrefs();
             positionPanel();
             positionNotificationCenter();
         });
@@ -4357,6 +4439,10 @@
         document.addEventListener("njc:inapp-notifications-updated", function () {
             renderNotificationCenter();
         });
+        document.addEventListener("njc:themechange", function () {
+            refreshMenuQuickPrefs();
+        });
+        refreshMenuQuickPrefs();
     }
 
     function setupSettingsPage() {
@@ -4993,9 +5079,18 @@
     }
 
     function setupThemeToggle() {
-        var header = document.querySelector(".app-header");
-        if (!header || document.getElementById("theme-toggle-btn")) {
+        if (document.getElementById("theme-toggle-btn")) {
             return;
+        }
+
+        var sink = document.getElementById("njc-settings-btn-sink");
+        if (!sink) {
+            sink = document.createElement("div");
+            sink.id = "njc-settings-btn-sink";
+            sink.className = "njc-settings-btn-sink";
+            sink.hidden = true;
+            sink.setAttribute("aria-hidden", "true");
+            document.body.appendChild(sink);
         }
 
         var button = document.createElement("button");
@@ -5015,7 +5110,7 @@
             document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
         });
 
-        ensureHeaderControls(header).appendChild(button);
+        sink.appendChild(button);
 
         var media = window.matchMedia("(prefers-color-scheme: dark)");
         if (media && media.addEventListener) {
@@ -5300,8 +5395,6 @@
         setupSettingsPage();
         setupHeaderHamburgerMenu();
         setupCardLanguageSwitchers();
-        setupHomeGlobalLanguageFab();
-        setupHomeGlobalThemeFab();
         setupOfflineBadge();
         showSplashScreenOnce();
         setupTabPrefetch();

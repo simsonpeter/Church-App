@@ -2305,7 +2305,7 @@ body.sermon-player-open {
 }
 
 /* Clear fixed tab bar (~72–88px) + safe area; Tamil/long labels need extra room */
-/* Below .home-global-fab (5600) so theme/lang FABs stay tappable; below songbook (5200) and bible fullscreen (5300). */
+/* Above tab bar; below songbook (5200) and bible fullscreen (5300). */
 .mini-sermon-player {
     position: fixed;
     left: 50%;
@@ -4903,58 +4903,47 @@ body.bible-fullscreen-open .offline-badge {
     animation-delay: 0.1s;
 }
 
-.home-global-fab {
-    position: fixed;
-    right: max(14px, env(safe-area-inset-right));
-    z-index: 5600;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--accent, #b42323);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
+/* Hidden container for #theme-toggle-btn (Settings page); language/theme live in hamburger menu */
+.njc-settings-btn-sink {
+    position: absolute;
+    width: 1px;
+    height: 1px;
     padding: 0;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
 }
 
-.home-global-theme-fab {
-    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px + 60px);
+.header-menu-quick-pref {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    row-gap: 4px;
 }
 
-.home-global-lang-fab {
-    bottom: calc(max(14px, env(safe-area-inset-bottom)) + 88px);
+.header-menu-quick-pref .header-menu-quick-pref-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-weight: 650;
 }
 
-.home-global-fab:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 24px rgba(120, 22, 22, 0.18);
+.header-menu-quick-pref .header-menu-quick-pref-value {
+    flex: 0 0 auto;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--muted);
+    margin-left: auto;
 }
 
-.home-global-fab:focus-visible {
-    outline: 2px solid var(--accent, #b42323);
-    outline-offset: 3px;
+.header-menu-theme-icon-wrap {
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
 }
 
-.home-global-fab i {
-    font-size: 1.35rem;
-}
-
-.home-global-fab[hidden] {
-    display: none !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .home-global-fab {
-        transition: none;
-    }
-    .home-global-fab:hover {
-        transform: none;
-    }
+.header-menu-theme-icon-wrap i {
+    font-size: 1.02rem;
 }
 
 .reading-compact-item:hover {
