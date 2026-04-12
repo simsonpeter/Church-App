@@ -4,8 +4,8 @@
     var BRUSSELS_TZ = "Europe/Brussels";
 
     var cache = [];
-    var unsubscribe = null;
-    var onChange = null;
+    var firestoreUnsubscribe = null;
+    var listeners = [];
 
     function getBrusselsYmdForDate(dateValue) {
         var parts = new Intl.DateTimeFormat("en-GB", {
@@ -94,9 +94,6 @@
         };
     }
 
-    /**
-     * Lines for one member's public celebration profile today (same shape as home buildPersonalWishAnnouncements).
-     */
     function celebrationLinesForProfile(profile, todayYmd) {
         if (!profile) {
             return [];
@@ -212,28 +209,24 @@
         return out;
     }
 
-    function stopListen() {
-        if (typeof unsubscribe === "function") {
-            unsubscribe();
-            unsubscribe = null;
-        }
-        cache = [];
+    function notifyListeners() {
+        listeners.slice().forEach(function (fn) {
+            try {
+                fn();
+            } catch (e) {}
+        });
     }
 
-    function startListen(callback) {
-        onChange = typeof callback === "function" ? callback : null;
-        stopListen();
+    function ensureFirestoreListen() {
+        if (firestoreUnsubscribe) {
+            return;
+        }
         if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
-            if (onChange) {
-                window.setTimeout(function () {
-                    onChange();
-                }, 0);
-            }
             return;
         }
         try {
             var db = window.firebase.firestore();
-            unsubscribe = db.collection(CELEBRATION_PROFILES_COLLECTION)
+            firestoreUnsubscribe = db.collection(CELEBRATION_PROFILES_COLLECTION)
                 .limit(PUBLIC_PROFILE_LIMIT)
                 .onSnapshot(function (snap) {
                     var list = [];
@@ -245,27 +238,70 @@
                         }
                     });
                     cache = list;
-                    if (onChange) {
-                        onChange();
-                    }
+                    notifyListeners();
                 }, function () {
                     cache = [];
-                    if (onChange) {
-                        onChange();
-                    }
+                    notifyListeners();
                 });
         } catch (e) {
             cache = [];
-            if (onChange) {
-                onChange();
-            }
+            notifyListeners();
         }
     }
 
+    /**
+     * Subscribe to celebrationProfiles updates. Returns unsubscribe.
+     * Fires immediately with current cache (may be empty until first snapshot).
+     */
+    function subscribe(callback) {
+        if (typeof callback !== "function") {
+            return function () {};
+        }
+        listeners.push(callback);
+        ensureFirestoreListen();
+        window.setTimeout(function () {
+            try {
+                callback();
+            } catch (e1) {}
+        }, 0);
+        return function unsubscribe() {
+            listeners = listeners.filter(function (fn) {
+                return fn !== callback;
+            });
+        };
+    }
+
+    /** @deprecated use subscribe — kept for home-page.js */
+    function startListen(callback) {
+        return subscribe(callback);
+    }
+
+    function stopListen() {
+        if (typeof firestoreUnsubscribe === "function") {
+            firestoreUnsubscribe();
+            firestoreUnsubscribe = null;
+        }
+        cache = [];
+        listeners = [];
+    }
+
+    function getProfiles() {
+        return cache.slice();
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        ensureFirestoreListen();
+    });
+    document.addEventListener("njc:authchange", function () {
+        ensureFirestoreListen();
+    });
+
     window.NjcCommunityCelebrations = {
         getAnnouncementsForHome: getAnnouncementsForHome,
+        subscribe: subscribe,
         startListen: startListen,
         stopListen: stopListen,
+        getProfiles: getProfiles,
         getCacheSize: function () {
             return cache.length;
         }

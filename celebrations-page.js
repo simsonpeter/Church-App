@@ -1,11 +1,9 @@
 (function () {
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var BRUSSELS_TZ = "Europe/Brussels";
-    var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
-    /** Default query cap (Firestore allows up to ~batch size). Old 200 hid almost everyone. */
-    var PUBLIC_PROFILE_LIMIT = 2000;
     var lastWishSuggestion = "";
     var communityProfilesCache = [];
+    /** Unsubscribe from shared NjcCommunityCelebrations feed (does not stop global Firestore listen). */
     var communityUnsubscribe = null;
 
     function getBrusselsYmdForDate(dateValue) {
@@ -418,41 +416,23 @@
             communityUnsubscribe();
             communityUnsubscribe = null;
         }
-        communityProfilesCache = [];
     }
 
     function startCommunityProfilesListen() {
         stopCommunityProfilesListen();
-        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+        var api = window.NjcCommunityCelebrations;
+        if (!api || typeof api.subscribe !== "function") {
+            communityProfilesCache = [];
             return;
         }
-        try {
-            var db = window.firebase.firestore();
-            communityUnsubscribe = db.collection(CELEBRATION_PROFILES_COLLECTION)
-                .limit(PUBLIC_PROFILE_LIMIT)
-                .onSnapshot(function (snap) {
-                    var list = [];
-                    snap.forEach(function (doc) {
-                        var uid = doc.id;
-                        var prof = profileFromFirestoreData(doc.data());
-                        if (prof) {
-                            list.push({ uid: uid, profile: prof });
-                        }
-                    });
-                    communityProfilesCache = list;
-                    if (isCelebrationsViewActive()) {
-                        renderCelebrationsPage();
-                    }
-                }, function () {
-                    communityProfilesCache = [];
-                    if (isCelebrationsViewActive()) {
-                        showNote("celebrations.communityLoadError", "Could not load community celebrations.", true);
-                        renderCelebrationsPage();
-                    }
-                });
-        } catch (eListen) {
-            communityProfilesCache = [];
-        }
+        communityProfilesCache = typeof api.getProfiles === "function" ? api.getProfiles().slice() : [];
+        communityUnsubscribe = api.subscribe(function () {
+            communityProfilesCache = typeof api.getProfiles === "function" ? api.getProfiles().slice() : [];
+            if (isCelebrationsViewActive()) {
+                showNote("", "", false);
+                renderCelebrationsPage();
+            }
+        });
     }
 
     window.NjcCelebrations = {
