@@ -5291,6 +5291,9 @@
         if (window.NjcAuth && typeof window.NjcAuth.init === "function") {
             window.NjcAuth.init();
         }
+        if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.ensureListen === "function") {
+            window.NjcCommunityCelebrations.ensureListen();
+        }
         setupThemeToggle();
         setupNotifications();
         setupNotificationQuickButton();

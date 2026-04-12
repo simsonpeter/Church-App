@@ -6,6 +6,10 @@
     var cache = [];
     var firestoreUnsubscribe = null;
     var listeners = [];
+    /** Firebase is initialized in app-shell after this script; poll until apps exist. */
+    var firebaseBootTimerId = null;
+    var FIREBASE_BOOT_INTERVAL_MS = 350;
+    var FIREBASE_BOOT_MAX_TICKS = 120;
 
     function getBrusselsYmdForDate(dateValue) {
         var parts = new Intl.DateTimeFormat("en-GB", {
@@ -217,8 +221,16 @@
         });
     }
 
+    function stopFirebaseBootPoll() {
+        if (firebaseBootTimerId !== null) {
+            window.clearInterval(firebaseBootTimerId);
+            firebaseBootTimerId = null;
+        }
+    }
+
     function ensureFirestoreListen() {
         if (firestoreUnsubscribe) {
+            stopFirebaseBootPoll();
             return;
         }
         if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
@@ -243,10 +255,25 @@
                     cache = [];
                     notifyListeners();
                 });
+            stopFirebaseBootPoll();
         } catch (e) {
             cache = [];
             notifyListeners();
         }
+    }
+
+    function startFirebaseBootPoll() {
+        if (firestoreUnsubscribe || firebaseBootTimerId !== null) {
+            return;
+        }
+        var ticks = 0;
+        firebaseBootTimerId = window.setInterval(function () {
+            ticks += 1;
+            ensureFirestoreListen();
+            if (firestoreUnsubscribe || ticks >= FIREBASE_BOOT_MAX_TICKS) {
+                stopFirebaseBootPoll();
+            }
+        }, FIREBASE_BOOT_INTERVAL_MS);
     }
 
     /**
@@ -291,9 +318,13 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         ensureFirestoreListen();
+        startFirebaseBootPoll();
     });
     document.addEventListener("njc:authchange", function () {
         ensureFirestoreListen();
+        if (!firestoreUnsubscribe) {
+            startFirebaseBootPoll();
+        }
     });
 
     window.NjcCommunityCelebrations = {
@@ -302,6 +333,8 @@
         startListen: startListen,
         stopListen: stopListen,
         getProfiles: getProfiles,
+        /** Call after Firebase init (e.g. right after NjcAuth.init). */
+        ensureListen: ensureFirestoreListen,
         getCacheSize: function () {
             return cache.length;
         }

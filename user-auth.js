@@ -607,10 +607,7 @@
         var user = auth.currentUser;
         var tokenCleanup = Promise.resolve();
         if (user && db) {
-            tokenCleanup = Promise.all([
-                db.collection("fcmTokens").doc(user.uid).delete().catch(function () { return null; }),
-                db.collection("celebrationProfiles").doc(user.uid).delete().catch(function () { return null; })
-            ]).then(function () { return null; });
+            tokenCleanup = db.collection("fcmTokens").doc(user.uid).delete().catch(function () { return null; });
         }
         return tokenCleanup.then(function () {
             return auth.signOut();
