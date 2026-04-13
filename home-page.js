@@ -1736,7 +1736,11 @@
                     var mergeUid = mergeAuth && mergeAuth.uid ? String(mergeAuth.uid) : "";
                     community = window.NjcCommunityCelebrations.getAnnouncementsForHome(mergeUid, todayYmd) || [];
                 }
-                var merged = (personal || []).concat(community || []).concat(cachedHomeStaticAnnouncements || []).concat(cachedHomeAdminNotices || []);
+                var mergedPersonalCommunity = (personal || []).concat(community || []);
+                if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.dedupeCelebrationAnnouncements === "function") {
+                    mergedPersonalCommunity = window.NjcCommunityCelebrations.dedupeCelebrationAnnouncements(mergedPersonalCommunity, todayYmd);
+                }
+                var merged = mergedPersonalCommunity.concat(cachedHomeStaticAnnouncements || []).concat(cachedHomeAdminNotices || []);
                 var seen = {};
                 allAnnouncements = merged.filter(function (item) {
                     if (item.personalWish) {

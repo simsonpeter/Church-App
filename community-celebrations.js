@@ -62,6 +62,119 @@
         return partner ? (me + " & " + partner) : me;
     }
 
+    function celebrationDedupeNameKey(raw) {
+        var s = String(raw || "").trim().toLowerCase().replace(/[^a-z0-9\u0b80-\u0bff\s]/gi, " ");
+        var parts = s.split(/\s+/).filter(Boolean);
+        return parts.slice(0, 4).join(" ");
+    }
+
+    function todayMonthDaySegment(todayYmd) {
+        if (!todayYmd) {
+            return "";
+        }
+        return String(todayYmd.month).padStart(2, "0") + "-" + String(todayYmd.day).padStart(2, "0");
+    }
+
+    function celebrationAnnouncementKeys(item, md) {
+        var wish = String(item && item.personalWish || "");
+        var keys = [];
+        if (wish === "celebrationsCombo" && item.personalCelebrationLines && Array.isArray(item.personalCelebrationLines)) {
+            item.personalCelebrationLines.forEach(function (line) {
+                if (!line || typeof line !== "object") {
+                    return;
+                }
+                if (line.kind === "anniversary") {
+                    keys.push("ann|" + md);
+                }
+                if (line.kind === "birthday" || line.kind === "familyBirthday") {
+                    keys.push("bday|" + md + "|" + celebrationDedupeNameKey(line.name));
+                }
+            });
+            return keys;
+        }
+        if (wish === "anniversary") {
+            keys.push("ann|" + md);
+        } else if (wish === "birthday" || wish === "familyBirthday") {
+            keys.push("bday|" + md + "|" + celebrationDedupeNameKey(item.personalDisplayName));
+        }
+        return keys;
+    }
+
+    function celebrationAnnouncementScore(item) {
+        var s = 0;
+        if (item.celebrationFromViewerProfile) {
+            s -= 30;
+        }
+        if (item.communityCelebration) {
+            s += 8;
+        }
+        var id = String(item && item.id || "");
+        if (id.indexOf("njc-personal-celebrations") === 0 || id.indexOf("njc-personal-birthday") === 0 || id.indexOf("njc-personal-anniversary") === 0) {
+            s -= 5;
+        }
+        if (id.indexOf("njc-family-bday") === 0) {
+            s -= 2;
+        }
+        var disp = String(item && item.personalDisplayName || "");
+        if (disp.indexOf(" & ") >= 0 && (item.personalWish === "anniversary" || item.personalWish === "celebrationsCombo")) {
+            s -= 3;
+        }
+        return s;
+    }
+
+    /**
+     * Merge duplicate celebration cards for the same calendar day (e.g. spouse on two profiles).
+     */
+    function dedupeCelebrationAnnouncements(items, todayYmd) {
+        var list = Array.isArray(items) ? items.slice() : [];
+        var md = todayMonthDaySegment(todayYmd);
+        if (!md) {
+            return list;
+        }
+        var bestByKey = {};
+        list.forEach(function (item) {
+            if (!item || !item.personalWish) {
+                return;
+            }
+            var w = String(item.personalWish);
+            if (w !== "birthday" && w !== "anniversary" && w !== "familyBirthday" && w !== "celebrationsCombo") {
+                return;
+            }
+            var keys = celebrationAnnouncementKeys(item, md);
+            if (!keys.length) {
+                return;
+            }
+            keys.forEach(function (k) {
+                var prev = bestByKey[k];
+                if (!prev) {
+                    bestByKey[k] = item;
+                    return;
+                }
+                var sa = celebrationAnnouncementScore(item);
+                var sb = celebrationAnnouncementScore(prev);
+                if (sa < sb) {
+                    bestByKey[k] = item;
+                } else if (sa === sb && String(item.id || "").localeCompare(String(prev.id || "")) < 0) {
+                    bestByKey[k] = item;
+                }
+            });
+        });
+        var keep = new Set();
+        Object.keys(bestByKey).forEach(function (k) {
+            keep.add(bestByKey[k]);
+        });
+        return list.filter(function (item) {
+            if (!item || !item.personalWish) {
+                return true;
+            }
+            var w = String(item.personalWish);
+            if (w !== "birthday" && w !== "anniversary" && w !== "familyBirthday" && w !== "celebrationsCombo") {
+                return true;
+            }
+            return keep.has(item);
+        });
+    }
+
     function normalizeFamilyMembers(raw) {
         if (!Array.isArray(raw)) {
             return [];
@@ -329,6 +442,7 @@
 
     window.NjcCommunityCelebrations = {
         getAnnouncementsForHome: getAnnouncementsForHome,
+        dedupeCelebrationAnnouncements: dedupeCelebrationAnnouncements,
         subscribe: subscribe,
         startListen: startListen,
         stopListen: stopListen,

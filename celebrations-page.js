@@ -107,6 +107,149 @@
         return partner ? (me + " & " + partner) : me;
     }
 
+    /** Loose name match so the same person under two Firestore profiles dedupes (e.g. spouse in family + own account). */
+    function celebrationDedupeNameKey(raw) {
+        var s = String(raw || "").trim().toLowerCase().replace(/[^a-z0-9\u0b80-\u0bff\s]/gi, " ");
+        var parts = s.split(/\s+/).filter(Boolean);
+        return parts.slice(0, 4).join(" ");
+    }
+
+    function todayMonthDayKey(brusselsYmd) {
+        if (!brusselsYmd) {
+            return "";
+        }
+        return String(brusselsYmd.month).padStart(2, "0") + "-" + String(brusselsYmd.day).padStart(2, "0");
+    }
+
+    function upcomingYmdKey(ymd) {
+        if (!ymd || !ymd.month) {
+            return "";
+        }
+        return String(ymd.month).padStart(2, "0") + "-" + String(ymd.day).padStart(2, "0");
+    }
+
+    /** Lower = preferred when merging duplicates. */
+    function todayEventPriority(ev, viewerUid) {
+        var self = Boolean(viewerUid && String(ev.subjectUid || "") === String(viewerUid));
+        if (ev.kind === "myBirthday" && self) {
+            return 0;
+        }
+        if (ev.kind === "myAnniversary" && self) {
+            return 0;
+        }
+        if (ev.kind === "myBirthday" || ev.kind === "myAnniversary") {
+            return 1;
+        }
+        if (ev.kind === "birthday" || ev.kind === "anniversary") {
+            return 2;
+        }
+        if (ev.kind === "familyBirthday") {
+            return 3;
+        }
+        return 4;
+    }
+
+    function dedupeTodayEvents(events, viewerUid) {
+        var list = Array.isArray(events) ? events.slice() : [];
+        var buckets = {};
+
+        function pickBetter(a, b) {
+            var pa = todayEventPriority(a, viewerUid);
+            var pb = todayEventPriority(b, viewerUid);
+            if (pa !== pb) {
+                return pa < pb ? a : b;
+            }
+            var ca = String(a.displayName || "").indexOf(" & ") >= 0;
+            var cb = String(b.displayName || "").indexOf(" & ") >= 0;
+            if (ca !== cb) {
+                return ca ? a : b;
+            }
+            return String(a.subjectUid || "").localeCompare(String(b.subjectUid || "")) <= 0 ? a : b;
+        }
+
+        var todayMd = todayMonthDayKey(getBrusselsYmd());
+        list.forEach(function (ev) {
+            if (!ev) {
+                return;
+            }
+            var key;
+            if (ev.kind === "anniversary" || ev.kind === "myAnniversary") {
+                key = "ann|" + todayMd;
+            } else if (ev.kind === "birthday" || ev.kind === "myBirthday" || ev.kind === "familyBirthday") {
+                key = "bday|" + todayMd + "|" + celebrationDedupeNameKey(ev.displayName);
+            } else {
+                key = String(ev.id || "");
+            }
+            if (!buckets[key]) {
+                buckets[key] = ev;
+            } else {
+                buckets[key] = pickBetter(buckets[key], ev);
+            }
+        });
+        return Object.keys(buckets).map(function (k) {
+            return buckets[k];
+        });
+    }
+
+    function upcomingRowPriority(row, viewerUid) {
+        var self = Boolean(viewerUid && String(row.subjectUid || "") === String(viewerUid));
+        if ((row.kind === "myBirthday" || row.kind === "myAnniversary") && self) {
+            return 0;
+        }
+        if (row.kind === "myBirthday" || row.kind === "myAnniversary") {
+            return 1;
+        }
+        if (row.kind === "birthday" || row.kind === "anniversary") {
+            return 2;
+        }
+        if (row.kind === "familyBirthday") {
+            return 3;
+        }
+        return 4;
+    }
+
+    function dedupeUpcomingRows(rows, viewerUid) {
+        var list = Array.isArray(rows) ? rows.slice() : [];
+        var buckets = {};
+
+        function pickBetter(a, b) {
+            var pa = upcomingRowPriority(a, viewerUid);
+            var pb = upcomingRowPriority(b, viewerUid);
+            if (pa !== pb) {
+                return pa < pb ? a : b;
+            }
+            var ca = String(a.name || "").indexOf(" & ") >= 0;
+            var cb = String(b.name || "").indexOf(" & ") >= 0;
+            if (ca !== cb) {
+                return ca ? a : b;
+            }
+            return String(a.subjectUid || "").localeCompare(String(b.subjectUid || "")) <= 0 ? a : b;
+        }
+
+        list.forEach(function (row) {
+            if (!row || !row.whenYmd) {
+                return;
+            }
+            var md = upcomingYmdKey(row.whenYmd);
+            var key;
+            if (row.kind === "anniversary" || row.kind === "myAnniversary") {
+                key = "ann|" + md;
+            } else if (row.kind === "birthday" || row.kind === "myBirthday" || row.kind === "familyBirthday") {
+                key = "bday|" + md + "|" + celebrationDedupeNameKey(row.name);
+            } else {
+                key = row.subjectUid + "|" + row.name + "|" + md + "|" + row.kind;
+            }
+            if (!buckets[key]) {
+                buckets[key] = row;
+            } else {
+                buckets[key] = pickBetter(buckets[key], row);
+            }
+        });
+        return Object.keys(buckets).map(function (k) {
+            return buckets[k];
+        });
+    }
+
     function profileFromFirestoreData(data) {
         if (!data || typeof data !== "object") {
             return null;
@@ -366,6 +509,8 @@
             return true;
         });
 
+        rows = dedupeUpcomingRows(rows, viewerUid);
+
         rows.sort(function (a, b) {
             return a.sortKey - b.sortKey;
         });
@@ -403,6 +548,8 @@
                 });
             }
         }
+
+        all = dedupeTodayEvents(all, viewerUid);
 
         all.sort(function (a, b) {
             var o = { myBirthday: 0, birthday: 0, myAnniversary: 1, anniversary: 1, familyBirthday: 2 };
