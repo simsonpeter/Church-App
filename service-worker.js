@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v310celededup";
-const RUNTIME_CACHE = "njc-runtime-cache-v310celededup";
+const APP_CACHE = "njc-app-cache-v311prayerpdfui";
+const RUNTIME_CACHE = "njc-runtime-cache-v311prayerpdfui";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260413menuorder1",
     "./user-auth.js?v=20260413celefix1",
-    "./app-shell.js?v=20260413prayerpdf1",
+    "./app-shell.js?v=20260413prayerpdf2",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260413celeDedup1",
     "./home-page.js?v=20260413celeDedup1",
@@ -50,7 +50,7 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20260330pw1",
     "./daily-bread-page.js?v=20260413tts1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260413prayerpdf1",
+    "./admin-dashboard-page.js?v=20260413prayerpdf2",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260413dobmerge1",

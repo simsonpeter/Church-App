@@ -485,7 +485,11 @@
                 return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
             });
 
-            var cards = sorted.map(function (entry) {
+            var urgentCount = sorted.filter(function (e) { return e.urgent; }).length;
+            var urgentStat = escapeHtml(T("admin.prayerExportUrgentCount", "Urgent: {n}")).replace(/\{n\}/g, String(urgentCount));
+            var subtitle = escapeHtml(T("admin.prayerExportSubtitle", "Compiled from the church prayer wall for intercession and follow-up."));
+
+            var cards = sorted.map(function (entry, idx) {
                 var badges = [];
                 if (entry.urgent) {
                     badges.push("<span class=\"badge urgent\">" + urgentLbl + "</span>");
@@ -497,41 +501,82 @@
                     badges.push("<span class=\"badge anon\">" + anonLbl + "</span>");
                 }
                 var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
+                var num = String(idx + 1);
+                var urgentClass = entry.urgent ? " req--urgent" : "";
                 return "" +
-                    "<article class=\"req\">" +
-                    "  <div class=\"req-top\">" +
-                    "    <strong class=\"req-name\">" + escapeHtml(entry.name || "") + "</strong>" +
-                    "    <span class=\"req-date\">" + dateLbl + ": " + escapeHtml(formatPrayerDateForPdf(entry.createdAt)) + "</span>" +
+                    "<article class=\"req" + urgentClass + "\">" +
+                    "  <div class=\"req-inner\">" +
+                    "    <div class=\"req-num\" aria-hidden=\"true\">" + num + "</div>" +
+                    "    <div class=\"req-main\">" +
+                    "      <div class=\"req-top\">" +
+                    "        <strong class=\"req-name\">" + escapeHtml(entry.name || "") + "</strong>" +
+                    "        <time class=\"req-date\">" + dateLbl + " · " + escapeHtml(formatPrayerDateForPdf(entry.createdAt)) + "</time>" +
+                    "      </div>" +
+                    (badges.length ? ("      <div class=\"badges\">" + badges.join("") + "</div>") : "") +
+                    "      <div class=\"req-quote\"><p class=\"req-msg\">" + msg + "</p></div>" +
+                    "    </div>" +
                     "  </div>" +
-                    (badges.length ? ("  <div class=\"badges\">" + badges.join("") + "</div>") : "") +
-                    "  <p class=\"req-msg\">" + msg + "</p>" +
                     "</article>";
             }).join("");
 
-            var html = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>" + title + "</title>" +
+            var html = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + title + "</title>" +
+                "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" +
+                "<link href=\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Source+Sans+3:wght@400;600;700&display=swap\" rel=\"stylesheet\">" +
                 "<style>" +
+                "@page{size:A4;margin:14mm 16mm}" +
                 "*{box-sizing:border-box}" +
-                "body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,sans-serif;margin:0;padding:28px 32px;color:#1a1a1a;background:#faf7f7}" +
-                ".masthead{border-bottom:3px solid #c61c1c;padding-bottom:18px;margin-bottom:28px}" +
-                ".masthead h1{margin:0 0 6px;font-size:1.55rem;color:#8b1515;letter-spacing:.02em}" +
-                ".masthead .sub{margin:0;font-size:.88rem;color:#555}" +
-                ".count{margin:10px 0 22px;font-size:.95rem;font-weight:600;color:#333}" +
-                ".req{break-inside:avoid-page;background:#fff;border:1px solid #e8d4d4;border-radius:12px;padding:16px 18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(80,20,20,.06)}" +
-                ".req-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:8px}" +
-                ".req-name{font-size:1.05rem;color:#1a1a1a}" +
-                ".req-date{font-size:.82rem;color:#666;white-space:nowrap}" +
-                ".badges{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}" +
-                ".badge{display:inline-block;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:999px}" +
-                ".badge.urgent{background:#fde8e8;color:#9b1c1c}" +
-                ".badge.pastor{background:#fff4e5;color:#8a5a00}" +
-                ".badge.anon{background:#eef2ff;color:#3730a3}" +
-                ".req-msg{margin:0;font-size:.95rem;line-height:1.55;color:#222}" +
-                "@media print{body{background:#fff;padding:12mm}.req{box-shadow:none;border-color:#ddd}}" +
-                "</style></head><body>" +
-                "<header class=\"masthead\"><h1>" + title + "</h1><p class=\"sub\">" + genLine + "</p></header>" +
-                "<p class=\"count\">" + countLine + "</p>" +
+                "body{margin:0;padding:0;font-family:'Source Sans 3',system-ui,-apple-system,Segoe UI,sans-serif;font-size:10.5pt;line-height:1.45;color:#1c1917;background:linear-gradient(180deg,#fffdfb 0%,#faf5f3 40%,#f7f0ee 100%);min-height:100vh}" +
+                ".sheet{max-width:720px;margin:0 auto;padding:8px 4px 32px}" +
+                ".masthead{text-align:center;padding:8px 12px 20px;border-bottom:1px solid rgba(180,40,40,.2);margin-bottom:22px}" +
+                ".masthead-brand{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;font-weight:700;color:#7f1d1d;letter-spacing:.04em;margin:0 0 4px}" +
+                ".masthead-rule{width:48px;height:3px;background:linear-gradient(90deg,#b91c1c,#f87171);border-radius:2px;margin:10px auto 14px}" +
+                ".masthead h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.35rem;font-weight:700;color:#44403c;margin:0 0 8px}" +
+                ".masthead .sub{margin:0;font-size:9pt;color:#78716c}" +
+                ".masthead .tagline{margin:12px auto 0;max-width:34em;font-size:9.2pt;color:#a8a29e;line-height:1.4}" +
+                ".meta-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px;margin-bottom:22px}" +
+                ".meta-pill{background:#fff;border:1px solid #e7d5d5;border-radius:999px;padding:6px 14px;font-size:9pt;font-weight:600;color:#57534e;box-shadow:0 1px 2px rgba(80,20,20,.04)}" +
+                ".meta-pill--urgent{border-color:#fecaca;background:linear-gradient(135deg,#fff5f5,#fff);color:#991b1b}" +
+                "main{display:flex;flex-direction:column;gap:14px}" +
+                ".req{break-inside:avoid-page}" +
+                ".req-inner{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #e8d5d5;border-radius:14px;padding:14px 16px 16px;box-shadow:0 2px 12px rgba(60,20,20,.06),0 0 0 1px rgba(255,255,255,.8) inset}" +
+                ".req--urgent .req-inner{border-color:#fca5a5;box-shadow:0 2px 14px rgba(185,28,28,.1),0 0 0 1px #fef2f2 inset}" +
+                ".req--urgent .req-inner{border-left:4px solid #b91c1c;padding-left:13px}" +
+                ".req-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:linear-gradient(145deg,#fef2f2,#fce7e7);border:1px solid #fecaca;color:#9f1239;font-weight:700;font-size:11pt;line-height:30px;text-align:center}" +
+                ".req--urgent .req-num{background:linear-gradient(145deg,#b91c1c,#dc2626);border-color:#991b1b;color:#fff}" +
+                ".req-main{flex:1;min-width:0}" +
+                ".req-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-start;gap:8px 12px;margin-bottom:6px}" +
+                ".req-name{font-size:11pt;font-weight:700;color:#292524}" +
+                ".req-date{font-size:8.5pt;color:#78716c;font-weight:500;white-space:nowrap}" +
+                ".badges{display:flex;flex-wrap:wrap;gap:5px 6px;margin-bottom:10px}" +
+                ".badge{display:inline-block;font-size:6.5pt;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:3px 8px;border-radius:999px}" +
+                ".badge.urgent{background:#fee2e2;color:#991b1b}" +
+                ".badge.pastor{background:#ffedd5;color:#9a3412}" +
+                ".badge.anon{background:#e0e7ff;color:#3730a3}" +
+                ".req-quote{margin:0;padding:10px 12px;background:linear-gradient(180deg,#fafaf9,#fff);border-radius:10px;border-left:3px solid #d6d3d1}" +
+                ".req--urgent .req-quote{border-left-color:#f87171;background:linear-gradient(180deg,#fffafa,#fff)" +
+                "}" +
+                ".req-msg{margin:0;font-size:10pt;line-height:1.6;color:#44403c}" +
+                ".doc-footer{margin-top:28px;padding-top:16px;border-top:1px solid #e7e5e4;text-align:center;font-size:8pt;color:#a8a29e}" +
+                "@media print{" +
+                "body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}" +
+                ".sheet{padding:0}" +
+                ".req-inner{box-shadow:none}" +
+                "}" +
+                "</style></head><body><div class=\"sheet\">" +
+                "<header class=\"masthead\">" +
+                "<p class=\"masthead-brand\">NJC Belgium</p>" +
+                "<div class=\"masthead-rule\"></div>" +
+                "<h1>" + title + "</h1>" +
+                "<p class=\"sub\">" + genLine + "</p>" +
+                "<p class=\"tagline\">" + subtitle + "</p>" +
+                "</header>" +
+                "<div class=\"meta-bar\">" +
+                "<span class=\"meta-pill\">" + countLine + "</span>" +
+                "<span class=\"meta-pill meta-pill--urgent\">" + urgentStat + "</span>" +
+                "</div>" +
                 "<main>" + cards + "</main>" +
-                "</body></html>";
+                "<footer class=\"doc-footer\">" + escapeHtml(T("admin.prayerExportFooter", "Prayer wall export · For pastoral use · Keep requests confidential.")) + "</footer>" +
+                "</div></body></html>";
 
             var w = window.open("", "_blank", "noopener,noreferrer");
             if (!w) {
