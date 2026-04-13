@@ -2906,6 +2906,11 @@ body.header-menu-open {
     margin-bottom: 2px;
 }
 
+.header-menu-spacer {
+    height: 10px;
+    flex-shrink: 0;
+}
+
 .header-menu-link {
     width: 100%;
     display: flex;

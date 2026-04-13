@@ -3729,6 +3729,13 @@
             document.dispatchEvent(new CustomEvent("njc:themechange", { detail: { theme: nextTheme } }));
         });
 
+        function appendMenuSpacer() {
+            var sp = document.createElement("div");
+            sp.className = "header-menu-spacer";
+            sp.setAttribute("aria-hidden", "true");
+            menuScroll.appendChild(sp);
+        }
+
         function refreshMenuQuickPrefs() {
             var langLabel = menuLanguageBtn.querySelector(".header-menu-quick-pref-label");
             var langValue = menuLanguageBtn.querySelector(".header-menu-quick-pref-value");
@@ -3769,12 +3776,20 @@
             menuThemeBtn.title = themeToggleHint;
         }
 
-        var primaryCard = document.createElement("section");
-        primaryCard.className = "header-menu-card";
-        menuScroll.appendChild(primaryCard);
-        var primaryLinksContainer = document.createElement("nav");
-        primaryLinksContainer.className = "header-menu-tabs";
-        primaryCard.appendChild(primaryLinksContainer);
+        var authCard = document.createElement("section");
+        authCard.className = "header-menu-card";
+        menuScroll.appendChild(authCard);
+        var authNav = document.createElement("nav");
+        authNav.className = "header-menu-tabs";
+        authCard.appendChild(authNav);
+
+        var authButton = document.createElement("button");
+        authButton.type = "button";
+        authButton.className = "header-menu-link header-menu-action";
+        authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
+        authNav.appendChild(authButton);
+
+        appendMenuSpacer();
 
         var bibleSongCard = document.createElement("section");
         bibleSongCard.className = "header-menu-card";
@@ -3795,17 +3810,17 @@
         songbookLink.innerHTML = "<i class=\"fa-solid fa-music\"></i><span></span>";
         bibleSongLinksContainer.appendChild(songbookLink);
 
-        var bookShelfLink = document.createElement("a");
-        bookShelfLink.className = "header-menu-link";
-        bookShelfLink.href = "#book-shelf";
-        bookShelfLink.innerHTML = "<i class=\"fa-solid fa-book-open-reader\"></i><span></span>";
-        bibleSongLinksContainer.appendChild(bookShelfLink);
-
         var dailyBreadMenuLink = document.createElement("a");
         dailyBreadMenuLink.className = "header-menu-link";
         dailyBreadMenuLink.href = "#daily-bread";
         dailyBreadMenuLink.innerHTML = "<i class=\"fa-solid fa-bread-slice\"></i><span></span>";
         bibleSongLinksContainer.appendChild(dailyBreadMenuLink);
+
+        var bookShelfLink = document.createElement("a");
+        bookShelfLink.className = "header-menu-link";
+        bookShelfLink.href = "#book-shelf";
+        bookShelfLink.innerHTML = "<i class=\"fa-solid fa-book-open-reader\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(bookShelfLink);
 
         var triviaLink = document.createElement("a");
         triviaLink.className = "header-menu-link";
@@ -3813,17 +3828,41 @@
         triviaLink.innerHTML = "<i class=\"fa-solid fa-question-circle\"></i><span></span>";
         bibleSongLinksContainer.appendChild(triviaLink);
 
+        appendMenuSpacer();
+
+        var communityCard = document.createElement("section");
+        communityCard.className = "header-menu-card";
+        menuScroll.appendChild(communityCard);
+        var communityLinksContainer = document.createElement("nav");
+        communityLinksContainer.className = "header-menu-tabs";
+        communityCard.appendChild(communityLinksContainer);
+
+        var celebrationsLink = document.createElement("a");
+        celebrationsLink.className = "header-menu-link";
+        celebrationsLink.href = "#celebrations";
+        celebrationsLink.setAttribute("data-route", "celebrations");
+        celebrationsLink.innerHTML = "<i class=\"fa-solid fa-cake-candles\"></i><span></span>";
+        communityLinksContainer.appendChild(celebrationsLink);
+
         var achievementsLink = document.createElement("a");
         achievementsLink.className = "header-menu-link";
         achievementsLink.href = "#user-achievements";
         achievementsLink.innerHTML = "<i class=\"fa-solid fa-trophy\"></i><span></span>";
-        bibleSongLinksContainer.appendChild(achievementsLink);
+        communityLinksContainer.appendChild(achievementsLink);
 
         var chatLink = document.createElement("a");
         chatLink.className = "header-menu-link";
         chatLink.href = "#chat";
         chatLink.innerHTML = "<i class=\"fa-solid fa-comments\"></i><span></span>";
-        bibleSongLinksContainer.appendChild(chatLink);
+        communityLinksContainer.appendChild(chatLink);
+
+        var profileLink = document.createElement("a");
+        profileLink.className = "header-menu-link";
+        profileLink.href = "#profile";
+        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
+        communityLinksContainer.appendChild(profileLink);
+
+        appendMenuSpacer();
 
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
@@ -3831,6 +3870,19 @@
         var utilityLinksContainer = document.createElement("nav");
         utilityLinksContainer.className = "header-menu-tabs";
         utilityCard.appendChild(utilityLinksContainer);
+
+        var settingsLink = document.createElement("a");
+        settingsLink.className = "header-menu-link";
+        settingsLink.href = "#settings";
+        settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
+        utilityLinksContainer.appendChild(settingsLink);
+
+        var contactMenuLink = document.createElement("a");
+        contactMenuLink.className = "header-menu-link";
+        contactMenuLink.href = "#contact";
+        contactMenuLink.setAttribute("data-route", "contact");
+        contactMenuLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span></span>";
+        utilityLinksContainer.appendChild(contactMenuLink);
 
         var mailboxLink = document.createElement("a");
         mailboxLink.className = "header-menu-link";
@@ -3843,31 +3895,6 @@
         adminLink.href = "#admin";
         adminLink.innerHTML = "<i class=\"fa-solid fa-screwdriver-wrench\"></i><span></span>";
         utilityLinksContainer.appendChild(adminLink);
-
-        var settingsLink = document.createElement("a");
-        settingsLink.className = "header-menu-link";
-        settingsLink.href = "#settings";
-        settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
-        utilityLinksContainer.appendChild(settingsLink);
-
-        var celebrationsLink = document.createElement("a");
-        celebrationsLink.className = "header-menu-link";
-        celebrationsLink.href = "#celebrations";
-        celebrationsLink.setAttribute("data-route", "celebrations");
-        celebrationsLink.innerHTML = "<i class=\"fa-solid fa-cake-candles\"></i><span></span>";
-        utilityLinksContainer.appendChild(celebrationsLink);
-
-        var profileLink = document.createElement("a");
-        profileLink.className = "header-menu-link";
-        profileLink.href = "#profile";
-        profileLink.innerHTML = "<i class=\"fa-solid fa-user\"></i><span></span>";
-        utilityLinksContainer.appendChild(profileLink);
-
-        var authButton = document.createElement("button");
-        authButton.type = "button";
-        authButton.className = "header-menu-link header-menu-action";
-        authButton.innerHTML = "<i class=\"fa-solid fa-right-to-bracket\"></i><span></span>";
-        utilityLinksContainer.appendChild(authButton);
         panel.appendChild(menuScroll);
         document.body.appendChild(panel);
 
@@ -3919,6 +3946,7 @@
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
             chatLink.hidden = !m.isModuleEnabled("chat");
             celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
+            contactMenuLink.hidden = !m.isModuleEnabled("contact");
         }
 
         function sanitizeNotificationTargetUrl(rawUrl) {
@@ -3937,58 +3965,6 @@
                 return "#home";
             }
             return u;
-        }
-
-        function buildTabLinksInMenu() {
-            if (!primaryLinksContainer) {
-                return;
-            }
-            var tabAnchors = document.querySelectorAll(".tab-nav a.tab[href]");
-            var allowedRoutes = ["home", "prayer", "events", "sermons", "contact"];
-            var routeMap = {};
-            primaryLinksContainer.innerHTML = "";
-            tabAnchors.forEach(function (anchor) {
-                var href = anchor.getAttribute("href") || "";
-                if (!href || href.charAt(0) !== "#") {
-                    return;
-                }
-                var route = (anchor.getAttribute("data-route") || "").trim().toLowerCase();
-                if (!route) {
-                    return;
-                }
-                routeMap[route] = anchor;
-            });
-            allowedRoutes.forEach(function (route) {
-                if (window.NjcAppModules && typeof window.NjcAppModules.isRouteEnabled === "function"
-                    && !window.NjcAppModules.isRouteEnabled(route)) {
-                    return;
-                }
-                if (route === "contact") {
-                    var contactLabel = t("menu.contact", "Contact us");
-                    var contactLink = document.createElement("a");
-                    contactLink.className = "header-menu-link header-menu-tab-link";
-                    contactLink.href = "#contact";
-                    contactLink.setAttribute("data-route", "contact");
-                    contactLink.innerHTML = "<i class=\"fa-solid fa-address-book\"></i><span>" + escapeHtml(contactLabel) + "</span>";
-                    primaryLinksContainer.appendChild(contactLink);
-                    return;
-                }
-                var anchor = routeMap[route];
-                if (!anchor || anchor.hidden) {
-                    return;
-                }
-                var href = anchor.getAttribute("href") || "";
-                var labelNode = anchor.querySelector(".tab-label");
-                var iconNode = anchor.querySelector(".tab-icon i");
-                var iconClass = iconNode ? iconNode.className : "fa-solid fa-circle";
-                var labelText = labelNode ? labelNode.textContent : route;
-                var link = document.createElement("a");
-                link.className = "header-menu-link header-menu-tab-link";
-                link.href = href;
-                link.setAttribute("data-route", route);
-                link.innerHTML = "<i class=\"" + iconClass + "\"></i><span>" + escapeHtml(labelText || "") + "</span>";
-                primaryLinksContainer.appendChild(link);
-            });
         }
 
         function getInAppApi() {
@@ -4099,6 +4075,7 @@
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
             var celebrationsLabel = t("menu.celebrations", "Celebrations");
+            var contactMenuLabel = t("menu.contact", "Contact us");
             var authApi = window.NjcAuth;
             var activeUser = authApi && typeof authApi.getUser === "function" ? authApi.getUser() : null;
             var profile = getProfileForUser(activeUser);
@@ -4190,15 +4167,13 @@
             if (authIcon) {
                 authIcon.className = "fa-solid " + authIconClass;
             }
-            buildTabLinksInMenu();
+            var contactMenuNode = contactMenuLink.querySelector("span");
+            if (contactMenuNode) {
+                contactMenuNode.textContent = contactMenuLabel;
+            }
             applyModuleNavVisibility();
             refreshMenuQuickPrefs();
             var currentRoute = getCurrentRoute();
-            primaryLinksContainer.querySelectorAll("a.header-menu-tab-link").forEach(function (link) {
-                var route = (link.getAttribute("data-route") || "").trim().toLowerCase();
-                var active = Boolean(route) && route === currentRoute;
-                link.classList.toggle("active", active);
-            });
             var isProfile = getCurrentRoute() === "profile";
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
@@ -4211,6 +4186,7 @@
             var isCelebrations = getCurrentRoute() === "celebrations";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
+            var isContact = getCurrentRoute() === "contact";
             profileLink.classList.toggle("active", isProfile);
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
@@ -4223,6 +4199,7 @@
             celebrationsLink.classList.toggle("active", isCelebrations);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);
+            contactMenuLink.classList.toggle("active", isContact);
             mailboxLink.hidden = !isAdmin;
             adminLink.hidden = !isAdmin;
             renderNotificationCenter();
