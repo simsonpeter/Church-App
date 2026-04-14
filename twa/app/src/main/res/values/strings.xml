@@ -15,7 +15,8 @@
      limitations under the License.
 -->
 <resources>
-  
+
+  <string name="njc_share_verse_title">Share verse image</string>
 
   <!--
     This variable below expresses the relationship between the app and the site,

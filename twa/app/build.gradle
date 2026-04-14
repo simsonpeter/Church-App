@@ -57,8 +57,8 @@ android {
         applicationId "be.njc.app"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.0.2"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -178,7 +178,8 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled true
+            // WebView + ABH: R8 minify has caused subtle breakage in similar shells; APK is small anyway.
+            minifyEnabled false
             // Only use signing config if it's properly configured
             if (signingConfigs.release.storePassword) {
                 signingConfig signingConfigs.release
@@ -237,6 +238,8 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
+
+ implementation 'androidx.core:core:1.12.0'
     
         implementation 'com.google.androidbrowserhelper:androidbrowserhelper:2.6.2'
         

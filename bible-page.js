@@ -902,6 +902,45 @@
         return lines;
     }
 
+    function canvasToPngBlob(canvas) {
+        return new Promise(function (resolve, reject) {
+            function fromDataUrl() {
+                try {
+                    var dataUrl = canvas.toDataURL("image/png");
+                    var parts = dataUrl.split(",");
+                    var bstr = atob(parts.length > 1 ? parts[1] : parts[0]);
+                    var n = bstr.length;
+                    var u8 = new Uint8Array(n);
+                    while (n--) {
+                        u8[n] = bstr.charCodeAt(n);
+                    }
+                    if (typeof Blob === "undefined") {
+                        reject(new Error("image-generation-failed"));
+                        return;
+                    }
+                    resolve(new Blob([u8], { type: "image/png" }));
+                } catch (err2) {
+                    reject(err2);
+                }
+            }
+            try {
+                if (typeof canvas.toBlob === "function") {
+                    canvas.toBlob(function (blob) {
+                        if (blob) {
+                            resolve(blob);
+                            return;
+                        }
+                        fromDataUrl();
+                    }, "image/png");
+                } else {
+                    fromDataUrl();
+                }
+            } catch (err) {
+                reject(err);
+            }
+        });
+    }
+
     function buildVerseImageBlob(payload) {
         return new Promise(function (resolve, reject) {
             var canvas = document.createElement("canvas");
@@ -977,13 +1016,9 @@
             ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
             ctx.fillText(payload.language === "ta" ? "தமிழ்" : "English", 540, 1238);
 
-            canvas.toBlob(function (blob) {
-                if (!blob) {
-                    reject(new Error("image-generation-failed"));
-                    return;
-                }
-                resolve(blob);
-            }, "image/png");
+            canvasToPngBlob(canvas).then(resolve).catch(function (err) {
+                reject(err || new Error("image-generation-failed"));
+            });
         });
     }
 
@@ -1008,6 +1043,40 @@
             .slice(0, 80) || "verse";
     }
 
+    function shareWithBlobWebFallback(blob, fileName, payload) {
+        var shared = false;
+        if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
+            var file = new File([blob], fileName, { type: "image/png" });
+            var canShareFiles = true;
+            if (typeof navigator.canShare === "function") {
+                canShareFiles = navigator.canShare({ files: [file] });
+            }
+            if (canShareFiles) {
+                return navigator.share({
+                    title: payload.reference,
+                    text: payload.reference,
+                    files: [file]
+                }).then(function () {
+                    shared = true;
+                }).catch(function (error) {
+                    if (error && error.name === "AbortError") {
+                        throw error;
+                    }
+                }).then(function () {
+                    if (!shared) {
+                        downloadBlob(blob, fileName);
+                        setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
+                        return;
+                    }
+                    setStatus(T("bible.shareReady", "Verse image ready to share."), false);
+                });
+            }
+        }
+        downloadBlob(blob, fileName);
+        setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
+        return Promise.resolve(null);
+    }
+
     function shareVerseImage() {
         if (shareImageBusy) {
             return;
@@ -1023,37 +1092,27 @@
         setStatus(T("bible.shareGenerating", "Generating verse image..."), false);
         buildVerseImageBlob(payload).then(function (blob) {
             var fileName = "njc-verse-" + slugifyForFileName(payload.reference) + ".png";
-            var shared = false;
-            if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
-                var file = new File([blob], fileName, { type: "image/png" });
-                var canShareFiles = true;
-                if (typeof navigator.canShare === "function") {
-                    canShareFiles = navigator.canShare({ files: [file] });
-                }
-                if (canShareFiles) {
-                    return navigator.share({
-                        title: payload.reference,
-                        text: payload.reference,
-                        files: [file]
-                    }).then(function () {
-                        shared = true;
-                    }).catch(function (error) {
-                        if (error && error.name === "AbortError") {
-                            throw error;
+            if (typeof window.NjcBridge !== "undefined" && window.NjcBridge && typeof window.NjcBridge.sharePngBase64 === "function") {
+                return new Promise(function (resolve, reject) {
+                    var reader = new FileReader();
+                    reader.onloadend = function () {
+                        try {
+                            var s = String(reader.result || "");
+                            var idx = s.indexOf(",");
+                            window.NjcBridge.sharePngBase64(idx >= 0 ? s.slice(idx + 1) : s, fileName);
+                            setStatus(T("bible.shareReady", "Verse image ready to share."), false);
+                            resolve(null);
+                        } catch (errBr) {
+                            shareWithBlobWebFallback(blob, fileName, payload).then(resolve).catch(reject);
                         }
-                    }).then(function () {
-                        if (!shared) {
-                            downloadBlob(blob, fileName);
-                            setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
-                            return;
-                        }
-                        setStatus(T("bible.shareReady", "Verse image ready to share."), false);
-                    });
-                }
+                    };
+                    reader.onerror = function () {
+                        shareWithBlobWebFallback(blob, fileName, payload).then(resolve).catch(reject);
+                    };
+                    reader.readAsDataURL(blob);
+                });
             }
-            downloadBlob(blob, fileName);
-            setStatus(T("bible.shareDownloaded", "Verse image downloaded. Share it on WhatsApp/Instagram."), false);
-            return null;
+            return shareWithBlobWebFallback(blob, fileName, payload);
         }).catch(function (error) {
             if (error && error.name === "AbortError") {
                 setStatus(T("bible.shareCancelled", "Share cancelled."), false);
@@ -1463,7 +1522,21 @@
             updateTtsControls();
             return;
         }
-        /* Prefer Web Speech first: Google translate_tts is often blocked (CORS/referrer), especially on Tamil. */
+        /* NJC Android WebView: Web Speech is often broken; stream uses translate_tts (fixed in app via Referer). */
+        var preferStreamInWrappedApp = false;
+        try {
+            preferStreamInWrappedApp =
+                typeof window.NjcBridge !== "undefined" &&
+                window.NjcBridge &&
+                typeof window.NjcBridge.isApp === "function" &&
+                window.NjcBridge.isApp();
+        } catch (eWrap) {
+            preferStreamInWrappedApp = false;
+        }
+        if (preferStreamInWrappedApp && streamSupported && startStreamPlayback()) {
+            return;
+        }
+        /* Prefer Web Speech in normal browsers: translate_tts is often blocked (CORS/referrer). */
         if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
             return;
         }
