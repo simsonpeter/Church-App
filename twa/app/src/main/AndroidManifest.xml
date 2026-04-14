@@ -84,22 +84,23 @@
             </activity>
         
 
-        <activity android:name=".WebViewActivity"
+        <activity
+            android:name=".LauncherActivity"
             android:alwaysRetainTaskState="true"
-            android:hardwareAccelerated="true"
-            android:label="@string/launcherName"
             android:exported="true"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            android:label="@string/launcherName"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="https"
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
                     android:host="@string/hostName"
                     android:pathPrefix="/Church-App" />
             </intent-filter>
