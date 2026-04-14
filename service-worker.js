@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v311prayerpdfui";
-const RUNTIME_CACHE = "njc-runtime-cache-v311prayerpdfui";
+const APP_CACHE = "njc-app-cache-v312biblebg";
+const RUNTIME_CACHE = "njc-runtime-cache-v312biblebg";
 
 const CORE_ASSETS = [
     "./",
@@ -45,7 +45,7 @@ const CORE_ASSETS = [
     "./home-page.js?v=20260413celeDedup1",
     "./events-page.js?v=20260414u2",
     "./sermons-page.js?v=20260324u1",
-    "./bible-page.js?v=20260413tts1",
+    "./bible-page.js?v=20260411biblebg",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260330pw1",
     "./daily-bread-page.js?v=20260413tts1",

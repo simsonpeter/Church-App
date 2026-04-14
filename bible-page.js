@@ -108,7 +108,6 @@
         location: { book: 0, chapter: 0 },
         verses: []
     };
-    var screenWakeLock = null;
     var streamQueue = [];
     var streamQueueIndex = 0;
     var speechSegmentVerseNumbers = [];
@@ -407,7 +406,6 @@
             navigator.mediaSession.setActionHandler("pause", function () {
                 if (speechState.mode === "stream" && streamAudio && !streamAudio.paused) {
                     streamAudio.pause();
-                    releaseWakeLock();
                     return;
                 }
                 var synth = getSpeechSynthesisApi();
@@ -417,7 +415,6 @@
                         synth.pause();
                     }
                     speechState.paused = true;
-                    releaseWakeLock();
                     updateTtsControls();
                 }
             });
@@ -548,7 +545,6 @@
         }
         updateTtsControls();
         syncMediaSessionState();
-        requestWakeLock();
         var streamStarted = startStreamSegment(0);
         if (streamStarted) {
             updateCurrentPlayingVerseFromSegments(streamQueueIndex);
@@ -571,7 +567,6 @@
             clearStreamStartWatch();
             speechState.active = true;
             speechState.paused = false;
-            requestWakeLock();
             updateTtsControls();
             syncMediaSessionState();
         });
@@ -588,7 +583,6 @@
             }
             if (!streamAudio.ended) {
                 speechState.paused = true;
-                releaseWakeLock();
                 updateTtsControls();
                 syncMediaSessionState();
             }
@@ -602,7 +596,6 @@
                 startStreamSegment(nextIndex);
                 return;
             }
-            releaseWakeLock();
             speechState.active = false;
             speechState.paused = false;
             speechState.mode = "none";
@@ -1066,36 +1059,6 @@
         });
     }
 
-    function releaseWakeLock() {
-        if (!screenWakeLock || typeof screenWakeLock.release !== "function") {
-            screenWakeLock = null;
-            return;
-        }
-        var lock = screenWakeLock;
-        screenWakeLock = null;
-        lock.release().catch(function () {
-            return null;
-        });
-    }
-
-    function requestWakeLock() {
-        if (typeof navigator === "undefined" || !navigator.wakeLock || typeof navigator.wakeLock.request !== "function") {
-            return;
-        }
-        navigator.wakeLock.request("screen").then(function (lock) {
-            screenWakeLock = lock;
-            if (lock && typeof lock.addEventListener === "function") {
-                lock.addEventListener("release", function () {
-                    if (screenWakeLock === lock) {
-                        screenWakeLock = null;
-                    }
-                });
-            }
-        }).catch(function () {
-            return null;
-        });
-    }
-
     function updateTtsControls() {
         if (!ttsToggleButton || !ttsStopButton) {
             updateShareControls();
@@ -1248,7 +1211,6 @@
             streamPrefetchAudio.removeAttribute("src");
             streamPrefetchAudio.load();
         }
-        releaseWakeLock();
         speakingUtterance = null;
         streamQueue = [];
         streamQueueIndex = 0;
@@ -1298,7 +1260,6 @@
             return;
         }
         if (speechSynthSegmentIndex >= speechSynthSegments.length) {
-            releaseWakeLock();
             speakingUtterance = null;
             speechState.active = false;
             speechState.paused = false;
@@ -1446,7 +1407,6 @@
         updateCurrentPlayingVerseFromSegments(0);
         updateTtsControls();
         syncMediaSessionState();
-        requestWakeLock();
         ensureSpeechVoicesLoaded(function () {
             if (speechState.mode !== "speech" || !speechState.active) {
                 return;
@@ -1463,11 +1423,11 @@
             updateTtsControls();
             return;
         }
-        /* Prefer Web Speech first: Google translate_tts is often blocked (CORS/referrer), especially on Tamil. */
-        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
+        /* Prefer <audio> stream: Web Speech often stops when the tab is hidden or the screen is off; real audio can keep playing in the background. */
+        if (streamSupported && startStreamPlayback()) {
             return;
         }
-        if (streamSupported && startStreamPlayback()) {
+        if (speechSupported && startSpeechSynthesisPlaybackQueued()) {
             return;
         }
         updateTtsControls();
@@ -1484,7 +1444,6 @@
             if (speechState.active && !speechState.paused && !streamAudio.paused) {
                 streamAudio.pause();
                 speechState.paused = true;
-                releaseWakeLock();
                 updateTtsControls();
                 syncMediaSessionState();
                 return;
@@ -1498,7 +1457,6 @@
                     return null;
                 });
                 speechState.paused = false;
-                requestWakeLock();
                 updateTtsControls();
                 syncMediaSessionState();
                 return;
@@ -1520,14 +1478,12 @@
                 synth.pause();
                 speechSynthUserPaused = true;
                 speechState.paused = true;
-                releaseWakeLock();
                 updateTtsControls();
                 syncMediaSessionState();
                 return;
             }
             speechSynthUserPaused = true;
             speechState.paused = true;
-            releaseWakeLock();
             updateTtsControls();
             syncMediaSessionState();
             return;
@@ -1543,7 +1499,6 @@
             }
             speechSynthUserPaused = false;
             speechState.paused = false;
-            requestWakeLock();
             if (synth.paused) {
                 synth.resume();
             } else {
@@ -2552,9 +2507,6 @@
         }
     });
     document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "visible" && speechState.active && !speechState.paused && !screenWakeLock) {
-            requestWakeLock();
-        }
         if (document.visibilityState !== "visible") {
             return;
         }
