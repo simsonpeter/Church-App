@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v314celemember";
-const RUNTIME_CACHE = "njc-runtime-cache-v314celemember";
+const APP_CACHE = "njc-app-cache-v315celeguest";
+const RUNTIME_CACHE = "njc-runtime-cache-v315celeguest";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260413menuorder1",
+    "./styles.css?v=20260411celeguest",
     "./user-auth.js?v=20260411celemember",
-    "./app-shell.js?v=20260411celemember",
+    "./app-shell.js?v=20260411celeguest",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -55,9 +55,9 @@ const CORE_ASSETS = [
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260413dobmerge1",
     "./celebration-wish-thread.js?v=20260411celemember",
-    "./celebrations-page.js?v=20260411celemember",
+    "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260411celemember",
+    "./spa-router.js?v=20260411celeguest",
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

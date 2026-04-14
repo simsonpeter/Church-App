@@ -624,6 +624,7 @@
     var threadMount = document.getElementById("celebrations-wish-thread-mount");
     var upcomingList = document.getElementById("celebrations-upcoming-list");
     var emptyEl = document.getElementById("celebrations-empty");
+    var guestInfoEl = document.getElementById("celebrations-guest-info");
     var noteEl = document.getElementById("celebrations-note");
     var celebrationsCard = document.querySelector(".celebrations-card");
 
@@ -649,6 +650,50 @@
         noteEl.textContent = key ? T(key, fallback) : "";
     }
 
+    function applyCelebrationsLayoutForMemberState() {
+        var member = Boolean(getViewerUid());
+        if (!celebrationsCard) {
+            return;
+        }
+        var hint = celebrationsCard.querySelector(".celebrations-today-hint");
+        var celebratingTitle = celebrationsCard.querySelector(".celebrations-celebrating-title");
+        var threadWrap = celebrationsCard.querySelector(".celebrations-thread-wrap");
+        if (guestInfoEl) {
+            guestInfoEl.hidden = member;
+        }
+        if (hint) {
+            hint.hidden = !member;
+        }
+        if (celebratingTitle) {
+            celebratingTitle.hidden = !member;
+        }
+        if (todayStack) {
+            todayStack.hidden = !member;
+        }
+        if (threadWrap) {
+            threadWrap.hidden = !member;
+        }
+    }
+
+    if (celebrationsCard && !celebrationsCard.dataset.njcGuestCtaBound) {
+        celebrationsCard.dataset.njcGuestCtaBound = "1";
+        celebrationsCard.addEventListener("click", function (ev) {
+            var btn = ev.target.closest("[data-njc-celeb-action]");
+            if (!btn || !celebrationsCard.contains(btn)) {
+                return;
+            }
+            var act = btn.getAttribute("data-njc-celeb-action");
+            if (!window.NjcAuth || typeof window.NjcAuth.openAuthModal !== "function") {
+                return;
+            }
+            if (act === "register") {
+                window.NjcAuth.openAuthModal("register");
+            } else if (act === "login") {
+                window.NjcAuth.openAuthModal("login");
+            }
+        });
+    }
+
     function mountWishThread() {
         if (!threadMount || !window.NjcCelebrationWish || typeof window.NjcCelebrationWish.mount !== "function") {
             return;
@@ -670,7 +715,7 @@
             return;
         }
         if (!getViewerUid()) {
-            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingMembersOnly", "Sign in to see upcoming celebrations from the community.")) + "</li>";
+            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingMembersOnly", "Register or sign in, then come back to see upcoming celebrations.")) + "</li>";
             return;
         }
         var rows = aggregateUpcomingEvents();
@@ -704,9 +749,33 @@
         lastWishSuggestion = "";
         if (!getViewerUid()) {
             todayStack.innerHTML = "";
-            emptyEl.hidden = false;
-            emptyEl.textContent = T("celebrations.membersOnlyBody", "Sign in with your church account to see community birthdays, anniversaries, and the wish thread.");
+            if (emptyEl) {
+                emptyEl.hidden = true;
+                emptyEl.textContent = "";
+            }
+            if (guestInfoEl) {
+                guestInfoEl.hidden = false;
+                guestInfoEl.innerHTML = "" +
+                    "<p class=\"celebrations-guest-info-title\"><strong>" +
+                    escapeHtml(T("celebrations.membersOnlyGuestTitle", "Members only")) +
+                    "</strong></p>" +
+                    "<p class=\"page-note celebrations-guest-info-body\">" +
+                    escapeHtml(T(
+                        "celebrations.membersOnlyGuestBody",
+                        "Only registered members can see birthdays and anniversaries and send wishes on this page. Please register or log in, then come back here to use Celebrations."
+                    )) +
+                    "</p>" +
+                    "<div class=\"celebrations-guest-actions\">" +
+                    "  <button type=\"button\" class=\"button-link\" data-njc-celeb-action=\"register\">" +
+                    escapeHtml(T("celebrations.registerToContinue", "Register")) +
+                    "</button>" +
+                    "  <button type=\"button\" class=\"button-link button-secondary\" data-njc-celeb-action=\"login\">" +
+                    escapeHtml(T("celebrations.loginToContinue", "Log in")) +
+                    "</button>" +
+                    "</div>";
+            }
             renderUpcoming();
+            applyCelebrationsLayoutForMemberState();
             return;
         }
         var events = aggregateTodayEvents();
@@ -715,6 +784,7 @@
             emptyEl.hidden = false;
             emptyEl.textContent = T("celebrations.emptyTodayCommunity", "No community celebrations today yet. Add birthdays or anniversary in Profile and save.");
             renderUpcoming();
+            applyCelebrationsLayoutForMemberState();
             return;
         }
         emptyEl.hidden = true;
@@ -733,6 +803,7 @@
         }).join("");
 
         renderUpcoming();
+        applyCelebrationsLayoutForMemberState();
     }
 
     if (todayStack) {

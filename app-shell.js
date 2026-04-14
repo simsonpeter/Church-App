@@ -289,7 +289,11 @@
         "celebrations.loginRequired": "சுயவிவரத்திலிருந்து பிறந்தநாட்களைக் காண முதலில் உள்நுழையவும்.",
         "celebrations.guestIntro": "சமூக விழாக்களையும் வாழ்த்துப் பெட்டியையும் காண சபைக் கணக்கில் உள்நுழையவும்.",
         "celebrations.membersOnlyBody": "சமூக பிறந்தநாட்கள், திருமண நாள் மற்றும் வாழ்த்துப் பெட்டியைக் காண சபைக் கணக்கில் உள்நுழையவும்.",
-        "celebrations.upcomingMembersOnly": "சமூகத்தின் வரவிருக்கும் விழாக்களைக் காண உள்நுழையவும்.",
+        "celebrations.membersOnlyGuestTitle": "விழாக்கள் — பதிவுசெய்த உறுப்பினர்களுக்கு மட்டும்",
+        "celebrations.membersOnlyGuestBody": "இந்தப் பக்கத்தில் பிறந்தநாட்கள், திருமண நாள் மற்றும் வாழ்த்துக்களைக் காணவும் அனுப்பவும் பதிவுசெய்த உறுப்பினர்கள் மட்டுமே. தயவுசெய்து கணக்கை உருவாக்கவும் அல்லது உள்நுழையவும், பின்னர் மீண்டும் இந்தப் பக்கத்திற்கு வாருங்கள்.",
+        "celebrations.registerToContinue": "பதிவு செய்",
+        "celebrations.loginToContinue": "உள்நுழை",
+        "celebrations.upcomingMembersOnly": "பதிவு செய்யவும் அல்லது உள்நுழையவும், பின்னர் வரவிருக்கும் விழாக்களை இங்கே காணலாம்.",
         "celebrations.wishThreadMembersOnly": "சமூக வாழ்த்துக்களைக் காண உள்நுழையவும்.",
         "celebrations.wishThreadSignInToView": "சமூக வாழ்த்துக்களைக் காணவும் அனுப்பவும் உள்நுழையவும்.",
         "celebrations.upcomingSignIn": "சுயவிவரத்திலிருந்து வரவிருப்ப தேதிகளைக் காண உள்நுழையவும்.",
@@ -3964,11 +3968,7 @@
             triviaLink.hidden = !m.isModuleEnabled("trivia");
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
             chatLink.hidden = !m.isModuleEnabled("chat");
-            var celebOk = m.isModuleEnabled("celebrations")
-                && window.NjcAuth
-                && typeof window.NjcAuth.isRegisteredMember === "function"
-                && window.NjcAuth.isRegisteredMember();
-            celebrationsLink.hidden = !celebOk;
+            celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
             contactMenuLink.hidden = !m.isModuleEnabled("contact");
         }
 

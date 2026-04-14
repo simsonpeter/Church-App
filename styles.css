@@ -4015,6 +4015,32 @@ body.auth-modal-open {
     color: var(--ink);
 }
 
+.celebrations-guest-info {
+    margin: 12px 0 18px;
+    padding: 16px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.celebrations-guest-info-title {
+    margin: 0 0 10px;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+.celebrations-guest-info-body {
+    margin: 0 0 14px !important;
+    line-height: 1.5;
+}
+
+.celebrations-guest-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    align-items: center;
+}
+
 .celebrations-thread-wrap {
     margin: 16px 0 8px;
 }
