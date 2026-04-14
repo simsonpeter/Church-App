@@ -311,7 +311,9 @@
             var loggedIn = Boolean(getUser() && getUser().uid);
             if (loginEl) {
                 loginEl.hidden = loggedIn;
-                loginEl.textContent = tLocal("celebrations.wishThreadLogin", "Sign in to post a wish.");
+                loginEl.textContent = loggedIn
+                    ? ""
+                    : tLocal("celebrations.wishThreadSignInToView", "Sign in to view and post celebration wishes.");
             }
             if (inputEl) {
                 inputEl.disabled = !loggedIn || sending;
@@ -329,6 +331,14 @@
 
         function startListen() {
             stopListen();
+            if (!getUser() || !getUser().uid) {
+                if (messagesEl) {
+                    messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadMembersOnly", "Sign in to see community wishes.")) + "</p>";
+                }
+                setStatus("");
+                updateGuestUi();
+                return;
+            }
             if (!messagesEl || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
                 if (messagesEl) {
                     messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadUnavailable", "Wishes are unavailable right now.")) + "</p>";
@@ -536,7 +546,7 @@
                 clearBtn.textContent = tLocal("celebrations.clearThread", "Clear all");
             }
             if (loginEl && !getUser()) {
-                loginEl.textContent = tLocal("celebrations.wishThreadLogin", "Sign in to post a wish.");
+                loginEl.textContent = tLocal("celebrations.wishThreadSignInToView", "Sign in to view and post celebration wishes.");
             }
         });
 

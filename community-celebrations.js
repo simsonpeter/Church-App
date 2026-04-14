@@ -6,6 +6,8 @@
     var cache = [];
     var firestoreUnsubscribe = null;
     var listeners = [];
+    /** Firebase uid when the shared listener is active; empty when signed out (no community data fetch). */
+    var subscribedAuthUid = "";
     /** Firebase is initialized in app-shell after this script; poll until apps exist. */
     var firebaseBootTimerId = null;
     var FIREBASE_BOOT_INTERVAL_MS = 350;
@@ -309,6 +311,9 @@
             return [];
         }
         var viewer = String(viewerUid || "").trim();
+        if (!viewer) {
+            return [];
+        }
         var out = [];
         cache.forEach(function (entry) {
             var subjectUid = entry && entry.uid;
@@ -334,6 +339,26 @@
         });
     }
 
+    function getAuthUid() {
+        if (window.NjcAuth && typeof window.NjcAuth.getUser === "function") {
+            var u = window.NjcAuth.getUser();
+            if (u && u.uid) {
+                return String(u.uid);
+            }
+        }
+        return "";
+    }
+
+    function detachFirestoreListen() {
+        if (typeof firestoreUnsubscribe === "function") {
+            firestoreUnsubscribe();
+            firestoreUnsubscribe = null;
+        }
+        subscribedAuthUid = "";
+        cache = [];
+        notifyListeners();
+    }
+
     function stopFirebaseBootPoll() {
         if (firebaseBootTimerId !== null) {
             window.clearInterval(firebaseBootTimerId);
@@ -342,24 +367,34 @@
     }
 
     function ensureFirestoreListen() {
-        if (firestoreUnsubscribe) {
+        var uid = getAuthUid();
+        if (!uid) {
+            detachFirestoreListen();
             stopFirebaseBootPoll();
             return;
+        }
+        if (firestoreUnsubscribe && subscribedAuthUid === uid) {
+            stopFirebaseBootPoll();
+            return;
+        }
+        if (firestoreUnsubscribe && subscribedAuthUid !== uid) {
+            detachFirestoreListen();
         }
         if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
             return;
         }
         try {
             var db = window.firebase.firestore();
+            subscribedAuthUid = uid;
             firestoreUnsubscribe = db.collection(CELEBRATION_PROFILES_COLLECTION)
                 .limit(PUBLIC_PROFILE_LIMIT)
                 .onSnapshot(function (snap) {
                     var list = [];
                     snap.forEach(function (doc) {
-                        var uid = doc.id;
+                        var docUid = doc.id;
                         var prof = profileFromFirestoreData(doc.data());
                         if (prof) {
-                            list.push({ uid: uid, profile: prof });
+                            list.push({ uid: docUid, profile: prof });
                         }
                     });
                     cache = list;
@@ -370,6 +405,8 @@
                 });
             stopFirebaseBootPoll();
         } catch (e) {
+            subscribedAuthUid = "";
+            firestoreUnsubscribe = null;
             cache = [];
             notifyListeners();
         }
@@ -417,11 +454,7 @@
     }
 
     function stopListen() {
-        if (typeof firestoreUnsubscribe === "function") {
-            firestoreUnsubscribe();
-            firestoreUnsubscribe = null;
-        }
-        cache = [];
+        detachFirestoreListen();
         listeners = [];
     }
 
@@ -434,6 +467,15 @@
         startFirebaseBootPoll();
     });
     document.addEventListener("njc:authchange", function () {
+        var uid = getAuthUid();
+        if (!uid) {
+            detachFirestoreListen();
+            stopFirebaseBootPoll();
+            return;
+        }
+        if (firestoreUnsubscribe && subscribedAuthUid !== uid) {
+            detachFirestoreListen();
+        }
         ensureFirestoreListen();
         if (!firestoreUnsubscribe) {
             startFirebaseBootPoll();

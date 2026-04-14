@@ -6,6 +6,11 @@
     /** Unsubscribe from shared NjcCommunityCelebrations feed (does not stop global Firestore listen). */
     var communityUnsubscribe = null;
 
+    function getViewerUid() {
+        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        return auth && auth.uid ? String(auth.uid) : "";
+    }
+
     function getBrusselsYmdForDate(dateValue) {
         var parts = new Intl.DateTimeFormat("en-GB", {
             timeZone: BRUSSELS_TZ,
@@ -478,11 +483,14 @@
     }
 
     function aggregateUpcomingEvents() {
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        var viewerUid = auth && auth.uid ? String(auth.uid) : "";
+        var viewerUid = getViewerUid();
         var today = getBrusselsYmd();
         var rows = [];
         var seen = {};
+
+        if (!viewerUid) {
+            return rows;
+        }
 
         communityProfilesCache.forEach(function (entry) {
             var sid = entry && entry.uid;
@@ -518,10 +526,13 @@
     }
 
     function aggregateTodayEvents() {
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-        var viewerUid = auth && auth.uid ? String(auth.uid) : "";
+        var viewerUid = getViewerUid();
         var all = [];
         var seenId = {};
+
+        if (!viewerUid) {
+            return all;
+        }
 
         communityProfilesCache.forEach(function (entry) {
             var sid = entry && entry.uid;
@@ -595,6 +606,9 @@
             return lastWishSuggestion;
         },
         getDefaultToolbarWishText: function () {
+            if (!getViewerUid()) {
+                return "";
+            }
             var evs = aggregateTodayEvents();
             if (!evs.length) {
                 return T("celebrations.communityWishDefault", "Warm wishes to everyone celebrating today!");
@@ -652,6 +666,10 @@
         if (!upcomingList) {
             return;
         }
+        if (!getViewerUid()) {
+            upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingMembersOnly", "Sign in to see upcoming celebrations from the community.")) + "</li>";
+            return;
+        }
         var rows = aggregateUpcomingEvents();
         if (!rows.length) {
             upcomingList.innerHTML = "<li class=\"celebrations-upcoming-empty page-note\">" + escapeHtml(T("celebrations.upcomingEmptyCommunity", "No upcoming dates in the community list yet. Add yours in Profile and save.")) + "</li>";
@@ -681,6 +699,13 @@
             return;
         }
         lastWishSuggestion = "";
+        if (!getViewerUid()) {
+            todayStack.innerHTML = "";
+            emptyEl.hidden = false;
+            emptyEl.textContent = T("celebrations.membersOnlyBody", "Sign in with your church account to see community birthdays, anniversaries, and the wish thread.");
+            renderUpcoming();
+            return;
+        }
         var events = aggregateTodayEvents();
         if (!events.length) {
             todayStack.innerHTML = "";
@@ -727,8 +752,13 @@
     function onCelebrationsRouteChange(ev) {
         var route = ev && ev.detail && ev.detail.route;
         if (route === "celebrations") {
-            startCommunityProfilesListen();
-            mountWishThread();
+            if (getViewerUid()) {
+                startCommunityProfilesListen();
+                mountWishThread();
+            } else {
+                stopCommunityProfilesListen();
+                unmountWishThread();
+            }
             renderCelebrationsPage();
         } else {
             stopCommunityProfilesListen();
@@ -741,8 +771,13 @@
     function onRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").split("?")[0].trim().toLowerCase();
         if (raw === "celebrations") {
-            startCommunityProfilesListen();
-            mountWishThread();
+            if (getViewerUid()) {
+                startCommunityProfilesListen();
+                mountWishThread();
+            } else {
+                stopCommunityProfilesListen();
+                unmountWishThread();
+            }
             renderCelebrationsPage();
         } else {
             stopCommunityProfilesListen();
@@ -754,6 +789,13 @@
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:authchange", function () {
         if (isCelebrationsViewActive()) {
+            if (getViewerUid()) {
+                startCommunityProfilesListen();
+                mountWishThread();
+            } else {
+                stopCommunityProfilesListen();
+                unmountWishThread();
+            }
             renderCelebrationsPage();
         }
     });

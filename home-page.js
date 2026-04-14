@@ -1731,9 +1731,9 @@
                     personal = [];
                 }
                 var community = [];
-                if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.getAnnouncementsForHome === "function") {
-                    var mergeAuth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
-                    var mergeUid = mergeAuth && mergeAuth.uid ? String(mergeAuth.uid) : "";
+                var mergeAuth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                var mergeUid = mergeAuth && mergeAuth.uid ? String(mergeAuth.uid) : "";
+                if (mergeUid && window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.getAnnouncementsForHome === "function") {
                     community = window.NjcCommunityCelebrations.getAnnouncementsForHome(mergeUid, todayYmd) || [];
                 }
                 var mergedPersonalCommunity = (personal || []).concat(community || []);
@@ -2557,6 +2557,9 @@
                 syncTriviaPointsForUser();
                 recalcAndStoreReadingPoints();
                 loadAnnouncements();
+                try {
+                    mergeHomeAnnouncements();
+                } catch (eAuthAnn) {}
             });
 
             function getTriviaUserId() {
