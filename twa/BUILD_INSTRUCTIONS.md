@@ -78,3 +78,75 @@ If you do **not** add `KEYSTORE_BASE64` (or no password secret), CI builds **ass
 - **App name**: NJC
 - **Package**: be.njc.app
 - **Web URL**: https://simsonpeter.github.io/Church-App/
+
+---
+
+## TWA: URL bar shows `simsonpeter.github.io` (verification and fingerprints)
+
+If the app opens the site but the **top bar still looks like a browser** (URL / Chrome UI), **Digital Asset Links verification failed**. Chrome then uses **Custom Tabs** (fallback) instead of a **verified** Trusted Web Activity.
+
+Fixing this is **not** only in Bubblewrap: the **website** must serve a matching file at a specific URL.
+
+### 1. Where Android looks for the statement
+
+The TWA `assetStatements` use the site origin **`https://simsonpeter.github.io`** (see `twa/app/src/main/res/values/strings.xml`).
+
+Chrome loads:
+
+**`https://simsonpeter.github.io/.well-known/assetlinks.json`**
+
+(not under `/Church-App/…`).
+
+For a **project** site (`…/Church-App/`), files in this repo deploy under that folder, so  
+`https://simsonpeter.github.io/Church-App/.well-known/assetlinks.json` may exist while the **origin** URL above **does not** → verification **fails** → you still see the GitHub hostname.
+
+**Fix (pick one):**
+
+1. **User GitHub Pages repo (simplest)**  
+   Create a repo named **`simsonpeter.github.io`** (username must match). At the **root** of that site, add:
+
+   ```
+   .well-known/assetlinks.json
+   ```
+
+   Use the same JSON as this repo’s `.well-known/assetlinks.json` (package `be.njc.app` + your SHA-256 fingerprints). Enable GitHub Pages.  
+   Confirm in a browser:  
+   `https://simsonpeter.github.io/.well-known/assetlinks.json`  
+   returns **200** and valid JSON.
+
+2. **Custom domain** on the Church-App Pages site, then host `.well-known/assetlinks.json` at the **root of that domain** (e.g. `https://yourdomain.com/.well-known/assetlinks.json`).
+
+### 2. SHA-256 fingerprint (must match the APK you install)
+
+The fingerprint in `assetlinks.json` must match the **signing certificate** of the APK on the device.
+
+**Release APK** (your keystore):
+
+```bash
+keytool -list -v -keystore /path/to/your.keystore -alias YOUR_ALIAS
+```
+
+Copy the **SHA256** line (with colons). Add it to `sha256_cert_fingerprints` in `assetlinks.json`.
+
+**Debug APK**:
+
+```bash
+keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android -keypass android
+```
+
+**From an APK file:**
+
+```bash
+unzip -p app-release.apk META-INF/*.RSA | keytool -printcert | grep SHA256
+```
+
+You can list **multiple** fingerprints in one JSON file (release + debug) while testing.
+
+### 3. Check verification
+
+- [Digital Asset Links statement generator / tester](https://developers.google.com/digital-asset-links/tools/generator) — package `be.njc.app`, SHA-256, site.
+- After fixing hosting: **uninstall** the app, **reinstall** the APK (verification is cached).
+
+### 4. Keep `strings.xml` in sync
+
+The `site` value in `assetStatements` must match Bubblewrap’s **start URL** (see `twa/app/build.gradle`: `hostName` + `launchUrl`). Currently it should stay `https://simsonpeter.github.io/Church-App`.
