@@ -264,6 +264,11 @@
             && !window.NjcAppModules.isRouteEnabled(resolved)) {
             return "home";
         }
+        if (resolved === "celebrations") {
+            if (!window.NjcAuth || typeof window.NjcAuth.isRegisteredMember !== "function" || !window.NjcAuth.isRegisteredMember()) {
+                return "home";
+            }
+        }
         return resolved;
     }
 

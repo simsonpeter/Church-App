@@ -308,30 +308,32 @@
         }
 
         function updateGuestUi() {
-            var loggedIn = Boolean(getUser() && getUser().uid);
+            var member = window.NjcAuth && typeof window.NjcAuth.isRegisteredMember === "function" && window.NjcAuth.isRegisteredMember();
             if (loginEl) {
-                loginEl.hidden = loggedIn;
-                loginEl.textContent = loggedIn
+                loginEl.hidden = member;
+                loginEl.textContent = member
                     ? ""
                     : tLocal("celebrations.wishThreadSignInToView", "Sign in to view and post celebration wishes.");
             }
             if (inputEl) {
-                inputEl.disabled = !loggedIn || sending;
+                inputEl.disabled = !member || sending;
             }
             if (sendBtn) {
-                sendBtn.disabled = !loggedIn || sending;
+                sendBtn.disabled = !member || sending;
             }
             if (wishFillBtn) {
-                wishFillBtn.disabled = !loggedIn;
+                wishFillBtn.disabled = !member;
             }
             if (clearBtn) {
-                clearBtn.hidden = !isAdminUser() || !loggedIn;
+                clearBtn.hidden = !isAdminUser() || !member;
             }
         }
 
         function startListen() {
             stopListen();
-            if (!getUser() || !getUser().uid) {
+            var u = getUser();
+            var member = window.NjcAuth && typeof window.NjcAuth.isRegisteredMember === "function" && window.NjcAuth.isRegisteredMember();
+            if (!u || !u.uid || !member) {
                 if (messagesEl) {
                     messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadMembersOnly", "Sign in to see community wishes.")) + "</p>";
                 }
@@ -375,6 +377,9 @@
         function sendText() {
             var user = getUser();
             if (!user || !user.uid || sending) {
+                return;
+            }
+            if (!window.NjcAuth || typeof window.NjcAuth.isRegisteredMember !== "function" || !window.NjcAuth.isRegisteredMember()) {
                 return;
             }
             var text = String(inputEl && inputEl.value || "").trim();

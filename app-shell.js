@@ -3964,7 +3964,11 @@
             triviaLink.hidden = !m.isModuleEnabled("trivia");
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
             chatLink.hidden = !m.isModuleEnabled("chat");
-            celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
+            var celebOk = m.isModuleEnabled("celebrations")
+                && window.NjcAuth
+                && typeof window.NjcAuth.isRegisteredMember === "function"
+                && window.NjcAuth.isRegisteredMember();
+            celebrationsLink.hidden = !celebOk;
             contactMenuLink.hidden = !m.isModuleEnabled("contact");
         }
 

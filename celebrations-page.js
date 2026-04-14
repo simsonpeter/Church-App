@@ -7,7 +7,10 @@
     var communityUnsubscribe = null;
 
     function getViewerUid() {
-        var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        if (!window.NjcAuth || typeof window.NjcAuth.isRegisteredMember !== "function" || !window.NjcAuth.isRegisteredMember()) {
+            return "";
+        }
+        var auth = typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
         return auth && auth.uid ? String(auth.uid) : "";
     }
 

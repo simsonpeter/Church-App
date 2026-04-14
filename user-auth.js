@@ -660,12 +660,19 @@
         return null;
     }
 
+    /** True only for email/password (or other) sign-in with a non-empty email — not “guest” browser sessions. */
+    function isRegisteredMember() {
+        var u = getUser();
+        return Boolean(u && String(u.email || "").trim());
+    }
+
     window.NjcAuth = {
         init: init,
         openAuthModal: openAuthModal,
         signOut: signOut,
         onStateChange: onStateChange,
         getUser: getUser,
+        isRegisteredMember: isRegisteredMember,
         queueSync: queueSyncLocalToCloud
     };
 })();

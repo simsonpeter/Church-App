@@ -311,7 +311,7 @@
             return [];
         }
         var viewer = String(viewerUid || "").trim();
-        if (!viewer) {
+        if (!viewer || !window.NjcAuth || typeof window.NjcAuth.isRegisteredMember !== "function" || !window.NjcAuth.isRegisteredMember()) {
             return [];
         }
         var out = [];
@@ -340,7 +340,10 @@
     }
 
     function getAuthUid() {
-        if (window.NjcAuth && typeof window.NjcAuth.getUser === "function") {
+        if (!window.NjcAuth || typeof window.NjcAuth.isRegisteredMember !== "function" || !window.NjcAuth.isRegisteredMember()) {
+            return "";
+        }
+        if (typeof window.NjcAuth.getUser === "function") {
             var u = window.NjcAuth.getUser();
             if (u && u.uid) {
                 return String(u.uid);
