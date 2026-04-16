@@ -568,6 +568,11 @@
 
             function getPrayerEntriesForActiveTab(entries) {
                 var source = Array.isArray(entries) ? entries : [];
+                if (activePrayerTab === "answered") {
+                    return source.filter(function (entry) {
+                        return Number(entry.answered || 0) > 0;
+                    });
+                }
                 if (activePrayerTab === "other") {
                     return source.filter(function (entry) {
                         return !entry.urgent;
@@ -585,13 +590,43 @@
                 });
             }
 
+            function hasNonUrgentPrayerEntries(entries) {
+                var source = Array.isArray(entries) ? entries : [];
+                return source.some(function (entry) {
+                    return Boolean(entry && !entry.urgent);
+                });
+            }
+
+            function hasAnsweredPrayerEntries(entries) {
+                var source = Array.isArray(entries) ? entries : [];
+                return source.some(function (entry) {
+                    return Boolean(entry && Number(entry.answered || 0) > 0);
+                });
+            }
+
             function getDefaultPrayerTab(entries) {
-                return hasUrgentPrayerEntries(entries) ? "urgent" : "other";
+                if (hasUrgentPrayerEntries(entries)) {
+                    return "urgent";
+                }
+                if (hasNonUrgentPrayerEntries(entries)) {
+                    return "other";
+                }
+                if (hasAnsweredPrayerEntries(entries)) {
+                    return "answered";
+                }
+                return "other";
             }
 
             function setActivePrayerTab(tab, options) {
                 var config = options && typeof options === "object" ? options : {};
-                activePrayerTab = tab === "other" ? "other" : "urgent";
+                var t = String(tab || "").toLowerCase();
+                if (t === "answered") {
+                    activePrayerTab = "answered";
+                } else if (t === "other") {
+                    activePrayerTab = "other";
+                } else {
+                    activePrayerTab = "urgent";
+                }
                 if (prayerWallTabs && prayerWallTabs.length) {
                     prayerWallTabs.forEach(function (tabButton) {
                         var tabValue = (tabButton.getAttribute("data-prayer-tab") || "").toLowerCase();
@@ -930,18 +965,28 @@
                 });
                 var sortedEntries = getSortedPrayerEntries(visibleEntries).slice(0, 40);
                 if (activePrayerTab === "urgent" && !hasUrgentPrayerEntries(sortedEntries)) {
-                    setActivePrayerTab("other");
+                    if (hasNonUrgentPrayerEntries(sortedEntries)) {
+                        setActivePrayerTab("other");
+                    } else if (hasAnsweredPrayerEntries(sortedEntries)) {
+                        setActivePrayerTab("answered");
+                    }
                     return;
                 }
                 var entries = getPrayerEntriesForActiveTab(sortedEntries).slice(0, 25);
                 if (entries.length === 0) {
                     closePrayerDetail();
-                    var noEntryTitle = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherTitle", "No daily prayers yet", prayerCard)
-                        : T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now", prayerCard);
-                    var noEntryBody = activePrayerTab === "other"
-                        ? T("contact.prayerWallNoOtherBody", "Daily prayer requests will appear here.", prayerCard)
-                        : T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
+                    var noEntryTitle;
+                    var noEntryBody;
+                    if (activePrayerTab === "answered") {
+                        noEntryTitle = T("contact.prayerWallNoAnsweredTitle", "No answered prayers yet", prayerCard);
+                        noEntryBody = T("contact.prayerWallNoAnsweredBody", "Requests with an “Answered” count above zero appear here.", prayerCard);
+                    } else if (activePrayerTab === "other") {
+                        noEntryTitle = T("contact.prayerWallNoOtherTitle", "No daily prayers yet", prayerCard);
+                        noEntryBody = T("contact.prayerWallNoOtherBody", "Daily prayer requests will appear here.", prayerCard);
+                    } else {
+                        noEntryTitle = T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now", prayerCard);
+                        noEntryBody = T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
+                    }
                     prayerWallList.innerHTML = "" +
                         "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(noEntryTitle) + "</h3>" +
