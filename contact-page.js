@@ -32,6 +32,10 @@
             var prayerDetailResetAnsweredButton = document.getElementById("prayer-detail-reset-answered");
             var prayerDetailEditButton = document.getElementById("prayer-detail-edit");
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
+            var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
+            var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
+            var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
+            var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
             var CONTACT_FORM_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
@@ -41,6 +45,8 @@
             var PRAYER_TRANSLATION_CACHE_KEY = "njc_prayer_translation_cache_v1";
             var PRAYER_ACTION_STATE_KEY = "njc_prayer_action_state_v1";
             var PRAYER_CLIENT_ID_KEY = "njc_prayer_client_id_v1";
+            var MY_PRAYER_IDS_KEY = "njc_my_prayer_ids_v1";
+            var MY_PRAYER_MAX = 100;
             var prayerWallEntries = [];
             var prayerWallLoading = true;
             var prayerWallError = false;
@@ -285,6 +291,231 @@
                     return false;
                 }
                 return currentUid === String(entry && entry.createdByUid || "").trim();
+            }
+
+            function loadMyPrayerIds() {
+                try {
+                    var raw = window.localStorage.getItem(MY_PRAYER_IDS_KEY);
+                    var arr = raw ? JSON.parse(raw) : [];
+                    if (!Array.isArray(arr)) {
+                        return [];
+                    }
+                    return arr.map(function (x) {
+                        return String(x || "").trim();
+                    }).filter(Boolean).slice(0, MY_PRAYER_MAX);
+                } catch (err) {
+                    return [];
+                }
+            }
+
+            function saveMyPrayerIds(ids) {
+                var seen = {};
+                var out = [];
+                (Array.isArray(ids) ? ids : []).forEach(function (id) {
+                    var k = String(id || "").trim();
+                    if (!k || seen[k]) {
+                        return;
+                    }
+                    seen[k] = true;
+                    out.push(k);
+                });
+                out = out.slice(0, MY_PRAYER_MAX);
+                try {
+                    window.localStorage.setItem(MY_PRAYER_IDS_KEY, JSON.stringify(out));
+                } catch (err) {}
+            }
+
+            function sanitizeMyPrayerIdsAgainstWall() {
+                var ids = loadMyPrayerIds();
+                if (!ids.length) {
+                    return;
+                }
+                var valid = {};
+                prayerWallEntries.forEach(function (e) {
+                    if (e && e.id) {
+                        valid[e.id] = true;
+                    }
+                });
+                var next = ids.filter(function (id) {
+                    return valid[id];
+                });
+                if (next.length !== ids.length) {
+                    saveMyPrayerIds(next);
+                }
+            }
+
+            function isPrayerInMyList(prayerId) {
+                var id = String(prayerId || "").trim();
+                if (!id) {
+                    return false;
+                }
+                return loadMyPrayerIds().indexOf(id) >= 0;
+            }
+
+            function addPrayerToMyList(prayerId) {
+                var id = String(prayerId || "").trim();
+                if (!id) {
+                    return false;
+                }
+                var cur = loadMyPrayerIds();
+                if (cur.indexOf(id) >= 0) {
+                    return false;
+                }
+                cur.unshift(id);
+                saveMyPrayerIds(cur);
+                return true;
+            }
+
+            function removePrayerFromMyList(prayerId) {
+                var id = String(prayerId || "").trim();
+                if (!id) {
+                    return;
+                }
+                saveMyPrayerIds(loadMyPrayerIds().filter(function (x) {
+                    return x !== id;
+                }));
+            }
+
+            function getMyPrayerOrderedEntries() {
+                var ids = loadMyPrayerIds();
+                var byId = {};
+                prayerWallEntries.forEach(function (e) {
+                    if (e && e.id) {
+                        byId[e.id] = e;
+                    }
+                });
+                var out = [];
+                ids.forEach(function (id) {
+                    var e = byId[id];
+                    if (e && e.message && (!e.pastorOnly || canSeePastorOnlyEntry(e))) {
+                        out.push(e);
+                    }
+                });
+                return out;
+            }
+
+            function formatPrayerDateForMinePdf(isoText) {
+                var d = new Date(isoText || "");
+                if (Number.isNaN(d.getTime())) {
+                    return "";
+                }
+                try {
+                    return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+                } catch (e1) {
+                    return String(isoText || "");
+                }
+            }
+
+            function exportMyPrayerPdf() {
+                var rows = getMyPrayerOrderedEntries();
+                if (!rows.length) {
+                    showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
+                    window.setTimeout(function () {
+                        if (prayerWallNote && prayerWallNote.dataset.state === "minePdfEmpty") {
+                            prayerWallNote.hidden = true;
+                        }
+                    }, 3200);
+                    return;
+                }
+                var title = escapeHtml(T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard));
+                var genLine = escapeHtml(T("contact.prayerMinePdfGenerated", "Generated", prayerCard)) + " " + escapeHtml(new Date().toLocaleString());
+                var subtitle = escapeHtml(T("contact.prayerMinePdfSubtitle", "Personal list from the church prayer wall. Share thoughtfully and keep requests confidential.", prayerCard));
+                var countLine = escapeHtml(T("contact.prayerMinePdfCount", "Prayers in this list: {count}", prayerCard)).replace(/\{count\}/g, String(rows.length));
+                var dateLbl = escapeHtml(T("contact.prayerMinePdfPosted", "Posted", prayerCard));
+                var urgentLbl = escapeHtml(T("contact.prayerWallUrgentBadge", "Urgent", prayerCard));
+                var pastorLbl = escapeHtml(T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard));
+                var anonLbl = escapeHtml(T("contact.prayerWallNameAnonymous", "Anonymous", prayerCard));
+                var footer = escapeHtml(T("contact.prayerMinePdfFooter", "My prayer list · For personal intercession · Keep confidential.", prayerCard));
+
+                var cards = rows.map(function (entry, idx) {
+                    var badges = [];
+                    if (entry.urgent) {
+                        badges.push("<span class=\"badge urgent\">" + urgentLbl + "</span>");
+                    }
+                    if (entry.pastorOnly) {
+                        badges.push("<span class=\"badge pastor\">" + pastorLbl + "</span>");
+                    }
+                    if (entry.anonymous) {
+                        badges.push("<span class=\"badge anon\">" + anonLbl + "</span>");
+                    }
+                    var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
+                    var num = String(idx + 1);
+                    var urgentClass = entry.urgent ? " req--urgent" : "";
+                    var dispName = escapeHtml(getPrayerDisplayName(entry, prayerCard));
+                    return "" +
+                        "<article class=\"req" + urgentClass + "\">" +
+                        "  <div class=\"req-inner\">" +
+                        "    <div class=\"req-num\" aria-hidden=\"true\">" + num + "</div>" +
+                        "    <div class=\"req-main\">" +
+                        "      <div class=\"req-top\">" +
+                        "        <strong class=\"req-name\">" + dispName + "</strong>" +
+                        "        <time class=\"req-date\">" + dateLbl + " · " + escapeHtml(formatPrayerDateForMinePdf(entry.createdAt)) + "</time>" +
+                        "      </div>" +
+                        (badges.length ? ("      <div class=\"badges\">" + badges.join("") + "</div>") : "") +
+                        "      <div class=\"req-quote\"><p class=\"req-msg\">" + msg + "</p></div>" +
+                        "    </div>" +
+                        "  </div>" +
+                        "</article>";
+                }).join("");
+
+                var html = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>" + title + "</title>" +
+                    "<link rel=\"preconnect\" href=\"https://fonts.googleapis.com\"><link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin>" +
+                    "<link href=\"https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,500&family=Source+Sans+3:wght@400;600;700&display=swap\" rel=\"stylesheet\">" +
+                    "<style>" +
+                    "@page{size:A4;margin:14mm 16mm}*{box-sizing:border-box}" +
+                    "body{margin:0;padding:0;font-family:'Source Sans 3',system-ui,sans-serif;font-size:10.5pt;line-height:1.45;color:#1c1917;background:linear-gradient(180deg,#fffdfb,#faf5f3);min-height:100vh}" +
+                    ".sheet{max-width:720px;margin:0 auto;padding:8px 4px 32px}" +
+                    ".masthead{text-align:center;padding:8px 12px 20px;border-bottom:1px solid rgba(180,40,40,.2);margin-bottom:22px}" +
+                    ".masthead-brand{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.75rem;font-weight:700;color:#7f1d1d;margin:0 0 4px}" +
+                    ".masthead h1{font-family:'Cormorant Garamond',Georgia,serif;font-size:1.28rem;font-weight:700;color:#44403c;margin:0 0 8px}" +
+                    ".masthead .sub{margin:0;font-size:9pt;color:#78716c}" +
+                    ".masthead .tagline{margin:10px auto 0;max-width:36em;font-size:9.2pt;color:#a8a29e;line-height:1.45}" +
+                    ".meta-bar{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-bottom:20px}" +
+                    ".meta-pill{background:#fff;border:1px solid #e7d5d5;border-radius:999px;padding:6px 14px;font-size:9pt;font-weight:600;color:#57534e}" +
+                    "main{display:flex;flex-direction:column;gap:14px}" +
+                    ".req{break-inside:avoid-page}" +
+                    ".req-inner{display:flex;gap:14px;align-items:flex-start;background:#fff;border:1px solid #e8d5d5;border-radius:14px;padding:14px 16px;box-shadow:0 2px 12px rgba(60,20,20,.06)}" +
+                    ".req--urgent .req-inner{border-left:4px solid #b91c1c}" +
+                    ".req-num{flex-shrink:0;width:32px;height:32px;border-radius:50%;background:#fef2f2;border:1px solid #fecaca;color:#9f1239;font-weight:700;font-size:11pt;line-height:30px;text-align:center}" +
+                    ".req--urgent .req-num{background:linear-gradient(145deg,#b91c1c,#dc2626);color:#fff;border-color:#991b1b}" +
+                    ".req-main{flex:1;min-width:0}" +
+                    ".req-top{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;margin-bottom:6px}" +
+                    ".req-name{font-size:11pt;font-weight:700}" +
+                    ".req-date{font-size:8.5pt;color:#78716c;white-space:nowrap}" +
+                    ".badges{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}" +
+                    ".badge{display:inline-block;font-size:6.5pt;font-weight:700;text-transform:uppercase;padding:3px 8px;border-radius:999px}" +
+                    ".badge.urgent{background:#fee2e2;color:#991b1b}" +
+                    ".badge.pastor{background:#ffedd5;color:#9a3412}" +
+                    ".badge.anon{background:#e0e7ff;color:#3730a3}" +
+                    ".req-quote{margin:0;padding:10px 12px;background:#fafaf9;border-radius:10px;border-left:3px solid #d6d3d1}" +
+                    ".req-msg{margin:0;font-size:10pt;line-height:1.55;color:#44403c}" +
+                    ".doc-footer{margin-top:26px;padding-top:14px;border-top:1px solid #e7e5e4;text-align:center;font-size:8pt;color:#a8a29e}" +
+                    "@media print{body{background:#fff;-webkit-print-color-adjust:exact;print-color-adjust:exact}.req-inner{box-shadow:none}}" +
+                    "</style></head><body><div class=\"sheet\">" +
+                    "<header class=\"masthead\"><p class=\"masthead-brand\">NJC Belgium</p><h1>" + title + "</h1><p class=\"sub\">" + genLine + "</p><p class=\"tagline\">" + subtitle + "</p></header>" +
+                    "<div class=\"meta-bar\"><span class=\"meta-pill\">" + countLine + "</span></div>" +
+                    "<main>" + cards + "</main><footer class=\"doc-footer\">" + footer + "</footer></div></body></html>";
+
+                var w = window.open("", "_blank", "noopener,noreferrer");
+                if (!w) {
+                    showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Allow pop-ups for this site, or use Print from the browser menu.");
+                    return;
+                }
+                w.document.open();
+                w.document.write(html);
+                w.document.close();
+                window.setTimeout(function () {
+                    try {
+                        w.focus();
+                        w.print();
+                    } catch (ePrint) {}
+                }, 300);
+            }
+
+            function updateMineToolbar() {
+                if (prayerMineToolbar) {
+                    prayerMineToolbar.hidden = activePrayerTab !== "mine";
+                }
             }
 
             function loadPrayerTranslationCache() {
@@ -568,6 +799,9 @@
 
             function getPrayerEntriesForActiveTab(entries) {
                 var source = Array.isArray(entries) ? entries : [];
+                if (activePrayerTab === "mine") {
+                    return getMyPrayerOrderedEntries();
+                }
                 if (activePrayerTab === "answered") {
                     return source.filter(function (entry) {
                         return Number(entry.answered || 0) > 0;
@@ -620,7 +854,9 @@
             function setActivePrayerTab(tab, options) {
                 var config = options && typeof options === "object" ? options : {};
                 var t = String(tab || "").toLowerCase();
-                if (t === "answered") {
+                if (t === "mine") {
+                    activePrayerTab = "mine";
+                } else if (t === "answered") {
                     activePrayerTab = "answered";
                 } else if (t === "other") {
                     activePrayerTab = "other";
@@ -635,6 +871,7 @@
                         tabButton.setAttribute("aria-selected", selected ? "true" : "false");
                     });
                 }
+                updateMineToolbar();
                 if (!config.skipRender) {
                     renderPrayerWall();
                 }
@@ -709,6 +946,9 @@
                     prayerDetailOverlay.hidden = true;
                     document.body.classList.remove("prayer-detail-open");
                     setDetailActionPrayerId("");
+                    if (prayerDetailMineToggle) {
+                        prayerDetailMineToggle.hidden = true;
+                    }
                     return;
                 }
                 var entry = prayerWallEntries.find(function (item) {
@@ -777,6 +1017,15 @@
                     prayerDetailDeleteButton.hidden = !canManage;
                     prayerDetailDeleteButton.disabled = !canManage || prayerWallBusy;
                 }
+                if (prayerDetailMineToggle) {
+                    prayerDetailMineToggle.hidden = false;
+                    prayerDetailMineToggle.setAttribute("data-prayer-id", entry.id || "");
+                    var inList = isPrayerInMyList(entry.id);
+                    prayerDetailMineToggle.textContent = inList
+                        ? T("contact.prayerMineRemove", "Remove from my prayer", prayerCard)
+                        : T("contact.prayerMineAdd", "Add to my prayer", prayerCard);
+                    prayerDetailMineToggle.disabled = prayerWallBusy;
+                }
                 setDetailActionPrayerId(entry.id || "");
             }
 
@@ -814,6 +1063,9 @@
                     prayerWallList.querySelectorAll("button[data-prayer-id][data-prayer-action]").forEach(function (button) {
                         button.disabled = prayerWallBusy;
                     });
+                    prayerWallList.querySelectorAll("button[data-prayer-mine-toggle], button[data-prayer-mine-remove]").forEach(function (button) {
+                        button.disabled = prayerWallBusy;
+                    });
                 }
                 if (prayerDetailOverlay) {
                     prayerDetailOverlay.querySelectorAll("button[data-prayer-id][data-prayer-action]").forEach(function (button) {
@@ -823,6 +1075,9 @@
                         }
                         button.disabled = prayerWallBusy;
                     });
+                }
+                if (prayerDetailMineToggle && !prayerDetailMineToggle.hidden) {
+                    prayerDetailMineToggle.disabled = prayerWallBusy;
                 }
             }
 
@@ -939,6 +1194,7 @@
                 if (!prayerWallList) {
                     return;
                 }
+                updateMineToolbar();
 
                 if (prayerWallLoading) {
                     closePrayerDetail();
@@ -969,15 +1225,20 @@
                         setActivePrayerTab("other");
                     } else if (hasAnsweredPrayerEntries(sortedEntries)) {
                         setActivePrayerTab("answered");
+                    } else if (loadMyPrayerIds().length) {
+                        setActivePrayerTab("mine");
                     }
                     return;
                 }
-                var entries = getPrayerEntriesForActiveTab(sortedEntries).slice(0, 25);
+                var entries = getPrayerEntriesForActiveTab(sortedEntries).slice(0, activePrayerTab === "mine" ? 80 : 25);
                 if (entries.length === 0) {
                     closePrayerDetail();
                     var noEntryTitle;
                     var noEntryBody;
-                    if (activePrayerTab === "answered") {
+                    if (activePrayerTab === "mine") {
+                        noEntryTitle = T("contact.prayerWallNoMineTitle", "Your list is empty", prayerCard);
+                        noEntryBody = T("contact.prayerWallNoMineBody", "Open any prayer and tap “Add to my prayer”, or use the button on each card below.", prayerCard);
+                    } else if (activePrayerTab === "answered") {
                         noEntryTitle = T("contact.prayerWallNoAnsweredTitle", "No answered prayers yet", prayerCard);
                         noEntryBody = T("contact.prayerWallNoAnsweredBody", "Requests with an “Answered” count above zero appear here.", prayerCard);
                     } else if (activePrayerTab === "other") {
@@ -1018,6 +1279,22 @@
                     var pastorOnlyBadge = entry.pastorOnly && canSeePastorOnlyEntry(entry)
                         ? ("<span class=\"prayer-list-pastor-only-badge\"><i class=\"fa-solid fa-lock\" aria-hidden=\"true\"></i>" + escapeHtml(T("contact.prayerWallPastorOnlyBadge", "Pastor only", prayerCard)) + "</span>")
                         : "";
+                    var inMine = isPrayerInMyList(entry.id);
+                    var mineShortLabel = inMine
+                        ? T("contact.prayerMineRemoveShort", "Remove", prayerCard)
+                        : T("contact.prayerMineAddShort", "My prayer", prayerCard);
+                    var mineShortClass = "prayer-mine-btn" + (inMine ? " prayer-mine-btn--in" : "");
+                    var mineRow = activePrayerTab === "mine"
+                        ? ("<div class=\"prayer-list-actions-row\">" +
+                            "  <button type=\"button\" class=\"prayer-mine-btn prayer-mine-btn--in\" data-prayer-mine-remove=\"" + escapeHtml(entry.id || "") + "\">" +
+                            escapeHtml(T("contact.prayerMineRemoveFromList", "Remove from my prayer", prayerCard)) +
+                            "  </button>" +
+                            "</div>")
+                        : ("<div class=\"prayer-list-actions-row\">" +
+                            "  <button type=\"button\" class=\"" + mineShortClass + "\" data-prayer-mine-toggle=\"" + escapeHtml(entry.id || "") + "\">" +
+                            escapeHtml(mineShortLabel) +
+                            "  </button>" +
+                            "</div>");
                     return "" +
                         "<li class=\"" + itemClass + "\">" +
                         "  " + urgentRibbon +
@@ -1039,10 +1316,13 @@
                         "      <span class=\"prayer-list-chevron\" aria-hidden=\"true\"><i class=\"fa-solid fa-chevron-right\"></i></span>" +
                         "    </div>" +
                         "  </button>" +
-                        "  <div class=\"prayer-list-actions\">" +
-                        "    <button type=\"button\" class=\"" + answerClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"answer\">" + escapeHtml(answeredLabel) + "</button>" +
-                        "    <button type=\"button\" class=\"" + thankClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"thank\">" + escapeHtml(thankLabel) + "</button>" +
-                        "  </div>" +
+                        mineRow +
+                        (activePrayerTab === "mine" ? "" : (
+                            "  <div class=\"prayer-list-actions\">" +
+                            "    <button type=\"button\" class=\"" + answerClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"answer\">" + escapeHtml(answeredLabel) + "</button>" +
+                            "    <button type=\"button\" class=\"" + thankClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"thank\">" + escapeHtml(thankLabel) + "</button>" +
+                            "  </div>"
+                        )) +
                         "</li>";
                 }).join("");
 
@@ -1151,6 +1431,7 @@
                             return entry.id !== prayerId;
                         });
                         await savePrayerWallEntries(latestEntries);
+                        removePrayerFromMyList(prayerId);
                         showPrayerWallNote("deleted", "contact.prayerWallDeleted", "Prayer request deleted.");
                         activePrayerDetailId = "";
                     } else {
@@ -1185,6 +1466,7 @@
                 try {
                     prayerWallEntries = await fetchPrayerWallEntries();
                     prayerWallError = false;
+                    sanitizeMyPrayerIdsAgainstWall();
                     setActivePrayerTab(getDefaultPrayerTab(prayerWallEntries), { skipRender: true });
                 } catch (err) {
                     prayerWallError = true;
@@ -1316,8 +1598,73 @@
                 });
             }
 
+            if (prayerDetailMineToggle) {
+                prayerDetailMineToggle.addEventListener("click", function () {
+                    if (prayerWallBusy) {
+                        return;
+                    }
+                    var pid = prayerDetailMineToggle.getAttribute("data-prayer-id") || activePrayerDetailId;
+                    if (!pid) {
+                        return;
+                    }
+                    if (isPrayerInMyList(pid)) {
+                        removePrayerFromMyList(pid);
+                        showPrayerWallNote("mineRemoved", "contact.prayerMineRemoved", "Removed from your list.");
+                    } else {
+                        if (addPrayerToMyList(pid)) {
+                            showPrayerWallNote("mineAdded", "contact.prayerMineAdded", "Added to your list. Open the My prayer tab to see it or make a PDF.");
+                        } else {
+                            showPrayerWallNote("mineFull", "contact.prayerMineFull", "Your list is full. Remove some first.");
+                        }
+                    }
+                    renderPrayerDetail();
+                    renderPrayerWall();
+                });
+            }
+
+            if (prayerMineExportPdfBtn) {
+                prayerMineExportPdfBtn.addEventListener("click", function () {
+                    exportMyPrayerPdf();
+                });
+            }
+
+            if (prayerMineClearBtn) {
+                prayerMineClearBtn.addEventListener("click", function () {
+                    if (!window.confirm(T("contact.prayerMineClearConfirm", "Clear every prayer from your personal list?", prayerCard))) {
+                        return;
+                    }
+                    saveMyPrayerIds([]);
+                    showPrayerWallNote("mineCleared", "contact.prayerMineCleared", "Your list is empty.");
+                    renderPrayerWall();
+                });
+            }
+
             if (prayerWallList) {
-                prayerWallList.addEventListener("click", function (event) {
+                    prayerWallList.addEventListener("click", function (event) {
+                    var mineRemove = event.target.closest("button[data-prayer-mine-remove]");
+                    if (mineRemove && !prayerWallBusy) {
+                        var rid = mineRemove.getAttribute("data-prayer-mine-remove");
+                        removePrayerFromMyList(rid);
+                        showPrayerWallNote("mineRemoved", "contact.prayerMineRemoved", "Removed from your list.");
+                        renderPrayerWall();
+                        return;
+                    }
+                    var mineToggle = event.target.closest("button[data-prayer-mine-toggle]");
+                    if (mineToggle && !prayerWallBusy) {
+                        var mid = mineToggle.getAttribute("data-prayer-mine-toggle");
+                        if (isPrayerInMyList(mid)) {
+                            removePrayerFromMyList(mid);
+                            showPrayerWallNote("mineRemoved", "contact.prayerMineRemoved", "Removed from your list.");
+                        } else {
+                            if (addPrayerToMyList(mid)) {
+                                showPrayerWallNote("mineAdded", "contact.prayerMineAdded", "Added to your list. Open the My prayer tab to see it or make a PDF.");
+                            } else {
+                                showPrayerWallNote("mineFull", "contact.prayerMineFull", "Your list is full. Remove some first.");
+                            }
+                        }
+                        renderPrayerWall();
+                        return;
+                    }
                     var actionButton = event.target.closest("button[data-prayer-id][data-prayer-action]");
                     if (actionButton && !prayerWallBusy) {
                         var targetPrayerId = actionButton.getAttribute("data-prayer-id");
@@ -1414,6 +1761,18 @@
                         prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can edit/delete.", prayerCard);
                     } else if (state === "syncError") {
                         prayerWallNote.textContent = T("contact.prayerWallSyncError", "Could not sync prayer wall. Please try again.", prayerCard);
+                    } else if (state === "mineAdded") {
+                        prayerWallNote.textContent = T("contact.prayerMineAdded", "Added to your list. Open the My prayer tab to see it or make a PDF.", prayerCard);
+                    } else if (state === "mineRemoved") {
+                        prayerWallNote.textContent = T("contact.prayerMineRemoved", "Removed from your list.", prayerCard);
+                    } else if (state === "mineFull") {
+                        prayerWallNote.textContent = T("contact.prayerMineFull", "Your list is full. Remove some first.", prayerCard);
+                    } else if (state === "mineCleared") {
+                        prayerWallNote.textContent = T("contact.prayerMineCleared", "Your list is empty.", prayerCard);
+                    } else if (state === "minePdfEmpty") {
+                        prayerWallNote.textContent = T("contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.", prayerCard);
+                    } else if (state === "minePdfBlocked") {
+                        prayerWallNote.textContent = T("contact.prayerMinePdfBlocked", "Allow pop-ups for this site, or use Print from the browser menu.", prayerCard);
                     } else {
                         prayerWallNote.textContent = T("contact.prayerWallNeedMessage", "Please write your prayer request.", prayerCard);
                     }

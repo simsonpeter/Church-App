@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v317prayanswered";
-const RUNTIME_CACHE = "njc-runtime-cache-v317prayanswered";
+const APP_CACHE = "njc-app-cache-v318mypraypdf";
+const RUNTIME_CACHE = "njc-runtime-cache-v318mypraypdf";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260416prayanswered",
+    "./styles.css?v=20260417mypraypdf",
     "./user-auth.js?v=20260411celemember",
-    "./app-shell.js?v=20260416prayanswered",
+    "./app-shell.js?v=20260417mypraypdf",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260416prayanswered",
+    "./contact-page.js?v=20260417mypraypdf",
     "./daily-bread-page.js?v=20260413tts1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260413prayerpdf2",

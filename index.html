@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260416prayanswered">
+    <link rel="stylesheet" href="styles.css?v=20260417mypraypdf">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -212,6 +212,21 @@
                         role="tab"
                         aria-selected="false"
                         data-i18n="contact.prayerWallTabAnswered">Answered</button>
+                    <button
+                        type="button"
+                        class="prayer-wall-tab"
+                        id="prayer-wall-tab-mine"
+                        data-prayer-tab="mine"
+                        role="tab"
+                        aria-selected="false"
+                        data-i18n="contact.prayerWallTabMine">My prayer</button>
+                </div>
+                <div class="prayer-mine-toolbar" id="prayer-mine-toolbar" hidden>
+                    <p class="page-note prayer-mine-toolbar-hint" data-i18n="contact.prayerMineToolbarHint">Open a request and use “Add to my prayer”, or use the button on each card. Then print or save as PDF.</p>
+                    <div class="prayer-mine-toolbar-actions">
+                        <button type="button" class="button-link" id="prayer-mine-export-pdf" data-i18n="contact.prayerMineExportPdf">Print / save PDF</button>
+                        <button type="button" class="button-link button-secondary" id="prayer-mine-clear" data-i18n="contact.prayerMineClearAll">Clear my list</button>
+                    </div>
                 </div>
                 <ul class="prayer-wall-list" id="prayer-wall-list">
                     <li class="prayer-wall-list-message">
@@ -1385,6 +1400,7 @@
                 <p class="page-note" id="prayer-detail-date"></p>
             </div>
             <div class="prayer-detail-actions">
+                <button type="button" class="prayer-action-btn button-secondary" id="prayer-detail-mine-toggle" data-prayer-id="" hidden data-i18n="contact.prayerMineAdd">Add to my prayer</button>
                 <button type="button" class="prayer-action-btn" id="prayer-detail-pray" data-prayer-id="" data-prayer-action="pray">Prayed (0)</button>
                 <button type="button" class="prayer-action-btn" id="prayer-detail-answered" data-prayer-id="" data-prayer-action="answer">Answered (0)</button>
                 <button type="button" class="prayer-action-btn" id="prayer-detail-thank" data-prayer-id="" data-prayer-action="thank">Thank You (0)</button>
@@ -1538,7 +1554,7 @@
     <script src="user-auth.js?v=20260411celemember"></script>
     <script src="app-modules.js?v=20260411mod1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260416prayanswered"></script>
+    <script src="app-shell.js?v=20260417mypraypdf"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1546,7 +1562,7 @@
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260413tts1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
-    <script src="contact-page.js?v=20260416prayanswered"></script>
+    <script src="contact-page.js?v=20260417mypraypdf"></script>
     <script src="daily-bread-page.js?v=20260413tts1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260413prayerpdf2"></script>
