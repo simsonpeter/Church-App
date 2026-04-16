@@ -89,6 +89,58 @@
                     .replace(/'/g, "&#39;");
             }
 
+            function openPrintableHtml(html) {
+                var w = null;
+                var blobUrl = "";
+                try {
+                    if (window.Blob && window.URL && typeof window.URL.createObjectURL === "function") {
+                        var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+                        blobUrl = window.URL.createObjectURL(blob);
+                        w = window.open(blobUrl, "_blank");
+                    } else {
+                        w = window.open("", "_blank");
+                    }
+                } catch (eOpen) {
+                    w = null;
+                }
+                if (!w) {
+                    if (blobUrl) {
+                        try {
+                            window.URL.revokeObjectURL(blobUrl);
+                        } catch (eRev) {}
+                    }
+                    return null;
+                }
+                if (!blobUrl && w.document) {
+                    try {
+                        w.document.open();
+                        w.document.write(html);
+                        w.document.close();
+                    } catch (eWrite) {
+                        try {
+                            w.close();
+                        } catch (eClose) {}
+                        return null;
+                    }
+                }
+                function revokeLater() {
+                    if (blobUrl) {
+                        try {
+                            window.URL.revokeObjectURL(blobUrl);
+                        } catch (eRev2) {}
+                    }
+                }
+                var delayMs = blobUrl ? 450 : 300;
+                window.setTimeout(function () {
+                    try {
+                        w.focus();
+                        w.print();
+                    } catch (ePrint) {}
+                    window.setTimeout(revokeLater, 2000);
+                }, delayMs);
+                return w;
+            }
+
             function getLocale(sourceElement) {
                 if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
                     if (sourceElement && typeof window.NjcI18n.getLocaleForElement === "function") {
@@ -496,20 +548,9 @@
                     "<div class=\"meta-bar\"><span class=\"meta-pill\">" + countLine + "</span></div>" +
                     "<main>" + cards + "</main><footer class=\"doc-footer\">" + footer + "</footer></div></body></html>";
 
-                var w = window.open("", "_blank", "noopener,noreferrer");
-                if (!w) {
+                if (!openPrintableHtml(html)) {
                     showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Allow pop-ups for this site, or use Print from the browser menu.");
-                    return;
                 }
-                w.document.open();
-                w.document.write(html);
-                w.document.close();
-                window.setTimeout(function () {
-                    try {
-                        w.focus();
-                        w.print();
-                    } catch (ePrint) {}
-                }, 300);
             }
 
             function updateMineToolbar() {
