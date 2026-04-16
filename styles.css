@@ -5213,17 +5213,22 @@ body.bible-fullscreen-open .offline-badge {
     font-size: 0.9rem;
 }
 
+/* Match bottom tab-nav: one frosted strip, icon + label cells (no pill “frame” per tab). */
 .prayer-wall-tabs {
     margin-top: 10px;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 8px;
-}
-
-@media (min-width: 420px) {
-    .prayer-wall-tabs {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-    }
+    padding: 8px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(255, 248, 248, 0.94));
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+    border: 1px solid rgba(243, 208, 208, 0.85);
+    border-radius: 20px;
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.9) inset,
+        0 8px 24px rgba(90, 28, 40, 0.08),
+        0 2px 8px rgba(31, 44, 105, 0.06);
 }
 
 .prayer-mine-toolbar {
@@ -5276,19 +5281,93 @@ body.bible-fullscreen-open .offline-badge {
 }
 
 .prayer-wall-tab {
-    border: 1px solid var(--line);
-    background: var(--surface-soft);
-    color: var(--text);
-    border-radius: 999px;
-    padding: 8px 10px;
+    border: 0;
+    background: transparent;
+    color: #7f5c5c;
+    border-radius: 12px;
+    padding: 7px 2px 8px;
     font-size: 0.78rem;
-    font-weight: 700;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.prayer-wall-tab-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: #ffeaea;
+    font-size: 0.92rem;
+    color: #7f1d1d;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.prayer-wall-tab-icon i {
+    font-size: 1rem;
+}
+
+.prayer-wall-tab-label {
+    font-size: 0.65rem;
+    line-height: 1.1;
+    font-weight: 600;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .prayer-wall-tab.active {
     background: var(--primary-soft);
-    border-color: rgba(198, 31, 31, 0.38);
-    color: #a61f1f;
+    color: #b71c1c;
+}
+
+.prayer-wall-tab.active .prayer-wall-tab-icon {
+    background: #ffd1d1;
+}
+
+.prayer-wall-tab:not(.active):hover {
+    transform: translateY(-1px);
+}
+
+.prayer-wall-tab:not(.active):hover .prayer-wall-tab-icon {
+    transform: scale(1.06);
+    background: #ffe0e0;
+}
+
+html[data-theme="dark"] .prayer-wall-tabs {
+    background: linear-gradient(180deg, rgba(38, 38, 38, 0.96), rgba(22, 22, 22, 0.94));
+    border-color: rgba(80, 80, 80, 0.55);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.06) inset,
+        0 8px 24px rgba(0, 0, 0, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="dark"] .prayer-wall-tab {
+    color: #e0e0e0;
+}
+
+html[data-theme="dark"] .prayer-wall-tab-icon {
+    background: #333333;
+    color: #ffffff;
+}
+
+html[data-theme="dark"] .prayer-wall-tab.active {
+    background: rgba(185, 28, 28, 0.22);
+    color: #fecaca;
+}
+
+html[data-theme="dark"] .prayer-wall-tab.active .prayer-wall-tab-icon {
+    background: #444444;
+    color: #fecaca;
 }
 
 .prayer-form-actions {

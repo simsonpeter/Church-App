@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260417mypraypdf">
+    <link rel="stylesheet" href="styles.css?v=20260418praytabs">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -194,32 +194,40 @@
                         id="prayer-wall-tab-urgent"
                         data-prayer-tab="urgent"
                         role="tab"
-                        aria-selected="true"
-                        data-i18n="contact.prayerWallTabUrgent">Urgent</button>
+                        aria-selected="true">
+                        <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-bolt"></i></span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabUrgent">Urgent</span>
+                    </button>
                     <button
                         type="button"
                         class="prayer-wall-tab"
                         id="prayer-wall-tab-other"
                         data-prayer-tab="other"
                         role="tab"
-                        aria-selected="false"
-                        data-i18n="contact.prayerWallTabOther">Daily Prayer</button>
+                        aria-selected="false">
+                        <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-calendar-day"></i></span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabOther">Daily Prayer</span>
+                    </button>
                     <button
                         type="button"
                         class="prayer-wall-tab"
                         id="prayer-wall-tab-answered"
                         data-prayer-tab="answered"
                         role="tab"
-                        aria-selected="false"
-                        data-i18n="contact.prayerWallTabAnswered">Answered</button>
+                        aria-selected="false">
+                        <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabAnswered">Answered</span>
+                    </button>
                     <button
                         type="button"
                         class="prayer-wall-tab"
                         id="prayer-wall-tab-mine"
                         data-prayer-tab="mine"
                         role="tab"
-                        aria-selected="false"
-                        data-i18n="contact.prayerWallTabMine">My prayer</button>
+                        aria-selected="false">
+                        <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-bookmark"></i></span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabMine">My prayer</span>
+                    </button>
                 </div>
                 <div class="prayer-mine-toolbar" id="prayer-mine-toolbar" hidden>
                     <p class="page-note prayer-mine-toolbar-hint" data-i18n="contact.prayerMineToolbarHint">Open a request and use “Add to my prayer”, or use the button on each card. Then print or save as PDF.</p>

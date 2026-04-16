@@ -31,13 +31,13 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v318mypraypdf";
-const RUNTIME_CACHE = "njc-runtime-cache-v318mypraypdf";
+const APP_CACHE = "njc-app-cache-v319praytabs";
+const RUNTIME_CACHE = "njc-runtime-cache-v319praytabs";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260417mypraypdf",
+    "./styles.css?v=20260418praytabs",
     "./user-auth.js?v=20260411celemember",
     "./app-shell.js?v=20260417mypraypdf",
     "./events-engine.js?v=20260318de",
