@@ -717,12 +717,12 @@
         "admin.statsSermons": "பிரசங்கங்கள்",
         "admin.statsUrgent": "அவசர ஜெபங்கள்",
         "admin.modulesTitle": "செயலி தொகுதிகள்",
-        "admin.modulesInfo": "அனைவருக்கும் செயலியின் பகுதிகளை இயக்க அல்லது நிறுத்த. மாற்றங்கள் Firebase firestore.rules வெளியீட்டிற்குப் பிறகு செல்லுபடியாகும்.",
+        "admin.modulesInfo": "அனைவருக்கும் பகுதிகளை இயக்க/நிறுத்த. Firebase இல் appConfig/modules-இல் சேமிக்கப்படும். நிறுத்தினால் முகப்பு மற்றும் பட்டியலில் மறையும்; தேவையில் மீண்டும் இயக்கலாம்.",
         "admin.modulesLegend": "உறுப்பினர்களுக்குத் தெரியும்",
         "admin.moduleAnnouncements": "அறிவிப்புகள் (முகப்பு)",
         "admin.moduleBibleReading": "இன்றைய வேத வாசிப்பு (முகப்பு)",
         "admin.moduleDailyVerse": "இன்றைய வசனம் (முகப்பு)",
-        "admin.moduleTrivia": "வேதாகமக் கேள்விகள்",
+        "admin.moduleTrivia": "வேதாகமக் கேள்விகள் (முகப்பு, பட்டியல், #trivia)",
         "admin.moduleEventsWeek": "இந்த வார நிகழ்வுகள் (முகப்பு)",
         "admin.moduleDailyBread": "அன்றன்றுள்ள அப்பம்",
         "admin.moduleBookShelf": "நூலகம்",
@@ -1025,6 +1025,7 @@
         "profile.cloudPermissionDenied": "இந்த சாதனத்தில் சேமிக்கப்பட்டது. மேக ஒத்திசைவு Firestore பாதுகாப்பு விதிகளால் தடுக்கப்பட்டது — நிர்வாகியை தொடர்பு கொள்ளவும்.",
         "profile.loginRequired": "சுயவிவரத்தை நிர்வகிக்க முதலில் உள்நுழையவும்.",
         "profile.triviaPoints": "வேதாகமக் கேள்விகள் புள்ளிகள்",
+        "profile.badgesEmptyReadingOnly": "படிப்பதன் மூலம் பதக்கங்களைப் பெறுங்கள்.",
         "profile.readingPoints": "வேத வாசிப்பு புள்ளிகள்",
         "profile.totalPoints": "மொத்த புள்ளிகள்",
         "profile.achievementsTitle": "சாதனைகள்",
@@ -3275,6 +3276,9 @@
 
     function checkTriviaReminder() {
         if (!notificationsSupported() || getNotificationPermission() !== "granted") {
+            return;
+        }
+        if (window.NjcAppModules && typeof window.NjcAppModules.isModuleEnabled === "function" && !window.NjcAppModules.isModuleEnabled("trivia")) {
             return;
         }
         var settings = getNotificationSettings();

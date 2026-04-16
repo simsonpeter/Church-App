@@ -3685,6 +3685,10 @@ body.auth-modal-open {
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
+.user-achievements-row--no-quiz {
+    grid-template-columns: 2rem minmax(0, 1fr) auto auto;
+}
+
 .user-achievements-row:not(.user-achievements-row--head):nth-child(2) {
     animation-delay: 0.05s;
 }

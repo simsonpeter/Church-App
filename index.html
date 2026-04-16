@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411celeguest">
+    <link rel="stylesheet" href="styles.css?v=20260415moduletrivia">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -784,7 +784,7 @@
                     <strong id="profile-total-points-value" class="profile-achievements-total-value" aria-live="polite">0</strong>
                 </div>
                 <ul class="profile-achievements-list">
-                    <li class="profile-achievement-row">
+                    <li class="profile-achievement-row profile-achievement-row--trivia-module">
                         <span class="profile-achievement-name"><i class="fa-solid fa-question-circle" aria-hidden="true"></i><span data-i18n="profile.triviaPoints">Bible Quiz</span></span>
                         <strong id="profile-trivia-points-value" class="profile-achievement-value" aria-live="polite">0</strong>
                     </li>
@@ -846,14 +846,14 @@
                         <div class="card-banner">
                             <img src="settings-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                         </div>
-                        <p class="page-note" data-i18n="admin.modulesInfo">Turn sections of the app on or off for everyone. Publish rules in Firebase for changes to apply (see firestore.rules).</p>
+                        <p class="page-note" data-i18n="admin.modulesInfo" data-i18n-fallback="Turn sections on or off for everyone. Saves to Firestore (appConfig/modules). Uncheck to hide from the home page and side menu; turn on again anytime.">Turn sections of the app on or off for everyone. Publish rules in Firebase for changes to apply (see firestore.rules).</p>
                         <p class="page-note" id="admin-modules-status" hidden></p>
                         <fieldset class="admin-modules-fieldset" id="admin-modules-fieldset" disabled>
                             <legend class="page-note" data-i18n="admin.modulesLegend">Visible to members</legend>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="announcements" checked> <span data-i18n="admin.moduleAnnouncements">Announcements (home)</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="bibleReading" checked> <span data-i18n="admin.moduleBibleReading">Today’s Bible reading (home)</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="dailyVerse" checked> <span data-i18n="admin.moduleDailyVerse">Daily verse (home)</span></label>
-                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="trivia" checked> <span data-i18n="admin.moduleTrivia">Bible Quiz</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="trivia" checked> <span data-i18n="admin.moduleTrivia" data-i18n-fallback="Bible Quiz (home card, menu, #trivia)">Bible Quiz</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="eventsWeek" checked> <span data-i18n="admin.moduleEventsWeek">Events this week (home)</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="dailyBread" checked> <span data-i18n="admin.moduleDailyBread">Daily bread</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="bookShelf" checked> <span data-i18n="admin.moduleBookShelf">Book shelf</span></label>
@@ -1530,7 +1530,7 @@
     <script src="user-auth.js?v=20260411celemember"></script>
     <script src="app-modules.js?v=20260411mod1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411celeguest"></script>
+    <script src="app-shell.js?v=20260415moduletrivia"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1545,12 +1545,12 @@
     <script src="admin-modules-page.js?v=20260411mod1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260411celepub1"></script>
+    <script src="profile-page.js?v=20260415moduletrivia"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
     <script src="spa-router.js?v=20260411celeguest"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="user-achievements-page.js?v=20260327bq1"></script>
+    <script src="user-achievements-page.js?v=20260415moduletrivia"></script>
 </body>
 </html>

@@ -2,6 +2,14 @@
     var COL = "userAchievementScores";
     var PROFILES_KEY = "njc_user_profiles_v1";
 
+    function modOn(moduleKey) {
+        var m = window.NjcAppModules;
+        if (!m || typeof m.isModuleEnabled !== "function") {
+            return true;
+        }
+        return m.isModuleEnabled(moduleKey);
+    }
+
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
             return window.NjcI18n.t(key, fallback);
@@ -27,9 +35,11 @@
         if (dt !== 0) {
             return dt;
         }
-        var dq = (b.triviaPoints || 0) - (a.triviaPoints || 0);
-        if (dq !== 0) {
-            return dq;
+        if (modOn("trivia")) {
+            var dq = (b.triviaPoints || 0) - (a.triviaPoints || 0);
+            if (dq !== 0) {
+                return dq;
+            }
         }
         var na = String(a.displayName || "").toLowerCase();
         var nb = String(b.displayName || "").toLowerCase();
@@ -138,19 +148,22 @@
             .replace(/"/g, "&quot;");
     }
 
-    function rowHtml(row, youLabel) {
+    function rowHtml(row, youLabel, quizOn) {
         var rank = row.rank != null ? row.rank : 1;
         var name = String(row.displayName || "Member").trim() || "Member";
         var updated = row.updatedLabel ? ("<span class=\"user-achievements-updated\">" + escapeHtml(row.updatedLabel) + "</span>") : "";
         var youBadge = youLabel ? ("<span class=\"user-achievements-you-badge\">" + escapeHtml(youLabel) + "</span> ") : "";
+        var triviaCell = quizOn
+            ? ("  <span class=\"user-achievements-num\">" + formatHalfPointTotal(row.triviaPoints) + "</span>")
+            : "";
         return "" +
-            "<li class=\"user-achievements-row" + (row.isYou ? " user-achievements-row--you" : "") + "\">" +
+            "<li class=\"user-achievements-row" + (row.isYou ? " user-achievements-row--you" : "") + (quizOn ? "" : " user-achievements-row--no-quiz") + "\">" +
             "  <span class=\"user-achievements-rank\">" + rank + "</span>" +
             "  <span class=\"user-achievements-name-cell\">" +
             "    <span class=\"user-achievements-name-line\">" + youBadge + escapeHtml(name) + "</span>" +
             updated +
             "  </span>" +
-            "  <span class=\"user-achievements-num\">" + formatHalfPointTotal(row.triviaPoints) + "</span>" +
+            triviaCell +
             "  <span class=\"user-achievements-num\">" + formatHalfPointTotal(row.readingPoints) + "</span>" +
             "  <span class=\"user-achievements-num user-achievements-num--total\">" + formatHalfPointTotal(row.totalPoints) + "</span>" +
             "</li>";
@@ -160,6 +173,7 @@
         if (!targetList) {
             return;
         }
+        var quizOn = modOn("trivia");
         var rankLabel = T("userAchievements.colRank", "#");
         var nameLabel = T("userAchievements.colName", "Name");
         var triviaLabel = T("userAchievements.colTrivia", "Bible Quiz");
@@ -168,15 +182,15 @@
         var updatedHint = T("userAchievements.colUpdatedHint", "Synced");
 
         var head = "" +
-            "<li class=\"user-achievements-row user-achievements-row--head\" aria-hidden=\"true\">" +
+            "<li class=\"user-achievements-row user-achievements-row--head" + (quizOn ? "" : " user-achievements-row--no-quiz") + "\" aria-hidden=\"true\">" +
             "  <span class=\"user-achievements-rank\">" + rankLabel + "</span>" +
             "  <span class=\"user-achievements-name-cell\">" + nameLabel + "<span class=\"user-achievements-head-meta\"> · " + updatedHint + "</span></span>" +
-            "  <span class=\"user-achievements-num\">" + triviaLabel + "</span>" +
+            (quizOn ? ("  <span class=\"user-achievements-num\">" + triviaLabel + "</span>") : "") +
             "  <span class=\"user-achievements-num\">" + readingLabel + "</span>" +
             "  <span class=\"user-achievements-num\">" + totalLabel + "</span>" +
             "</li>";
         var body = rows.map(function (r) {
-            return rowHtml(r, youLabelForPinned && r.isYou ? youLabelForPinned : "");
+            return rowHtml(r, youLabelForPinned && r.isYou ? youLabelForPinned : "", quizOn);
         }).join("");
         targetList.innerHTML = head + body;
         targetList.hidden = false;
@@ -227,7 +241,7 @@
                         var d = doc.data() || {};
                         var trivia = toNum(d.triviaPoints);
                         var reading = toNum(d.readingPoints);
-                        var total = trivia + reading;
+                        var total = modOn("trivia") ? (trivia + reading) : reading;
                         rows.push({
                             id: doc.id,
                             displayName: d.displayName,
@@ -334,4 +348,5 @@
     document.addEventListener("njc:trivia-points-updated", onVisibleRefresh);
     document.addEventListener("njc:reading-points-updated", onVisibleRefresh);
     document.addEventListener("njc:profile-updated", onVisibleRefresh);
+    document.addEventListener("njc:modules-updated", onVisibleRefresh);
 })();

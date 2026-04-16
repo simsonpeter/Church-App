@@ -1,4 +1,12 @@
 (function () {
+    function modOn(moduleKey) {
+        var m = window.NjcAppModules;
+        if (!m || typeof m.isModuleEnabled !== "function") {
+            return true;
+        }
+        return m.isModuleEnabled(moduleKey);
+    }
+
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
     var TRIVIA_POINTS_KEY = "njc_trivia_points_v1";
     var READING_POINTS_KEY = "njc_reading_points_v1";
@@ -123,19 +131,23 @@
         }
         var tr = getTriviaPoints();
         var rd = getReadingPoints();
-        var sum = tr + rd;
+        var quizOn = modOn("trivia");
+        var sum = quizOn ? (tr + rd) : rd;
         var badges = [];
         if (rd >= 10) {
             badges.push({ icon: "book-open", label: T("profile.badgeReader10", "Dedicated reader (10+ reading points)") });
         }
-        if (tr >= 10) {
+        if (quizOn && tr >= 10) {
             badges.push({ icon: "question-circle", label: T("profile.badgeTrivia10", "Bible Quiz champion (10+ quiz points)") });
         }
         if (sum >= 25) {
             badges.push({ icon: "star", label: T("profile.badgeAllStar", "All-star (25+ total points)") });
         }
         if (!badges.length) {
-            profileBadgesList.innerHTML = "<li class=\"page-note profile-badge-empty\">" + escapeHtmlLite(T("profile.badgesEmpty", "Keep reading and playing Bible Quiz to earn badges.")) + "</li>";
+            var emptyMsg = quizOn
+                ? T("profile.badgesEmpty", "Keep reading and playing Bible Quiz to earn badges.")
+                : T("profile.badgesEmptyReadingOnly", "Keep reading to earn badges.");
+            profileBadgesList.innerHTML = "<li class=\"page-note profile-badge-empty\">" + escapeHtmlLite(emptyMsg) + "</li>";
             return;
         }
         profileBadgesList.innerHTML = badges.map(function (b) {
@@ -146,7 +158,12 @@
     function renderProfileAchievementPoints() {
         var trivia = getTriviaPoints();
         var reading = getReadingPoints();
-        var total = trivia + reading;
+        var quizOn = modOn("trivia");
+        var total = quizOn ? (trivia + reading) : reading;
+        var triviaRow = document.querySelector(".profile-achievement-row--trivia-module");
+        if (triviaRow) {
+            triviaRow.hidden = !quizOn;
+        }
         if (profileTriviaPointsValue) {
             profileTriviaPointsValue.textContent = String(trivia);
         }
@@ -914,6 +931,7 @@
     document.addEventListener("njc:authchange", loadProfile);
     document.addEventListener("njc:trivia-points-updated", renderProfileAchievementPoints);
     document.addEventListener("njc:reading-points-updated", renderProfileAchievementPoints);
+    document.addEventListener("njc:modules-updated", renderProfileAchievementPoints);
     document.addEventListener("njc:langchange", function () {
         refreshNoteTranslation();
         renderProfileBadges();
