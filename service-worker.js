@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v326removeprintbtn";
-const RUNTIME_CACHE = "njc-runtime-cache-v326removeprintbtn";
+const APP_CACHE = "njc-app-cache-v327removeprintbtn";
+const RUNTIME_CACHE = "njc-runtime-cache-v327removeprintbtn";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260414removeprintbtn",
+    "./contact-page.js?v=20260414removeprintbtn2",
     "./daily-bread-page.js?v=20260413tts1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260414removeprint2",
