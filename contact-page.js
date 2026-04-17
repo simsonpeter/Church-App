@@ -415,61 +415,67 @@
                 var title = escapeHtml(T("contact.prayerMinePdfTitle", "My prayer list - NJC Belgium", prayerCard));
                 var cards = rows.map(function (entry, idx) {
                     var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
+                    var name = escapeHtml(getPrayerDisplayName(entry, prayerCard));
+                    var date = escapeHtml(formatPrayerDateForMinePdf(entry.createdAt));
                     return "" +
-                        "<article class=\"req\">" +
-                        "  <h3>" + escapeHtml(String(idx + 1) + ". " + getPrayerDisplayName(entry, prayerCard)) + "</h3>" +
-                        "  <p class=\"req-date\">" + escapeHtml(formatPrayerDateForMinePdf(entry.createdAt)) + "</p>" +
-                        "  <p class=\"req-msg\">" + msg + "</p>" +
+                        "<article class=\"mine-text-card\">" +
+                        "  <div class=\"mine-text-card-top\">" +
+                        "    <strong class=\"mine-text-name\">" + escapeHtml(String(idx + 1) + ". " + name) + "</strong>" +
+                        "    <span class=\"mine-text-date\">" + date + "</span>" +
+                        "  </div>" +
+                        "  <p class=\"mine-text-msg\">" + msg + "</p>" +
                         "</article>";
                 }).join("");
-                var html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
-                    "<title>" + title + "</title>" +
-                    "<style>@page{size:A4;margin:12mm}body{font-family:Arial,sans-serif;color:#222}h1{font-size:20px}article.req{border:1px solid #ddd;border-radius:8px;padding:10px;margin:0 0 10px}.req-date{font-size:12px;color:#666}.req-msg{white-space:normal;line-height:1.45}</style>" +
-                    "</head><body><h1>" + title + "</h1>" + cards + "</body></html>";
 
-                try {
-                    var printHost = document.getElementById("prayer-mine-print-root");
-                    if (!printHost) {
-                        printHost = document.createElement("div");
-                        printHost.id = "prayer-mine-print-root";
-                        document.body.appendChild(printHost);
-                    }
-                    var printCss = document.getElementById("prayer-mine-print-css");
-                    if (!printCss) {
-                        printCss = document.createElement("style");
-                        printCss.id = "prayer-mine-print-css";
-                        printCss.textContent =
-                            "body.prayer-mine-printing > *{display:none !important;}" +
-                            "body.prayer-mine-printing #prayer-mine-print-root{display:block !important;background:#fff;color:#111;}" +
-                            "@media print{body{margin:0 !important;background:#fff !important;}}";
-                        document.head.appendChild(printCss);
-                    }
-                    printHost.innerHTML = html.replace(/^.*<body>/i, "").replace(/<\/body><\/html>$/i, "");
-                    document.body.classList.add("prayer-mine-printing");
-                    window.setTimeout(function () {
-                        try {
-                            window.focus();
-                            window.print();
-                        } finally {
-                            document.body.classList.remove("prayer-mine-printing");
+                var overlay = document.getElementById("prayer-mine-text-overlay");
+                if (!overlay) {
+                    overlay = document.createElement("div");
+                    overlay.id = "prayer-mine-text-overlay";
+                    overlay.innerHTML = "" +
+                        "<div class=\"mine-text-backdrop\" data-mine-text-close=\"1\"></div>" +
+                        "<section class=\"mine-text-sheet\" role=\"dialog\" aria-modal=\"true\" aria-label=\"My prayer text list\">" +
+                        "  <div class=\"mine-text-head\">" +
+                        "    <h3 id=\"prayer-mine-text-title\"></h3>" +
+                        "    <button type=\"button\" class=\"button-link button-secondary\" id=\"prayer-mine-text-close\" data-mine-text-close=\"1\">Close</button>" +
+                        "  </div>" +
+                        "  <div id=\"prayer-mine-text-body\"></div>" +
+                        "</section>";
+                    document.body.appendChild(overlay);
+                    overlay.addEventListener("click", function (event) {
+                        var closeTrigger = event.target.closest("[data-mine-text-close='1']");
+                        if (closeTrigger) {
+                            overlay.hidden = true;
                         }
-                    }, 250);
-                } catch (ePrint) {
-                    try {
-                        var blob = new Blob([html], { type: "text/html;charset=utf-8" });
-                        var url = URL.createObjectURL(blob);
-                        var a = document.createElement("a");
-                        a.href = url;
-                        a.download = "my-prayer-list.html";
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                        window.setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
-                        showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Downloaded file instead of print preview.");
-                    } catch (eDownload) {
-                        showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Print / save PDF failed on this device.");
-                    }
+                    });
                 }
+
+                var styleEl = document.getElementById("prayer-mine-text-style");
+                if (!styleEl) {
+                    styleEl = document.createElement("style");
+                    styleEl.id = "prayer-mine-text-style";
+                    styleEl.textContent =
+                        "#prayer-mine-text-overlay{position:fixed;inset:0;z-index:9999;display:block;}" +
+                        "#prayer-mine-text-overlay[hidden]{display:none;}" +
+                        "#prayer-mine-text-overlay .mine-text-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);}" +
+                        "#prayer-mine-text-overlay .mine-text-sheet{position:relative;max-width:860px;max-height:88vh;overflow:auto;margin:4vh auto;background:#fff;border-radius:14px;padding:16px 14px 18px;box-shadow:0 12px 36px rgba(0,0,0,.25);}" +
+                        "#prayer-mine-text-overlay .mine-text-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}" +
+                        "#prayer-mine-text-overlay .mine-text-card{border:1px solid #eadede;border-radius:10px;padding:10px 11px;margin-bottom:10px;background:#fffaf8;}" +
+                        "#prayer-mine-text-overlay .mine-text-card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px;}" +
+                        "#prayer-mine-text-overlay .mine-text-name{font-size:15px;color:#7f1d1d;}" +
+                        "#prayer-mine-text-overlay .mine-text-date{font-size:12px;color:#78716c;white-space:nowrap;}" +
+                        "#prayer-mine-text-overlay .mine-text-msg{margin:0;color:#2c2a29;line-height:1.5;}";
+                    document.head.appendChild(styleEl);
+                }
+
+                var titleEl = document.getElementById("prayer-mine-text-title");
+                var bodyEl = document.getElementById("prayer-mine-text-body");
+                if (titleEl) {
+                    titleEl.textContent = title;
+                }
+                if (bodyEl) {
+                    bodyEl.innerHTML = cards;
+                }
+                overlay.hidden = false;
             }
 
             function updateMineToolbar() {
