@@ -35,6 +35,10 @@
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
             var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
             var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
+            if (prayerMineExportPdfBtn && prayerMineExportPdfBtn.parentNode) {
+                prayerMineExportPdfBtn.parentNode.removeChild(prayerMineExportPdfBtn);
+                prayerMineExportPdfBtn = null;
+            }
             var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
