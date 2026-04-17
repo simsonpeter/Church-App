@@ -35,11 +35,6 @@
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
             var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
             var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
-            // Hard-remove legacy My prayer print button if stale HTML still contains it.
-            if (prayerMineExportPdfBtn && prayerMineExportPdfBtn.parentNode) {
-                prayerMineExportPdfBtn.parentNode.removeChild(prayerMineExportPdfBtn);
-                prayerMineExportPdfBtn = null;
-            }
             var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
 
             var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
@@ -412,12 +407,69 @@
             }
 
             function exportMyPrayerPdf() {
-                showPrayerWallNote("minePdfDisabled", "contact.prayerMinePdfDisabled", "Print / save PDF is disabled.");
-                window.setTimeout(function () {
-                    if (prayerWallNote && prayerWallNote.dataset.state === "minePdfDisabled") {
-                        prayerWallNote.hidden = true;
+                var rows = getMyPrayerOrderedEntries();
+                if (!rows.length) {
+                    showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
+                    return;
+                }
+                var title = escapeHtml(T("contact.prayerMinePdfTitle", "My prayer list - NJC Belgium", prayerCard));
+                var cards = rows.map(function (entry, idx) {
+                    var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
+                    return "" +
+                        "<article class=\"req\">" +
+                        "  <h3>" + escapeHtml(String(idx + 1) + ". " + getPrayerDisplayName(entry, prayerCard)) + "</h3>" +
+                        "  <p class=\"req-date\">" + escapeHtml(formatPrayerDateForMinePdf(entry.createdAt)) + "</p>" +
+                        "  <p class=\"req-msg\">" + msg + "</p>" +
+                        "</article>";
+                }).join("");
+                var html = "<!DOCTYPE html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\">" +
+                    "<title>" + title + "</title>" +
+                    "<style>@page{size:A4;margin:12mm}body{font-family:Arial,sans-serif;color:#222}h1{font-size:20px}article.req{border:1px solid #ddd;border-radius:8px;padding:10px;margin:0 0 10px}.req-date{font-size:12px;color:#666}.req-msg{white-space:normal;line-height:1.45}</style>" +
+                    "</head><body><h1>" + title + "</h1>" + cards + "</body></html>";
+
+                try {
+                    var printHost = document.getElementById("prayer-mine-print-root");
+                    if (!printHost) {
+                        printHost = document.createElement("div");
+                        printHost.id = "prayer-mine-print-root";
+                        document.body.appendChild(printHost);
                     }
-                }, 3200);
+                    var printCss = document.getElementById("prayer-mine-print-css");
+                    if (!printCss) {
+                        printCss = document.createElement("style");
+                        printCss.id = "prayer-mine-print-css";
+                        printCss.textContent =
+                            "body.prayer-mine-printing > *{display:none !important;}" +
+                            "body.prayer-mine-printing #prayer-mine-print-root{display:block !important;background:#fff;color:#111;}" +
+                            "@media print{body{margin:0 !important;background:#fff !important;}}";
+                        document.head.appendChild(printCss);
+                    }
+                    printHost.innerHTML = html.replace(/^.*<body>/i, "").replace(/<\/body><\/html>$/i, "");
+                    document.body.classList.add("prayer-mine-printing");
+                    window.setTimeout(function () {
+                        try {
+                            window.focus();
+                            window.print();
+                        } finally {
+                            document.body.classList.remove("prayer-mine-printing");
+                        }
+                    }, 250);
+                } catch (ePrint) {
+                    try {
+                        var blob = new Blob([html], { type: "text/html;charset=utf-8" });
+                        var url = URL.createObjectURL(blob);
+                        var a = document.createElement("a");
+                        a.href = url;
+                        a.download = "my-prayer-list.html";
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        window.setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+                        showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Downloaded file instead of print preview.");
+                    } catch (eDownload) {
+                        showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Print / save PDF failed on this device.");
+                    }
+                }
             }
 
             function updateMineToolbar() {
@@ -1538,6 +1590,11 @@
                     saveMyPrayerIds([]);
                     showPrayerWallNote("mineCleared", "contact.prayerMineCleared", "Your list is empty.");
                     renderPrayerWall();
+                });
+            }
+            if (prayerMineExportPdfBtn) {
+                prayerMineExportPdfBtn.addEventListener("click", function () {
+                    exportMyPrayerPdf();
                 });
             }
 
