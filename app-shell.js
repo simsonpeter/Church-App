@@ -666,7 +666,7 @@
         "contact.prayerWallNoMineTitle": "பட்டியல் காலியாக உள்ளது",
         "contact.prayerWallNoMineBody": "எந்த ஜெபத்தையும் திறந்து “என் ஜெபத்தில் சேர்” என்பதைத் தட்டவும், அல்லது கீழே உள்ள பொத்தானைப் பயன்படுத்தவும்.",
         "contact.prayerMineToolbarHint": "வேண்டுதலைத் திறந்து “என் ஜெபத்தில் சேர்” அல்லது அட்டையில் உள்ள பொத்தானைப் பயன்படுத்தவும். பின்னர் அச்சிடவும் அல்லது PDF-ஆகச் சேமிக்கவும்.",
-        "contact.prayerMineExportPdf": "அச்சிடு / PDF சேமி",
+        "contact.prayerMineExportPdf": "PDF",
         "contact.prayerMineClearAll": "பட்டியலை அழி",
         "contact.prayerMineAdd": "என் ஜெபத்தில் சேர்",
         "contact.prayerMineRemove": "என் ஜெபத்திலிருந்து நீக்கு",
