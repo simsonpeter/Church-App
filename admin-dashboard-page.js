@@ -23,6 +23,11 @@
     var sermonList = document.getElementById("admin-sermon-list");
     var prayerList = document.getElementById("admin-prayer-list");
     var prayerExportPdfBtn = document.getElementById("admin-prayer-export-pdf");
+    // Hard-disable legacy PDF export control in case stale HTML still contains it.
+    if (prayerExportPdfBtn && prayerExportPdfBtn.parentNode) {
+        prayerExportPdfBtn.parentNode.removeChild(prayerExportPdfBtn);
+        prayerExportPdfBtn = null;
+    }
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaForm = document.getElementById("admin-trivia-form");
     var dailyBreadForm = document.getElementById("admin-daily-bread-form");
@@ -2627,12 +2632,6 @@
             setBusyState(false);
         });
     });
-
-    if (prayerExportPdfBtn) {
-        prayerExportPdfBtn.addEventListener("click", function () {
-            exportPrayerWallPdf();
-        });
-    }
 
     prayerList.addEventListener("click", function (event) {
         var button = event.target.closest("button[data-admin-prayer-id]");

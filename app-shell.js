@@ -1781,8 +1781,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260414removeprint1";
-    var APP_VERSION = "2026.4.14";
+    var SW_VERSION = "20260414removeprint2";
+    var APP_VERSION = "2026.4.15";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
     var UPDATE_NOTES_SUMMARY = "Admin: removed prayer PDF export button.";
 
