@@ -646,7 +646,7 @@
         "contact.messageSendError": "செய்தியை இப்போது அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.openMap": "Google Maps-ல் திற",
         "contact.prayerWallTitle": "ஜெப சுவர்",
-        "contact.prayerWallSubtitle": "சபை குடும்பம் ஜெபிக்க உங்கள் வேண்டுதலை பகிருங்கள்.",
+        "contact.prayerWallSubtitle": "சபை குடும்பம் ஜெபிக்க உங்கள் வேண்டுதலை பகிருங்கள். புதிய பதிவுகள் சுவரில் தோன்ற நிர்வாகி அங்கீகாரம் தேவை.",
         "contact.prayerWallOpen": "ஜெப வேண்டுதல் பதிவிடு",
         "contact.prayerWallCancel": "மூடு",
         "contact.prayerWallNamePlaceholder": "பெயர் (விருப்பம்)",
@@ -697,6 +697,10 @@
         "contact.prayerWallNoOtherBody": "தினசரி ஜெப வேண்டுதல்கள் இங்கே காட்டப்படும்.",
         "contact.prayerWallNeedMessage": "தயவுசெய்து ஜெப வேண்டுதலை எழுதுங்கள்.",
         "contact.prayerWallPosted": "ஜெப வேண்டுதல் சுவரில் சேர்க்கப்பட்டது.",
+        "contact.prayerWallPendingReview": "உங்கள் ஜெப வேண்டுதல் அனுப்பப்பட்டது. நிர்வாகி அங்கீகரித்த பின் சுவரில் தோன்றும்.",
+        "admin.prayerApprove": "அங்கீகரி",
+        "admin.prayerPendingBadge": "அங்கீகாரத்திற்காக காத்திருக்கிறது",
+        "admin.prayerApproved": "ஜெப வேண்டுதல் அங்கீகரிக்கப்பட்டு வெளியிடப்பட்டது.",
         "contact.prayerWallNameAnonymous": "அடையாளமில்லை",
         "contact.prayerWallPrayed": "ஜெபித்தேன் ({count})",
         "contact.prayerWallAnswered": "பதில் கிடைத்தது ({count})",
@@ -1781,10 +1785,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260414removepdfbtn1";
-    var APP_VERSION = "2026.4.21";
+    var SW_VERSION = "20260417prayerapprove1";
+    var APP_VERSION = "2026.4.22";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "My prayer PDF button removed.";
+    var UPDATE_NOTES_SUMMARY = "Prayer wall: new posts need admin approval before going public.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -2942,10 +2946,13 @@
             })
             .then(function (payload) {
                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
-                if (!entries.length) {
+                var publicEntries = entries.filter(function (e) {
+                    return e && e.approved !== false;
+                });
+                if (!publicEntries.length) {
                     return null;
                 }
-                var sorted = entries.slice().sort(function (a, b) {
+                var sorted = publicEntries.slice().sort(function (a, b) {
                     var aTime = String((a && (a.updatedAt || a.createdAt)) || "");
                     var bTime = String((b && (b.updatedAt || b.createdAt)) || "");
                     return bTime.localeCompare(aTime);

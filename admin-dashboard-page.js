@@ -430,6 +430,10 @@
 
     function normalizePrayerEntry(entry, index) {
         var source = entry && typeof entry === "object" ? entry : {};
+        var approved = true;
+        if (Object.prototype.hasOwnProperty.call(source, "approved")) {
+            approved = Boolean(source.approved);
+        }
         return {
             id: String(source.id || ("prayer-" + index)),
             name: String(source.name || "").trim() || T("contact.prayerWallNameAnonymous", "Anonymous"),
@@ -437,6 +441,7 @@
             urgent: Boolean(source.urgent),
             pastorOnly: Boolean(source.pastorOnly),
             anonymous: Boolean(source.anonymous),
+            approved: approved,
             createdAt: String(source.createdAt || "")
         };
     }
@@ -1096,11 +1101,23 @@
             var buttonLabel = entry.urgent
                 ? T("admin.prayerUnpin", "Remove urgent")
                 : T("admin.prayerPin", "Mark urgent");
+            var pending = entry.approved === false;
+            var statusLine = pending
+                ? ("<p class=\"page-note\">" + escapeHtml(T("admin.prayerPendingBadge", "Awaiting approval")) + "</p>")
+                : "";
+            var approveBtn = pending
+                ? ("<button type=\"button\" class=\"button-link\" data-admin-prayer-id=\"" + escapeHtml(entry.id) + "\" data-admin-prayer-action=\"approve\">" +
+                    escapeHtml(T("admin.prayerApprove", "Approve")) + "</button>")
+                : "";
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(entry.name || T("contact.prayerWallNameAnonymous", "Anonymous")) + "</h3>" +
                 "  <p>" + escapeHtml(String(entry.message || "").slice(0, 140)) + "</p>" +
-                "  <button type=\"button\" class=\"button-link button-secondary\" data-admin-prayer-id=\"" + escapeHtml(entry.id) + "\">" + escapeHtml(buttonLabel) + "</button>" +
+                statusLine +
+                "  <div class=\"admin-item-actions\">" +
+                approveBtn +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-prayer-id=\"" + escapeHtml(entry.id) + "\" data-admin-prayer-action=\"toggle-urgent\">" + escapeHtml(buttonLabel) + "</button>" +
+                "  </div>" +
                 "</li>";
         }).join("");
         prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
@@ -2634,12 +2651,13 @@
     });
 
     prayerList.addEventListener("click", function (event) {
-        var button = event.target.closest("button[data-admin-prayer-id]");
+        var button = event.target.closest("button[data-admin-prayer-id][data-admin-prayer-action]");
         if (!button || busy || !isAdminUser()) {
             return;
         }
         var prayerId = String(button.getAttribute("data-admin-prayer-id") || "").trim();
-        if (!prayerId) {
+        var action = String(button.getAttribute("data-admin-prayer-action") || "").trim();
+        if (!prayerId || (action !== "approve" && action !== "toggle-urgent")) {
             return;
         }
         setBusyState(true);
@@ -2651,8 +2669,13 @@
             if (!target) {
                 throw new Error("Prayer not found");
             }
-            target.urgent = !Boolean(target.urgent);
-            target.updatedAt = new Date().toISOString();
+            if (action === "approve") {
+                target.approved = true;
+                target.updatedAt = new Date().toISOString();
+            } else {
+                target.urgent = !Boolean(target.urgent);
+                target.updatedAt = new Date().toISOString();
+            }
             return saveMantleEntries(PRAYER_WALL_URL, source).then(function () {
                 return fetchMantleEntries(PRAYER_WALL_URL);
             });
@@ -2662,7 +2685,11 @@
             });
             renderStats();
             renderPrayerList();
-            showNote("success", "admin.prayerUpdated", "Prayer urgency updated.");
+            if (action === "approve") {
+                showNote("success", "admin.prayerApproved", "Prayer request approved and published.");
+            } else {
+                showNote("success", "admin.prayerUpdated", "Prayer urgency updated.");
+            }
             document.dispatchEvent(new CustomEvent("njc:admin-prayer-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load admin dashboard data.");

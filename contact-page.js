@@ -899,6 +899,10 @@
 
             function normalizeEntry(entry, index) {
                 var source = entry && typeof entry === "object" ? entry : {};
+                var approved = true;
+                if (Object.prototype.hasOwnProperty.call(source, "approved")) {
+                    approved = Boolean(source.approved);
+                }
                 return {
                     id: String(source.id || ("prayer-" + index + "-" + Date.now())),
                     name: String(source.name || "").trim(),
@@ -906,6 +910,7 @@
                     anonymous: Boolean(source.anonymous),
                     urgent: Boolean(source.urgent),
                     pastorOnly: Boolean(source.pastorOnly),
+                    approved: approved,
                     prayed: Math.max(0, Number(source.prayed || 0) || 0),
                     answered: Math.max(0, Number(source.answered || 0) || 0),
                     thanked: Math.max(0, Number(source.thanked || 0) || 0),
@@ -914,6 +919,20 @@
                     createdByUid: String(source.createdByUid || "").trim(),
                     createdByEmail: normalizeEmail(source.createdByEmail)
                 };
+            }
+
+            function isPrayerApprovedForPublic(entry) {
+                return Boolean(entry && entry.approved !== false);
+            }
+
+            function getPrayerWallEntriesForPublicTabs() {
+                var base = prayerWallEntries.filter(function (e) {
+                    return !e.pastorOnly || canSeePastorOnlyEntry(e);
+                });
+                if (isAdminUser()) {
+                    return base;
+                }
+                return base.filter(isPrayerApprovedForPublic);
             }
 
             function getPrayerEntriesForActiveTab(entries) {
@@ -1335,9 +1354,7 @@
                     return;
                 }
 
-                var visibleEntries = prayerWallEntries.filter(function (e) {
-                    return !e.pastorOnly || canSeePastorOnlyEntry(e);
-                });
+                var visibleEntries = getPrayerWallEntriesForPublicTabs();
                 var sortedEntries = getSortedPrayerEntries(visibleEntries).slice(0, 40);
                 if (activePrayerTab === "urgent" && !hasUrgentPrayerEntries(sortedEntries)) {
                     if (hasNonUrgentPrayerEntries(sortedEntries)) {
@@ -1586,7 +1603,7 @@
                     prayerWallEntries = await fetchPrayerWallEntries();
                     prayerWallError = false;
                     sanitizeMyPrayerIdsAgainstWall();
-                    setActivePrayerTab(getDefaultPrayerTab(prayerWallEntries), { skipRender: true });
+                    setActivePrayerTab(getDefaultPrayerTab(getPrayerWallEntriesForPublicTabs()), { skipRender: true });
                 } catch (err) {
                     prayerWallError = true;
                 }
@@ -1671,6 +1688,7 @@
                             anonymous: anonymousValue,
                             urgent: urgentValue,
                             pastorOnly: pastorOnlyValue,
+                            approved: Boolean(isAdminUser()),
                             prayed: 0,
                             answered: 0,
                             thanked: 0,
@@ -1690,7 +1708,11 @@
                             prayerWallPastorOnly.checked = false;
                         }
                         closePrayerComposer();
-                        showPrayerWallNote("posted", "contact.prayerWallPosted", "Prayer request added to wall.");
+                        if (isAdminUser()) {
+                            showPrayerWallNote("posted", "contact.prayerWallPosted", "Prayer request added to wall.");
+                        } else {
+                            showPrayerWallNote("postedPending", "contact.prayerWallPendingReview", "Prayer request sent for review. It will appear on the wall after an admin approves it.");
+                        }
                         prayerWallError = false;
                         prayerWallLoading = false;
                         renderPrayerWall();
@@ -1805,7 +1827,7 @@
                         setActivePrayerTab((tabButton.getAttribute("data-prayer-tab") || "").toLowerCase());
                     });
                 });
-                setActivePrayerTab(getDefaultPrayerTab(prayerWallEntries));
+                setActivePrayerTab(getDefaultPrayerTab(getPrayerWallEntriesForPublicTabs()));
             }
 
             if (prayerDetailOverlay) {
@@ -1869,6 +1891,8 @@
                     var state = prayerWallNote.dataset.state || "";
                     if (state === "posted") {
                         prayerWallNote.textContent = T("contact.prayerWallPosted", "Prayer request added to wall.", prayerCard);
+                    } else if (state === "postedPending") {
+                        prayerWallNote.textContent = T("contact.prayerWallPendingReview", "Prayer request sent for review. It will appear on the wall after an admin approves it.", prayerCard);
                     } else if (state === "updated") {
                         prayerWallNote.textContent = T("contact.prayerWallUpdated", "Prayer request updated.", prayerCard);
                     } else if (state === "resetAnswered") {
