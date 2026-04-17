@@ -582,15 +582,57 @@
                 "<\/script>" +
                 "</body></html>";
 
-            // Some Android WebViews return a blank page when noopener/noreferrer is used.
-            var w = window.open("about:blank", "_blank");
-            if (!w) {
-                showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
-                return;
+            // Prefer iframe printing (same tab) because Android webviews often return blank popup prints.
+            var frame = document.getElementById("prayer-export-print-frame");
+            if (!frame) {
+                frame = document.createElement("iframe");
+                frame.id = "prayer-export-print-frame";
+                frame.setAttribute("aria-hidden", "true");
+                frame.style.position = "fixed";
+                frame.style.right = "0";
+                frame.style.bottom = "0";
+                frame.style.width = "0";
+                frame.style.height = "0";
+                frame.style.border = "0";
+                frame.style.opacity = "0";
+                document.body.appendChild(frame);
             }
-            w.document.open();
-            w.document.write(html);
-            w.document.close();
+
+            var printed = false;
+            frame.onload = function () {
+                window.setTimeout(function () {
+                    try {
+                        var cw = frame.contentWindow;
+                        if (cw) {
+                            cw.focus();
+                            cw.print();
+                            printed = true;
+                        }
+                    } catch (ePrintFrame) {}
+                    if (!printed) {
+                        var w = window.open("about:blank", "_blank");
+                        if (!w) {
+                            showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
+                            return;
+                        }
+                        w.document.open();
+                        w.document.write(html);
+                        w.document.close();
+                    }
+                }, 650);
+            };
+            try {
+                frame.srcdoc = html;
+            } catch (eSrcDoc) {
+                var w2 = window.open("about:blank", "_blank");
+                if (!w2) {
+                    showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
+                    return;
+                }
+                w2.document.open();
+                w2.document.write(html);
+                w2.document.close();
+            }
         }
 
         if (cachedPrayers.length) {
