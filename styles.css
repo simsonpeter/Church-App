@@ -182,7 +182,7 @@ body.splash-active {
     max-width: var(--app-shell-max);
     min-height: 100vh;
     margin: 0 auto;
-    padding: 18px var(--app-inline-pad) 120px;
+    padding: calc(18px + env(safe-area-inset-top)) var(--app-inline-pad) 120px;
     position: relative;
 }
 

@@ -363,7 +363,7 @@
 
     function getRemoteTtsUrl(language, text) {
         var targetLang = normalizeLanguage(language) === "ta" ? "ta" : "en";
-        return "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=" +
+        return "https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=" +
             encodeURIComponent(targetLang) +
             "&q=" + encodeURIComponent(String(text || ""));
     }

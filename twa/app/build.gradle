@@ -22,8 +22,8 @@ plugins {
 
 def twaManifest = [
     applicationId: 'be.njc.app',
-    hostName: 'simsonpeter.github.io', // The domain being opened in the TWA.
-    launchUrl: '/Church-App/index.html', // The start path for the TWA. Must be relative to the domain.
+    hostName: 'njcapp.vercel.app', // The domain being opened in the TWA.
+    launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
     name: 'NJC', // The application name.
     launcherName: 'NJC', // The name shown on the Android Launcher.
     themeColor: '#ffffff', // The color used for the status bar.
@@ -39,7 +39,7 @@ def twaManifest = [
     // - short_name: Shorter string used if |name| is too long.
     // - url: Absolute path of the URL to launch the app with (e.g '/create').
     // - icon: Name of the resource in the drawable folder to use as an icon.
-    shortcuts: [[name:'Home', short_name:'Home', url:'https://simsonpeter.github.io/Church-App/#home', icon:'shortcut_0'],[name:'Prayer', short_name:'Prayer', url:'https://simsonpeter.github.io/Church-App/#prayer', icon:'shortcut_1'],[name:'Events', short_name:'Events', url:'https://simsonpeter.github.io/Church-App/#events', icon:'shortcut_2']],
+    shortcuts: [[name:'Home', short_name:'Home', url:'https://njcapp.vercel.app/#home', icon:'shortcut_0'],[name:'Prayer', short_name:'Prayer', url:'https://njcapp.vercel.app/#prayer', icon:'shortcut_1'],[name:'Events', short_name:'Events', url:'https://njcapp.vercel.app/#events', icon:'shortcut_2']],
     // The duration of fade out animation in milliseconds to be played when removing splash screen.
     splashScreenFadeOutDuration: 300,
     generatorApp: 'bubblewrap-cli', // Application that generated the Android Project
@@ -56,8 +56,8 @@ android {
         applicationId "be.njc.app"
         minSdkVersion 21
         targetSdkVersion 35
-        versionCode 7
-        versionName "1.0.6"
+        versionCode 17
+        versionName "1.0.16"
 
         // The name for the application
         resValue "string", "appName", twaManifest.name
@@ -75,12 +75,12 @@ android {
             // The URL the Web Manifest for the Progressive Web App that the TWA points to. This
             // is used by Chrome OS and Meta Quest to open the Web version of the PWA instead of
             // the TWA, as it will probably give a better user experience for non-mobile devices.
-            resValue "string", "webManifestUrl", 'https://simsonpeter.github.io/Church-App/site.webmanifest'
+            resValue "string", "webManifestUrl", 'https://njcapp.vercel.app/site.webmanifest'
         
 
         
             // This is used by Meta Quest.
-            resValue "string", "fullScopeUrl", 'https://simsonpeter.github.io/Church-App/'
+            resValue "string", "fullScopeUrl", 'https://njcapp.vercel.app/'
         
 
         
@@ -156,21 +156,21 @@ android {
             if (keystorePropertiesFile.exists()) {
                 def keystoreProperties = new Properties()
                 keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
-                def storePassword = keystoreProperties['storePassword']
-                if (storePassword && !storePassword.isEmpty()) {
+                def keystorePass = keystoreProperties['storePassword']
+                if (keystorePass && !keystorePass.isEmpty()) {
                     storeFile file(keystoreProperties['storeFile'] ?: '../jayathasoft.keystore')
-                    storePassword storePassword
+                    storePassword keystorePass
                     keyAlias keystoreProperties['keyAlias'] ?: 'jayathasoft-keystore'
-                    keyPassword keystoreProperties['keyPassword'] ?: storePassword
+                    keyPassword keystoreProperties['keyPassword'] ?: keystorePass
                 }
             } else {
                 // Try environment variables
-                def storePassword = System.getenv("KEYSTORE_PASSWORD")
-                if (storePassword && !storePassword.isEmpty()) {
+                def envStorePass = System.getenv("KEYSTORE_PASSWORD")
+                if (envStorePass && !envStorePass.isEmpty()) {
                     storeFile file('../jayathasoft.keystore')
-                    storePassword storePassword
+                    storePassword envStorePass
                     keyAlias System.getenv("KEY_ALIAS") ?: "jayathasoft-keystore"
-                    keyPassword System.getenv("KEY_PASSWORD") ?: storePassword
+                    keyPassword System.getenv("KEY_PASSWORD") ?: envStorePass
                 }
             }
         }

@@ -576,9 +576,14 @@
                 "</div>" +
                 "<main>" + cards + "</main>" +
                 "<footer class=\"doc-footer\">" + escapeHtml(T("admin.prayerExportFooter", "Prayer wall export · For pastoral use · Keep requests confidential.")) + "</footer>" +
-                "</div></body></html>";
+                "</div>" +
+                "<script>" +
+                "window.addEventListener('load',function(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},550);});" +
+                "<\/script>" +
+                "</body></html>";
 
-            var w = window.open("", "_blank", "noopener,noreferrer");
+            // Some Android WebViews return a blank page when noopener/noreferrer is used.
+            var w = window.open("about:blank", "_blank");
             if (!w) {
                 showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
                 return;
@@ -586,12 +591,6 @@
             w.document.open();
             w.document.write(html);
             w.document.close();
-            window.setTimeout(function () {
-                try {
-                    w.focus();
-                    w.print();
-                } catch (ePrint) {}
-            }, 300);
         }
 
         if (cachedPrayers.length) {
