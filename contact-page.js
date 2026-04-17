@@ -406,76 +406,178 @@
                 }
             }
 
-            function exportMyPrayerPdf() {
+            var pdfLibLoadPromise = null;
+
+            function loadPdfLib() {
+                if (window.PDFLib && window.PDFLib.PDFDocument) {
+                    return Promise.resolve(window.PDFLib);
+                }
+                if (pdfLibLoadPromise) {
+                    return pdfLibLoadPromise;
+                }
+                pdfLibLoadPromise = new Promise(function (resolve, reject) {
+                    var script = document.createElement("script");
+                    script.src = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
+                    script.async = true;
+                    script.onload = function () {
+                        if (window.PDFLib && window.PDFLib.PDFDocument) {
+                            resolve(window.PDFLib);
+                            return;
+                        }
+                        reject(new Error("PDFLib not available"));
+                    };
+                    script.onerror = function () {
+                        reject(new Error("Failed to load PDF library"));
+                    };
+                    document.head.appendChild(script);
+                });
+                return pdfLibLoadPromise;
+            }
+
+            function wrapPdfText(text, maxCharsPerLine) {
+                var words = String(text || "").split(/\s+/).filter(Boolean);
+                if (!words.length) {
+                    return [""];
+                }
+                var lines = [];
+                var current = "";
+                words.forEach(function (word) {
+                    var next = current ? (current + " " + word) : word;
+                    if (next.length <= maxCharsPerLine) {
+                        current = next;
+                    } else {
+                        if (current) {
+                            lines.push(current);
+                        }
+                        if (word.length > maxCharsPerLine) {
+                            var start = 0;
+                            while (start < word.length) {
+                                lines.push(word.slice(start, start + maxCharsPerLine));
+                                start += maxCharsPerLine;
+                            }
+                            current = "";
+                        } else {
+                            current = word;
+                        }
+                    }
+                });
+                if (current) {
+                    lines.push(current);
+                }
+                return lines;
+            }
+
+            function downloadBlobFile(blob, filename) {
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.setTimeout(function () {
+                    URL.revokeObjectURL(url);
+                }, 4000);
+            }
+
+            async function exportMyPrayerPdf() {
                 var rows = getMyPrayerOrderedEntries();
                 if (!rows.length) {
                     showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
                     return;
                 }
-                var title = escapeHtml(T("contact.prayerMinePdfTitle", "My prayer list - NJC Belgium", prayerCard));
-                var cards = rows.map(function (entry, idx) {
-                    var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
-                    var name = escapeHtml(getPrayerDisplayName(entry, prayerCard));
-                    var date = escapeHtml(formatPrayerDateForMinePdf(entry.createdAt));
-                    return "" +
-                        "<article class=\"mine-text-card\">" +
-                        "  <div class=\"mine-text-card-top\">" +
-                        "    <strong class=\"mine-text-name\">" + escapeHtml(String(idx + 1) + ". " + name) + "</strong>" +
-                        "    <span class=\"mine-text-date\">" + date + "</span>" +
-                        "  </div>" +
-                        "  <p class=\"mine-text-msg\">" + msg + "</p>" +
-                        "</article>";
-                }).join("");
+                showPrayerWallNote("minePdfBuilding", "contact.prayerMinePdfBuilding", "Preparing PDF...");
+                try {
+                    var PDFLib = await loadPdfLib();
+                    var PDFDocument = PDFLib.PDFDocument;
+                    var StandardFonts = PDFLib.StandardFonts;
+                    var rgb = PDFLib.rgb;
 
-                var overlay = document.getElementById("prayer-mine-text-overlay");
-                if (!overlay) {
-                    overlay = document.createElement("div");
-                    overlay.id = "prayer-mine-text-overlay";
-                    overlay.innerHTML = "" +
-                        "<div class=\"mine-text-backdrop\" data-mine-text-close=\"1\"></div>" +
-                        "<section class=\"mine-text-sheet\" role=\"dialog\" aria-modal=\"true\" aria-label=\"My prayer text list\">" +
-                        "  <div class=\"mine-text-head\">" +
-                        "    <h3 id=\"prayer-mine-text-title\"></h3>" +
-                        "    <button type=\"button\" class=\"button-link button-secondary\" id=\"prayer-mine-text-close\" data-mine-text-close=\"1\">Close</button>" +
-                        "  </div>" +
-                        "  <div id=\"prayer-mine-text-body\"></div>" +
-                        "</section>";
-                    document.body.appendChild(overlay);
-                    overlay.addEventListener("click", function (event) {
-                        var closeTrigger = event.target.closest("[data-mine-text-close='1']");
-                        if (closeTrigger) {
-                            overlay.hidden = true;
+                    var pdfDoc = await PDFDocument.create();
+                    var font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+                    var fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+                    var page = pdfDoc.addPage([595.28, 841.89]); // A4
+                    var margin = 42;
+                    var y = 800;
+
+                    function newPage() {
+                        page = pdfDoc.addPage([595.28, 841.89]);
+                        y = 800;
+                    }
+
+                    function ensureSpace(heightNeeded) {
+                        if (y - heightNeeded < 48) {
+                            newPage();
                         }
+                    }
+
+                    var title = T("contact.prayerMinePdfTitle", "My prayer list - NJC Belgium", prayerCard);
+                    page.drawText(String(title || ""), {
+                        x: margin,
+                        y: y,
+                        size: 17,
+                        font: fontBold,
+                        color: rgb(0.42, 0.08, 0.08)
                     });
-                }
+                    y -= 22;
+                    page.drawText(String(new Date().toLocaleString()), {
+                        x: margin,
+                        y: y,
+                        size: 10,
+                        font: font,
+                        color: rgb(0.4, 0.4, 0.4)
+                    });
+                    y -= 20;
 
-                var styleEl = document.getElementById("prayer-mine-text-style");
-                if (!styleEl) {
-                    styleEl = document.createElement("style");
-                    styleEl.id = "prayer-mine-text-style";
-                    styleEl.textContent =
-                        "#prayer-mine-text-overlay{position:fixed;inset:0;z-index:9999;display:block;}" +
-                        "#prayer-mine-text-overlay[hidden]{display:none;}" +
-                        "#prayer-mine-text-overlay .mine-text-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.45);}" +
-                        "#prayer-mine-text-overlay .mine-text-sheet{position:relative;max-width:860px;max-height:88vh;overflow:auto;margin:4vh auto;background:#fff;border-radius:14px;padding:16px 14px 18px;box-shadow:0 12px 36px rgba(0,0,0,.25);}" +
-                        "#prayer-mine-text-overlay .mine-text-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px;}" +
-                        "#prayer-mine-text-overlay .mine-text-card{border:1px solid #eadede;border-radius:10px;padding:10px 11px;margin-bottom:10px;background:#fffaf8;}" +
-                        "#prayer-mine-text-overlay .mine-text-card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:6px;}" +
-                        "#prayer-mine-text-overlay .mine-text-name{font-size:15px;color:#7f1d1d;}" +
-                        "#prayer-mine-text-overlay .mine-text-date{font-size:12px;color:#78716c;white-space:nowrap;}" +
-                        "#prayer-mine-text-overlay .mine-text-msg{margin:0;color:#2c2a29;line-height:1.5;}";
-                    document.head.appendChild(styleEl);
-                }
+                    rows.forEach(function (entry, idx) {
+                        var header = String(idx + 1) + ". " + getPrayerDisplayName(entry, prayerCard);
+                        var dateText = formatPrayerDateForMinePdf(entry.createdAt);
+                        var msgRaw = String(entry.message || "").replace(/\s+/g, " ").trim();
+                        var wrapped = wrapPdfText(msgRaw, 88);
+                        var blockHeight = 20 + (wrapped.length * 13) + 12;
+                        ensureSpace(blockHeight);
 
-                var titleEl = document.getElementById("prayer-mine-text-title");
-                var bodyEl = document.getElementById("prayer-mine-text-body");
-                if (titleEl) {
-                    titleEl.textContent = title;
+                        page.drawText(header, {
+                            x: margin,
+                            y: y,
+                            size: 12,
+                            font: fontBold,
+                            color: rgb(0.15, 0.15, 0.15)
+                        });
+                        y -= 14;
+                        if (dateText) {
+                            page.drawText(String(dateText), {
+                                x: margin,
+                                y: y,
+                                size: 9,
+                                font: font,
+                                color: rgb(0.45, 0.45, 0.45)
+                            });
+                            y -= 14;
+                        } else {
+                            y -= 4;
+                        }
+                        wrapped.forEach(function (line) {
+                            page.drawText(line, {
+                                x: margin,
+                                y: y,
+                                size: 11,
+                                font: font,
+                                color: rgb(0.16, 0.16, 0.16)
+                            });
+                            y -= 13;
+                        });
+                        y -= 10;
+                    });
+
+                    var pdfBytes = await pdfDoc.save();
+                    var blob = new Blob([pdfBytes], { type: "application/pdf" });
+                    downloadBlobFile(blob, "my-prayer-list.pdf");
+                    showPrayerWallNote("minePdfSaved", "contact.prayerMinePdfSaved", "PDF generated and downloaded.");
+                } catch (err) {
+                    showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Could not generate PDF on this device right now.");
                 }
-                if (bodyEl) {
-                    bodyEl.innerHTML = cards;
-                }
-                overlay.hidden = false;
             }
 
             function updateMineToolbar() {
