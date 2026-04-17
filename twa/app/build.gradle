@@ -24,8 +24,8 @@ def twaManifest = [
     applicationId: 'be.njc.app',
     hostName: 'njcapp.vercel.app', // The domain being opened in the TWA.
     launchUrl: '/', // The start path for the TWA. Must be relative to the domain.
-    name: 'NJC', // The application name.
-    launcherName: 'NJC', // The name shown on the Android Launcher.
+    name: 'NJC Belgium', // The application name.
+    launcherName: 'NJC Belgium', // The name shown on the Android Launcher.
     themeColor: '#ffffff', // The color used for the status bar.
     themeColorDark: '#000000', // The color used for the dark status bar.
     navigationColor: '#000000', // The color used for the navigation bar.

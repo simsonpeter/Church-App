@@ -13,6 +13,7 @@
     var ENTRY_PREFERENCE_KEY = "njc_auth_entry_preference_v1";
     var USER_STATE_COLLECTION = "app";
     var USER_STATE_DOC = "state";
+    var USER_ACCESS_DOC = "access";
 
     var auth = null;
     var db = null;
@@ -40,6 +41,7 @@
     var entryTitle = null;
     var entrySubtitle = null;
     var entryShowTimerId = null;
+    var registerModulesContainer = null;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
@@ -123,6 +125,119 @@
             return null;
         }
         return db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_STATE_DOC);
+    }
+
+    function moduleLabelForRegister(key) {
+        var k = String(key || "");
+        var map = {
+            announcements: T("auth.regModAnnouncements", "Announcements (home)"),
+            bibleReading: T("auth.regModBibleReading", "Today’s Bible reading (home)"),
+            dailyVerse: T("auth.regModDailyVerse", "Daily verse (home)"),
+            trivia: T("auth.regModTrivia", "Bible Quiz"),
+            eventsWeek: T("auth.regModEventsWeek", "Events this week (home)"),
+            dailyBread: T("auth.regModDailyBread", "Daily bread"),
+            bookShelf: T("auth.regModBookShelf", "Book shelf"),
+            bible: T("auth.regModBible", "Bible reader"),
+            songbook: T("auth.regModSongbook", "Songbook"),
+            prayer: T("auth.regModPrayer", "Prayer wall"),
+            events: T("auth.regModEvents", "Events"),
+            sermons: T("auth.regModSermons", "Sermons"),
+            contact: T("auth.regModContact", "Contact"),
+            celebrations: T("auth.regModCelebrations", "Celebrations (kids & wishes)"),
+            chat: T("auth.regModChat", "Chat"),
+            userAchievements: T("auth.regModUserAchievements", "User achievements")
+        };
+        return map[k] || k;
+    }
+
+    function buildModuleGrantsForRegister(container, pool) {
+        var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
+        var out = {};
+        Object.keys(defs).forEach(function (key) {
+            if (!pool || pool[key] !== true) {
+                out[key] = false;
+                return;
+            }
+            var inp = container ? container.querySelector('input[data-reg-module="' + key + '"]') : null;
+            out[key] = inp ? Boolean(inp.checked) : true;
+        });
+        return out;
+    }
+
+    function countTrueGrants(grants) {
+        var n = 0;
+        Object.keys(grants || {}).forEach(function (k) {
+            if (grants[k] === true) {
+                n += 1;
+            }
+        });
+        return n;
+    }
+
+    async function writeLimitedAccessDoc(uid, grants) {
+        if (!db || !uid || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            throw new Error("no_db");
+        }
+        await db.collection("users").doc(uid).collection(USER_STATE_COLLECTION).doc(USER_ACCESS_DOC).set({
+            accessTier: "limited",
+            moduleGrants: grants,
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: false });
+    }
+
+    function renderRegisterModuleChoices() {
+        if (!registerModulesContainer) {
+            return;
+        }
+        registerModulesContainer.innerHTML = "";
+        var pool = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
+            ? window.NjcAppModules.getRegistrationPoolSync()
+            : {};
+        var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
+        var keys = Object.keys(defs).filter(function (key) {
+            return pool[key] === true;
+        });
+        if (!keys.length) {
+            var p = document.createElement("p");
+            p.className = "page-note";
+            p.textContent = T("auth.regPoolEmpty", "No optional modules are open for registration yet. You can still create an account; ask the church office for a member code to unlock everything.");
+            registerModulesContainer.appendChild(p);
+            return;
+        }
+        var intro = document.createElement("p");
+        intro.className = "page-note";
+        intro.textContent = T("auth.regModulesIntro", "Choose which parts of the app you want to use (you can add a church member code later in your profile for full access).");
+        registerModulesContainer.appendChild(intro);
+        keys.forEach(function (key) {
+            var label = document.createElement("label");
+            label.className = "auth-register-module-row";
+            var input = document.createElement("input");
+            input.type = "checkbox";
+            input.setAttribute("data-reg-module", key);
+            input.checked = true;
+            var span = document.createElement("span");
+            span.textContent = moduleLabelForRegister(key);
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(" "));
+            label.appendChild(span);
+            registerModulesContainer.appendChild(label);
+        });
+    }
+
+    function refreshRegisterModulesPanel() {
+        if (!registerModulesContainer || authMode !== "register") {
+            return;
+        }
+        registerModulesContainer.hidden = false;
+        if (window.NjcAppModules && typeof window.NjcAppModules.ensureRegistrationPoolLoaded === "function") {
+            window.NjcAppModules.ensureRegistrationPoolLoaded().then(function () {
+                renderRegisterModuleChoices();
+            }).catch(function () {
+                renderRegisterModuleChoices();
+            });
+        } else {
+            renderRegisterModuleChoices();
+        }
     }
 
     function buildLocalPayload() {
@@ -335,6 +450,7 @@
             "  <form id=\"auth-modal-form\" class=\"auth-modal-form\">" +
             "    <input id=\"auth-email\" class=\"search-input\" type=\"email\" autocomplete=\"email\" placeholder=\"Email\" required>" +
             "    <input id=\"auth-password\" class=\"search-input\" type=\"password\" autocomplete=\"current-password\" minlength=\"6\" placeholder=\"Password\" required>" +
+            "    <div id=\"auth-register-modules\" class=\"auth-register-modules\" hidden></div>" +
             "    <button id=\"auth-submit\" class=\"button-link\" type=\"submit\">Login</button>" +
             "    <button id=\"auth-forgot-password\" class=\"button-link button-secondary auth-forgot-btn\" type=\"button\">Forgot password?</button>" +
             "    <button id=\"auth-switch-mode\" class=\"button-link button-secondary\" type=\"button\">Create account</button>" +
@@ -353,6 +469,7 @@
         closeButton = document.getElementById("auth-modal-close");
         var backdrop = document.getElementById("auth-modal-backdrop");
         var form = document.getElementById("auth-modal-form");
+        registerModulesContainer = document.getElementById("auth-register-modules");
 
         function closeModal() {
             if (!modalOverlay) {
@@ -383,6 +500,12 @@
             if (forgotPasswordButton) {
                 forgotPasswordButton.textContent = T("auth.forgotPassword", "Forgot password?");
                 forgotPasswordButton.hidden = isRegister;
+            }
+            if (registerModulesContainer) {
+                registerModulesContainer.hidden = !isRegister;
+                if (isRegister) {
+                    refreshRegisterModulesPanel();
+                }
             }
             if (emailInput) {
                 emailInput.placeholder = T("auth.email", "Email");
@@ -438,7 +561,41 @@
             setStatus(T("auth.working", "Please wait..."), "working");
             try {
                 if (authMode === "register") {
-                    await auth.createUserWithEmailAndPassword(email, password);
+                    var poolPre = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
+                        ? window.NjcAppModules.getRegistrationPoolSync()
+                        : {};
+                    if (registerModulesContainer && !registerModulesContainer.hidden) {
+                        var grantsPreview = buildModuleGrantsForRegister(registerModulesContainer, poolPre);
+                        if (countTrueGrants(grantsPreview) < 1) {
+                            setStatus(T("auth.regPickOne", "Please select at least one module."), "error");
+                            return;
+                        }
+                    }
+                    var cred = await auth.createUserWithEmailAndPassword(email, password);
+                    var newUid = cred && cred.user && cred.user.uid ? cred.user.uid : "";
+                    var pool = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
+                        ? window.NjcAppModules.getRegistrationPoolSync()
+                        : {};
+                    var grants = buildModuleGrantsForRegister(registerModulesContainer, pool);
+                    if (countTrueGrants(grants) < 1) {
+                        grants = buildModuleGrantsForRegister(null, pool);
+                    }
+                    try {
+                        await writeLimitedAccessDoc(newUid, grants);
+                    } catch (writeErr) {
+                        try {
+                            if (cred && cred.user && typeof cred.user.delete === "function") {
+                                await cred.user.delete();
+                            }
+                        } catch (delErr) {
+                            // Account may still exist if delete failed; user should contact admin.
+                        }
+                        setStatus(T("auth.regAccessWriteFailed", "Account could not be finalized. Please try again or contact the church office."), "error");
+                        return;
+                    }
+                    if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
+                        window.NjcAppModules.refresh().catch(function () { return null; });
+                    }
                     setStatus(T("auth.registered", "Account created successfully."), "ok");
                 } else {
                     await auth.signInWithEmailAndPassword(email, password);

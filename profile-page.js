@@ -37,6 +37,11 @@
     var familyBlock = document.getElementById("profile-family-block");
     var familyList = document.getElementById("profile-family-list");
     var familyAddBtn = document.getElementById("profile-family-add");
+    var memberAccessBlock = document.getElementById("profile-member-access-block");
+    var memberCodeInput = document.getElementById("profile-member-code");
+    var memberRedeemBtn = document.getElementById("profile-member-redeem-btn");
+    var memberNote = document.getElementById("profile-member-note");
+    var FUNCTIONS_REGION = "europe-west1";
     var busy = false;
     var noteState = "";
     var currentUid = "";
@@ -661,6 +666,108 @@
         }
     }
 
+    function setMemberNote(message, state) {
+        if (!memberNote) {
+            return;
+        }
+        memberNote.hidden = !message;
+        memberNote.textContent = message || "";
+        memberNote.dataset.state = state || "";
+    }
+
+    function updateMemberAccessUi() {
+        if (!memberAccessBlock) {
+            return;
+        }
+        var user = getCurrentUser();
+        if (!user || !user.uid) {
+            memberAccessBlock.hidden = true;
+            setMemberNote("", "");
+            return;
+        }
+        memberAccessBlock.hidden = false;
+        var acc = window.NjcAppModules && typeof window.NjcAppModules.getAccessSync === "function"
+            ? window.NjcAppModules.getAccessSync()
+            : { tier: "legacy", loaded: false };
+        if (acc.tier === "member") {
+            if (memberCodeInput) {
+                memberCodeInput.disabled = true;
+            }
+            if (memberRedeemBtn) {
+                memberRedeemBtn.hidden = true;
+            }
+            if (memberNote && memberNote.dataset.state !== "working") {
+                setMemberNote(T("profile.memberAlreadyFull", "You already have church member access. The menu shows every module the church has enabled."), "ok");
+            }
+        } else {
+            if (memberCodeInput) {
+                memberCodeInput.disabled = false;
+            }
+            if (memberRedeemBtn) {
+                memberRedeemBtn.hidden = false;
+            }
+            if (memberNote && memberNote.dataset.state !== "working") {
+                var st = memberNote.dataset.state;
+                if (st !== "error" && st !== "ok") {
+                    setMemberNote("", "");
+                }
+            }
+        }
+    }
+
+    async function redeemMemberCode() {
+        if (!memberCodeInput || !memberRedeemBtn || memberRedeemBtn.hidden) {
+            return;
+        }
+        var code = String(memberCodeInput.value || "").trim();
+        if (!code) {
+            setMemberNote(T("profile.memberCodeEmpty", "Enter a code first."), "error");
+            return;
+        }
+        var fb = window.firebase;
+        if (!fb || !fb.auth || !fb.functions || typeof fb.app !== "function") {
+            setMemberNote(T("profile.memberRedeemUnavailable", "This action is not available right now."), "error");
+            return;
+        }
+        var auth = fb.auth();
+        if (!auth.currentUser) {
+            return;
+        }
+        if (memberRedeemBtn) {
+            memberRedeemBtn.disabled = true;
+        }
+        setMemberNote(T("auth.working", "Please wait..."), "working");
+        try {
+            await auth.currentUser.getIdToken(true);
+            var region = fb.app().functions(FUNCTIONS_REGION);
+            var callable = region.httpsCallable("redeemMemberCode");
+            await callable({ code: code });
+            if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
+                window.NjcAppModules.invalidateCache();
+            }
+            if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
+                await window.NjcAppModules.refresh();
+            }
+            memberCodeInput.value = "";
+            setMemberNote(T("profile.memberRedeemOk", "Member access unlocked."), "ok");
+            updateMemberAccessUi();
+            if (window.NjcAppModules && typeof window.NjcAppModules.getSync === "function") {
+                document.dispatchEvent(new CustomEvent("njc:modules-updated", { detail: { modules: window.NjcAppModules.getSync() } }));
+            }
+        } catch (err) {
+            var codeStr = String(err && err.code || "");
+            if (codeStr.indexOf("not-found") >= 0 || codeStr.indexOf("invalid-argument") >= 0) {
+                setMemberNote(T("profile.memberRedeemInvalid", "That code is not valid or was already used."), "error");
+            } else {
+                setMemberNote(T("profile.memberRedeemError", "Something went wrong. Try again later."), "error");
+            }
+        } finally {
+            if (memberRedeemBtn) {
+                memberRedeemBtn.disabled = false;
+            }
+        }
+    }
+
     async function loadProfile() {
         if (!form) {
             return;
@@ -673,10 +780,12 @@
             renderAvatar({}, user);
             renderProfileAchievementPoints();
             setNote("authRequired", "profile.loginRequired", "Please login to manage your profile.");
+            updateMemberAccessUi();
             return;
         }
 
         setFormEnabled(true);
+        updateMemberAccessUi();
         var map = getProfileMap();
         var localProfile = normalizeProfile(map[currentUid] || {}, user);
         populateForm(localProfile);
@@ -688,6 +797,7 @@
         if (!doc) {
             syncCelebrationProfilePublic(currentUid, localProfile);
             syncAchievementBoardIfPossible();
+            updateMemberAccessUi();
             return;
         }
         try {
@@ -695,6 +805,7 @@
             if (!snapshot.exists) {
                 syncCelebrationProfilePublic(currentUid, localProfile);
                 syncAchievementBoardIfPossible();
+                updateMemberAccessUi();
                 return;
             }
             var cloudProfile = normalizeProfile(snapshot.data() || {}, user);
@@ -737,9 +848,11 @@
             syncCelebrationProfilePublic(currentUid, cloudProfile);
         } catch (err) {
             syncAchievementBoardIfPossible();
+            updateMemberAccessUi();
             return;
         }
         syncAchievementBoardIfPossible();
+        updateMemberAccessUi();
     }
 
     async function saveProfile(event) {
@@ -926,6 +1039,15 @@
             }
         });
     }
+
+    if (memberRedeemBtn) {
+        memberRedeemBtn.addEventListener("click", function () {
+            redeemMemberCode().catch(function () {
+                return null;
+            });
+        });
+    }
+    document.addEventListener("njc:user-access-updated", updateMemberAccessUi);
 
     document.addEventListener("DOMContentLoaded", loadProfile);
     document.addEventListener("njc:authchange", loadProfile);

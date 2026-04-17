@@ -1,6 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 
 initializeApp();
@@ -77,4 +77,52 @@ exports.sendBroadcastPush = onCall({ region: "europe-west1", maxInstances: 5 }, 
     }
 
     return { success: true, sent, failed, total: tokens.length };
+});
+
+exports.redeemMemberCode = onCall({ region: "europe-west1", maxInstances: 10 }, async (request) => {
+    if (!request.auth || !request.auth.uid) {
+        throw new HttpsError("permission-denied", "Sign in required.");
+    }
+    const raw = String((request.data && request.data.code) || "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "");
+    if (raw.length < 4 || raw.length > 64) {
+        throw new HttpsError("invalid-argument", "Invalid code.");
+    }
+
+    const db = getFirestore();
+    const uid = request.auth.uid;
+    const codesRef = db.collection("appConfig").doc("memberCodes");
+    const accessRef = db.collection("users").doc(uid).collection("app").doc("access");
+
+    await db.runTransaction(async (tx) => {
+        const snap = await tx.get(codesRef);
+        const data = snap.exists ? snap.data() || {} : {};
+        const list = Array.isArray(data.codes) ? data.codes.map((c) => String(c).trim().toUpperCase()) : [];
+        const idx = list.indexOf(raw);
+        if (idx === -1) {
+            throw new HttpsError("not-found", "Invalid or already used code.");
+        }
+        list.splice(idx, 1);
+        tx.set(
+            codesRef,
+            {
+                codes: list,
+                updatedAt: FieldValue.serverTimestamp()
+            },
+            { merge: true }
+        );
+        tx.set(
+            accessRef,
+            {
+                accessTier: "member",
+                moduleGrants: {},
+                updatedAt: FieldValue.serverTimestamp()
+            },
+            { merge: true }
+        );
+    });
+
+    return { success: true };
 });

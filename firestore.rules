@@ -14,6 +14,9 @@ rules_version = '2';
 //   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
+//   users/{uid}/app/access     — limited vs member tier + module picks (create once; member via Cloud Function)
+//   appConfig/access           — registrationPool: which modules new users may pick at signup (public read)
+//   appConfig/memberCodes      — one-time church member codes (admin read/write only)
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   celebrationWishes/{msgId} — daily thread (registered member read; create/delete when signed in)
 //   celebrationProfiles/{uid} — celebration fields; registered member read (token.email); owner write
@@ -44,20 +47,40 @@ service cloud.firestore {
         && request.auth.token.email.size() > 0;
     }
 
-    // App-wide feature toggles (hide routes/cards in the PWA). Public read; admin write only.
+    // App-wide feature toggles + registration pool + member codes under appConfig/{docId}.
     match /appConfig/{docId} {
-      allow read: if true;
-      allow create: if isAdmin()
-        && docId == "modules"
-        && request.resource.data.keys().hasOnly(["flags", "updatedAt"])
-        && request.resource.data.flags is map
-        && request.resource.data.flags.size() <= 40
-        && request.resource.data.updatedAt is timestamp;
-      allow update: if isAdmin()
-        && docId == "modules"
-        && request.resource.data.flags is map
-        && request.resource.data.flags.size() <= 40
-        && request.resource.data.updatedAt is timestamp;
+      allow read: if docId != "memberCodes" || isAdmin();
+      allow create: if isAdmin() && (
+        (docId == "modules"
+          && request.resource.data.keys().hasOnly(["flags", "updatedAt"])
+          && request.resource.data.flags is map
+          && request.resource.data.flags.size() <= 40
+          && request.resource.data.updatedAt is timestamp)
+        || (docId == "access"
+          && request.resource.data.keys().hasOnly(["registrationPool", "updatedAt"])
+          && request.resource.data.registrationPool is map
+          && request.resource.data.registrationPool.size() <= 40
+          && request.resource.data.updatedAt is timestamp)
+        || (docId == "memberCodes"
+          && request.resource.data.keys().hasOnly(["codes", "updatedAt"])
+          && request.resource.data.codes is list
+          && request.resource.data.codes.size() <= 500
+          && request.resource.data.updatedAt is timestamp)
+      );
+      allow update: if isAdmin() && (
+        (docId == "modules"
+          && request.resource.data.flags is map
+          && request.resource.data.flags.size() <= 40
+          && request.resource.data.updatedAt is timestamp)
+        || (docId == "access"
+          && request.resource.data.registrationPool is map
+          && request.resource.data.registrationPool.size() <= 40
+          && request.resource.data.updatedAt is timestamp)
+        || (docId == "memberCodes"
+          && request.resource.data.codes is list
+          && request.resource.data.codes.size() <= 500
+          && request.resource.data.updatedAt is timestamp)
+      );
       allow delete: if false;
     }
 
@@ -77,9 +100,29 @@ service cloud.firestore {
       allow write: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /users/{userId}/app/{docId} {
+    match /users/{userId}/app/state {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/app/access {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      // First-time signup: limited tier + module picks. Upgrades to member are done by Cloud Function (Admin SDK).
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && !exists(/databases/$(database)/documents/users/$(userId)/app/access)
+        && request.resource.data.keys().hasOnly(["accessTier", "moduleGrants", "updatedAt"])
+        && request.resource.data.accessTier == "limited"
+        && request.resource.data.moduleGrants is map
+        && request.resource.data.moduleGrants.size() <= 25
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.moduleGrants.keys().hasOnly([
+          "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
+          "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
+          "sermons", "contact", "celebrations", "chat", "userAchievements"
+        ]);
+      allow update, delete: if isAdmin();
     }
 
     // Public leaderboard rows (one doc per Firebase uid). Anyone can read;
