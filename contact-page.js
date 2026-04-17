@@ -416,20 +416,36 @@
                     return pdfLibLoadPromise;
                 }
                 pdfLibLoadPromise = new Promise(function (resolve, reject) {
-                    var script = document.createElement("script");
-                    script.src = "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js";
-                    script.async = true;
-                    script.onload = function () {
+                    var urls = [
+                        "https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js",
+                        "https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"
+                    ];
+                    var i = 0;
+                    function tryNext() {
                         if (window.PDFLib && window.PDFLib.PDFDocument) {
                             resolve(window.PDFLib);
                             return;
                         }
-                        reject(new Error("PDFLib not available"));
-                    };
-                    script.onerror = function () {
-                        reject(new Error("Failed to load PDF library"));
-                    };
-                    document.head.appendChild(script);
+                        if (i >= urls.length) {
+                            reject(new Error("Failed to load PDF library"));
+                            return;
+                        }
+                        var script = document.createElement("script");
+                        script.src = urls[i++];
+                        script.async = true;
+                        script.onload = function () {
+                            if (window.PDFLib && window.PDFLib.PDFDocument) {
+                                resolve(window.PDFLib);
+                            } else {
+                                tryNext();
+                            }
+                        };
+                        script.onerror = function () {
+                            tryNext();
+                        };
+                        document.head.appendChild(script);
+                    }
+                    tryNext();
                 });
                 return pdfLibLoadPromise;
             }
@@ -467,17 +483,44 @@
                 return lines;
             }
 
-            function downloadBlobFile(blob, filename) {
+            async function downloadBlobFile(blob, filename) {
+                try {
+                    if (navigator.canShare && navigator.share && typeof File !== "undefined") {
+                        var fileForShare = new File([blob], filename, { type: "application/pdf" });
+                        if (navigator.canShare({ files: [fileForShare] })) {
+                            await navigator.share({
+                                files: [fileForShare],
+                                title: filename
+                            });
+                            return true;
+                        }
+                    }
+                } catch (shareErr) {
+                    // Continue with download fallbacks.
+                }
                 var url = URL.createObjectURL(blob);
-                var a = document.createElement("a");
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                window.setTimeout(function () {
-                    URL.revokeObjectURL(url);
-                }, 4000);
+                try {
+                    var a = document.createElement("a");
+                    a.href = url;
+                    a.download = filename;
+                    a.target = "_blank";
+                    a.rel = "noopener";
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    return true;
+                } catch (downloadErr) {
+                    try {
+                        window.open(url, "_blank");
+                        return true;
+                    } catch (openErr) {
+                        return false;
+                    }
+                } finally {
+                    window.setTimeout(function () {
+                        URL.revokeObjectURL(url);
+                    }, 4000);
+                }
             }
 
             async function exportMyPrayerPdf() {
@@ -573,8 +616,12 @@
 
                     var pdfBytes = await pdfDoc.save();
                     var blob = new Blob([pdfBytes], { type: "application/pdf" });
-                    downloadBlobFile(blob, "my-prayer-list.pdf");
-                    showPrayerWallNote("minePdfSaved", "contact.prayerMinePdfSaved", "PDF generated and downloaded.");
+                    var saved = await downloadBlobFile(blob, "my-prayer-list.pdf");
+                    if (saved) {
+                        showPrayerWallNote("minePdfSaved", "contact.prayerMinePdfSaved", "PDF generated. Save/share from the dialog.");
+                    } else {
+                        showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "PDF was created but save was blocked on this device.");
+                    }
                 } catch (err) {
                     showPrayerWallNote("minePdfBlocked", "contact.prayerMinePdfBlocked", "Could not generate PDF on this device right now.");
                 }
