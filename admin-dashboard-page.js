@@ -582,40 +582,49 @@
                 "<\/script>" +
                 "</body></html>";
 
-            // Android WebView/TWA can show a blank print page for popup/srcdoc flows.
-            // Write into an offscreen iframe document directly and print that context.
-            var frame = document.getElementById("prayer-export-print-frame");
-            if (!frame) {
-                frame = document.createElement("iframe");
-                frame.id = "prayer-export-print-frame";
-                frame.setAttribute("aria-hidden", "true");
-                frame.style.position = "fixed";
-                frame.style.left = "-10000px";
-                frame.style.top = "0";
-                frame.style.width = "1px";
-                frame.style.height = "1px";
-                frame.style.border = "0";
-                frame.style.opacity = "0.01";
-                document.body.appendChild(frame);
-            }
-
+            // Android WebView/TWA may render blank pages when printing iframe/popup documents.
+            // Primary path: print from the current document using an isolated print root.
             try {
-                var doc = frame.contentDocument || (frame.contentWindow ? frame.contentWindow.document : null);
-                if (!doc || !frame.contentWindow) {
-                    throw new Error("print-frame-unavailable");
+                var printHost = document.getElementById("prayer-export-print-root");
+                if (!printHost) {
+                    printHost = document.createElement("div");
+                    printHost.id = "prayer-export-print-root";
+                    document.body.appendChild(printHost);
                 }
-                doc.open();
-                doc.write(html);
-                doc.close();
+                var printCss = document.getElementById("prayer-export-print-css");
+                if (!printCss) {
+                    printCss = document.createElement("style");
+                    printCss.id = "prayer-export-print-css";
+                    printCss.textContent =
+                        "body.prayer-export-printing > *{display:none !important;}" +
+                        "#prayer-export-print-root{display:none;}" +
+                        "body.prayer-export-printing #prayer-export-print-root{display:block !important;position:static !important;inset:auto !important;background:#fff;color:#111;}" +
+                        "body.prayer-export-printing #prayer-export-print-root *{visibility:visible !important;}" +
+                        "@media print{body{margin:0 !important;background:#fff !important;}}" ;
+                    document.head.appendChild(printCss);
+                }
+                printHost.innerHTML = html.replace(/^.*<body>/i, "").replace(/<\/body><\/html>$/i, "");
+                document.body.classList.add("prayer-export-printing");
+                var cleanup = function () {
+                    document.body.classList.remove("prayer-export-printing");
+                };
+                if (!window.__njcPrayerAfterPrintBound) {
+                    window.addEventListener("afterprint", function () {
+                        document.body.classList.remove("prayer-export-printing");
+                    });
+                    window.__njcPrayerAfterPrintBound = true;
+                }
                 window.setTimeout(function () {
                     try {
-                        frame.contentWindow.focus();
-                        frame.contentWindow.print();
-                    } catch (ePrintFrame) {
-                        showNote("error", "admin.prayerExportPrintFailed", "Print failed on this device. Try browser menu → Share/Print.");
+                        window.focus();
+                        window.print();
+                    } catch (ePrintInline) {
+                        cleanup();
+                        throw ePrintInline;
                     }
-                }, 900);
-            } catch (eFrame) {
+                }, 300);
+            } catch (eInlinePrint) {
+                // Fallback path if inline print is blocked.
                 var w = window.open("about:blank", "_blank");
                 if (!w) {
                     showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
