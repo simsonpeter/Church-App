@@ -1781,10 +1781,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260413dobmerge";
-    var APP_VERSION = "2026.4.7";
+    var SW_VERSION = "20260414removeprint1";
+    var APP_VERSION = "2026.4.14";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Profile: keep birthday when cloud doc missing dob.";
+    var UPDATE_NOTES_SUMMARY = "Admin: removed prayer PDF export button.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -2114,10 +2114,13 @@
         if (!("serviceWorker" in navigator)) {
             return;
         }
-        navigator.serviceWorker.register("service-worker.js", { updateViaCache: "none" }).then(function (registration) {
+        navigator.serviceWorker.register("service-worker.js?v=" + encodeURIComponent(SW_VERSION), { updateViaCache: "none" }).then(function (registration) {
             clearStoredUpdateDismissIfIdle(registration);
             ensureFcmPushRegistration();
             registration.update();
+            if (registration.waiting) {
+                tryShowUpdateModal(registration);
+            }
             registration.addEventListener("updatefound", function () {
                 var worker = registration.installing;
                 if (!worker) {
