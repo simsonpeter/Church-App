@@ -582,56 +582,48 @@
                 "<\/script>" +
                 "</body></html>";
 
-            // Prefer iframe printing (same tab) because Android webviews often return blank popup prints.
+            // Android WebView/TWA can show a blank print page for popup/srcdoc flows.
+            // Write into an offscreen iframe document directly and print that context.
             var frame = document.getElementById("prayer-export-print-frame");
             if (!frame) {
                 frame = document.createElement("iframe");
                 frame.id = "prayer-export-print-frame";
                 frame.setAttribute("aria-hidden", "true");
                 frame.style.position = "fixed";
-                frame.style.right = "0";
-                frame.style.bottom = "0";
-                frame.style.width = "0";
-                frame.style.height = "0";
+                frame.style.left = "-10000px";
+                frame.style.top = "0";
+                frame.style.width = "1px";
+                frame.style.height = "1px";
                 frame.style.border = "0";
-                frame.style.opacity = "0";
+                frame.style.opacity = "0.01";
                 document.body.appendChild(frame);
             }
 
-            var printed = false;
-            frame.onload = function () {
+            try {
+                var doc = frame.contentDocument || (frame.contentWindow ? frame.contentWindow.document : null);
+                if (!doc || !frame.contentWindow) {
+                    throw new Error("print-frame-unavailable");
+                }
+                doc.open();
+                doc.write(html);
+                doc.close();
                 window.setTimeout(function () {
                     try {
-                        var cw = frame.contentWindow;
-                        if (cw) {
-                            cw.focus();
-                            cw.print();
-                            printed = true;
-                        }
-                    } catch (ePrintFrame) {}
-                    if (!printed) {
-                        var w = window.open("about:blank", "_blank");
-                        if (!w) {
-                            showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
-                            return;
-                        }
-                        w.document.open();
-                        w.document.write(html);
-                        w.document.close();
+                        frame.contentWindow.focus();
+                        frame.contentWindow.print();
+                    } catch (ePrintFrame) {
+                        showNote("error", "admin.prayerExportPrintFailed", "Print failed on this device. Try browser menu → Share/Print.");
                     }
-                }, 650);
-            };
-            try {
-                frame.srcdoc = html;
-            } catch (eSrcDoc) {
-                var w2 = window.open("about:blank", "_blank");
-                if (!w2) {
+                }, 900);
+            } catch (eFrame) {
+                var w = window.open("about:blank", "_blank");
+                if (!w) {
                     showNote("error", "admin.prayerExportPopupBlocked", "Allow pop-ups for this site to export PDF, or use Print from the browser menu.");
                     return;
                 }
-                w2.document.open();
-                w2.document.write(html);
-                w2.document.close();
+                w.document.open();
+                w.document.write(html);
+                w.document.close();
             }
         }
 
