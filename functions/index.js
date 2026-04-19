@@ -21,7 +21,12 @@ function normalizeMemberCode(value) {
         .replace(/[^A-Z0-9]/g, "");
 }
 
-exports.sendBroadcastPush = onCall({ region: "europe-west1", maxInstances: 5 }, async (request) => {
+exports.sendBroadcastPush = onCall({
+    region: "europe-west1",
+    maxInstances: 5,
+    /** Gen2 runs on Cloud Run; clients need Run invoker. Auth is still enforced in the handler. */
+    invoker: "public"
+}, async (request) => {
     if (!request.auth || !request.auth.token || !request.auth.token.email) {
         throw new HttpsError("permission-denied", "Sign in required.");
     }
@@ -89,7 +94,11 @@ exports.sendBroadcastPush = onCall({ region: "europe-west1", maxInstances: 5 }, 
     return { success: true, sent, failed, total: tokens.length };
 });
 
-exports.redeemMemberCode = onCall({ region: "europe-west1", maxInstances: 10 }, async (request) => {
+exports.redeemMemberCode = onCall({
+    region: "europe-west1",
+    maxInstances: 10,
+    invoker: "public"
+}, async (request) => {
     if (!request.auth || !request.auth.uid) {
         throw new HttpsError("permission-denied", "Sign in required.");
     }
