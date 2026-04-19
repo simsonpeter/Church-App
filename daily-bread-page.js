@@ -1,5 +1,12 @@
 (function () {
     var FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
+    /** Tamil “Antantulla Appam” devotions (public JSON) — used when Mantle has no entry for today. File is chosen by numeric order (1.json, 2.json, …), not by dates inside GitHub. */
+    var GITHUB_ANTANTULLA_TAMIL_BASE = "https://raw.githubusercontent.com/yesudas/bible-devotions-app/main/antantulla-appam/meditations/%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/";
+    var GITHUB_ANTANTULLA_INDEX_URL = GITHUB_ANTANTULLA_TAMIL_BASE + "all-meditations.json";
+    var GITHUB_INDEX_CACHE_KEY = "njc_antantulla_index_cache_v2";
+    var GITHUB_INDEX_CACHE_MS = 6 * 60 * 60 * 1000;
+    /** Civil calendar days since this UTC noon anchor; Brussels Y-M-D is interpreted at UTC noon for stable indexing. */
+    var ANTANTULLA_SEQUENCE_ANCHOR_UTC = Date.UTC(2024, 0, 1, 12, 0, 0);
     var BRUSSELS_TZ = "Europe/Brussels";
     var SPEECH_CHAIN_GAP_MS = 55;
     var SPEECH_CHAIN_GAP_MS_TA = 95;
@@ -122,8 +129,171 @@
             author: String(source.author || "").trim(),
             authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
-            bodyTa: String(source.bodyTa || "").trim()
+            bodyTa: String(source.bodyTa || "").trim(),
+            sourceCredit: String(source.sourceCredit || "").trim()
         };
+    }
+
+    function filenameToNumber(name) {
+        var n = parseInt(String(name || "").replace(/\.json$/i, ""), 10);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function formatAntantullaGithubBody(raw) {
+        var parts = [];
+        if (raw.memory_verse && String(raw.memory_verse.text || "").trim()) {
+            parts.push(String(raw.memory_verse.text).trim());
+        }
+        if (raw.devotion && String(raw.devotion.text || "").trim()) {
+            parts.push(String(raw.devotion.text).replace(/\r\n/g, "\n").trim());
+        }
+        if (raw.conclusion && raw.conclusion.text !== undefined && raw.conclusion.text !== null) {
+            var ct = raw.conclusion.text;
+            if (Array.isArray(ct)) {
+                ct.forEach(function (line) {
+                    var t = String(line || "").trim();
+                    if (t) {
+                        parts.push(t);
+                    }
+                });
+            } else if (String(ct).trim()) {
+                parts.push(String(ct).trim());
+            }
+        }
+        return parts.join("\n\n");
+    }
+
+    function mapAntantullaGithubToEntry(raw, ymdKey, filename) {
+        var bodyTa = formatAntantullaGithubBody(raw && typeof raw === "object" ? raw : {});
+        var authorTa = "";
+        if (raw && raw.author) {
+            authorTa = String(raw.author.author || raw.author.name || "").trim();
+        }
+        var uid = String((raw && raw.uniqueid) || "").replace(/\s/g, "");
+        var fid = String(filename || "").replace(/[^\w.-]/g, "");
+        return {
+            id: "gh-antantulla-" + (uid || fid || "x"),
+            date: ymdKey,
+            title: "",
+            titleTa: String((raw && raw.title) || "").trim(),
+            author: "",
+            authorTa: authorTa,
+            body: "",
+            bodyTa: bodyTa,
+            sourceCredit: "Antantulla Appam (Tamil) — yesudas/bible-devotions-app / WordOfGod.in"
+        };
+    }
+
+    function readCachedAntantullaIndex() {
+        try {
+            var raw = window.sessionStorage.getItem(GITHUB_INDEX_CACHE_KEY);
+            if (!raw) {
+                return null;
+            }
+            var o = JSON.parse(raw);
+            if (!o || typeof o.at !== "number" || !Array.isArray(o.rows)) {
+                return null;
+            }
+            if (Date.now() - o.at > GITHUB_INDEX_CACHE_MS) {
+                return null;
+            }
+            return o.rows;
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function writeCachedAntantullaIndex(rows) {
+        try {
+            window.sessionStorage.setItem(GITHUB_INDEX_CACHE_KEY, JSON.stringify({
+                at: Date.now(),
+                rows: rows
+            }));
+        } catch (e) {}
+    }
+
+    function fetchAntantullaIndexRows() {
+        var cached = readCachedAntantullaIndex();
+        if (cached) {
+            return Promise.resolve(cached);
+        }
+        return fetch(GITHUB_ANTANTULLA_INDEX_URL + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+            if (!response.ok) {
+                throw new Error("index");
+            }
+            return response.json();
+        }).then(function (rows) {
+            var list = Array.isArray(rows) ? rows : [];
+            writeCachedAntantullaIndex(list);
+            return list;
+        });
+    }
+
+    function uniqueSortedAntantullaFileNumbers(rows) {
+        var seen = {};
+        (rows || []).forEach(function (row) {
+            var fn = row && String(row.filename || "").trim();
+            if (!fn || !/\.json$/i.test(fn)) {
+                return;
+            }
+            if (/^all-meditations\.json$/i.test(fn)) {
+                return;
+            }
+            var n = filenameToNumber(fn);
+            if (n > 0) {
+                seen[n] = true;
+            }
+        });
+        return Object.keys(seen).map(function (k) {
+            return parseInt(k, 10);
+        }).sort(function (a, b) {
+            return a - b;
+        });
+    }
+
+    /**
+     * Pick N.json by position in sorted numeric list: one step per calendar day since a fixed anchor (Brussels calendar ymdKey).
+     * Does not use GitHub `date` fields.
+     */
+    function pickAntantullaFilenameBySequence(rows, ymdKey) {
+        var nums = uniqueSortedAntantullaFileNumbers(rows);
+        if (!nums.length) {
+            return "";
+        }
+        var parts = String(ymdKey || "").split("-");
+        var y = parseInt(parts[0], 10) || 2025;
+        var m = parseInt(parts[1], 10) || 1;
+        var d = parseInt(parts[2], 10) || 1;
+        var curUtc = Date.UTC(y, m - 1, d, 12, 0, 0);
+        var daySeq = Math.floor((curUtc - ANTANTULLA_SEQUENCE_ANCHOR_UTC) / 86400000);
+        if (daySeq < 0) {
+            daySeq = 0;
+        }
+        var idx = daySeq % nums.length;
+        var n = nums[idx];
+        return String(n) + ".json";
+    }
+
+    function loadGithubAntantullaFallback(ymdKey) {
+        return fetchAntantullaIndexRows().then(function (rows) {
+            var fname = pickAntantullaFilenameBySequence(rows, ymdKey);
+            if (!fname) {
+                return null;
+            }
+            return fetch(GITHUB_ANTANTULLA_TAMIL_BASE + encodeURIComponent(fname) + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+                if (!response.ok) {
+                    return null;
+                }
+                return response.json();
+            }).then(function (data) {
+                if (!data || typeof data !== "object") {
+                    return null;
+                }
+                return mapAntantullaGithubToEntry(data, ymdKey, fname);
+            });
+        }).catch(function () {
+            return null;
+        });
     }
 
     function pickContent(entry, lang) {
@@ -690,7 +860,12 @@
                 authorLineEl.textContent = "";
             }
         }
-        bodyEl.innerHTML = escapeHtml(picked.body || "");
+        var bodyHtml = escapeHtml(picked.body || "");
+        var credit = String(entry.sourceCredit || "").trim();
+        if (credit) {
+            bodyHtml += "<p class=\"page-note daily-bread-source-note\">" + escapeHtml(credit) + "</p>";
+        }
+        bodyEl.innerHTML = bodyHtml;
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
         var authorPart = authorText;
@@ -733,7 +908,7 @@
             })
             .then(function (payload) {
                 if (token !== loadToken) {
-                    return;
+                    return "skip";
                 }
                 var rows = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.entries) ? payload.entries : []);
                 var list = rows.map(function (row, i) {
@@ -746,11 +921,24 @@
                 }).sort(function (a, b) {
                     return String(b.id).localeCompare(String(a.id));
                 })[0];
-                if (!match) {
-                    setEmptyState();
+                if (match) {
+                    renderEntry(match);
+                    return "mantle";
+                }
+                return loadGithubAntantullaFallback(ymd.key);
+            })
+            .then(function (fallbackEntry) {
+                if (token !== loadToken || fallbackEntry === "skip") {
                     return;
                 }
-                renderEntry(match);
+                if (fallbackEntry === "mantle") {
+                    return;
+                }
+                if (fallbackEntry && typeof fallbackEntry === "object") {
+                    renderEntry(fallbackEntry);
+                    return;
+                }
+                setEmptyState();
             })
             .catch(function () {
                 if (token !== loadToken) {
