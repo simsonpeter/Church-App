@@ -1,9 +1,10 @@
 (function () {
     var FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
-    /** Tamil “Antantulla Appam” devotions (public JSON) — used when Mantle has no entry for today. File is chosen by numeric order (1.json, 2.json, …), not by dates inside GitHub. */
+    /** Antantulla Appam devotions (public JSON) — used when Mantle has no entry for today. File is chosen by numeric order (1.json, 2.json, …), not by dates inside GitHub. */
     var GITHUB_ANTANTULLA_TAMIL_BASE = "https://raw.githubusercontent.com/yesudas/bible-devotions-app/main/antantulla-appam/meditations/%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/";
-    var GITHUB_ANTANTULLA_INDEX_URL = GITHUB_ANTANTULLA_TAMIL_BASE + "all-meditations.json";
-    var GITHUB_INDEX_CACHE_KEY = "njc_antantulla_index_cache_v2";
+    var GITHUB_ANTANTULLA_ENGLISH_BASE = "https://raw.githubusercontent.com/yesudas/bible-devotions-app/main/antantulla-appam/meditations/English/";
+    var GITHUB_INDEX_CACHE_KEY_TA = "njc_antantulla_index_cache_ta_v1";
+    var GITHUB_INDEX_CACHE_KEY_EN = "njc_antantulla_index_cache_en_v1";
     var GITHUB_INDEX_CACHE_MS = 6 * 60 * 60 * 1000;
     /** Civil calendar days since this UTC noon anchor; Brussels Y-M-D is interpreted at UTC noon for stable indexing. */
     var ANTANTULLA_SEQUENCE_ANCHOR_UTC = Date.UTC(2024, 0, 1, 12, 0, 0);
@@ -162,29 +163,51 @@
         return parts.join("\n\n");
     }
 
-    function mapAntantullaGithubToEntry(raw, ymdKey, filename) {
-        var bodyTa = formatAntantullaGithubBody(raw && typeof raw === "object" ? raw : {});
-        var authorTa = "";
+    function mapAntantullaGithubToEntry(raw, ymdKey, filename, langKey) {
+        var bodyText = formatAntantullaGithubBody(raw && typeof raw === "object" ? raw : {});
+        var authorText = "";
         if (raw && raw.author) {
-            authorTa = String(raw.author.author || raw.author.name || "").trim();
+            authorText = String(raw.author.author || raw.author.name || "").trim();
         }
+        var titleText = String((raw && raw.title) || "").trim();
         var uid = String((raw && raw.uniqueid) || "").replace(/\s/g, "");
         var fid = String(filename || "").replace(/[^\w.-]/g, "");
+        var idSuffix = (uid || fid || "x");
+        if (langKey === "ta") {
+            return {
+                id: "gh-antantulla-ta-" + idSuffix,
+                date: ymdKey,
+                title: "",
+                titleTa: titleText,
+                author: "",
+                authorTa: authorText,
+                body: "",
+                bodyTa: bodyText
+            };
+        }
         return {
-            id: "gh-antantulla-" + (uid || fid || "x"),
+            id: "gh-antantulla-en-" + idSuffix,
             date: ymdKey,
-            title: "",
-            titleTa: String((raw && raw.title) || "").trim(),
-            author: "",
-            authorTa: authorTa,
-            body: "",
-            bodyTa: bodyTa
+            title: titleText,
+            titleTa: "",
+            author: authorText,
+            authorTa: "",
+            body: bodyText,
+            bodyTa: ""
         };
     }
 
-    function readCachedAntantullaIndex() {
+    function antantullaIndexCacheKey(langKey) {
+        return langKey === "ta" ? GITHUB_INDEX_CACHE_KEY_TA : GITHUB_INDEX_CACHE_KEY_EN;
+    }
+
+    function antantullaBaseUrl(langKey) {
+        return langKey === "ta" ? GITHUB_ANTANTULLA_TAMIL_BASE : GITHUB_ANTANTULLA_ENGLISH_BASE;
+    }
+
+    function readCachedAntantullaIndex(langKey) {
         try {
-            var raw = window.sessionStorage.getItem(GITHUB_INDEX_CACHE_KEY);
+            var raw = window.sessionStorage.getItem(antantullaIndexCacheKey(langKey));
             if (!raw) {
                 return null;
             }
@@ -201,28 +224,29 @@
         }
     }
 
-    function writeCachedAntantullaIndex(rows) {
+    function writeCachedAntantullaIndex(langKey, rows) {
         try {
-            window.sessionStorage.setItem(GITHUB_INDEX_CACHE_KEY, JSON.stringify({
+            window.sessionStorage.setItem(antantullaIndexCacheKey(langKey), JSON.stringify({
                 at: Date.now(),
                 rows: rows
             }));
         } catch (e) {}
     }
 
-    function fetchAntantullaIndexRows() {
-        var cached = readCachedAntantullaIndex();
+    function fetchAntantullaIndexRows(langKey) {
+        var cached = readCachedAntantullaIndex(langKey);
         if (cached) {
             return Promise.resolve(cached);
         }
-        return fetch(GITHUB_ANTANTULLA_INDEX_URL + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+        var indexUrl = antantullaBaseUrl(langKey) + "all-meditations.json";
+        return fetch(indexUrl + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
             if (!response.ok) {
                 throw new Error("index");
             }
             return response.json();
         }).then(function (rows) {
             var list = Array.isArray(rows) ? rows : [];
-            writeCachedAntantullaIndex(list);
+            writeCachedAntantullaIndex(langKey, list);
             return list;
         });
     }
@@ -273,12 +297,14 @@
     }
 
     function loadGithubAntantullaFallback(ymdKey) {
-        return fetchAntantullaIndexRows().then(function (rows) {
+        var langKey = getAppLanguage() === "ta" ? "ta" : "en";
+        return fetchAntantullaIndexRows(langKey).then(function (rows) {
             var fname = pickAntantullaFilenameBySequence(rows, ymdKey);
             if (!fname) {
                 return null;
             }
-            return fetch(GITHUB_ANTANTULLA_TAMIL_BASE + encodeURIComponent(fname) + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+            var base = antantullaBaseUrl(langKey);
+            return fetch(base + encodeURIComponent(fname) + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
                 if (!response.ok) {
                     return null;
                 }
@@ -287,7 +313,7 @@
                 if (!data || typeof data !== "object") {
                     return null;
                 }
-                return mapAntantullaGithubToEntry(data, ymdKey, fname);
+                return mapAntantullaGithubToEntry(data, ymdKey, fname, langKey);
             });
         }).catch(function () {
             return null;
