@@ -154,19 +154,31 @@
         return out;
     }
 
+    /** Must match Cloud Function `normalizeMemberCode` in functions/index.js (redeemMemberCode). */
+    function normalizeMemberCode(value) {
+        return String(value || "")
+            .replace(/^\uFEFF/, "")
+            .trim()
+            .toUpperCase()
+            .replace(/\s+/g, "")
+            .replace(/[^A-Z0-9]/g, "");
+    }
+
     function parseCodesFromTextarea(text) {
         var seen = {};
         var out = [];
-        String(text || "").split(/\r?\n/).forEach(function (line) {
-            var s = String(line || "").trim().toUpperCase();
-            if (s.length < 4 || s.length > 64) {
-                return;
-            }
-            if (!seen[s]) {
-                seen[s] = true;
-                out.push(s);
-            }
-        });
+        String(text || "")
+            .split(/[\r\n,]+/)
+            .forEach(function (line) {
+                var s = normalizeMemberCode(line);
+                if (s.length < 4 || s.length > 64) {
+                    return;
+                }
+                if (!seen[s]) {
+                    seen[s] = true;
+                    out.push(s);
+                }
+            });
         return out.slice(0, 500);
     }
 

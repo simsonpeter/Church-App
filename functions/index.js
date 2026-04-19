@@ -11,6 +11,16 @@ function isAdminEmail(email) {
     return String(email || "").trim().toLowerCase() === ADMIN_EMAIL;
 }
 
+/** Same rules as admin UI: compare codes ignoring spaces, hyphens, and other non-alphanumeric characters. */
+function normalizeMemberCode(value) {
+    return String(value || "")
+        .replace(/^\uFEFF/, "")
+        .trim()
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .replace(/[^A-Z0-9]/g, "");
+}
+
 exports.sendBroadcastPush = onCall({ region: "europe-west1", maxInstances: 5 }, async (request) => {
     if (!request.auth || !request.auth.token || !request.auth.token.email) {
         throw new HttpsError("permission-denied", "Sign in required.");
@@ -83,10 +93,7 @@ exports.redeemMemberCode = onCall({ region: "europe-west1", maxInstances: 10 }, 
     if (!request.auth || !request.auth.uid) {
         throw new HttpsError("permission-denied", "Sign in required.");
     }
-    const raw = String((request.data && request.data.code) || "")
-        .trim()
-        .toUpperCase()
-        .replace(/\s+/g, "");
+    const raw = normalizeMemberCode((request.data && request.data.code) || "");
     if (raw.length < 4 || raw.length > 64) {
         throw new HttpsError("invalid-argument", "Invalid code.");
     }
@@ -99,8 +106,9 @@ exports.redeemMemberCode = onCall({ region: "europe-west1", maxInstances: 10 }, 
     await db.runTransaction(async (tx) => {
         const snap = await tx.get(codesRef);
         const data = snap.exists ? snap.data() || {} : {};
-        const list = Array.isArray(data.codes) ? data.codes.map((c) => String(c).trim().toUpperCase()) : [];
-        const idx = list.indexOf(raw);
+        const list = Array.isArray(data.codes) ? data.codes.map((c) => String(c).trim()) : [];
+        const normalizedList = list.map((c) => normalizeMemberCode(c));
+        const idx = normalizedList.findIndex((c) => c === raw);
         if (idx === -1) {
             throw new HttpsError("not-found", "Invalid or already used code.");
         }
