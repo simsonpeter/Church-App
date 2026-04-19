@@ -675,6 +675,30 @@
         memberNote.dataset.state = state || "";
     }
 
+    function memberRedeemErrorMessage(err) {
+        var codeStr = String(err && err.code || "").toLowerCase();
+        var msg = String(err && err.message || "").trim();
+        if (codeStr.indexOf("not-found") >= 0 || codeStr.indexOf("invalid-argument") >= 0) {
+            return { key: "profile.memberRedeemInvalid", fb: "That code is not valid or was already used." };
+        }
+        if (codeStr.indexOf("permission-denied") >= 0) {
+            return { key: "profile.memberRedeemPermission", fb: "Permission denied. Sign in again or ask the church for help." };
+        }
+        if (codeStr.indexOf("unauthenticated") >= 0) {
+            return { key: "profile.memberRedeemAuth", fb: "Please sign in again, then try the code." };
+        }
+        if (codeStr.indexOf("unavailable") >= 0 || codeStr.indexOf("deadline-exceeded") >= 0 || codeStr.indexOf("resource-exhausted") >= 0) {
+            return { key: "profile.memberRedeemBusy", fb: "Server was busy. Wait a moment and try again." };
+        }
+        if (codeStr.indexOf("internal") >= 0 || codeStr.indexOf("cancelled") >= 0 || codeStr.indexOf("aborted") >= 0) {
+            return { key: "profile.memberRedeemServer", fb: "The member-code service is not responding. This often means Firebase Functions failed to deploy or are still starting. Try again later or contact the church." };
+        }
+        if (msg && msg.length <= 220 && msg.toLowerCase().indexOf("internal assertion") < 0) {
+            return { raw: msg };
+        }
+        return { key: "profile.memberRedeemError", fb: "Something went wrong. Try again later." };
+    }
+
     function updateMemberAccessUi() {
         if (!memberAccessBlock) {
             return;
@@ -740,26 +764,30 @@
         try {
             await auth.currentUser.getIdToken(true);
             var region = fb.app().functions(FUNCTIONS_REGION);
-            var callable = region.httpsCallable("redeemMemberCode");
+            var callable = region.httpsCallable("redeemMemberCode", { timeout: 70000 });
             await callable({ code: code });
+            memberCodeInput.value = "";
+            setMemberNote(T("profile.memberRedeemOk", "Member access unlocked."), "ok");
             if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
                 window.NjcAppModules.invalidateCache();
             }
-            if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
-                await window.NjcAppModules.refresh();
+            try {
+                if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
+                    await window.NjcAppModules.refresh();
+                }
+            } catch (refreshErr) {
+                setMemberNote(T("profile.memberRedeemOkRefreshWarn", "Member access unlocked. If the menu does not update, refresh the page."), "ok");
             }
-            memberCodeInput.value = "";
-            setMemberNote(T("profile.memberRedeemOk", "Member access unlocked."), "ok");
             updateMemberAccessUi();
             if (window.NjcAppModules && typeof window.NjcAppModules.getSync === "function") {
                 document.dispatchEvent(new CustomEvent("njc:modules-updated", { detail: { modules: window.NjcAppModules.getSync() } }));
             }
         } catch (err) {
-            var codeStr = String(err && err.code || "");
-            if (codeStr.indexOf("not-found") >= 0 || codeStr.indexOf("invalid-argument") >= 0) {
-                setMemberNote(T("profile.memberRedeemInvalid", "That code is not valid or was already used."), "error");
+            var mapped = memberRedeemErrorMessage(err);
+            if (mapped.raw) {
+                setMemberNote(mapped.raw, "error");
             } else {
-                setMemberNote(T("profile.memberRedeemError", "Something went wrong. Try again later."), "error");
+                setMemberNote(T(mapped.key, mapped.fb), "error");
             }
         } finally {
             if (memberRedeemBtn) {
