@@ -12,6 +12,8 @@
     var SPEECH_CHAIN_GAP_MS = 55;
     var SPEECH_CHAIN_GAP_MS_TA = 95;
     var SEGMENT_MAX_CHARS = 320;
+    /** Matches `data-card-lang-id` on the daily bread card (per-card language switcher). */
+    var DAILY_BREAD_CARD_LANG_ID = "daily-bread";
 
     var dateLine = document.getElementById("daily-bread-date-line");
     var statusEl = document.getElementById("daily-bread-status");
@@ -68,6 +70,14 @@
             return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
         }
         return "en";
+    }
+
+    /** Title/body/fallback source language: same as other cards (card switcher + app default). */
+    function getDailyBreadContentLanguage() {
+        if (window.NjcI18n && typeof window.NjcI18n.getLanguageForElement === "function" && pageCard) {
+            return window.NjcI18n.getLanguageForElement(pageCard) === "ta" ? "ta" : "en";
+        }
+        return getAppLanguage();
     }
 
     function getBrusselsYmd() {
@@ -297,7 +307,7 @@
     }
 
     function loadGithubAntantullaFallback(ymdKey) {
-        var langKey = getAppLanguage() === "ta" ? "ta" : "en";
+        var langKey = getDailyBreadContentLanguage() === "ta" ? "ta" : "en";
         return fetchAntantullaIndexRows(langKey).then(function (rows) {
             var fname = pickAntantullaFilenameBySequence(rows, ymdKey);
             if (!fname) {
@@ -870,7 +880,7 @@
 
     function renderEntry(entry) {
         stopSpeechPlayback();
-        var lang = getAppLanguage();
+        var lang = getDailyBreadContentLanguage();
         var picked = pickContent(entry, lang);
         headingEl.textContent = picked.title || T("dailyBread.title", "Daily bread");
         currentSpeechTitle = String(picked.title || "").trim() || T("dailyBread.title", "Daily bread");
@@ -1000,6 +1010,16 @@
         }
     });
     document.addEventListener("njc:langchange", function () {
+        stopSpeechPlayback();
+        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+            loadDailyBread();
+        }
+    });
+    document.addEventListener("njc:cardlangchange", function (ev) {
+        var d = ev && ev.detail;
+        if (!d || d.cardId !== DAILY_BREAD_CARD_LANG_ID) {
+            return;
+        }
         stopSpeechPlayback();
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
             loadDailyBread();
