@@ -129,8 +129,7 @@
             author: String(source.author || "").trim(),
             authorTa: String(source.authorTa || "").trim(),
             body: String(source.body || "").trim(),
-            bodyTa: String(source.bodyTa || "").trim(),
-            sourceCredit: String(source.sourceCredit || "").trim()
+            bodyTa: String(source.bodyTa || "").trim()
         };
     }
 
@@ -179,8 +178,7 @@
             author: "",
             authorTa: authorTa,
             body: "",
-            bodyTa: bodyTa,
-            sourceCredit: "Antantulla Appam (Tamil) — yesudas/bible-devotions-app / WordOfGod.in"
+            bodyTa: bodyTa
         };
     }
 
@@ -860,12 +858,7 @@
                 authorLineEl.textContent = "";
             }
         }
-        var bodyHtml = escapeHtml(picked.body || "");
-        var credit = String(entry.sourceCredit || "").trim();
-        if (credit) {
-            bodyHtml += "<p class=\"page-note daily-bread-source-note\">" + escapeHtml(credit) + "</p>";
-        }
-        bodyEl.innerHTML = bodyHtml;
+        bodyEl.innerHTML = escapeHtml(picked.body || "");
         currentReadLang = picked.readLang === "ta" ? "ta" : "en";
         var titlePart = String(picked.title || "").trim();
         var authorPart = authorText;
