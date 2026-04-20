@@ -3234,6 +3234,41 @@ body.auth-modal-open {
     font-family: inherit;
 }
 
+.admin-member-grant-label {
+    display: block;
+    margin-top: 0.35rem;
+}
+
+.admin-member-users-wrap {
+    margin-top: 0.75rem;
+    overflow-x: auto;
+}
+
+.admin-member-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 640px;
+}
+
+.admin-member-users-table th,
+.admin-member-users-table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    text-align: left;
+    padding: 0.5rem 0.45rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.admin-member-users-table th {
+    font-weight: 700;
+}
+
+.admin-member-users-actions {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
 .auth-forgot-btn {
     margin-top: 0;
 }

@@ -935,6 +935,30 @@
                         <label class="admin-member-codes-label">
                             <textarea id="admin-member-codes-text" class="search-input admin-member-codes-text" rows="8" spellcheck="false" placeholder="NJC-2026-ABCD"></textarea>
                         </label>
+                        <h3 class="admin-access-subheading" data-i18n="admin.memberManualHeading" data-i18n-fallback="Manual member access (backup)">Manual member access (backup)</h3>
+                        <p class="page-note" data-i18n="admin.memberManualInfo" data-i18n-fallback="Use this if member-code service is down. Paste a Firebase Auth UID to grant full member access directly.">Use this if member-code service is down. Paste a Firebase Auth UID to grant full member access directly.</p>
+                        <label class="admin-member-grant-label">
+                            <input id="admin-member-grant-uid" class="search-input" type="text" maxlength="128" placeholder="Firebase UID (example: A1b2C3d4...)" autocomplete="off">
+                        </label>
+                        <button type="button" class="button-link button-secondary" id="admin-member-grant-btn" data-i18n="admin.memberManualGrant" data-i18n-fallback="Grant member access">Grant member access</button>
+                        <hr class="admin-access-divider" aria-hidden="true">
+                        <h3 class="admin-access-subheading" data-i18n="admin.memberUsersHeading" data-i18n-fallback="Registered users and member access">Registered users and member access</h3>
+                        <p class="page-note" data-i18n="admin.memberUsersInfo" data-i18n-fallback="Set each user as Member (full access) or Limited (only their chosen modules).">Set each user as Member (full access) or Limited (only their chosen modules).</p>
+                        <button type="button" class="button-link button-secondary" id="admin-member-users-refresh" data-i18n="admin.memberUsersRefresh" data-i18n-fallback="Refresh users">Refresh users</button>
+                        <p class="page-note" id="admin-member-users-status" hidden></p>
+                        <div class="admin-member-users-wrap" id="admin-member-users-wrap" hidden>
+                            <table class="admin-member-users-table" aria-describedby="admin-member-users-status">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.memberUsersColName" data-i18n-fallback="Name">Name</th>
+                                        <th data-i18n="admin.memberUsersColUid" data-i18n-fallback="UID">UID</th>
+                                        <th data-i18n="admin.memberUsersColTier" data-i18n-fallback="Current tier">Current tier</th>
+                                        <th data-i18n="admin.memberUsersColActions" data-i18n-fallback="Actions">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-member-users-tbody"></tbody>
+                            </table>
+                        </div>
                         <p class="page-note" id="admin-access-status" hidden></p>
                         <button type="button" class="button-link button-secondary" id="admin-access-save" data-i18n="admin.accessSave" data-i18n-fallback="Save registration pool &amp; codes">Save registration pool &amp; codes</button>
                     </div>

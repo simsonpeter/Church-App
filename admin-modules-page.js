@@ -8,10 +8,19 @@
     var statusEl = document.getElementById("admin-modules-status");
     var poolFieldset = document.getElementById("admin-registration-pool-fieldset");
     var codesTextarea = document.getElementById("admin-member-codes-text");
+    var memberGrantUidInput = document.getElementById("admin-member-grant-uid");
+    var memberGrantBtn = document.getElementById("admin-member-grant-btn");
+    var memberUsersRefreshBtn = document.getElementById("admin-member-users-refresh");
+    var memberUsersStatusEl = document.getElementById("admin-member-users-status");
+    var memberUsersWrap = document.getElementById("admin-member-users-wrap");
+    var memberUsersTbody = document.getElementById("admin-member-users-tbody");
     var accessSaveBtn = document.getElementById("admin-access-save");
     var accessStatusEl = document.getElementById("admin-access-status");
     var ACCESS_DOC_ID = "access";
     var MEMBER_CODES_DOC_ID = "memberCodes";
+    var MAX_MEMBER_USERS = 300;
+    var memberUsersBusy = false;
+    var latestMemberRows = {};
 
     if (!fieldset || !saveBtn || !window.NjcAppModules) {
         return;
@@ -102,6 +111,20 @@
         if (codesTextarea) {
             codesTextarea.disabled = Boolean(busy);
         }
+        if (memberGrantUidInput) {
+            memberGrantUidInput.disabled = Boolean(busy);
+        }
+        if (memberGrantBtn) {
+            memberGrantBtn.disabled = Boolean(busy);
+        }
+        if (memberUsersRefreshBtn) {
+            memberUsersRefreshBtn.disabled = Boolean(busy) || memberUsersBusy;
+        }
+        if (memberUsersTbody) {
+            memberUsersTbody.querySelectorAll("button[data-admin-member-uid]").forEach(function (btn) {
+                btn.disabled = Boolean(busy) || memberUsersBusy;
+            });
+        }
     }
 
     function setAccessStatus(kind, key, fallback) {
@@ -182,6 +205,254 @@
         return out.slice(0, 500);
     }
 
+    function normalizeUid(value) {
+        return String(value || "").trim().replace(/\s+/g, "");
+    }
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+    }
+
+    function setMemberUsersStatus(kind, key, fallback) {
+        if (!memberUsersStatusEl) {
+            return;
+        }
+        memberUsersStatusEl.hidden = !fallback;
+        memberUsersStatusEl.dataset.kind = kind || "";
+        memberUsersStatusEl.textContent = fallback ? T(key, fallback) : "";
+    }
+
+    function countTrueGrants(grants) {
+        var n = 0;
+        Object.keys(grants || {}).forEach(function (k) {
+            if (grants[k] === true) {
+                n += 1;
+            }
+        });
+        return n;
+    }
+
+    function baseLimitedGrants() {
+        var grants = {};
+        var pool = getPoolFromForm();
+        Object.keys(pool || {}).forEach(function (key) {
+            grants[key] = pool[key] === true;
+        });
+        return grants;
+    }
+
+    function deriveLimitedGrants(existing) {
+        var current = existing && typeof existing === "object" ? existing : {};
+        if (countTrueGrants(current) > 0) {
+            return current;
+        }
+        return baseLimitedGrants();
+    }
+
+    function inferTierFromAccess(accessData) {
+        var raw = String(accessData && accessData.accessTier || "").toLowerCase();
+        if (raw === "member" || raw === "limited") {
+            return raw;
+        }
+        return "legacy";
+    }
+
+    function setMemberUsersBusy(isBusy) {
+        memberUsersBusy = Boolean(isBusy);
+        if (memberUsersRefreshBtn) {
+            memberUsersRefreshBtn.disabled = memberUsersBusy;
+        }
+        if (memberUsersTbody) {
+            memberUsersTbody.querySelectorAll("button[data-admin-member-uid]").forEach(function (btn) {
+                btn.disabled = memberUsersBusy;
+            });
+        }
+    }
+
+    function renderMemberUsers(rows) {
+        if (!memberUsersTbody || !memberUsersWrap) {
+            return;
+        }
+        latestMemberRows = {};
+        if (!rows.length) {
+            memberUsersWrap.hidden = true;
+            memberUsersTbody.innerHTML = "";
+            setMemberUsersStatus("info", "admin.memberUsersEmpty", "No registered users found yet.");
+            return;
+        }
+        var html = rows.map(function (row) {
+            latestMemberRows[row.uid] = row;
+            var tierLabel = row.tier === "member"
+                ? T("admin.memberUsersTierMember", "Member")
+                : (row.tier === "limited" ? T("admin.memberUsersTierLimited", "Limited") : T("admin.memberUsersTierLegacy", "Legacy"));
+            var grantsCount = countTrueGrants(row.moduleGrants || {});
+            var detailText = row.tier === "limited" ? (" (" + grantsCount + " modules)") : "";
+            var name = row.name || ("User " + row.uid.slice(0, 8));
+            return "" +
+                "<tr>" +
+                "  <td>" + escapeHtml(name) + "</td>" +
+                "  <td><code>" + escapeHtml(row.uid) + "</code></td>" +
+                "  <td>" + escapeHtml(tierLabel + detailText) + "</td>" +
+                "  <td><div class=\"admin-member-users-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-member-uid=\"" + escapeHtml(row.uid) + "\" data-admin-member-target=\"member\">" + escapeHtml(T("admin.memberUsersSetMember", "Set member")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-member-uid=\"" + escapeHtml(row.uid) + "\" data-admin-member-target=\"limited\">" + escapeHtml(T("admin.memberUsersSetLimited", "Set limited")) + "</button>" +
+                "  </div></td>" +
+                "</tr>";
+        }).join("");
+        memberUsersTbody.innerHTML = html;
+        memberUsersWrap.hidden = false;
+    }
+
+    function getUidFromUsersDocRef(ref) {
+        if (!ref || !ref.path) {
+            return "";
+        }
+        var parts = String(ref.path || "").split("/");
+        if (parts.length >= 2 && parts[0] === "users") {
+            return String(parts[1] || "");
+        }
+        return "";
+    }
+
+    function getUidFromNestedDocRef(ref, collectionName, docId) {
+        if (!ref || !ref.path) {
+            return "";
+        }
+        var parts = String(ref.path || "").split("/");
+        if (parts.length === 4 && parts[0] === "users" && parts[2] === collectionName && parts[3] === docId) {
+            return String(parts[1] || "");
+        }
+        return "";
+    }
+
+    function loadMemberUsers() {
+        if (!memberUsersTbody || !memberUsersWrap) {
+            return Promise.resolve([]);
+        }
+        if (!isAdminUser()) {
+            memberUsersWrap.hidden = true;
+            memberUsersTbody.innerHTML = "";
+            setMemberUsersStatus("info", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+            return Promise.resolve([]);
+        }
+        var db = getFirestoreDb();
+        var fb = window.firebase;
+        if (!db || !fb || !fb.firestore || !fb.firestore.FieldPath) {
+            memberUsersWrap.hidden = true;
+            memberUsersTbody.innerHTML = "";
+            setMemberUsersStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+            return Promise.resolve([]);
+        }
+        setMemberUsersBusy(true);
+        setMemberUsersStatus("working", "auth.working", "Please wait...");
+        var docIdField = fb.firestore.FieldPath.documentId();
+        return Promise.all([
+            db.collection("users").limit(MAX_MEMBER_USERS).get().catch(function () { return null; }),
+            db.collectionGroup("profile").where(docIdField, "==", "basic").limit(MAX_MEMBER_USERS).get().catch(function () { return null; }),
+            db.collectionGroup("app").where(docIdField, "==", "access").limit(MAX_MEMBER_USERS).get().catch(function () { return null; })
+        ]).then(function (results) {
+            var usersSnap = results[0];
+            var profileSnap = results[1];
+            var accessSnap = results[2];
+            var byUid = {};
+
+            if (usersSnap && !usersSnap.empty) {
+                usersSnap.forEach(function (d) {
+                    var uid = normalizeUid(getUidFromUsersDocRef(d.ref) || d.id);
+                    if (!uid) {
+                        return;
+                    }
+                    if (!byUid[uid]) {
+                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
+                    }
+                });
+            }
+            if (profileSnap && !profileSnap.empty) {
+                profileSnap.forEach(function (d) {
+                    var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "profile", "basic"));
+                    if (!uid) {
+                        return;
+                    }
+                    if (!byUid[uid]) {
+                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
+                    }
+                    var p = d.data() || {};
+                    byUid[uid].name = String(p.fullName || "").trim();
+                });
+            }
+            if (accessSnap && !accessSnap.empty) {
+                accessSnap.forEach(function (d) {
+                    var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "app", "access"));
+                    if (!uid) {
+                        return;
+                    }
+                    if (!byUid[uid]) {
+                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
+                    }
+                    var a = d.data() || {};
+                    byUid[uid].tier = inferTierFromAccess(a);
+                    byUid[uid].moduleGrants = a.moduleGrants && typeof a.moduleGrants === "object" ? a.moduleGrants : {};
+                });
+            }
+
+            var rows = Object.keys(byUid).map(function (uid) {
+                return byUid[uid];
+            }).sort(function (a, b) {
+                var an = String(a.name || a.uid);
+                var bn = String(b.name || b.uid);
+                return an.localeCompare(bn);
+            }).slice(0, MAX_MEMBER_USERS);
+
+            renderMemberUsers(rows);
+            if (rows.length) {
+                setMemberUsersStatus("success", "admin.memberUsersLoaded", "Loaded registered users.");
+            }
+            return rows;
+        }).catch(function () {
+            memberUsersWrap.hidden = true;
+            memberUsersTbody.innerHTML = "";
+            setMemberUsersStatus("error", "admin.memberUsersLoadError", "Could not load registered users.");
+            return [];
+        }).finally(function () {
+            setMemberUsersBusy(false);
+        });
+    }
+
+    function setUserAccessTier(uid, targetTier) {
+        var cleanUid = normalizeUid(uid);
+        var nextTier = String(targetTier || "").toLowerCase() === "member" ? "member" : "limited";
+        var db = getFirestoreDb();
+        if (!cleanUid || !db || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            setMemberUsersStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+            return Promise.resolve(null);
+        }
+        var row = latestMemberRows[cleanUid] || { moduleGrants: {} };
+        var payload = {
+            accessTier: nextTier,
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+            moduleGrants: nextTier === "member" ? {} : deriveLimitedGrants(row.moduleGrants)
+        };
+        setMemberUsersBusy(true);
+        setMemberUsersStatus("working", "auth.working", "Please wait...");
+        return db.collection("users").doc(cleanUid).collection("app").doc("access").set(payload, { merge: true }).then(function () {
+            setMemberUsersStatus("success", "admin.memberUsersUpdated", "User access updated.");
+            if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
+                window.NjcAppModules.invalidateCache();
+            }
+            return loadMemberUsers();
+        }).catch(function () {
+            setMemberUsersStatus("error", "admin.memberUsersUpdateError", "Could not update this user.");
+            return null;
+        }).finally(function () {
+            setMemberUsersBusy(false);
+        });
+    }
+
     function loadModulesDoc() {
         if (!isAdminUser()) {
             fieldset.disabled = true;
@@ -194,6 +465,18 @@
             }
             if (codesTextarea) {
                 codesTextarea.disabled = true;
+            }
+            if (memberGrantUidInput) {
+                memberGrantUidInput.disabled = true;
+            }
+            if (memberGrantBtn) {
+                memberGrantBtn.disabled = true;
+            }
+            if (memberUsersRefreshBtn) {
+                memberUsersRefreshBtn.disabled = true;
+            }
+            if (memberUsersWrap) {
+                memberUsersWrap.hidden = true;
             }
             setStatus("info", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
             return;
@@ -212,7 +495,17 @@
             if (codesTextarea) {
                 codesTextarea.disabled = false;
             }
+            if (memberGrantUidInput) {
+                memberGrantUidInput.disabled = false;
+            }
+            if (memberGrantBtn) {
+                memberGrantBtn.disabled = false;
+            }
+            if (memberUsersRefreshBtn) {
+                memberUsersRefreshBtn.disabled = false;
+            }
             setStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+            setMemberUsersStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
             return;
         }
         setFormBusy(true);
@@ -241,6 +534,7 @@
             } else if (codesTextarea) {
                 codesTextarea.value = "";
             }
+            return loadMemberUsers();
         }).catch(function () {
             applyFormFromModules(window.NjcAppModules.getSync());
             setStatus("error", "admin.modulesLoadError", "Could not load module settings.");
@@ -323,6 +617,69 @@
             }).finally(function () {
                 setFormBusy(false);
             });
+        });
+    }
+
+    if (memberGrantBtn) {
+        memberGrantBtn.addEventListener("click", function () {
+            if (!isAdminUser()) {
+                setAccessStatus("error", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+                return;
+            }
+            var db = getFirestoreDb();
+            if (!db || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+                setAccessStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+                return;
+            }
+            var uid = normalizeUid(memberGrantUidInput && memberGrantUidInput.value);
+            if (!uid || uid.length < 8) {
+                setAccessStatus("error", "admin.memberManualUidMissing", "Enter a valid Firebase UID first.");
+                return;
+            }
+            setFormBusy(true);
+            clearAccessStatus();
+            db.collection("users").doc(uid).collection("app").doc("access").set({
+                accessTier: "member",
+                moduleGrants: {},
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true }).then(function () {
+                if (memberGrantUidInput) {
+                    memberGrantUidInput.value = "";
+                }
+                setAccessStatus("success", "admin.memberManualGranted", "Member access granted for that UID.");
+                return loadMemberUsers();
+            }).catch(function () {
+                setAccessStatus("error", "admin.memberManualGrantError", "Could not grant member access. Check UID and Firestore rules.");
+            }).finally(function () {
+                setFormBusy(false);
+            });
+        });
+    }
+
+    if (memberUsersRefreshBtn) {
+        memberUsersRefreshBtn.addEventListener("click", function () {
+            if (!isAdminUser()) {
+                setMemberUsersStatus("error", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+                return;
+            }
+            if (!memberUsersBusy) {
+                loadMemberUsers();
+            }
+        });
+    }
+
+    if (memberUsersTbody) {
+        memberUsersTbody.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-member-uid]");
+            if (!button || memberUsersBusy) {
+                return;
+            }
+            var uid = normalizeUid(button.getAttribute("data-admin-member-uid"));
+            var targetTier = String(button.getAttribute("data-admin-member-target") || "").toLowerCase();
+            if (!uid || (targetTier !== "member" && targetTier !== "limited")) {
+                return;
+            }
+            setUserAccessTier(uid, targetTier);
         });
     }
 
