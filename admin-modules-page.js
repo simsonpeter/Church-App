@@ -352,26 +352,12 @@
         setMemberUsersStatus("working", "auth.working", "Please wait...");
         var docIdField = fb.firestore.FieldPath.documentId();
         return Promise.all([
-            db.collection("users").limit(MAX_MEMBER_USERS).get().catch(function () { return null; }),
             db.collectionGroup("profile").where(docIdField, "==", "basic").limit(MAX_MEMBER_USERS).get().catch(function () { return null; }),
             db.collectionGroup("app").where(docIdField, "==", "access").limit(MAX_MEMBER_USERS).get().catch(function () { return null; })
         ]).then(function (results) {
-            var usersSnap = results[0];
-            var profileSnap = results[1];
-            var accessSnap = results[2];
+            var profileSnap = results[0];
+            var accessSnap = results[1];
             var byUid = {};
-
-            if (usersSnap && !usersSnap.empty) {
-                usersSnap.forEach(function (d) {
-                    var uid = normalizeUid(getUidFromUsersDocRef(d.ref) || d.id);
-                    if (!uid) {
-                        return;
-                    }
-                    if (!byUid[uid]) {
-                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
-                    }
-                });
-            }
             if (profileSnap && !profileSnap.empty) {
                 profileSnap.forEach(function (d) {
                     var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "profile", "basic"));
