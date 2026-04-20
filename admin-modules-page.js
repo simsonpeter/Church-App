@@ -19,6 +19,7 @@
     var ACCESS_DOC_ID = "access";
     var MEMBER_CODES_DOC_ID = "memberCodes";
     var MAX_MEMBER_USERS = 300;
+    var MEMBER_USERS_QUERY_TIMEOUT_MS = 12000;
     var memberUsersBusy = false;
     var latestMemberRows = {};
 
@@ -351,12 +352,40 @@
         setMemberUsersBusy(true);
         setMemberUsersStatus("working", "auth.working", "Please wait...");
         var docIdField = fb.firestore.FieldPath.documentId();
+        function queryWithTimeout(queryPromise) {
+            return new Promise(function (resolve) {
+                var settled = false;
+                var timer = window.setTimeout(function () {
+                    if (!settled) {
+                        settled = true;
+                        resolve({ timeout: true, snap: null });
+                    }
+                }, MEMBER_USERS_QUERY_TIMEOUT_MS);
+                queryPromise.then(function (snap) {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    window.clearTimeout(timer);
+                    resolve({ timeout: false, snap: snap || null });
+                }).catch(function () {
+                    if (settled) {
+                        return;
+                    }
+                    settled = true;
+                    window.clearTimeout(timer);
+                    resolve({ timeout: false, snap: null });
+                });
+            });
+        }
         return Promise.all([
-            db.collectionGroup("profile").where(docIdField, "==", "basic").limit(MAX_MEMBER_USERS).get().catch(function () { return null; }),
-            db.collectionGroup("app").where(docIdField, "==", "access").limit(MAX_MEMBER_USERS).get().catch(function () { return null; })
+            queryWithTimeout(db.collectionGroup("profile").where(docIdField, "==", "basic").limit(MAX_MEMBER_USERS).get()),
+            queryWithTimeout(db.collectionGroup("app").where(docIdField, "==", "access").limit(MAX_MEMBER_USERS).get())
         ]).then(function (results) {
-            var profileSnap = results[0];
-            var accessSnap = results[1];
+            var profileRes = results[0] || { timeout: false, snap: null };
+            var accessRes = results[1] || { timeout: false, snap: null };
+            var profileSnap = profileRes.snap;
+            var accessSnap = accessRes.snap;
             var byUid = {};
             if (profileSnap && !profileSnap.empty) {
                 profileSnap.forEach(function (d) {
@@ -397,6 +426,8 @@
             renderMemberUsers(rows);
             if (rows.length) {
                 setMemberUsersStatus("success", "admin.memberUsersLoaded", "Loaded registered users.");
+            } else if (profileRes.timeout || accessRes.timeout) {
+                setMemberUsersStatus("error", "admin.memberUsersLoadTimeout", "Loading users timed out. Please tap Refresh users again.");
             }
             return rows;
         }).catch(function () {
