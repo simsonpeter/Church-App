@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v333prayerapprove";
-const RUNTIME_CACHE = "njc-runtime-cache-v333prayerapprove";
+const APP_CACHE = "njc-app-cache-v334memberusers";
+const RUNTIME_CACHE = "njc-runtime-cache-v334memberusers";
 
 const CORE_ASSETS = [
     "./",
