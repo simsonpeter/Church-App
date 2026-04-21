@@ -351,7 +351,6 @@
         }
         setMemberUsersBusy(true);
         setMemberUsersStatus("working", "auth.working", "Please wait...");
-        var docIdField = fb.firestore.FieldPath.documentId();
         function queryWithTimeout(queryPromise) {
             return new Promise(function (resolve) {
                 var settled = false;
@@ -379,8 +378,8 @@
             });
         }
         return Promise.all([
-            queryWithTimeout(db.collectionGroup("profile").where(docIdField, "==", "basic").limit(MAX_MEMBER_USERS).get()),
-            queryWithTimeout(db.collectionGroup("app").where(docIdField, "==", "access").limit(MAX_MEMBER_USERS).get())
+            queryWithTimeout(db.collectionGroup("profile").limit(MAX_MEMBER_USERS * 3).get()),
+            queryWithTimeout(db.collectionGroup("app").limit(MAX_MEMBER_USERS * 3).get())
         ]).then(function (results) {
             var profileRes = results[0] || { timeout: false, snap: null };
             var accessRes = results[1] || { timeout: false, snap: null };
@@ -389,6 +388,9 @@
             var byUid = {};
             if (profileSnap && !profileSnap.empty) {
                 profileSnap.forEach(function (d) {
+                    if (String(d.id || "") !== "basic") {
+                        return;
+                    }
                     var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "profile", "basic"));
                     if (!uid) {
                         return;
@@ -402,6 +404,9 @@
             }
             if (accessSnap && !accessSnap.empty) {
                 accessSnap.forEach(function (d) {
+                    if (String(d.id || "") !== "access") {
+                        return;
+                    }
                     var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "app", "access"));
                     if (!uid) {
                         return;
