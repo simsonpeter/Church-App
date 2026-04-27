@@ -98,7 +98,9 @@
         }
         var db = getFirestoreDb();
         if (!db) {
-            applyFormFromModules(window.NjcAppModules.getSync());
+            applyFormFromModules(window.NjcAppModules.getGlobalSync && typeof window.NjcAppModules.getGlobalSync === "function"
+                ? window.NjcAppModules.getGlobalSync()
+                : window.NjcAppModules.getSync());
             fieldset.disabled = false;
             saveBtn.disabled = false;
             setStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
@@ -111,7 +113,10 @@
             var raw = data && data.flags && typeof data.flags === "object" ? data.flags : data;
             applyFormFromModules(raw);
         }).catch(function () {
-            applyFormFromModules(window.NjcAppModules.getSync());
+            var fallback = window.NjcAppModules.getGlobalSync && typeof window.NjcAppModules.getGlobalSync === "function"
+                ? window.NjcAppModules.getGlobalSync()
+                : window.NjcAppModules.getSync();
+            applyFormFromModules(fallback);
             setStatus("error", "admin.modulesLoadError", "Could not load module settings.");
         }).finally(function () {
             if (isAdminUser()) {

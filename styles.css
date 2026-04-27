@@ -5492,6 +5492,47 @@ html[data-theme="dark"] .admin-notice-inline-note[data-state="validation"] {
     opacity: 0.9;
 }
 
+#admin-user-access-status[data-kind="success"] {
+    color: var(--success, #2e7d32);
+}
+
+#admin-user-access-status[data-kind="error"] {
+    color: var(--danger, #c62828);
+}
+
+#admin-user-access-status[data-kind="info"],
+#admin-user-access-status[data-kind="validation"] {
+    opacity: 0.9;
+}
+
+.admin-user-access-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 10px 0 6px;
+}
+
+.admin-user-access-modules-legend {
+    margin-top: 16px;
+}
+
+.profile-visible-modules-wrap {
+    margin: 8px 0 4px;
+}
+
+.profile-visible-modules-fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0 0 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-visible-modules-intro {
+    margin-bottom: 8px;
+}
+
 /* Scheduled daily bread list — long list scrolls inside open section */
 .admin-daily-bread-scheduled-summary-inner {
     display: flex;

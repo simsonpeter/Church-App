@@ -29,6 +29,7 @@
     var familyBlock = document.getElementById("profile-family-block");
     var familyList = document.getElementById("profile-family-list");
     var familyAddBtn = document.getElementById("profile-family-add");
+    var visibleModulesWrap = document.getElementById("profile-visible-modules-wrap");
     var busy = false;
     var noteState = "";
     var currentUid = "";
@@ -45,6 +46,50 @@
     var MAX_FAMILY_MEMBERS = 20;
     var FAMILY_DOB_RE = /^\d{4}-\d{2}-\d{2}$/;
     var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
+
+    var MODULE_LABEL_FALLBACK = {
+        announcements: "Announcements (home)",
+        bibleReading: "Today’s Bible reading (home)",
+        dailyVerse: "Daily verse (home)",
+        trivia: "Bible Quiz",
+        eventsWeek: "Events this week (home)",
+        dailyBread: "Daily bread",
+        bookShelf: "Book shelf",
+        bible: "Bible reader",
+        songbook: "Songbook",
+        prayer: "Prayer wall",
+        events: "Events",
+        sermons: "Sermons",
+        contact: "Contact",
+        celebrations: "Celebrations",
+        chat: "Chat",
+        userAchievements: "User achievements"
+    };
+
+    function normalizeStringList(raw, maxLen) {
+        if (!Array.isArray(raw)) {
+            return [];
+        }
+        var cap = Number(maxLen) || 40;
+        var seen = {};
+        var out = [];
+        raw.forEach(function (item) {
+            var k = String(item || "").trim();
+            if (!k || seen[k]) {
+                return;
+            }
+            seen[k] = true;
+            out.push(k);
+        });
+        return out.slice(0, cap);
+    }
+
+    function normalizeVisibleModulesList(raw) {
+        var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
+        return normalizeStringList(raw, 40).filter(function (k) {
+            return Object.prototype.hasOwnProperty.call(defs, k);
+        });
+    }
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && profileCard) {
@@ -291,6 +336,7 @@
             groupId: base.groupId || "",
             leaderboardAnonymous: Boolean(base.leaderboardAnonymous),
             photoSkipCloud: Boolean(base.photoSkipCloud),
+            visibleModules: normalizeVisibleModulesList(base.visibleModules),
             updatedAt: base.updatedAt
         };
         if (base.photoSkipCloud) {
@@ -360,6 +406,11 @@
                 btn.disabled = disabled;
             });
         }
+        if (visibleModulesWrap) {
+            visibleModulesWrap.querySelectorAll("input[data-profile-visible-module]").forEach(function (inp) {
+                inp.disabled = disabled;
+            });
+        }
         if (saveButton) {
             saveButton.disabled = disabled || busy;
         }
@@ -406,8 +457,64 @@
             leaderboardAnonymous: Boolean(source.leaderboardAnonymous),
             photoSkipCloud: Boolean(source.photoSkipCloud),
             photoUrl: String(source.photoUrl || activeUser.photoURL || "").trim(),
+            visibleModules: normalizeVisibleModulesList(source.visibleModules),
             updatedAt: Number(source.updatedAt || Date.now()) || Date.now()
         };
+    }
+
+    function collectVisibleModulesFromDom() {
+        if (!visibleModulesWrap || visibleModulesWrap.hidden) {
+            return [];
+        }
+        var keys = [];
+        visibleModulesWrap.querySelectorAll("input[data-profile-visible-module]").forEach(function (input) {
+            if (input.checked) {
+                var k = String(input.getAttribute("data-profile-visible-module") || "").trim();
+                if (k) {
+                    keys.push(k);
+                }
+            }
+        });
+        return normalizeVisibleModulesList(keys);
+    }
+
+    function renderVisibleModulesSection(profile) {
+        if (!visibleModulesWrap) {
+            return;
+        }
+        var m = window.NjcAppModules;
+        if (!m || typeof m.isLimitedMemberSync !== "function" || !m.isLimitedMemberSync()) {
+            visibleModulesWrap.hidden = true;
+            visibleModulesWrap.innerHTML = "";
+            return;
+        }
+        var grant = typeof m.getLimitedGrantModuleKeysSync === "function" ? m.getLimitedGrantModuleKeysSync() : [];
+        if (!grant.length) {
+            visibleModulesWrap.hidden = true;
+            visibleModulesWrap.innerHTML = "";
+            return;
+        }
+        visibleModulesWrap.hidden = false;
+        var prof = profile && typeof profile === "object" ? profile : {};
+        var selected = normalizeVisibleModulesList(prof.visibleModules);
+        var selSet = {};
+        selected.forEach(function (k) {
+            selSet[k] = true;
+        });
+        var intro = escapeHtmlLite(T("profile.visibleModulesIntro", "Your church has enabled only some sections. Choose which ones you want on your menu and home screen, then tap Save."));
+        var legend = escapeHtmlLite(T("profile.visibleModulesLegend", "Show these sections in the app"));
+        var html = "<p class=\"page-note profile-visible-modules-intro\">" + intro + "</p>" +
+            "<fieldset class=\"profile-visible-modules-fieldset\">" +
+            "<legend class=\"page-note\">" + legend + "</legend>";
+        grant.forEach(function (key) {
+            var checked = !selected.length || selSet[key] ? " checked" : "";
+            var label = escapeHtmlLite(T("admin.module" + key.charAt(0).toUpperCase() + key.slice(1), MODULE_LABEL_FALLBACK[key] || key));
+            html += "<label class=\"profile-field profile-checkbox-field\">" +
+                "<input type=\"checkbox\" data-profile-visible-module=\"" + escapeHtmlLite(key) + "\"" + checked + ">" +
+                "<span>" + label + "</span></label>";
+        });
+        html += "</fieldset>";
+        visibleModulesWrap.innerHTML = html;
     }
 
     function collectFamilyMembersFromDom() {
@@ -430,6 +537,16 @@
     }
 
     function getCurrentFormProfile() {
+        var user = getCurrentUser() || {};
+        var uid = String(user.uid || "").trim();
+        var map = getProfileMap();
+        var existing = normalizeProfile(uid ? (map[uid] || {}) : {}, user);
+        var m = window.NjcAppModules;
+        var limited = m && typeof m.isLimitedMemberSync === "function" && m.isLimitedMemberSync();
+        var vis = existing.visibleModules;
+        if (limited && visibleModulesWrap && !visibleModulesWrap.hidden) {
+            vis = collectVisibleModulesFromDom();
+        }
         return {
             fullName: String(fullNameInput && fullNameInput.value || "").trim(),
             dob: String(dobInput && dobInput.value || "").trim(),
@@ -441,6 +558,7 @@
             leaderboardAnonymous: Boolean(leaderboardAnonymousInput && leaderboardAnonymousInput.checked),
             photoSkipCloud: Boolean(photoSkipCloudInput && photoSkipCloudInput.checked),
             photoUrl: String(selectedPhotoDataUrl || savedPhotoDataUrl || "").trim(),
+            visibleModules: normalizeVisibleModulesList(vis),
             updatedAt: Date.now()
         };
     }
@@ -605,6 +723,9 @@
         }
         var fam = normalizeProfile(profile, getCurrentUser() || {});
         renderFamilyList(fam, !getCurrentUser());
+        window.setTimeout(function () {
+            renderVisibleModulesSection(fam);
+        }, 0);
     }
 
     function notifyProfileUpdated(uid, profile) {
@@ -907,6 +1028,14 @@
             }
         });
     }
+
+    document.addEventListener("njc:modules-updated", function () {
+        if (!currentUid) {
+            return;
+        }
+        var map = getProfileMap();
+        renderVisibleModulesSection(normalizeProfile(map[currentUid] || {}, getCurrentUser() || {}));
+    });
 
     document.addEventListener("DOMContentLoaded", loadProfile);
     document.addEventListener("njc:authchange", loadProfile);

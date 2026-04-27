@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411mod1">
+    <link rel="stylesheet" href="styles.css?v=20260420useraccess">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -760,6 +760,7 @@
                         <input id="profile-photo-skip-cloud" type="checkbox">
                         <span data-i18n="profile.photoSkipCloud">Keep profile photo on this device only (do not upload to cloud)</span>
                     </label>
+                    <div id="profile-visible-modules-wrap" class="profile-visible-modules-wrap" hidden></div>
                     <label class="profile-field">
                         <span data-i18n="profile.photo">Photo (optional)</span>
                         <input id="profile-photo-file" class="search-input" type="file" accept="image/*">
@@ -867,6 +868,48 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
                         </fieldset>
                         <button type="button" class="button-link" id="admin-modules-save" data-i18n="admin.modulesSave">Save module settings</button>
+                    </div>
+                </details>
+            </section>
+
+            <section class="card admin-user-access-card card-v-minimal">
+                <details class="admin-panel-section-details">
+                    <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
+                        <h2><i class="fa-solid fa-user-shield"></i><span data-i18n="admin.userAccessTitle">Member access (church vs limited)</span></h2>
+                    </summary>
+                    <div class="admin-panel-section-body">
+                        <p class="page-note" data-i18n="admin.userAccessInfo">Set a member to Limited and tick only the modules they may use. They can then hide some of those in Profile. Church members: leave as Church (full access, still respects global toggles).</p>
+                        <label class="admin-field">
+                            <span data-i18n="admin.userAccessUidLabel">Firebase user ID (UID)</span>
+                            <input id="admin-user-access-uid" class="search-input" type="text" autocomplete="off" spellcheck="false" placeholder="e.g. AbCdEfGhIjKlMnOpQrStUvWxYz">
+                        </label>
+                        <div class="admin-user-access-actions">
+                            <button type="button" class="button-link button-secondary" id="admin-user-access-load" data-i18n="admin.userAccessLoad">Load</button>
+                            <button type="button" class="button-link" id="admin-user-access-save" data-i18n="admin.userAccessSave">Save access</button>
+                        </div>
+                        <p class="page-note" id="admin-user-access-status" hidden></p>
+                        <fieldset class="admin-modules-fieldset" id="admin-user-access-fieldset" disabled>
+                            <legend class="page-note" data-i18n="admin.userAccessTypeLegend">Member type</legend>
+                            <label class="admin-module-toggle"><input type="radio" name="admin-user-access-type" id="admin-user-access-type-church" value="church" checked> <span data-i18n="admin.userAccessTypeChurch">Church member — full app (per global modules)</span></label>
+                            <label class="admin-module-toggle"><input type="radio" name="admin-user-access-type" id="admin-user-access-type-limited" value="limited"> <span data-i18n="admin.userAccessTypeLimited">Limited — only checked modules below</span></label>
+                            <legend class="page-note admin-user-access-modules-legend" data-i18n="admin.userAccessModulesLegend">Allowed modules for this UID (when Limited)</legend>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="announcements" checked> <span data-i18n="admin.moduleAnnouncements">Announcements (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="bibleReading" checked> <span data-i18n="admin.moduleBibleReading">Today’s Bible reading (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="dailyVerse" checked> <span data-i18n="admin.moduleDailyVerse">Daily verse (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="trivia" checked> <span data-i18n="admin.moduleTrivia">Bible Quiz</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="eventsWeek" checked> <span data-i18n="admin.moduleEventsWeek">Events this week (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="dailyBread" checked> <span data-i18n="admin.moduleDailyBread">Daily bread</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="bookShelf" checked> <span data-i18n="admin.moduleBookShelf">Book shelf</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="bible" checked> <span data-i18n="admin.moduleBible">Bible reader</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="songbook" checked> <span data-i18n="admin.moduleSongbook">Songbook</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="prayer" checked> <span data-i18n="admin.modulePrayer">Prayer wall</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="events" checked> <span data-i18n="admin.moduleEvents">Events tab</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="sermons" checked> <span data-i18n="admin.moduleSermons">Sermons</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="contact" checked> <span data-i18n="admin.moduleContact">Contact</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                        </fieldset>
                     </div>
                 </details>
             </section>
@@ -1526,11 +1569,11 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260412commceleb1"></script>
-    <script src="app-modules.js?v=20260411mod1"></script>
-    <script src="app-shell.js?v=20260411mod1"></script>
+    <script src="app-modules.js?v=20260420useraccess"></script>
+    <script src="app-shell.js?v=20260420useraccess"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260412guestcele1"></script>
-    <script src="home-page.js?v=20260411mod1"></script>
+    <script src="home-page.js?v=20260420useraccess"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260413tts1"></script>
@@ -1539,14 +1582,15 @@
     <script src="daily-bread-page.js?v=20260413tts1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260411mod1"></script>
-    <script src="admin-modules-page.js?v=20260411mod1"></script>
+    <script src="admin-modules-page.js?v=20260420useraccess"></script>
+    <script src="admin-user-access-page.js?v=20260420useraccess"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260413dobmerge1"></script>
+    <script src="profile-page.js?v=20260420useraccess"></script>
     <script src="celebrations-page.js?v=20260412annpartner1"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
-    <script src="spa-router.js?v=20260411mod1"></script>
+    <script src="spa-router.js?v=20260420useraccess"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="user-achievements-page.js?v=20260327bq1"></script>
 </body>
