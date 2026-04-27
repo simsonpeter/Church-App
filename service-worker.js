@@ -31,15 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v335memberusers";
-const RUNTIME_CACHE = "njc-runtime-cache-v335memberusers";
+const APP_CACHE = "njc-app-cache-v336mainmerge";
+const RUNTIME_CACHE = "njc-runtime-cache-v336mainmerge";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260418praytabs",
-    "./user-auth.js?v=20260411celemember",
-    "./app-shell.js?v=20260417prayerapprove1",
+    "./styles.css?v=20260421mainmerge",
+    "./user-auth.js?v=20260417access1",
+    "./app-modules.js?v=20260421mainmerge",
+    "./app-shell.js?v=20260421mainmerge",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -48,12 +49,14 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260417prayerapprove1",
-    "./daily-bread-page.js?v=20260413tts1",
+    "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260417prayerapprove1",
+    "./admin-modules-page.js?v=20260421mainmerge",
+    "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260415moduletrivia",
+    "./profile-page.js?v=20260421mainmerge",
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",

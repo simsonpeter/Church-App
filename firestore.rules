@@ -10,9 +10,10 @@ rules_version = '2';
 //
 // Church-App Firestore paths:
 //   appConfig/modules          — feature toggles (public read; admin write): { flags: { ... }, updatedAt }
+//   userAccess/{uid}           — optional per-user access: { accessType, allowedModules, updatedAt }; user reads own; admin writes
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
-//   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
+//   users/{uid}/profile/basic  — profile (incl. optional familyMembers[], optional visibleModules[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   users/{uid}/app/access     — limited vs member tier + module picks (create once; member via Cloud Function)
 //   appConfig/access           — registrationPool: which modules new users may pick at signup (public read)
@@ -78,6 +79,23 @@ service cloud.firestore {
           && request.resource.data.codes.size() <= 500)
       );
       allow delete: if false;
+    }
+
+    function isUserAccessPayload() {
+      return request.resource.data.keys().hasOnly(["accessType", "allowedModules", "updatedAt"])
+        && request.resource.data.accessType is string
+        && (request.resource.data.accessType == "church" || request.resource.data.accessType == "limited")
+        && request.resource.data.allowedModules is list
+        && request.resource.data.allowedModules.size() <= 40
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    // Per-user module access (limited members). Signed-in user may read own doc; admin may read/write any.
+    match /userAccess/{userId} {
+      allow read: if request.auth != null
+        && (request.auth.uid == userId || isAdmin());
+      allow create, update: if isAdmin() && isUserAccessPayload();
+      allow delete: if isAdmin();
     }
 
     // Songbook (written from NJC Song / admin tools; church app loads with Firebase SDK).
