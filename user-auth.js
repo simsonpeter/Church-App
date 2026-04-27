@@ -127,14 +127,34 @@
         return db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_STATE_DOC);
     }
 
-    /** New email registrations: full “church app” access for whatever modules are on globally (same as redeeming a member code). */
-    async function writeDefaultMemberAccessDoc(uid) {
+    function buildNormalPlusGrantsFromPool(pool) {
+        var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
+        var p = pool && typeof pool === "object" ? pool : {};
+        var out = {};
+        Object.keys(defs).forEach(function (key) {
+            out[key] = p[key] === true;
+        });
+        return out;
+    }
+
+    /** New email registrations: “normal user plus” — limited tier, all modules allowed in the registration pool (not church member until admin/code). */
+    async function writeDefaultNormalPlusAccessDoc(uid) {
         if (!db || !uid || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
             throw new Error("no_db");
         }
+        var pool = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
+            ? window.NjcAppModules.getRegistrationPoolSync()
+            : {};
+        if (window.NjcAppModules && typeof window.NjcAppModules.ensureRegistrationPoolLoaded === "function") {
+            try {
+                await window.NjcAppModules.ensureRegistrationPoolLoaded();
+                pool = window.NjcAppModules.getRegistrationPoolSync();
+            } catch (ePool) {}
+        }
+        var grants = buildNormalPlusGrantsFromPool(pool);
         await db.collection("users").doc(uid).collection(USER_STATE_COLLECTION).doc(USER_ACCESS_DOC).set({
-            accessTier: "member",
-            moduleGrants: {},
+            accessTier: "limited",
+            moduleGrants: grants,
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: false });
     }
@@ -154,7 +174,7 @@
         var note = document.createElement("p");
         note.className = "page-note";
         note.textContent = keys.length
-            ? T("auth.regMemberDefaultIntro", "New accounts get access to every part of the app the church has turned on. The church may adjust access for individual accounts if needed.")
+            ? T("auth.regNormalPlusIntro", "New accounts start as a normal user: you can use the sections the church has opened for sign-up. A church member code or the office can upgrade you to full church member access when ready.")
             : T("auth.regPoolEmpty", "No optional modules are open for registration yet. You can still create an account; ask the church office for a member code to unlock everything.");
         registerModulesContainer.appendChild(note);
     }
@@ -259,6 +279,46 @@
                 detail: { source: "cloud" }
             }));
         } catch (err) {
+            return;
+        }
+    }
+
+    /** Email users who signed up before access docs existed: create normal-plus limited access once. */
+    async function ensureRegisteredUserAccessDoc() {
+        if (!db || !user || !user.uid) {
+            return;
+        }
+        var email = String(user.email || "").trim();
+        if (!email) {
+            return;
+        }
+        var ref = db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_ACCESS_DOC);
+        try {
+            var snap = await ref.get();
+            if (snap.exists) {
+                return;
+            }
+            if (window.NjcAppModules && typeof window.NjcAppModules.ensureRegistrationPoolLoaded === "function") {
+                try {
+                    await window.NjcAppModules.ensureRegistrationPoolLoaded();
+                } catch (ePool) {}
+            }
+            var pool = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
+                ? window.NjcAppModules.getRegistrationPoolSync()
+                : {};
+            var grants = buildNormalPlusGrantsFromPool(pool);
+            await ref.set({
+                accessTier: "limited",
+                moduleGrants: grants,
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: false });
+            if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
+                window.NjcAppModules.invalidateCache();
+            }
+            if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
+                await window.NjcAppModules.refresh();
+            }
+        } catch (e) {
             return;
         }
     }
@@ -499,7 +559,7 @@
                     var cred = await auth.createUserWithEmailAndPassword(email, password);
                     var newUid = cred && cred.user && cred.user.uid ? cred.user.uid : "";
                     try {
-                        await writeDefaultMemberAccessDoc(newUid);
+                        await writeDefaultNormalPlusAccessDoc(newUid);
                     } catch (writeErr) {
                         try {
                             if (cred && cred.user && typeof cred.user.delete === "function") {
@@ -641,6 +701,9 @@
             emitAuthState();
             if (user) {
                 pullCloudToLocalOrBootstrap();
+                ensureRegisteredUserAccessDoc().catch(function () {
+                    return null;
+                });
                 window.setTimeout(function () {
                     if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
                         window.NjcAchievementBoard.syncMyPublicScore();

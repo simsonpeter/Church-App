@@ -250,15 +250,33 @@
         if (!id || !userAccessState.loaded || userAccessState.uid !== id) {
             return g;
         }
-        if (userAccessState.tier === "member" || userAccessState.tier === "legacy") {
+        if (userAccessState.tier === "member") {
             return g;
         }
+        var pool = userAccessState.registrationPool || {};
+        if (userAccessState.tier === "legacy") {
+            if (!isRegisteredWithEmail()) {
+                return g;
+            }
+            var outLegacy = cloneDefaults();
+            Object.keys(DEFAULT_MODULES).forEach(function (key) {
+                outLegacy[key] = Boolean(g[key] !== false && pool[key] === true);
+            });
+            return outLegacy;
+        }
         if (userAccessState.tier === "limited") {
-            var pool = userAccessState.registrationPool || {};
             var grants = userAccessState.grants || {};
             var out = cloneDefaults();
+            var grantAny = Object.keys(DEFAULT_MODULES).some(function (key) {
+                return pool[key] === true && grants[key] === true;
+            });
             Object.keys(DEFAULT_MODULES).forEach(function (key) {
-                out[key] = Boolean(g[key] !== false && pool[key] === true && grants[key] === true);
+                if (pool[key] !== true) {
+                    out[key] = false;
+                    return;
+                }
+                var granted = grantAny ? grants[key] === true : true;
+                out[key] = Boolean(g[key] !== false && granted);
             });
             return out;
         }
