@@ -127,60 +127,14 @@
         return db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_STATE_DOC);
     }
 
-    function moduleLabelForRegister(key) {
-        var k = String(key || "");
-        var map = {
-            announcements: T("auth.regModAnnouncements", "Announcements (home)"),
-            bibleReading: T("auth.regModBibleReading", "Today’s Bible reading (home)"),
-            dailyVerse: T("auth.regModDailyVerse", "Daily verse (home)"),
-            trivia: T("auth.regModTrivia", "Bible Quiz"),
-            eventsWeek: T("auth.regModEventsWeek", "Events this week (home)"),
-            dailyBread: T("auth.regModDailyBread", "Daily bread"),
-            bookShelf: T("auth.regModBookShelf", "Book shelf"),
-            bible: T("auth.regModBible", "Bible reader"),
-            songbook: T("auth.regModSongbook", "Songbook"),
-            prayer: T("auth.regModPrayer", "Prayer wall"),
-            events: T("auth.regModEvents", "Events"),
-            sermons: T("auth.regModSermons", "Sermons"),
-            contact: T("auth.regModContact", "Contact"),
-            celebrations: T("auth.regModCelebrations", "Celebrations (kids & wishes)"),
-            chat: T("auth.regModChat", "Chat"),
-            userAchievements: T("auth.regModUserAchievements", "User achievements")
-        };
-        return map[k] || k;
-    }
-
-    function buildModuleGrantsForRegister(container, pool) {
-        var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
-        var out = {};
-        Object.keys(defs).forEach(function (key) {
-            if (!pool || pool[key] !== true) {
-                out[key] = false;
-                return;
-            }
-            var inp = container ? container.querySelector('input[data-reg-module="' + key + '"]') : null;
-            out[key] = inp ? Boolean(inp.checked) : true;
-        });
-        return out;
-    }
-
-    function countTrueGrants(grants) {
-        var n = 0;
-        Object.keys(grants || {}).forEach(function (k) {
-            if (grants[k] === true) {
-                n += 1;
-            }
-        });
-        return n;
-    }
-
-    async function writeLimitedAccessDoc(uid, grants) {
+    /** New email registrations: full “church app” access for whatever modules are on globally (same as redeeming a member code). */
+    async function writeDefaultMemberAccessDoc(uid) {
         if (!db || !uid || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
             throw new Error("no_db");
         }
         await db.collection("users").doc(uid).collection(USER_STATE_COLLECTION).doc(USER_ACCESS_DOC).set({
-            accessTier: "limited",
-            moduleGrants: grants,
+            accessTier: "member",
+            moduleGrants: {},
             updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
         }, { merge: false });
     }
@@ -197,31 +151,12 @@
         var keys = Object.keys(defs).filter(function (key) {
             return pool[key] === true;
         });
-        if (!keys.length) {
-            var p = document.createElement("p");
-            p.className = "page-note";
-            p.textContent = T("auth.regPoolEmpty", "No optional modules are open for registration yet. You can still create an account; ask the church office for a member code to unlock everything.");
-            registerModulesContainer.appendChild(p);
-            return;
-        }
-        var intro = document.createElement("p");
-        intro.className = "page-note";
-        intro.textContent = T("auth.regModulesIntro", "Choose which parts of the app you want to use (you can add a church member code later in your profile for full access).");
-        registerModulesContainer.appendChild(intro);
-        keys.forEach(function (key) {
-            var label = document.createElement("label");
-            label.className = "auth-register-module-row";
-            var input = document.createElement("input");
-            input.type = "checkbox";
-            input.setAttribute("data-reg-module", key);
-            input.checked = true;
-            var span = document.createElement("span");
-            span.textContent = moduleLabelForRegister(key);
-            label.appendChild(input);
-            label.appendChild(document.createTextNode(" "));
-            label.appendChild(span);
-            registerModulesContainer.appendChild(label);
-        });
+        var note = document.createElement("p");
+        note.className = "page-note";
+        note.textContent = keys.length
+            ? T("auth.regMemberDefaultIntro", "New accounts get access to every part of the app the church has turned on. The church may adjust access for individual accounts if needed.")
+            : T("auth.regPoolEmpty", "No optional modules are open for registration yet. You can still create an account; ask the church office for a member code to unlock everything.");
+        registerModulesContainer.appendChild(note);
     }
 
     function refreshRegisterModulesPanel() {
@@ -561,27 +496,10 @@
             setStatus(T("auth.working", "Please wait..."), "working");
             try {
                 if (authMode === "register") {
-                    var poolPre = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
-                        ? window.NjcAppModules.getRegistrationPoolSync()
-                        : {};
-                    if (registerModulesContainer && !registerModulesContainer.hidden) {
-                        var grantsPreview = buildModuleGrantsForRegister(registerModulesContainer, poolPre);
-                        if (countTrueGrants(grantsPreview) < 1) {
-                            setStatus(T("auth.regPickOne", "Please select at least one module."), "error");
-                            return;
-                        }
-                    }
                     var cred = await auth.createUserWithEmailAndPassword(email, password);
                     var newUid = cred && cred.user && cred.user.uid ? cred.user.uid : "";
-                    var pool = window.NjcAppModules && typeof window.NjcAppModules.getRegistrationPoolSync === "function"
-                        ? window.NjcAppModules.getRegistrationPoolSync()
-                        : {};
-                    var grants = buildModuleGrantsForRegister(registerModulesContainer, pool);
-                    if (countTrueGrants(grants) < 1) {
-                        grants = buildModuleGrantsForRegister(null, pool);
-                    }
                     try {
-                        await writeLimitedAccessDoc(newUid, grants);
+                        await writeDefaultMemberAccessDoc(newUid);
                     } catch (writeErr) {
                         try {
                             if (cred && cred.user && typeof cred.user.delete === "function") {

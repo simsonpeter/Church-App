@@ -31,16 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v337accessloopfix";
-const RUNTIME_CACHE = "njc-runtime-cache-v337accessloopfix";
+const APP_CACHE = "njc-app-cache-v338regmember";
+const RUNTIME_CACHE = "njc-runtime-cache-v338regmember";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260421mainmerge",
-    "./user-auth.js?v=20260417access1",
+    "./user-auth.js?v=20260423regmember",
     "./app-modules.js?v=20260422accessloopfix",
-    "./app-shell.js?v=20260421mainmerge",
+    "./app-shell.js?v=20260423regmember",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",

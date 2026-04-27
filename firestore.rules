@@ -15,7 +15,7 @@ rules_version = '2';
 //   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[], optional visibleModules[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
-//   users/{uid}/app/access     — limited vs member tier + module picks (create once; member via Cloud Function)
+//   users/{uid}/app/access     — member (default new signup) or limited + module picks; member code redeem via Cloud Function
 //   appConfig/access           — registrationPool: which modules new users may pick at signup (public read)
 //   appConfig/memberCodes      — one-time church member codes (admin read/write only)
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
@@ -136,22 +136,12 @@ service cloud.firestore {
 
     match /users/{userId}/app/access {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // First-time signup: limited tier + module picks (self create only when doc missing).
-      // Admin dashboard "Grant member access" / "Set member" uses merge and must be allowed to create
-      // accessTier "member" when the doc does not exist yet (rules previously blocked this).
+      // First-time signup (self, doc missing): default member, or limited + module picks.
+      // Admin "Grant member access" / "Set member" uses merge — same payload helper as updates.
       allow create: if (request.auth != null
         && request.auth.uid == userId
         && !exists(/databases/$(database)/documents/users/$(userId)/app/access)
-        && request.resource.data.keys().hasOnly(["accessTier", "moduleGrants", "updatedAt"])
-        && request.resource.data.accessTier == "limited"
-        && request.resource.data.moduleGrants is map
-        && request.resource.data.moduleGrants.size() <= 25
-        && request.resource.data.moduleGrants.keys().hasOnly([
-          "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
-          "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
-          "sermons", "contact", "celebrations", "chat", "userAchievements"
-        ])
-        && request.resource.data.updatedAt is timestamp)
+        && isUserAppAccessPayload())
         || (isAdmin() && isUserAppAccessPayload());
       allow update: if isAdmin() && isUserAppAccessPayload();
       allow delete: if isAdmin();
