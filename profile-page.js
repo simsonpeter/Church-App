@@ -802,6 +802,19 @@
     function memberRedeemErrorMessage(err) {
         var codeStr = String(err && err.code || "").toLowerCase();
         var msg = String(err && err.message || "").trim();
+        var msgLow = msg.toLowerCase();
+        if (codeStr.indexOf("functions/not-found") >= 0) {
+            if (msgLow.indexOf("invalid") >= 0 || msgLow.indexOf("already used") >= 0 || msgLow.indexOf("code") >= 0) {
+                return { key: "profile.memberRedeemInvalid", fb: "That code is not valid or was already used." };
+            }
+            return { key: "profile.memberRedeemFunctionMissing", fb: "Member codes run on Firebase Cloud Functions, but the function was missing or not deployed. Ask the church tech to deploy redeemMemberCode in region europe-west1 (Firebase Console → Functions), then try again." };
+        }
+        if (codeStr.indexOf("failed-precondition") >= 0 || msgLow.indexOf("billing") >= 0 || msgLow.indexOf("payment") >= 0) {
+            return { key: "profile.memberRedeemBilling", fb: "Cloud Functions may need billing enabled on the Firebase project. Ask the church tech to check Firebase Console → Functions (errors) and project billing." };
+        }
+        if (msgLow.indexOf("failed to fetch") >= 0 || msgLow.indexOf("network error") >= 0 || msgLow.indexOf("load failed") >= 0) {
+            return { key: "profile.memberRedeemNetwork", fb: "Could not reach the server (network or browser blocked the request). Check your connection, try another browser, or try again on Wi‑Fi." };
+        }
         if (codeStr.indexOf("not-found") >= 0 || codeStr.indexOf("invalid-argument") >= 0) {
             return { key: "profile.memberRedeemInvalid", fb: "That code is not valid or was already used." };
         }
@@ -815,9 +828,9 @@
             return { key: "profile.memberRedeemBusy", fb: "Server was busy. Wait a moment and try again." };
         }
         if (codeStr.indexOf("internal") >= 0 || codeStr.indexOf("cancelled") >= 0 || codeStr.indexOf("aborted") >= 0) {
-            return { key: "profile.memberRedeemServer", fb: "The member-code service is not responding. This often means Firebase Functions failed to deploy or are still starting. Try again later or contact the church." };
+            return { key: "profile.memberRedeemServer", fb: "The member-code service returned an error. Open Firebase Console → Functions → redeemMemberCode → Logs for details. The function must be deployed in europe-west1." };
         }
-        if (msg && msg.length <= 220 && msg.toLowerCase().indexOf("internal assertion") < 0) {
+        if (msg && msg.length <= 220 && msgLow.indexOf("internal assertion") < 0) {
             return { raw: msg };
         }
         return { key: "profile.memberRedeemError", fb: "Something went wrong. Try again later." };

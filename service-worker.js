@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v341adminbypass";
-const RUNTIME_CACHE = "njc-runtime-cache-v341adminbypass";
+const APP_CACHE = "njc-app-cache-v342memberfnerr";
+const RUNTIME_CACHE = "njc-runtime-cache-v342memberfnerr";
 
 const CORE_ASSETS = [
     "./",
@@ -40,7 +40,7 @@ const CORE_ASSETS = [
     "./styles.css?v=20260421mainmerge",
     "./user-auth.js?v=20260426adminbypass",
     "./app-modules.js?v=20260426adminbypass",
-    "./app-shell.js?v=20260425downgrade",
+    "./app-shell.js?v=20260427memberfnerr",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -56,7 +56,7 @@ const CORE_ASSETS = [
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260426adminbypass",
+    "./profile-page.js?v=20260427memberfnerr",
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",
