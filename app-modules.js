@@ -612,9 +612,4 @@
         window.NjcAppModules.invalidateCache();
         refreshAppModules();
     });
-
-    document.addEventListener("njc:user-access-updated", function () {
-        window.NjcAppModules.invalidateCache();
-        refreshAppModules();
-    });
 })();
