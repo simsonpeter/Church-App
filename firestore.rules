@@ -120,10 +120,26 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
+    function isUserAppAccessPayload() {
+      return request.resource.data.keys().hasOnly(["accessTier", "moduleGrants", "updatedAt"])
+        && request.resource.data.accessTier is string
+        && (request.resource.data.accessTier == "member" || request.resource.data.accessTier == "limited")
+        && request.resource.data.moduleGrants is map
+        && request.resource.data.moduleGrants.size() <= 25
+        && request.resource.data.moduleGrants.keys().hasOnly([
+          "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
+          "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
+          "sermons", "contact", "celebrations", "chat", "userAchievements"
+        ])
+        && request.resource.data.updatedAt is timestamp;
+    }
+
     match /users/{userId}/app/access {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // First-time signup: limited tier + module picks. Upgrades to member are done by Cloud Function (Admin SDK).
-      allow create: if request.auth != null
+      // First-time signup: limited tier + module picks (self create only when doc missing).
+      // Admin dashboard "Grant member access" / "Set member" uses merge and must be allowed to create
+      // accessTier "member" when the doc does not exist yet (rules previously blocked this).
+      allow create: if (request.auth != null
         && request.auth.uid == userId
         && !exists(/databases/$(database)/documents/users/$(userId)/app/access)
         && request.resource.data.keys().hasOnly(["accessTier", "moduleGrants", "updatedAt"])
@@ -134,8 +150,11 @@ service cloud.firestore {
           "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
           "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
           "sermons", "contact", "celebrations", "chat", "userAchievements"
-        ]);
-      allow update, delete: if isAdmin();
+        ])
+        && request.resource.data.updatedAt is timestamp)
+        || (isAdmin() && isUserAppAccessPayload());
+      allow update: if isAdmin() && isUserAppAccessPayload();
+      allow delete: if isAdmin();
     }
 
     // Public leaderboard rows (one doc per Firebase uid). Anyone can read;
