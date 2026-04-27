@@ -292,6 +292,9 @@
         if (!email) {
             return;
         }
+        if (window.NjcAppModules && typeof window.NjcAppModules.isChurchAdminAccount === "function" && window.NjcAppModules.isChurchAdminAccount()) {
+            return;
+        }
         var ref = db.collection("users").doc(user.uid).collection(USER_STATE_COLLECTION).doc(USER_ACCESS_DOC);
         try {
             var snap = await ref.get();

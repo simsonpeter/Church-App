@@ -1,4 +1,5 @@
 (function () {
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
     var COLLECTION = "appConfig";
     var DOC_ID = "modules";
     var ACCESS_DOC_ID = "access";
@@ -162,6 +163,19 @@
         return Boolean(u && u.uid && email);
     }
 
+    function normalizeAdminEmail(value) {
+        return String(value || "").trim().toLowerCase();
+    }
+
+    /** Church app admin: always sees every module the church turned on globally (ignores tier / pool / userAccess). */
+    function isChurchAdminAccount() {
+        if (!window.NjcAuth || typeof window.NjcAuth.getUser !== "function") {
+            return false;
+        }
+        var u = window.NjcAuth.getUser();
+        return normalizeAdminEmail(u && u.email) === ADMIN_EMAIL;
+    }
+
     function getSignedInUid() {
         if (!window.NjcAuth || typeof window.NjcAuth.getUser !== "function") {
             return "";
@@ -204,6 +218,12 @@
     function mergeGlobalWithGrantsAndVisibility(globalFlags, topLevelUserAccess, uid) {
         var g = normalizeModules(globalFlags);
         lastGlobalFlags = g;
+        if (isChurchAdminAccount()) {
+            lastUserAccess = null;
+            lastUserAccessUid = "";
+            lastEffectiveFlags = g;
+            return g;
+        }
         var id = String(uid || "").trim();
         if (!id || !isRegisteredWithEmail()) {
             lastUserAccess = null;
@@ -246,6 +266,9 @@
 
     function applyTierToFlags(globalFlags, uid) {
         var g = normalizeModules(globalFlags);
+        if (isChurchAdminAccount()) {
+            return g;
+        }
         var id = String(uid || "").trim();
         if (!id || !userAccessState.loaded || userAccessState.uid !== id) {
             return g;
@@ -559,6 +582,9 @@
     }
 
     function isLimitedMemberSync() {
+        if (isChurchAdminAccount()) {
+            return false;
+        }
         var uid = getSignedInUid();
         if (!uid || !isRegisteredWithEmail()) {
             return false;
@@ -570,6 +596,9 @@
     }
 
     function getLimitedGrantModuleKeysSync() {
+        if (isChurchAdminAccount()) {
+            return [];
+        }
         var uid = getSignedInUid();
         var top = lastUserAccess && lastUserAccessUid === uid ? lastUserAccess : null;
         return getGrantModuleKeys(uid, top);
@@ -599,6 +628,7 @@
         isLimitedMemberSync: isLimitedMemberSync,
         getLimitedGrantModuleKeysSync: getLimitedGrantModuleKeysSync,
         getNormalPlusModuleGrantsSync: getNormalPlusModuleGrantsSync,
+        isChurchAdminAccount: isChurchAdminAccount,
         isModuleEnabled: isModuleEnabled,
         isRouteEnabled: isRouteEnabled,
         refresh: refreshAppModules,

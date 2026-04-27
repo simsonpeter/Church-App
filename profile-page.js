@@ -833,6 +833,11 @@
             setMemberNote("", "");
             return;
         }
+        if (window.NjcAppModules && typeof window.NjcAppModules.isChurchAdminAccount === "function" && window.NjcAppModules.isChurchAdminAccount()) {
+            memberAccessBlock.hidden = true;
+            setMemberNote("", "");
+            return;
+        }
         memberAccessBlock.hidden = false;
         var acc = window.NjcAppModules && typeof window.NjcAppModules.getAccessSync === "function"
             ? window.NjcAppModules.getAccessSync()
