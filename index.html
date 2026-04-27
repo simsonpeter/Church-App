@@ -808,6 +808,7 @@
                             <input id="profile-member-code" class="search-input" type="text" autocomplete="one-time-code" maxlength="80" placeholder="e.g. NJC-2026-ABCD">
                         </label>
                         <button type="button" class="button-link button-secondary" id="profile-member-redeem-btn" data-i18n="profile.memberRedeemBtn" data-i18n-fallback="Apply code">Apply code</button>
+                        <button type="button" class="button-link button-secondary" id="profile-member-downgrade-btn" hidden data-i18n="profile.memberDowngradeBtn" data-i18n-fallback="Use normal account (not full church member)">Use normal account (not full church member)</button>
                         <p class="page-note" id="profile-member-note" hidden></p>
                     </div>
                     <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
@@ -1664,9 +1665,9 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260424normalplus"></script>
-    <script src="app-modules.js?v=20260424normalplus"></script>
+    <script src="app-modules.js?v=20260425downgrade"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260424normalplus"></script>
+    <script src="app-shell.js?v=20260425downgrade"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1682,7 +1683,7 @@
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260421mainmerge"></script>
+    <script src="profile-page.js?v=20260425downgrade"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>

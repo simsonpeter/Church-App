@@ -40,7 +40,10 @@
     var memberAccessBlock = document.getElementById("profile-member-access-block");
     var memberCodeInput = document.getElementById("profile-member-code");
     var memberRedeemBtn = document.getElementById("profile-member-redeem-btn");
+    var memberDowngradeBtn = document.getElementById("profile-member-downgrade-btn");
     var memberNote = document.getElementById("profile-member-note");
+    var USER_APP_COLLECTION = "app";
+    var USER_ACCESS_DOC_ID = "access";
     var FUNCTIONS_REGION = "europe-west1";
     var visibleModulesWrap = document.getElementById("profile-visible-modules-wrap");
     var busy = false;
@@ -841,6 +844,9 @@
             if (memberRedeemBtn) {
                 memberRedeemBtn.hidden = true;
             }
+            if (memberDowngradeBtn) {
+                memberDowngradeBtn.hidden = false;
+            }
             if (memberNote && memberNote.dataset.state !== "working") {
                 setMemberNote(T("profile.memberAlreadyFull", "You already have church member access. The menu shows every module the church has enabled."), "ok");
             }
@@ -851,12 +857,61 @@
             if (memberRedeemBtn) {
                 memberRedeemBtn.hidden = false;
             }
+            if (memberDowngradeBtn) {
+                memberDowngradeBtn.hidden = true;
+            }
             if (memberNote && memberNote.dataset.state !== "working") {
                 var st = memberNote.dataset.state;
                 if (st !== "error" && st !== "ok") {
                     setMemberNote("", "");
                 }
             }
+        }
+    }
+
+    async function downgradeMemberToNormalPlus() {
+        if (!memberDowngradeBtn || memberDowngradeBtn.hidden) {
+            return;
+        }
+        var user = getCurrentUser();
+        var uid = String(user && user.uid || "").trim();
+        if (!uid || !String(user.email || "").trim()) {
+            setMemberNote(T("profile.memberDowngradeNeedAuth", "Sign in with email to change this."), "error");
+            return;
+        }
+        if (!window.confirm(T("profile.memberDowngradeConfirm", "Switch to a normal account? You will only see sections allowed for new sign-ups until the church upgrades you again."))) {
+            return;
+        }
+        if (!window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            setMemberNote(T("profile.memberRedeemUnavailable", "This action is not available right now."), "error");
+            return;
+        }
+        memberDowngradeBtn.disabled = true;
+        setMemberNote(T("auth.working", "Please wait..."), "working");
+        try {
+            if (window.NjcAppModules && typeof window.NjcAppModules.ensureRegistrationPoolLoaded === "function") {
+                await window.NjcAppModules.ensureRegistrationPoolLoaded();
+            }
+            var grants = window.NjcAppModules && typeof window.NjcAppModules.getNormalPlusModuleGrantsSync === "function"
+                ? window.NjcAppModules.getNormalPlusModuleGrantsSync()
+                : {};
+            await window.firebase.firestore().collection("users").doc(uid).collection(USER_APP_COLLECTION).doc(USER_ACCESS_DOC_ID).set({
+                accessTier: "limited",
+                moduleGrants: grants,
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true });
+            if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
+                window.NjcAppModules.invalidateCache();
+            }
+            if (window.NjcAppModules && typeof window.NjcAppModules.refresh === "function") {
+                await window.NjcAppModules.refresh();
+            }
+            setMemberNote(T("profile.memberDowngradeOk", "You are now on a normal account. Refresh if the menu does not update."), "ok");
+            updateMemberAccessUi();
+        } catch (err) {
+            setMemberNote(T("profile.memberDowngradeFail", "Could not update. Ask the church to check Firestore rules, then try again."), "error");
+        } finally {
+            memberDowngradeBtn.disabled = false;
         }
     }
 
@@ -1192,6 +1247,13 @@
     if (memberRedeemBtn) {
         memberRedeemBtn.addEventListener("click", function () {
             redeemMemberCode().catch(function () {
+                return null;
+            });
+        });
+    }
+    if (memberDowngradeBtn) {
+        memberDowngradeBtn.addEventListener("click", function () {
+            downgradeMemberToNormalPlus().catch(function () {
                 return null;
             });
         });

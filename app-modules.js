@@ -575,6 +575,15 @@
         return getGrantModuleKeys(uid, top);
     }
 
+    function getNormalPlusModuleGrantsSync() {
+        var pool = registrationPoolPublic || normalizeRegistrationPool(null);
+        var out = {};
+        Object.keys(DEFAULT_MODULES).forEach(function (key) {
+            out[key] = pool[key] === true;
+        });
+        return out;
+    }
+
     window.NjcAppModules = {
         DEFAULT_MODULES: DEFAULT_MODULES,
         ROUTE_TO_MODULE: ROUTE_TO_MODULE,
@@ -589,6 +598,7 @@
         },
         isLimitedMemberSync: isLimitedMemberSync,
         getLimitedGrantModuleKeysSync: getLimitedGrantModuleKeysSync,
+        getNormalPlusModuleGrantsSync: getNormalPlusModuleGrantsSync,
         isModuleEnabled: isModuleEnabled,
         isRouteEnabled: isRouteEnabled,
         refresh: refreshAppModules,

@@ -136,14 +136,20 @@ service cloud.firestore {
 
     match /users/{userId}/app/access {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // First-time signup (self, doc missing): default member, or limited + module picks.
+      // First-time signup (self, doc missing): member or limited + module picks (see isUserAppAccessPayload).
       // Admin "Grant member access" / "Set member" uses merge — same payload helper as updates.
       allow create: if (request.auth != null
         && request.auth.uid == userId
         && !exists(/databases/$(database)/documents/users/$(userId)/app/access)
         && isUserAppAccessPayload())
         || (isAdmin() && isUserAppAccessPayload());
-      allow update: if isAdmin() && isUserAppAccessPayload();
+      // Owner may downgrade member → limited (normal user plus); upgrades stay admin/code only.
+      allow update: if isAdmin() && isUserAppAccessPayload()
+        || (request.auth != null
+          && request.auth.uid == userId
+          && resource.data.accessTier == "member"
+          && request.resource.data.accessTier == "limited"
+          && isUserAppAccessPayload());
       allow delete: if isAdmin();
     }
 
