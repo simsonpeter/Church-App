@@ -22,6 +22,26 @@
     var MEMBER_USERS_QUERY_TIMEOUT_MS = 12000;
     var memberUsersBusy = false;
     var latestMemberRows = {};
+    var CELEBRATION_PROFILES_COLLECTION = "celebrationProfiles";
+    var adminUserEditor = { backdrop: null, currentUid: "", saveBtn: null, statusEl: null, busy: false };
+    var MODULE_LABEL_FALLBACK = {
+        announcements: "Announcements",
+        bibleReading: "Today’s Bible reading",
+        dailyVerse: "Daily verse",
+        trivia: "Bible Quiz",
+        eventsWeek: "Events this week",
+        dailyBread: "Daily bread",
+        bookShelf: "Book shelf",
+        bible: "Bible reader",
+        songbook: "Songbook",
+        prayer: "Prayer wall",
+        events: "Events",
+        sermons: "Sermons",
+        contact: "Contact",
+        celebrations: "Celebrations",
+        chat: "Chat",
+        userAchievements: "User achievements"
+    };
 
     if (!fieldset || !saveBtn || !window.NjcAppModules) {
         return;
@@ -219,13 +239,383 @@
             .replace(/'/g, "&#39;");
     }
 
-    function setMemberUsersStatus(kind, key, fallback) {
-        if (!memberUsersStatusEl) {
+    function ensureAdminUserEditor() {
+        if (adminUserEditor.backdrop) {
             return;
         }
-        memberUsersStatusEl.hidden = !fallback;
-        memberUsersStatusEl.dataset.kind = kind || "";
-        memberUsersStatusEl.textContent = fallback ? T(key, fallback) : "";
+        var backdrop = document.createElement("div");
+        backdrop.className = "admin-user-editor-backdrop";
+        backdrop.hidden = true;
+        backdrop.setAttribute("role", "dialog");
+        backdrop.setAttribute("aria-modal", "true");
+        backdrop.setAttribute("aria-label", T("admin.userEditorTitle", "Edit user"));
+        backdrop.innerHTML = "" +
+            "<div class=\"admin-user-editor-card\" role=\"document\">" +
+            "  <div class=\"admin-user-editor-header\">" +
+            "    <h3 id=\"admin-user-editor-title\">" + escapeHtml(T("admin.userEditorTitle", "Edit user")) + "</h3>" +
+            "    <button type=\"button\" class=\"button-link admin-user-editor-close\" id=\"admin-user-editor-close\" aria-label=\"" + escapeHtml(T("admin.userEditorClose", "Close")) + "\"><i class=\"fa-solid fa-xmark\" aria-hidden=\"true\"></i></button>" +
+            "  </div>" +
+            "  <p class=\"page-note admin-user-editor-meta\" id=\"admin-user-editor-meta\"></p>" +
+            "  <div class=\"admin-user-editor-grid\">" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.fullName", "Full name")) +
+            "      <input class=\"search-input\" type=\"text\" id=\"admin-user-editor-fullname\" maxlength=\"120\" autocomplete=\"name\">" +
+            "    </label>" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.dob", "Date of birth")) +
+            "      <input class=\"search-input\" type=\"date\" id=\"admin-user-editor-dob\" autocomplete=\"bday\">" +
+            "    </label>" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.anniversary", "Wedding anniversary")) +
+            "      <input class=\"search-input\" type=\"date\" id=\"admin-user-editor-anniversary\" autocomplete=\"off\">" +
+            "    </label>" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.anniversaryPartnerName", "Spouse name (anniversary)")) +
+            "      <input class=\"search-input\" type=\"text\" id=\"admin-user-editor-anniv-partner\" maxlength=\"120\" autocomplete=\"name\">" +
+            "    </label>" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.phone", "Phone")) +
+            "      <input class=\"search-input\" type=\"tel\" id=\"admin-user-editor-phone\" maxlength=\"40\" autocomplete=\"tel\">" +
+            "    </label>" +
+            "    <label class=\"admin-field\">" + escapeHtml(T("profile.groupId", "Group / team code")) +
+            "      <input class=\"search-input\" type=\"text\" id=\"admin-user-editor-group\" maxlength=\"80\" autocomplete=\"off\">" +
+            "    </label>" +
+            "  </div>" +
+            "  <label class=\"admin-field admin-user-editor-checkbox\">" +
+            "    <input type=\"checkbox\" id=\"admin-user-editor-leader-anon\"> " + escapeHtml(T("profile.leaderboardAnonymous", "Show as \"Anonymous\" on public leaderboard")) +
+            "  </label>" +
+            "  <label class=\"admin-field admin-user-editor-checkbox\">" +
+            "    <input type=\"checkbox\" id=\"admin-user-editor-photo-skip\"> " + escapeHtml(T("profile.photoSkipCloud", "Keep photo on device only (no cloud)")) +
+            "  </label>" +
+            "  <div class=\"admin-user-editor-visible-wrap\" id=\"admin-user-editor-visible-wrap\" hidden>" +
+            "    <p class=\"page-note\" data-i18n-fallback=\"Menu visibility (subset of allowed)\">" + escapeHtml(T("admin.userEditorVisibleLegend", "Menu & home: show only these (subset of what this user is allowed)")) + "</p>" +
+            "    <fieldset class=\"admin-modules-fieldset\" id=\"admin-user-editor-visible-fieldset\"></fieldset>" +
+            "  </div>" +
+            "  <p class=\"page-note\" id=\"admin-user-editor-status\" hidden></p>" +
+            "  <div class=\"admin-user-editor-actions\">" +
+            "    <button type=\"button\" class=\"button-link\" id=\"admin-user-editor-save\">" + escapeHtml(T("admin.userEditorSave", "Save profile")) + "</button>" +
+            "    <button type=\"button\" class=\"button-link button-secondary\" id=\"admin-user-editor-cancel\">" + escapeHtml(T("admin.userEditorCancel", "Cancel")) + "</button>" +
+            "  </div>" +
+            "</div>";
+        document.body.appendChild(backdrop);
+        adminUserEditor.backdrop = backdrop;
+        adminUserEditor.statusEl = document.getElementById("admin-user-editor-status");
+        adminUserEditor.saveBtn = document.getElementById("admin-user-editor-save");
+        var closeBtn = document.getElementById("admin-user-editor-close");
+        var cancelBtn = document.getElementById("admin-user-editor-cancel");
+        function onClose() {
+            closeAdminUserEditor();
+        }
+        if (closeBtn) {
+            closeBtn.addEventListener("click", onClose);
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", onClose);
+        }
+        backdrop.addEventListener("click", function (e) {
+            if (e.target === backdrop) {
+                onClose();
+            }
+        });
+        if (adminUserEditor.saveBtn) {
+            adminUserEditor.saveBtn.addEventListener("click", function () {
+                saveAdminUserProfile();
+            });
+        }
+        document.addEventListener("keydown", function (ev) {
+            if (ev.key === "Escape" && adminUserEditor.backdrop && !adminUserEditor.backdrop.hidden) {
+                onClose();
+            }
+        });
+    }
+
+    function setUserEditorStatus(kind, key, fallback) {
+        ensureAdminUserEditor();
+        var el = adminUserEditor.statusEl;
+        if (!el) {
+            return;
+        }
+        el.hidden = !fallback;
+        el.dataset.kind = kind || "";
+        el.textContent = fallback ? T(key, fallback) : "";
+    }
+
+    function setUserEditorBusy(busy) {
+        adminUserEditor.busy = Boolean(busy);
+        if (!adminUserEditor.backdrop) {
+            return;
+        }
+        adminUserEditor.backdrop.querySelectorAll("input, fieldset, button").forEach(function (node) {
+            if (node.id === "admin-user-editor-close") {
+                return;
+            }
+            node.disabled = adminUserEditor.busy;
+        });
+    }
+
+    function closeAdminUserEditor() {
+        ensureAdminUserEditor();
+        if (adminUserEditor.backdrop) {
+            adminUserEditor.backdrop.hidden = true;
+        }
+        document.body.classList.remove("admin-user-editor-open");
+        adminUserEditor.currentUid = "";
+        setUserEditorStatus("", "", "");
+    }
+
+    function buildVisibleCheckboxesGrants(tier, moduleGrants) {
+        if (tier === "member") {
+            var defs = window.NjcAppModules && window.NjcAppModules.DEFAULT_MODULES ? window.NjcAppModules.DEFAULT_MODULES : {};
+            return Object.keys(defs);
+        }
+        var g = moduleGrants && typeof moduleGrants === "object" ? moduleGrants : {};
+        return Object.keys(g).filter(function (k) {
+            return g[k] === true;
+        });
+    }
+
+    function buildVisibleModulesHtml(row, selectedKeys) {
+        var grantKeys = buildVisibleCheckboxesGrants(row.tier, row.moduleGrants);
+        if (!grantKeys.length) {
+            return "";
+        }
+        var set = {};
+        (selectedKeys || []).forEach(function (k) {
+            set[String(k || "").trim()] = true;
+        });
+        if (!Object.keys(set).length) {
+            grantKeys.forEach(function (k) {
+                set[k] = true;
+            });
+        }
+        return grantKeys.map(function (key) {
+            var id = "admin-user-vis-" + key;
+            var lab = T("admin.module" + key.charAt(0).toUpperCase() + key.slice(1), MODULE_LABEL_FALLBACK[key] || key);
+            return "<label class=\"admin-module-toggle\" for=\"" + id + "\"><input type=\"checkbox\" id=\"" + id + "\" data-admin-visible-mod=\"" + key + "\" " + (set[key] ? "checked" : "") + "> <span>" + escapeHtml(lab) + "</span></label>";
+        }).join("");
+    }
+
+    function getSelectedVisibleKeys() {
+        var out = [];
+        if (!adminUserEditor.backdrop) {
+            return out;
+        }
+        adminUserEditor.backdrop.querySelectorAll("input[data-admin-visible-mod]").forEach(function (inp) {
+            if (inp.checked) {
+                var k = String(inp.getAttribute("data-admin-visible-mod") || "").trim();
+                if (k) {
+                    out.push(k);
+                }
+            }
+        });
+        return out;
+    }
+
+    function openAdminUserEditorForUid(uid) {
+        var row = latestMemberRows[uid];
+        if (!row) {
+            return;
+        }
+        ensureAdminUserEditor();
+        var backdrop = adminUserEditor.backdrop;
+        if (!backdrop) {
+            return;
+        }
+        var meta = document.getElementById("admin-user-editor-meta");
+        if (meta) {
+            meta.textContent = (row.displayName || row.name || "User") + " · " + (row.email || "") + " · " + String(uid).slice(0, 12) + "…";
+        }
+        var full = document.getElementById("admin-user-editor-fullname");
+        var dob = document.getElementById("admin-user-editor-dob");
+        var ann = document.getElementById("admin-user-editor-anniversary");
+        var ap = document.getElementById("admin-user-editor-anniv-partner");
+        var phone = document.getElementById("admin-user-editor-phone");
+        var group = document.getElementById("admin-user-editor-group");
+        var la = document.getElementById("admin-user-editor-leader-anon");
+        var ps = document.getElementById("admin-user-editor-photo-skip");
+        var p = row.profile || {};
+        if (full) {
+            full.value = String(p.fullName || row.name || row.displayName || "");
+        }
+        if (dob) {
+            dob.value = String(p.dob || "").trim().slice(0, 10);
+        }
+        if (ann) {
+            ann.value = String(p.anniversary || "").trim().slice(0, 10);
+        }
+        if (ap) {
+            ap.value = String(p.anniversaryPartnerName || "");
+        }
+        if (phone) {
+            phone.value = String(p.phone || "");
+        }
+        if (group) {
+            group.value = String(p.groupId || "");
+        }
+        if (la) {
+            la.checked = Boolean(p.leaderboardAnonymous);
+        }
+        if (ps) {
+            ps.checked = Boolean(p.photoSkipCloud);
+        }
+        var visWrap = document.getElementById("admin-user-editor-visible-wrap");
+        var visFs = document.getElementById("admin-user-editor-visible-fieldset");
+        if (visFs && visWrap) {
+            var vkeys = Array.isArray(p.visibleModules) ? p.visibleModules : [];
+            visFs.innerHTML = buildVisibleModulesHtml(row, vkeys);
+            var hasVis = visFs.querySelector("input") !== null;
+            visWrap.hidden = !hasVis;
+        }
+        setUserEditorStatus("", "", "");
+        adminUserEditor.currentUid = String(uid);
+        backdrop.hidden = false;
+        document.body.classList.add("admin-user-editor-open");
+        if (full) {
+            full.focus();
+        }
+    }
+
+    function syncCelebrationFromProfile(uid, profile) {
+        if (!uid || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.resolve(null);
+        }
+        try {
+            var p = profile && typeof profile === "object" ? profile : {};
+            var fam = Array.isArray(p.familyMembers) ? p.familyMembers : [];
+            var clean = [];
+            for (var i = 0; i < fam.length && clean.length < 20; i += 1) {
+                var m = fam[i];
+                if (!m || typeof m !== "object") {
+                    continue;
+                }
+                clean.push({
+                    id: String(m.id || "").trim().slice(0, 64) || ("fm-" + i),
+                    name: String(m.name || "").trim().slice(0, 120),
+                    dob: String(m.dob || "").trim().slice(0, 12)
+                });
+            }
+            var payload = {
+                fullName: String(p.fullName || "").trim().slice(0, 120),
+                dob: String(p.dob || "").trim().slice(0, 12),
+                anniversary: String(p.anniversary || "").trim().slice(0, 12),
+                anniversaryPartnerName: String(p.anniversaryPartnerName || "").trim().slice(0, 120),
+                familyMembers: clean
+            };
+            if (window.firebase.firestore && window.firebase.firestore.FieldValue) {
+                payload.updatedAt = window.firebase.firestore.FieldValue.serverTimestamp();
+            }
+            return window.firebase.firestore().collection(CELEBRATION_PROFILES_COLLECTION).doc(String(uid)).set(payload, { merge: true }).catch(function () {
+                return null;
+            });
+        } catch (e) {
+            return Promise.resolve(null);
+        }
+    }
+
+    function updateDirectoryDisplayName(uid, name, email) {
+        var db = getFirestoreDb();
+        if (!db || !uid || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            return Promise.resolve();
+        }
+        var disp = String(name || "").trim().slice(0, 120);
+        var em = String(email || "").trim().toLowerCase();
+        if (!disp) {
+            disp = em && em.indexOf("@") > 0 ? em.split("@")[0].replace(/[._-]+/g, " ").trim() : "User";
+        }
+        var now = window.firebase.firestore.FieldValue.serverTimestamp();
+        return db.collection("userDirectory").doc(String(uid)).set({
+            displayName: disp,
+            email: em || "unknown@users.invalid",
+            lastSeenAt: now,
+            updatedAt: now
+        }, { merge: true });
+    }
+
+    function saveAdminUserProfile() {
+        if (adminUserEditor.busy) {
+            return;
+        }
+        var uid = normalizeUid(adminUserEditor.currentUid);
+        if (!uid) {
+            return;
+        }
+        var row = latestMemberRows[uid];
+        if (!isAdminUser()) {
+            setUserEditorStatus("error", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+            return;
+        }
+        var db = getFirestoreDb();
+        if (!db || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            setUserEditorStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+            return;
+        }
+        var full = document.getElementById("admin-user-editor-fullname");
+        var dob = document.getElementById("admin-user-editor-dob");
+        var ann = document.getElementById("admin-user-editor-anniversary");
+        var ap = document.getElementById("admin-user-editor-anniv-partner");
+        var phone = document.getElementById("admin-user-editor-phone");
+        var group = document.getElementById("admin-user-editor-group");
+        var la = document.getElementById("admin-user-editor-leader-anon");
+        var ps = document.getElementById("admin-user-editor-photo-skip");
+        var p0 = row && row.profile && typeof row.profile === "object" ? row.profile : {};
+        var profile = Object.assign({}, p0, {
+            fullName: full ? String(full.value || "").trim().slice(0, 120) : "",
+            dob: dob ? String(dob.value || "").trim() : "",
+            anniversary: ann ? String(ann.value || "").trim() : "",
+            anniversaryPartnerName: ap ? String(ap.value || "").trim().slice(0, 120) : "",
+            phone: phone ? String(phone.value || "").trim().slice(0, 40) : "",
+            groupId: group ? String(group.value || "").trim().slice(0, 80) : "",
+            leaderboardAnonymous: la ? Boolean(la.checked) : false,
+            photoSkipCloud: ps ? Boolean(ps.checked) : false
+        });
+        if (p0.photoSkipCloud) {
+            profile.photoSkipCloud = true;
+        }
+        var visKeys = getSelectedVisibleKeys();
+        if (visKeys.length) {
+            profile.visibleModules = visKeys;
+        } else {
+            var visWrap = document.getElementById("admin-user-editor-visible-wrap");
+            if (visWrap && !visWrap.hidden) {
+                profile.visibleModules = [];
+            }
+        }
+        var ref = db.collection("users").doc(uid).collection("profile").doc("basic");
+        var nameForDir = String(profile.fullName || row.displayName || row.name || "");
+        setUserEditorBusy(true);
+        setUserEditorStatus("working", "auth.working", "Please wait...");
+        return ref.set({
+            fullName: profile.fullName,
+            dob: profile.dob,
+            anniversary: profile.anniversary,
+            anniversaryPartnerName: profile.anniversaryPartnerName,
+            familyMembers: Array.isArray(p0.familyMembers) ? p0.familyMembers : [],
+            phone: profile.phone,
+            groupId: profile.groupId,
+            leaderboardAnonymous: profile.leaderboardAnonymous,
+            photoSkipCloud: profile.photoSkipCloud,
+            visibleModules: Array.isArray(profile.visibleModules) ? profile.visibleModules : (p0.visibleModules || []),
+            photoUrl: profile.photoSkipCloud && window.firebase.firestore && window.firebase.firestore.FieldValue
+                ? window.firebase.firestore.FieldValue.delete()
+                : (typeof p0.photoUrl === "string" ? p0.photoUrl : ""),
+            updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+        }, { merge: true }).then(function () {
+            return syncCelebrationFromProfile(uid, profile);
+        }).then(function () {
+            return updateDirectoryDisplayName(uid, nameForDir, row.email);
+        }).then(function () {
+            if (row) {
+                row.name = nameForDir;
+                row.displayName = nameForDir;
+                row.profile = Object.assign(p0, profile);
+            }
+            setUserEditorStatus("success", "admin.userEditorSaved", "Profile saved.");
+            if (window.NjcAppModules && typeof window.NjcAppModules.invalidateCache === "function") {
+                window.NjcAppModules.invalidateCache();
+            }
+            return loadMemberUsers();
+        }).then(function () {
+            closeAdminUserEditor();
+        }).catch(function () {
+            setUserEditorStatus("error", "admin.userEditorError", "Could not save. Check Firestore rules.");
+        }).finally(function () {
+            setUserEditorBusy(false);
+        });
     }
 
     function countTrueGrants(grants) {
@@ -293,13 +683,16 @@
                 : (row.tier === "limited" ? T("admin.memberUsersTierLimited", "Limited") : T("admin.memberUsersTierLegacy", "Legacy"));
             var grantsCount = countTrueGrants(row.moduleGrants || {});
             var detailText = row.tier === "limited" ? (" (" + grantsCount + " modules)") : "";
-            var name = row.name || ("User " + row.uid.slice(0, 8));
+            var name = row.name || row.displayName || ("User " + row.uid.slice(0, 8));
+            var em = row.email || "";
             return "" +
                 "<tr>" +
                 "  <td>" + escapeHtml(name) + "</td>" +
+                "  <td>" + (em ? "<a href=\"mailto:" + escapeHtml(em) + "\">" + escapeHtml(em) + "</a>" : "—") + "</td>" +
                 "  <td><code>" + escapeHtml(row.uid) + "</code></td>" +
                 "  <td>" + escapeHtml(tierLabel + detailText) + "</td>" +
                 "  <td><div class=\"admin-member-users-actions\">" +
+                "    <button type=\"button\" class=\"button-link\" data-admin-user-edit=\"" + escapeHtml(row.uid) + "\">" + escapeHtml(T("admin.memberUsersEdit", "Edit profile")) + "</button>" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-member-uid=\"" + escapeHtml(row.uid) + "\" data-admin-member-target=\"member\">" + escapeHtml(T("admin.memberUsersSetMember", "Set member")) + "</button>" +
                 "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-member-uid=\"" + escapeHtml(row.uid) + "\" data-admin-member-target=\"limited\">" + escapeHtml(T("admin.memberUsersSetLimited", "Set limited")) + "</button>" +
                 "  </div></td>" +
@@ -307,28 +700,6 @@
         }).join("");
         memberUsersTbody.innerHTML = html;
         memberUsersWrap.hidden = false;
-    }
-
-    function getUidFromUsersDocRef(ref) {
-        if (!ref || !ref.path) {
-            return "";
-        }
-        var parts = String(ref.path || "").split("/");
-        if (parts.length >= 2 && parts[0] === "users") {
-            return String(parts[1] || "");
-        }
-        return "";
-    }
-
-    function getUidFromNestedDocRef(ref, collectionName, docId) {
-        if (!ref || !ref.path) {
-            return "";
-        }
-        var parts = String(ref.path || "").split("/");
-        if (parts.length === 4 && parts[0] === "users" && parts[2] === collectionName && parts[3] === docId) {
-            return String(parts[1] || "");
-        }
-        return "";
     }
 
     function loadMemberUsers() {
@@ -377,62 +748,103 @@
                 });
             });
         }
-        return Promise.all([
-            queryWithTimeout(db.collectionGroup("profile").limit(MAX_MEMBER_USERS * 3).get()),
-            queryWithTimeout(db.collectionGroup("app").limit(MAX_MEMBER_USERS * 3).get())
-        ]).then(function (results) {
-            var profileRes = results[0] || { timeout: false, snap: null };
-            var accessRes = results[1] || { timeout: false, snap: null };
-            var profileSnap = profileRes.snap;
-            var accessSnap = accessRes.snap;
-            var byUid = {};
-            if (profileSnap && !profileSnap.empty) {
-                profileSnap.forEach(function (d) {
-                    if (String(d.id || "") !== "basic") {
-                        return;
-                    }
-                    var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "profile", "basic"));
-                    if (!uid) {
-                        return;
-                    }
-                    if (!byUid[uid]) {
-                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
-                    }
-                    var p = d.data() || {};
-                    byUid[uid].name = String(p.fullName || "").trim();
+        return queryWithTimeout(db.collection("userDirectory").limit(MAX_MEMBER_USERS).get()).then(function (res) {
+            return { directoryRes: res };
+        }).then(function (ctx) {
+            var directoryRes = ctx.directoryRes || { timeout: false, snap: null };
+            var dirSnap = directoryRes.snap;
+            var uids = [];
+            if (dirSnap && !dirSnap.empty) {
+                dirSnap.forEach(function (d) {
+                    uids.push(String(d.id));
                 });
             }
-            if (accessSnap && !accessSnap.empty) {
-                accessSnap.forEach(function (d) {
-                    if (String(d.id || "") !== "access") {
-                        return;
-                    }
-                    var uid = normalizeUid(getUidFromNestedDocRef(d.ref, "app", "access"));
+            if (!uids.length) {
+                return {
+                    directoryRes: directoryRes,
+                    accessSnaps: {},
+                    profileSnaps: {}
+                };
+            }
+            return Promise.all(uids.map(function (u) {
+                return db.collection("users").doc(u).collection("app").doc("access").get().then(function (as) {
+                    return { uid: u, access: as };
+                });
+            })).then(function (accessList) {
+                return Promise.all(uids.map(function (u) {
+                    return db.collection("users").doc(u).collection("profile").doc("basic").get().then(function (ps) {
+                        return { uid: u, profile: ps };
+                    });
+                })).then(function (profileList) {
+                    var accessSnaps = {};
+                    accessList.forEach(function (x) {
+                        accessSnaps[x.uid] = x.access;
+                    });
+                    var profileSnaps = {};
+                    profileList.forEach(function (x) {
+                        profileSnaps[x.uid] = x.profile;
+                    });
+                    return {
+                        directoryRes: directoryRes,
+                        accessSnaps: accessSnaps,
+                        profileSnaps: profileSnaps
+                    };
+                });
+            });
+        }).then(function (bundle) {
+            var directoryRes = bundle.directoryRes || { timeout: false, snap: null };
+            var dirSnap = directoryRes.snap;
+            var accessSnaps = bundle.accessSnaps || {};
+            var profileSnaps = bundle.profileSnaps || {};
+            var byUid = {};
+            if (dirSnap && !dirSnap.empty) {
+                dirSnap.forEach(function (d) {
+                    var uid = normalizeUid(d.id);
                     if (!uid) {
                         return;
                     }
-                    if (!byUid[uid]) {
-                        byUid[uid] = { uid: uid, name: "", tier: "legacy", moduleGrants: {} };
-                    }
-                    var a = d.data() || {};
+                    var dr = d.data() || {};
+                    byUid[uid] = {
+                        uid: uid,
+                        name: String(dr.displayName || "").trim(),
+                        displayName: String(dr.displayName || "").trim(),
+                        email: String(dr.email || "").trim().toLowerCase(),
+                        tier: "legacy",
+                        moduleGrants: {},
+                        profile: {}
+                    };
+                });
+            }
+            Object.keys(byUid).forEach(function (uid) {
+                var as = accessSnaps[uid];
+                if (as && as.exists) {
+                    var a = as.data() || {};
                     byUid[uid].tier = inferTierFromAccess(a);
                     byUid[uid].moduleGrants = a.moduleGrants && typeof a.moduleGrants === "object" ? a.moduleGrants : {};
-                });
-            }
-
+                }
+                var ps = profileSnaps[uid];
+                if (ps && ps.exists) {
+                    var p = ps.data() || {};
+                    byUid[uid].profile = p;
+                    if (!String(byUid[uid].name || "").trim() && p.fullName) {
+                        byUid[uid].name = String(p.fullName || "").trim();
+                    }
+                }
+            });
             var rows = Object.keys(byUid).map(function (uid) {
                 return byUid[uid];
             }).sort(function (a, b) {
-                var an = String(a.name || a.uid);
-                var bn = String(b.name || b.uid);
+                var an = String(a.name || a.displayName || a.email || a.uid);
+                var bn = String(b.name || b.displayName || b.email || b.uid);
                 return an.localeCompare(bn);
-            }).slice(0, MAX_MEMBER_USERS);
-
+            });
             renderMemberUsers(rows);
             if (rows.length) {
                 setMemberUsersStatus("success", "admin.memberUsersLoaded", "Loaded registered users.");
-            } else if (profileRes.timeout || accessRes.timeout) {
+            } else if (directoryRes.timeout) {
                 setMemberUsersStatus("error", "admin.memberUsersLoadTimeout", "Loading users timed out. Please tap Refresh users again.");
+            } else {
+                setMemberUsersStatus("info", "admin.memberUsersEmpty", "No directory entries yet. Have users open the app while signed in, or use Refresh after they log in.");
             }
             return rows;
         }).catch(function () {
@@ -697,8 +1109,19 @@
 
     if (memberUsersTbody) {
         memberUsersTbody.addEventListener("click", function (event) {
+            if (memberUsersBusy) {
+                return;
+            }
+            var editBtn = event.target.closest("button[data-admin-user-edit]");
+            if (editBtn) {
+                var euid = normalizeUid(editBtn.getAttribute("data-admin-user-edit"));
+                if (euid) {
+                    openAdminUserEditorForUid(euid);
+                }
+                return;
+            }
             var button = event.target.closest("button[data-admin-member-uid]");
-            if (!button || memberUsersBusy) {
+            if (!button) {
                 return;
             }
             var uid = normalizeUid(button.getAttribute("data-admin-member-uid"));

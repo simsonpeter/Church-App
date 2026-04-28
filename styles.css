@@ -3269,6 +3269,81 @@ body.auth-modal-open {
     flex-wrap: wrap;
 }
 
+.admin-user-editor-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.45);
+    overflow-y: auto;
+}
+
+.admin-user-editor-card {
+    width: min(520px, 100%);
+    max-height: min(90vh, 900px);
+    overflow-y: auto;
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #222);
+    border-radius: 14px;
+    padding: 1rem 1.1rem 1.15rem;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.admin-user-editor-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.35rem;
+}
+
+.admin-user-editor-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.admin-user-editor-meta {
+    font-size: 0.85rem;
+    margin: 0 0 0.75rem;
+    word-break: break-word;
+}
+
+.admin-user-editor-grid {
+    display: grid;
+    gap: 0.65rem;
+    margin-bottom: 0.5rem;
+}
+
+@media (min-width: 480px) {
+    .admin-user-editor-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.admin-user-editor-checkbox {
+    display: block;
+    margin: 0.35rem 0;
+    font-size: 0.9rem;
+}
+
+.admin-user-editor-visible-wrap {
+    margin: 0.75rem 0 0.25rem;
+}
+
+.admin-user-editor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    justify-content: flex-end;
+}
+
+body.admin-user-editor-open {
+    overflow: hidden;
+}
+
 .auth-forgot-btn {
     margin-top: 0;
 }

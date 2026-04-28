@@ -257,30 +257,55 @@
         }, 120000);
     }
 
-    async function pullCloudToLocalOrBootstrap() {
+    function pullCloudToLocalOrBootstrap() {
         var doc = currentUserStateDoc();
         if (!doc) {
             return;
         }
         try {
-            var snapshot = await doc.get();
-            if (!snapshot.exists) {
-                await syncLocalToCloud();
-                return;
-            }
-            var data = snapshot.data() || {};
-            if (data.readingProgress && typeof data.readingProgress === "object") {
-                setLocalObject(READING_PROGRESS_KEY, data.readingProgress);
-            }
-            if (data.sermonFavorites && typeof data.sermonFavorites === "object") {
-                setLocalObject(SERMON_FAVORITES_KEY, data.sermonFavorites);
-            }
-            document.dispatchEvent(new CustomEvent("njc:userdata-updated", {
-                detail: { source: "cloud" }
-            }));
+            return doc.get().then(function (snapshot) {
+                if (!snapshot.exists) {
+                    return syncLocalToCloud();
+                }
+                var data = snapshot.data() || {};
+                if (data.readingProgress && typeof data.readingProgress === "object") {
+                    setLocalObject(READING_PROGRESS_KEY, data.readingProgress);
+                }
+                if (data.sermonFavorites && typeof data.sermonFavorites === "object") {
+                    setLocalObject(SERMON_FAVORITES_KEY, data.sermonFavorites);
+                }
+                document.dispatchEvent(new CustomEvent("njc:userdata-updated", {
+                    detail: { source: "cloud" }
+                }));
+            });
         } catch (err) {
             return;
         }
+    }
+
+    function upsertUserDirectoryEntry() {
+        if (!db || !user || !user.uid) {
+            return;
+        }
+        var email = String(user.email || "").trim().toLowerCase();
+        if (!email || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            return;
+        }
+        var displayName = String(user.displayName || "").trim();
+        if (!displayName) {
+            displayName = email.split("@")[0].replace(/[._-]+/g, " ").trim() || "User";
+        }
+        var ref = db.collection("userDirectory").doc(user.uid);
+        var now = window.firebase.firestore.FieldValue.serverTimestamp();
+        var payload = {
+            displayName: displayName.slice(0, 120),
+            email: email,
+            lastSeenAt: now,
+            updatedAt: now
+        };
+        ref.set(payload, { merge: true }).catch(function () {
+            return null;
+        });
     }
 
     /** Email users who signed up before access docs existed: create normal-plus limited access once. */
@@ -707,6 +732,7 @@
                 ensureRegisteredUserAccessDoc().catch(function () {
                     return null;
                 });
+                upsertUserDirectoryEntry();
                 window.setTimeout(function () {
                     if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
                         window.NjcAchievementBoard.syncMyPublicScore();
