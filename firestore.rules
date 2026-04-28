@@ -13,7 +13,7 @@ rules_version = '2';
 //   userAccess/{uid}           — optional per-user access: { accessType, allowedModules, updatedAt }; user reads own; admin writes
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
-    // userDirectory/{uid}  — one doc per email user (admin lists all; user upserts own)
+//   userDirectory/{uid}        — one doc per email user (admin lists all; user upserts own; admin may fix displayName/email)
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[], optional visibleModules[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   users/{uid}/app/access     — member (default new signup) or limited + module picks; member code redeem via Cloud Function
