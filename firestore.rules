@@ -300,12 +300,8 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /celebrationProfiles/{userId} {
-      allow read: if isRegisteredMember();
-      // Only celebration-related fields; written by app after profile save.
-      allow create, update: if request.auth != null
-        && request.auth.uid == userId
-        && request.resource.data.keys().hasOnly(["fullName", "dob", "anniversary", "anniversaryPartnerName", "familyMembers", "updatedAt"])
+    function isCelebrationProfilePayload() {
+      return request.resource.data.keys().hasOnly(["fullName", "dob", "anniversary", "anniversaryPartnerName", "familyMembers", "updatedAt"])
         && request.resource.data.fullName is string
         && request.resource.data.fullName.size() <= 120
         && request.resource.data.dob is string
@@ -316,6 +312,14 @@ service cloud.firestore {
         && request.resource.data.anniversaryPartnerName.size() <= 120
         && request.resource.data.familyMembers is list
         && request.resource.data.familyMembers.size() <= 20;
+    }
+
+    match /celebrationProfiles/{userId} {
+      allow read: if isRegisteredMember();
+      // Celebration fields; written by app after profile save; admin may sync when editing a user.
+      allow create, update: if request.auth != null
+        && isCelebrationProfilePayload()
+        && (request.auth.uid == userId || isAdmin());
       allow delete: if request.auth != null
         && (request.auth.uid == userId || isAdmin());
     }
