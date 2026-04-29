@@ -31,16 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v342memberfnerr";
-const RUNTIME_CACHE = "njc-runtime-cache-v342memberfnerr";
+const APP_CACHE = "njc-app-cache-v343mainmerge1";
+const RUNTIME_CACHE = "njc-runtime-cache-v343mainmerge1";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260421mainmerge",
-    "./user-auth.js?v=20260426adminbypass",
+    "./styles.css?v=20260411mainmerge1",
+    "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260426adminbypass",
-    "./app-shell.js?v=20260427memberfnerr",
+    "./app-shell.js?v=20260411mainmerge1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -54,6 +54,7 @@ const CORE_ASSETS = [
     "./admin-dashboard-page.js?v=20260417prayerapprove1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
+    "./admin-users-page.js?v=20260411mainmerge1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260427memberfnerr",

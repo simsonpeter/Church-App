@@ -3,6 +3,7 @@
     var STATE_KEY = "njc_sermon_player_v1";
     var SPLASH_KEY = "njc_splash_seen_v1";
     var THEME_KEY = "njc_theme_v1";
+    var THEME_PALETTE_KEY = "njc_theme_palette_v1";
     var LANGUAGE_KEY = "njc_language_v1";
     var FONT_EN_KEY = "njc_font_preset_en_v1";
     var FONT_TA_KEY = "njc_font_preset_ta_v1";
@@ -801,6 +802,16 @@
         "profile.memberRedeemFunctionMissing": "உறுப்பினர் குறியீடுகள் Firebase Cloud Functions-இல் இயங்கும்; செயலி கண்டுபிடிக்கவில்லை. redeemMemberCode-ஐ europe-west1-இல் வெளியிடச் சொல்லுங்கள் (Firebase → Functions).",
         "profile.memberRedeemBilling": "Cloud Functions-க்கு Firebase திட்டத்தில் பில்லிங் இயக்க வேண்டியிருக்கலாம். Functions பிழைகளைப் பார்க்கவும்.",
         "profile.memberRedeemNetwork": "சேவையை அடைய முடியவில்லை (இணைப்பு அல்லது உலாவி). Wi‑Fi அல்லது வேறு உலாவியை முயற்சிக்கவும்.",
+        "admin.registeredUsersTitle": "பதிவுசெய்த பயனர்கள்",
+        "admin.registeredUsersInfo": "பதிவுசெய்த பயனர்களின் பட்டியல். மின்னஞ்சல் கணக்குடன் திறக்கும் ஒவ்வொருவரையும் பார்க்கலாம் (தொகுதி இயக்கம் appConfig-ஆல்).",
+        "admin.registeredUsersRefresh": "பட்டியலை புதுப்பி",
+        "admin.registeredUsersColName": "பெயர்",
+        "admin.registeredUsersColEmail": "மின்னஞ்சல்",
+        "admin.registeredUsersColUid": "UID",
+        "admin.registeredUsersColSeen": "கடைசியாகப் பார்த்தது",
+        "admin.registeredUsersEmpty": "இன்னும் பட்டியலில் யாரும் இல்லை. மின்னஞ்சலுடன் செயலியைத் திறந்த பிறகு தோன்றும்.",
+        "admin.registeredUsersLoaded": "பதிவுசெய்த பயனர்கள் ஏற்றப்பட்டனர்.",
+        "admin.registeredUsersLoadError": "ஏற்ற முடியவில்லை. userDirectory-க்கான Firestore விதிகளைச் சரிபார்க்கவும்.",
         "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
         "admin.noticeTitlePlaceholder": "அறிவிப்பு தலைப்பு",
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
@@ -1020,6 +1031,14 @@
         "settings.title": "அமைப்புகள்",
         "settings.info": "செயலி அமைப்புகள் மற்றும் விருப்பங்கள்.",
         "settings.theme": "தீம்",
+        "settings.themeMode": "ஒளி / இருள்",
+        "settings.themeColor": "நிற தீம்",
+        "settings.themeColorHint": "பின்னணி மற்றும் நிறங்களை மாற்று (பிரகாசம் மேலே).",
+        "settings.paletteDefault": "கிளாசிக் (சிவப்பு & வெள்ளை)",
+        "settings.paletteOcean": "ஓசியன் (நீல-பச்சை)",
+        "settings.paletteForest": "காடு (பச்சை)",
+        "settings.paletteSunset": "சன்செட் (நாரஞ்சு)",
+        "settings.paletteSlate": "ஸ்லேட் (சாம்பல்-நீலம்)",
         "settings.themeLight": "ஒளி நிலை",
         "settings.themeDark": "இருள் நிலை",
         "settings.language": "மொழி",
@@ -4617,12 +4636,65 @@
         controls.innerHTML = "";
         var items = [];
         if (themeButton) {
-            var themeItem = createSettingsItem(themeButton, "settings.theme", "Theme", getThemeStateLabel);
+            var themeItem = createSettingsItem(themeButton, "settings.themeMode", "Light / dark", getThemeStateLabel);
             if (themeItem) {
                 controls.appendChild(themeItem.node);
                 items.push(themeItem);
             }
         }
+        var paletteRow = document.createElement("div");
+        paletteRow.className = "settings-palette-row";
+        var paletteLabel = document.createElement("span");
+        paletteLabel.className = "settings-palette-label";
+        paletteLabel.setAttribute("data-i18n", "settings.themeColor");
+        paletteLabel.textContent = t("settings.themeColor", "Color theme");
+        var paletteHint = document.createElement("p");
+        paletteHint.className = "settings-palette-hint page-note";
+        paletteHint.setAttribute("data-i18n", "settings.themeColorHint");
+        paletteHint.textContent = t("settings.themeColorHint", "Change accent and background colors (brightness is above).");
+        var paletteSelect = document.createElement("select");
+        paletteSelect.id = "settings-palette-select";
+        paletteSelect.className = "settings-palette-select";
+        paletteSelect.setAttribute("aria-label", t("settings.themeColor", "Color theme"));
+        THEME_PALETTES.forEach(function (p) {
+            var opt = document.createElement("option");
+            opt.value = p.id;
+            opt.textContent = t(p.key, p.fallback);
+            paletteSelect.appendChild(opt);
+        });
+        paletteSelect.value = getActivePalette();
+        paletteSelect.addEventListener("change", function () {
+            var next = String(paletteSelect.value || "default");
+            applyThemePalette(next);
+            persistThemePalette(next);
+            document.dispatchEvent(new CustomEvent("njc:themepalettechange", { detail: { palette: next } }));
+        });
+        paletteRow.appendChild(paletteLabel);
+        paletteRow.appendChild(paletteHint);
+        paletteRow.appendChild(paletteSelect);
+        controls.appendChild(paletteRow);
+        var paletteItem = {
+            refresh: function () {
+                paletteLabel.textContent = t("settings.themeColor", "Color theme");
+                paletteHint.textContent = t("settings.themeColorHint", "Change accent and background colors (brightness is above).");
+                paletteSelect.setAttribute("aria-label", t("settings.themeColor", "Color theme"));
+                for (var i = 0; i < paletteSelect.options.length; i += 1) {
+                    var o = paletteSelect.options[i];
+                    var pid = o.value;
+                    for (var j = 0; j < THEME_PALETTES.length; j += 1) {
+                        if (THEME_PALETTES[j].id === pid) {
+                            o.textContent = t(THEME_PALETTES[j].key, THEME_PALETTES[j].fallback);
+                            break;
+                        }
+                    }
+                }
+                var cur = getActivePalette();
+                if (paletteSelect.value !== cur) {
+                    paletteSelect.value = cur;
+                }
+            }
+        };
+        items.push(paletteItem);
         if (languageButton) {
             var languageItem = createSettingsItem(languageButton, "settings.language", "Language", getLanguageStateLabel);
             if (languageItem) {
@@ -4890,6 +4962,7 @@
 
         document.addEventListener("njc:langchange", refreshSettingsItems);
         document.addEventListener("njc:themechange", refreshSettingsItems);
+        document.addEventListener("njc:themepalettechange", refreshSettingsItems);
         document.addEventListener("njc:notificationstatus", refreshSettingsItems);
         document.addEventListener("njc:inapp-notifications-updated", refreshSettingsItems);
     }
@@ -5117,6 +5190,77 @@
         return null;
     }
 
+    var THEME_PALETTES = [
+        { id: "default", key: "settings.paletteDefault", fallback: "Classic (red & white)" },
+        { id: "ocean", key: "settings.paletteOcean", fallback: "Ocean (teal)" },
+        { id: "forest", key: "settings.paletteForest", fallback: "Forest (green)" },
+        { id: "sunset", key: "settings.paletteSunset", fallback: "Sunset (amber)" },
+        { id: "slate", key: "settings.paletteSlate", fallback: "Slate (blue-gray)" }
+    ];
+
+    function getStoredPalette() {
+        try {
+            var v = window.localStorage.getItem(THEME_PALETTE_KEY);
+            if (v) {
+                for (var i = 0; i < THEME_PALETTES.length; i += 1) {
+                    if (THEME_PALETTES[i].id === v) {
+                        return v;
+                    }
+                }
+            }
+        } catch (e) {
+            return null;
+        }
+        return null;
+    }
+
+    function getActivePalette() {
+        return getStoredPalette() || "default";
+    }
+
+    function applyThemePalette(paletteId) {
+        var id = String(paletteId || "default");
+        var ok = false;
+        for (var i = 0; i < THEME_PALETTES.length; i += 1) {
+            if (THEME_PALETTES[i].id === id) {
+                ok = true;
+                break;
+            }
+        }
+        if (!ok) {
+            id = "default";
+        }
+        if (id === "default") {
+            document.documentElement.removeAttribute("data-theme-palette");
+        } else {
+            document.documentElement.setAttribute("data-theme-palette", id);
+        }
+    }
+
+    function persistThemePalette(paletteId) {
+        var id = String(paletteId || "default");
+        var ok = false;
+        for (var j = 0; j < THEME_PALETTES.length; j += 1) {
+            if (THEME_PALETTES[j].id === id) {
+                ok = true;
+                break;
+            }
+        }
+        if (!ok) {
+            id = "default";
+        }
+        try {
+            if (id === "default") {
+                window.localStorage.removeItem(THEME_PALETTE_KEY);
+            } else {
+                window.localStorage.setItem(THEME_PALETTE_KEY, id);
+            }
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
     function getSystemTheme() {
         return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
     }
@@ -5170,6 +5314,7 @@
 
         var activeTheme = getActiveTheme();
         applyTheme(activeTheme);
+        applyThemePalette(getActivePalette());
         setToggleIcon(button, activeTheme);
 
         button.addEventListener("click", function () {

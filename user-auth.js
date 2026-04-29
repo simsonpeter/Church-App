@@ -326,6 +326,30 @@
         }
     }
 
+    function upsertUserDirectoryEntry() {
+        if (!db || !user || !user.uid) {
+            return;
+        }
+        var email = String(user.email || "").trim().toLowerCase();
+        if (!email || !window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            return;
+        }
+        var displayName = String(user.displayName || "").trim();
+        if (!displayName) {
+            displayName = email.split("@")[0].replace(/[._-]+/g, " ").trim() || "User";
+        }
+        var ref = db.collection("userDirectory").doc(user.uid);
+        var now = window.firebase.firestore.FieldValue.serverTimestamp();
+        ref.set({
+            displayName: displayName.slice(0, 120),
+            email: email,
+            lastSeenAt: now,
+            updatedAt: now
+        }, { merge: true }).catch(function () {
+            return null;
+        });
+    }
+
     function hideEntryOverlay() {
         if (entryShowTimerId) {
             window.clearTimeout(entryShowTimerId);
@@ -707,6 +731,7 @@
                 ensureRegisteredUserAccessDoc().catch(function () {
                     return null;
                 });
+                upsertUserDirectoryEntry();
                 window.setTimeout(function () {
                     if (window.NjcAchievementBoard && typeof window.NjcAchievementBoard.syncMyPublicScore === "function") {
                         window.NjcAchievementBoard.syncMyPublicScore();
