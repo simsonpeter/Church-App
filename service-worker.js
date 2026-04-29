@@ -31,15 +31,15 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v303dobmerge";
-const RUNTIME_CACHE = "njc-runtime-cache-v303dobmerge";
+const APP_CACHE = "njc-app-cache-v304userdir1";
+const RUNTIME_CACHE = "njc-runtime-cache-v304userdir1";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411celeui1",
-    "./user-auth.js?v=20260412commceleb1",
-    "./app-shell.js?v=20260413dobmerge1",
+    "./styles.css?v=20260411userdir1",
+    "./user-auth.js?v=20260411userdir1",
+    "./app-shell.js?v=20260411userdir1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260412annpartner1",
     "./events-page.js?v=20260414u2",
@@ -49,7 +49,9 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20260330pw1",
     "./daily-bread-page.js?v=20260413tts1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260407fcm1",
+    "./admin-dashboard-page.js?v=20260411mod1",
+    "./admin-modules-page.js?v=20260411userdir1",
+    "./admin-users-page.js?v=20260411userdir1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260413dobmerge1",

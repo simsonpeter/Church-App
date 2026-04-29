@@ -5225,6 +5225,30 @@ body.bible-fullscreen-open .offline-badge {
     gap: 8px;
 }
 
+.admin-registered-users-wrap {
+    margin-top: 0.75rem;
+    overflow-x: auto;
+}
+
+.admin-registered-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 560px;
+}
+
+.admin-registered-users-table th,
+.admin-registered-users-table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    text-align: left;
+    padding: 0.5rem 0.45rem;
+    vertical-align: middle;
+    font-size: 0.9rem;
+}
+
+.admin-registered-users-table th {
+    font-weight: 700;
+}
+
 .admin-stat-card {
     border: 1px solid var(--line);
     border-radius: 12px;

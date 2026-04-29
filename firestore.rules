@@ -10,6 +10,7 @@ rules_version = '2';
 //
 // Church-App Firestore paths:
 //   appConfig/modules          — feature toggles (public read; admin write): { flags: { ... }, updatedAt }
+//   userDirectory/{uid}        — registry of email sign-ins (admin reads all; user upserts own row)
 //   lyrics/{songId}            — NJC Songbook (church app reads via Firebase SDK)
 //   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[]) + triviaPoints (merge)
@@ -51,6 +52,38 @@ service cloud.firestore {
         && request.resource.data.flags is map
         && request.resource.data.flags.size() <= 40
         && request.resource.data.updatedAt is timestamp;
+      allow delete: if false;
+    }
+
+    function isUserDirectoryDocument() {
+      return request.resource.data.keys().hasOnly(["displayName", "email", "lastSeenAt", "updatedAt"])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email == request.auth.token.email.lower()
+        && request.resource.data.lastSeenAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    function isAdminUserDirectoryDocument() {
+      return request.resource.data.keys().hasOnly(["displayName", "email", "lastSeenAt", "updatedAt"])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 3
+        && request.resource.data.email.size() <= 320
+        && request.resource.data.lastSeenAt is timestamp
+        && request.resource.data.updatedAt is timestamp;
+    }
+
+    match /userDirectory/{userId} {
+      allow read: if isAdmin();
+      allow create, update: if (request.auth != null
+        && request.auth.uid == userId
+        && isUserDirectoryDocument())
+        || (isAdmin() && isAdminUserDirectoryDocument());
       allow delete: if false;
     }
 

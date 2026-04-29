@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411mod1">
+    <link rel="stylesheet" href="styles.css?v=20260411userdir1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -836,6 +836,32 @@
                 </details>
             </section>
 
+            <section class="card admin-registered-users-card card-v-minimal">
+                <details class="admin-panel-section-details" open>
+                    <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
+                        <h2><i class="fa-solid fa-users"></i><span data-i18n="admin.registeredUsersTitle">Registered users</span></h2>
+                    </summary>
+                    <div class="admin-panel-section-body">
+                        <p class="page-note" data-i18n="admin.registeredUsersInfo">Everyone who registers has the same access (sections still follow your App modules toggles above). This list updates when each person opens the app while signed in.</p>
+                        <button type="button" class="button-link button-secondary" id="admin-registered-users-refresh" data-i18n="admin.registeredUsersRefresh">Refresh list</button>
+                        <p class="page-note" id="admin-registered-users-status" hidden></p>
+                        <div class="admin-registered-users-wrap" id="admin-registered-users-wrap" hidden>
+                            <table class="admin-registered-users-table" aria-describedby="admin-registered-users-status">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.registeredUsersColName">Name</th>
+                                        <th data-i18n="admin.registeredUsersColEmail">Email</th>
+                                        <th data-i18n="admin.registeredUsersColUid">UID</th>
+                                        <th data-i18n="admin.registeredUsersColSeen">Last seen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-registered-users-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </details>
+            </section>
+
             <section class="card admin-modules-card card-v-minimal">
                 <details class="admin-panel-section-details">
                     <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
@@ -848,7 +874,7 @@
                         <p class="page-note" data-i18n="admin.modulesInfo">Turn sections of the app on or off for everyone. Publish rules in Firebase for changes to apply (see firestore.rules).</p>
                         <p class="page-note" id="admin-modules-status" hidden></p>
                         <fieldset class="admin-modules-fieldset" id="admin-modules-fieldset" disabled>
-                            <legend class="page-note" data-i18n="admin.modulesLegend">Visible to members</legend>
+                            <legend class="page-note" data-i18n="admin.modulesLegend">Sections in the app</legend>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="announcements" checked> <span data-i18n="admin.moduleAnnouncements">Announcements (home)</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="bibleReading" checked> <span data-i18n="admin.moduleBibleReading">Today’s Bible reading (home)</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="dailyVerse" checked> <span data-i18n="admin.moduleDailyVerse">Daily verse (home)</span></label>
@@ -1525,9 +1551,9 @@
     <script>
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
-    <script src="user-auth.js?v=20260412commceleb1"></script>
+    <script src="user-auth.js?v=20260411userdir1"></script>
     <script src="app-modules.js?v=20260411mod1"></script>
-    <script src="app-shell.js?v=20260411mod1"></script>
+    <script src="app-shell.js?v=20260411userdir1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260412guestcele1"></script>
     <script src="home-page.js?v=20260411mod1"></script>
@@ -1539,7 +1565,8 @@
     <script src="daily-bread-page.js?v=20260413tts1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260411mod1"></script>
-    <script src="admin-modules-page.js?v=20260411mod1"></script>
+    <script src="admin-modules-page.js?v=20260411userdir1"></script>
+    <script src="admin-users-page.js?v=20260411userdir1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260413dobmerge1"></script>
