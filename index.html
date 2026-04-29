@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411kids1">
+    <link rel="stylesheet" href="styles.css?v=20260412kids2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -374,18 +374,49 @@
                 </div>
                 <p class="page-note kids-page-lead" data-i18n="kids.lead">Fun, faith-centred games for children. Best with a parent nearby.</p>
                 <p class="page-note kids-page-parent" data-i18n="kids.parentNote">Grown-ups: you can use these in Sunday School, at home, or while travelling.</p>
+                <p class="page-note kids-total-stars" id="kids-total-stars" aria-live="polite" data-i18n="kids.starsLine">Your stars: {n}</p>
 
                 <div class="kids-activity" id="kids-activity-memory">
                     <h3 class="kids-activity-title"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> <span data-i18n="kids.memTitle">Bible match cards</span></h3>
                     <p class="page-note" data-i18n="kids.memHelp">Find two matching pictures. Tap a card, then its pair.</p>
+                    <div class="kids-toolbar" role="group" aria-label="Bible match settings">
+                        <div class="kids-toolbar-row">
+                            <span class="kids-toolbar-label" data-i18n="kids.memLevelLabel">Level</span>
+                            <div class="kids-segment" id="kids-mem-level-group">
+                                <button type="button" class="kids-segment-btn" data-mem-level="0" data-i18n="kids.memLevelEasy" aria-pressed="false">Easy</button>
+                                <button type="button" class="kids-segment-btn active" data-mem-level="1" data-i18n="kids.memLevelNormal" aria-pressed="true">Normal</button>
+                                <button type="button" class="kids-segment-btn" data-mem-level="2" data-i18n="kids.memLevelTough" aria-pressed="false">Tough</button>
+                            </div>
+                        </div>
+                        <div class="kids-toolbar-row">
+                            <label class="kids-toolbar-label" for="kids-mem-deck" data-i18n="kids.memDeckLabel">Icons</label>
+                            <select class="kids-select" id="kids-mem-deck" aria-label="Icon set for match cards">
+                                <option value="0" data-i18n="kids.memDeck0">Bible &amp; world</option>
+                                <option value="1" data-i18n="kids.memDeck1">Church &amp; praise</option>
+                                <option value="2" data-i18n="kids.memDeck2">Journey of faith</option>
+                            </select>
+                        </div>
+                        <p class="page-note kids-toolbar-score" id="kids-mem-score" data-i18n="kids.memScoreLine">This game: 0 / Best: 0</p>
+                    </div>
                     <p class="kids-mem-status" id="kids-mem-status" aria-live="polite" data-i18n="kids.memStatusStart">Find all pairs to win.</p>
-                    <div class="kids-mem-grid" id="kids-mem-grid" role="grid" aria-label="Bible match cards"></div>
+                    <div class="kids-mem-grid" id="kids-mem-grid" role="grid" aria-label="Bible match cards" data-mem-cols="4"></div>
                     <button type="button" class="button-link button-secondary" id="kids-mem-restart" data-i18n="kids.memNew">New game</button>
                 </div>
 
                 <div class="kids-activity" id="kids-activity-word">
                     <h3 class="kids-activity-title"><i class="fa-solid fa-shuffle" aria-hidden="true"></i> <span data-i18n="kids.scrambleTitle">Word unscramble</span></h3>
                     <p class="page-note" id="kids-scramble-hint" data-i18n="kids.scrambleHint">Put the letters in the right order. Tap a letter, then a slot.</p>
+                    <div class="kids-toolbar" role="group" aria-label="Word game settings">
+                        <div class="kids-toolbar-row">
+                            <span class="kids-toolbar-label" data-i18n="kids.wordLevelLabel">Level</span>
+                            <div class="kids-segment" id="kids-word-level-group">
+                                <button type="button" class="kids-segment-btn" data-word-level="0" data-i18n="kids.wordLevelEasy" aria-pressed="false">Easy (short)</button>
+                                <button type="button" class="kids-segment-btn active" data-word-level="1" data-i18n="kids.wordLevelNormal" aria-pressed="true">Normal</button>
+                                <button type="button" class="kids-segment-btn" data-word-level="2" data-i18n="kids.wordLevelHard" aria-pressed="false">Hard (longer)</button>
+                            </div>
+                        </div>
+                        <p class="page-note kids-toolbar-score" id="kids-word-score" data-i18n="kids.wordScoreLine">This game: 0 / Solved: 0</p>
+                    </div>
                     <div class="kids-scramble-row">
                         <div class="kids-scramble-letters" id="kids-scramble-letters" role="group"></div>
                     </div>
@@ -1752,7 +1783,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411kids1"></script>
+    <script src="app-shell.js?v=20260412kids2"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1775,5 +1806,5 @@
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
     <script src="spa-router.js?v=20260411kids1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260411kids1"></script>
+    <script src="kids-page.js?v=20260412kids2"></script>
 </html>
