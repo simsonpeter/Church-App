@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411mainmerge1">
+    <link rel="stylesheet" href="styles.css?v=20260411prayershare1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -1519,9 +1519,15 @@
         <section class="prayer-detail-sheet" role="dialog" aria-modal="true" aria-label="Prayer details" data-i18n-aria-label="contact.prayerWallDetailsTitle">
             <div class="prayer-detail-top">
                 <strong data-i18n="contact.prayerWallDetailsTitle">Prayer details</strong>
-                <button type="button" id="prayer-detail-close" class="prayer-detail-close" aria-label="Close prayer details" data-i18n-aria-label="contact.prayerWallCloseDetails">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
+                <div class="prayer-detail-top-actions">
+                    <button type="button" id="prayer-detail-share" class="prayer-detail-share" data-i18n="contact.prayerShareLink" data-i18n-aria-label="contact.prayerShareAria" aria-label="Share link to this prayer" hidden>
+                        <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+                        <span>Share</span>
+                    </button>
+                    <button type="button" id="prayer-detail-close" class="prayer-detail-close" aria-label="Close prayer details" data-i18n-aria-label="contact.prayerWallCloseDetails">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
             </div>
             <div class="prayer-detail-body">
                 <div class="prayer-detail-title-row">
@@ -1693,7 +1699,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260426adminbypass"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411mainmerge1"></script>
+    <script src="app-shell.js?v=20260411prayershare1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1701,7 +1707,7 @@
     <script src="sermons-page.js?v=20260324u1"></script>
     <script src="bible-page.js?v=20260413tts1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
-    <script src="contact-page.js?v=20260411deeplink1"></script>
+    <script src="contact-page.js?v=20260411prayershare1"></script>
     <script src="daily-bread-page.js?v=20260417cardlang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260417prayerapprove1"></script>

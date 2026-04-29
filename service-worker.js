@@ -31,16 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v344deeplink1";
-const RUNTIME_CACHE = "njc-runtime-cache-v344deeplink1";
+const APP_CACHE = "njc-app-cache-v345prayershare1";
+const RUNTIME_CACHE = "njc-runtime-cache-v345prayershare1";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411mainmerge1",
+    "./styles.css?v=20260411prayershare1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260426adminbypass",
-    "./app-shell.js?v=20260411mainmerge1",
+    "./app-shell.js?v=20260411prayershare1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -48,7 +48,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260411deeplink1",
+    "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260417prayerapprove1",

@@ -32,6 +32,7 @@
             var prayerDetailResetAnsweredButton = document.getElementById("prayer-detail-reset-answered");
             var prayerDetailEditButton = document.getElementById("prayer-detail-edit");
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
+            var prayerDetailShareButton = document.getElementById("prayer-detail-share");
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
             var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
             var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
@@ -774,6 +775,106 @@
                 return previewText;
             }
 
+            function getPrayerDeepLinkUrl(entryId) {
+                var id = String(entryId || "").trim();
+                if (!id) {
+                    return "";
+                }
+                try {
+                    var u = new URL(String(window.location.href));
+                    u.hash = "prayer/" + encodeURIComponent(id);
+                    return u.toString();
+                } catch (err) {
+                    return "";
+                }
+            }
+
+            function copyTextToClipboard(text) {
+                var t = String(text || "");
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    return navigator.clipboard.writeText(t);
+                }
+                return new Promise(function (resolve, reject) {
+                    var area = document.createElement("textarea");
+                    area.value = t;
+                    area.setAttribute("readonly", "");
+                    area.style.position = "fixed";
+                    area.style.left = "-5000px";
+                    document.body.appendChild(area);
+                    try {
+                        area.select();
+                        area.setSelectionRange(0, 99999);
+                        var ok = document.execCommand("copy");
+                        document.body.removeChild(area);
+                        if (ok) {
+                            resolve();
+                        } else {
+                            reject(new Error("copy"));
+                        }
+                    } catch (err) {
+                        try {
+                            document.body.removeChild(area);
+                        } catch (e2) {
+                            // ignore
+                        }
+                        reject(err);
+                    }
+                });
+            }
+
+            function runPrayerShareForId(prayerId) {
+                var id = String(prayerId || "").trim();
+                if (!id) {
+                    return;
+                }
+                var url = getPrayerDeepLinkUrl(id);
+                if (!url) {
+                    return;
+                }
+                var found = null;
+                for (var j = 0; j < prayerWallEntries.length; j += 1) {
+                    if (prayerWallEntries[j] && String(prayerWallEntries[j].id) === id) {
+                        found = prayerWallEntries[j];
+                        break;
+                    }
+                }
+                var nameLine = T("contact.prayerShareNameFallback", "Prayer request", prayerCard);
+                if (found) {
+                    nameLine = getPrayerDisplayName(found, prayerCard);
+                }
+                var textBody = (found && found.message) ? toPreviewText(found.message) : nameLine;
+                if (String(textBody).length > 200) {
+                    textBody = String(textBody).slice(0, 197) + "...";
+                }
+                if (window.navigator && window.navigator.share) {
+                    var p = window.navigator.share({ title: nameLine, text: String(textBody || nameLine), url: url });
+                    if (p && typeof p.then === "function" && typeof p.catch === "function") {
+                        p.catch(function (err) {
+                            if (err && err.name === "AbortError") {
+                                return;
+                            }
+                            return copyTextToClipboard(url).then(
+                                function () {
+                                    showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
+                                },
+                                function () {
+                                    showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use Share from the menu.");
+                                }
+                            );
+                        });
+                    }
+                    return;
+                }
+                copyTextToClipboard(url).then(
+                    function () {
+                        showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
+                    },
+                    function () {
+                        showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use the browser menu to copy the address bar.");
+                    }
+                );
+            }
+
             function getPrayerPreviewNode(prayerId) {
                 if (!prayerWallList) {
                     return null;
@@ -1197,6 +1298,10 @@
                 prayerDetailOverlay.hidden = true;
                 document.body.classList.remove("prayer-detail-open");
                 setDetailActionPrayerId("");
+                if (prayerDetailShareButton) {
+                    prayerDetailShareButton.hidden = true;
+                    prayerDetailShareButton.removeAttribute("data-prayer-id");
+                }
                 if (isPrayerRouteInHash() && getPrayerIdFromAppHash()) {
                     setPrayerRouteHashForDetail("");
                 }
@@ -1212,6 +1317,10 @@
                     setDetailActionPrayerId("");
                     if (prayerDetailMineToggle) {
                         prayerDetailMineToggle.hidden = true;
+                    }
+                    if (prayerDetailShareButton) {
+                        prayerDetailShareButton.hidden = true;
+                        prayerDetailShareButton.removeAttribute("data-prayer-id");
                     }
                     return;
                 }
@@ -1291,6 +1400,10 @@
                     prayerDetailMineToggle.disabled = prayerWallBusy;
                 }
                 setDetailActionPrayerId(entry.id || "");
+                if (prayerDetailShareButton) {
+                    prayerDetailShareButton.hidden = false;
+                    prayerDetailShareButton.setAttribute("data-prayer-id", entry.id || "");
+                }
             }
 
             function openPrayerDetail(prayerId) {
@@ -1301,6 +1414,9 @@
                 renderPrayerDetail();
                 if (!activePrayerDetailId) {
                     return;
+                }
+                if (prayerDetailShareButton) {
+                    prayerDetailShareButton.setAttribute("data-prayer-id", activePrayerDetailId || "");
                 }
                 setPrayerRouteHashForDetail(activePrayerDetailId);
                 prayerDetailOverlay.hidden = false;
@@ -1325,6 +1441,9 @@
                     prayerWallList.querySelectorAll("button[data-prayer-open-id]").forEach(function (button) {
                         button.disabled = prayerWallBusy;
                     });
+                    prayerWallList.querySelectorAll("button[data-prayer-share-id]").forEach(function (button) {
+                        button.disabled = prayerWallBusy;
+                    });
                     prayerWallList.querySelectorAll("button[data-prayer-id][data-prayer-action]").forEach(function (button) {
                         button.disabled = prayerWallBusy;
                     });
@@ -1343,6 +1462,9 @@
                 }
                 if (prayerDetailMineToggle && !prayerDetailMineToggle.hidden) {
                     prayerDetailMineToggle.disabled = prayerWallBusy;
+                }
+                if (prayerDetailShareButton && !prayerDetailShareButton.hidden) {
+                    prayerDetailShareButton.disabled = prayerWallBusy;
                 }
             }
 
@@ -1558,6 +1680,7 @@
                             escapeHtml(mineShortLabel) +
                             "  </button>" +
                             "</div>");
+                    var shareLabel = T("contact.prayerShareLink", "Share link", prayerCard);
                     return "" +
                         "<li class=\"" + itemClass + "\">" +
                         "  " + urgentRibbon +
@@ -1579,6 +1702,11 @@
                         "      <span class=\"prayer-list-chevron\" aria-hidden=\"true\"><i class=\"fa-solid fa-chevron-right\"></i></span>" +
                         "    </div>" +
                         "  </button>" +
+                        "  <div class=\"prayer-list-share-row\">" +
+                        "    <button type=\"button\" class=\"prayer-list-share\" data-prayer-share-id=\"" + escapeHtml(entry.id || "") + "\" title=\"" + escapeHtml(shareLabel) + "\">" +
+                        "      <i class=\"fa-solid fa-share-nodes\" aria-hidden=\"true\"></i> " + escapeHtml(shareLabel) +
+                        "    </button>" +
+                        "  </div>" +
                         mineRow +
                         (activePrayerTab === "mine" ? "" : (
                             "  <div class=\"prayer-list-actions\">" +
@@ -1891,6 +2019,17 @@
                 });
             }
 
+            if (prayerDetailShareButton) {
+                prayerDetailShareButton.addEventListener("click", function (event) {
+                    event.stopPropagation();
+                    if (prayerWallBusy) {
+                        return;
+                    }
+                    var sid = prayerDetailShareButton.getAttribute("data-prayer-id") || activePrayerDetailId;
+                    runPrayerShareForId(sid);
+                });
+            }
+
             if (prayerMineClearBtn) {
                 prayerMineClearBtn.addEventListener("click", function () {
                     if (!window.confirm(T("contact.prayerMineClearConfirm", "Clear every prayer from your personal list?", prayerCard))) {
@@ -1909,6 +2048,13 @@
 
             if (prayerWallList) {
                     prayerWallList.addEventListener("click", function (event) {
+                    var shareBtn = event.target.closest("button[data-prayer-share-id]");
+                    if (shareBtn && !prayerWallBusy) {
+                        event.stopPropagation();
+                        var sid = shareBtn.getAttribute("data-prayer-share-id");
+                        runPrayerShareForId(sid);
+                        return;
+                    }
                     var mineRemove = event.target.closest("button[data-prayer-mine-remove]");
                     if (mineRemove && !prayerWallBusy) {
                         var rid = mineRemove.getAttribute("data-prayer-mine-remove");
@@ -2005,6 +2151,9 @@
                         prayerDetailOverlay.hidden = true;
                         document.body.classList.remove("prayer-detail-open");
                         setDetailActionPrayerId("");
+                        if (prayerDetailShareButton) {
+                            prayerDetailShareButton.hidden = true;
+                        }
                     }
                     return;
                 }
@@ -2018,6 +2167,9 @@
                         prayerDetailOverlay.hidden = true;
                         document.body.classList.remove("prayer-detail-open");
                         setDetailActionPrayerId("");
+                        if (prayerDetailShareButton) {
+                            prayerDetailShareButton.hidden = true;
+                        }
                     }
                     return;
                 }
@@ -2065,6 +2217,10 @@
                         prayerWallNote.textContent = T("contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.", prayerCard);
                     } else if (state === "minePdfBlocked") {
                         prayerWallNote.textContent = T("contact.prayerMinePdfBlocked", "Allow pop-ups for this site, or use Print from the browser menu.", prayerCard);
+                    } else if (state === "linkCopied") {
+                        prayerWallNote.textContent = T("contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.", prayerCard);
+                    } else if (state === "shareError") {
+                        prayerWallNote.textContent = T("contact.prayerShareFailed", "Could not copy. Try again or use the browser to copy the address from the top bar.", prayerCard);
                     } else {
                         prayerWallNote.textContent = T("contact.prayerWallNeedMessage", "Please write your prayer request.", prayerCard);
                     }

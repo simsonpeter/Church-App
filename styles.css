@@ -6220,6 +6220,36 @@ html[data-theme="dark"] .prayer-list-translated-note {
     opacity: 0.62;
 }
 
+.prayer-list-share-row {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    justify-content: flex-end;
+    margin: 0 14px 0 18px;
+    padding: 0 0 4px 0;
+}
+
+.prayer-list-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 30px;
+    padding: 4px 8px 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.prayer-list-share:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
 .prayer-list-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -6433,8 +6463,37 @@ body.prayer-detail-open {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 8px;
     margin-bottom: 12px;
     color: var(--primary);
+}
+
+.prayer-detail-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.prayer-detail-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    min-height: 32px;
+    padding: 4px 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface-soft);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.prayer-detail-share:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .prayer-detail-close {
