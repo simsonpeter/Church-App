@@ -925,6 +925,129 @@
                 return Boolean(entry && entry.approved !== false);
             }
 
+            function safeDecodePathSegment(value) {
+                var raw = String(value || "").trim();
+                if (!raw) {
+                    return "";
+                }
+                try {
+                    return decodeURIComponent(raw);
+                } catch (err) {
+                    return raw;
+                }
+            }
+
+            function isPrayerRouteInHash() {
+                if (window.NjcSpaRouter && typeof window.NjcSpaRouter.splitHashRoute === "function") {
+                    var p = window.NjcSpaRouter.splitHashRoute();
+                    var b = (p && p.baseRoute || "").toLowerCase();
+                    return b === "prayer" || b === "about";
+                }
+                var h = (window.location.hash || "").replace(/^#/, "").toLowerCase();
+                var part = h.indexOf("?") < 0 ? h : h.slice(0, h.indexOf("?"));
+                return part === "prayer" || part.indexOf("prayer/") === 0 || part === "about" || part.indexOf("about/") === 0;
+            }
+
+            function getPrayerIdFromAppHash() {
+                if (window.NjcSpaRouter && typeof window.NjcSpaRouter.splitHashRoute === "function") {
+                    var parts = window.NjcSpaRouter.splitHashRoute();
+                    var b = (parts && parts.baseRoute || "").toLowerCase();
+                    if (b === "about") {
+                        b = "prayer";
+                    }
+                    if (b !== "prayer") {
+                        return "";
+                    }
+                    if (parts.segments && parts.segments.length > 1) {
+                        return safeDecodePathSegment(parts.segments[1] || "");
+                    }
+                    return safeDecodePathSegment(String(parts.subPath || "").split("/").filter(Boolean)[0] || "");
+                }
+                return "";
+            }
+
+            function setPrayerRouteHashForDetail(prayerId) {
+                var id = String(prayerId || "").trim();
+                var want = id ? ("#prayer/" + encodeURIComponent(id)) : "#prayer";
+                if (String(window.location.hash || "") === want) {
+                    return;
+                }
+                try {
+                    window.history.replaceState(null, "", want);
+                } catch (e) {
+                    // ignore
+                }
+            }
+
+            function getPrayerTabForEntry(entry) {
+                if (!entry) {
+                    return "other";
+                }
+                if (isPrayerInMyList(entry.id)) {
+                    return "mine";
+                }
+                if (Number(entry.answered || 0) > 0) {
+                    return "answered";
+                }
+                if (entry.urgent) {
+                    return "urgent";
+                }
+                return "other";
+            }
+
+            function canViewDeepLinkedEntry(entry) {
+                if (!entry) {
+                    return false;
+                }
+                if (isAdminUser()) {
+                    return true;
+                }
+                if (entry.pastorOnly && !canSeePastorOnlyEntry(entry)) {
+                    return false;
+                }
+                return isPrayerApprovedForPublic(entry);
+            }
+
+            function tryOpenPrayerFromAppHash() {
+                if (!prayerWallList) {
+                    return;
+                }
+                if (prayerWallLoading) {
+                    return;
+                }
+                var deepId = getPrayerIdFromAppHash();
+                if (deepId && deepId === activePrayerDetailId
+                    && prayerDetailOverlay
+                    && !prayerDetailOverlay.hidden) {
+                    return;
+                }
+                if (!deepId) {
+                    if (prayerDetailOverlay
+                        && !prayerDetailOverlay.hidden
+                        && isPrayerRouteInHash()
+                        && !getPrayerIdFromAppHash()) {
+                        closePrayerDetail();
+                    }
+                    return;
+                }
+                var found = null;
+                for (var i = 0; i < prayerWallEntries.length; i += 1) {
+                    if (prayerWallEntries[i] && String(prayerWallEntries[i].id) === String(deepId)) {
+                        found = prayerWallEntries[i];
+                        break;
+                    }
+                }
+                if (!found) {
+                    return;
+                }
+                if (!canViewDeepLinkedEntry(found)) {
+                    return;
+                }
+                setActivePrayerTab(getPrayerTabForEntry(found), { skipRender: true });
+                renderPrayerWall();
+                openPrayerDetail(found.id);
+            }
+
             function getPrayerWallEntriesForPublicTabs() {
                 var base = prayerWallEntries.filter(function (e) {
                     return !e.pastorOnly || canSeePastorOnlyEntry(e);
@@ -1074,6 +1197,9 @@
                 prayerDetailOverlay.hidden = true;
                 document.body.classList.remove("prayer-detail-open");
                 setDetailActionPrayerId("");
+                if (isPrayerRouteInHash() && getPrayerIdFromAppHash()) {
+                    setPrayerRouteHashForDetail("");
+                }
             }
 
             function renderPrayerDetail() {
@@ -1176,6 +1302,7 @@
                 if (!activePrayerDetailId) {
                     return;
                 }
+                setPrayerRouteHashForDetail(activePrayerDetailId);
                 prayerDetailOverlay.hidden = false;
                 document.body.classList.add("prayer-detail-open");
                 if (prayerDetailCloseButton) {
@@ -1609,6 +1736,7 @@
                 }
                 prayerWallLoading = false;
                 renderPrayerWall();
+                tryOpenPrayerFromAppHash();
             }
 
             if (form) {
@@ -1868,10 +1996,32 @@
                 }
             });
 
-            window.addEventListener("hashchange", function () {
-                if ((window.location.hash || "").toLowerCase() !== "#prayer") {
-                    closePrayerDetail();
+            document.addEventListener("njc:routechange", function (event) {
+                var d = (event && event.detail) || {};
+                var r = (d.route || "").toLowerCase();
+                if (r !== "prayer") {
+                    if (r && prayerDetailOverlay && !prayerDetailOverlay.hidden) {
+                        activePrayerDetailId = "";
+                        prayerDetailOverlay.hidden = true;
+                        document.body.classList.remove("prayer-detail-open");
+                        setDetailActionPrayerId("");
+                    }
+                    return;
                 }
+                tryOpenPrayerFromAppHash();
+            });
+
+            window.addEventListener("hashchange", function () {
+                if (!isPrayerRouteInHash()) {
+                    if (prayerDetailOverlay && !prayerDetailOverlay.hidden) {
+                        activePrayerDetailId = "";
+                        prayerDetailOverlay.hidden = true;
+                        document.body.classList.remove("prayer-detail-open");
+                        setDetailActionPrayerId("");
+                    }
+                    return;
+                }
+                tryOpenPrayerFromAppHash();
             });
 
             loadPrayerWall();
@@ -1928,6 +2078,7 @@
             document.addEventListener("njc:authchange", function () {
                 renderPrayerWall();
                 renderPrayerDetail();
+                tryOpenPrayerFromAppHash();
             });
             document.addEventListener("njc:admin-prayer-updated", function () {
                 loadPrayerWall();

@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v343mainmerge1";
-const RUNTIME_CACHE = "njc-runtime-cache-v343mainmerge1";
+const APP_CACHE = "njc-app-cache-v344deeplink1";
+const RUNTIME_CACHE = "njc-runtime-cache-v344deeplink1";
 
 const CORE_ASSETS = [
     "./",
@@ -48,7 +48,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260417prayerapprove1",
+    "./contact-page.js?v=20260411deeplink1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260417prayerapprove1",
@@ -61,7 +61,7 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260411celeguest",
+    "./spa-router.js?v=20260411deeplink1",
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

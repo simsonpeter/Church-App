@@ -1639,7 +1639,14 @@
     }
 
     function getCurrentRouteId() {
-        return String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() || "home";
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim();
+        var path = raw;
+        var q = path.indexOf("?");
+        if (q >= 0) {
+            path = path.slice(0, q);
+        }
+        var first = path.split("/").map(function (s) { return s.trim(); }).filter(Boolean)[0] || "";
+        return (first || "home").toLowerCase();
     }
 
     function setupHomeGlobalLanguageFab() {
@@ -4032,10 +4039,16 @@
 
         function getCurrentRoute() {
             var raw = (window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-            if (raw === "library") {
+            var path = raw;
+            var q = path.indexOf("?");
+            if (q >= 0) {
+                path = path.slice(0, q);
+            }
+            var first = path.split("/").map(function (s) { return s.trim(); }).filter(Boolean)[0] || "";
+            if (first === "library") {
                 return "book-shelf";
             }
-            return raw;
+            return first || "home";
         }
 
         function applyModuleNavVisibility() {
@@ -4068,7 +4081,9 @@
             }
             var path = u.slice(1);
             var q = path.indexOf("?");
-            var route = (q < 0 ? path : path.slice(0, q)).trim().toLowerCase();
+            var pathNoQuery = q < 0 ? path : path.slice(0, q);
+            var route = pathNoQuery.split("/").map(function (s) { return s.trim(); }).filter(Boolean)[0] || "";
+            route = String(route).toLowerCase();
             if (route === "library") {
                 route = "book-shelf";
             }

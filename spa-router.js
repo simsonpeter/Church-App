@@ -238,18 +238,31 @@
 
     function splitHashRoute() {
         var raw = String(window.location.hash || "").replace(/^#/, "").trim();
+        var pathPart = raw;
+        var query = "";
         var q = raw.indexOf("?");
-        if (q < 0) {
-            return { route: raw.toLowerCase(), query: "" };
+        if (q >= 0) {
+            pathPart = raw.slice(0, q);
+            query = raw.slice(q + 1);
         }
+        var segments = pathPart.split("/").map(function (s) {
+            return s.trim();
+        }).filter(function (s) {
+            return Boolean(s);
+        });
+        var base = segments.length ? segments[0].toLowerCase() : "";
+        var subPath = segments.length > 1 ? segments.slice(1).join("/") : "";
         return {
-            route: raw.slice(0, q).trim().toLowerCase(),
-            query: raw.slice(q + 1)
+            baseRoute: base,
+            subPath: subPath,
+            segments: segments,
+            query: query,
+            pathPart: pathPart
         };
     }
 
     function getRouteFromHash() {
-        var raw = splitHashRoute().route;
+        var raw = splitHashRoute().baseRoute;
         if (raw === "about") {
             return "prayer";
         }
@@ -299,13 +312,27 @@
             subtitle.hidden = !subtitleValue;
         }
 
-        var hashParts = splitHashRoute();
-        var hashRoute = hashParts.route;
-        if (hashRoute !== current) {
+        var parts = splitHashRoute();
+        var baseLower = (parts.baseRoute || "").toLowerCase();
+        var baseAlias = baseLower;
+        if (baseLower === "about") {
+            baseAlias = "prayer";
+        }
+        if (baseLower === "library") {
+            baseAlias = "book-shelf";
+        }
+        if (baseAlias !== current) {
             window.history.replaceState(null, "", "#" + current);
         }
 
-        document.dispatchEvent(new CustomEvent("njc:routechange", { detail: { route: current } }));
+        document.dispatchEvent(new CustomEvent("njc:routechange", {
+            detail: {
+                route: current,
+                subPath: parts.subPath || "",
+                query: parts.query || "",
+                hashSegments: parts.segments || []
+            }
+        }));
 
         window.setTimeout(function () {
             window.scrollTo(0, 0);
@@ -323,4 +350,9 @@
     window.addEventListener("hashchange", onRouteChange);
     document.addEventListener("njc:langchange", onRouteChange);
     document.addEventListener("njc:authchange", onRouteChange);
+
+    window.NjcSpaRouter = {
+        getRouteFromHash: getRouteFromHash,
+        splitHashRoute: splitHashRoute
+    };
 })();
