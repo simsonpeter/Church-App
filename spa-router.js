@@ -101,6 +101,15 @@
             subtitleKey: "userAchievements.subtitle",
             subtitleText: "Bible Quiz and Bible reading points"
         },
+        kids: {
+            icon: "fa-child-reaching",
+            eyebrowKey: "kids.eyebrow",
+            eyebrowText: "Kids",
+            titleKey: "kids.title",
+            titleText: "Kids corner",
+            subtitleKey: "kids.subtitle",
+            subtitleText: "Simple activities for children"
+        },
         chat: {
             icon: "fa-comments",
             eyebrowKey: "chat.eyebrow",

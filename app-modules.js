@@ -24,7 +24,8 @@
         contact: true,
         celebrations: true,
         chat: true,
-        userAchievements: true
+        userAchievements: true,
+        kids: true
     };
 
     var ROUTE_TO_MODULE = {
@@ -39,7 +40,8 @@
         trivia: "trivia",
         "user-achievements": "userAchievements",
         chat: "chat",
-        celebrations: "celebrations"
+        celebrations: "celebrations",
+        kids: "kids"
     };
 
     var registrationPoolPublic = null;
@@ -80,7 +82,7 @@
 
     function defaultSignupPool() {
         var o = {};
-        ["prayer", "trivia", "dailyBread", "celebrations"].forEach(function (key) {
+        ["prayer", "trivia", "dailyBread", "celebrations", "kids"].forEach(function (key) {
             o[key] = true;
         });
         Object.keys(DEFAULT_MODULES).forEach(function (key) {

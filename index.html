@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411prayershare1">
+    <link rel="stylesheet" href="styles.css?v=20260411kids1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -361,6 +361,56 @@
                 </div>
                 <p id="sermon-archive-note" data-i18n="sermons.archiveLoading">Loading archive summary...</p>
                 <p class="page-note" data-i18n="sermons.tip">Tip: Use the latest list to open sermon audio directly.</p>
+            </section>
+            </main>
+        </section>
+
+        <section class="page-view" data-route="kids">
+            <main class="app-content">
+            <section class="card card-v-featured kids-page-card" data-card-lang-id="kids">
+                <h2><i class="fa-solid fa-child-reaching" aria-hidden="true"></i><span data-i18n="kids.title">Kids corner</span></h2>
+                <div class="card-banner">
+                    <img src="bible-reader-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                </div>
+                <p class="page-note kids-page-lead" data-i18n="kids.lead">Fun, faith-centred games for children. Best with a parent nearby.</p>
+                <p class="page-note kids-page-parent" data-i18n="kids.parentNote">Grown-ups: you can use these in Sunday School, at home, or while travelling.</p>
+
+                <div class="kids-activity" id="kids-activity-memory">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-rectangle-list" aria-hidden="true"></i> <span data-i18n="kids.memTitle">Bible match cards</span></h3>
+                    <p class="page-note" data-i18n="kids.memHelp">Find two matching pictures. Tap a card, then its pair.</p>
+                    <p class="kids-mem-status" id="kids-mem-status" aria-live="polite" data-i18n="kids.memStatusStart">Find all pairs to win.</p>
+                    <div class="kids-mem-grid" id="kids-mem-grid" role="grid" aria-label="Bible match cards"></div>
+                    <button type="button" class="button-link button-secondary" id="kids-mem-restart" data-i18n="kids.memNew">New game</button>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-word">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-shuffle" aria-hidden="true"></i> <span data-i18n="kids.scrambleTitle">Word unscramble</span></h3>
+                    <p class="page-note" id="kids-scramble-hint" data-i18n="kids.scrambleHint">Put the letters in the right order. Tap a letter, then a slot.</p>
+                    <div class="kids-scramble-row">
+                        <div class="kids-scramble-letters" id="kids-scramble-letters" role="group"></div>
+                    </div>
+                    <div class="kids-scramble-row">
+                        <div class="kids-scramble-build" id="kids-scramble-build" role="group" aria-label="Build the word"></div>
+                    </div>
+                    <p class="page-note" id="kids-scramble-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link" id="kids-scramble-check" data-i18n="kids.scrambleCheck">Check</button>
+                        <button type="button" class="button-link button-secondary" id="kids-scramble-next" data-i18n="kids.scrambleNext">Next word</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-choice">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> <span data-i18n="kids.choiceTitle">What would God like?</span></h3>
+                    <p class="page-note" id="kids-choice-q" data-i18n="kids.choiceQ1">Your friend is sad. What is a good thing to do?</p>
+                    <ul class="kids-choice-list" id="kids-choice-list" role="list">
+                    </ul>
+                    <p class="page-note" id="kids-choice-feedback" aria-live="polite" hidden></p>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-verse">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-book-bible" aria-hidden="true"></i> <span data-i18n="kids.verseTitle">Read together</span></h3>
+                    <p class="page-note kids-verse-text" data-i18n="kids.verseText">"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life." — John 3:16 (KJV)</p>
+                </div>
             </section>
             </main>
         </section>
@@ -934,6 +984,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
                         </fieldset>
                         <button type="button" class="button-link" id="admin-modules-save" data-i18n="admin.modulesSave">Save module settings</button>
                         <hr class="admin-access-divider" aria-hidden="true">
@@ -957,6 +1008,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-pool-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
                         </fieldset>
                         <h3 class="admin-access-subheading" data-i18n="admin.memberCodesHeading" data-i18n-fallback="One-time member codes">One-time member codes</h3>
                         <p class="page-note" data-i18n="admin.memberCodesInfo" data-i18n-fallback="One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.">One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.</p>
@@ -1030,6 +1082,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
                         </fieldset>
                     </div>
                 </details>
@@ -1697,9 +1750,9 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260411mainmerge1"></script>
-    <script src="app-modules.js?v=20260426adminbypass"></script>
+    <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411prayershare1"></script>
+    <script src="app-shell.js?v=20260411kids1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1716,12 +1769,11 @@
     <script src="admin-users-page.js?v=20260411mainmerge1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260427memberfnerr"></script>
+    <script src="profile-page.js?v=20260411kids1"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
-    <script src="spa-router.js?v=20260411deeplink1"></script>
+    <script src="spa-router.js?v=20260411kids1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="user-achievements-page.js?v=20260415moduletrivia"></script>
-</body>
+    <script src="kids-page.js?v=20260411kids1"></script>
 </html>

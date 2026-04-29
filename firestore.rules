@@ -162,7 +162,7 @@ service cloud.firestore {
         && request.resource.data.moduleGrants.keys().hasOnly([
           "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
           "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
-          "sermons", "contact", "celebrations", "chat", "userAchievements"
+          "sermons", "contact", "celebrations", "chat", "userAchievements", "kids"
         ])
         && request.resource.data.updatedAt is timestamp;
     }

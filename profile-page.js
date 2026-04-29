@@ -79,7 +79,8 @@
         contact: "Contact",
         celebrations: "Celebrations",
         chat: "Chat",
-        userAchievements: "User achievements"
+        userAchievements: "User achievements",
+        kids: "Kids corner"
     };
 
     function normalizeStringList(raw, maxLen) {

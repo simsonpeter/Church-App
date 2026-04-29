@@ -62,6 +62,7 @@
         "menu.trivia": "வேதாகமக் கேள்விகள்",
         "menu.userAchievements": "பயனர் சாதனைகள்",
         "menu.chat": "அரட்டை",
+        "menu.kids": "குழந்தைகள்",
         "menu.celebrations": "இன்றைய விழாக்கள்",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
@@ -773,6 +774,7 @@
         "admin.moduleCelebrations": "விழாக்கள்",
         "admin.moduleChat": "அரட்டை",
         "admin.moduleUserAchievements": "பயனர் சாதனைகள்",
+        "admin.moduleKids": "குழந்தைகள் மூலை",
         "admin.modulesSave": "தொகுப்பு அமைப்புகளைச் சேமி",
         "admin.modulesSaved": "தொகுப்பு அமைப்புகள் சேமிக்கப்பட்டன.",
         "admin.modulesLoadError": "தொகுப்பு அமைப்புகளை ஏற்ற முடியவில்லை.",
@@ -1125,6 +1127,38 @@
         "userAchievements.eyebrow": "சமூகம்",
         "userAchievements.title": "பயனர் சாதனைகள்",
         "userAchievements.subtitle": "வேதாகமக் கேள்விகள் மற்றும் வேத வாசிப்பு புள்ளிகள்",
+        "kids.eyebrow": "குழந்தைகள்",
+        "kids.title": "குழந்தைகள் மூலை",
+        "kids.subtitle": "எளிய நடவடிக்கைகள்",
+        "kids.lead": "பிள்ளைகளுக்கான எளிய, தேவனைப் பற்றிய விளையாட்டுகள். பெற்றோருடன் இணைந்து நன்று.",
+        "kids.parentNote": "பெரியவர்கள்: ஞாயிறு பள்ளி, வீடு, பயணம் — எங்கும் இதைப் பயன்படுத்தலாம்.",
+        "kids.memTitle": "பைபிள் ஜோடி படங்கள்",
+        "kids.memHelp": "இரண்டு ஒரே படங்களைக் கண்டுபிடி. ஒரு கார்டைத் தட்டி, ஜோடியையும் தட்டு.",
+        "kids.memStatusStart": "எல்லா ஜோடிகளையும் கண்டுபிடி.",
+        "kids.memStatusGood": "நன்று! தொடருங்கள்.",
+        "kids.memStatusTry": "பொருந்தவில்லை. மீண்டும் முயல்க.",
+        "kids.memWon": "அனைத்து ஜோடிகளையும் கண்டுபிடித்தீர்கள்! அருமை.",
+        "kids.memNew": "புது விளையாட்டு",
+        "kids.scrambleTitle": "எழுத்து ஒழுங்கு",
+        "kids.scrambleHint": "எழுத்துகளை வரிசையாக நிரப்பு. எழுத்தைத் தட்டி, வரிசையிலுள்ள காலியிடத்தில் நிரப்பு. திரும்பப் பெற நிரப்பப்பட்ட இடத்தைத் தட்டு.",
+        "kids.scrambleCheck": "சரி பார்",
+        "kids.scrambleNext": "அடுத்த வார்த்தை",
+        "kids.scrambleOk": "சரியாக எழுதிவிட்டீர்கள்!",
+        "kids.scrambleBad": "இன்னும் அல்ல. எல்லா இடங்களையும் நிரப்பி முயலுங்கள்.",
+        "kids.choiceTitle": "கடவுள் எதை விரும்புவார்?",
+        "kids.choiceQ1": "உங்கள் நண்பர் கவலையாக இருக்கிறார்கள். நல்லது எது?",
+        "kids.choiceA1": "அவர்களுக்காக ஜெபித்து, அன்பாக நடக்க முயல்",
+        "kids.choiceB1": "அவர்கள் வரிசையை மனப்பூர்வமாக எடுத்து விடு",
+        "kids.choiceQ2": "உங்களிடம் ஏதாவது தவறி விழுந்து விட்டால், நீங்கள் என்ன செய்ய வேண்டும்?",
+        "kids.choiceA2": "உண்மையைச் சொல்லி மன்னிப்பு கேட்க",
+        "kids.choiceB2": "புறங்கைகாட்டி ஓடு",
+        "kids.choiceQ3": "நீங்கள் எதைப் பகிர்ந்து கொள்ள முடியும்?",
+        "kids.choiceA3": "உங்கள் பொருட்களையும் நேரத்தையும் (பாடசாலை, விளையாட்டு)",
+        "kids.choiceB3": "பிறரைப் பற்றிய கோபமான பேச்சு",
+        "kids.choiceRight": "இயேசு மகிழ்வார் என்று தோன்றும் தேர்வு.",
+        "kids.choiceOther": "வேறு பதில் நன்றாக இருக்கலாம். பெற்றோருடன் பேசுங்கள்.",
+        "kids.verseTitle": "ஒன்றாக வாசி",
+        "kids.verseText": "\"உலகத்தை மிகவும் நேசித்தபடி, தம்முடைய ஒப்புவிக்கப்பட்ட ஒரேகுமாரனை அளித்தார், அவரை விசுவாசிக்கிறவன் எவனோ அவன் கெட்டுப்போகாமல் நித்தியஜீவனை அடைவான்.\" — யோவான் 3:16 (KJV, ஆங்கிலம். தமிழ் வசனம்: வேத வாசிப்பு பிரிவிற்குச் சென்று BSI-யைப் படிக்கவும்).",
         "userAchievements.lead": "வேதாகமக் கேள்விகள் மற்றும் வேத வாசிப்பு புள்ளிகள். ஒவ்வொரு உறுப்பினரும் உள்நுழைந்து செயலியை திறந்த பிறகே பட்டியலில் தோன்றுவர் (ஒவ்வொரு சாதனமும் ஒரு மேக வரியை வெளியிடும்). மீண்டும் ஏற்று என தட்டவும்.",
         "userAchievements.loginHint": "பட்டியலில் தோன்ற உள்நுழையவும்; உங்கள் பெயர் சுயவிவரத்திலிருந்து எடுக்கப்படும்.",
         "userAchievements.refresh": "மீண்டும் ஏற்று",
@@ -3946,6 +3980,13 @@
         bookShelfLink.innerHTML = "<i class=\"fa-solid fa-book-open-reader\"></i><span></span>";
         bibleSongLinksContainer.appendChild(bookShelfLink);
 
+        var kidsLink = document.createElement("a");
+        kidsLink.className = "header-menu-link";
+        kidsLink.href = "#kids";
+        kidsLink.setAttribute("data-route", "kids");
+        kidsLink.innerHTML = "<i class=\"fa-solid fa-child-reaching\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(kidsLink);
+
         var triviaLink = document.createElement("a");
         triviaLink.className = "header-menu-link";
         triviaLink.href = "#trivia";
@@ -4071,6 +4112,7 @@
             bibleLink.hidden = !m.isModuleEnabled("bible");
             songbookLink.hidden = !m.isModuleEnabled("songbook");
             bookShelfLink.hidden = !m.isModuleEnabled("bookShelf");
+            kidsLink.hidden = !m.isModuleEnabled("kids");
             dailyBreadMenuLink.hidden = !m.isModuleEnabled("dailyBread");
             triviaLink.hidden = !m.isModuleEnabled("trivia");
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
@@ -4199,6 +4241,7 @@
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
             var bookShelfLabel = t("menu.bookShelf", "Book shelf");
+            var kidsLabel = t("menu.kids", "Kids");
             var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
@@ -4259,6 +4302,10 @@
             if (bookShelfNode) {
                 bookShelfNode.textContent = bookShelfLabel;
             }
+            var kidsNode = kidsLink.querySelector("span");
+            if (kidsNode) {
+                kidsNode.textContent = kidsLabel;
+            }
             var dailyBreadNode = dailyBreadMenuLink.querySelector("span");
             if (dailyBreadNode) {
                 dailyBreadNode.textContent = dailyBreadMenuLabel;
@@ -4310,6 +4357,7 @@
             var isBible = getCurrentRoute() === "bible";
             var isSongbook = getCurrentRoute() === "songbook";
             var isBookShelf = getCurrentRoute() === "book-shelf";
+            var isKids = getCurrentRoute() === "kids";
             var isDailyBread = getCurrentRoute() === "daily-bread";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
@@ -4323,6 +4371,7 @@
             bibleLink.classList.toggle("active", isBible);
             songbookLink.classList.toggle("active", isSongbook);
             bookShelfLink.classList.toggle("active", isBookShelf);
+            kidsLink.classList.toggle("active", isKids);
             dailyBreadMenuLink.classList.toggle("active", isDailyBread);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
