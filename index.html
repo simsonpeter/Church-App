@@ -368,7 +368,7 @@
         <section class="page-view" data-route="kids">
             <main class="app-content">
             <section class="card card-v-featured kids-page-card" data-card-lang-id="kids">
-                <h2><i class="fa-solid fa-child-reaching" aria-hidden="true"></i><span data-i18n="kids.title">Kids corner</span></h2>
+                <h2><i class="fa-solid fa-child-reaching" aria-hidden="true"></i><span data-i18n="kids.title">Kids World</span></h2>
                 <div class="card-banner kids-corner-banner">
                     <img src="kids-corner-banner.png?v=20260430kids1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
                 </div>
@@ -376,7 +376,7 @@
                 <p class="page-note kids-page-lead" data-i18n="kids.lead">Fun, faith-centred games for children. Best with a parent nearby.</p>
                 <p class="page-note kids-page-parent" data-i18n="kids.parentNote">Grown-ups: you can use these in Sunday School, at home, or while travelling.</p>
 
-                <nav class="kids-tabs" id="kids-tabs" role="tablist" aria-label="Kids corner sections">
+                <nav class="kids-tabs" id="kids-tabs" role="tablist" aria-label="Kids World sections">
                     <button type="button" class="kids-tab active" id="kids-tab-games" role="tab" aria-selected="true" aria-controls="kids-panel-games" data-kids-tab="games">
                         <span class="kids-tab-icon" aria-hidden="true"><i class="fa-solid fa-gamepad"></i></span>
                         <span class="kids-tab-label" data-i18n="kids.tabGames">Games</span>
@@ -1059,7 +1059,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
-                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids World</span></label>
                         </fieldset>
                         <button type="button" class="button-link" id="admin-modules-save" data-i18n="admin.modulesSave">Save module settings</button>
                         <hr class="admin-access-divider" aria-hidden="true">
@@ -1083,7 +1083,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
-                            <label class="admin-module-toggle"><input type="checkbox" data-pool-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-pool-key="kids" checked> <span data-i18n="admin.moduleKids">Kids World</span></label>
                         </fieldset>
                         <h3 class="admin-access-subheading" data-i18n="admin.memberCodesHeading" data-i18n-fallback="One-time member codes">One-time member codes</h3>
                         <p class="page-note" data-i18n="admin.memberCodesInfo" data-i18n-fallback="One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.">One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.</p>
@@ -1157,7 +1157,7 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="celebrations" checked> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="chat" checked> <span data-i18n="admin.moduleChat">Chat</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="userAchievements" checked> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
-                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids corner</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-user-access-module-key="kids" checked> <span data-i18n="admin.moduleKids">Kids World</span></label>
                         </fieldset>
                     </div>
                 </details>
@@ -1827,7 +1827,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260430kidsbanner1"></script>
+    <script src="app-shell.js?v=20260411kidsworld1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1844,11 +1844,11 @@
     <script src="admin-users-page.js?v=20260411mainmerge1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260411kids1"></script>
+    <script src="profile-page.js?v=20260411kidsworld"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260330u1"></script>
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
-    <script src="spa-router.js?v=20260411kids1"></script>
+    <script src="spa-router.js?v=20260411kidsworld"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="kids-page.js?v=20260430kidsbanner"></script>
 </html>

@@ -80,7 +80,7 @@
         celebrations: "Celebrations",
         chat: "Chat",
         userAchievements: "User achievements",
-        kids: "Kids corner"
+        kids: "Kids World"
     };
 
     function normalizeStringList(raw, maxLen) {

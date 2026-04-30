@@ -104,9 +104,9 @@
         kids: {
             icon: "fa-child-reaching",
             eyebrowKey: "kids.eyebrow",
-            eyebrowText: "Kids",
+            eyebrowText: "Kids World",
             titleKey: "kids.title",
-            titleText: "Kids corner",
+            titleText: "Kids World",
             subtitleKey: "kids.subtitle",
             subtitleText: "Simple activities for children"
         },

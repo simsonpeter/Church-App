@@ -62,7 +62,7 @@
         "menu.trivia": "வேதாகமக் கேள்விகள்",
         "menu.userAchievements": "பயனர் சாதனைகள்",
         "menu.chat": "அரட்டை",
-        "menu.kids": "குழந்தைகள்",
+        "menu.kids": "சிறுவர் உலகம்",
         "menu.celebrations": "இன்றைய விழாக்கள்",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
@@ -774,7 +774,7 @@
         "admin.moduleCelebrations": "விழாக்கள்",
         "admin.moduleChat": "அரட்டை",
         "admin.moduleUserAchievements": "பயனர் சாதனைகள்",
-        "admin.moduleKids": "குழந்தைகள் மூலை",
+        "admin.moduleKids": "சிறுவர் உலகம்",
         "admin.modulesSave": "தொகுப்பு அமைப்புகளைச் சேமி",
         "admin.modulesSaved": "தொகுப்பு அமைப்புகள் சேமிக்கப்பட்டன.",
         "admin.modulesLoadError": "தொகுப்பு அமைப்புகளை ஏற்ற முடியவில்லை.",
@@ -1127,8 +1127,8 @@
         "userAchievements.eyebrow": "சமூகம்",
         "userAchievements.title": "பயனர் சாதனைகள்",
         "userAchievements.subtitle": "வேதாகமக் கேள்விகள் மற்றும் வேத வாசிப்பு புள்ளிகள்",
-        "kids.eyebrow": "குழந்தைகள்",
-        "kids.title": "குழந்தைகள் மூலை",
+        "kids.eyebrow": "சிறுவர் உலகம்",
+        "kids.title": "சிறுவர் உலகம்",
         "kids.subtitle": "எளிய நடவடிக்கைகள்",
         "kids.tagline": "கற்றுக்கொள் · விளையாடு · விசுவாசத்தில் வளர்",
         "kids.tabGames": "விளையாட்டுகள்",
@@ -1909,7 +1909,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260430kidsbanner1";
+    var SW_VERSION = "20260411kidsworld1";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
@@ -4300,7 +4300,7 @@
             var bibleLabel = t("menu.bible", "Bible");
             var songbookLabel = t("menu.songbook", "Songbook");
             var bookShelfLabel = t("menu.bookShelf", "Book shelf");
-            var kidsLabel = t("menu.kids", "Kids");
+            var kidsLabel = t("menu.kids", "Kids World");
             var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
