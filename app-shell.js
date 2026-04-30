@@ -1894,10 +1894,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260417prayerapprove1";
-    var APP_VERSION = "2026.4.22";
-    /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Prayer wall: new posts need admin approval before going public.";
+    var SW_VERSION = "20260411releaseui1";
+    var APP_VERSION = "2026.4.11";
+    /** Fallback if the waiting worker is too old to send release notes. */
+    var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
@@ -1920,9 +1920,9 @@
         return Date.now() < getUpdateSnoozeUntilMs();
     }
 
-    function getWaitingWorkerAppCacheId(registration) {
+    function getWaitingWorkerUpdateMeta(registration) {
         if (!registration || !registration.waiting) {
-            return Promise.resolve("");
+            return Promise.resolve({ version: "", releaseNotes: "" });
         }
         return new Promise(function (resolve) {
             var settled = false;
@@ -1931,22 +1931,27 @@
                     return;
                 }
                 settled = true;
-                resolve(value || "");
+                resolve(value || { version: "", releaseNotes: "" });
             }
             var timer = window.setTimeout(function () {
-                done("");
+                done({ version: "", releaseNotes: "" });
             }, 2500);
             try {
                 var channel = new MessageChannel();
                 channel.port1.onmessage = function (ev) {
                     window.clearTimeout(timer);
-                    var v = ev && ev.data && ev.data.version;
-                    done(typeof v === "string" ? v : "");
+                    var d = ev && ev.data;
+                    var v = d && d.version;
+                    var notes = d && d.releaseNotes;
+                    done({
+                        version: typeof v === "string" ? v : "",
+                        releaseNotes: typeof notes === "string" ? notes.trim() : ""
+                    });
                 };
                 registration.waiting.postMessage({ type: "GET_APP_CACHE_VERSION" }, [channel.port2]);
             } catch (e2) {
                 window.clearTimeout(timer);
-                done("");
+                done({ version: "", releaseNotes: "" });
             }
         });
     }
@@ -2009,7 +2014,10 @@
             }
             updateModalAutoInFlight = true;
         }
-        getWaitingWorkerAppCacheId(registration).then(function (buildId) {
+        getWaitingWorkerUpdateMeta(registration).then(function (meta) {
+            var buildId = meta && meta.version ? meta.version : "";
+            var releaseNotesFromWorker = meta && meta.releaseNotes ? meta.releaseNotes : "";
+
             function releaseAutoLock() {
                 if (!fromSettings) {
                     updateModalAutoInFlight = false;
@@ -2026,7 +2034,10 @@
                 }
                 markAutoUpdateModalShownThisSession();
             }
-            showUpdateModal(registration, { dismissedBuildId: buildId });
+            showUpdateModal(registration, {
+                dismissedBuildId: buildId,
+                releaseNotesFromWorker: releaseNotesFromWorker
+            });
             releaseAutoLock();
         });
     }
@@ -2305,8 +2316,26 @@
             var prefix = (window.NjcI18n && typeof window.NjcI18n.t === "function")
                 ? window.NjcI18n.t("app.updateNotesPrefix", "What's new:")
                 : "What's new:";
-            notesEl.textContent = prefix + " " + UPDATE_NOTES_SUMMARY + " (" + SW_VERSION + ")";
-            notesEl.hidden = false;
+            function formatUpdateNotesLine(buildId, notesFromWorker) {
+                var notes = String(notesFromWorker || "").trim();
+                if (!notes) {
+                    notes = UPDATE_NOTES_FALLBACK;
+                }
+                var ver = String(buildId || "").trim();
+                return ver ? notes + " (" + ver + ")" : notes;
+            }
+            function applyNotesLine(buildId, workerNotes) {
+                notesEl.textContent = prefix + " " + formatUpdateNotesLine(buildId, workerNotes);
+                notesEl.hidden = false;
+            }
+            var workerNotesEarly = opts.releaseNotesFromWorker;
+            if (dismissedBuildId || (workerNotesEarly && String(workerNotesEarly).trim())) {
+                applyNotesLine(dismissedBuildId, workerNotesEarly);
+            } else {
+                getWaitingWorkerUpdateMeta(registration).then(function (m) {
+                    applyNotesLine(m.version, m.releaseNotes);
+                });
+            }
         }
 
         function reloadForUpdate() {
@@ -2325,8 +2354,8 @@
                 cb(dismissedBuildId);
                 return;
             }
-            getWaitingWorkerAppCacheId(registration).then(function (id) {
-                cb(id || "");
+            getWaitingWorkerUpdateMeta(registration).then(function (m) {
+                cb((m && m.version) || "");
             });
         }
 

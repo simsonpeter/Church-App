@@ -31,8 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v348tabtheme";
-const RUNTIME_CACHE = "njc-runtime-cache-v348tabtheme";
+const APP_CACHE = "njc-app-cache-v349releaseui";
+const RUNTIME_CACHE = "njc-runtime-cache-v349releaseui";
+
+/** Shown in the in-app update dialog for this build (keep in sync when you ship). */
+const RELEASE_NOTES_SUMMARY =
+    "Bottom navigation colors follow your theme palette; update notes now come from the new app build.";
 
 const CORE_ASSETS = [
     "./",
@@ -40,7 +44,7 @@ const CORE_ASSETS = [
     "./styles.css?v=20260411tabtheme",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260412kids2",
+    "./app-shell.js?v=20260411releaseui1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -120,7 +124,11 @@ self.addEventListener("message", function (event) {
     }
     if (event.data.type === "GET_APP_CACHE_VERSION" && event.ports && event.ports[0]) {
         try {
-            event.ports[0].postMessage({ type: "APP_CACHE_VERSION", version: APP_CACHE });
+            event.ports[0].postMessage({
+                type: "APP_CACHE_VERSION",
+                version: APP_CACHE,
+                releaseNotes: RELEASE_NOTES_SUMMARY
+            });
         } catch (e) {
             return null;
         }
