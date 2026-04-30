@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v349releaseui";
-const RUNTIME_CACHE = "njc-runtime-cache-v349releaseui";
+const APP_CACHE = "njc-app-cache-v350kidsbanner";
+const RUNTIME_CACHE = "njc-runtime-cache-v350kidsbanner";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Bottom navigation colors follow your theme palette; update notes now come from the new app build.";
+    "Kids corner: new banner, Games/Books/Audios/Videos tabs; bottom tabs use your theme colors.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411tabtheme",
+    "./styles.css?v=20260430kidsbanner",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411releaseui1",
+    "./app-shell.js?v=20260430kidsbanner1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -69,7 +69,7 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260412kids2",
+    "./kids-page.js?v=20260430kidsbanner",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
@@ -88,6 +88,7 @@ const CORE_ASSETS = [
     "./sermons-banner.jpg?v=20260411cb1",
     "./settings-banner.jpg?v=20260411cb1",
     "./songbook-banner.jpg?v=20260411cb1",
+    "./kids-corner-banner.png?v=20260430kids1",
     "./trivia-banner.jpg?v=20260411cb1",
     "./announcements.json"
 ];

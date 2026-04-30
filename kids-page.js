@@ -18,9 +18,13 @@
     var choiceList = document.getElementById("kids-choice-list");
     var choiceFeedback = document.getElementById("kids-choice-feedback");
     var pageCard = document.querySelector(".kids-page-card");
+    var kidsTabsNav = document.getElementById("kids-tabs");
     if (!pageCard) {
         return;
     }
+
+    var KIDS_TAB_IDS = ["games", "books", "audios", "videos"];
+    var KIDS_TAB_STORAGE_KEY = "njc_kids_active_tab_v1";
 
     var KIDS_STARS_KEY = "njc_kids_stars_v1";
     var KIDS_MEM_BEST_KEY = "njc_kids_mem_best_stars";
@@ -671,6 +675,122 @@
         renderChoiceRound();
     }
 
+    function normalizeKidsTabId(raw) {
+        var s = String(raw || "").toLowerCase().trim();
+        if (KIDS_TAB_IDS.indexOf(s) >= 0) {
+            return s;
+        }
+        return "games";
+    }
+
+    function readKidsTabFromHash() {
+        try {
+            if (window.NjcSpaRouter && typeof window.NjcSpaRouter.splitHashRoute === "function") {
+                var p = window.NjcSpaRouter.splitHashRoute();
+                var sub = (p && p.subPath) ? String(p.subPath).split("/")[0].toLowerCase().trim() : "";
+                if (sub) {
+                    return normalizeKidsTabId(sub);
+                }
+            }
+        } catch (e) {
+            return null;
+        }
+        return null;
+    }
+
+    function rememberKidsTab(tabId) {
+        try {
+            window.localStorage.setItem(KIDS_TAB_STORAGE_KEY, tabId);
+        } catch (e1) {
+            return null;
+        }
+    }
+
+    function recallKidsTab() {
+        try {
+            return normalizeKidsTabId(window.localStorage.getItem(KIDS_TAB_STORAGE_KEY));
+        } catch (e2) {
+            return "games";
+        }
+    }
+
+    function setKidsHashForTab(tabId) {
+        var id = normalizeKidsTabId(tabId);
+        var next = id === "games" ? "#kids" : "#kids/" + id;
+        try {
+            if (String(window.location.hash || "") === next) {
+                return;
+            }
+            window.history.replaceState(null, "", next);
+        } catch (e3) {
+            return null;
+        }
+    }
+
+    function applyKidsTab(tabId, options) {
+        var opts = options || {};
+        var id = normalizeKidsTabId(tabId);
+        if (!kidsTabsNav) {
+            return;
+        }
+        var buttons = kidsTabsNav.querySelectorAll(".kids-tab[data-kids-tab]");
+        var panels = pageCard.querySelectorAll(".kids-tab-panel");
+        buttons.forEach(function (btn) {
+            var bid = btn.getAttribute("data-kids-tab");
+            var on = bid === id;
+            btn.classList.toggle("active", on);
+            btn.setAttribute("aria-selected", on ? "true" : "false");
+        });
+        panels.forEach(function (panel) {
+            var pid = panel.id.replace(/^kids-panel-/, "");
+            var show = pid === id;
+            panel.classList.toggle("active", show);
+            panel.hidden = !show;
+        });
+        if (!opts.skipHash) {
+            setKidsHashForTab(id);
+        }
+        rememberKidsTab(id);
+    }
+
+    function initKidsTabs() {
+        if (!kidsTabsNav) {
+            return;
+        }
+        kidsTabsNav.addEventListener("click", function (event) {
+            var btn = event.target && event.target.closest
+                ? event.target.closest("button[data-kids-tab]")
+                : null;
+            if (!btn || !kidsTabsNav.contains(btn)) {
+                return;
+            }
+            event.preventDefault();
+            applyKidsTab(btn.getAttribute("data-kids-tab"));
+        });
+        document.addEventListener("njc:routechange", function (event) {
+            var d = (event && event.detail) || {};
+            if ((d.route || "").toLowerCase() !== "kids") {
+                return;
+            }
+            var fromHash = readKidsTabFromHash();
+            applyKidsTab(fromHash || recallKidsTab(), { skipHash: true });
+        });
+        window.addEventListener("hashchange", function () {
+            try {
+                if (window.NjcSpaRouter && typeof window.NjcSpaRouter.getRouteFromHash === "function"
+                    && window.NjcSpaRouter.getRouteFromHash() !== "kids") {
+                    return;
+                }
+            } catch (e4) {
+                return;
+            }
+            var fromHash = readKidsTabFromHash();
+            applyKidsTab(fromHash || "games", { skipHash: true });
+        });
+        var initial = readKidsTabFromHash() || recallKidsTab();
+        applyKidsTab(initial, { skipHash: Boolean(readKidsTabFromHash()) });
+    }
+
     document.addEventListener("njc:cardlangchange", function (event) {
         if (!pageCard) {
             return;
@@ -691,4 +811,5 @@
         }
     });
     boot();
+    initKidsTabs();
 })();

@@ -8246,6 +8246,120 @@ html[data-theme="dark"][data-theme-palette="slate"] {
     gap: 0.4em;
 }
 
+.kids-corner-banner img {
+    object-position: center 28%;
+}
+
+.kids-tagline {
+    margin-top: 6px !important;
+    margin-bottom: 2px !important;
+    font-weight: 700;
+    font-size: 0.88rem;
+    color: var(--primary);
+    letter-spacing: 0.02em;
+}
+
+.kids-tabs {
+    margin: 12px 0 14px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    padding: 8px;
+    border-radius: 16px;
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 96%, transparent),
+        color-mix(in srgb, var(--surface-soft) 92%, transparent)
+    );
+}
+
+.kids-tab {
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    border-radius: 12px;
+    padding: 8px 2px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 4px;
+    min-width: 0;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.kids-tab-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--primary-soft) 72%, var(--surface));
+    color: inherit;
+    font-size: 0.95rem;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.kids-tab-label {
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 100%;
+}
+
+.kids-tab.active {
+    background: var(--primary-soft);
+    color: var(--primary);
+}
+
+.kids-tab.active .kids-tab-icon {
+    background: color-mix(in srgb, var(--primary) 26%, var(--surface));
+    color: var(--primary);
+}
+
+.kids-tab:not(.active):hover {
+    transform: translateY(-1px);
+}
+
+.kids-tab:not(.active):hover .kids-tab-icon {
+    transform: scale(1.05);
+}
+
+.kids-tab-panels {
+    margin-top: 2px;
+}
+
+.kids-tab-panel[hidden] {
+    display: none !important;
+}
+
+.kids-tab-panel:not([hidden]) {
+    display: block;
+}
+
+.kids-resource-link {
+    margin-top: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.kids-resource-link + .kids-resource-link {
+    margin-top: 8px;
+}
+
+.kids-resource-hint {
+    margin-top: 14px !important;
+}
+
 .kids-activity {
     margin-top: 1.1rem;
     padding: 0.9rem 0.75rem 1rem;

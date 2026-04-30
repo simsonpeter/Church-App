@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411tabtheme">
+    <link rel="stylesheet" href="styles.css?v=20260430kidsbanner">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -369,11 +369,34 @@
             <main class="app-content">
             <section class="card card-v-featured kids-page-card" data-card-lang-id="kids">
                 <h2><i class="fa-solid fa-child-reaching" aria-hidden="true"></i><span data-i18n="kids.title">Kids corner</span></h2>
-                <div class="card-banner">
-                    <img src="bible-reader-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                <div class="card-banner kids-corner-banner">
+                    <img src="kids-corner-banner.png?v=20260430kids1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
                 </div>
+                <p class="page-note kids-tagline" data-i18n="kids.tagline">Learn · Play · Grow in faith</p>
                 <p class="page-note kids-page-lead" data-i18n="kids.lead">Fun, faith-centred games for children. Best with a parent nearby.</p>
                 <p class="page-note kids-page-parent" data-i18n="kids.parentNote">Grown-ups: you can use these in Sunday School, at home, or while travelling.</p>
+
+                <nav class="kids-tabs" id="kids-tabs" role="tablist" aria-label="Kids corner sections">
+                    <button type="button" class="kids-tab active" id="kids-tab-games" role="tab" aria-selected="true" aria-controls="kids-panel-games" data-kids-tab="games">
+                        <span class="kids-tab-icon" aria-hidden="true"><i class="fa-solid fa-gamepad"></i></span>
+                        <span class="kids-tab-label" data-i18n="kids.tabGames">Games</span>
+                    </button>
+                    <button type="button" class="kids-tab" id="kids-tab-books" role="tab" aria-selected="false" aria-controls="kids-panel-books" data-kids-tab="books">
+                        <span class="kids-tab-icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
+                        <span class="kids-tab-label" data-i18n="kids.tabBooks">Books</span>
+                    </button>
+                    <button type="button" class="kids-tab" id="kids-tab-audios" role="tab" aria-selected="false" aria-controls="kids-panel-audios" data-kids-tab="audios">
+                        <span class="kids-tab-icon" aria-hidden="true"><i class="fa-solid fa-headphones"></i></span>
+                        <span class="kids-tab-label" data-i18n="kids.tabAudios">Audios</span>
+                    </button>
+                    <button type="button" class="kids-tab" id="kids-tab-videos" role="tab" aria-selected="false" aria-controls="kids-panel-videos" data-kids-tab="videos">
+                        <span class="kids-tab-icon" aria-hidden="true"><i class="fa-solid fa-film"></i></span>
+                        <span class="kids-tab-label" data-i18n="kids.tabVideos">Videos</span>
+                    </button>
+                </nav>
+
+                <div class="kids-tab-panels">
+                <div class="kids-tab-panel active" id="kids-panel-games" role="tabpanel" aria-labelledby="kids-tab-games">
                 <p class="page-note kids-total-stars" id="kids-total-stars" aria-live="polite" data-i18n="kids.starsLine">Your stars: {n}</p>
 
                 <div class="kids-activity" id="kids-activity-memory">
@@ -441,6 +464,27 @@
                 <div class="kids-activity" id="kids-activity-verse">
                     <h3 class="kids-activity-title"><i class="fa-solid fa-book-bible" aria-hidden="true"></i> <span data-i18n="kids.verseTitle">Read together</span></h3>
                     <p class="page-note kids-verse-text" data-i18n="kids.verseText">"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life." — John 3:16 (KJV)</p>
+                </div>
+                </div>
+
+                <div class="kids-tab-panel" id="kids-panel-books" role="tabpanel" aria-labelledby="kids-tab-books" hidden>
+                    <p class="page-note" data-i18n="kids.booksLead">Stories and reading for kids — open the church library from here.</p>
+                    <a class="button-link kids-resource-link" href="#book-shelf" data-i18n="kids.booksCta">Open library (books)</a>
+                    <p class="page-note kids-resource-hint" data-i18n="kids.booksHint">Tip: ask a grown-up to pick something together.</p>
+                </div>
+
+                <div class="kids-tab-panel" id="kids-panel-audios" role="tabpanel" aria-labelledby="kids-tab-audios" hidden>
+                    <p class="page-note" data-i18n="kids.audiosLead">Listen to sermons and Bible audio — great for quiet time.</p>
+                    <a class="button-link kids-resource-link" href="#sermons" data-i18n="kids.audiosCta">Open sermons &amp; audio</a>
+                    <a class="button-link button-secondary kids-resource-link" href="#bible" data-i18n="kids.audiosBibleCta">Bible reader (listen)</a>
+                    <p class="page-note kids-resource-hint" data-i18n="kids.audiosHint">Use headphones if you like; stay with a parent for younger children.</p>
+                </div>
+
+                <div class="kids-tab-panel" id="kids-panel-videos" role="tabpanel" aria-labelledby="kids-tab-videos" hidden>
+                    <p class="page-note" data-i18n="kids.videosLead">Family-friendly clips — your church may add links in the library.</p>
+                    <a class="button-link kids-resource-link" href="#book-shelf" data-i18n="kids.videosCta">Browse library for videos</a>
+                    <p class="page-note kids-resource-hint" data-i18n="kids.videosHint">Parents: supervise screen time and choose what fits your family.</p>
+                </div>
                 </div>
             </section>
             </main>
@@ -1783,7 +1827,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411releaseui1"></script>
+    <script src="app-shell.js?v=20260430kidsbanner1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1806,5 +1850,5 @@
     <script src="book-shelf-page.js?v=20260331bsfile1"></script>
     <script src="spa-router.js?v=20260411kids1"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260412kids2"></script>
+    <script src="kids-page.js?v=20260430kidsbanner"></script>
 </html>
