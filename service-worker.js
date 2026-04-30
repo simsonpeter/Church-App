@@ -31,13 +31,13 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v347kids2";
-const RUNTIME_CACHE = "njc-runtime-cache-v347kids2";
+const APP_CACHE = "njc-app-cache-v348tabtheme";
+const RUNTIME_CACHE = "njc-runtime-cache-v348tabtheme";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260412kids2",
+    "./styles.css?v=20260411tabtheme",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
     "./app-shell.js?v=20260412kids2",

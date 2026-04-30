@@ -2718,23 +2718,30 @@ body.songbook-fullscreen-open .offline-badge {
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 8px;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(255, 248, 248, 0.94));
+    background: linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--surface) 96%, transparent),
+        color-mix(in srgb, var(--surface-soft) 92%, transparent)
+    );
     backdrop-filter: blur(14px) saturate(1.15);
     -webkit-backdrop-filter: blur(14px) saturate(1.15);
-    border: 1px solid rgba(243, 208, 208, 0.85);
+    border: 1px solid color-mix(in srgb, var(--line) 88%, transparent);
     border-radius: 20px;
     padding: 8px;
     box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.9) inset,
-        0 12px 32px rgba(90, 28, 40, 0.12),
-        0 4px 12px rgba(31, 44, 105, 0.08);
+        0 1px 0 color-mix(in srgb, var(--surface) 85%, transparent) inset,
+        0 12px 32px color-mix(in srgb, var(--primary) 16%, transparent),
+        0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
     animation: fade-up-nav 0.55s ease both, tab-bar-glow 4s ease-in-out infinite;
     z-index: 1000;
     transition: box-shadow 0.35s ease, transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .tab-nav:hover {
-    box-shadow: 0 14px 32px rgba(180, 40, 40, 0.16);
+    box-shadow:
+        0 1px 0 color-mix(in srgb, var(--surface) 85%, transparent) inset,
+        0 14px 34px color-mix(in srgb, var(--primary) 22%, transparent),
+        0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 .header-menu-popover {
@@ -3276,7 +3283,7 @@ body.auth-modal-open {
 .tab {
     text-align: center;
     text-decoration: none;
-    color: #7f5c5c;
+    color: var(--muted);
     font-size: 0.78rem;
     border-radius: 12px;
     padding: 7px 4px 8px;
@@ -3293,10 +3300,11 @@ body.auth-modal-open {
     border-radius: 50%;
     display: inline-grid;
     place-items: center;
-    background: #ffeaea;
+    background: color-mix(in srgb, var(--primary-soft) 72%, var(--surface));
+    color: inherit;
     font-size: 0.58rem;
     font-weight: 700;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease, color 0.2s ease;
 }
 
 .tab-icon i {
@@ -3305,11 +3313,12 @@ body.auth-modal-open {
 
 .tab.active {
     background: var(--primary-soft);
-    color: #b71c1c;
+    color: var(--primary);
 }
 
 .tab.active .tab-icon {
-    background: #ffd1d1;
+    background: color-mix(in srgb, var(--primary) 26%, var(--surface));
+    color: var(--primary);
     animation: tab-pulse 1.8s ease-in-out infinite;
 }
 
@@ -3319,7 +3328,7 @@ body.auth-modal-open {
 
 .tab:not(.active):hover .tab-icon {
     transform: scale(1.06);
-    background: #ffe0e0;
+    background: color-mix(in srgb, var(--primary-soft) 88%, var(--surface));
 }
 
 .tab-label {
@@ -6698,24 +6707,6 @@ body.prayer-detail-open {
         --body-glow-corner: transparent;
     }
 
-    :root:not([data-theme="light"]) .tab-nav {
-        background: linear-gradient(180deg, rgba(38, 38, 38, 0.96), rgba(22, 22, 22, 0.94));
-        border-color: rgba(80, 80, 80, 0.55);
-        box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.06) inset,
-            0 12px 32px rgba(0, 0, 0, 0.45),
-            0 4px 12px rgba(0, 0, 0, 0.25);
-    }
-
-    :root:not([data-theme="light"]) .tab {
-        color: #e0e0e0;
-    }
-
-    :root:not([data-theme="light"]) .tab-icon {
-        background: #333333;
-        color: #ffffff;
-    }
-
     :root:not([data-theme="light"]) .hero-card {
         background: linear-gradient(160deg, #252525, #1a1a1a);
     }
@@ -6876,24 +6867,6 @@ html[data-theme="dark"] {
     --body-glow-top: transparent;
     --body-glow-corner: transparent;
     color-scheme: dark;
-}
-
-html[data-theme="dark"] .tab-nav {
-    background: linear-gradient(180deg, rgba(38, 38, 38, 0.96), rgba(22, 22, 22, 0.94));
-    border-color: rgba(80, 80, 80, 0.55);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.06) inset,
-        0 12px 32px rgba(0, 0, 0, 0.45),
-        0 4px 12px rgba(0, 0, 0, 0.25);
-}
-
-html[data-theme="dark"] .tab {
-    color: #e0e0e0;
-}
-
-html[data-theme="dark"] .tab-icon {
-    background: #333333;
-    color: #ffffff;
 }
 
 html[data-theme="dark"] .hero-card {
@@ -7132,24 +7105,6 @@ html[data-theme="light"] {
     --body-glow-top: transparent;
     --body-glow-corner: transparent;
     color-scheme: light;
-}
-
-html[data-theme="light"] .tab-nav {
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(255, 248, 248, 0.94));
-    border-color: rgba(243, 208, 208, 0.85);
-    box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.9) inset,
-        0 12px 32px rgba(90, 28, 40, 0.12),
-        0 4px 12px rgba(31, 44, 105, 0.08);
-}
-
-html[data-theme="light"] .tab {
-    color: #7f5c5c;
-}
-
-html[data-theme="light"] .tab-icon {
-    background: #ffeaea;
-    color: inherit;
 }
 
 html[data-theme="light"] .hero-card {
@@ -7403,10 +7358,16 @@ html[data-theme="light"] .mini-player-btn {
 @keyframes tab-bar-glow {
     0%,
     100% {
-        box-shadow: 0 10px 24px rgba(31, 44, 105, 0.18);
+        box-shadow:
+            0 1px 0 color-mix(in srgb, var(--surface) 85%, transparent) inset,
+            0 10px 26px color-mix(in srgb, var(--primary) 14%, transparent),
+            0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
     }
     50% {
-        box-shadow: 0 12px 30px rgba(200, 60, 60, 0.14);
+        box-shadow:
+            0 1px 0 color-mix(in srgb, var(--surface) 85%, transparent) inset,
+            0 14px 34px color-mix(in srgb, var(--primary) 22%, transparent),
+            0 4px 12px color-mix(in srgb, var(--text) 8%, transparent);
     }
 }
 
