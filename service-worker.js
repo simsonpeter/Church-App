@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v351kidsworld";
-const RUNTIME_CACHE = "njc-runtime-cache-v351kidsworld";
+const APP_CACHE = "njc-app-cache-v352kidsnotext";
+const RUNTIME_CACHE = "njc-runtime-cache-v352kidsnotext";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World: renamed module (Tamil: சிறுவர் உலகம்); menu and headers updated.";
+    "Kids World: removed intro text between banner and tabs for a cleaner layout.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260430kidsbanner",
+    "./styles.css?v=20260411kidsnotext",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsworld1",
+    "./app-shell.js?v=20260411kidsnotext1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",

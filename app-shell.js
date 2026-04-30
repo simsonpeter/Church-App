@@ -1909,7 +1909,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411kidsworld1";
+    var SW_VERSION = "20260411kidsnotext1";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
