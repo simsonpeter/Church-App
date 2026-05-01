@@ -7605,8 +7605,8 @@ body:has(.offline-banner:not([hidden])):has(.pwa-install-banner:not([hidden])) .
 /* Reading extras — compact row: share icon + unread toggle */
 .reading-actions-row {
     display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
+    flex-wrap: wrap;
+    align-items: stretch;
     gap: 8px;
     margin-top: 6px;
 }
@@ -7648,7 +7648,15 @@ html[data-theme="dark"] .reading-share-icon-btn:hover {
 
 .reading-actions-row .reading-unread-toggle {
     flex: 1 1 auto;
-    min-width: 0;
+    min-width: min(140px, 100%);
+    margin-top: 0;
+    text-align: center;
+    justify-content: center;
+}
+
+.reading-actions-row .reading-mark-all-read {
+    flex: 1 1 auto;
+    min-width: min(140px, 100%);
     margin-top: 0;
     text-align: center;
     justify-content: center;

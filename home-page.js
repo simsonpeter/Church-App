@@ -12,6 +12,7 @@
             var readingProgressSummary = document.getElementById("reading-progress-summary");
             var readingProgressRemaining = document.getElementById("reading-progress-remaining");
             var readingUnreadToggle = document.getElementById("reading-unread-toggle");
+            var readingMarkAllReadBtn = document.getElementById("reading-mark-all-read");
             var readingUnreadList = document.getElementById("reading-unread-list");
             var readingStreakLine = document.getElementById("reading-streak-line");
             var readingNudgeLine = document.getElementById("reading-nudge-line");
@@ -2114,6 +2115,37 @@
                 } catch (e) {}
             }
 
+            function markAllUnreadBacklogRead() {
+                var progress = buildReadingProgressData();
+                if (!progress || !Array.isArray(progress.unreadBacklog) || progress.unreadBacklog.length === 0) {
+                    return;
+                }
+                var map = getProgressMap();
+                progress.unreadBacklog.forEach(function (item) {
+                    if (!item || !item.dateKey) {
+                        return;
+                    }
+                    var dk = String(item.dateKey);
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(dk)) {
+                        return;
+                    }
+                    var entry = map[dk] || {};
+                    if (item.morningMissing) {
+                        entry.morning = true;
+                    }
+                    if (item.eveningMissing) {
+                        entry.evening = true;
+                    }
+                    map[dk] = entry;
+                });
+                saveProgressMap(map);
+                recalcAndStoreReadingPoints();
+                if (window.NjcUiFeedback && typeof window.NjcUiFeedback.readingCheckIn === "function") {
+                    window.NjcUiFeedback.readingCheckIn();
+                }
+                renderReadingPlan();
+            }
+
             function renderUnreadBacklog(items) {
                 if (!readingUnreadList) {
                     return;
@@ -2177,6 +2209,9 @@
                     readingProgressRemaining.textContent = "";
                     readingUnreadToggle.textContent = T("home.unreadDaysShow", "Unread days (0)", readingCard).replace("{count}", "0");
                     readingUnreadToggle.disabled = true;
+                    if (readingMarkAllReadBtn) {
+                        readingMarkAllReadBtn.disabled = true;
+                    }
                     renderUnreadBacklog([]);
                     return;
                 }
@@ -2201,6 +2236,9 @@
                     readingUnreadToggle.textContent = formatCount(T("home.unreadDaysShow", "Unread days ({count})", readingCard), unreadCount);
                 }
                 readingUnreadToggle.disabled = false;
+                if (readingMarkAllReadBtn) {
+                    readingMarkAllReadBtn.disabled = progress.unreadBacklog.length === 0;
+                }
                 renderUnreadBacklog(progress.unreadBacklog);
                 renderReadingStreakAndNudge();
             }
@@ -2996,6 +3034,11 @@
                 readingUnreadToggle.addEventListener("click", function () {
                     unreadListOpen = !unreadListOpen;
                     renderReadingProgress();
+                });
+            }
+            if (readingMarkAllReadBtn) {
+                readingMarkAllReadBtn.addEventListener("click", function () {
+                    markAllUnreadBacklogRead();
                 });
             }
 

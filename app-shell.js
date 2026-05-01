@@ -355,6 +355,7 @@
         "home.readingRemainingPercent": "இன்னும் {count}% முடிக்க வேண்டும்",
         "home.unreadDaysShow": "வாசிக்காத நாட்கள் ({count})",
         "home.unreadDaysHide": "வாசிக்காத பட்டியலை மறை",
+        "home.markAllUnreadRead": "அனைத்தையும் வாசித்ததாகக் குறி",
         "home.unreadDaysEmpty": "இன்றுவரை தவறவிட்ட வாசிப்பு இல்லை.",
         "home.unreadDaysTitle": "முடிக்க வேண்டிய வாசிப்புகள்",
         "home.markMorningDone": "காலை வாசிப்பு முடிந்தது",
@@ -1918,7 +1919,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411kidsdefaultroute1";
+    var SW_VERSION = "20260411readall1";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
