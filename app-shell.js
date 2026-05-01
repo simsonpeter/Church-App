@@ -1183,6 +1183,15 @@
         "kids.audiosCtaMore": "மேலும் பிரசங்கங்கள்",
         "kids.audiosBibleCta": "வேத வாசிப்பு (கேட்க)",
         "kids.audiosHint": "விரும்பினால் ஹெட்ஃபோன் பயன்படுத்தவும்; சிறிய குழந்தைகளுக்குப் பெற்றோர் அருகில் இருக்கவும்.",
+        "kids.audiosMoreLinks": "மேலும்",
+        "kids.audioNowPlayingHeader": "சிறுவர் ஆடியோ",
+        "kids.audioNowPlayingShort": "ஆடியோ",
+        "kids.audioPlayerAria": "சிறுவர் ஆடியோ இயக்கி",
+        "kids.audioWheelAria": "இசை கட்டுப்பாடுகள்",
+        "kids.audioPrevious": "முந்தைய தடம்",
+        "kids.audioNext": "அடுத்த தடம்",
+        "kids.audioTapToPlay": "இயக்க தட்டவும்",
+        "player.openKidsAudioPlayer": "முழு இசை இயக்கியைத் திற",
         "kids.audioPlay": "இயக்கு",
         "kids.audioLoading": "ஆடியோ பட்டியல் ஏற்றுகிறது…",
         "kids.audioEmpty": "இன்னும் ஆடியோ இல்லை. நிர்வாக பலகையில் இணைப்புகளைச் சேர்க்கலாம்.",
@@ -1956,7 +1965,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411kidsaudio1";
+    var SW_VERSION = "20260411kidsaudio2";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";

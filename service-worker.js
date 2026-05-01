@@ -31,26 +31,26 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v357kidsaudio1";
-const RUNTIME_CACHE = "njc-runtime-cache-v357kidsaudio1";
+const APP_CACHE = "njc-app-cache-v358kidsplayer";
+const RUNTIME_CACHE = "njc-runtime-cache-v358kidsplayer";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World → Audios: church-managed list with player; admin adds HTTPS audio links (MantleDB njc-belgium-kids-audio).";
+    "Kids World → Audios: same full-screen player and list style as Sermons (wheel, seek, mini bar).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsaudio1",
+    "./styles.css?v=20260411kidsaudio2",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsaudio1",
+    "./app-shell.js?v=20260411kidsaudio2",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
     "./events-page.js?v=20260414u2",
-    "./sermons-page.js?v=20260324u1",
-    "./bible-page.js?v=20260411bible4lang",
+    "./sermons-page.js?v=20260411kidsaudio2",
+    "./bible-page.js?v=20260411kidsaudio2",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
@@ -69,8 +69,8 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260411kidsshelf1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260411kidsaudio1",
-    "./kids-audio-page.js?v=20260411kidsaudio1",
+    "./kids-page.js?v=20260411kidsaudio2",
+    "./kids-audio-page.js?v=20260411kidsaudio2",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",

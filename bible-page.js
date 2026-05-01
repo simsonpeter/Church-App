@@ -1575,6 +1575,9 @@
 
     function startSpeechPlayback() {
         updateSpeechTextFromSelection();
+        if (window.NjcKidsAudio && typeof window.NjcKidsAudio.pause === "function") {
+            window.NjcKidsAudio.pause();
+        }
         if (!currentSpeechText) {
             updateTtsControls();
             return;

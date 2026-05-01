@@ -4,18 +4,42 @@
     var panel = document.getElementById("kids-panel-audios");
     var listEl = document.getElementById("kids-audio-list");
     var statusEl = document.getElementById("kids-audio-status");
-    var playerWrap = document.getElementById("kids-audio-player-wrap");
-    var playerTitleEl = document.getElementById("kids-audio-now-title");
-    var audioEl = document.getElementById("kids-audio-element");
-    var playerCloseBtn = document.getElementById("kids-audio-player-close");
     var pageCard = document.querySelector(".kids-page-card");
 
-    if (!panel || !listEl) {
+    var playerOverlay = document.getElementById("kids-audio-player");
+    var playerBackdrop = document.getElementById("kids-audio-player-backdrop");
+    var playerCloseBtn = document.getElementById("kids-audio-player-close-btn");
+    var playerMinimize = document.getElementById("kids-audio-player-minimize");
+    var playerWheelMenu = document.getElementById("kids-player-wheel-menu");
+    var playerPrev = document.getElementById("kids-player-prev");
+    var playerNext = document.getElementById("kids-player-next");
+    var playerPlay = document.getElementById("kids-player-play");
+    var playerCenter = document.getElementById("kids-player-center");
+    var playerTitle = document.getElementById("kids-player-title");
+    var playerSubtitle = document.getElementById("kids-player-subtitle");
+    var playerMeta = document.getElementById("kids-player-meta");
+    var playerSeek = document.getElementById("kids-player-seek");
+    var playerTime = document.getElementById("kids-player-time");
+    var playerSpeed = document.getElementById("kids-player-speed");
+    var playerSleep = document.getElementById("kids-player-sleep");
+    var playerSleepNote = document.getElementById("kids-player-sleep-note");
+    var audioEl = document.getElementById("kids-audio-element");
+
+    var miniPlayer = document.getElementById("mini-kids-audio-player");
+    var miniOpen = document.getElementById("mini-kids-audio-open");
+    var miniTitle = document.getElementById("mini-kids-audio-title");
+    var miniTime = document.getElementById("mini-kids-audio-time");
+    var miniPlay = document.getElementById("mini-kids-audio-play");
+    var miniClose = document.getElementById("mini-kids-audio-close");
+
+    if (!panel || !listEl || !playerOverlay || !audioEl) {
         return;
     }
 
-    var rowsCache = [];
+    var playlist = [];
+    var currentIndex = -1;
     var inflight = null;
+    var sleepTimerId = null;
 
     function escapeHtml(value) {
         return String(value || "")
@@ -36,26 +60,17 @@
         return fallback || key;
     }
 
-    function isHttpsAudio(url) {
-        var u = String(url || "").trim();
-        return /^https:\/\//i.test(u);
+    function getLang() {
+        try {
+            if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
+                return window.NjcI18n.getLanguage() || "en";
+            }
+        } catch (e) {}
+        return "en";
     }
 
-    function guessAudioKind(url) {
-        var path = String(url || "").split("?")[0].split("#")[0].toLowerCase();
-        if (/\.(mp3|mpeg)(\b|$)/.test(path)) {
-            return "audio/mpeg";
-        }
-        if (/\.m4a(\b|$)/.test(path)) {
-            return "audio/mp4";
-        }
-        if (/\.ogg(\b|$)/.test(path)) {
-            return "audio/ogg";
-        }
-        if (/\.wav(\b|$)/.test(path)) {
-            return "audio/wav";
-        }
-        return "";
+    function isHttpsAudio(url) {
+        return /^https:\/\//i.test(String(url || "").trim());
     }
 
     function normalizeRow(raw, index) {
@@ -75,22 +90,62 @@
     }
 
     function pickLang(entry) {
-        var lang = "en";
-        try {
-            if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
-                lang = window.NjcI18n.getLanguage() || "en";
-            }
-        } catch (e) {}
+        var lang = getLang();
         if (lang === "ta") {
             return {
                 title: entry.titleTa || entry.title || T("kids.audioUntitled", "Untitled"),
+                subtitle: entry.title && entry.titleTa && entry.title !== entry.titleTa ? entry.title : "",
                 description: entry.descriptionTa || entry.description || ""
             };
         }
         return {
             title: entry.title || entry.titleTa || T("kids.audioUntitled", "Untitled"),
+            subtitle: entry.titleTa && entry.title && entry.title !== entry.titleTa ? entry.titleTa : "",
             description: entry.description || entry.descriptionTa || ""
         };
+    }
+
+    function avatarTextFromEntry(entry) {
+        var p = pickLang(entry);
+        var base = String(p.title || "").trim();
+        if (!base) {
+            return "♪";
+        }
+        var parts = base.split(/\s+/).filter(Boolean);
+        if (parts.length >= 2) {
+            return (parts[0].charAt(0) + parts[1].charAt(0)).toUpperCase();
+        }
+        return base.slice(0, 2).toUpperCase();
+    }
+
+    function metaLine(entry) {
+        return entry.durationLabel ? String(entry.durationLabel).trim() : "";
+    }
+
+    function secondaryLine(entry) {
+        var p = pickLang(entry);
+        if (p.subtitle) {
+            return p.subtitle;
+        }
+        if (p.description) {
+            return p.description.replace(/\s+/g, " ").trim().slice(0, 160);
+        }
+        return "";
+    }
+
+    function pauseOtherMedia() {
+        try {
+            var sermonEl = document.getElementById("sermon-audio");
+            if (sermonEl && !sermonEl.paused) {
+                sermonEl.pause();
+            }
+        } catch (e1) {}
+        try {
+            var bibleEl = document.getElementById("bible-stream-audio");
+            if (bibleEl && !bibleEl.paused) {
+                bibleEl.pause();
+            }
+        } catch (e2) {}
     }
 
     function fetchEntries() {
@@ -108,11 +163,254 @@
             });
     }
 
-    function renderList(rows) {
-        var valid = rows.filter(function (e) {
+    function formatTime(seconds) {
+        if (!Number.isFinite(seconds) || seconds < 0) {
+            return "00:00";
+        }
+        var mins = Math.floor(seconds / 60);
+        var secs = Math.floor(seconds % 60);
+        var paddedSecs = secs < 10 ? "0" + secs : String(secs);
+        return mins + ":" + paddedSecs;
+    }
+
+    function clearSleepTimer() {
+        if (sleepTimerId) {
+            window.clearTimeout(sleepTimerId);
+            sleepTimerId = null;
+        }
+    }
+
+    function setSleepNote(minutes) {
+        if (!playerSleepNote) {
+            return;
+        }
+        if (!minutes || minutes <= 0) {
+            playerSleepNote.textContent = "";
+            return;
+        }
+        playerSleepNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
+            ? window.NjcI18n.formatCount(T("sermons.sleepActive", "Stops in {count} min"), minutes)
+            : ("Stops in " + minutes + " min");
+    }
+
+    function setSleepTimer(minutes) {
+        clearSleepTimer();
+        var mins = Number(minutes);
+        if (!Number.isFinite(mins) || mins <= 0) {
+            setSleepNote(0);
+            return;
+        }
+        setSleepNote(mins);
+        sleepTimerId = window.setTimeout(function () {
+            audioEl.pause();
+            if (playerSleep) {
+                playerSleep.value = "0";
+            }
+            setSleepNote(0);
+            sleepTimerId = null;
+        }, mins * 60000);
+    }
+
+    function updatePlayerButtons() {
+        var isPaused = audioEl.paused;
+        var playIcon = isPaused ? "fa-play" : "fa-pause";
+        var html = "<i class=\"fa-solid " + playIcon + "\"></i>";
+        if (playerPlay) {
+            playerPlay.innerHTML = html;
+        }
+        if (playerCenter) {
+            playerCenter.innerHTML = html;
+        }
+        if (miniPlay) {
+            miniPlay.innerHTML = html;
+        }
+    }
+
+    function refreshPlayerTime() {
+        var current = audioEl.currentTime || 0;
+        var duration = audioEl.duration || 0;
+        var percent = duration > 0 ? Math.round((current / duration) * 100) : 0;
+        if (playerSeek) {
+            playerSeek.value = String(percent);
+        }
+        var line = formatTime(current) + " / " + formatTime(duration);
+        if (playerTime) {
+            playerTime.textContent = line;
+        }
+        if (miniTime) {
+            miniTime.textContent = line;
+        }
+    }
+
+    function syncPlayerText() {
+        if (currentIndex < 0 || currentIndex >= playlist.length) {
+            return;
+        }
+        var entry = playlist[currentIndex];
+        var p = pickLang(entry);
+        if (playerTitle) {
+            playerTitle.textContent = p.title;
+        }
+        if (playerSubtitle) {
+            var sub = secondaryLine(entry);
+            playerSubtitle.textContent = sub;
+            playerSubtitle.hidden = !sub;
+        }
+        if (playerMeta) {
+            var meta = metaLine(entry);
+            playerMeta.textContent = meta;
+            playerMeta.hidden = !meta;
+        }
+        if (miniTitle) {
+            miniTitle.textContent = p.title;
+        }
+    }
+
+    function openPlayer(index, autoplay) {
+        if (index < 0 || index >= playlist.length) {
+            return;
+        }
+        var entry = playlist[index];
+        if (!entry || !isHttpsAudio(entry.audioUrl)) {
+            return;
+        }
+        pauseOtherMedia();
+        currentIndex = index;
+        syncPlayerText();
+        playerOverlay.hidden = false;
+        if (miniPlayer) {
+            miniPlayer.hidden = true;
+        }
+        document.body.classList.add("kids-audio-player-open");
+
+        if (audioEl.src !== entry.audioUrl) {
+            audioEl.src = entry.audioUrl;
+            audioEl.load();
+        }
+        audioEl.playbackRate = playerSpeed ? Number(playerSpeed.value) || 1 : 1;
+
+        if (autoplay) {
+            audioEl.play().catch(function () {
+                return null;
+            });
+        }
+        updatePlayerButtons();
+    }
+
+    function minimizePlayer() {
+        if (playerOverlay.hidden) {
+            return;
+        }
+        playerOverlay.hidden = true;
+        if (miniPlayer) {
+            miniPlayer.hidden = false;
+        }
+        document.body.classList.remove("kids-audio-player-open");
+        refreshPlayerTime();
+        updatePlayerButtons();
+    }
+
+    function restorePlayer() {
+        playerOverlay.hidden = false;
+        if (miniPlayer) {
+            miniPlayer.hidden = true;
+        }
+        document.body.classList.add("kids-audio-player-open");
+        refreshPlayerTime();
+    }
+
+    function closePlayer() {
+        audioEl.pause();
+        clearSleepTimer();
+        if (playerSleep) {
+            playerSleep.value = "0";
+        }
+        setSleepNote(0);
+        playerOverlay.hidden = true;
+        if (miniPlayer) {
+            miniPlayer.hidden = true;
+        }
+        document.body.classList.remove("kids-audio-player-open");
+        audioEl.removeAttribute("src");
+        try {
+            audioEl.load();
+        } catch (e) {}
+        currentIndex = -1;
+        updatePlayerButtons();
+    }
+
+    function playAdjacent(delta) {
+        if (!playlist.length) {
+            return;
+        }
+        var next = currentIndex + delta;
+        if (next < 0) {
+            next = playlist.length - 1;
+        }
+        if (next >= playlist.length) {
+            next = 0;
+        }
+        openPlayer(next, true);
+    }
+
+    function togglePlayPause() {
+        if (!audioEl.src && playlist.length) {
+            openPlayer(0, true);
+            return;
+        }
+        if (audioEl.paused) {
+            pauseOtherMedia();
+            audioEl.play().catch(function () {
+                return null;
+            });
+        } else {
+            audioEl.pause();
+        }
+        updatePlayerButtons();
+    }
+
+    function renderList() {
+        if (!playlist.length) {
+            listEl.innerHTML = "";
+            listEl.hidden = true;
+            return;
+        }
+        listEl.hidden = false;
+        listEl.innerHTML = playlist.map(function (entry, index) {
+            var p = pickLang(entry);
+            var titleLine = escapeHtml(p.title);
+            var second = secondaryLine(entry);
+            var secondLine = escapeHtml(second || "");
+            var meta = metaLine(entry);
+            var metaLineHtml = escapeHtml(meta);
+            var avatar = escapeHtml(avatarTextFromEntry(entry));
+            return "" +
+                "<li class=\"sermon-item kids-audio-item-wrap\">" +
+                "  <div class=\"sermon-item-row\">" +
+                "    <div class=\"sermon-open-btn kids-audio-open-btn\" role=\"button\" tabindex=\"0\" data-kids-audio-index=\"" + index + "\">" +
+                "      <div class=\"sermon-open-top\">" +
+                "        <span class=\"sermon-speaker-avatar kids-audio-avatar\" aria-hidden=\"true\">" + avatar + "</span>" +
+                "        <div class=\"sermon-open-main\">" +
+                "          <h3 class=\"sermon-line sermon-line-tamil\">" + titleLine + "</h3>" +
+                (secondLine ? ("          <p class=\"sermon-line sermon-line-english\">" + secondLine + "</p>") : "") +
+                (metaLineHtml ? ("          <p class=\"sermon-line sermon-line-speaker\">" + metaLineHtml + "</p>") : "") +
+                "          <p class=\"sermon-line sermon-line-date\"><i class=\"fa-solid fa-headphones\" aria-hidden=\"true\"></i> " +
+                escapeHtml(T("kids.audioTapToPlay", "Tap to play")) + "</p>" +
+                "        </div>" +
+                "      </div>" +
+                "    </div>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+    }
+
+    function applyRows(rows) {
+        playlist = rows.map(function (r, i) {
+            return normalizeRow(r, i);
+        }).filter(function (e) {
             return e && isHttpsAudio(e.audioUrl);
         });
-        valid.sort(function (a, b) {
+        playlist.sort(function (a, b) {
             var ao = Number(a.sortOrder) || 0;
             var bo = Number(b.sortOrder) || 0;
             if (ao !== bo) {
@@ -120,103 +418,7 @@
             }
             return String(a.title || "").localeCompare(String(b.title || ""));
         });
-        if (!valid.length) {
-            listEl.innerHTML = "";
-            listEl.hidden = true;
-            return;
-        }
-        listEl.hidden = false;
-        listEl.innerHTML = valid.map(function (entry) {
-            var picked = pickLang(entry);
-            var desc = picked.description ? "<p class=\"kids-audio-desc\">" + escapeHtml(picked.description) + "</p>" : "";
-            var dur = entry.durationLabel
-                ? "<span class=\"kids-audio-duration\">" + escapeHtml(entry.durationLabel) + "</span>"
-                : "";
-            var cover = /^https:\/\//i.test(entry.coverImageUrl)
-                ? "<div class=\"kids-audio-cover\"><img src=\"" + escapeHtml(entry.coverImageUrl) + "\" alt=\"\" width=\"72\" height=\"72\" loading=\"lazy\" decoding=\"async\"></div>"
-                : "<div class=\"kids-audio-cover kids-audio-cover-fallback\" aria-hidden=\"true\"><i class=\"fa-solid fa-headphones\"></i></div>";
-            return (
-                "<li class=\"kids-audio-item\">" +
-                cover +
-                "<div class=\"kids-audio-item-main\">" +
-                "  <div class=\"kids-audio-item-head\">" +
-                "    <h3 class=\"kids-audio-item-title\">" + escapeHtml(picked.title) + "</h3>" +
-                dur +
-                "  </div>" +
-                desc +
-                "  <div class=\"kids-audio-item-actions\">" +
-                "    <button type=\"button\" class=\"button-link kids-audio-play-btn\" data-kids-audio-id=\"" + escapeHtml(entry.id) + "\">" +
-                "      <i class=\"fa-solid fa-circle-play\" aria-hidden=\"true\"></i> " +
-                escapeHtml(T("kids.audioPlay", "Play")) +
-                "    </button>" +
-                "  </div>" +
-                "</div>" +
-                "</li>"
-            );
-        }).join("");
-    }
-
-    function findEntry(id) {
-        var sid = String(id || "");
-        for (var i = 0; i < rowsCache.length; i++) {
-            if (rowsCache[i] && String(rowsCache[i].id) === sid) {
-                return rowsCache[i];
-            }
-        }
-        return null;
-    }
-
-    function showPlayer(entry) {
-        if (!audioEl || !playerWrap) {
-            return;
-        }
-        var picked = pickLang(entry);
-        if (playerTitleEl) {
-            playerTitleEl.textContent = picked.title;
-        }
-        audioEl.pause();
-        audioEl.removeAttribute("src");
-        audioEl.innerHTML = "";
-        var kind = guessAudioKind(entry.audioUrl);
-        var src = document.createElement("source");
-        src.src = entry.audioUrl;
-        if (kind) {
-            src.type = kind;
-        }
-        audioEl.appendChild(src);
-        audioEl.load();
-        playerWrap.hidden = false;
-        try {
-            var p = audioEl.play();
-            if (p && typeof p.catch === "function") {
-                p.catch(function () {});
-            }
-        } catch (ePlay) {}
-    }
-
-    function hidePlayer() {
-        if (audioEl) {
-            try {
-                audioEl.pause();
-            } catch (e) {}
-            audioEl.removeAttribute("src");
-            audioEl.innerHTML = "";
-        }
-        if (playerWrap) {
-            playerWrap.hidden = true;
-        }
-        if (playerTitleEl) {
-            playerTitleEl.textContent = "";
-        }
-    }
-
-    function applyRows(rows) {
-        rowsCache = rows.map(function (r, i) {
-            return normalizeRow(r, i);
-        }).filter(function (e) {
-            return e && isHttpsAudio(e.audioUrl);
-        });
-        renderList(rowsCache);
+        renderList();
     }
 
     function setStatus(key, fallback, isError) {
@@ -249,13 +451,13 @@
             .then(function (raw) {
                 applyRows(Array.isArray(raw) ? raw : []);
                 clearStatus();
-                if (!rowsCache.length) {
+                if (!playlist.length) {
                     setStatus("kids.audioEmpty", "No audio yet. Your church can add links in the admin dashboard.", false);
                 }
             })
             .catch(function () {
-                rowsCache = [];
-                renderList([]);
+                playlist = [];
+                renderList();
                 setStatus("kids.audioError", "Could not load audio. Try again later.", true);
             })
             .finally(function () {
@@ -264,28 +466,108 @@
         return inflight;
     }
 
-    listEl.addEventListener("click", function (event) {
-        var btn = event.target && event.target.closest ? event.target.closest("button[data-kids-audio-id]") : null;
-        if (!btn) {
+    function openFromRow(row) {
+        if (!row) {
             return;
         }
-        var id = btn.getAttribute("data-kids-audio-id");
-        var entry = findEntry(id);
-        if (!entry) {
+        var idx = Number(row.getAttribute("data-kids-audio-index"));
+        if (Number.isNaN(idx)) {
             return;
         }
-        showPlayer(entry);
-    });
+        openPlayer(idx, true);
+    }
 
-    if (playerCloseBtn) {
-        playerCloseBtn.addEventListener("click", function () {
-            hidePlayer();
+    if (listEl) {
+        listEl.addEventListener("click", function (event) {
+            var row = event.target.closest(".kids-audio-open-btn");
+            openFromRow(row);
+        });
+        listEl.addEventListener("keydown", function (event) {
+            if (event.key !== "Enter" && event.key !== " ") {
+                return;
+            }
+            var row = event.target.closest(".kids-audio-open-btn");
+            if (!row || !listEl.contains(row)) {
+                return;
+            }
+            event.preventDefault();
+            openFromRow(row);
         });
     }
 
+    if (playerBackdrop) {
+        playerBackdrop.addEventListener("click", closePlayer);
+    }
+    if (playerCloseBtn) {
+        playerCloseBtn.addEventListener("click", closePlayer);
+    }
+    if (playerMinimize) {
+        playerMinimize.addEventListener("click", minimizePlayer);
+    }
+    if (playerWheelMenu) {
+        playerWheelMenu.addEventListener("click", closePlayer);
+    }
+    if (playerPrev) {
+        playerPrev.addEventListener("click", function () {
+            playAdjacent(-1);
+        });
+    }
+    if (playerNext) {
+        playerNext.addEventListener("click", function () {
+            playAdjacent(1);
+        });
+    }
+    if (playerPlay) {
+        playerPlay.addEventListener("click", togglePlayPause);
+    }
+    if (playerCenter) {
+        playerCenter.addEventListener("click", togglePlayPause);
+    }
+    if (playerSeek) {
+        playerSeek.addEventListener("input", function () {
+            var duration = audioEl.duration || 0;
+            if (duration <= 0) {
+                return;
+            }
+            var nextTime = (Number(playerSeek.value) / 100) * duration;
+            audioEl.currentTime = nextTime;
+            refreshPlayerTime();
+        });
+    }
+    if (playerSpeed) {
+        playerSpeed.addEventListener("change", function () {
+            audioEl.playbackRate = Number(playerSpeed.value) || 1;
+        });
+    }
+    if (playerSleep) {
+        playerSleep.addEventListener("change", function () {
+            setSleepTimer(Number(playerSleep.value));
+        });
+    }
+    if (miniOpen) {
+        miniOpen.addEventListener("click", restorePlayer);
+    }
+    if (miniPlay) {
+        miniPlay.addEventListener("click", togglePlayPause);
+    }
+    if (miniClose) {
+        miniClose.addEventListener("click", closePlayer);
+    }
+
+    audioEl.addEventListener("timeupdate", refreshPlayerTime);
+    audioEl.addEventListener("loadedmetadata", refreshPlayerTime);
+    audioEl.addEventListener("play", updatePlayerButtons);
+    audioEl.addEventListener("pause", updatePlayerButtons);
+    audioEl.addEventListener("ended", function () {
+        playAdjacent(1);
+    });
+
     document.addEventListener("njc:langchange", function () {
-        if (rowsCache.length) {
-            renderList(rowsCache);
+        if (playlist.length) {
+            renderList();
+            syncPlayerText();
+            refreshPlayerTime();
+            setSleepNote(Number(playerSleep && playerSleep.value));
         }
     });
 
@@ -295,6 +577,11 @@
 
     window.NjcKidsAudio = {
         load: loadKidsAudios,
-        mantleUrl: MANTLE_URL
+        mantleUrl: MANTLE_URL,
+        pause: function () {
+            try {
+                audioEl.pause();
+            } catch (e) {}
+        }
     };
 })();

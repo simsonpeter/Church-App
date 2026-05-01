@@ -584,6 +584,10 @@
                     return;
                 }
 
+                if (window.NjcKidsAudio && typeof window.NjcKidsAudio.pause === "function") {
+                    window.NjcKidsAudio.pause();
+                }
+
                 currentSermonIndex = index;
                 currentSermon = sermon;
                 syncPlayerText();
