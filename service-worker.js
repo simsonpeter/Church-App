@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v356readall1";
-const RUNTIME_CACHE = "njc-runtime-cache-v356readall1";
+const APP_CACHE = "njc-app-cache-v357kidsaudio1";
+const RUNTIME_CACHE = "njc-runtime-cache-v357kidsaudio1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: “Mark all as read” for missed Bible reading days (next to Unread days).";
+    "Kids World → Audios: church-managed list with player; admin adds HTTPS audio links (MantleDB njc-belgium-kids-audio).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411readall1",
+    "./styles.css?v=20260411kidsaudio1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411readall1",
+    "./app-shell.js?v=20260411kidsaudio1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
@@ -55,7 +55,7 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260411kidsshelf",
+    "./admin-dashboard-page.js?v=20260411kidsaudio1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260411mainmerge1",
@@ -69,7 +69,8 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260411kidsshelf1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260411kidsdefaultroute1",
+    "./kids-page.js?v=20260411kidsaudio1",
+    "./kids-audio-page.js?v=20260411kidsaudio1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",

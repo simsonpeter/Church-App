@@ -8,6 +8,7 @@
     var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
     var ADMIN_DAILY_BREAD_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
     var ADMIN_LIBRARY_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
+    var ADMIN_KIDS_AUDIO_URL = "https://mantledb.sh/v2/njc-belgium-kids-audio/entries";
     var MAX_ENTRIES = 250;
     var NJC_BROADCAST_PUSH_REGION = "europe-west1";
 
@@ -59,6 +60,18 @@
     var bookShelfDetectSizeBtn = document.getElementById("admin-book-shelf-detect-size");
     var bookShelfSubmit = document.getElementById("admin-book-shelf-submit");
     var bookShelfList = document.getElementById("admin-book-shelf-list");
+
+    var kidsAudioForm = document.getElementById("admin-kids-audio-form");
+    var kidsAudioTitleInput = document.getElementById("admin-kids-audio-title");
+    var kidsAudioTitleTaInput = document.getElementById("admin-kids-audio-title-ta");
+    var kidsAudioUrlInput = document.getElementById("admin-kids-audio-url");
+    var kidsAudioCoverInput = document.getElementById("admin-kids-audio-cover");
+    var kidsAudioDurationInput = document.getElementById("admin-kids-audio-duration");
+    var kidsAudioSortInput = document.getElementById("admin-kids-audio-sort");
+    var kidsAudioDescInput = document.getElementById("admin-kids-audio-description");
+    var kidsAudioDescTaInput = document.getElementById("admin-kids-audio-description-ta");
+    var kidsAudioSubmit = document.getElementById("admin-kids-audio-submit");
+    var kidsAudioList = document.getElementById("admin-kids-audio-list");
 
     var noticeForm = document.getElementById("admin-notice-form");
     var noticeTitleInput = document.getElementById("admin-notice-title");
@@ -121,9 +134,10 @@
     var cachedTrivia = [];
     var cachedDailyBread = [];
     var cachedBookShelf = [];
+    var cachedKidsAudio = [];
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !bookShelfList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !bookShelfForm) {
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !bookShelfList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !bookShelfForm || !kidsAudioForm || !kidsAudioList) {
         return;
     }
 
@@ -230,6 +244,9 @@
         if (bookShelfSubmit) {
             bookShelfSubmit.disabled = busy;
         }
+        if (kidsAudioSubmit) {
+            kidsAudioSubmit.disabled = busy;
+        }
         if (bookShelfDetectSizeBtn) {
             bookShelfDetectSizeBtn.disabled = busy;
         }
@@ -263,6 +280,11 @@
         }
         if (bookShelfList) {
             bookShelfList.querySelectorAll("button[data-admin-book-shelf-id]").forEach(function (button) {
+                button.disabled = busy;
+            });
+        }
+        if (kidsAudioList) {
+            kidsAudioList.querySelectorAll("button[data-admin-kids-audio-id]").forEach(function (button) {
                 button.disabled = busy;
             });
         }
@@ -998,18 +1020,40 @@
         });
     }
 
-    function renderLibraryList() {
-        if (!libraryList) {
+    function normalizeKidsAudioEntry(entry, index) {
+        var source = entry && typeof entry === "object" ? entry : {};
+        var audioUrl = String(source.audioUrl || source.url || source.href || "").trim();
+        var sortOrder = Number(source.sortOrder);
+        if (!isFinite(sortOrder)) {
+            sortOrder = 0;
+        }
+        return {
+            id: String(source.id || "").trim() || ("kids-audio-" + index),
+            title: String(source.title || "").trim(),
+            titleTa: String(source.titleTa || "").trim(),
+            description: String(source.description || "").trim(),
+            descriptionTa: String(source.descriptionTa || "").trim(),
+            audioUrl: audioUrl,
+            coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
+            durationLabel: String(source.durationLabel || source.duration || "").trim(),
+            sortOrder: sortOrder,
+            createdAt: String(source.createdAt || ""),
+            updatedAt: String(source.updatedAt || "")
+        };
+    }
+
+    function renderKidsAudioList() {
+        if (!kidsAudioList) {
             return;
         }
-        var valid = cachedLibrary.filter(function (e) {
-            return e && /^https?:\/\//i.test(String(e.url || "").trim());
+        var valid = cachedKidsAudio.filter(function (e) {
+            return e && /^https:\/\//i.test(String(e.audioUrl || "").trim());
         });
         if (!valid.length) {
-            libraryList.innerHTML = "" +
+            kidsAudioList.innerHTML = "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(T("admin.libraryEmptyTitle", "No items yet")) + "</h3>" +
-                "  <p>" + escapeHtml(T("admin.libraryEmptyBody", "Add a title and file URL above.")) + "</p>" +
+                "  <h3>" + escapeHtml(T("admin.kidsAudioEmptyTitle", "No Kids audio yet")) + "</h3>" +
+                "  <p>" + escapeHtml(T("admin.kidsAudioEmptyBody", "Add a title and audio URL (https) above.")) + "</p>" +
                 "</li>";
             return;
         }
@@ -1023,26 +1067,27 @@
             var bt = String(b.updatedAt || b.createdAt || "");
             return bt.localeCompare(at);
         }).slice(0, 120);
-        libraryList.innerHTML = sorted.map(function (entry) {
+        kidsAudioList.innerHTML = sorted.map(function (entry) {
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
-            var urlShort = String(entry.url || "").replace(/^https?:\/\//, "").slice(0, 72);
+            var urlShort = String(entry.audioUrl || "").replace(/^https:\/\//, "").slice(0, 72);
+            var dur = entry.durationLabel ? (" · " + escapeHtml(entry.durationLabel)) : "";
             var cover = String(entry.coverImageUrl || "").trim();
             var thumb = /^https:\/\//i.test(cover)
-                ? ("<p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(cover) + "\" alt=\"\" width=\"72\" height=\"108\" loading=\"lazy\" decoding=\"async\"></p>")
+                ? ("<p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(cover) + "\" alt=\"\" width=\"72\" height=\"72\" loading=\"lazy\" decoding=\"async\"></p>")
                 : "";
             return "" +
                 "<li>" +
-                "  <h3>" + escapeHtml(titleLine) + "</h3>" +
+                "  <h3>" + escapeHtml(titleLine) + dur + "</h3>" +
                 thumb +
-                "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.url || "").length > 72 ? "…" : "")) + "</a></p>" +
+                "  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(entry.audioUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(urlShort + (String(entry.audioUrl || "").length > 72 ? "…" : "")) + "</a></p>" +
                 "  <div class=\"admin-item-actions\">" +
-                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-library-id=\"" + escapeHtml(id) + "\" data-admin-library-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
-                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-library-id=\"" + escapeHtml(id) + "\" data-admin-library-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-kids-audio-id=\"" + escapeHtml(id) + "\" data-admin-kids-audio-action=\"edit\">" + escapeHtml(T("admin.eventEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-admin-kids-audio-id=\"" + escapeHtml(id) + "\" data-admin-kids-audio-action=\"delete\">" + escapeHtml(T("admin.eventDelete", "Delete")) + "</button>" +
                 "  </div>" +
                 "</li>";
         }).join("");
-        libraryList.querySelectorAll("button[data-admin-library-id]").forEach(function (button) {
+        kidsAudioList.querySelectorAll("button[data-admin-kids-audio-id]").forEach(function (button) {
             button.disabled = busy;
         });
     }
@@ -1406,6 +1451,12 @@
                 "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
                 "</li>";
         }
+        if (kidsAudioList) {
+            kidsAudioList.innerHTML = "" +
+                "<li>" +
+                "  <h3>" + escapeHtml(T("admin.accessDenied", "This dashboard is admin only.")) + "</h3>" +
+                "</li>";
+        }
         statNotices.textContent = "0";
         statEvents.textContent = "0";
         statSermons.textContent = "0";
@@ -1441,6 +1492,11 @@
                 node.disabled = !active;
             });
         }
+        if (kidsAudioForm) {
+            kidsAudioForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -1454,7 +1510,7 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length > 0)) {
+        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length + cachedKidsAudio.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -1464,6 +1520,7 @@
             renderTriviaList();
             renderDailyBreadList();
             renderBookShelfList();
+            renderKidsAudioList();
             return;
         }
         setBusyState(true);
@@ -1476,7 +1533,8 @@
             fetchMantleEntries(PRAYER_WALL_URL),
             fetchMantleEntries(TRIVIA_URL),
             fetchMantleEntries(ADMIN_DAILY_BREAD_URL),
-            fetchMantleEntries(ADMIN_LIBRARY_URL)
+            fetchMantleEntries(ADMIN_LIBRARY_URL),
+            fetchMantleEntries(ADMIN_KIDS_AUDIO_URL)
         ]).then(function (results) {
             function extract(idx) {
                 var r = results[idx];
@@ -1500,6 +1558,9 @@
             cachedBookShelf = extract(7).map(function (row, idx) {
                 return normalizeBookShelfEntry(row, idx);
             });
+            cachedKidsAudio = extract(8).map(function (row, idx) {
+                return normalizeKidsAudioEntry(row, idx);
+            });
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -1509,6 +1570,7 @@
             renderTriviaList();
             renderDailyBreadList();
             renderBookShelfList();
+            renderKidsAudioList();
             var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
             if (failed > 0) {
                 showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
@@ -1523,6 +1585,7 @@
             renderTriviaList();
             renderDailyBreadList();
             renderBookShelfList();
+            renderKidsAudioList();
         }).finally(function () {
             setBusyState(false);
         });
@@ -1984,6 +2047,67 @@
         });
     });
 
+    kidsAudioForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var titleEn = String(kidsAudioTitleInput && kidsAudioTitleInput.value || "").trim();
+        var audioUrl = String(kidsAudioUrlInput && kidsAudioUrlInput.value || "").trim();
+        if (!titleEn) {
+            showNote("validation", "admin.kidsAudioNeedTitle", "Please enter a title.");
+            return;
+        }
+        if (!/^https:\/\//i.test(audioUrl)) {
+            showNote("validation", "admin.kidsAudioNeedUrl", "Please enter a secure audio URL (https://…).");
+            return;
+        }
+        var coverUrl = String(kidsAudioCoverInput && kidsAudioCoverInput.value || "").trim();
+        if (coverUrl && !/^https:\/\//i.test(coverUrl)) {
+            showNote("validation", "admin.kidsAudioNeedCoverUrl", "Cover image must be https:// or leave empty.");
+            return;
+        }
+        var sortRaw = String(kidsAudioSortInput && kidsAudioSortInput.value || "").trim();
+        var sortOrder = sortRaw === "" ? 0 : Number(sortRaw);
+        if (!isFinite(sortOrder)) {
+            sortOrder = 0;
+        }
+        setBusyState(true);
+        fetchMantleEntries(ADMIN_KIDS_AUDIO_URL).then(function (raw) {
+            var list = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                return normalizeKidsAudioEntry(row, idx);
+            });
+            var newEntry = {
+                id: makeEntryId("kids-audio"),
+                title: titleEn,
+                titleTa: String(kidsAudioTitleTaInput && kidsAudioTitleTaInput.value || "").trim(),
+                audioUrl: audioUrl,
+                coverImageUrl: coverUrl,
+                durationLabel: String(kidsAudioDurationInput && kidsAudioDurationInput.value || "").trim(),
+                description: String(kidsAudioDescInput && kidsAudioDescInput.value || "").trim(),
+                descriptionTa: String(kidsAudioDescTaInput && kidsAudioDescTaInput.value || "").trim(),
+                sortOrder: sortOrder,
+                createdAt: new Date().toISOString(),
+                updatedAt: ""
+            };
+            return saveMantleEntries(ADMIN_KIDS_AUDIO_URL, [newEntry].concat(list)).then(function () {
+                return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+            });
+        }).then(function (entries) {
+            cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                return normalizeKidsAudioEntry(row, idx);
+            });
+            kidsAudioForm.reset();
+            renderKidsAudioList();
+            showNote("success", "admin.kidsAudioSaved", "Kids audio added.");
+            document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
+        }).catch(function () {
+            showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-kids-audio if needed.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
     if (bookShelfList) {
         bookShelfList.addEventListener("click", function (event) {
             var button = event.target.closest("button[data-admin-book-shelf-id][data-admin-book-shelf-action]");
@@ -2128,6 +2252,128 @@
                 renderBookShelfList();
                 showNote("success", "admin.bookShelfUpdated", "Updated.");
                 document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
+            }).catch(function () {
+                showNote("error", "admin.syncError", "Could not update.");
+            }).finally(function () {
+                setBusyState(false);
+            });
+        });
+    }
+
+    if (kidsAudioList) {
+        kidsAudioList.addEventListener("click", function (event) {
+            var button = event.target.closest("button[data-admin-kids-audio-id][data-admin-kids-audio-action]");
+            if (!button || busy || !isAdminUser()) {
+                return;
+            }
+            var entryId = String(button.getAttribute("data-admin-kids-audio-id") || "").trim();
+            var action = String(button.getAttribute("data-admin-kids-audio-action") || "").trim();
+            if (!entryId || (action !== "edit" && action !== "delete")) {
+                return;
+            }
+            var source = cachedKidsAudio.slice(0, MAX_ENTRIES);
+            var targetIndex = source.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            if (targetIndex < 0) {
+                showNote("error", "admin.syncError", "Could not find entry.");
+                return;
+            }
+            if (action === "delete") {
+                if (!window.confirm(T("admin.kidsAudioDeleteConfirm", "Remove this audio track?"))) {
+                    return;
+                }
+                source.splice(targetIndex, 1);
+                setBusyState(true);
+                saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+                }).then(function (entries) {
+                    cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                        return normalizeKidsAudioEntry(row, idx);
+                    });
+                    renderKidsAudioList();
+                    showNote("success", "admin.kidsAudioDeleted", "Removed.");
+                    document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.syncError", "Could not delete.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+                return;
+            }
+            var current = source[targetIndex] || {};
+            var nextTitle = window.prompt(T("admin.kidsAudioEditTitle", "Title (English)"), String(current.title || ""));
+            if (nextTitle === null) {
+                return;
+            }
+            var nextTitleTa = window.prompt(T("admin.kidsAudioEditTitleTa", "Title (Tamil, optional)"), String(current.titleTa || ""));
+            if (nextTitleTa === null) {
+                return;
+            }
+            var nextUrl = window.prompt(T("admin.kidsAudioEditUrl", "Audio URL (https)"), String(current.audioUrl || ""));
+            if (nextUrl === null) {
+                return;
+            }
+            var nextCover = window.prompt(T("admin.kidsAudioEditCover", "Cover image URL (https, optional)"), String(current.coverImageUrl || ""));
+            if (nextCover === null) {
+                return;
+            }
+            var nextDur = window.prompt(T("admin.kidsAudioEditDuration", "Duration label (optional)"), String(current.durationLabel || ""));
+            if (nextDur === null) {
+                return;
+            }
+            var nextSort = window.prompt(T("admin.kidsAudioEditSort", "Sort order (number, optional)"), String(Number(current.sortOrder) || 0));
+            if (nextSort === null) {
+                return;
+            }
+            var nextDesc = window.prompt(T("admin.kidsAudioEditDesc", "Description (optional)"), String(current.description || ""));
+            if (nextDesc === null) {
+                return;
+            }
+            var nextDescTa = window.prompt(T("admin.kidsAudioEditDescTa", "Description Tamil (optional)"), String(current.descriptionTa || ""));
+            if (nextDescTa === null) {
+                return;
+            }
+            var cleanTitle = String(nextTitle || "").trim();
+            var cleanUrl = String(nextUrl || "").trim();
+            var cleanCover = String(nextCover || "").trim();
+            if (!cleanTitle) {
+                showNote("validation", "admin.kidsAudioNeedTitle", "Please enter a title.");
+                return;
+            }
+            if (!/^https:\/\//i.test(cleanUrl)) {
+                showNote("validation", "admin.kidsAudioNeedUrl", "Please enter a secure audio URL (https://…).");
+                return;
+            }
+            if (cleanCover && !/^https:\/\//i.test(cleanCover)) {
+                showNote("validation", "admin.kidsAudioNeedCoverUrl", "Cover image must be https:// or empty.");
+                return;
+            }
+            var sortNum = Number(nextSort);
+            if (!isFinite(sortNum)) {
+                sortNum = 0;
+            }
+            source[targetIndex] = Object.assign({}, current, {
+                title: cleanTitle,
+                titleTa: String(nextTitleTa || "").trim(),
+                audioUrl: cleanUrl,
+                coverImageUrl: cleanCover,
+                durationLabel: String(nextDur || "").trim(),
+                sortOrder: sortNum,
+                description: String(nextDesc || "").trim(),
+                descriptionTa: String(nextDescTa || "").trim(),
+                updatedAt: new Date().toISOString()
+            });
+            setBusyState(true);
+            saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
+                return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+            }).then(function (entries) {
+                cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                    return normalizeKidsAudioEntry(row, idx);
+                });
+                renderKidsAudioList();
+                showNote("success", "admin.kidsAudioUpdated", "Updated.");
+                document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
             }).catch(function () {
                 showNote("error", "admin.syncError", "Could not update.");
             }).finally(function () {

@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411readall1">
+    <link rel="stylesheet" href="styles.css?v=20260411kidsaudio1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -474,9 +474,22 @@
                 </div>
 
                 <div class="kids-tab-panel" id="kids-panel-audios" role="tabpanel" aria-labelledby="kids-tab-audios" hidden>
-                    <p class="page-note" data-i18n="kids.audiosLead">Listen to sermons and Bible audio — great for quiet time.</p>
-                    <a class="button-link kids-resource-link" href="#sermons" data-i18n="kids.audiosCta">Open sermons &amp; audio</a>
-                    <a class="button-link button-secondary kids-resource-link" href="#bible" data-i18n="kids.audiosBibleCta">Bible reader (listen)</a>
+                    <p class="page-note kids-audios-intro" data-i18n="kids.audiosLead">Stories and songs picked by your church.</p>
+                    <div class="kids-audio-player-card" id="kids-audio-player-wrap" hidden>
+                        <div class="kids-audio-player-head">
+                            <strong id="kids-audio-now-title" class="kids-audio-now-title"></strong>
+                            <button type="button" class="kids-audio-player-close" id="kids-audio-player-close" aria-label="Close player" data-i18n-aria-label="kids.audioClosePlayer" data-i18n-aria-fallback="Close player">
+                                <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <audio id="kids-audio-element" class="kids-audio-element" controls preload="metadata" playsinline></audio>
+                    </div>
+                    <p class="page-note" id="kids-audio-status" aria-live="polite"></p>
+                    <ul class="list kids-audio-list" id="kids-audio-list"></ul>
+                    <div class="kids-audio-more-links">
+                        <a class="button-link kids-resource-link" href="#sermons" data-i18n="kids.audiosCtaMore">More sermons</a>
+                        <a class="button-link button-secondary kids-resource-link" href="#bible" data-i18n="kids.audiosBibleCta">Bible reader (listen)</a>
+                    </div>
                     <p class="page-note kids-resource-hint" data-i18n="kids.audiosHint">Use headphones if you like; stay with a parent for younger children.</p>
                 </div>
 
@@ -1228,6 +1241,7 @@
                             <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
                             <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread tab shows the entry for today (Brussels date). Create the MantleDB bucket njc-belgium-admin-daily-bread if needed.</li>
                             <li data-i18n="admin.scheduleHintBookShelf">Book shelf: pick English, Tamil, or Kids World. English/Tamil show on the main library; Kids only on Kids → Books. Bucket njc-belgium-admin-library.</li>
+                            <li data-i18n="admin.scheduleHintKidsAudio">Kids World audio: add HTTPS links to audio files; they show on Kids World → Audios. Create MantleDB bucket njc-belgium-kids-audio if needed.</li>
                         </ul>
                     </div>
                 </details>
@@ -1289,6 +1303,48 @@
                     <div class="admin-panel-section-body">
                         <p class="page-note" data-i18n="admin.bookShelfManageInfo">Edit or remove. Refresh reloads from MantleDB.</p>
                         <ul class="list" id="admin-book-shelf-list">
+                            <li>
+                                <h3 data-i18n="admin.loading">Loading dashboard...</h3>
+                                <p data-i18n="admin.loadingBody">Please wait.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </details>
+            </section>
+
+            <section class="card card-v-ink">
+                <details class="admin-panel-section-details">
+                    <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
+                        <h2><i class="fa-solid fa-headphones"></i><span data-i18n="admin.kidsAudioTitle">Kids World — audio</span></h2>
+                    </summary>
+                    <div class="admin-panel-section-body">
+                        <div class="card-banner">
+                            <img src="kids-corner-banner.png?v=20260430kids1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
+                        </div>
+                        <p class="page-note" data-i18n="admin.kidsAudioInfo">These tracks appear on Kids World → Audios. Use direct HTTPS links to MP3 or other audio files.</p>
+                        <form class="prayer-form" id="admin-kids-audio-form">
+                            <input id="admin-kids-audio-title" class="search-input" type="text" required aria-required="true" placeholder="Title (English)" data-i18n-placeholder="admin.kidsAudioTitleEnPlaceholder">
+                            <input id="admin-kids-audio-title-ta" class="search-input" type="text" placeholder="Title (Tamil, optional)" data-i18n-placeholder="admin.kidsAudioTitleTaPlaceholder">
+                            <input id="admin-kids-audio-url" class="search-input" type="url" inputmode="url" required aria-required="true" autocomplete="off" placeholder="Audio URL (https://… mp3, m4a, …)" data-i18n-placeholder="admin.kidsAudioUrlPlaceholder">
+                            <input id="admin-kids-audio-cover" class="search-input" type="url" inputmode="url" autocomplete="off" placeholder="Cover image URL (https://…, optional)" data-i18n-placeholder="admin.kidsAudioCoverPlaceholder">
+                            <input id="admin-kids-audio-duration" class="search-input" type="text" placeholder="Duration label (optional), e.g. 4 min" data-i18n-placeholder="admin.kidsAudioDurationPlaceholder">
+                            <input id="admin-kids-audio-sort" class="search-input" type="number" inputmode="numeric" placeholder="Sort order (optional, lower first)" data-i18n-placeholder="admin.kidsAudioSortPlaceholder">
+                            <textarea id="admin-kids-audio-description" class="search-input prayer-textarea" rows="2" placeholder="Short description (optional)" data-i18n-placeholder="admin.kidsAudioDescPlaceholder"></textarea>
+                            <textarea id="admin-kids-audio-description-ta" class="search-input prayer-textarea" rows="2" placeholder="Description (Tamil, optional)" data-i18n-placeholder="admin.kidsAudioDescTaPlaceholder"></textarea>
+                            <button class="button-link" id="admin-kids-audio-submit" type="submit" data-i18n="admin.kidsAudioPublish">Add Kids audio</button>
+                        </form>
+                    </div>
+                </details>
+            </section>
+
+            <section class="card card-v-mesh">
+                <details class="admin-panel-section-details">
+                    <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
+                        <h2><i class="fa-solid fa-list"></i><span data-i18n="admin.kidsAudioManageTitle">Kids audio items</span></h2>
+                    </summary>
+                    <div class="admin-panel-section-body">
+                        <p class="page-note" data-i18n="admin.kidsAudioManageInfo">Edit or remove. Create MantleDB bucket njc-belgium-kids-audio if the first save fails.</p>
+                        <ul class="list" id="admin-kids-audio-list">
                             <li>
                                 <h3 data-i18n="admin.loading">Loading dashboard...</h3>
                                 <p data-i18n="admin.loadingBody">Please wait.</p>
@@ -1833,7 +1889,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411readall1"></script>
+    <script src="app-shell.js?v=20260411kidsaudio1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411readall1"></script>
@@ -1844,7 +1900,7 @@
     <script src="contact-page.js?v=20260411prayershare1"></script>
     <script src="daily-bread-page.js?v=20260417cardlang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260411kidsshelf"></script>
+    <script src="admin-dashboard-page.js?v=20260411kidsaudio1"></script>
     <script src="admin-modules-page.js?v=20260421mainmerge"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-users-page.js?v=20260411mainmerge1"></script>
@@ -1856,5 +1912,6 @@
     <script src="book-shelf-page.js?v=20260411kidsshelf1"></script>
     <script src="spa-router.js?v=20260411kidsworld"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260411kidsdefaultroute1"></script>
+    <script src="kids-page.js?v=20260411kidsaudio1"></script>
+    <script src="kids-audio-page.js?v=20260411kidsaudio1"></script>
 </html>

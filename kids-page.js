@@ -768,6 +768,9 @@
         if (id === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
             window.NjcLibrary.loadKidsShelf();
         }
+        if (id === "audios" && window.NjcKidsAudio && typeof window.NjcKidsAudio.load === "function") {
+            window.NjcKidsAudio.load();
+        }
     }
 
     function initKidsTabs() {
@@ -794,6 +797,9 @@
             var tabId = fromHash || recallKidsTab();
             if ((tabId || "games") === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
                 window.NjcLibrary.loadKidsShelf();
+            }
+            if ((tabId || "games") === "audios" && window.NjcKidsAudio && typeof window.NjcKidsAudio.load === "function") {
+                window.NjcKidsAudio.load();
             }
         });
         window.addEventListener("hashchange", function () {
