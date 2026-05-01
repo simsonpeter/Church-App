@@ -1,9 +1,14 @@
 (function () {
     var ENGLISH_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/englishbible.json";
     var TAMIL_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
+    var DUTCH_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/dutchbible.json";
+    var ROMANIZED_TAMIL_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilromanizedbible.json";
+
     var BIBLE_STATE_KEY = "njc_bible_reader_state_v1";
     var languageEnButton = document.getElementById("bible-language-en");
     var languageTaButton = document.getElementById("bible-language-ta");
+    var languageNlButton = document.getElementById("bible-language-nl");
+    var languageTrButton = document.getElementById("bible-language-tr");
     var bookSelect = document.getElementById("bible-book-select");
     var chapterSelect = document.getElementById("bible-chapter-select");
     var verseInput = document.getElementById("bible-verse-input");
@@ -28,13 +33,16 @@
     var chapterTransitionToken = 0;
     var chapterTransitionFallbackTimer = null;
 
-    if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton) {
+    if (!bookSelect || !chapterSelect || !verseList || !languageEnButton || !languageTaButton
+        || !languageNlButton || !languageTrButton) {
         return;
     }
 
     var BIBLE_SEARCH_LANGS = [
         { id: "en", labelKey: "bible.languageEnglish", labelFallback: "English" },
-        { id: "ta", labelKey: "bible.languageTamil", labelFallback: "Tamil" }
+        { id: "ta", labelKey: "bible.languageTamil", labelFallback: "Tamil" },
+        { id: "nl", labelKey: "bible.languageDutch", labelFallback: "Dutch" },
+        { id: "tr", labelKey: "bible.languageTamilRomanized", labelFallback: "Tamil (romanized)" }
     ];
     var BIBLE_SEARCH_MIN_LEN = 2;
     var BIBLE_SEARCH_MAX_PER_LANG = 35;
@@ -63,11 +71,15 @@
 
     var cache = {
         en: null,
-        ta: null
+        ta: null,
+        nl: null,
+        tr: null
     };
     var loadingPromise = {
         en: null,
-        ta: null
+        ta: null,
+        nl: null,
+        tr: null
     };
     var state = getStoredState();
     var streamSupported = Boolean(typeof window !== "undefined" && typeof window.Audio === "function");
@@ -196,7 +208,7 @@
 
     function pickNaturalVoice(language) {
         var targetLang = normalizeLanguage(language);
-        var targetPrefix = targetLang === "ta" ? "ta" : "en";
+        var targetPrefix = targetLang === "ta" ? "ta" : (targetLang === "nl" ? "nl" : "en");
         var voices = getSpeechVoices();
         if (!voices.length) {
             return null;
@@ -205,6 +217,11 @@
             var lang = String(voice && voice.lang || "").toLowerCase();
             return lang.indexOf(targetPrefix) === 0;
         });
+        if (!candidates.length && targetLang === "nl") {
+            candidates = voices.filter(function (voice) {
+                return /dutch|nederlands/i.test(String(voice && voice.name || ""));
+            });
+        }
         if (!candidates.length && targetLang === "ta") {
             candidates = voices.filter(function (voice) {
                 return String(voice && voice.name || "").toLowerCase().indexOf("tamil") >= 0;
@@ -228,11 +245,34 @@
         return bestVoice;
     }
 
+    function getSpeechChapterWord(language) {
+        var lang = normalizeLanguage(language);
+        if (lang === "ta") {
+            return "அதிகாரம்";
+        }
+        if (lang === "nl") {
+            return "hoofdstuk";
+        }
+        return "chapter";
+    }
+
+    function getSpeechVerseWord(language) {
+        var lang = normalizeLanguage(language);
+        if (lang === "ta") {
+            return "வசனம்";
+        }
+        if (lang === "nl") {
+            return "Vers";
+        }
+        return "Verse";
+    }
+
     function buildChapterSpeechText(language, location, verses, startVerseNumber) {
+        var langNorm = normalizeLanguage(language);
         var chapterNumber = Number(location && location.chapter || 0) + 1;
-        var header = normalizeLanguage(language) === "ta"
-            ? (getBookName(language, Number(location && location.book || 0)) + " அதிகாரம் " + String(chapterNumber))
-            : (getBookName(language, Number(location && location.book || 0)) + " chapter " + String(chapterNumber));
+        var header = langNorm === "ta"
+            ? (getBookName(language, Number(location && location.book || 0)) + " " + getSpeechChapterWord(language) + " " + String(chapterNumber))
+            : (getBookName(language, Number(location && location.book || 0)) + " " + getSpeechChapterWord(language) + " " + String(chapterNumber));
         var safeStartVerse = Math.max(1, Number(startVerseNumber || 1));
         var startIndex = safeStartVerse - 1;
         var lines = [header];
@@ -245,11 +285,7 @@
             if (!text) {
                 return;
             }
-            if (normalizeLanguage(language) === "ta") {
-                lines.push("வசனம் " + String(safeNumber) + ". " + text);
-                return;
-            }
-            lines.push("Verse " + String(safeNumber) + ". " + text);
+            lines.push(getSpeechVerseWord(language) + " " + String(safeNumber) + ". " + text);
         });
         return lines.join(". ");
     }
@@ -292,20 +328,27 @@
         return segments;
     }
 
+    function getSpeechStartFromLine(language, verseNum) {
+        var lang = normalizeLanguage(language);
+        if (lang === "ta") {
+            return "வசனம் " + String(verseNum) + " முதல் வாசிக்கப்படுகிறது";
+        }
+        if (lang === "nl") {
+            return "Beginnen bij vers " + String(verseNum);
+        }
+        return "Starting from verse " + String(verseNum);
+    }
+
     function buildChapterSpeechSegments(language, location, verses, startVerseNumber) {
         var activeLanguage = normalizeLanguage(language);
         var chapterNumber = Number(location && location.chapter || 0) + 1;
-        var header = activeLanguage === "ta"
-            ? (getBookName(language, Number(location && location.book || 0)) + " அதிகாரம் " + String(chapterNumber))
-            : (getBookName(language, Number(location && location.book || 0)) + " chapter " + String(chapterNumber));
+        var header = getBookName(language, Number(location && location.book || 0)) + " " + getSpeechChapterWord(language) + " " + String(chapterNumber);
         var safeStartVerse = Math.max(1, Number(startVerseNumber || 1));
         var startIndex = safeStartVerse - 1;
         var lines = [{ text: header, verseNumber: null }];
         if (safeStartVerse > 1) {
             lines.push({
-                text: activeLanguage === "ta"
-                    ? ("வசனம் " + String(safeStartVerse) + " முதல் வாசிக்கப்படுகிறது")
-                    : ("Starting from verse " + String(safeStartVerse)),
+                text: getSpeechStartFromLine(language, safeStartVerse),
                 verseNumber: null
             });
         }
@@ -318,9 +361,7 @@
             if (!text) {
                 return;
             }
-            var lineText = activeLanguage === "ta"
-                ? ("வசனம் " + String(safeNumber) + ". " + text)
-                : ("Verse " + String(safeNumber) + ". " + text);
+            var lineText = getSpeechVerseWord(language) + " " + String(safeNumber) + ". " + text;
             lines.push({ text: lineText, verseNumber: safeNumber });
         });
 
@@ -362,7 +403,8 @@
     }
 
     function getRemoteTtsUrl(language, text) {
-        var targetLang = normalizeLanguage(language) === "ta" ? "ta" : "en";
+        var langNorm = normalizeLanguage(language);
+        var targetLang = langNorm === "ta" ? "ta" : (langNorm === "nl" ? "nl" : "en");
         return "https://translate.googleapis.com/translate_tts?ie=UTF-8&client=gtx&tl=" +
             encodeURIComponent(targetLang) +
             "&q=" + encodeURIComponent(String(text || ""));
@@ -380,7 +422,7 @@
             var displayVerse = getDisplayVerseForMiniPlayer();
             var metaArtist = activeLanguage === "ta"
                 ? ("அதிகாரம் " + String(chapterNumber) + " · வசனம் " + String(displayVerse))
-                : ("Chapter " + String(chapterNumber) + " · Verse " + String(displayVerse));
+                : ("Chapter " + String(chapterNumber) + " · " + getSpeechVerseWord(activeLanguage) + " " + String(displayVerse));
             if (typeof window.MediaMetadata === "function") {
                 navigator.mediaSession.metadata = new MediaMetadata({
                     title: metaTitle,
@@ -985,7 +1027,9 @@
 
             var verseFont = payload.language === "ta"
                 ? "600 58px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
-                : "600 56px 'Segoe UI', Arial, sans-serif";
+                : (payload.language === "nl"
+                    ? "600 56px 'Segoe UI', Arial, sans-serif"
+                    : "600 56px 'Segoe UI', Arial, sans-serif");
             ctx.font = verseFont;
             ctx.fillStyle = "#ffffff";
             var textLines = wrapTextToLines(ctx, payload.verseText, 760, 13);
@@ -1014,7 +1058,12 @@
 
             ctx.fillStyle = "rgba(255,255,255,0.8)";
             ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
-            ctx.fillText(payload.language === "ta" ? "தமிழ்" : "English", 540, 1238);
+            var langTag = payload.language === "ta"
+                ? "தமிழ்"
+                : (payload.language === "nl"
+                    ? "Nederlands"
+                    : (payload.language === "tr" ? "Tamil (romanized)" : "English"));
+            ctx.fillText(langTag, 540, 1238);
 
             canvasToPngBlob(canvas).then(resolve).catch(function (err) {
                 reject(err || new Error("image-generation-failed"));
@@ -1379,7 +1428,15 @@
         }
         var utterance = new SpeechSynthesisUtterance(text);
         var activeLanguage = normalizeLanguage(currentSpeechContext.language);
-        utterance.lang = activeLanguage === "ta" ? "ta-IN" : "en-GB";
+        var utterLang = "en-GB";
+        if (activeLanguage === "ta") {
+            utterLang = "ta-IN";
+        } else if (activeLanguage === "nl") {
+            utterLang = "nl-NL";
+        } else if (activeLanguage === "tr") {
+            utterLang = "en-IN";
+        }
+        utterance.lang = utterLang;
         /* Slightly slower rate + near-default pitch reads less “robotic” on many engines. */
         utterance.rate = activeLanguage === "ta" ? 0.9 : 0.92;
         utterance.pitch = activeLanguage === "ta" ? 1 : 0.98;
@@ -1630,7 +1687,11 @@
     }
 
     function normalizeLanguage(value) {
-        return value === "ta" ? "ta" : "en";
+        var s = String(value || "").trim().toLowerCase();
+        if (s === "ta" || s === "nl" || s === "tr") {
+            return s;
+        }
+        return "en";
     }
 
     function normalizeNumber(value, fallback) {
@@ -1639,11 +1700,18 @@
     }
 
     function getStoredState() {
+        var defaults = {
+            language: "en",
+            en: { book: 0, chapter: 0 },
+            ta: { book: 0, chapter: 0 },
+            nl: { book: 0, chapter: 0 },
+            tr: { book: 0, chapter: 0 }
+        };
         try {
             var raw = window.localStorage.getItem(BIBLE_STATE_KEY);
             var parsed = raw ? JSON.parse(raw) : {};
             var source = parsed && typeof parsed === "object" ? parsed : {};
-            return {
+            var out = {
                 language: normalizeLanguage(source.language),
                 en: {
                     book: normalizeNumber(source.en && source.en.book, 0),
@@ -1652,14 +1720,27 @@
                 ta: {
                     book: normalizeNumber(source.ta && source.ta.book, 0),
                     chapter: normalizeNumber(source.ta && source.ta.chapter, 0)
+                },
+                nl: {
+                    book: normalizeNumber(source.nl && source.nl.book, 0),
+                    chapter: normalizeNumber(source.nl && source.nl.chapter, 0)
+                },
+                tr: {
+                    book: normalizeNumber(source.tr && source.tr.book, 0),
+                    chapter: normalizeNumber(source.tr && source.tr.chapter, 0)
                 }
             };
+            if (!source.nl && source.en) {
+                out.nl.book = out.en.book;
+                out.nl.chapter = out.en.chapter;
+            }
+            if (!source.tr && source.ta) {
+                out.tr.book = out.ta.book;
+                out.tr.chapter = out.ta.chapter;
+            }
+            return out;
         } catch (err) {
-            return {
-                language: "en",
-                en: { book: 0, chapter: 0 },
-                ta: { book: 0, chapter: 0 }
-            };
+            return defaults;
         }
     }
 
@@ -1674,15 +1755,27 @@
 
     function setLanguageButtons() {
         var active = normalizeLanguage(state.language);
-        var enActive = active === "en";
-        languageEnButton.classList.toggle("active", enActive);
-        languageTaButton.classList.toggle("active", !enActive);
-        languageEnButton.setAttribute("aria-pressed", enActive ? "true" : "false");
-        languageTaButton.setAttribute("aria-pressed", enActive ? "false" : "true");
+        if (languageEnButton) {
+            languageEnButton.classList.toggle("active", active === "en");
+            languageEnButton.setAttribute("aria-pressed", active === "en" ? "true" : "false");
+        }
+        if (languageTaButton) {
+            languageTaButton.classList.toggle("active", active === "ta");
+            languageTaButton.setAttribute("aria-pressed", active === "ta" ? "true" : "false");
+        }
+        if (languageNlButton) {
+            languageNlButton.classList.toggle("active", active === "nl");
+            languageNlButton.setAttribute("aria-pressed", active === "nl" ? "true" : "false");
+        }
+        if (languageTrButton) {
+            languageTrButton.classList.toggle("active", active === "tr");
+            languageTrButton.setAttribute("aria-pressed", active === "tr" ? "true" : "false");
+        }
     }
 
     function getBooksForLanguage(language) {
-        return language === "ta" ? TAMIL_BOOKS : ENGLISH_BOOKS;
+        var lang = normalizeLanguage(language);
+        return lang === "ta" ? TAMIL_BOOKS : ENGLISH_BOOKS;
     }
 
     function getBookName(language, index) {
@@ -1875,16 +1968,25 @@
         }
         return Promise.all([
             loadBible("en"),
-            loadBible("ta")
-        ]).then(function (pair) {
-            var enData = pair[0];
-            var taData = pair[1];
+            loadBible("ta"),
+            loadBible("nl"),
+            loadBible("tr")
+        ]).then(function (quad) {
+            var enData = quad[0];
+            var taData = quad[1];
+            var nlData = quad[2];
+            var trData = quad[3];
             var enHits = searchOneLanguageBible(enData, "en", regex, BIBLE_SEARCH_MAX_PER_LANG);
             var taHits = searchOneLanguageBible(taData, "ta", regex, BIBLE_SEARCH_MAX_PER_LANG);
+            var nlHits = searchOneLanguageBible(nlData, "nl", regex, BIBLE_SEARCH_MAX_PER_LANG);
+            var trHits = searchOneLanguageBible(trData, "tr", regex, BIBLE_SEARCH_MAX_PER_LANG);
             return {
                 query: q,
-                results: enHits.concat(taHits),
-                truncated: enHits.length >= BIBLE_SEARCH_MAX_PER_LANG || taHits.length >= BIBLE_SEARCH_MAX_PER_LANG
+                results: enHits.concat(taHits, nlHits, trHits),
+                truncated: enHits.length >= BIBLE_SEARCH_MAX_PER_LANG
+                    || taHits.length >= BIBLE_SEARCH_MAX_PER_LANG
+                    || nlHits.length >= BIBLE_SEARCH_MAX_PER_LANG
+                    || trHits.length >= BIBLE_SEARCH_MAX_PER_LANG
             };
         }).catch(function () {
             return { query: q, results: [], error: "load" };
@@ -1918,7 +2020,7 @@
         }
         var list = payload && Array.isArray(payload.results) ? payload.results : [];
         if (!list.length) {
-            setStatus(T("bible.searchNoResults", "No matches in English or Tamil."), false);
+            setStatus(T("bible.searchNoResults", "No matches in the selected Bibles."), false);
             searchResults.hidden = true;
             return;
         }
@@ -1990,7 +2092,7 @@
             renderBibleSearchResults({ query: q, results: [], error: "short" });
             return;
         }
-        setStatus(T("bible.searchRunning", "Searching English and Tamil…"), false);
+        setStatus(T("bible.searchRunning", "Searching all Bible texts…"), false);
         hideBibleSearchResults();
         runBibleSearchAllLanguages(q).then(function (payload) {
             renderBibleSearchResults(payload);
@@ -2124,7 +2226,16 @@
         if (loadingPromise[lang]) {
             return loadingPromise[lang];
         }
-        var url = lang === "ta" ? TAMIL_BIBLE_URL : ENGLISH_BIBLE_URL;
+        var url;
+        if (lang === "ta") {
+            url = TAMIL_BIBLE_URL;
+        } else if (lang === "nl") {
+            url = DUTCH_BIBLE_URL;
+        } else if (lang === "tr") {
+            url = ROMANIZED_TAMIL_BIBLE_URL;
+        } else {
+            url = ENGLISH_BIBLE_URL;
+        }
         loadingPromise[lang] = fetch(url)
             .then(function (response) {
                 if (!response.ok) {
@@ -2446,6 +2557,16 @@
     languageTaButton.addEventListener("click", function () {
         setLanguage("ta");
     });
+    if (languageNlButton) {
+        languageNlButton.addEventListener("click", function () {
+            setLanguage("nl");
+        });
+    }
+    if (languageTrButton) {
+        languageTrButton.addEventListener("click", function () {
+            setLanguage("tr");
+        });
+    }
     bookSelect.addEventListener("change", function () {
         stopSpeechPlayback();
         closeBibleSearchPanel();

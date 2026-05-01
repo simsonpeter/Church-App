@@ -466,10 +466,12 @@
         "events.typeSpecial": "சிறப்பு",
         "bible.eyebrow": "வேதாகமம்",
         "bible.title": "வேதாகம வாசிப்பு",
-        "bible.info": "தமிழ் மற்றும் ஆங்கில வேதாகமத்தில் வாசிக்கவும்.",
+        "bible.info": "ஆங்கிலம், தமிழ், டச், உரோம எழுத்து தமிழ் (சபை வாசிப்புத் திட்டப் பிரதிகள்) — வாசிக்கவும்.",
         "bible.languageLabel": "மொழி",
         "bible.languageEnglish": "ஆங்கிலம்",
         "bible.languageTamil": "தமிழ்",
+        "bible.languageDutch": "டச் (ஹால்லான்ட்)",
+        "bible.languageTamilRomanized": "தமிழ் (உரோம)",
         "bible.book": "புத்தகம்",
         "bible.chapter": "அதிகாரம்",
         "bible.verse": "வசனம்",
@@ -497,14 +499,14 @@
         "bible.shareCancelled": "பகிர்வு ரத்து செய்யப்பட்டது.",
         "bible.shareError": "இப்போது பகிர்வு படத்தை உருவாக்க முடியவில்லை.",
         "bible.searchLabel": "அனைத்து வேதாகமங்களிலும் தேடு",
-        "bible.searchPlaceholder": "ஆங்கிலம் மற்றும் தமிழ் வசனங்களில் தேடு…",
+        "bible.searchPlaceholder": "அனைத்து வேதப் பிரதிகளிலும் தேடு…",
         "bible.searchButton": "தேடு",
-        "bible.searchAllLanguagesHint": "ஆங்கிலம் மற்றும் தமிழ் இரண்டிலும் ஒரே நேரத்தில் தேடுகிறது.",
+        "bible.searchAllLanguagesHint": "ஆங்கிலம், தமிழ், டச், உரோம தமிழ் — ஒரே நேரத்தில் தேடல்.",
         "bible.searchTooShort": "தேட குறைந்தது 2 எழுத்துக்கள் தட்டச்சு செய்யவும்.",
-        "bible.searchNoResults": "ஆங்கிலம் அல்லது தமிழில் பொருந்துவது ஏதுமில்லை.",
+        "bible.searchNoResults": "எந்த வேதப் பிரதியிலும் பொருந்துவது இல்லை.",
         "bible.searchMoreAvailable": "(ஒவ்வொரு மொழிக்கும் முதல் பொருத்தங்கள் மட்டும்.)",
         "bible.searchResultCount": "பொருத்தம்(ங்கள்)",
-        "bible.searchRunning": "ஆங்கிலம் மற்றும் தமிழில் தேடுகிறது…",
+        "bible.searchRunning": "அனைத்து மொழிகளிலும் தேடுகிறது…",
         "bible.searchToggleAria": "வேதாகமத்தை தேடு",
         "bible.searchToggleTitle": "வேதாகமத்தை தேடு",
         "bible.searchToggleCloseTitle": "வேதாகமத் தேடலை மூடு",
@@ -1916,7 +1918,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411kidsshelf1";
+    var SW_VERSION = "20260411bible4lang";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";

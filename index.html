@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411kidsshelf">
+    <link rel="stylesheet" href="styles.css?v=20260411bible4lang">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -541,11 +541,13 @@
                 <div class="card-banner">
                     <img src="bible-reader-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="bible.info">Read in Tamil and English.</p>
+                <p class="page-note" data-i18n="bible.info">Read in English, Tamil, Dutch, or romanized Tamil (from the church reading-plan app).</p>
                 <div class="bible-toolbar">
                     <div class="bible-lang-switch" role="group" aria-label="Bible language">
                         <button type="button" class="button-link button-secondary bible-lang-btn active" id="bible-language-en" data-bible-lang="en" data-i18n="bible.languageEnglish">English</button>
                         <button type="button" class="button-link button-secondary bible-lang-btn" id="bible-language-ta" data-bible-lang="ta" data-i18n="bible.languageTamil">Tamil</button>
+                        <button type="button" class="button-link button-secondary bible-lang-btn" id="bible-language-nl" data-bible-lang="nl" data-i18n="bible.languageDutch">Dutch</button>
+                        <button type="button" class="button-link button-secondary bible-lang-btn" id="bible-language-tr" data-bible-lang="tr" data-i18n="bible.languageTamilRomanized">Tamil (R)</button>
                     </div>
                     <div class="bible-utility-buttons">
                         <button type="button" class="bible-icon-btn" id="bible-search-toggle" aria-expanded="false" aria-controls="bible-search-panel" data-i18n-aria-label="bible.searchToggleAria" aria-label="Search Bible" title="Search Bible" data-i18n-title="bible.searchToggleTitle" data-i18n-title-fallback="Search Bible">
@@ -584,7 +586,7 @@
                     <div class="bible-search-row">
                         <label class="bible-field bible-search-field">
                             <span class="sr-only" data-i18n="bible.searchLabel">Search all Bibles</span>
-                            <input id="bible-search-input" class="search-input" type="search" enterkeyhint="search" autocomplete="off" data-i18n-placeholder="bible.searchPlaceholder" placeholder="Search English and Tamil text…" aria-label="Search English and Tamil Bible text">
+                            <input id="bible-search-input" class="search-input" type="search" enterkeyhint="search" autocomplete="off" data-i18n-placeholder="bible.searchPlaceholder" placeholder="Search all Bible texts…" aria-label="Search Bible text">
                         </label>
                         <button type="button" class="button-link button-secondary" id="bible-search-button" data-i18n="bible.searchButton">Search</button>
                     </div>
@@ -1830,13 +1832,13 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411kidsshelf1"></script>
+    <script src="app-shell.js?v=20260411bible4lang"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
     <script src="events-page.js?v=20260414u2"></script>
     <script src="sermons-page.js?v=20260324u1"></script>
-    <script src="bible-page.js?v=20260413tts1"></script>
+    <script src="bible-page.js?v=20260411bible4lang"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260411prayershare1"></script>
     <script src="daily-bread-page.js?v=20260417cardlang1"></script>

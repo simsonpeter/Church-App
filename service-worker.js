@@ -31,26 +31,26 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v353kidsshelf";
-const RUNTIME_CACHE = "njc-runtime-cache-v353kidsshelf";
+const APP_CACHE = "njc-app-cache-v354bible4lang";
+const RUNTIME_CACHE = "njc-runtime-cache-v354bible4lang";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Library: Kids shelf for Kids World books only; admin can assign English, Tamil, or Kids.";
+    "Bible reader: Dutch (Statenvertaling) and romanized Tamil from Readingplan repo; 4-language search.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsshelf",
+    "./styles.css?v=20260411bible4lang",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsshelf1",
+    "./app-shell.js?v=20260411bible4lang",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
     "./events-page.js?v=20260414u2",
     "./sermons-page.js?v=20260324u1",
-    "./bible-page.js?v=20260413tts1",
+    "./bible-page.js?v=20260411bible4lang",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",

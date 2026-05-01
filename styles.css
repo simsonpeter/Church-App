@@ -4361,7 +4361,7 @@ body.auth-modal-open {
 
 .bible-lang-switch {
     display: inline-grid;
-    grid-template-columns: repeat(2, max-content);
+    grid-template-columns: repeat(4, max-content);
     gap: 6px;
     flex: 0 0 auto;
     min-width: 0;
