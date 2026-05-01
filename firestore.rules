@@ -153,6 +153,8 @@ service cloud.firestore {
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Note: do not require updatedAt is timestamp — FieldValue.serverTimestamp() is a sentinel
+    // during rule evaluation and fails timestamp checks (same pattern as celebrationWishes create).
     function isUserAppAccessPayload() {
       return request.resource.data.keys().hasOnly(["accessTier", "moduleGrants", "updatedAt"])
         && request.resource.data.accessTier is string
@@ -163,8 +165,7 @@ service cloud.firestore {
           "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
           "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
           "sermons", "contact", "celebrations", "chat", "userAchievements", "kids"
-        ])
-        && request.resource.data.updatedAt is timestamp;
+        ]);
     }
 
     match /users/{userId}/app/access {
