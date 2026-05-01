@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v354bible4lang";
-const RUNTIME_CACHE = "njc-runtime-cache-v354bible4lang";
+const APP_CACHE = "njc-app-cache-v355kidsdefaultroute";
+const RUNTIME_CACHE = "njc-runtime-cache-v355kidsdefaultroute";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Bible reader: Dutch (Statenvertaling) and romanized Tamil from Readingplan repo; 4-language search.";
+    "Kids World: opening the app no longer forces #kids in the URL or lands on Kids instead of Home.";
 
 const CORE_ASSETS = [
     "./",
@@ -69,7 +69,7 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260411kidsshelf1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260411kidsshelf1",
+    "./kids-page.js?v=20260411kidsdefaultroute1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",

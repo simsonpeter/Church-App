@@ -714,7 +714,21 @@
         }
     }
 
+    function isKidsRouteActive() {
+        try {
+            if (window.NjcSpaRouter && typeof window.NjcSpaRouter.getRouteFromHash === "function") {
+                return window.NjcSpaRouter.getRouteFromHash() === "kids";
+            }
+        } catch (e0) {
+            return false;
+        }
+        return false;
+    }
+
     function setKidsHashForTab(tabId) {
+        if (!isKidsRouteActive()) {
+            return;
+        }
         var id = normalizeKidsTabId(tabId);
         var next = id === "games" ? "#kids" : "#kids/" + id;
         try {
@@ -794,8 +808,12 @@
             var fromHash = readKidsTabFromHash();
             applyKidsTab(fromHash || "games", { skipHash: true });
         });
-        var initial = readKidsTabFromHash() || recallKidsTab();
-        applyKidsTab(initial, { skipHash: Boolean(readKidsTabFromHash()) });
+        if (!isKidsRouteActive()) {
+            return;
+        }
+        var subFromHash = readKidsTabFromHash();
+        var initial = subFromHash || recallKidsTab();
+        applyKidsTab(initial, { skipHash: Boolean(subFromHash) });
     }
 
     document.addEventListener("njc:cardlangchange", function (event) {
