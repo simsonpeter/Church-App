@@ -137,12 +137,13 @@
         "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
         "dailyBread.byAuthor": "எழுத்தாளர்: {author}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
-        "admin.scheduleHintBookShelf": "நூலகம்: ஒவ்வொரு நூலுக்கும் தமிழ் தாவல் அல்லது ஆங்கில தாவல் தேர்வு; அந்த தாவலில் மட்டும் காட்டும். பெட்டி njc-belgium-admin-library.",
+        "admin.scheduleHintBookShelf": "நூலகம்: ஆங்கிலம், தமிழ் அல்லது சிறுவர் உலகம். ஆங்கில/தமிழ் முக்கிய நூலகத்தில்; சிறுவர் உலகம் மட்டும் சிறுவர் உலகம் → புத்தகங்கள். பெட்டி njc-belgium-admin-library.",
         "admin.bookShelfTitle": "நூலகம்",
-        "admin.bookShelfInfo": "இந்த நூல் தமிழ் தாவலில் அல்லது ஆங்கில தாவலில் காட்ட எது என தேர்ந்தெடுத்து, கோப்பு மற்றும் விருப்ப முகப்பு படத்திற்கு https:// இணைப்புகளை ஒட்டவும். உறுப்பினர்கள் எவ்வளவு டேட்டா பயன்படுத்துவார்கள் என காட்ட கோப்பு அளவை சேர்க்கவும்.",
+        "admin.bookShelfInfo": "ஆங்கிலம், தமிழ் அல்லது சிறுவர் உலகம் தேர்ந்தெடுக்கவும். சிறுவர் புத்தகங்கள் முக்கிய நூலகத்தில் தோன்றா — சிறுவர் உலகம் → புத்தகங்களில் மட்டும். கோப்பு மற்றும் விருப்ப முகப்பு படத்திற்கு https:// இணைப்புகளை ஒட்டவும். கோப்பு அளவை சேர்க்கவும்.",
         "admin.bookShelfShelfLegend": "தாவலில் காட்டு",
         "admin.bookShelfShelfEnglish": "ஆங்கில தாவல்",
         "admin.bookShelfShelfTamil": "தமிழ் தாவல்",
+        "admin.bookShelfShelfKids": "சிறுவர் உலகம்",
         "admin.bookShelfTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
         "admin.bookShelfTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
         "admin.bookShelfAuthorPlaceholder": "ஆசிரியர் (விருப்பம்)",
@@ -176,7 +177,8 @@
         "admin.bookShelfDeleteConfirm": "இந்த உருப்படியை நீக்கவா?",
         "admin.bookShelfBadgeEnglish": "ஆங்கில தாவல்",
         "admin.bookShelfBadgeTamil": "தமிழ் தாவல்",
-        "admin.bookShelfEditPromptShelf": "தாவல்: ta (தமிழ்) அல்லது en (ஆங்கிலம்)",
+        "admin.bookShelfBadgeKids": "சிறுவர் உலகம்",
+        "admin.bookShelfEditPromptShelf": "தாவல்: en (ஆங்கிலம்), ta (தமிழ்), அல்லது kids (சிறுவர் உலகம்)",
         "admin.bookShelfEditPromptTitle": "தலைப்பு (EN)",
         "admin.bookShelfEditPromptTitleTa": "தலைப்பு (தமிழ், விருப்பம்)",
         "admin.bookShelfEditPromptAuthor": "ஆசிரியர் (விருப்பம்)",
@@ -1135,8 +1137,13 @@
         "kids.tabBooks": "புத்தகங்கள்",
         "kids.tabAudios": "ஆடியோ",
         "kids.tabVideos": "வீடியோ",
-        "kids.booksLead": "குழந்தைகளுக்கான கதைகளும் வாசிப்பும் — சபை நூலகத்தை இங்கிருந்து திறக்கவும்.",
-        "kids.booksCta": "நூலகத்தைத் திற (புத்தகங்கள்)",
+        "kids.booksLead": "உங்கள் சபை தேர்ந்தெடுத்த சிறுவர் புத்தகங்கள்.",
+        "kids.booksFullLibrary": "முழு சபை நூலகம்",
+        "kids.booksLoading": "ஏற்றுகிறது…",
+        "kids.booksEmpty": "இன்னும் சிறுவர் புத்தகங்கள் இல்லை. நிர்வாக பலகையில் «சிறுவர் உலகம்» தேர்ந்தெடுத்துச் சேர்க்கவும்.",
+        "kids.booksError": "பட்டியலை ஏற்ற முடியவில்லை. பின்னர் முயலவும்.",
+        "kids.booksRead": "நூலைத் திற",
+        "kids.booksDownloadAria": "பதிவிறக்க",
         "kids.booksHint": "குறிப்பு: பெற்றோருடன் இணைந்து ஒன்றைத் தேர்ந்தெடுக்கவும்.",
         "kids.audiosLead": "பிரசங்கங்கள் மற்றும் வேதாகம ஆடியோ கேளுங்கள் — அமைதியான நேரத்திற்கு ஏற்றது.",
         "kids.audiosCta": "பிரசங்கங்கள் & ஆடியோவைத் திற",
@@ -1909,7 +1916,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260411kidsnotext1";
+    var SW_VERSION = "20260411kidsshelf1";
     var APP_VERSION = "2026.4.11";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";

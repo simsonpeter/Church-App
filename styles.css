@@ -8351,6 +8351,14 @@ html[data-theme="dark"][data-theme-palette="slate"] {
     margin-top: 14px !important;
 }
 
+.kids-books-intro {
+    margin-bottom: 6px !important;
+}
+
+.kids-books-list {
+    margin-top: 8px;
+}
+
 .kids-activity {
     margin-top: 1.1rem;
     padding: 0.9rem 0.75rem 1rem;

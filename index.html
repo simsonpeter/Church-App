@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411kidsnotext">
+    <link rel="stylesheet" href="styles.css?v=20260411kidsshelf">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -465,8 +465,10 @@
                 </div>
 
                 <div class="kids-tab-panel" id="kids-panel-books" role="tabpanel" aria-labelledby="kids-tab-books" hidden>
-                    <p class="page-note" data-i18n="kids.booksLead">Stories and reading for kids — open the church library from here.</p>
-                    <a class="button-link kids-resource-link" href="#book-shelf" data-i18n="kids.booksCta">Open library (books)</a>
+                    <p class="page-note kids-books-intro" data-i18n="kids.booksLead">Books picked for children by your church.</p>
+                    <p class="page-note" id="kids-book-shelf-status" aria-live="polite"></p>
+                    <ul class="list library-books-list kids-books-list" id="kids-book-shelf-list"></ul>
+                    <a class="button-link button-secondary kids-resource-link" href="#book-shelf" data-i18n="kids.booksFullLibrary">Full church library</a>
                     <p class="page-note kids-resource-hint" data-i18n="kids.booksHint">Tip: ask a grown-up to pick something together.</p>
                 </div>
 
@@ -1222,7 +1224,7 @@
                             <li data-i18n="admin.scheduleHintEvents">Events: add dates here; they appear on Home and the Events tab.</li>
                             <li data-i18n="admin.scheduleHintNotices">Notices: publish to MantleDB; they merge into Home announcements with the static list.</li>
                             <li data-i18n="admin.scheduleHintDailyBread">Daily bread: add dated entries; the Daily bread tab shows the entry for today (Brussels date). Create the MantleDB bucket njc-belgium-admin-daily-bread if needed.</li>
-                            <li data-i18n="admin.scheduleHintBookShelf">Book shelf: pick Tamil tab or English tab for each book; items show only on that tab. Bucket njc-belgium-admin-library.</li>
+                            <li data-i18n="admin.scheduleHintBookShelf">Book shelf: pick English, Tamil, or Kids World. English/Tamil show on the main library; Kids only on Kids → Books. Bucket njc-belgium-admin-library.</li>
                         </ul>
                     </div>
                 </details>
@@ -1237,9 +1239,9 @@
                         <div class="card-banner">
                             <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
                         </div>
-                        <p class="page-note" data-i18n="admin.bookShelfInfo">Choose Tamil tab or English tab for this book, then paste https:// links to the file and optional cover image. Add file size so members see how much data a download uses.</p>
+                        <p class="page-note" data-i18n="admin.bookShelfInfo">Choose English, Tamil, or Kids World. Kids items appear only on Kids → Books, not on the main library.</p>
                         <form class="prayer-form" id="admin-book-shelf-form">
-                    <fieldset class="admin-book-shelf-shelf-fieldset">
+                        <fieldset class="admin-book-shelf-shelf-fieldset">
                         <legend class="page-note" data-i18n="admin.bookShelfShelfLegend">Show on tab</legend>
                         <label class="prayer-wall-anon">
                             <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-ta" value="ta">
@@ -1248,6 +1250,10 @@
                         <label class="prayer-wall-anon">
                             <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-en" value="en" checked>
                             <span data-i18n="admin.bookShelfShelfEnglish">English tab</span>
+                        </label>
+                        <label class="prayer-wall-anon">
+                            <input type="radio" name="admin-book-shelf-shelf" id="admin-book-shelf-shelf-kids" value="kids">
+                            <span data-i18n="admin.bookShelfShelfKids">Kids World</span>
                         </label>
                     </fieldset>
                     <input id="admin-book-shelf-title" class="search-input" type="text" required aria-required="true" placeholder="Title (English)" data-i18n-placeholder="admin.bookShelfTitleEnPlaceholder">
@@ -1824,7 +1830,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260411kidsnotext1"></script>
+    <script src="app-shell.js?v=20260411kidsshelf1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260411celemember"></script>
@@ -1835,7 +1841,7 @@
     <script src="contact-page.js?v=20260411prayershare1"></script>
     <script src="daily-bread-page.js?v=20260417cardlang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260417prayerapprove1"></script>
+    <script src="admin-dashboard-page.js?v=20260411kidsshelf"></script>
     <script src="admin-modules-page.js?v=20260421mainmerge"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-users-page.js?v=20260411mainmerge1"></script>
@@ -1844,8 +1850,8 @@
     <script src="profile-page.js?v=20260411kidsworld"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260330u1"></script>
-    <script src="book-shelf-page.js?v=20260331bsfile1"></script>
+    <script src="book-shelf-page.js?v=20260411kidsshelf1"></script>
     <script src="spa-router.js?v=20260411kidsworld"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260430kidsbanner"></script>
+    <script src="kids-page.js?v=20260411kidsshelf1"></script>
 </html>

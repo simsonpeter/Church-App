@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v352kidsnotext";
-const RUNTIME_CACHE = "njc-runtime-cache-v352kidsnotext";
+const APP_CACHE = "njc-app-cache-v353kidsshelf";
+const RUNTIME_CACHE = "njc-runtime-cache-v353kidsshelf";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World: removed intro text between banner and tabs for a cleaner layout.";
+    "Library: Kids shelf for Kids World books only; admin can assign English, Tamil, or Kids.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsnotext",
+    "./styles.css?v=20260411kidsshelf",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsnotext1",
+    "./app-shell.js?v=20260411kidsshelf1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411celemember",
@@ -55,7 +55,7 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260417prayerapprove1",
+    "./admin-dashboard-page.js?v=20260411kidsshelf",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260411mainmerge1",
@@ -66,10 +66,10 @@ const CORE_ASSETS = [
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",
     "./spa-router.js?v=20260411kidsworld",
-    "./book-shelf-page.js?v=20260331bsfile1",
+    "./book-shelf-page.js?v=20260411kidsshelf1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260430kidsbanner",
+    "./kids-page.js?v=20260411kidsshelf1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",

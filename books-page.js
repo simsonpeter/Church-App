@@ -34,6 +34,17 @@
         return m ? m[1] : "";
     }
 
+    function normalizeShelfValue(value) {
+        var s = String(value || "").trim().toLowerCase();
+        if (s === "ta") {
+            return "ta";
+        }
+        if (s === "kids") {
+            return "kids";
+        }
+        return "en";
+    }
+
     function normalizeEntry(row, index) {
         var source = row && typeof row === "object" ? row : {};
         var url = String(source.url || source.fileUrl || source.href || "").trim();
@@ -50,6 +61,7 @@
             url: url,
             coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase() || guessFormat(url),
+            shelf: normalizeShelfValue(source.shelf),
             sortOrder: Number(source.sortOrder) || 0,
             updatedAt: String(source.updatedAt || ""),
             createdAt: String(source.createdAt || "")
@@ -194,7 +206,7 @@
             .then(function (rows) {
                 var valid = sortLibraryRows(rows).filter(function (raw) {
                     var e = normalizeEntry(raw, 0);
-                    return isValidHttpsUrl(e.url);
+                    return isValidHttpsUrl(e.url) && e.shelf !== "kids";
                 });
                 if (valid.length) {
                     renderList(valid);

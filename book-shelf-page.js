@@ -9,19 +9,9 @@
     var tabEn = document.getElementById("book-shelf-tab-en");
     var tabTa = document.getElementById("book-shelf-tab-ta");
 
-    if (!listEl || !statusEl) {
-        return;
-    }
-
-    function T(key, fallback) {
-        if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
-            return window.NjcI18n.tForElement(pageCard, key, fallback);
-        }
-        if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
-            return window.NjcI18n.t(key, fallback);
-        }
-        return fallback || key;
-    }
+    var kidsListEl = document.getElementById("kids-book-shelf-list");
+    var kidsStatusEl = document.getElementById("kids-book-shelf-status");
+    var kidsPageCard = document.querySelector(".kids-page-card");
 
     function escapeHtml(value) {
         return String(value || "")
@@ -38,8 +28,21 @@
         return m ? m[1] : "";
     }
 
-    function normalizeShelf(value) {
+    /** Full Mantle shelf value: English / Tamil / Kids World library only. */
+    function normalizeShelfFull(value) {
         var s = String(value || "").trim().toLowerCase();
+        if (s === "ta") {
+            return "ta";
+        }
+        if (s === "kids") {
+            return "kids";
+        }
+        return "en";
+    }
+
+    /** Books tab on main library: English or Tamil only (not Kids). */
+    function normalizeShelfTab(value) {
+        var s = normalizeShelfFull(value);
         return s === "ta" ? "ta" : "en";
     }
 
@@ -82,7 +85,7 @@
             url: url,
             coverImageUrl: String(source.coverImageUrl || source.coverUrl || source.imageUrl || "").trim(),
             format: String(source.format || "").trim().toLowerCase() || guessFormat(url),
-            shelf: normalizeShelf(source.shelf),
+            shelf: normalizeShelfFull(source.shelf),
             fileSizeBytes: fileSizeBytes,
             sortOrder: Number(source.sortOrder) || 0,
             updatedAt: String(source.updatedAt || ""),
@@ -94,33 +97,31 @@
         return /^https:\/\//i.test(String(url || "").trim());
     }
 
-    function getStoredShelfTab() {
-        try {
-            var raw = String(window.localStorage.getItem(TAB_KEY) || "").trim().toLowerCase();
-            return raw === "ta" ? "ta" : "en";
-        } catch (e) {
-            return "en";
+    function pickLang(entry, lang) {
+        if (lang === "ta") {
+            return {
+                title: String(entry.titleTa || "").trim() || String(entry.title || "").trim(),
+                author: String(entry.authorTa || "").trim() || String(entry.author || "").trim(),
+                description: String(entry.descriptionTa || "").trim() || String(entry.description || "").trim(),
+                category: String(entry.categoryTa || "").trim() || String(entry.category || "").trim()
+            };
         }
+        return {
+            title: String(entry.title || "").trim() || String(entry.titleTa || "").trim(),
+            author: String(entry.author || "").trim() || String(entry.authorTa || "").trim(),
+            description: String(entry.description || "").trim() || String(entry.descriptionTa || "").trim(),
+            category: String(entry.category || "").trim() || String(entry.categoryTa || "").trim()
+        };
     }
 
-    function setStoredShelfTab(tab) {
+    function pickLangForKids(entry) {
+        var appLang = "en";
         try {
-            window.localStorage.setItem(TAB_KEY, normalizeShelf(tab));
+            if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
+                appLang = window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+            }
         } catch (e) {}
-    }
-
-    var activeShelfTab = getStoredShelfTab();
-
-    function updateTabButtons() {
-        var en = activeShelfTab === "en";
-        if (tabEn) {
-            tabEn.classList.toggle("active", en);
-            tabEn.setAttribute("aria-selected", en ? "true" : "false");
-        }
-        if (tabTa) {
-            tabTa.classList.toggle("active", !en);
-            tabTa.setAttribute("aria-selected", en ? "false" : "true");
-        }
+        return pickLang(entry, appLang);
     }
 
     function sortLibraryRows(rows) {
@@ -164,47 +165,35 @@
             });
     }
 
-    function pickLang(entry, lang) {
-        if (lang === "ta") {
-            return {
-                title: String(entry.titleTa || "").trim() || String(entry.title || "").trim(),
-                author: String(entry.authorTa || "").trim() || String(entry.author || "").trim(),
-                description: String(entry.descriptionTa || "").trim() || String(entry.description || "").trim(),
-                category: String(entry.categoryTa || "").trim() || String(entry.category || "").trim()
-            };
+    function TBook(key, fallback) {
+        if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
+            return window.NjcI18n.tForElement(pageCard, key, fallback);
         }
-        return {
-            title: String(entry.title || "").trim() || String(entry.titleTa || "").trim(),
-            author: String(entry.author || "").trim() || String(entry.authorTa || "").trim(),
-            description: String(entry.description || "").trim() || String(entry.descriptionTa || "").trim(),
-            category: String(entry.category || "").trim() || String(entry.categoryTa || "").trim()
-        };
+        if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+            return window.NjcI18n.t(key, fallback);
+        }
+        return fallback || key;
     }
 
-    function renderList(rows) {
-        var shelf = activeShelfTab;
-        var lang = shelf === "ta" ? "ta" : "en";
-        var sorted = sortLibraryRows(Array.isArray(rows) ? rows : []);
-        var filtered = sorted.filter(function (raw) {
-            var e = normalizeEntry(raw, 0);
-            return e.shelf === shelf && isValidHttpsUrl(e.url);
-        });
-        if (!filtered.length) {
-            statusEl.hidden = false;
-            statusEl.textContent = T("bookShelf.empty", "No books in this shelf yet.");
-            listEl.innerHTML = "";
-            return;
+    function TKids(key, fallback) {
+        if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && kidsPageCard) {
+            return window.NjcI18n.tForElement(kidsPageCard, key, fallback);
         }
-        statusEl.hidden = true;
-        statusEl.textContent = "";
-        listEl.innerHTML = filtered.map(function (raw, i) {
+        if (window.NjcI18n && typeof window.NjcI18n.t === "function") {
+            return window.NjcI18n.t(key, fallback);
+        }
+        return fallback || key;
+    }
+
+    function renderBookCardsHtml(rows, langPick) {
+        return rows.map(function (raw, i) {
             var entry = normalizeEntry(raw, i);
-            var p = pickLang(entry, lang);
-            var title = p.title || T("bookShelf.untitled", "Untitled");
+            var p = langPick === "kids" ? pickLangForKids(entry) : pickLang(entry, langPick);
+            var title = p.title || TBook("bookShelf.untitled", "Untitled");
             var fmt = entry.format ? entry.format.toUpperCase() : "FILE";
             var sizeHuman = formatBytesHuman(entry.fileSizeBytes);
             var sizeBadge = sizeHuman
-                ? ("<span class=\"library-book-filesize\" title=\"" + escapeHtml(T("bookShelf.fileSizeHint", "Approximate download size")) + "\">" + escapeHtml(T("bookShelf.fileSizeAbout", "≈ {size} download").replace("{size}", sizeHuman)) + "</span>")
+                ? ("<span class=\"library-book-filesize\" title=\"" + escapeHtml(TBook("bookShelf.fileSizeHint", "Approximate download size")) + "\">" + escapeHtml(TBook("bookShelf.fileSizeAbout", "≈ {size} download").replace("{size}", sizeHuman)) + "</span>")
                 : "";
             var catLine = p.category
                 ? ("<span class=\"library-book-category\">" + escapeHtml(p.category) + "</span>")
@@ -223,6 +212,12 @@
                     "  <img class=\"library-book-cover\" src=\"" + escapeHtml(coverUrl) + "\" alt=\"\" width=\"96\" height=\"144\" loading=\"lazy\" decoding=\"async\">" +
                     "</div>";
             }
+            var readBtn = langPick === "kids"
+                ? TKids("kids.booksRead", "Open book")
+                : TBook("bookShelf.read", "Read");
+            var dlAria = langPick === "kids"
+                ? TKids("kids.booksDownloadAria", "Download")
+                : TBook("bookShelf.download", "Download");
             return "" +
                 "<li class=\"library-book-card\">" +
                 "  <div class=\"library-book-main\">" +
@@ -240,9 +235,9 @@
                 desc +
                 "      <div class=\"library-book-actions\">" +
                 "        <a class=\"button-link button-secondary\" href=\"" + escapeHtml(entry.url) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" +
-                "          <i class=\"fa-solid fa-book-open\" aria-hidden=\"true\"></i> " + escapeHtml(T("bookShelf.read", "Read")) +
+                "          <i class=\"fa-solid fa-book-open\" aria-hidden=\"true\"></i> " + escapeHtml(readBtn) +
                 "        </a>" +
-                "        <a class=\"button-link button-secondary library-book-download-icon\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\" aria-label=\"" + escapeHtml(T("bookShelf.download", "Download")) + "\" title=\"" + escapeHtml(T("bookShelf.download", "Download")) + "\">" +
+                "        <a class=\"button-link button-secondary library-book-download-icon\" href=\"" + escapeHtml(entry.url) + "\" download rel=\"noopener noreferrer\" aria-label=\"" + escapeHtml(dlAria) + "\" title=\"" + escapeHtml(dlAria) + "\">" +
                 "          <i class=\"fa-solid fa-download\" aria-hidden=\"true\"></i>" +
                 "        </a>" +
                 "      </div>" +
@@ -252,10 +247,88 @@
         }).join("");
     }
 
+    function renderIntoList(targetList, targetStatus, rows, options) {
+        var opts = options || {};
+        var shelfFilter = opts.shelfFilter;
+        var langPick = opts.langPick || "en";
+        var emptyKey = opts.emptyKey || "bookShelf.empty";
+        var emptyFb = opts.emptyFallback || "No books in this shelf yet.";
+        var loadingKey = opts.loadingKey || "bookShelf.loading";
+        var loadingFb = opts.loadingFallback || "Loading…";
+        var errorKey = opts.errorKey || "bookShelf.error";
+        var errorFb = opts.errorFallback || "Could not load the list. Try again later.";
+        var sorted = sortLibraryRows(Array.isArray(rows) ? rows : []);
+        var filtered = sorted.filter(function (raw) {
+            var e = normalizeEntry(raw, 0);
+            return e.shelf === shelfFilter && isValidHttpsUrl(e.url);
+        });
+        if (!targetList || !targetStatus) {
+            return;
+        }
+        if (!filtered.length) {
+            targetStatus.hidden = false;
+            targetStatus.textContent = opts.useKidsT
+                ? TKids(emptyKey, emptyFb)
+                : TBook(emptyKey, emptyFb);
+            targetList.innerHTML = "";
+            return;
+        }
+        targetStatus.hidden = true;
+        targetStatus.textContent = "";
+        targetList.innerHTML = renderBookCardsHtml(filtered, langPick);
+    }
+
+    function getStoredShelfTab() {
+        try {
+            var raw = String(window.localStorage.getItem(TAB_KEY) || "").trim().toLowerCase();
+            return raw === "ta" ? "ta" : "en";
+        } catch (e) {
+            return "en";
+        }
+    }
+
+    function setStoredShelfTab(tab) {
+        try {
+            window.localStorage.setItem(TAB_KEY, normalizeShelfTab(tab));
+        } catch (e) {}
+    }
+
+    var activeShelfTab = getStoredShelfTab();
+
+    function updateTabButtons() {
+        var en = activeShelfTab === "en";
+        if (tabEn) {
+            tabEn.classList.toggle("active", en);
+            tabEn.setAttribute("aria-selected", en ? "true" : "false");
+        }
+        if (tabTa) {
+            tabTa.classList.toggle("active", !en);
+            tabTa.setAttribute("aria-selected", en ? "false" : "true");
+        }
+    }
+
+    function renderMainList(rows) {
+        if (!listEl || !statusEl) {
+            return;
+        }
+        var shelf = activeShelfTab;
+        var lang = shelf === "ta" ? "ta" : "en";
+        renderIntoList(listEl, statusEl, rows, {
+            shelfFilter: shelf,
+            langPick: lang,
+            emptyKey: "bookShelf.empty",
+            emptyFb: "No books in this shelf yet.",
+            useKidsT: false
+        });
+    }
+
     function loadBooks() {
+        if (!listEl || !statusEl) {
+            return;
+        }
         updateTabButtons();
         statusEl.hidden = false;
-        statusEl.textContent = T("bookShelf.loading", "Loading…");
+        statusEl.textContent = TBook("bookShelf.loading", "Loading…");
         listEl.innerHTML = "";
         loadFromMantle()
             .then(function (rows) {
@@ -264,30 +337,65 @@
                     return isValidHttpsUrl(e.url);
                 });
                 if (valid.length) {
-                    renderList(valid);
+                    renderMainList(valid);
                     return;
                 }
                 return loadFromJson(FALLBACK_JSON).then(function (fallbackRows) {
-                    renderList(Array.isArray(fallbackRows) ? fallbackRows : []);
+                    renderMainList(Array.isArray(fallbackRows) ? fallbackRows : []);
                 });
             })
             .catch(function () {
                 return loadFromJson(FALLBACK_JSON).then(function (rows) {
-                    renderList(Array.isArray(rows) ? rows : []);
+                    renderMainList(Array.isArray(rows) ? rows : []);
                 });
             })
             .catch(function () {
                 statusEl.hidden = false;
-                statusEl.textContent = T("bookShelf.error", "Could not load the list. Try again later.");
+                statusEl.textContent = TBook("bookShelf.error", "Could not load the list. Try again later.");
                 listEl.innerHTML = "";
             });
     }
 
+    function loadKidsBooks() {
+        if (!kidsListEl || !kidsStatusEl) {
+            return;
+        }
+        kidsStatusEl.hidden = false;
+        kidsStatusEl.textContent = TKids("kids.booksLoading", "Loading…");
+        kidsListEl.innerHTML = "";
+        loadFromMantle()
+            .then(function (rows) {
+                renderIntoList(kidsListEl, kidsStatusEl, Array.isArray(rows) ? rows : [], {
+                    shelfFilter: "kids",
+                    langPick: "kids",
+                    emptyKey: "kids.booksEmpty",
+                    emptyFallback: "No kids books yet. Ask your admin to add some in the dashboard (Kids tab).",
+                    loadingKey: "kids.booksLoading",
+                    loadingFallback: "Loading…",
+                    errorKey: "kids.booksError",
+                    errorFallback: "Could not load books. Try again later.",
+                    useKidsT: true
+                });
+            })
+            .catch(function () {
+                kidsStatusEl.hidden = false;
+                kidsStatusEl.textContent = TKids("kids.booksError", "Could not load books. Try again later.");
+                kidsListEl.innerHTML = "";
+            });
+    }
+
     function setShelfTab(tab) {
-        activeShelfTab = normalizeShelf(tab);
+        activeShelfTab = normalizeShelfTab(tab);
         setStoredShelfTab(activeShelfTab);
         loadBooks();
     }
+
+    window.NjcLibrary = {
+        normalizeShelfFull: normalizeShelfFull,
+        normalizeEntry: normalizeEntry,
+        loadFromMantle: loadFromMantle,
+        loadKidsShelf: loadKidsBooks
+    };
 
     if (tabEn) {
         tabEn.addEventListener("click", function () {
@@ -319,12 +427,16 @@
         if (route === "book-shelf" || route === "library") {
             loadBooks();
         }
+        if (kidsListEl && kidsPageCard) {
+            loadKidsBooks();
+        }
     });
     document.addEventListener("njc:admin-library-updated", function () {
         var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         if (route === "book-shelf" || route === "library") {
             loadBooks();
         }
+        loadKidsBooks();
     });
 
     document.addEventListener("DOMContentLoaded", onRoute);

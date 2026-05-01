@@ -751,6 +751,9 @@
             setKidsHashForTab(id);
         }
         rememberKidsTab(id);
+        if (id === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
+            window.NjcLibrary.loadKidsShelf();
+        }
     }
 
     function initKidsTabs() {
@@ -774,6 +777,10 @@
             }
             var fromHash = readKidsTabFromHash();
             applyKidsTab(fromHash || recallKidsTab(), { skipHash: true });
+            var tabId = fromHash || recallKidsTab();
+            if ((tabId || "games") === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
+                window.NjcLibrary.loadKidsShelf();
+            }
         });
         window.addEventListener("hashchange", function () {
             try {

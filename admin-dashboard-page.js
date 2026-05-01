@@ -43,6 +43,7 @@
     var bookShelfForm = document.getElementById("admin-book-shelf-form");
     var bookShelfShelfEn = document.getElementById("admin-book-shelf-shelf-en");
     var bookShelfShelfTa = document.getElementById("admin-book-shelf-shelf-ta");
+    var bookShelfShelfKids = document.getElementById("admin-book-shelf-shelf-kids");
     var bookShelfTitleInput = document.getElementById("admin-book-shelf-title");
     var bookShelfTitleTaInput = document.getElementById("admin-book-shelf-title-ta");
     var bookShelfAuthorInput = document.getElementById("admin-book-shelf-author");
@@ -861,7 +862,14 @@
         var source = entry && typeof entry === "object" ? entry : {};
         var url = String(source.url || source.fileUrl || source.href || "").trim();
         var shelfRaw = String(source.shelf || "").trim().toLowerCase();
-        var shelf = shelfRaw === "ta" ? "ta" : "en";
+        var shelf;
+        if (shelfRaw === "ta") {
+            shelf = "ta";
+        } else if (shelfRaw === "kids") {
+            shelf = "kids";
+        } else {
+            shelf = "en";
+        }
         var sizeRaw = source.fileSizeBytes != null ? source.fileSizeBytes : source.fileSize;
         var fileSizeBytes = Number(sizeRaw);
         if (!isFinite(fileSizeBytes) || fileSizeBytes <= 0) {
@@ -920,7 +928,9 @@
             var titleLine = entry.title || entry.titleTa || "—";
             var shelfLabel = entry.shelf === "ta"
                 ? T("admin.bookShelfBadgeTamil", "Tamil tab")
-                : T("admin.bookShelfBadgeEnglish", "English tab");
+                : (entry.shelf === "kids"
+                    ? T("admin.bookShelfBadgeKids", "Kids World")
+                    : T("admin.bookShelfBadgeEnglish", "English tab"));
             var urlShort = String(entry.url || "").replace(/^https:\/\//, "").slice(0, 72);
             var sizeLine = entry.fileSizeBytes > 0
                 ? ("<p class=\"page-note\">" + escapeHtml(T("admin.bookShelfListFileSize", "File size")) + ": " + escapeHtml(formatBookFileSizeBytes(entry.fileSizeBytes)) + "</p>")
@@ -1901,7 +1911,12 @@
         if (busy || !isAdminUser()) {
             return;
         }
-        var shelf = (bookShelfShelfTa && bookShelfShelfTa.checked) ? "ta" : "en";
+        var shelf = "en";
+        if (bookShelfShelfTa && bookShelfShelfTa.checked) {
+            shelf = "ta";
+        } else if (bookShelfShelfKids && bookShelfShelfKids.checked) {
+            shelf = "kids";
+        }
         var titleEn = String(bookShelfTitleInput && bookShelfTitleInput.value || "").trim();
         var fileUrl = String(bookShelfUrlInput && bookShelfUrlInput.value || "").trim();
         if (!titleEn) {
@@ -1956,7 +1971,9 @@
                 return normalizeBookShelfEntry(row, idx);
             });
             bookShelfForm.reset();
-            if (bookShelfShelfEn) bookShelfShelfEn.checked = true;
+            if (bookShelfShelfEn) {
+                bookShelfShelfEn.checked = true;
+            }
             renderBookShelfList();
             showNote("success", "admin.bookShelfSaved", "Book shelf item added.");
             document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
@@ -2009,11 +2026,12 @@
                 return;
             }
             var current = source[targetIndex] || {};
-            var nextShelfRaw = window.prompt(T("admin.bookShelfEditPromptShelf", "Tab: ta (Tamil) or en (English)"), String(current.shelf || "en"));
-            if (nextShelfRaw === null) {
+            var nextShelfInput = window.prompt(T("admin.bookShelfEditPromptShelf", "Tab: en (English), ta (Tamil), or kids (Kids World)"), String(current.shelf || "en"));
+            if (nextShelfInput === null) {
                 return;
             }
-            var nextShelf = String(nextShelfRaw || "").trim().toLowerCase() === "ta" ? "ta" : "en";
+            var nextShelfKey = String(nextShelfInput || "").trim().toLowerCase();
+            var nextShelf = nextShelfKey === "ta" ? "ta" : (nextShelfKey === "kids" ? "kids" : "en");
             var nextTitle = window.prompt(T("admin.bookShelfEditPromptTitle", "Title (English)"), String(current.title || ""));
             if (nextTitle === null) {
                 return;
