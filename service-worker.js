@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v358kidsplayer";
-const RUNTIME_CACHE = "njc-runtime-cache-v358kidsplayer";
+const APP_CACHE = "njc-app-cache-v359kidsaudiolist";
+const RUNTIME_CACHE = "njc-runtime-cache-v359kidsaudiolist";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World → Audios: same full-screen player and list style as Sermons (wheel, seek, mini bar).";
+    "Kids World → Audios: compact one-line list (cover, title, play).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsaudio2",
+    "./styles.css?v=20260411kidsaudio3",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsaudio2",
+    "./app-shell.js?v=20260411kidsaudio3",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
@@ -70,7 +70,7 @@ const CORE_ASSETS = [
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
     "./kids-page.js?v=20260411kidsaudio2",
-    "./kids-audio-page.js?v=20260411kidsaudio2",
+    "./kids-audio-page.js?v=20260411kidsaudio3",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",

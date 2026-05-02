@@ -73,6 +73,17 @@
         return /^https:\/\//i.test(String(url || "").trim());
     }
 
+    function isLikelyImageUrl(url) {
+        var u = String(url || "").trim().toLowerCase();
+        if (!/^https:\/\//i.test(u)) {
+            return false;
+        }
+        if (/\.(png|jpe?g|webp|gif|avif)(\?|#|$)/i.test(u)) {
+            return true;
+        }
+        return u.indexOf("image") !== -1;
+    }
+
     function normalizeRow(raw, index) {
         var r = raw && typeof raw === "object" ? raw : {};
         var audioUrl = String(r.audioUrl || r.url || r.href || "").trim();
@@ -376,29 +387,29 @@
             return;
         }
         listEl.hidden = false;
+        var playAria = escapeHtml(T("kids.audioPlayThis", "Play"));
         listEl.innerHTML = playlist.map(function (entry, index) {
             var p = pickLang(entry);
             var titleLine = escapeHtml(p.title);
-            var second = secondaryLine(entry);
-            var secondLine = escapeHtml(second || "");
             var meta = metaLine(entry);
-            var metaLineHtml = escapeHtml(meta);
+            var metaHtml = escapeHtml(meta);
+            var cover = String(entry.coverImageUrl || "").trim();
+            var useImg = isLikelyImageUrl(cover);
             var avatar = escapeHtml(avatarTextFromEntry(entry));
+            var thumbInner = useImg
+                ? ("<img class=\"kids-audio-thumb-img\" src=\"" + escapeHtml(cover) + "\" alt=\"\" loading=\"lazy\" decoding=\"async\" />")
+                : ("<span class=\"kids-audio-thumb-fallback\" aria-hidden=\"true\">" + avatar + "</span>");
             return "" +
-                "<li class=\"sermon-item kids-audio-item-wrap\">" +
-                "  <div class=\"sermon-item-row\">" +
-                "    <div class=\"sermon-open-btn kids-audio-open-btn\" role=\"button\" tabindex=\"0\" data-kids-audio-index=\"" + index + "\">" +
-                "      <div class=\"sermon-open-top\">" +
-                "        <span class=\"sermon-speaker-avatar kids-audio-avatar\" aria-hidden=\"true\">" + avatar + "</span>" +
-                "        <div class=\"sermon-open-main\">" +
-                "          <h3 class=\"sermon-line sermon-line-tamil\">" + titleLine + "</h3>" +
-                (secondLine ? ("          <p class=\"sermon-line sermon-line-english\">" + secondLine + "</p>") : "") +
-                (metaLineHtml ? ("          <p class=\"sermon-line sermon-line-speaker\">" + metaLineHtml + "</p>") : "") +
-                "          <p class=\"sermon-line sermon-line-date\"><i class=\"fa-solid fa-headphones\" aria-hidden=\"true\"></i> " +
-                escapeHtml(T("kids.audioTapToPlay", "Tap to play")) + "</p>" +
-                "        </div>" +
-                "      </div>" +
+                "<li class=\"kids-audio-row\">" +
+                "  <div class=\"kids-audio-row-inner kids-audio-row-click\" role=\"button\" tabindex=\"0\" data-kids-audio-index=\"" + index + "\">" +
+                "    <div class=\"kids-audio-thumb\">" + thumbInner + "</div>" +
+                "    <div class=\"kids-audio-row-text\">" +
+                "      <span class=\"kids-audio-row-title\">" + titleLine + "</span>" +
+                (metaHtml ? ("<span class=\"kids-audio-row-meta\">" + metaHtml + "</span>") : "") +
                 "    </div>" +
+                "    <button type=\"button\" class=\"kids-audio-play-btn\" data-kids-audio-index=\"" + index + "\" aria-label=\"" + playAria + "\">" +
+                "      <i class=\"fa-solid fa-circle-play\" aria-hidden=\"true\"></i>" +
+                "    </button>" +
                 "  </div>" +
                 "</li>";
         }).join("");
@@ -479,14 +490,21 @@
 
     if (listEl) {
         listEl.addEventListener("click", function (event) {
-            var row = event.target.closest(".kids-audio-open-btn");
+            var btn = event.target.closest(".kids-audio-play-btn");
+            if (btn && listEl.contains(btn)) {
+                event.preventDefault();
+                event.stopPropagation();
+                openFromRow(btn);
+                return;
+            }
+            var row = event.target.closest(".kids-audio-row-click");
             openFromRow(row);
         });
         listEl.addEventListener("keydown", function (event) {
             if (event.key !== "Enter" && event.key !== " ") {
                 return;
             }
-            var row = event.target.closest(".kids-audio-open-btn");
+            var row = event.target.closest(".kids-audio-row-click");
             if (!row || !listEl.contains(row)) {
                 return;
             }

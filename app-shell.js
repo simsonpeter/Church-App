@@ -1191,6 +1191,7 @@
         "kids.audioPrevious": "முந்தைய தடம்",
         "kids.audioNext": "அடுத்த தடம்",
         "kids.audioTapToPlay": "இயக்க தட்டவும்",
+        "kids.audioPlayThis": "இயக்கு",
         "player.openKidsAudioPlayer": "முழு இசை இயக்கியைத் திற",
         "kids.audioPlay": "இயக்கு",
         "kids.audioLoading": "ஆடியோ பட்டியல் ஏற்றுகிறது…",

@@ -8371,6 +8371,150 @@ html[data-theme="dark"][data-theme-palette="slate"] {
     margin-bottom: 8px !important;
 }
 
+/* Kids World — compact single-line audio list (thumb + title + play) */
+.kids-page-card ul.list.kids-audio-track-list {
+    gap: 0;
+}
+
+.kids-page-card ul.list.kids-audio-track-list > li.kids-audio-row {
+    padding: 0;
+    border-bottom: 1px solid var(--line);
+    border-radius: 0;
+    background: transparent;
+    transition:
+        background-color 0.2s ease,
+        border-color 0.2s ease;
+}
+
+.kids-page-card ul.list.kids-audio-track-list > li.kids-audio-row:first-child {
+    padding-top: 0;
+}
+
+.kids-page-card ul.list.kids-audio-track-list > li.kids-audio-row:last-child {
+    border-bottom: 0;
+    padding-bottom: 0;
+}
+
+.kids-audio-row-inner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 10px 4px 10px 2px;
+    border-radius: 14px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.kids-audio-thumb {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--primary) 14%, var(--surface-soft));
+    border: 1px solid color-mix(in srgb, var(--line) 80%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+}
+
+.kids-audio-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.kids-audio-thumb-fallback {
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--primary);
+    line-height: 1;
+}
+
+.kids-audio-row-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.kids-audio-row-title {
+    display: block;
+    width: 100%;
+    font-size: 0.98rem;
+    font-weight: 650;
+    line-height: 1.25;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.kids-audio-row-meta {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+
+.kids-audio-play-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--primary) 12%, transparent);
+    color: var(--primary);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease,
+        transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.kids-audio-play-btn i {
+    font-size: 1.35rem;
+    line-height: 1;
+}
+
+.kids-audio-play-btn:hover,
+.kids-audio-play-btn:focus-visible {
+    background: color-mix(in srgb, var(--primary) 22%, transparent);
+    outline: none;
+}
+
+.kids-audio-play-btn:active {
+    transform: scale(0.94);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .kids-page-card ul.list.kids-audio-track-list > li.kids-audio-row:hover .kids-audio-row-inner {
+        background: color-mix(in srgb, var(--surface-soft) 88%, var(--primary));
+    }
+
+    html[data-theme="dark"] .kids-page-card ul.list.kids-audio-track-list > li.kids-audio-row:hover .kids-audio-row-inner {
+        background: rgba(255, 255, 255, 0.06);
+    }
+}
+
 /* Kids World — same sermon list + full player as Sermons (scoped to card) */
 body.kids-audio-player-open {
     overflow: hidden;
@@ -8386,10 +8530,6 @@ body.kids-audio-player-open {
 
 .kids-page-card .sermon-open-btn {
     border-radius: 12px;
-}
-
-.kids-audio-avatar {
-    font-size: 0.7rem;
 }
 
 .kids-audio-more-links {
