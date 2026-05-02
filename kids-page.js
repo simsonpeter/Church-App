@@ -14,9 +14,6 @@
     var wordLevelGroup = document.getElementById("kids-word-level-group");
     var wordScoreLine = document.getElementById("kids-word-score");
     var totalStarsLine = document.getElementById("kids-total-stars");
-    var choiceQ = document.getElementById("kids-choice-q");
-    var choiceList = document.getElementById("kids-choice-list");
-    var choiceFeedback = document.getElementById("kids-choice-feedback");
     var pageCard = document.querySelector(".kids-page-card");
     var kidsTabsNav = document.getElementById("kids-tabs");
     if (!pageCard) {
@@ -98,13 +95,6 @@
         sessionSolved: 0,
         sessionRunStars: 0
     };
-    var choiceRounds = [
-        { q: "kids.choiceQ1", a: "kids.choiceA1", b: "kids.choiceB1" },
-        { q: "kids.choiceQ2", a: "kids.choiceA2", b: "kids.choiceB2" },
-        { q: "kids.choiceQ3", a: "kids.choiceA3", b: "kids.choiceB3" }
-    ];
-    var choiceState = { index: 0 };
-
     function T(key, fallback) {
         if (pageCard && window.NjcI18n && typeof window.NjcI18n.tForElement === "function") {
             return window.NjcI18n.tForElement(pageCard, key, fallback);
@@ -520,48 +510,6 @@
         renderScramble();
     }
 
-    function renderChoiceRound() {
-        if (!choiceQ || !choiceList) {
-            return;
-        }
-        var r = choiceRounds[choiceState.index % choiceRounds.length];
-        choiceQ.setAttribute("data-i18n", r.q);
-        choiceQ.textContent = T(r.q, choiceQ.textContent);
-        choiceList.innerHTML = "";
-        if (choiceFeedback) {
-            choiceFeedback.hidden = true;
-        }
-        [["a", 1, r.a], ["b", 0, r.b]].forEach(function (x) {
-            var li = document.createElement("li");
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "button-link button-secondary kids-choice-btn";
-            btn.setAttribute("data-correct", x[1] ? "1" : "0");
-            btn.setAttribute("data-i18n", x[2]);
-            btn.textContent = T(x[2], btn.textContent);
-            li.appendChild(btn);
-            choiceList.appendChild(li);
-        });
-    }
-
-    function onChoiceClick(event) {
-        var b = event.target && event.target.closest
-            ? event.target.closest("button.kids-choice-btn")
-            : null;
-        if (!b || !choiceFeedback) {
-            return;
-        }
-        if (b.getAttribute("data-correct") === "1") {
-            choiceFeedback.textContent = T("kids.choiceRight", "That sounds like the kind of choice Jesus would be pleased with.");
-            choiceFeedback.className = "page-note kids-feedback-good";
-            addStars(1);
-        } else {
-            choiceFeedback.textContent = T("kids.choiceOther", "Another answer might be better. Talk about it with a parent or leader.");
-            choiceFeedback.className = "page-note kids-feedback-bad";
-        }
-        choiceFeedback.hidden = false;
-    }
-
     function resetWordRun() {
         scrambleState.sessionSolved = 0;
         scrambleState.sessionRunStars = 0;
@@ -653,16 +601,6 @@
     if (scrambleNext) {
         scrambleNext.addEventListener("click", nextScramble);
     }
-    if (choiceList) {
-        choiceList.addEventListener("click", onChoiceClick);
-    }
-    if (choiceQ) {
-        choiceQ.addEventListener("dblclick", function () {
-            choiceState.index = (choiceState.index + 1) % choiceRounds.length;
-            renderChoiceRound();
-        });
-    }
-
     function boot() {
         memGameBest = loadMemBest();
         syncMemLevelUI();
@@ -672,7 +610,6 @@
         pickNextWord();
         renderScramble();
         startMemory();
-        renderChoiceRound();
     }
 
     function normalizeKidsTabId(raw) {
@@ -838,7 +775,6 @@
             updateWordScoreLine();
             updateTotalStarsDisplay();
             renderScramble();
-            renderChoiceRound();
         }
     });
     boot();

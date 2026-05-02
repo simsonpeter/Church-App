@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v360kidsbanner";
-const RUNTIME_CACHE = "njc-runtime-cache-v360kidsbanner";
+const APP_CACHE = "njc-app-cache-v361kidsnochoice";
+const RUNTIME_CACHE = "njc-runtime-cache-v361kidsnochoice";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World: updated banner image.";
+    "Kids World: removed “What would God like?” choice activity from Games.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsbanner1",
+    "./styles.css?v=20260411kidsnochoice1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsbanner1",
+    "./app-shell.js?v=20260411kidsnochoice1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
@@ -69,7 +69,7 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260411kidsshelf1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260411kidsaudio2",
+    "./kids-page.js?v=20260411kidsnochoice1",
     "./kids-audio-page.js?v=20260411kidsaudio3",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",

@@ -8731,21 +8731,6 @@ html[data-theme="dark"] .kids-toolbar {
     margin-top: 0.4rem;
 }
 
-.kids-choice-list {
-    list-style: none;
-    margin: 0.35rem 0 0;
-    padding: 0;
-    display: grid;
-    gap: 0.4rem;
-}
-
-.kids-choice-list .kids-choice-btn {
-    display: block;
-    width: 100%;
-    text-align: left;
-    white-space: normal;
-}
-
 .kids-verse-text {
     line-height: 1.55;
 }
