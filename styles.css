@@ -8255,7 +8255,7 @@ html[data-theme="dark"][data-theme-palette="slate"] {
 }
 
 .kids-corner-banner img {
-    object-position: center 28%;
+    object-position: center center;
 }
 
 .kids-tabs {

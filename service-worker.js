@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v359kidsaudiolist";
-const RUNTIME_CACHE = "njc-runtime-cache-v359kidsaudiolist";
+const APP_CACHE = "njc-app-cache-v360kidsbanner";
+const RUNTIME_CACHE = "njc-runtime-cache-v360kidsbanner";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World → Audios: compact one-line list (cover, title, play).";
+    "Kids World: updated banner image.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsaudio3",
+    "./styles.css?v=20260411kidsbanner1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsaudio3",
+    "./app-shell.js?v=20260411kidsbanner1",
     "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
@@ -89,7 +89,6 @@ const CORE_ASSETS = [
     "./sermons-banner.jpg?v=20260411cb1",
     "./settings-banner.jpg?v=20260411cb1",
     "./songbook-banner.jpg?v=20260411cb1",
-    "./kids-corner-banner.png?v=20260430kids1",
     "./trivia-banner.jpg?v=20260411cb1",
     "./announcements.json"
 ];
@@ -174,6 +173,7 @@ self.addEventListener("fetch", function (event) {
     const isRemoteData = url.origin === "https://raw.githubusercontent.com";
     const isMantleDb = url.origin === "https://mantledb.sh";
     const isFirebaseJs = url.origin === "https://www.gstatic.com" && url.pathname.indexOf("/firebasejs/") === 0;
+    const isImgBb = url.origin === "https://i.ibb.co";
 
     if (event.request.mode === "navigate") {
         event.respondWith(
@@ -195,7 +195,7 @@ self.addEventListener("fetch", function (event) {
         return;
     }
 
-    if (isSameOrigin || isRemoteData || isMantleDb || isFirebaseJs) {
+    if (isSameOrigin || isRemoteData || isMantleDb || isFirebaseJs || isImgBb) {
         event.respondWith(staleWhileRevalidate(event.request));
     }
 });
