@@ -17,7 +17,10 @@
             var latestSermonsCard = latestSermonsList ? latestSermonsList.closest(".card") : null;
             var archiveCard = archiveNote ? archiveNote.closest(".card") : null;
             var allSermons = [];
-            var visibleCount = 4;
+            /** Default list shows this many; sermons are sorted newest-first, so older same-month items need a higher default than 4. */
+            var INITIAL_VISIBLE_SERMONS = 12;
+            var VISIBLE_SERMON_INCREMENT = 8;
+            var visibleCount = INITIAL_VISIBLE_SERMONS;
             var currentSermonIndex = -1;
             var currentSermon = null;
             var sermonsLoaded = false;
@@ -675,7 +678,7 @@
             }
 
             showMoreSermonsButton.addEventListener("click", function () {
-                visibleCount += 4;
+                visibleCount += VISIBLE_SERMON_INCREMENT;
                 renderSermons();
             });
 
@@ -685,7 +688,7 @@
                 selectedMonth = "";
                 selectedSavedOnly = false;
                 searchTriggered = true;
-                visibleCount = 4;
+                visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             }
 
@@ -695,7 +698,7 @@
                 selectedSpeaker = "";
                 selectedMonth = "";
                 selectedSavedOnly = false;
-                visibleCount = 4;
+                visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             });
 
@@ -726,7 +729,7 @@
                 }
                 selectedSpeaker = button.getAttribute("data-speaker") || "";
                 searchTriggered = true;
-                visibleCount = 4;
+                visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             });
 
@@ -737,7 +740,7 @@
                 }
                 selectedMonth = button.getAttribute("data-month") || "";
                 searchTriggered = true;
-                visibleCount = 4;
+                visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             });
 
@@ -748,7 +751,7 @@
                 }
                 selectedSavedOnly = button.getAttribute("data-saved") === "only";
                 searchTriggered = true;
-                visibleCount = 4;
+                visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             });
 

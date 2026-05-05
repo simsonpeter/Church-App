@@ -1954,7 +1954,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260413sermonfeed2";
+    var SW_VERSION = "20260413sermonlist1";
     var APP_VERSION = "2026.4.13";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";

@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v363sermonfresh";
-const RUNTIME_CACHE = "njc-runtime-cache-v363sermonfresh";
+const APP_CACHE = "njc-app-cache-v364sermonlist12";
+const RUNTIME_CACHE = "njc-runtime-cache-v364sermonlist12";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermons: GitHub sermon list updates without stale cache (network-first).";
+    "Sermons: show 12 items by default (newest-first hides older rows until “more”).";
 
 const CORE_ASSETS = [
     "./",
@@ -44,12 +44,14 @@ const CORE_ASSETS = [
     "./styles.css?v=20260411kidsnochoice1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260413sermonfeed2",    "./events-engine.js?v=20260318de",
+    "./app-shell.js?v=20260413sermonfeed2",
+    "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
     "./events-page.js?v=20260414u2",
-    "./sermons-page.js?v=20260413sermonfeed1",
-    "./bible-page.js?v=20260411kidsaudio2",    "./songbook-page.js?v=20260325u4",
+    "./sermons-page.js?v=20260413sermonlist1",
+    "./bible-page.js?v=20260411kidsaudio2",
+    "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
