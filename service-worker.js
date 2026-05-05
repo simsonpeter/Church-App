@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v361kidsnochoice";
-const RUNTIME_CACHE = "njc-runtime-cache-v361kidsnochoice";
+const APP_CACHE = "njc-app-cache-v363sermonfresh";
+const RUNTIME_CACHE = "njc-runtime-cache-v363sermonfresh";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World: removed “What would God like?” choice activity from Games.";
+    "Sermons: GitHub sermon list updates without stale cache (network-first).";
 
 const CORE_ASSETS = [
     "./",
@@ -44,14 +44,12 @@ const CORE_ASSETS = [
     "./styles.css?v=20260411kidsnochoice1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260411kidsnochoice1",
-    "./events-engine.js?v=20260318de",
+    "./app-shell.js?v=20260413sermonfeed2",    "./events-engine.js?v=20260318de",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260411readall1",
     "./events-page.js?v=20260414u2",
-    "./sermons-page.js?v=20260411kidsaudio2",
-    "./bible-page.js?v=20260411kidsaudio2",
-    "./songbook-page.js?v=20260325u4",
+    "./sermons-page.js?v=20260413sermonfeed1",
+    "./bible-page.js?v=20260411kidsaudio2",    "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260411prayershare1",
     "./daily-bread-page.js?v=20260417cardlang1",
     "./admin-trivia.js?v=20260327bq1",
@@ -113,6 +111,30 @@ function staleWhileRevalidate(request) {
             });
         return cached || networkFetch;
     });
+}
+
+/** GitHub sermon list must show new entries quickly; avoid serving stale JSON first. */
+function isGithubSermonsJsonUrl(url) {
+    if (!url || url.origin !== "https://raw.githubusercontent.com") {
+        return false;
+    }
+    var p = String(url.pathname || "");
+    return p.indexOf("sermons.json") !== -1 && p.endsWith("sermons.json");
+}
+
+function networkFirstThenCache(request) {
+    return fetch(request)
+        .then(function (response) {
+            if (isCacheableResponse(response)) {
+                caches.open(RUNTIME_CACHE).then(function (cache) {
+                    cache.put(request, response.clone());
+                });
+            }
+            return response;
+        })
+        .catch(function () {
+            return caches.match(request);
+        });
 }
 
 self.addEventListener("message", function (event) {
@@ -192,6 +214,11 @@ self.addEventListener("fetch", function (event) {
                     });
                 })
         );
+        return;
+    }
+
+    if (isRemoteData && isGithubSermonsJsonUrl(url)) {
+        event.respondWith(networkFirstThenCache(event.request));
         return;
     }
 

@@ -868,7 +868,7 @@
 
             function loadSermonsData() {
                 Promise.allSettled([
-                    fetch(sermonsUrl).then(function (response) {
+                    fetch(sermonsUrl + "?ts=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
                         if (!response.ok) {
                             throw new Error("Failed to load sermons");
                         }
