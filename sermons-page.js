@@ -953,5 +953,9 @@
                 loadSermonsData();
             });
 
+            document.addEventListener("njc:data-refresh", function () {
+                loadSermonsData();
+            });
+
             loadSermonsData();
         })();

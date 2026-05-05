@@ -1030,6 +1030,11 @@
             loadDailyBread();
         }
     });
+    document.addEventListener("njc:data-refresh", function () {
+        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+            loadDailyBread();
+        }
+    });
     document.addEventListener("visibilitychange", function () {
         maybeResumeDailyBreadAfterBackground();
     });

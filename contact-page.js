@@ -2178,6 +2178,10 @@
 
             loadPrayerWall();
 
+            document.addEventListener("njc:data-refresh", function () {
+                loadPrayerWall();
+            });
+
             document.addEventListener("njc:langchange", function () {
                 if (note && !note.hidden) {
                     var contactState = note.dataset.state || "";

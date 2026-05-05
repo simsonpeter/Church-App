@@ -1280,6 +1280,7 @@
         "profile.badgeTrivia10": "வேதாகமக் கேள்வி வீரர் (10+ புள்ளிகள்)",
         "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
         "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
+        "app.feedCheckPartial": "சில உள்ளடக்க இணைப்புகள் பதிலளிக்கவில்லை. இணையத்தை சரிபார்க்கவும்.",
         "app.installBannerRegionAria": "செயலியை நிறுவு",
         "app.installBannerTitle": "NJC செயலியை நிறுவவும்",
         "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
@@ -1954,8 +1955,8 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260413sermonlist1";
-    var APP_VERSION = "2026.4.13";
+    var SW_VERSION = "20260414feedprobe1";
+    var APP_VERSION = "2026.4.14";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
 
@@ -2104,15 +2105,101 @@
 
     function setupOfflineBanner() {
         var banner = document.getElementById("offline-banner");
+        var sub = document.getElementById("offline-banner-sub");
         if (!banner) {
             return;
         }
         function sync() {
-            banner.hidden = navigator.onLine !== false;
+            var offline = navigator.onLine === false;
+            banner.hidden = !offline;
+            if (sub) {
+                sub.hidden = true;
+                sub.textContent = "";
+            }
         }
         sync();
         window.addEventListener("online", sync);
         window.addEventListener("offline", sync);
+    }
+
+    var FEED_PROBE_MIN_MS = 4 * 60 * 1000;
+    var lastFeedProbeAt = 0;
+    var feedProbeInFlight = false;
+
+    function runFeedConnectivityProbe(reason) {
+        if (navigator.onLine === false) {
+            return;
+        }
+        var now = Date.now();
+        if (feedProbeInFlight || (now - lastFeedProbeAt < FEED_PROBE_MIN_MS && reason !== "startup")) {
+            return;
+        }
+        lastFeedProbeAt = now;
+        feedProbeInFlight = true;
+        var urls = [
+            EVENTS_FEED_URL,
+            SERMONS_FEED_URL,
+            ADMIN_SERMONS_URL,
+            PRAYER_WALL_FEED_URL,
+            ADMIN_NOTICES_FEED_URL
+        ];
+        Promise.allSettled(urls.map(function (u) {
+            var sep = u.indexOf("?") >= 0 ? "&" : "?";
+            return fetch(u + sep + "ts=" + String(now), {
+                method: "GET",
+                cache: "no-store",
+                credentials: "omit"
+            }).then(function (r) {
+                if (!r.ok) {
+                    throw new Error(String(r.status));
+                }
+            });
+        })).then(function (results) {
+            var bad = results.filter(function (r) {
+                return !r || r.status !== "fulfilled";
+            }).length;
+            var banner = document.getElementById("offline-banner");
+            var sub = document.getElementById("offline-banner-sub");
+            if (!banner || !sub) {
+                return;
+            }
+            if (navigator.onLine === false) {
+                return;
+            }
+            if (bad === 0) {
+                return;
+            }
+            sub.textContent = t("app.feedCheckPartial", "Some content links did not respond. Check your connection.");
+            sub.hidden = false;
+            banner.hidden = false;
+        }).finally(function () {
+            feedProbeInFlight = false;
+        });
+    }
+
+    function setupFeedConnectivityProbe() {
+        document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") {
+                runFeedConnectivityProbe("visibility");
+                dispatchDataRefresh("visibility");
+            }
+        });
+        window.addEventListener("pageshow", function () {
+            runFeedConnectivityProbe("pageshow");
+            dispatchDataRefresh("pageshow");
+        });
+        window.setTimeout(function () {
+            runFeedConnectivityProbe("startup");
+        }, 1200);
+    }
+
+    function dispatchDataRefresh(reason) {
+        try {
+            document.dispatchEvent(new CustomEvent("njc:data-refresh", { detail: { reason: reason || "unknown" } }));
+        } catch (e) {
+            return null;
+        }
+        return null;
     }
 
     var PWA_INSTALL_DISMISS_KEY = "njc_pwa_install_banner_dismissed_v1";
@@ -5645,6 +5732,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         registerServiceWorker();
         setupOfflineBanner();
+        setupFeedConnectivityProbe();
         setupPwaInstallBanner();
         activeLanguage = getActiveLanguage();
         try {

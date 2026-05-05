@@ -2239,7 +2239,7 @@
         } else {
             url = ENGLISH_BIBLE_URL;
         }
-        loadingPromise[lang] = fetch(url)
+        loadingPromise[lang] = fetch(url + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error("Bible load failed");
@@ -2731,6 +2731,16 @@
             shareVerseImage();
         });
     }
+
+    document.addEventListener("njc:data-refresh", function () {
+        ["en", "ta", "nl", "tr"].forEach(function (l) {
+            cache[l] = null;
+            loadingPromise[l] = null;
+        });
+        if (isBibleRouteActive()) {
+            renderBible();
+        }
+    });
 
     document.addEventListener("keydown", function (event) {
         if (event.key === "Escape") {

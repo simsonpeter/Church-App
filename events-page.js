@@ -387,5 +387,9 @@
                 loadEventsData();
             });
 
+            document.addEventListener("njc:data-refresh", function () {
+                loadEventsData();
+            });
+
             loadEventsData();
         })();

@@ -439,5 +439,13 @@
         loadKidsBooks();
     });
 
+    document.addEventListener("njc:data-refresh", function () {
+        var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        if (route === "book-shelf" || route === "library") {
+            loadBooks();
+        }
+        loadKidsBooks();
+    });
+
     document.addEventListener("DOMContentLoaded", onRoute);
 })();

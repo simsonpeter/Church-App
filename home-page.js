@@ -1788,7 +1788,8 @@
                     announcementsCard.hidden = false;
                 }
                 function fetchJson(url) {
-                    return fetch(url).then(function (response) {
+                    var bust = url + (url.indexOf("?") >= 0 ? "&" : "?") + "ts=" + String(Date.now());
+                    return fetch(bust, { cache: "no-store" }).then(function (response) {
                         if (!response.ok) {
                             throw new Error("Failed to load " + url);
                         }
@@ -2290,7 +2291,11 @@
                 }
                 var dayOfYear = getDayOfYear(todayYmd);
 
-                promiseWithTimeout(fetch(readingPlanUrl), 12000, "Reading plan timeout")
+                promiseWithTimeout(
+                    fetch(readingPlanUrl + "?ts=" + String(Date.now()), { cache: "no-store" }),
+                    12000,
+                    "Reading plan timeout"
+                )
                     .then(function (response) {
                         if (!response.ok) {
                             throw new Error("Could not load reading plan");

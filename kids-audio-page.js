@@ -593,6 +593,10 @@
         loadKidsAudios();
     });
 
+    document.addEventListener("njc:data-refresh", function () {
+        loadKidsAudios();
+    });
+
     window.NjcKidsAudio = {
         load: loadKidsAudios,
         mantleUrl: MANTLE_URL,

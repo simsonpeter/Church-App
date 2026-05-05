@@ -216,7 +216,7 @@
         var eventsUrl = config.eventsUrl || "";
         var recurringEvents = buildRecurringEvents(nowBrussels, config.horizonDays || 210);
 
-        return fetch(eventsUrl)
+        return fetch(eventsUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error("Unable to load events");

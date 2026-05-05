@@ -31,29 +31,29 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v364sermonlist12";
-const RUNTIME_CACHE = "njc-runtime-cache-v364sermonlist12";
+const APP_CACHE = "njc-app-cache-v365feedprobe";
+const RUNTIME_CACHE = "njc-runtime-cache-v365feedprobe";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermons: show 12 items by default (newest-first hides older rows until “more”).";
+    "Feeds: network-first cache for GitHub JSON + MantleDB; refresh lists when app opens; link health check.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411kidsnochoice1",
+    "./styles.css?v=20260414feedprobe1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260413sermonfeed2",
-    "./events-engine.js?v=20260318de",
+    "./app-shell.js?v=20260414feedprobe1",
+    "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260411readall1",
-    "./events-page.js?v=20260414u2",
-    "./sermons-page.js?v=20260413sermonlist1",
-    "./bible-page.js?v=20260411kidsaudio2",
+    "./home-page.js?v=20260414feedprobe1",
+    "./events-page.js?v=20260414feedprobe1",
+    "./sermons-page.js?v=20260414feedprobe1",
+    "./bible-page.js?v=20260414feedprobe1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260411prayershare1",
-    "./daily-bread-page.js?v=20260417cardlang1",
+    "./contact-page.js?v=20260414feedprobe1",
+    "./daily-bread-page.js?v=20260414feedprobe1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260411kidsaudio1",
     "./admin-modules-page.js?v=20260421mainmerge",
@@ -66,11 +66,11 @@ const CORE_ASSETS = [
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260330u1",
     "./spa-router.js?v=20260411kidsworld",
-    "./book-shelf-page.js?v=20260411kidsshelf1",
+    "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
     "./kids-page.js?v=20260411kidsnochoice1",
-    "./kids-audio-page.js?v=20260411kidsaudio3",
+    "./kids-audio-page.js?v=20260414feedprobe1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
@@ -115,13 +115,13 @@ function staleWhileRevalidate(request) {
     });
 }
 
-/** GitHub sermon list must show new entries quickly; avoid serving stale JSON first. */
-function isGithubSermonsJsonUrl(url) {
+/** GitHub JSON feeds (sermons, events, announcements, bible JSON, etc.): prefer network so edits show quickly. */
+function isGithubJsonFeedUrl(url) {
     if (!url || url.origin !== "https://raw.githubusercontent.com") {
         return false;
     }
-    var p = String(url.pathname || "");
-    return p.indexOf("sermons.json") !== -1 && p.endsWith("sermons.json");
+    var p = String(url.pathname || "").toLowerCase();
+    return p.endsWith(".json");
 }
 
 function networkFirstThenCache(request) {
@@ -219,11 +219,15 @@ self.addEventListener("fetch", function (event) {
         return;
     }
 
-    if (isRemoteData && isGithubSermonsJsonUrl(url)) {
+    if (isRemoteData && isGithubJsonFeedUrl(url)) {
         event.respondWith(networkFirstThenCache(event.request));
         return;
     }
 
+    if (isMantleDb && String(url.pathname || "").toLowerCase().endsWith("/entries")) {
+        event.respondWith(networkFirstThenCache(event.request));
+        return;
+    }
     if (isSameOrigin || isRemoteData || isMantleDb || isFirebaseJs || isImgBb) {
         event.respondWith(staleWhileRevalidate(event.request));
     }
