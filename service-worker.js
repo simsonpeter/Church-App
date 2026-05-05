@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v365feedprobe";
-const RUNTIME_CACHE = "njc-runtime-cache-v365feedprobe";
+const APP_CACHE = "njc-app-cache-v366sermonannounce";
+const RUNTIME_CACHE = "njc-runtime-cache-v366sermonannounce";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Feeds: network-first cache for GitHub JSON + MantleDB; refresh lists when app opens; link health check.";
+    "Home: latest sermon auto-shows in announcements until Sunday (Belgium time).";
 
 const CORE_ASSETS = [
     "./",
@@ -44,12 +44,12 @@ const CORE_ASSETS = [
     "./styles.css?v=20260414feedprobe1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260414feedprobe1",
+    "./app-shell.js?v=20260414sermonannounce1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260414feedprobe1",
+    "./home-page.js?v=20260414sermonannounce1",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260414feedprobe1",
+    "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260414feedprobe1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260414feedprobe1",

@@ -1299,6 +1299,8 @@
         "home.readingHeatmapTitle": "இந்த மாத வாசிப்பு (அடர் = அதிகம்)",
         "home.readingShareLine": "என் வேத வாசிப்பு திட்டம்: {done}/{total} நாட்கள் ({pct}%) — NJC செயலி",
         "home.announcementDismiss": "படித்ததாக குறி",
+        "home.sermonAnnouncementSpeaker": "பேச்சாளர்: {name}",
+        "home.sermonAnnouncementCta": "கேட்க செய்திகள் பகுதியைத் திறக்கவும்.",
         "admin.leaderboardPreviewTitle": "பயனர் சாதனைகள் முன்னோட்டம்",
         "admin.leaderboardPreviewInfo": "Firestore பொது பட்டியல் (செயலி பட்டியல் போல).",
         "admin.leaderboardPreviewRefresh": "பட்டியலை ஏற்று",
@@ -1955,7 +1957,7 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260414feedprobe1";
+    var SW_VERSION = "20260414sermonannounce1";
     var APP_VERSION = "2026.4.14";
     /** Fallback if the waiting worker is too old to send release notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";

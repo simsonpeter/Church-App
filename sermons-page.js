@@ -209,12 +209,21 @@
                 }
 
                 var dateObj = toDateObject(item.date);
+                var dateYmd = "";
+                var rawDate = String(item.date || "").trim();
+                if (/^\d{4}-\d{2}-\d{2}$/.test(rawDate)) {
+                    dateYmd = rawDate;
+                } else if (dateObj && !Number.isNaN(dateObj.getTime())) {
+                    dateYmd = String(dateObj.getFullYear()) + "-" + String(dateObj.getMonth() + 1).padStart(2, "0") + "-" + String(dateObj.getDate()).padStart(2, "0");
+                }
                 return {
                     title: item.title,
+                    titleTa: String(item.titleTa || "").trim(),
                     subtitle: item.subtitle || "",
                     speaker: item.speaker || "",
                     audioUrl: item.audioUrl || "",
                     dateObj: dateObj,
+                    dateYmd: dateYmd,
                     dateKey: dateObj ? dateObj.getTime() : -1,
                     monthKey: dateObj
                         ? (String(dateObj.getFullYear()) + "-" + String(dateObj.getMonth() + 1).padStart(2, "0"))
@@ -869,6 +878,99 @@
                 renderSermons();
             });
 
+            var SERMON_AUTO_ANNOUNCE_STORAGE_KEY = "njc_latest_sermon_announce_v1";
+
+            function sermonAnnounceFingerprint(s) {
+                var au = String(s.audioUrl || "").trim();
+                if (au) {
+                    return au;
+                }
+                return String(s.title || "").trim() + "|" + String(s.dateYmd || "") + "|" + String(s.dateKey || "");
+            }
+
+            function brusselsWeekdayAndYmdParts() {
+                var parts = new Intl.DateTimeFormat("en-GB", {
+                    timeZone: "Europe/Brussels",
+                    weekday: "short",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit"
+                }).formatToParts(new Date());
+                var map = {};
+                parts.forEach(function (p) {
+                    if (p.type !== "literal") {
+                        map[p.type] = p.value;
+                    }
+                });
+                return {
+                    weekday: String(map.weekday || ""),
+                    year: Number(map.year) || 0,
+                    month: Number(map.month) || 0,
+                    day: Number(map.day) || 0
+                };
+            }
+
+            function upcomingSundayVisibleUntilYmdBrussels() {
+                var br = brusselsWeekdayAndYmdParts();
+                if (!br.year || !br.month || !br.day) {
+                    return "";
+                }
+                var order = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+                var todayOrd = order[br.weekday];
+                if (!Number.isFinite(todayOrd)) {
+                    return "";
+                }
+                var daysUntilSun = todayOrd === 0 ? 0 : (7 - todayOrd);
+                var base = new Date(Date.UTC(br.year, br.month - 1, br.day, 12, 0, 0));
+                base.setUTCDate(base.getUTCDate() + daysUntilSun);
+                return String(base.getUTCFullYear()) + "-" + String(base.getUTCMonth() + 1).padStart(2, "0") + "-" + String(base.getUTCDate()).padStart(2, "0");
+            }
+
+            function maybePublishLatestSermonAnnouncement(sortedNewestFirst) {
+                var mods = window.NjcAppModules;
+                if (mods && typeof mods.isModuleEnabled === "function") {
+                    if (!mods.isModuleEnabled("announcements") || !mods.isModuleEnabled("sermons")) {
+                        return;
+                    }
+                }
+                if (!Array.isArray(sortedNewestFirst) || sortedNewestFirst.length === 0) {
+                    return;
+                }
+                var latest = sortedNewestFirst[0];
+                if (!latest || !String(latest.title || "").trim()) {
+                    return;
+                }
+                var fp = sermonAnnounceFingerprint(latest);
+                if (!fp) {
+                    return;
+                }
+                var until = upcomingSundayVisibleUntilYmdBrussels();
+                if (!until) {
+                    return;
+                }
+                var payload = {
+                    sermonFingerprint: fp,
+                    visibleUntilYmd: until,
+                    title: String(latest.title || "").trim(),
+                    titleTa: String(latest.titleTa || latest.title || "").trim(),
+                    subtitle: String(latest.subtitle || "").trim(),
+                    speaker: String(latest.speaker || "").trim(),
+                    sermonDateYmd: String(latest.dateYmd || "").trim(),
+                    updatedAt: Date.now()
+                };
+                try {
+                    var rawPrev = window.localStorage.getItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY);
+                    var prev = rawPrev ? JSON.parse(rawPrev) : null;
+                    if (prev && prev.sermonFingerprint === fp && prev.visibleUntilYmd === until) {
+                        return;
+                    }
+                    window.localStorage.setItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY, JSON.stringify(payload));
+                } catch (eStore) {
+                    return;
+                }
+                document.dispatchEvent(new CustomEvent("njc:latest-sermon-announcement-updated"));
+            }
+
             function loadSermonsData() {
                 Promise.allSettled([
                     fetch(sermonsUrl + "?ts=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
@@ -907,6 +1009,10 @@
                         .sort(function (a, b) {
                             return b.dateKey - a.dateKey;
                         });
+
+                    try {
+                        maybePublishLatestSermonAnnouncement(allSermons);
+                    } catch (ePub) {}
 
                     sermonsLoaded = true;
                     sermonsLoadFailed = false;

@@ -98,6 +98,8 @@
             var announcementTranslationSaveTimerId = null;
             var cachedHomeStaticAnnouncements = [];
             var cachedHomeAdminNotices = [];
+            var SERMON_AUTO_ANNOUNCE_STORAGE_KEY = "njc_latest_sermon_announce_v1";
+            var SERMON_AUTO_ANNOUNCE_ITEM_ID = "njc-auto-latest-sermon";
 
             function modOn(moduleKey) {
                 var m = window.NjcAppModules;
@@ -1721,6 +1723,68 @@
                 return null;
             }
 
+            function readStoredLatestSermonAnnouncement() {
+                try {
+                    var raw = window.localStorage.getItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY);
+                    var obj = raw ? JSON.parse(raw) : null;
+                    if (!obj || typeof obj !== "object") {
+                        return null;
+                    }
+                    var fp = String(obj.sermonFingerprint || "").trim();
+                    var until = toYmdKey(obj.visibleUntilYmd);
+                    var title = String(obj.title || "").trim();
+                    if (!fp || !until || !title) {
+                        return null;
+                    }
+                    var todayKey = getTodayKey();
+                    if (until < todayKey) {
+                        window.localStorage.removeItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY);
+                        return null;
+                    }
+                    return obj;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function buildLatestSermonAnnouncementItem(stored) {
+                if (!stored || !modOn("sermons")) {
+                    return null;
+                }
+                var subtitle = String(stored.subtitle || "").trim();
+                var speaker = String(stored.speaker || "").trim();
+                var extraLines = [];
+                if (subtitle) {
+                    extraLines.push(subtitle);
+                }
+                if (speaker) {
+                    extraLines.push(T("home.sermonAnnouncementSpeaker", "Speaker: {name}", announcementsCard).replace(/\{name\}/g, speaker));
+                }
+                extraLines.push(T("home.sermonAnnouncementCta", "Open Sermons to listen.", announcementsCard));
+                var bodyEn = extraLines.join("\n\n");
+                var titleEn = String(stored.title || "").trim();
+                var titleTa = String(stored.titleTa || "").trim() || titleEn;
+                var bodyTa = extraLines.join("\n\n");
+                var sermonYmd = toYmdKey(stored.sermonDateYmd) || getTodayKey();
+                return normalizeAnnouncement({
+                    id: SERMON_AUTO_ANNOUNCE_ITEM_ID,
+                    title: titleEn,
+                    titleTa: titleTa,
+                    body: bodyEn,
+                    bodyTa: bodyTa,
+                    date: sermonYmd,
+                    visibleUntilYmd: toYmdKey(stored.visibleUntilYmd),
+                    important: true,
+                    link: "#sermons",
+                    imageUrl: "sermons-banner.jpg?v=20260411cb1"
+                }, 0);
+            }
+
+            function getLatestSermonAnnouncementMergedItem() {
+                var stored = readStoredLatestSermonAnnouncement();
+                return buildLatestSermonAnnouncementItem(stored);
+            }
+
             function mergeHomeAnnouncements() {
                 if (!modOn("announcements")) {
                     return;
@@ -1742,7 +1806,11 @@
                 if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.dedupeCelebrationAnnouncements === "function") {
                     mergedPersonalCommunity = window.NjcCommunityCelebrations.dedupeCelebrationAnnouncements(mergedPersonalCommunity, todayYmd);
                 }
-                var merged = mergedPersonalCommunity.concat(cachedHomeStaticAnnouncements || []).concat(cachedHomeAdminNotices || []);
+                var sermonAnn = getLatestSermonAnnouncementMergedItem();
+                var merged = mergedPersonalCommunity
+                    .concat(sermonAnn ? [sermonAnn] : [])
+                    .concat(cachedHomeStaticAnnouncements || [])
+                    .concat(cachedHomeAdminNotices || []);
                 var seen = {};
                 allAnnouncements = merged.filter(function (item) {
                     if (item.personalWish) {
@@ -2430,6 +2498,12 @@
                 }
             }
 
+            document.addEventListener("njc:latest-sermon-announcement-updated", function () {
+                if (modOn("announcements")) {
+                    mergeHomeAnnouncements();
+                }
+            });
+
             document.addEventListener("njc:modules-updated", function () {
                 applyHomeModulesFromFlags();
             });
@@ -2438,7 +2512,7 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderDailyVerse();
-                renderAnnouncements();
+                mergeHomeAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
             });
@@ -2452,7 +2526,7 @@
                 }
                 updateReadingPlanMeta();
                 renderReadingPlan();
-                renderAnnouncements();
+                mergeHomeAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
             });
