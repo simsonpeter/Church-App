@@ -8025,6 +8025,48 @@ html[data-theme="dark"] .reading-share-icon-btn:hover {
     opacity: 0.85;
 }
 
+.chat-admin-tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.25rem 0 0.5rem;
+}
+
+.chat-admin-tools[hidden] {
+    display: none !important;
+}
+
+.chat-bubble--admin {
+    position: relative;
+    padding-top: 1.85rem;
+}
+
+.chat-msg-delete {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    padding: 0.25rem 0.45rem;
+    margin: 0;
+    border: none;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--danger, #b42318) 12%, transparent);
+    color: var(--danger, #8b1e1e);
+    cursor: pointer;
+    font-size: 0.82rem;
+    line-height: 1;
+    opacity: 0.85;
+}
+
+.chat-msg-delete:hover {
+    opacity: 1;
+}
+
+.chat-bubble--mine .chat-msg-delete {
+    right: auto;
+    left: 8px;
+}
+
 .chat-form {
     display: flex;
     flex-wrap: wrap;

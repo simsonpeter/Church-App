@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v368kidsgames2";
-const RUNTIME_CACHE = "njc-runtime-cache-v368kidsgames2";
+const APP_CACHE = "njc-app-cache-v369chatadmin";
+const RUNTIME_CACHE = "njc-runtime-cache-v369chatadmin";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World: more games — finish the sentence, odd one out, Who am I?, plus extra quiz items.";
+    "Chat: admin can delete single messages or clear full history (Firestore rules updated — publish rules).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260416kidsgames2",
+    "./styles.css?v=20260606chatadmin1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260416kidsgames2",
+    "./app-shell.js?v=20260606chatadmin1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
@@ -64,7 +64,7 @@ const CORE_ASSETS = [
     "./profile-page.js?v=20260411kidsworld",
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
-    "./chat-page.js?v=20260330u1",
+    "./chat-page.js?v=20260606chatadmin1",
     "./spa-router.js?v=20260411kidsworld",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",

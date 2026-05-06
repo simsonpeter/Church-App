@@ -22,7 +22,7 @@ rules_version = '2';
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   celebrationWishes/{msgId} — daily thread (registered member read; create/delete when signed in)
 //   celebrationProfiles/{uid} — celebration fields; registered member read (token.email); owner write
-//   chatMessages/{msgId} — church group chat: text only, signed-in users
+//   chatMessages/{msgId} — church group chat: text only, signed-in users; admin may delete any message
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
@@ -281,7 +281,8 @@ service cloud.firestore {
         && request.resource.data.text is string
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() < 5000;
-      allow update, delete: if false;
+      allow update: if false;
+      allow delete: if isAdmin();
     }
   }
 }

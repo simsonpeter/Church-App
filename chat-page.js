@@ -4,17 +4,22 @@
     var QUEUE_KEY = "njc_chat_outbox_v1";
     var MAX_TEXT = 4000;
     var MAX_QUEUE = 30;
+    var ADMIN_EMAIL = "simsonpeter@gmail.com";
+    var DELETE_BATCH_SIZE = 400;
 
     var messagesEl = document.getElementById("chat-messages");
     var formEl = document.getElementById("chat-form");
     var inputEl = document.getElementById("chat-input");
     var sendBtn = document.getElementById("chat-send");
     var statusEl = document.getElementById("chat-status");
+    var chatAdminToolsEl = document.getElementById("chat-admin-tools");
+    var chatAdminDeleteAllBtn = document.getElementById("chat-admin-delete-all");
     var chatCard = document.querySelector(".chat-page-card");
 
     var unsubscribe = null;
     var sending = false;
     var lastServerDocs = [];
+    var deletingAll = false;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function" && chatCard && typeof window.NjcI18n.tForElement === "function") {
@@ -39,6 +44,15 @@
             return window.NjcAuth.getUser();
         }
         return null;
+    }
+
+    function normalizeEmail(em) {
+        return String(em || "").trim().toLowerCase();
+    }
+
+    function isAdminUser() {
+        var u = getUser();
+        return Boolean(u && normalizeEmail(u.email) === normalizeEmail(ADMIN_EMAIL));
     }
 
     function displayNameForUser(user) {
@@ -156,6 +170,7 @@
         var uid = user && user.uid ? String(user.uid) : "";
         var pending = uid ? loadQueue(uid) : [];
         var rows = Array.isArray(docs) ? docs.slice().reverse() : [];
+        var admin = isAdminUser();
         if (!rows.length && !pending.length) {
             messagesEl.innerHTML = "<p class=\"page-note chat-empty\">" + escapeHtml(T("chat.empty", "No messages yet. Say hello!")) + "</p>";
             scrollToBottom();
@@ -174,9 +189,18 @@
             } else {
                 body = "<p class=\"chat-text\">" + escapeHtml(String(d.text || "")).replace(/\n/g, "<br>") + "</p>";
             }
+            var docId = String(snap.id || "");
+            var delBtn = "";
+            if (admin && docId) {
+                var ariaDel = escapeHtml(T("chat.adminDeleteOneAria", "Delete this message"));
+                delBtn =
+                    "<button type=\"button\" class=\"chat-msg-delete\" data-chat-doc-id=\"" + escapeHtml(docId) + "\" aria-label=\"" + ariaDel + "\" title=\"" + ariaDel + "\">" +
+                    "<i class=\"fa-solid fa-trash\" aria-hidden=\"true\"></i></button>";
+            }
             return "" +
                 "<div class=\"chat-row" + (mine ? " chat-row--mine" : "") + "\">" +
-                "  <div class=\"" + bubbleClass + "\">" +
+                "  <div class=\"" + bubbleClass + (delBtn ? " chat-bubble--admin" : "") + "\">" +
+                delBtn +
                 "    <div class=\"chat-meta\"><span class=\"chat-name\">" + name + "</span>" +
                 (time ? "<span class=\"chat-time\">" + escapeHtml(time) + "</span>" : "") + "</div>" +
                 body +
@@ -198,6 +222,108 @@
         });
         messagesEl.innerHTML = html;
         scrollToBottom();
+    }
+
+    function updateAdminTools() {
+        if (!chatAdminToolsEl) {
+            return;
+        }
+        var show = Boolean(getUser() && getUser().uid && isAdminUser());
+        chatAdminToolsEl.hidden = !show;
+        if (chatAdminDeleteAllBtn) {
+            chatAdminDeleteAllBtn.disabled = deletingAll;
+        }
+    }
+
+    function deleteChatDocument(docId) {
+        if (!docId || !isAdminUser() || !window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.resolve();
+        }
+        var db = window.firebase.firestore();
+        return db.collection(CHAT_COLLECTION).doc(String(docId)).delete();
+    }
+
+    function deleteAllChatBatches() {
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.reject(new Error("no firebase"));
+        }
+        var db = window.firebase.firestore();
+        return new Promise(function (resolve, reject) {
+            function step() {
+                db.collection(CHAT_COLLECTION).limit(DELETE_BATCH_SIZE).get()
+                    .then(function (snap) {
+                        if (snap.empty) {
+                            resolve();
+                            return;
+                        }
+                        var batch = db.batch();
+                        snap.docs.forEach(function (d) {
+                            batch.delete(d.ref);
+                        });
+                        return batch.commit().then(step);
+                    })
+                    .catch(reject);
+            }
+            step();
+        });
+    }
+
+    function onAdminDeleteAllClick() {
+        if (!isAdminUser() || deletingAll) {
+            return;
+        }
+        var ok = window.confirm(T(
+            "chat.adminConfirmDeleteAll",
+            "Delete ALL chat messages for everyone? This cannot be undone."
+        ));
+        if (!ok) {
+            return;
+        }
+        deletingAll = true;
+        updateAdminTools();
+        setStatus(T("chat.adminDeleting", "Deleting messages…"));
+        deleteAllChatBatches()
+            .then(function () {
+                setStatus(T("chat.adminDeleteDone", "All messages were deleted."));
+                window.setTimeout(function () {
+                    if (statusEl && statusEl.textContent.indexOf(T("chat.adminDeleteDone", "All messages were deleted.")) >= 0) {
+                        setStatus("");
+                    }
+                }, 4000);
+            })
+            .catch(function () {
+                setStatus(T("chat.adminDeleteFailed", "Could not delete some messages. Check rules and try again."));
+            })
+            .finally(function () {
+                deletingAll = false;
+                updateAdminTools();
+            });
+    }
+
+    function onMessagesClick(ev) {
+        var btn = ev.target && ev.target.closest ? ev.target.closest(".chat-msg-delete") : null;
+        if (!btn || !messagesEl || !messagesEl.contains(btn)) {
+            return;
+        }
+        if (!isAdminUser()) {
+            return;
+        }
+        ev.preventDefault();
+        var docId = btn.getAttribute("data-chat-doc-id");
+        if (!docId) {
+            return;
+        }
+        if (!window.confirm(T("chat.adminConfirmDeleteOne", "Delete this message?"))) {
+            return;
+        }
+        setStatus(T("chat.adminDeletingOne", "Deleting…"));
+        deleteChatDocument(docId)
+            .then(function () {
+                setStatus("");
+            })
+            .catch(function () {
+                setStatus(T("chat.adminDeleteFailed", "Could not delete some messages. Check rules and try again."));
+            });
     }
 
     function stopListen() {
@@ -255,6 +381,7 @@
         if (sendBtn) {
             sendBtn.disabled = !loggedIn || sending;
         }
+        updateAdminTools();
     }
 
     function refreshChat() {
@@ -391,6 +518,14 @@
         formEl.addEventListener("submit", function (ev) {
             ev.preventDefault();
             sendText();
+        });
+    }
+    if (messagesEl) {
+        messagesEl.addEventListener("click", onMessagesClick);
+    }
+    if (chatAdminDeleteAllBtn) {
+        chatAdminDeleteAllBtn.addEventListener("click", function () {
+            onAdminDeleteAllClick();
         });
     }
 
