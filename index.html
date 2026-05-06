@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260414feedprobe1">
+    <link rel="stylesheet" href="styles.css?v=20260415kidsgames1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -449,6 +449,41 @@
                     <div class="kids-scramble-actions">
                         <button type="button" class="button-link" id="kids-scramble-check" data-i18n="kids.scrambleCheck">Check</button>
                         <button type="button" class="button-link button-secondary" id="kids-scramble-next" data-i18n="kids.scrambleNext">Next word</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-quiz">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-circle-question" aria-hidden="true"></i> <span data-i18n="kids.quizTitle">Bible quiz</span></h3>
+                    <p class="page-note" data-i18n="kids.quizHelp">Pick the right answer. Tap Next for another question.</p>
+                    <p class="kids-quiz-question page-note" id="kids-quiz-question" aria-live="polite"></p>
+                    <div class="kids-quiz-choices" id="kids-quiz-choices" role="group"></div>
+                    <p class="page-note" id="kids-quiz-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link button-secondary" id="kids-quiz-next" data-i18n="kids.quizNext">Next question</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-tf">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-scale-balanced" aria-hidden="true"></i> <span data-i18n="kids.tfTitle">True or false?</span></h3>
+                    <p class="page-note" data-i18n="kids.tfHelp">Read the sentence. Is it true?</p>
+                    <p class="kids-tf-statement page-note" id="kids-tf-statement" aria-live="polite"></p>
+                    <div class="kids-tf-actions">
+                        <button type="button" class="button-link kids-tf-btn" id="kids-tf-true" data-i18n="kids.tfTrue">True</button>
+                        <button type="button" class="button-link button-secondary kids-tf-btn" id="kids-tf-false" data-i18n="kids.tfFalse">False</button>
+                    </div>
+                    <p class="page-note" id="kids-tf-feedback" aria-live="polite" hidden></p>
+                    <button type="button" class="button-link button-secondary" id="kids-tf-next" data-i18n="kids.tfNext">Next</button>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-order">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-arrow-down-short-wide" aria-hidden="true"></i> <span data-i18n="kids.orderTitle">Story steps</span></h3>
+                    <p class="page-note" data-i18n="kids.orderHelp">Tap the steps from first to last (1, then 2, then 3…).</p>
+                    <p class="page-note kids-order-story" id="kids-order-story"></p>
+                    <div class="kids-order-steps" id="kids-order-steps" role="group"></div>
+                    <p class="page-note" id="kids-order-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link button-secondary" id="kids-order-reset" data-i18n="kids.orderReset">Try again</button>
+                        <button type="button" class="button-link" id="kids-order-next" data-i18n="kids.orderNext">Next story</button>
                     </div>
                 </div>
 
@@ -1947,7 +1982,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260414sermonannounce1"></script>
+    <script src="app-shell.js?v=20260415kidsgames1"></script>
     <script src="events-engine.js?v=20260414feedprobe1"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260414sermonannounce1"></script>
@@ -1970,6 +2005,6 @@
     <script src="book-shelf-page.js?v=20260414feedprobe1"></script>
     <script src="spa-router.js?v=20260411kidsworld"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260411kidsnochoice1"></script>
+    <script src="kids-page.js?v=20260415kidsgames1"></script>
     <script src="kids-audio-page.js?v=20260414feedprobe1"></script>
 </html>

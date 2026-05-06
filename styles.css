@@ -8739,6 +8739,78 @@ html[data-theme="dark"] .kids-toolbar {
     margin-top: 0.4rem;
 }
 
+.kids-quiz-question,
+.kids-tf-statement {
+    font-weight: 650;
+    line-height: 1.4;
+    margin: 0.25rem 0 0.5rem;
+}
+
+.kids-quiz-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0.25rem 0 0.35rem;
+}
+
+.kids-quiz-choice {
+    text-align: left;
+    width: 100%;
+    justify-content: flex-start;
+    white-space: normal;
+    line-height: 1.35;
+}
+
+.kids-tf-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.35rem 0;
+}
+
+.kids-tf-btn {
+    min-width: 6.5rem;
+}
+
+.kids-order-story {
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 0.35rem !important;
+}
+
+.kids-order-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0.25rem 0 0.35rem;
+}
+
+.kids-order-step-btn {
+    font: inherit;
+    font-size: 0.88rem;
+    font-weight: 600;
+    text-align: left;
+    width: 100%;
+    padding: 0.55rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+    line-height: 1.35;
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+}
+
+.kids-order-step-btn:hover:not(:disabled) {
+    border-color: color-mix(in srgb, var(--primary) 40%, var(--line));
+}
+
+.kids-order-step-btn:disabled,
+.kids-order-step-btn--done {
+    opacity: 0.55;
+    cursor: default;
+}
+
 .kids-verse-text {
     line-height: 1.55;
 }

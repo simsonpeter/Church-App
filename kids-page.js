@@ -13,6 +13,20 @@
     var scrambleNext = document.getElementById("kids-scramble-next");
     var wordLevelGroup = document.getElementById("kids-word-level-group");
     var wordScoreLine = document.getElementById("kids-word-score");
+    var quizQuestionEl = document.getElementById("kids-quiz-question");
+    var quizChoicesEl = document.getElementById("kids-quiz-choices");
+    var quizFeedbackEl = document.getElementById("kids-quiz-feedback");
+    var quizNextBtn = document.getElementById("kids-quiz-next");
+    var tfStatementEl = document.getElementById("kids-tf-statement");
+    var tfTrueBtn = document.getElementById("kids-tf-true");
+    var tfFalseBtn = document.getElementById("kids-tf-false");
+    var tfFeedbackEl = document.getElementById("kids-tf-feedback");
+    var tfNextBtn = document.getElementById("kids-tf-next");
+    var orderStoryEl = document.getElementById("kids-order-story");
+    var orderStepsEl = document.getElementById("kids-order-steps");
+    var orderFeedbackEl = document.getElementById("kids-order-feedback");
+    var orderResetBtn = document.getElementById("kids-order-reset");
+    var orderNextBtn = document.getElementById("kids-order-next");
     var totalStarsLine = document.getElementById("kids-total-stars");
     var pageCard = document.querySelector(".kids-page-card");
     var kidsTabsNav = document.getElementById("kids-tabs");
@@ -95,6 +109,126 @@
         sessionSolved: 0,
         sessionRunStars: 0
     };
+
+    /** Multiple-choice Bible trivia (i18n keys + English fallbacks). */
+    var KIDS_QUIZ_BANK = [
+        {
+            qKey: "kids.quizQ1",
+            qFb: "Who built a big boat because God asked him to?",
+            opts: [
+                { k: "kids.quizQ1a", fb: "Noah", ok: true },
+                { k: "kids.quizQ1b", fb: "Jonah", ok: false },
+                { k: "kids.quizQ1c", fb: "Samson", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ2",
+            qFb: "Who was thrown into a lions’ den but God kept him safe?",
+            opts: [
+                { k: "kids.quizQ2a", fb: "Daniel", ok: true },
+                { k: "kids.quizQ2b", fb: "Paul", ok: false },
+                { k: "kids.quizQ2c", fb: "Peter", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ3",
+            qFb: "What did David use to beat Goliath?",
+            opts: [
+                { k: "kids.quizQ3a", fb: "A sling and a stone", ok: true },
+                { k: "kids.quizQ3b", fb: "A sword only", ok: false },
+                { k: "kids.quizQ3c", fb: "A big shield", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ4",
+            qFb: "How many days was Jesus in the tomb before He rose again?",
+            opts: [
+                { k: "kids.quizQ4a", fb: "Three days", ok: true },
+                { k: "kids.quizQ4b", fb: "One day", ok: false },
+                { k: "kids.quizQ4c", fb: "Seven days", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ5",
+            qFb: "Who led God’s people through the sea?",
+            opts: [
+                { k: "kids.quizQ5a", fb: "Moses", ok: true },
+                { k: "kids.quizQ5b", fb: "Joshua", ok: false },
+                { k: "kids.quizQ5c", fb: "Joseph", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ6",
+            qFb: "What is the first book of the Bible?",
+            opts: [
+                { k: "kids.quizQ6a", fb: "Genesis", ok: true },
+                { k: "kids.quizQ6b", fb: "Matthew", ok: false },
+                { k: "kids.quizQ6c", fb: "Psalms", ok: false }
+            ]
+        }
+    ];
+
+    var quizState = { order: [], idx: 0, locked: false };
+
+    var KIDS_TF_BANK = [
+        { key: "kids.tfS1", fb: "Jesus welcomed children and blessed them.", truth: true },
+        { key: "kids.tfS2", fb: "The wise men brought gifts to baby Moses.", truth: false },
+        { key: "kids.tfS3", fb: "Jesus fed thousands with bread and fish.", truth: true },
+        { key: "kids.tfS4", fb: "Jonah stayed inside the big fish for only one hour.", truth: false },
+        { key: "kids.tfS5", fb: "David wrote many psalms.", truth: true },
+        { key: "kids.tfS6", fb: "The prodigal son story teaches that God loves us when we turn back to Him.", truth: true }
+    ];
+
+    var tfState = { order: [], idx: 0, locked: false };
+    var currentTf = null;
+
+    var KIDS_ORDER_BANK = [
+        {
+            titleKey: "kids.orderT1",
+            titleFb: "Creation — light first",
+            steps: [
+                { key: "kids.orderT1s1", fb: "God said, “Let there be light.”" },
+                { key: "kids.orderT1s2", fb: "God separated light from darkness." },
+                { key: "kids.orderT1s3", fb: "Evening and morning — day one." }
+            ]
+        },
+        {
+            titleKey: "kids.orderT2",
+            titleFb: "Daniel and the lions",
+            steps: [
+                { key: "kids.orderT2s1", fb: "Daniel prayed to God." },
+                { key: "kids.orderT2s2", fb: "He was put in the lions’ den." },
+                { key: "kids.orderT2s3", fb: "God shut the lions’ mouths; Daniel was safe." }
+            ]
+        },
+        {
+            titleKey: "kids.orderT3",
+            titleFb: "Good Samaritan (kind neighbour)",
+            steps: [
+                { key: "kids.orderT3s1", fb: "A man was hurt on the road." },
+                { key: "kids.orderT3s2", fb: "A kind stranger stopped to help." },
+                { key: "kids.orderT3s3", fb: "He cared for him — Jesus tells us to love others too." }
+            ]
+        },
+        {
+            titleKey: "kids.orderT4",
+            titleFb: "Zacchaeus meets Jesus",
+            steps: [
+                { key: "kids.orderT4s1", fb: "Zacchaeus climbed a tree to see Jesus." },
+                { key: "kids.orderT4s2", fb: "Jesus said He would visit his home." },
+                { key: "kids.orderT4s3", fb: "Zacchaeus chose to make things right and follow Jesus." }
+            ]
+        }
+    ];
+
+    var orderState = {
+        storyOrder: [],
+        storyIdx: 0,
+        expect: 0,
+        locked: false,
+        currentStory: null
+    };
+
     function T(key, fallback) {
         if (pageCard && window.NjcI18n && typeof window.NjcI18n.tForElement === "function") {
             return window.NjcI18n.tForElement(pageCard, key, fallback);
@@ -510,6 +644,187 @@
         renderScramble();
     }
 
+    function buildQuizOrder() {
+        quizState.order = shuffledCopy(KIDS_QUIZ_BANK.map(function (_r, i) { return i; }));
+        quizState.idx = 0;
+        quizState.locked = false;
+    }
+
+    function pickNextQuiz() {
+        if (!quizState.order.length || quizState.idx >= quizState.order.length) {
+            buildQuizOrder();
+        }
+        var bankIdx = quizState.order[quizState.idx];
+        quizState.idx += 1;
+        return KIDS_QUIZ_BANK[bankIdx];
+    }
+
+    function renderQuiz() {
+        if (!quizQuestionEl || !quizChoicesEl) {
+            return;
+        }
+        var item = pickNextQuiz();
+        if (!item) {
+            return;
+        }
+        quizState.locked = false;
+        if (quizFeedbackEl) {
+            quizFeedbackEl.hidden = true;
+            quizFeedbackEl.textContent = "";
+        }
+        quizQuestionEl.textContent = T(item.qKey, item.qFb);
+        var opts = shuffledCopy(item.opts.slice());
+        quizChoicesEl.innerHTML = "";
+        opts.forEach(function (opt) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "button-link kids-quiz-choice";
+            btn.setAttribute("data-correct", opt.ok ? "1" : "0");
+            btn.textContent = T(opt.k, opt.fb);
+            btn.addEventListener("click", function () {
+                if (quizState.locked || !quizFeedbackEl) {
+                    return;
+                }
+                quizState.locked = true;
+                var correct = btn.getAttribute("data-correct") === "1";
+                if (correct) {
+                    quizFeedbackEl.textContent = T("kids.quizRight", "That’s right!");
+                    quizFeedbackEl.className = "page-note kids-feedback-good";
+                    addStars(2);
+                } else {
+                    quizFeedbackEl.textContent = T("kids.quizWrong", "Not quite — try the next question!");
+                    quizFeedbackEl.className = "page-note kids-feedback-bad";
+                }
+                quizFeedbackEl.hidden = false;
+            });
+            quizChoicesEl.appendChild(btn);
+        });
+    }
+
+    function buildTfOrder() {
+        tfState.order = shuffledCopy(KIDS_TF_BANK.map(function (_r, i) { return i; }));
+        tfState.idx = 0;
+        tfState.locked = false;
+    }
+
+    function pickNextTf() {
+        if (!tfState.order.length || tfState.idx >= tfState.order.length) {
+            buildTfOrder();
+        }
+        var bankIdx = tfState.order[tfState.idx];
+        tfState.idx += 1;
+        currentTf = KIDS_TF_BANK[bankIdx];
+        return currentTf;
+    }
+
+    function renderTf() {
+        if (!tfStatementEl) {
+            return;
+        }
+        pickNextTf();
+        tfState.locked = false;
+        if (tfFeedbackEl) {
+            tfFeedbackEl.hidden = true;
+        }
+        if (currentTf) {
+            tfStatementEl.textContent = T(currentTf.key, currentTf.fb);
+        }
+    }
+
+    function answerTf(userTrue) {
+        if (tfState.locked || !currentTf || !tfFeedbackEl) {
+            return;
+        }
+        tfState.locked = true;
+        var ok = userTrue === currentTf.truth;
+        if (ok) {
+            tfFeedbackEl.textContent = T("kids.tfRight", "Yes, that’s right!");
+            tfFeedbackEl.className = "page-note kids-feedback-good";
+            addStars(1);
+        } else {
+            tfFeedbackEl.textContent = T("kids.tfWrong", "Good try! The answer was the other one.");
+            tfFeedbackEl.className = "page-note kids-feedback-bad";
+        }
+        tfFeedbackEl.hidden = false;
+    }
+
+    function buildOrderStoryOrder() {
+        orderState.storyOrder = shuffledCopy(KIDS_ORDER_BANK.map(function (_r, i) { return i; }));
+        orderState.storyIdx = 0;
+    }
+
+    function advanceOrderStory() {
+        if (!orderState.storyOrder.length || orderState.storyIdx >= orderState.storyOrder.length) {
+            buildOrderStoryOrder();
+            orderState.storyIdx = 0;
+        }
+        var bankIdx = orderState.storyOrder[orderState.storyIdx];
+        orderState.storyIdx += 1;
+        orderState.currentStory = KIDS_ORDER_BANK[bankIdx];
+    }
+
+    function buildOrderStepsFromStory(story) {
+        if (!story || !orderStoryEl || !orderStepsEl) {
+            return;
+        }
+        orderState.locked = false;
+        orderState.expect = 1;
+        if (orderFeedbackEl) {
+            orderFeedbackEl.hidden = true;
+        }
+        orderStoryEl.textContent = T(story.titleKey, story.titleFb);
+        var labels = story.steps.map(function (step, i) {
+            return { n: i + 1, text: T(step.key, step.fb) };
+        });
+        var perm = shuffledCopy(labels.map(function (x) { return x.n; }));
+        orderStepsEl.innerHTML = "";
+        perm.forEach(function (num) {
+            var lab = labels[num - 1];
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "kids-order-step-btn";
+            btn.setAttribute("data-step-n", String(lab.n));
+            btn.appendChild(document.createTextNode(lab.text));
+            btn.addEventListener("click", function () {
+                if (orderState.locked) {
+                    return;
+                }
+                var n = parseInt(btn.getAttribute("data-step-n") || "0", 10);
+                if (n !== orderState.expect) {
+                    orderState.locked = true;
+                    if (orderFeedbackEl) {
+                        orderFeedbackEl.textContent = T("kids.orderWrong", "Oops — tap Try again and start from step 1.");
+                        orderFeedbackEl.className = "page-note kids-feedback-bad";
+                        orderFeedbackEl.hidden = false;
+                    }
+                    return;
+                }
+                btn.disabled = true;
+                btn.classList.add("kids-order-step-btn--done");
+                orderState.expect += 1;
+                if (orderState.expect > labels.length) {
+                    orderState.locked = true;
+                    if (orderFeedbackEl) {
+                        orderFeedbackEl.textContent = T("kids.orderWin", "You got the story order!");
+                        orderFeedbackEl.className = "page-note kids-feedback-good";
+                        orderFeedbackEl.hidden = false;
+                    }
+                    addStars(3);
+                }
+            });
+            orderStepsEl.appendChild(btn);
+        });
+    }
+
+    function renderOrderStory() {
+        advanceOrderStory();
+        buildOrderStepsFromStory(orderState.currentStory);
+    }
+
+    function resetOrderStory() {
+        buildOrderStepsFromStory(orderState.currentStory);
+    }
+
     function resetWordRun() {
         scrambleState.sessionSolved = 0;
         scrambleState.sessionRunStars = 0;
@@ -601,6 +916,28 @@
     if (scrambleNext) {
         scrambleNext.addEventListener("click", nextScramble);
     }
+    if (quizNextBtn) {
+        quizNextBtn.addEventListener("click", renderQuiz);
+    }
+    if (tfTrueBtn) {
+        tfTrueBtn.addEventListener("click", function () {
+            answerTf(true);
+        });
+    }
+    if (tfFalseBtn) {
+        tfFalseBtn.addEventListener("click", function () {
+            answerTf(false);
+        });
+    }
+    if (tfNextBtn) {
+        tfNextBtn.addEventListener("click", renderTf);
+    }
+    if (orderResetBtn) {
+        orderResetBtn.addEventListener("click", resetOrderStory);
+    }
+    if (orderNextBtn) {
+        orderNextBtn.addEventListener("click", renderOrderStory);
+    }
     function boot() {
         memGameBest = loadMemBest();
         syncMemLevelUI();
@@ -610,6 +947,9 @@
         pickNextWord();
         renderScramble();
         startMemory();
+        renderQuiz();
+        renderTf();
+        renderOrderStory();
     }
 
     function normalizeKidsTabId(raw) {
@@ -775,6 +1115,12 @@
             updateWordScoreLine();
             updateTotalStarsDisplay();
             renderScramble();
+            renderQuiz();
+            renderTf();
+            if (orderStoryEl && orderState.currentStory) {
+                orderStoryEl.textContent = T(orderState.currentStory.titleKey, orderState.currentStory.titleFb);
+                resetOrderStory();
+            }
         }
     });
     boot();

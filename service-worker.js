@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v366sermonannounce";
-const RUNTIME_CACHE = "njc-runtime-cache-v366sermonannounce";
+const APP_CACHE = "njc-app-cache-v367kidsgames";
+const RUNTIME_CACHE = "njc-runtime-cache-v367kidsgames";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: latest sermon auto-shows in announcements until Sunday (Belgium time).";
+    "Kids World: Bible quiz, True/False, and Story steps games.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260414feedprobe1",
+    "./styles.css?v=20260415kidsgames1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260414sermonannounce1",
+    "./app-shell.js?v=20260415kidsgames1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
@@ -69,7 +69,7 @@ const CORE_ASSETS = [
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260411kidsnochoice1",
+    "./kids-page.js?v=20260415kidsgames1",
     "./kids-audio-page.js?v=20260414feedprobe1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
