@@ -27,6 +27,18 @@
     var orderFeedbackEl = document.getElementById("kids-order-feedback");
     var orderResetBtn = document.getElementById("kids-order-reset");
     var orderNextBtn = document.getElementById("kids-order-next");
+    var fillSentenceEl = document.getElementById("kids-fill-sentence");
+    var fillChoicesEl = document.getElementById("kids-fill-choices");
+    var fillFeedbackEl = document.getElementById("kids-fill-feedback");
+    var fillNextBtn = document.getElementById("kids-fill-next");
+    var oddQuestionEl = document.getElementById("kids-odd-question");
+    var oddChoicesEl = document.getElementById("kids-odd-choices");
+    var oddFeedbackEl = document.getElementById("kids-odd-feedback");
+    var oddNextBtn = document.getElementById("kids-odd-next");
+    var whoClueEl = document.getElementById("kids-who-clue");
+    var whoChoicesEl = document.getElementById("kids-who-choices");
+    var whoFeedbackEl = document.getElementById("kids-who-feedback");
+    var whoNextBtn = document.getElementById("kids-who-next");
     var totalStarsLine = document.getElementById("kids-total-stars");
     var pageCard = document.querySelector(".kids-page-card");
     var kidsTabsNav = document.getElementById("kids-tabs");
@@ -165,6 +177,33 @@
                 { k: "kids.quizQ6b", fb: "Matthew", ok: false },
                 { k: "kids.quizQ6c", fb: "Psalms", ok: false }
             ]
+        },
+        {
+            qKey: "kids.quizQ7",
+            qFb: "Who was Jesus’ mother?",
+            opts: [
+                { k: "kids.quizQ7a", fb: "Mary", ok: true },
+                { k: "kids.quizQ7b", fb: "Martha", ok: false },
+                { k: "kids.quizQ7c", fb: "Elizabeth", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ8",
+            qFb: "At the wedding in Cana, what did Jesus turn water into?",
+            opts: [
+                { k: "kids.quizQ8a", fb: "Wine", ok: true },
+                { k: "kids.quizQ8b", fb: "Oil", ok: false },
+                { k: "kids.quizQ8c", fb: "Milk", ok: false }
+            ]
+        },
+        {
+            qKey: "kids.quizQ9",
+            qFb: "Who walked on the water toward Jesus (and called to Him)?",
+            opts: [
+                { k: "kids.quizQ9a", fb: "Peter", ok: true },
+                { k: "kids.quizQ9b", fb: "John", ok: false },
+                { k: "kids.quizQ9c", fb: "Andrew", ok: false }
+            ]
         }
     ];
 
@@ -176,7 +215,10 @@
         { key: "kids.tfS3", fb: "Jesus fed thousands with bread and fish.", truth: true },
         { key: "kids.tfS4", fb: "Jonah stayed inside the big fish for only one hour.", truth: false },
         { key: "kids.tfS5", fb: "David wrote many psalms.", truth: true },
-        { key: "kids.tfS6", fb: "The prodigal son story teaches that God loves us when we turn back to Him.", truth: true }
+        { key: "kids.tfS6", fb: "The prodigal son story teaches that God loves us when we turn back to Him.", truth: true },
+        { key: "kids.tfS7", fb: "The wise men brought gifts to baby Jesus in Bethlehem.", truth: true },
+        { key: "kids.tfS8", fb: "Adam and Eve lived in the Garden of Eden.", truth: true },
+        { key: "kids.tfS9", fb: "Jesus was born in the city of Nazareth.", truth: false }
     ];
 
     var tfState = { order: [], idx: 0, locked: false };
@@ -228,6 +270,189 @@
         locked: false,
         currentStory: null
     };
+
+    var KIDS_FILL_BANK = [
+        {
+            sentKey: "kids.fillS1",
+            sentFb: "For God so loved the world that he gave his only _____.",
+            opts: [
+                { k: "kids.fillS1a", fb: "Son", ok: true },
+                { k: "kids.fillS1b", fb: "camel", ok: false },
+                { k: "kids.fillS1c", fb: "boat", ok: false }
+            ]
+        },
+        {
+            sentKey: "kids.fillS2",
+            sentFb: "Noah obeyed God and built a big _____.",
+            opts: [
+                { k: "kids.fillS2a", fb: "ark", ok: true },
+                { k: "kids.fillS2b", fb: "castle", ok: false },
+                { k: "kids.fillS2c", fb: "tower", ok: false }
+            ]
+        },
+        {
+            sentKey: "kids.fillS3",
+            sentFb: "Young David trusted God and used a sling and a _____ against Goliath.",
+            opts: [
+                { k: "kids.fillS3a", fb: "stone", ok: true },
+                { k: "kids.fillS3b", fb: "spear", ok: false },
+                { k: "kids.fillS3c", fb: "shield", ok: false }
+            ]
+        },
+        {
+            sentKey: "kids.fillS4",
+            sentFb: "Jesus blessed thousands of people with bread and _____.",
+            opts: [
+                { k: "kids.fillS4a", fb: "fish", ok: true },
+                { k: "kids.fillS4b", fb: "apples", ok: false },
+                { k: "kids.fillS4c", fb: "rice", ok: false }
+            ]
+        },
+        {
+            sentKey: "kids.fillS5",
+            sentFb: "God’s Word tells children to honor their father and _____.",
+            opts: [
+                { k: "kids.fillS5a", fb: "mother", ok: true },
+                { k: "kids.fillS5b", fb: "toys", ok: false },
+                { k: "kids.fillS5c", fb: "phone", ok: false }
+            ]
+        },
+        {
+            sentKey: "kids.fillS6",
+            sentFb: "On the first day of creation God said, “Let there be _____.”",
+            opts: [
+                { k: "kids.fillS6a", fb: "light", ok: true },
+                { k: "kids.fillS6b", fb: "pizza", ok: false },
+                { k: "kids.fillS6c", fb: "snow", ok: false }
+            ]
+        }
+    ];
+
+    var fillState = { order: [], idx: 0, locked: false };
+
+    var KIDS_ODD_BANK = [
+        {
+            qKey: "kids.oddQ1",
+            qFb: "Which name does not fit with the others?",
+            items: [
+                { key: "kids.odd1a", fb: "Noah" },
+                { key: "kids.odd1b", fb: "Moses" },
+                { key: "kids.odd1c", fb: "Daniel" },
+                { key: "kids.odd1d", fb: "Piano", odd: true }
+            ]
+        },
+        {
+            qKey: "kids.oddQ2",
+            qFb: "Which one does not belong with the bread-and-fish miracle?",
+            items: [
+                { key: "kids.odd2a", fb: "Bread" },
+                { key: "kids.odd2b", fb: "Fish" },
+                { key: "kids.odd2c", fb: "Basket" },
+                { key: "kids.odd2d", fb: "Bicycle", odd: true }
+            ]
+        },
+        {
+            qKey: "kids.oddQ3",
+            qFb: "Which word is not about loving God?",
+            items: [
+                { key: "kids.odd3a", fb: "Pray" },
+                { key: "kids.odd3b", fb: "Church" },
+                { key: "kids.odd3c", fb: "Bible" },
+                { key: "kids.odd3d", fb: "Ice cream", odd: true }
+            ]
+        },
+        {
+            qKey: "kids.oddQ4",
+            qFb: "Which one does not belong in heaven’s story?",
+            items: [
+                { key: "kids.odd4a", fb: "Angel" },
+                { key: "kids.odd4b", fb: "Star" },
+                { key: "kids.odd4c", fb: "Heaven" },
+                { key: "kids.odd4d", fb: "Banana", odd: true }
+            ]
+        },
+        {
+            qKey: "kids.oddQ5",
+            qFb: "Which word is not a fruit of the Spirit in Galatians 5?",
+            items: [
+                { key: "kids.odd5a", fb: "Love" },
+                { key: "kids.odd5b", fb: "Joy" },
+                { key: "kids.odd5c", fb: "Peace" },
+                { key: "kids.odd5d", fb: "Truck", odd: true }
+            ]
+        },
+        {
+            qKey: "kids.oddQ6",
+            qFb: "Which day is not usually a special church celebration day?",
+            items: [
+                { key: "kids.odd6a", fb: "Easter" },
+                { key: "kids.odd6b", fb: "Christmas" },
+                { key: "kids.odd6c", fb: "Sunday" },
+                { key: "kids.odd6d", fb: "Monday", odd: true }
+            ]
+        }
+    ];
+
+    var oddState = { order: [], idx: 0, locked: false };
+
+    var KIDS_WHO_BANK = [
+        {
+            clueKey: "kids.whoC1",
+            clueFb: "I built a big boat because God told me to. Who am I?",
+            opts: [
+                { k: "kids.whoC1a", fb: "Noah", ok: true },
+                { k: "kids.whoC1b", fb: "Jonah", ok: false },
+                { k: "kids.whoC1c", fb: "Samuel", ok: false }
+            ]
+        },
+        {
+            clueKey: "kids.whoC2",
+            clueFb: "I prayed every day, even when the king made it against the rules. Who am I?",
+            opts: [
+                { k: "kids.whoC2a", fb: "Daniel", ok: true },
+                { k: "kids.whoC2b", fb: "Goliath", ok: false },
+                { k: "kids.whoC2c", fb: "Caesar", ok: false }
+            ]
+        },
+        {
+            clueKey: "kids.whoC3",
+            clueFb: "I was a shepherd boy who trusted God to beat a giant. Who am I?",
+            opts: [
+                { k: "kids.whoC3a", fb: "David", ok: true },
+                { k: "kids.whoC3b", fb: "Saul", ok: false },
+                { k: "kids.whoC3c", fb: "Joshua", ok: false }
+            ]
+        },
+        {
+            clueKey: "kids.whoC4",
+            clueFb: "God spoke to me from a burning bush and sent me to lead His people. Who am I?",
+            opts: [
+                { k: "kids.whoC4a", fb: "Moses", ok: true },
+                { k: "kids.whoC4b", fb: "Aaron", ok: false },
+                { k: "kids.whoC4c", fb: "Elijah", ok: false }
+            ]
+        },
+        {
+            clueKey: "kids.whoC5",
+            clueFb: "I ran from God, but a big fish taught me to obey. Who am I?",
+            opts: [
+                { k: "kids.whoC5a", fb: "Jonah", ok: true },
+                { k: "kids.whoC5b", fb: "Paul", ok: false },
+                { k: "kids.whoC5c", fb: "Simon Peter", ok: false }
+            ]
+        },
+        {
+            clueKey: "kids.whoC6",
+            clueFb: "Jesus raised me from the dead after I had been in the tomb four days. Who am I?",
+            opts: [
+                { k: "kids.whoC6a", fb: "Lazarus", ok: true },
+                { k: "kids.whoC6b", fb: "Martha", ok: false },
+                { k: "kids.whoC6c", fb: "Nicodemus", ok: false }
+            ]
+        }
+    ];
+
+    var whoState = { order: [], idx: 0, locked: false };
 
     function T(key, fallback) {
         if (pageCard && window.NjcI18n && typeof window.NjcI18n.tForElement === "function") {
@@ -825,6 +1050,180 @@
         buildOrderStepsFromStory(orderState.currentStory);
     }
 
+    function buildFillOrder() {
+        fillState.order = shuffledCopy(KIDS_FILL_BANK.map(function (_r, i) { return i; }));
+        fillState.idx = 0;
+        fillState.locked = false;
+    }
+
+    function pickNextFill() {
+        if (!fillState.order.length || fillState.idx >= fillState.order.length) {
+            buildFillOrder();
+        }
+        var bankIdx = fillState.order[fillState.idx];
+        fillState.idx += 1;
+        return KIDS_FILL_BANK[bankIdx];
+    }
+
+    function renderFill() {
+        if (!fillSentenceEl || !fillChoicesEl) {
+            return;
+        }
+        var item = pickNextFill();
+        if (!item) {
+            return;
+        }
+        fillState.locked = false;
+        if (fillFeedbackEl) {
+            fillFeedbackEl.hidden = true;
+            fillFeedbackEl.textContent = "";
+        }
+        fillSentenceEl.textContent = T(item.sentKey, item.sentFb);
+        var opts = shuffledCopy(item.opts.slice());
+        fillChoicesEl.innerHTML = "";
+        opts.forEach(function (opt) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "button-link kids-quiz-choice";
+            btn.setAttribute("data-correct", opt.ok ? "1" : "0");
+            btn.textContent = T(opt.k, opt.fb);
+            btn.addEventListener("click", function () {
+                if (fillState.locked || !fillFeedbackEl) {
+                    return;
+                }
+                fillState.locked = true;
+                var correct = btn.getAttribute("data-correct") === "1";
+                if (correct) {
+                    fillFeedbackEl.textContent = T("kids.fillRight", "Perfect fit!");
+                    fillFeedbackEl.className = "page-note kids-feedback-good";
+                    addStars(2);
+                } else {
+                    fillFeedbackEl.textContent = T("kids.fillWrong", "Try the next sentence!");
+                    fillFeedbackEl.className = "page-note kids-feedback-bad";
+                }
+                fillFeedbackEl.hidden = false;
+            });
+            fillChoicesEl.appendChild(btn);
+        });
+    }
+
+    function buildOddOrder() {
+        oddState.order = shuffledCopy(KIDS_ODD_BANK.map(function (_r, i) { return i; }));
+        oddState.idx = 0;
+        oddState.locked = false;
+    }
+
+    function pickNextOdd() {
+        if (!oddState.order.length || oddState.idx >= oddState.order.length) {
+            buildOddOrder();
+        }
+        var bankIdx = oddState.order[oddState.idx];
+        oddState.idx += 1;
+        return KIDS_ODD_BANK[bankIdx];
+    }
+
+    function renderOdd() {
+        if (!oddQuestionEl || !oddChoicesEl) {
+            return;
+        }
+        var item = pickNextOdd();
+        if (!item) {
+            return;
+        }
+        oddState.locked = false;
+        if (oddFeedbackEl) {
+            oddFeedbackEl.hidden = true;
+            oddFeedbackEl.textContent = "";
+        }
+        oddQuestionEl.textContent = T(item.qKey, item.qFb);
+        var rows = item.items.map(function (x) {
+            return { key: x.key, fb: x.fb, odd: !!x.odd };
+        });
+        var shuffled = shuffledCopy(rows);
+        oddChoicesEl.innerHTML = "";
+        shuffled.forEach(function (row) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "button-link kids-quiz-choice kids-odd-choice-btn";
+            btn.setAttribute("data-odd", row.odd ? "1" : "0");
+            btn.textContent = T(row.key, row.fb);
+            btn.addEventListener("click", function () {
+                if (oddState.locked || !oddFeedbackEl) {
+                    return;
+                }
+                oddState.locked = true;
+                var isOdd = btn.getAttribute("data-odd") === "1";
+                if (isOdd) {
+                    oddFeedbackEl.textContent = T("kids.oddRight", "Yes — that one is different!");
+                    oddFeedbackEl.className = "page-note kids-feedback-good";
+                    addStars(2);
+                } else {
+                    oddFeedbackEl.textContent = T("kids.oddWrong", "Look again — one choice is not like the others.");
+                    oddFeedbackEl.className = "page-note kids-feedback-bad";
+                }
+                oddFeedbackEl.hidden = false;
+            });
+            oddChoicesEl.appendChild(btn);
+        });
+    }
+
+    function buildWhoOrder() {
+        whoState.order = shuffledCopy(KIDS_WHO_BANK.map(function (_r, i) { return i; }));
+        whoState.idx = 0;
+        whoState.locked = false;
+    }
+
+    function pickNextWho() {
+        if (!whoState.order.length || whoState.idx >= whoState.order.length) {
+            buildWhoOrder();
+        }
+        var bankIdx = whoState.order[whoState.idx];
+        whoState.idx += 1;
+        return KIDS_WHO_BANK[bankIdx];
+    }
+
+    function renderWho() {
+        if (!whoClueEl || !whoChoicesEl) {
+            return;
+        }
+        var item = pickNextWho();
+        if (!item) {
+            return;
+        }
+        whoState.locked = false;
+        if (whoFeedbackEl) {
+            whoFeedbackEl.hidden = true;
+            whoFeedbackEl.textContent = "";
+        }
+        whoClueEl.textContent = T(item.clueKey, item.clueFb);
+        var opts = shuffledCopy(item.opts.slice());
+        whoChoicesEl.innerHTML = "";
+        opts.forEach(function (opt) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "button-link kids-quiz-choice";
+            btn.setAttribute("data-correct", opt.ok ? "1" : "0");
+            btn.textContent = T(opt.k, opt.fb);
+            btn.addEventListener("click", function () {
+                if (whoState.locked || !whoFeedbackEl) {
+                    return;
+                }
+                whoState.locked = true;
+                var correct = btn.getAttribute("data-correct") === "1";
+                if (correct) {
+                    whoFeedbackEl.textContent = T("kids.whoRight", "You guessed it!");
+                    whoFeedbackEl.className = "page-note kids-feedback-good";
+                    addStars(2);
+                } else {
+                    whoFeedbackEl.textContent = T("kids.whoWrong", "Nice try — ask a grown-up to read the clue again!");
+                    whoFeedbackEl.className = "page-note kids-feedback-bad";
+                }
+                whoFeedbackEl.hidden = false;
+            });
+            whoChoicesEl.appendChild(btn);
+        });
+    }
+
     function resetWordRun() {
         scrambleState.sessionSolved = 0;
         scrambleState.sessionRunStars = 0;
@@ -938,6 +1337,15 @@
     if (orderNextBtn) {
         orderNextBtn.addEventListener("click", renderOrderStory);
     }
+    if (fillNextBtn) {
+        fillNextBtn.addEventListener("click", renderFill);
+    }
+    if (oddNextBtn) {
+        oddNextBtn.addEventListener("click", renderOdd);
+    }
+    if (whoNextBtn) {
+        whoNextBtn.addEventListener("click", renderWho);
+    }
     function boot() {
         memGameBest = loadMemBest();
         syncMemLevelUI();
@@ -950,6 +1358,9 @@
         renderQuiz();
         renderTf();
         renderOrderStory();
+        renderFill();
+        renderOdd();
+        renderWho();
     }
 
     function normalizeKidsTabId(raw) {
@@ -1121,6 +1532,9 @@
                 orderStoryEl.textContent = T(orderState.currentStory.titleKey, orderState.currentStory.titleFb);
                 resetOrderStory();
             }
+            renderFill();
+            renderOdd();
+            renderWho();
         }
     });
     boot();

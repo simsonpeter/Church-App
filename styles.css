@@ -8740,10 +8740,28 @@ html[data-theme="dark"] .kids-toolbar {
 }
 
 .kids-quiz-question,
-.kids-tf-statement {
+.kids-tf-statement,
+.kids-fill-sentence,
+.kids-who-clue {
     font-weight: 650;
     line-height: 1.4;
     margin: 0.25rem 0 0.5rem;
+}
+
+.kids-odd-choice-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+}
+
+@media (min-width: 420px) {
+    .kids-odd-choice-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+.kids-odd-choice-btn {
+    min-height: 2.75rem;
 }
 
 .kids-quiz-choices {

@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260415kidsgames1">
+    <link rel="stylesheet" href="styles.css?v=20260416kidsgames2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -484,6 +484,39 @@
                     <div class="kids-scramble-actions">
                         <button type="button" class="button-link button-secondary" id="kids-order-reset" data-i18n="kids.orderReset">Try again</button>
                         <button type="button" class="button-link" id="kids-order-next" data-i18n="kids.orderNext">Next story</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-fill">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-puzzle-piece" aria-hidden="true"></i> <span data-i18n="kids.fillTitle">Finish the sentence</span></h3>
+                    <p class="page-note" data-i18n="kids.fillHelp">Pick the missing word that fits God’s story.</p>
+                    <p class="kids-fill-sentence page-note" id="kids-fill-sentence" aria-live="polite"></p>
+                    <div class="kids-quiz-choices" id="kids-fill-choices" role="group"></div>
+                    <p class="page-note" id="kids-fill-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link button-secondary" id="kids-fill-next" data-i18n="kids.fillNext">Next sentence</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-odd">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-shapes" aria-hidden="true"></i> <span data-i18n="kids.oddTitle">Odd one out</span></h3>
+                    <p class="page-note" data-i18n="kids.oddHelp">Tap the word that does not belong with the others.</p>
+                    <p class="kids-quiz-question page-note" id="kids-odd-question" aria-live="polite"></p>
+                    <div class="kids-quiz-choices kids-odd-choice-grid" id="kids-odd-choices" role="group"></div>
+                    <p class="page-note" id="kids-odd-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link button-secondary" id="kids-odd-next" data-i18n="kids.oddNext">Next</button>
+                    </div>
+                </div>
+
+                <div class="kids-activity" id="kids-activity-who">
+                    <h3 class="kids-activity-title"><i class="fa-solid fa-user-secret" aria-hidden="true"></i> <span data-i18n="kids.whoTitle">Who am I?</span></h3>
+                    <p class="page-note" data-i18n="kids.whoHelp">Read the clue and pick the right Bible friend.</p>
+                    <p class="kids-who-clue page-note" id="kids-who-clue" aria-live="polite"></p>
+                    <div class="kids-quiz-choices" id="kids-who-choices" role="group"></div>
+                    <p class="page-note" id="kids-who-feedback" aria-live="polite" hidden></p>
+                    <div class="kids-scramble-actions">
+                        <button type="button" class="button-link button-secondary" id="kids-who-next" data-i18n="kids.whoNext">Next clue</button>
                     </div>
                 </div>
 
@@ -1982,7 +2015,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260411kids1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260415kidsgames1"></script>
+    <script src="app-shell.js?v=20260416kidsgames2"></script>
     <script src="events-engine.js?v=20260414feedprobe1"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260414sermonannounce1"></script>
@@ -2005,6 +2038,6 @@
     <script src="book-shelf-page.js?v=20260414feedprobe1"></script>
     <script src="spa-router.js?v=20260411kidsworld"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
-    <script src="kids-page.js?v=20260415kidsgames1"></script>
+    <script src="kids-page.js?v=20260416kidsgames2"></script>
     <script src="kids-audio-page.js?v=20260414feedprobe1"></script>
 </html>
