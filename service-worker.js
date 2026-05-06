@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v370chatpurge";
-const RUNTIME_CACHE = "njc-runtime-cache-v370chatpurge";
+const APP_CACHE = "njc-app-cache-v371prayerapprove";
+const RUNTIME_CACHE = "njc-runtime-cache-v371prayerapprove";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Chat: clearing history now drops stale offline drafts app-wide (appConfig/chat). Publish updated Firestore rules.";
+    "Prayer wall: church (non-limited) members’ requests publish immediately without admin approval.";
 
 const CORE_ASSETS = [
     "./",
@@ -52,7 +52,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260414feedprobe1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260414feedprobe1",
+    "./contact-page.js?v=20260607prayerapprove1",
     "./daily-bread-page.js?v=20260414feedprobe1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260411kidsaudio1",

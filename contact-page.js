@@ -286,6 +286,29 @@
                 return Boolean(currentEmail) && currentEmail === normalizeEmail(ADMIN_EMAIL);
             }
 
+            /** Church (non-limited) signed-in members: requests go on the wall immediately. Limited tier stays pending until admin approves. */
+            function shouldAutoApprovePrayerWallPost(activeUser) {
+                if (isAdminUser()) {
+                    return true;
+                }
+                var uid = String(activeUser && activeUser.uid || "").trim();
+                var email = normalizeEmail(activeUser && activeUser.email);
+                if (!uid || !email) {
+                    return false;
+                }
+                var M = window.NjcAppModules;
+                if (M && typeof M.isLimitedMemberSync === "function") {
+                    return !M.isLimitedMemberSync();
+                }
+                if (M && typeof M.getUserAccessSync === "function") {
+                    var ua = M.getUserAccessSync();
+                    if (ua && ua.accessType === "limited") {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             function canSeePastorOnlyEntry(entry) {
                 if (isAdminUser()) {
                     return true;
@@ -1937,6 +1960,7 @@
                     setPrayerWallBusy(true);
                     try {
                         var latestEntries = await fetchPrayerWallEntries();
+                        var autoApprove = shouldAutoApprovePrayerWallPost(activeUser);
                         latestEntries.unshift({
                             id: String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000)),
                             name: nameValue,
@@ -1944,7 +1968,7 @@
                             anonymous: anonymousValue,
                             urgent: urgentValue,
                             pastorOnly: pastorOnlyValue,
-                            approved: Boolean(isAdminUser()),
+                            approved: Boolean(autoApprove),
                             prayed: 0,
                             answered: 0,
                             thanked: 0,
@@ -1964,7 +1988,7 @@
                             prayerWallPastorOnly.checked = false;
                         }
                         closePrayerComposer();
-                        if (isAdminUser()) {
+                        if (autoApprove) {
                             showPrayerWallNote("posted", "contact.prayerWallPosted", "Prayer request added to wall.");
                         } else {
                             showPrayerWallNote("postedPending", "contact.prayerWallPendingReview", "Prayer request sent for review. It will appear on the wall after an admin approves it.");
