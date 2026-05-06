@@ -17,7 +17,7 @@ rules_version = '2';
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[], optional visibleModules[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
 //   users/{uid}/app/access     — member (default new signup) or limited + module picks; member code redeem via Cloud Function
-//   appConfig/access           — registrationPool: which modules new users may pick at signup (public read)
+//   appConfig/chat          — { clearedAt } last time admin cleared chat (public read; admin write); clients drop older offline queue
 //   appConfig/memberCodes      — one-time church member codes (admin read/write only)
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   celebrationWishes/{msgId} — daily thread (registered member read; create/delete when signed in)
@@ -67,6 +67,8 @@ service cloud.firestore {
           && request.resource.data.keys().hasOnly(["codes", "updatedAt"])
           && request.resource.data.codes is list
           && request.resource.data.codes.size() <= 500)
+        || (docId == "chat"
+          && request.resource.data.keys().hasOnly(["clearedAt"]))
       );
       allow update: if isAdmin() && (
         (docId == "modules"
@@ -78,6 +80,8 @@ service cloud.firestore {
         || (docId == "memberCodes"
           && request.resource.data.codes is list
           && request.resource.data.codes.size() <= 500)
+        || (docId == "chat"
+          && request.resource.data.keys().hasOnly(["clearedAt"]))
       );
       allow delete: if false;
     }

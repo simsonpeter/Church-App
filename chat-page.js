@@ -1,5 +1,7 @@
 (function () {
     var CHAT_COLLECTION = "chatMessages";
+    var APP_CONFIG_COLLECTION = "appConfig";
+    var CHAT_PURGE_DOC_ID = "chat";
     var PROFILE_KEY = "njc_user_profiles_v1";
     var QUEUE_KEY = "njc_chat_outbox_v1";
     var MAX_TEXT = 4000;
@@ -17,9 +19,12 @@
     var chatCard = document.querySelector(".chat-page-card");
 
     var unsubscribe = null;
+    var unsubscribeMeta = null;
     var sending = false;
     var lastServerDocs = [];
     var deletingAll = false;
+    /** Drop offline-queue items queued before this time (ms); set from Firestore appConfig/chat.clearedAt */
+    var chatPurgeMs = 0;
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.t === "function" && chatCard && typeof window.NjcI18n.tForElement === "function") {
@@ -86,13 +91,84 @@
         try {
             var raw = window.localStorage.getItem(QUEUE_KEY);
             var o = raw ? JSON.parse(raw) : {};
-            var list = o && o[uid] && Array.isArray(o[uid]) ? o[uid] : [];
-            return list.filter(function (item) {
+            var storedFull = o && o[uid] && Array.isArray(o[uid]) ? o[uid] : [];
+            var valid = storedFull.filter(function (item) {
                 return item && typeof item.text === "string" && item.text.trim();
-            }).slice(0, MAX_QUEUE);
+            });
+            var dirty = valid.length !== storedFull.length;
+            var afterPurge = chatPurgeMs > 0
+                ? valid.filter(function (item) {
+                    return (item.queuedAt || 0) >= chatPurgeMs;
+                })
+                : valid;
+            if (afterPurge.length !== valid.length) {
+                dirty = true;
+            }
+            var out = afterPurge.slice(0, MAX_QUEUE);
+            if (dirty) {
+                saveQueue(uid, out);
+            }
+            return out;
         } catch (e) {
             return [];
         }
+    }
+
+    function syncChatPurgeFromData(data) {
+        var d = data || {};
+        if (d.clearedAt && typeof d.clearedAt.toMillis === "function") {
+            chatPurgeMs = d.clearedAt.toMillis();
+        } else {
+            chatPurgeMs = 0;
+        }
+    }
+
+    function stopMetaListen() {
+        if (typeof unsubscribeMeta === "function") {
+            unsubscribeMeta();
+            unsubscribeMeta = null;
+        }
+    }
+
+    function startMetaListen() {
+        stopMetaListen();
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return;
+        }
+        var user = getUser();
+        if (!user || !user.uid) {
+            return;
+        }
+        try {
+            var db = window.firebase.firestore();
+            unsubscribeMeta = db.collection(APP_CONFIG_COLLECTION).doc(CHAT_PURGE_DOC_ID).onSnapshot(
+                function (snap) {
+                    syncChatPurgeFromData(snap.exists ? snap.data() : {});
+                    var u = getUser();
+                    if (u && u.uid) {
+                        loadQueue(String(u.uid));
+                    }
+                    renderCombined(lastServerDocs);
+                    if (navigator.onLine !== false) {
+                        flushOutbox();
+                    }
+                },
+                function () {}
+            );
+        } catch (e1) {
+            return null;
+        }
+    }
+
+    function writeChatPurgeMarker() {
+        if (!window.firebase || !window.firebase.apps || !window.firebase.apps.length) {
+            return Promise.reject(new Error("no firebase"));
+        }
+        var db = window.firebase.firestore();
+        return db.collection(APP_CONFIG_COLLECTION).doc(CHAT_PURGE_DOC_ID).set(
+            { clearedAt: window.firebase.firestore.FieldValue.serverTimestamp() },
+            { merge: true }
+        );
     }
 
     function saveQueue(uid, list) {
@@ -282,8 +358,15 @@
         deletingAll = true;
         updateAdminTools();
         setStatus(T("chat.adminDeleting", "Deleting messages…"));
-        deleteAllChatBatches()
+        writeChatPurgeMarker()
             .then(function () {
+                return deleteAllChatBatches();
+            })
+            .then(function () {
+                var u = getUser();
+                if (u && u.uid) {
+                    saveQueue(String(u.uid), []);
+                }
                 setStatus(T("chat.adminDeleteDone", "All messages were deleted."));
                 window.setTimeout(function () {
                     if (statusEl && statusEl.textContent.indexOf(T("chat.adminDeleteDone", "All messages were deleted.")) >= 0) {
@@ -386,15 +469,17 @@
 
     function refreshChat() {
         updateGuestUi();
-        if (!isChatRoute()) {
-            stopListen();
-            return;
-        }
         if (!getUser() || !getUser().uid) {
             stopListen();
-            if (messagesEl) {
+            stopMetaListen();
+            if (messagesEl && isChatRoute()) {
                 messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(T("chat.loginRequired", "Sign in to read and send messages.")) + "</p>";
             }
+            return;
+        }
+        startMetaListen();
+        if (!isChatRoute()) {
+            stopListen();
             return;
         }
         startListen();

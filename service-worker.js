@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v369chatadmin";
-const RUNTIME_CACHE = "njc-runtime-cache-v369chatadmin";
+const APP_CACHE = "njc-app-cache-v370chatpurge";
+const RUNTIME_CACHE = "njc-runtime-cache-v370chatpurge";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Chat: admin can delete single messages or clear full history (Firestore rules updated — publish rules).";
+    "Chat: clearing history now drops stale offline drafts app-wide (appConfig/chat). Publish updated Firestore rules.";
 
 const CORE_ASSETS = [
     "./",
@@ -64,7 +64,7 @@ const CORE_ASSETS = [
     "./profile-page.js?v=20260411kidsworld",
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
-    "./chat-page.js?v=20260606chatadmin1",
+    "./chat-page.js?v=20260607chatpurge1",
     "./spa-router.js?v=20260411kidsworld",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
