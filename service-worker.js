@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v372prayerpastoral";
-const RUNTIME_CACHE = "njc-runtime-cache-v372prayerpastoral";
+const APP_CACHE = "njc-app-cache-v373appversionlabel";
+const RUNTIME_CACHE = "njc-runtime-cache-v373appversionlabel";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: topic tags and filters, private pastoral replies for posters (with new-reply badge), admin weekly bulletin PDF plus full-wall export.";
+    "Settings app version now matches each deploy (service worker build id). Service worker URL tracks APP_CACHE so updates are detected reliably.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,7 +44,7 @@ const CORE_ASSETS = [
     "./styles.css?v=20260608prayerpastoral1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260608prayerpastoral1",
+    "./app-shell.js?v=20260609appversion1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",

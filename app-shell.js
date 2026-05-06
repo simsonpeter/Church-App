@@ -2164,9 +2164,104 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260414sermonannounce1";
-    var APP_VERSION = "2026.4.14";
-    /** Fallback if the waiting worker is too old to send release notes. */
+    var SW_REGISTER_VERSION_FALLBACK = "20260414sermonannounce1";
+    /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
+    var lastKnownAppCacheId = "";
+
+    function parseAppCacheFromServiceWorkerSource(text) {
+        var m = String(text || "").match(/const\s+APP_CACHE\s*=\s*"([^"]+)"/);
+        return m ? m[1] : "";
+    }
+
+    function fetchServiceWorkerAppCacheId() {
+        var url = "service-worker.js?buildprobe=" + String(Date.now());
+        return fetch(url, { cache: "no-store", credentials: "same-origin" })
+            .then(function (r) {
+                return r.ok ? r.text() : "";
+            })
+            .then(parseAppCacheFromServiceWorkerSource)
+            .catch(function () {
+                return "";
+            });
+    }
+
+    function getActiveServiceWorkerBuildMeta() {
+        var ctrl = navigator.serviceWorker && navigator.serviceWorker.controller;
+        if (!ctrl) {
+            return Promise.resolve({ version: "", releaseNotes: "" });
+        }
+        return new Promise(function (resolve) {
+            var settled = false;
+            function done(value) {
+                if (settled) {
+                    return;
+                }
+                settled = true;
+                resolve(value || { version: "", releaseNotes: "" });
+            }
+            var timer = window.setTimeout(function () {
+                done({ version: "", releaseNotes: "" });
+            }, 2500);
+            try {
+                var channel = new MessageChannel();
+                channel.port1.onmessage = function (ev) {
+                    window.clearTimeout(timer);
+                    var d = ev && ev.data;
+                    var v = d && d.version;
+                    var notes = d && d.releaseNotes;
+                    done({
+                        version: typeof v === "string" ? v : "",
+                        releaseNotes: typeof notes === "string" ? notes.trim() : ""
+                    });
+                };
+                ctrl.postMessage({ type: "GET_APP_CACHE_VERSION" }, [channel.port2]);
+            } catch (eSwMeta) {
+                window.clearTimeout(timer);
+                done({ version: "", releaseNotes: "" });
+            }
+        });
+    }
+
+    /** Strip fixed prefix so the settings line stays readable; value still tracks each deploy. */
+    function formatSettingsAppVersionLabel(cacheId) {
+        var id = String(cacheId || "").trim();
+        if (!id) {
+            return "";
+        }
+        if (id.indexOf("njc-app-cache-v") === 0) {
+            return id.slice("njc-app-cache-v".length);
+        }
+        return id;
+    }
+
+    function refreshSettingsAppVersionDisplay() {
+        var versionValue = document.getElementById("settings-version-value");
+        if (!versionValue) {
+            return;
+        }
+        getActiveServiceWorkerBuildMeta().then(function (meta) {
+            var v = meta && meta.version ? String(meta.version).trim() : "";
+            if (v) {
+                lastKnownAppCacheId = v;
+                versionValue.textContent = formatSettingsAppVersionLabel(v);
+                return;
+            }
+            if (lastKnownAppCacheId) {
+                versionValue.textContent = formatSettingsAppVersionLabel(lastKnownAppCacheId);
+                return;
+            }
+            fetchServiceWorkerAppCacheId().then(function (cid) {
+                if (cid) {
+                    lastKnownAppCacheId = cid;
+                    versionValue.textContent = formatSettingsAppVersionLabel(cid);
+                    return;
+                }
+                versionValue.textContent = SW_REGISTER_VERSION_FALLBACK;
+            });
+        });
+    }
+
+    /** Fallback release-notes line when the worker does not send notes. */
     var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
@@ -2592,12 +2687,32 @@
 
     function registerServiceWorker() {
         if (!("serviceWorker" in navigator)) {
+            refreshSettingsAppVersionDisplay();
             return;
         }
-        navigator.serviceWorker.register("service-worker.js?v=" + encodeURIComponent(SW_VERSION), { updateViaCache: "none" }).then(function (registration) {
+        fetchServiceWorkerAppCacheId().then(function (cacheId) {
+            if (cacheId) {
+                lastKnownAppCacheId = cacheId;
+            }
+            var bust = cacheId || SW_REGISTER_VERSION_FALLBACK;
+            return navigator.serviceWorker.register(
+                "service-worker.js?v=" + encodeURIComponent(bust),
+                { updateViaCache: "none" }
+            );
+        }).catch(function () {
+            return navigator.serviceWorker.register(
+                "service-worker.js?v=" + encodeURIComponent(SW_REGISTER_VERSION_FALLBACK),
+                { updateViaCache: "none" }
+            );
+        }).then(function (registration) {
+            if (!registration) {
+                refreshSettingsAppVersionDisplay();
+                return null;
+            }
             clearStoredUpdateDismissIfIdle(registration);
             ensureFcmPushRegistration();
             registration.update();
+            refreshSettingsAppVersionDisplay();
             if (registration.waiting) {
                 tryShowUpdateModal(registration);
             }
@@ -2612,11 +2727,14 @@
                     }
                 });
             });
+            return registration;
         }).catch(function () {
+            refreshSettingsAppVersionDisplay();
             return null;
         });
         navigator.serviceWorker.addEventListener("controllerchange", function () {
             hideUpdateModal();
+            refreshSettingsAppVersionDisplay();
             navigator.serviceWorker.getRegistration().then(function (r) {
                 clearStoredUpdateDismissIfIdle(r);
             });
@@ -2634,6 +2752,7 @@
                 if (r) {
                     r.update();
                 }
+                refreshSettingsAppVersionDisplay();
             });
         });
     }
@@ -5412,7 +5531,7 @@
         var versionNote = document.getElementById("settings-version-note");
         var versionValue = document.getElementById("settings-version-value");
         if (versionValue) {
-            versionValue.textContent = APP_VERSION;
+            refreshSettingsAppVersionDisplay();
         }
 
         function refreshSettingsItems() {
