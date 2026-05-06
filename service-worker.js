@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v371prayerapprove";
-const RUNTIME_CACHE = "njc-runtime-cache-v371prayerapprove";
+const APP_CACHE = "njc-app-cache-v372prayerpastoral";
+const RUNTIME_CACHE = "njc-runtime-cache-v372prayerpastoral";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: church (non-limited) members’ requests publish immediately without admin approval.";
+    "Prayer wall: topic tags and filters, private pastoral replies for posters (with new-reply badge), admin weekly bulletin PDF plus full-wall export.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260606chatadmin1",
+    "./styles.css?v=20260608prayerpastoral1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260606chatadmin1",
+    "./app-shell.js?v=20260608prayerpastoral1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
@@ -52,10 +52,10 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260414feedprobe1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260607prayerapprove1",
+    "./contact-page.js?v=20260608prayerpastoral1",
     "./daily-bread-page.js?v=20260414feedprobe1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260411kidsaudio1",
+    "./admin-dashboard-page.js?v=20260608prayerpastoral1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260411mainmerge1",

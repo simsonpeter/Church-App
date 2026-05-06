@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260606chatadmin1">
+    <link rel="stylesheet" href="styles.css?v=20260608prayerpastoral1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -183,6 +183,16 @@
                         <input id="prayer-wall-pastor-only" type="checkbox">
                         <span data-i18n="contact.prayerWallPastorOnlyLabel">Pastor only (only pastor can see this)</span>
                     </label>
+                    <fieldset class="prayer-category-fieldset">
+                        <legend class="prayer-category-legend page-note" data-i18n="contact.prayerCategoriesHint">Topics (optional, up to three)</legend>
+                        <div class="prayer-category-checkboxes">
+                            <label class="prayer-category-option"><input type="checkbox" name="prayer-wall-category" value="healing"> <span data-i18n="contact.prayerCat.healing">Healing</span></label>
+                            <label class="prayer-category-option"><input type="checkbox" name="prayer-wall-category" value="travel"> <span data-i18n="contact.prayerCat.travel">Travel</span></label>
+                            <label class="prayer-category-option"><input type="checkbox" name="prayer-wall-category" value="thanksgiving"> <span data-i18n="contact.prayerCat.thanksgiving">Thanksgiving</span></label>
+                            <label class="prayer-category-option"><input type="checkbox" name="prayer-wall-category" value="family"> <span data-i18n="contact.prayerCat.family">Family</span></label>
+                            <label class="prayer-category-option"><input type="checkbox" name="prayer-wall-category" value="guidance"> <span data-i18n="contact.prayerCat.guidance">Guidance</span></label>
+                        </div>
+                    </fieldset>
                     <div class="prayer-form-actions">
                         <button class="button-link" type="submit" data-i18n="contact.prayerWallPost">Post to Prayer Wall</button>
                         <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
@@ -1698,6 +1708,10 @@
                             <img src="prayer-banner.jpg?v=20260329m1" alt="" width="1024" height="559" loading="lazy" decoding="async" />
                         </div>
                         <p class="page-note" data-i18n="admin.prayerInfo">Approve new prayer requests before they appear on the wall. You can also mark requests as urgent.</p>
+                        <div class="admin-prayer-export-actions">
+                            <button type="button" class="button-link button-secondary" id="admin-prayer-export-pdf" data-i18n="admin.prayerExportPdf">Export full prayer wall PDF</button>
+                            <button type="button" class="button-link button-secondary" id="admin-prayer-bulletin-week-pdf" data-i18n="admin.prayerBulletinWeekPdf">Weekly bulletin PDF (this week)</button>
+                        </div>
                         <ul class="list" id="admin-prayer-list">
                             <li>
                                 <h3 data-i18n="admin.loading">Loading dashboard...</h3>
@@ -1789,6 +1803,19 @@
                 </div>
                 <p class="prayer-detail-message" id="prayer-detail-message"></p>
                 <p class="page-note" id="prayer-detail-date"></p>
+                <div class="prayer-detail-category-row page-note" id="prayer-detail-category-row" hidden></div>
+                <div class="prayer-detail-private-wrap" id="prayer-detail-private-wrap" hidden>
+                    <h4 class="prayer-detail-private-title" id="prayer-detail-private-title">Pastoral reply</h4>
+                    <p class="page-note prayer-detail-private-hint" id="prayer-detail-private-hint"></p>
+                    <div class="prayer-detail-private-list" id="prayer-detail-private-list"></div>
+                </div>
+                <div class="prayer-detail-admin-reply-wrap" id="prayer-detail-admin-reply-wrap" hidden>
+                    <label class="prayer-detail-admin-reply-label page-note" for="prayer-detail-pastor-reply-input" data-i18n="contact.prayerPrivateReplyLabel">Private note to the person who posted</label>
+                    <div class="prayer-detail-admin-reply-row">
+                        <textarea id="prayer-detail-pastor-reply-input" class="search-input prayer-detail-pastor-reply-input" rows="2" maxlength="2000" data-i18n-placeholder="contact.prayerPrivateReplyPlaceholder" placeholder="Write an encouraging private note…"></textarea>
+                        <button type="button" class="button-link" id="prayer-detail-pastor-reply-send" data-i18n="contact.prayerPrivateReplySend">Send note</button>
+                    </div>
+                </div>
             </div>
             <div class="prayer-detail-actions">
                 <button type="button" class="prayer-action-btn button-secondary" id="prayer-detail-mine-toggle" data-prayer-id="" hidden data-i18n="contact.prayerMineAdd">Add to my prayer</button>
@@ -2029,7 +2056,7 @@
     <script src="contact-page.js?v=20260607prayerapprove1"></script>
     <script src="daily-bread-page.js?v=20260414feedprobe1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260411kidsaudio1"></script>
+    <script src="admin-dashboard-page.js?v=20260608prayerpastoral1"></script>
     <script src="admin-modules-page.js?v=20260421mainmerge"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-users-page.js?v=20260411mainmerge1"></script>

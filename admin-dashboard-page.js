@@ -24,11 +24,7 @@
     var sermonList = document.getElementById("admin-sermon-list");
     var prayerList = document.getElementById("admin-prayer-list");
     var prayerExportPdfBtn = document.getElementById("admin-prayer-export-pdf");
-    // Hard-disable legacy PDF export control in case stale HTML still contains it.
-    if (prayerExportPdfBtn && prayerExportPdfBtn.parentNode) {
-        prayerExportPdfBtn.parentNode.removeChild(prayerExportPdfBtn);
-        prayerExportPdfBtn = null;
-    }
+    var prayerBulletinWeekBtn = document.getElementById("admin-prayer-bulletin-week-pdf");
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaForm = document.getElementById("admin-trivia-form");
     var dailyBreadForm = document.getElementById("admin-daily-bread-form");
@@ -268,6 +264,9 @@
         if (prayerExportPdfBtn) {
             prayerExportPdfBtn.disabled = busy;
         }
+        if (prayerBulletinWeekBtn) {
+            prayerBulletinWeekBtn.disabled = busy;
+        }
         if (triviaList) {
             triviaList.querySelectorAll("button[data-admin-trivia-id]").forEach(function (button) {
                 button.disabled = busy;
@@ -451,6 +450,66 @@
         return T("admin.broadcastCategoryGeneral", "General");
     }
 
+    function normalizePrayerCategoriesAdmin(raw) {
+        var allow = ["healing", "travel", "thanksgiving", "family", "guidance"];
+        var map = {};
+        allow.forEach(function (k) {
+            map[k] = true;
+        });
+        var src = Array.isArray(raw) ? raw : [];
+        var out = [];
+        src.forEach(function (x) {
+            var k = String(x || "").trim().toLowerCase();
+            if (map[k] && out.indexOf(k) < 0) {
+                out.push(k);
+            }
+        });
+        return out.slice(0, 3);
+    }
+
+    function prayerCatPdfLabel(slug) {
+        var s = String(slug || "").trim().toLowerCase();
+        if (!s) {
+            return "";
+        }
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function getLocalMondayWeekRange() {
+        var now = new Date();
+        var day = now.getDay();
+        var diffToMonday = (day + 6) % 7;
+        var start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+        start.setHours(0, 0, 0, 0);
+        var endMs = start.getTime() + 7 * 24 * 60 * 60 * 1000;
+        return { startMs: start.getTime(), endMs: endMs, startDate: start };
+    }
+
+    function formatWeekPeriodLabel(range) {
+        if (!range || !range.startDate) {
+            return "";
+        }
+        try {
+            var fmt = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
+            var endDay = new Date(range.endMs - 86400000);
+            return fmt.format(range.startDate) + " – " + fmt.format(endDay);
+        } catch (e) {
+            return "";
+        }
+    }
+
+    function prayerPostedInLocalWeek(entry, range) {
+        var raw = String(entry.createdAt || "").trim();
+        if (!raw) {
+            return false;
+        }
+        var t = new Date(raw).getTime();
+        if (Number.isNaN(t)) {
+            return false;
+        }
+        return t >= range.startMs && t < range.endMs;
+    }
+
     function normalizePrayerEntry(entry, index) {
         var source = entry && typeof entry === "object" ? entry : {};
         var approved = true;
@@ -465,6 +524,7 @@
             pastorOnly: Boolean(source.pastorOnly),
             anonymous: Boolean(source.anonymous),
             approved: approved,
+            categories: normalizePrayerCategoriesAdmin(source.categories),
             createdAt: String(source.createdAt || "")
         };
     }
@@ -491,25 +551,49 @@
         }
     }
 
-    function exportPrayerWallPdf() {
+    function exportPrayerWallPdf(options) {
+        var opts = options && typeof options === "object" ? options : {};
+        var mode = opts.mode === "week" ? "week" : "all";
         if (!isAdminUser()) {
             showNote("error", "admin.prayerExportDenied", "Only an admin can export prayer requests.");
             return;
         }
+        var weekRange = mode === "week" ? getLocalMondayWeekRange() : null;
+
+        function filterForMode(rows) {
+            var list = Array.isArray(rows) ? rows.slice() : [];
+            if (mode !== "week" || !weekRange) {
+                return list;
+            }
+            return list.filter(function (e) {
+                return prayerPostedInLocalWeek(e, weekRange);
+            });
+        }
+
         function buildAndPrint(rows) {
-            if (!Array.isArray(rows) || !rows.length) {
-                showNote("validation", "admin.prayerExportEmpty", "No prayer requests to export. Refresh the dashboard first.");
+            var working = filterForMode(rows);
+            if (!working.length) {
+                showNote(
+                    "validation",
+                    mode === "week" ? "admin.prayerBulletinWeekEmpty" : "admin.prayerExportEmpty",
+                    mode === "week"
+                        ? "No prayer requests were posted during this calendar week yet."
+                        : "No prayer requests to export. Refresh the dashboard first."
+                );
                 return;
             }
-            var title = escapeHtml(T("admin.prayerExportDocTitle", "Prayer wall — NJC Belgium"));
+            var titlePlain = mode === "week"
+                ? T("admin.prayerBulletinWeekTitle", "Weekly prayer bulletin")
+                : T("admin.prayerExportDocTitle", "Prayer wall — NJC Belgium");
+            var title = escapeHtml(titlePlain);
             var genLine = escapeHtml(T("admin.prayerExportGenerated", "Generated")) + " " + escapeHtml(new Date().toLocaleString());
             var urgentLbl = escapeHtml(T("admin.prayerExportUrgent", "Urgent"));
             var pastorLbl = escapeHtml(T("admin.prayerExportPastorOnly", "Pastor only"));
             var anonLbl = escapeHtml(T("admin.prayerExportAnonymous", "Anonymous post"));
             var dateLbl = escapeHtml(T("admin.prayerExportDate", "Posted"));
-            var countLine = escapeHtml(T("admin.prayerExportCount", "Total requests: {count}")).replace(/\{count\}/g, String(rows.length));
+            var countLine = escapeHtml(T("admin.prayerExportCount", "Total requests: {count}")).replace(/\{count\}/g, String(working.length));
 
-            var sorted = rows.slice().sort(function (a, b) {
+            var sorted = working.slice().sort(function (a, b) {
                 var ua = a.urgent ? 0 : 1;
                 var ub = b.urgent ? 0 : 1;
                 if (ua !== ub) {
@@ -520,7 +604,21 @@
 
             var urgentCount = sorted.filter(function (e) { return e.urgent; }).length;
             var urgentStat = escapeHtml(T("admin.prayerExportUrgentCount", "Urgent: {n}")).replace(/\{n\}/g, String(urgentCount));
-            var subtitle = escapeHtml(T("admin.prayerExportSubtitle", "Compiled from the church prayer wall for intercession and follow-up."));
+            var subtitlePlain = mode === "week"
+                ? T("admin.prayerBulletinWeekSubtitle", "Posted this calendar week (Monday–Sunday, device time).")
+                : T("admin.prayerExportSubtitle", "Compiled from the church prayer wall for intercession and follow-up.");
+            var subtitle = escapeHtml(subtitlePlain);
+
+            var weekPill = "";
+            if (mode === "week" && weekRange) {
+                var period = formatWeekPeriodLabel(weekRange);
+                weekPill = "<span class=\"meta-pill\">" + escapeHtml(T("admin.prayerBulletinWeekRangeLabel", "This week")) +
+                    (period ? (" · " + escapeHtml(period)) : "") + "</span>";
+            }
+
+            var footerText = mode === "week"
+                ? T("admin.prayerBulletinWeekFooter", "Weekly bulletin · For church printing · Keep requests confidential.")
+                : T("admin.prayerExportFooter", "Prayer wall export · For pastoral use · Keep requests confidential.");
 
             var cards = sorted.map(function (entry, idx) {
                 var badges = [];
@@ -533,6 +631,12 @@
                 if (entry.anonymous) {
                     badges.push("<span class=\"badge anon\">" + anonLbl + "</span>");
                 }
+                (entry.categories || []).forEach(function (c) {
+                    var catLbl = prayerCatPdfLabel(c);
+                    if (catLbl) {
+                        badges.push("<span class=\"badge cat\">" + escapeHtml(catLbl) + "</span>");
+                    }
+                });
                 var msg = escapeHtml(String(entry.message || "")).replace(/\n/g, "<br>");
                 var num = String(idx + 1);
                 var urgentClass = entry.urgent ? " req--urgent" : "";
@@ -585,6 +689,7 @@
                 ".badge.urgent{background:#fee2e2;color:#991b1b}" +
                 ".badge.pastor{background:#ffedd5;color:#9a3412}" +
                 ".badge.anon{background:#e0e7ff;color:#3730a3}" +
+                ".badge.cat{background:#ecfccb;color:#3f6212;text-transform:none;letter-spacing:0;font-weight:600}" +
                 ".req-quote{margin:0;padding:10px 12px;background:linear-gradient(180deg,#fafaf9,#fff);border-radius:10px;border-left:3px solid #d6d3d1}" +
                 ".req--urgent .req-quote{border-left-color:#f87171;background:linear-gradient(180deg,#fffafa,#fff)" +
                 "}" +
@@ -606,9 +711,10 @@
                 "<div class=\"meta-bar\">" +
                 "<span class=\"meta-pill\">" + countLine + "</span>" +
                 "<span class=\"meta-pill meta-pill--urgent\">" + urgentStat + "</span>" +
+                weekPill +
                 "</div>" +
                 "<main>" + cards + "</main>" +
-                "<footer class=\"doc-footer\">" + escapeHtml(T("admin.prayerExportFooter", "Prayer wall export · For pastoral use · Keep requests confidential.")) + "</footer>" +
+                "<footer class=\"doc-footer\">" + escapeHtml(footerText) + "</footer>" +
                 "</div>" +
                 "<script>" +
                 "window.addEventListener('load',function(){setTimeout(function(){try{window.focus();window.print();}catch(e){}},550);});" +
@@ -3200,6 +3306,17 @@
     refreshButton.addEventListener("click", function () {
         loadDashboard(true);
     });
+
+    if (prayerExportPdfBtn) {
+        prayerExportPdfBtn.addEventListener("click", function () {
+            exportPrayerWallPdf({ mode: "all" });
+        });
+    }
+    if (prayerBulletinWeekBtn) {
+        prayerBulletinWeekBtn.addEventListener("click", function () {
+            exportPrayerWallPdf({ mode: "week" });
+        });
+    }
 
     document.addEventListener("njc:langchange", function () {
         if (!note.hidden) {

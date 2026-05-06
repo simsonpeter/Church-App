@@ -5448,6 +5448,226 @@ html[data-theme="dark"] .prayer-wall-tab.active .prayer-wall-tab-icon {
     color: #fecaca;
 }
 
+html[data-theme="dark"] .prayer-wall-tab.active .prayer-wall-tab-icon {
+    background: #444444;
+    color: #fecaca;
+}
+
+.prayer-category-fieldset {
+    border: 0;
+    margin: 10px 0 6px;
+    padding: 0;
+}
+
+.prayer-category-legend {
+    margin: 0 0 8px !important;
+    font-weight: 600;
+}
+
+.prayer-category-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 14px;
+    align-items: center;
+}
+
+.prayer-category-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.prayer-wall-topic-filter {
+    margin: 12px 0 8px;
+    padding: 10px 12px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(243, 208, 208, 0.85);
+    background: color-mix(in srgb, var(--surface) 92%, #fff5f5);
+}
+
+.prayer-wall-topic-filter-label {
+    display: block;
+    margin: 0 0 8px !important;
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    opacity: 0.85;
+}
+
+.prayer-wall-topic-filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.prayer-cat-chip {
+    border: 1px solid rgba(198, 31, 31, 0.22);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.prayer-cat-chip:hover {
+    border-color: rgba(198, 31, 31, 0.42);
+}
+
+.prayer-cat-chip.active {
+    background: linear-gradient(135deg, rgba(254, 226, 226, 0.95), rgba(255, 241, 241, 0.98));
+    border-color: rgba(185, 28, 28, 0.45);
+    color: #7f1d1d;
+}
+
+.prayer-cat-pill {
+    display: inline-block;
+    margin: 0 4px 4px 0;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    background: color-mix(in srgb, var(--primary-soft) 78%, transparent);
+    border: 1px solid rgba(198, 31, 31, 0.2);
+    color: #7f1d1d;
+}
+
+.prayer-cat-pill--small {
+    font-size: 0.62rem;
+    padding: 2px 7px;
+}
+
+.prayer-detail-cat-label {
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+.prayer-detail-category-row {
+    margin-top: 10px !important;
+    line-height: 1.5;
+}
+
+.prayer-list-cats {
+    margin-top: 8px;
+}
+
+.prayer-list-reply-badge {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    border: 1px solid #c7d2fe;
+    color: #3730a3;
+}
+
+.prayer-detail-private-wrap {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--surface-soft);
+}
+
+.prayer-detail-private-title {
+    margin: 0 0 6px;
+    font-size: 0.95rem;
+}
+
+.prayer-detail-private-hint {
+    margin: 0 0 10px !important;
+}
+
+.prayer-private-note {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.08);
+}
+
+.prayer-private-note:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.prayer-private-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted, #78716c);
+    margin-bottom: 6px;
+}
+
+.prayer-private-from {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.prayer-private-text {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+}
+
+.prayer-detail-admin-reply-wrap {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.prayer-detail-admin-reply-label {
+    display: block;
+    margin: 0 0 8px !important;
+    font-weight: 600;
+}
+
+.prayer-detail-admin-reply-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.prayer-detail-pastor-reply-input {
+    width: 100%;
+    resize: vertical;
+    min-height: 52px;
+}
+
+.admin-prayer-export-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    margin: 10px 0 14px;
+}
+
+html[data-theme="dark"] .prayer-wall-topic-filter {
+    border-color: rgba(80, 80, 80, 0.55);
+    background: rgba(30, 30, 30, 0.65);
+}
+
+html[data-theme="dark"] .prayer-cat-chip.active {
+    background: rgba(185, 28, 28, 0.22);
+    border-color: rgba(248, 113, 113, 0.35);
+    color: #fecaca;
+}
+
+html[data-theme="dark"] .prayer-list-reply-badge {
+    background: rgba(55, 48, 163, 0.35);
+    border-color: rgba(199, 210, 254, 0.35);
+    color: #e0e7ff;
+}
+
 .prayer-form-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
