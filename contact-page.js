@@ -569,6 +569,10 @@
                 }));
             }
 
+            function isPrayerMarkedAnswered(entry) {
+                return Boolean(entry && Number(entry.answered || 0) > 0);
+            }
+
             function getMyPrayerOrderedEntries() {
                 var ids = loadMyPrayerIds();
                 var byId = {};
@@ -585,6 +589,17 @@
                     }
                 });
                 return out;
+            }
+
+            /** Same order as “My prayer”, but excludes requests already marked answered (those stay on Answered tab only). */
+            function getMyPrayerOrderedEntriesActiveOnly() {
+                return getMyPrayerOrderedEntries().filter(function (e) {
+                    return !isPrayerMarkedAnswered(e);
+                });
+            }
+
+            function hasMyPrayerActiveListEntries() {
+                return getMyPrayerOrderedEntriesActiveOnly().length > 0;
             }
 
             function formatPrayerDateForMinePdf(isoText) {
@@ -717,8 +732,12 @@
             }
 
             async function exportMyPrayerPdf() {
-                var rows = getMyPrayerOrderedEntries();
+                var rows = getMyPrayerOrderedEntriesActiveOnly();
                 if (!rows.length) {
+                    if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
+                        showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
+                        return;
+                    }
                     showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
                     return;
                 }
@@ -1274,11 +1293,11 @@
                 if (!entry) {
                     return "other";
                 }
+                if (isPrayerMarkedAnswered(entry)) {
+                    return "answered";
+                }
                 if (isPrayerInMyList(entry.id)) {
                     return "mine";
-                }
-                if (Number(entry.answered || 0) > 0) {
-                    return "answered";
                 }
                 if (entry.urgent) {
                     return "urgent";
@@ -1353,18 +1372,18 @@
                 var source = Array.isArray(entries) ? entries : [];
                 var out;
                 if (activePrayerTab === "mine") {
-                    out = getMyPrayerOrderedEntries();
+                    out = getMyPrayerOrderedEntriesActiveOnly();
                 } else if (activePrayerTab === "answered") {
                     out = source.filter(function (entry) {
-                        return Number(entry.answered || 0) > 0;
+                        return isPrayerMarkedAnswered(entry);
                     });
                 } else if (activePrayerTab === "other") {
                     out = source.filter(function (entry) {
-                        return !entry.urgent;
+                        return !entry.urgent && !isPrayerMarkedAnswered(entry);
                     });
                 } else {
                     out = source.filter(function (entry) {
-                        return entry.urgent;
+                        return Boolean(entry.urgent) && !isPrayerMarkedAnswered(entry);
                     });
                 }
                 var cat = String(activePrayerCategoryFilter || "").trim().toLowerCase();
@@ -1380,21 +1399,21 @@
             function hasUrgentPrayerEntries(entries) {
                 var source = Array.isArray(entries) ? entries : [];
                 return source.some(function (entry) {
-                    return Boolean(entry && entry.urgent);
+                    return Boolean(entry && entry.urgent && !isPrayerMarkedAnswered(entry));
                 });
             }
 
             function hasNonUrgentPrayerEntries(entries) {
                 var source = Array.isArray(entries) ? entries : [];
                 return source.some(function (entry) {
-                    return Boolean(entry && !entry.urgent);
+                    return Boolean(entry && !entry.urgent && !isPrayerMarkedAnswered(entry));
                 });
             }
 
             function hasAnsweredPrayerEntries(entries) {
                 var source = Array.isArray(entries) ? entries : [];
                 return source.some(function (entry) {
-                    return Boolean(entry && Number(entry.answered || 0) > 0);
+                    return Boolean(entry && isPrayerMarkedAnswered(entry));
                 });
             }
 
@@ -1877,7 +1896,7 @@
                         setActivePrayerTab("other");
                     } else if (hasAnsweredPrayerEntries(sortedEntries)) {
                         setActivePrayerTab("answered");
-                    } else if (loadMyPrayerIds().length) {
+                    } else if (hasMyPrayerActiveListEntries()) {
                         setActivePrayerTab("mine");
                     }
                     return;
@@ -1888,8 +1907,13 @@
                     var noEntryTitle;
                     var noEntryBody;
                     if (activePrayerTab === "mine") {
-                        noEntryTitle = T("contact.prayerWallNoMineTitle", "Your list is empty", prayerCard);
-                        noEntryBody = T("contact.prayerWallNoMineBody", "Open any prayer and tap “Add to my prayer”, or use the button on each card below.", prayerCard);
+                        if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
+                            noEntryTitle = T("contact.prayerWallNoMineActiveTitle", "Nothing left to pray here", prayerCard);
+                            noEntryBody = T("contact.prayerWallNoMineActiveBody", "Everything on your list is marked answered. Open the Answered tab to see those requests.", prayerCard);
+                        } else {
+                            noEntryTitle = T("contact.prayerWallNoMineTitle", "Your list is empty", prayerCard);
+                            noEntryBody = T("contact.prayerWallNoMineBody", "Open any prayer and tap “Add to my prayer”, or use the button on each card below.", prayerCard);
+                        }
                     } else if (activePrayerTab === "answered") {
                         noEntryTitle = T("contact.prayerWallNoAnsweredTitle", "No answered prayers yet", prayerCard);
                         noEntryBody = T("contact.prayerWallNoAnsweredBody", "Requests with an “Answered” count above zero appear here.", prayerCard);
@@ -2600,6 +2624,8 @@
                         prayerWallNote.textContent = T("contact.prayerMineFull", "Your list is full. Remove some first.", prayerCard);
                     } else if (state === "mineCleared") {
                         prayerWallNote.textContent = T("contact.prayerMineCleared", "Your list is empty.", prayerCard);
+                    } else if (state === "minePdfOnlyAnswered") {
+                        prayerWallNote.textContent = T("contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.", prayerCard);
                     } else if (state === "minePdfEmpty") {
                         prayerWallNote.textContent = T("contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.", prayerCard);
                     } else if (state === "minePdfBlocked") {

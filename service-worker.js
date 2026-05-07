@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v373appversionlabel";
-const RUNTIME_CACHE = "njc-runtime-cache-v373appversionlabel";
+const APP_CACHE = "njc-app-cache-v374prayeransweredtabs";
+const RUNTIME_CACHE = "njc-runtime-cache-v374prayeransweredtabs";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Settings app version now matches each deploy (service worker build id). Service worker URL tracks APP_CACHE so updates are detected reliably.";
+    "Prayer wall: requests marked answered appear only under Answered — removed from Urgent, Daily, and My prayer lists.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,7 +44,7 @@ const CORE_ASSETS = [
     "./styles.css?v=20260608prayerpastoral1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260609appversion1",
+    "./app-shell.js?v=20260609answeredtabs1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
@@ -52,7 +52,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260414feedprobe1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260608prayerpastoral1",
+    "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260608prayerpastoral1",
