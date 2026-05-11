@@ -2277,6 +2277,7 @@
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
     var SESSION_UPDATE_MODAL_AUTO_KEY = "njc_update_modal_auto_shown_v1";
     var updateModalAutoInFlight = false;
+    var autoUpdateReloadPending = false;
     var lastVisibilitySwUpdateAt = 0;
     var VISIBILITY_SW_UPDATE_MIN_MS = 2 * 60 * 1000;
 
@@ -2751,6 +2752,10 @@
             navigator.serviceWorker.getRegistration().then(function (r) {
                 clearStoredUpdateDismissIfIdle(r);
             });
+            if (autoUpdateReloadPending && isAutoUpdateEnabled()) {
+                autoUpdateReloadPending = false;
+                window.location.reload();
+            }
         });
         document.addEventListener("visibilitychange", function () {
             if (document.visibilityState !== "visible") {
@@ -2805,9 +2810,11 @@
             return false;
         }
         try {
+            autoUpdateReloadPending = true;
             registration.waiting.postMessage({ type: "SKIP_WAITING" });
             return true;
         } catch (err) {
+            autoUpdateReloadPending = false;
             return false;
         }
     }
