@@ -26,7 +26,7 @@
             var tamilBsiOldBibleUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilbible.json";
             var announcementsUrl = "./announcements.json";
             var announcementsFallbackUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/announcements.json";
-            var defaultAnnouncementImageUrl = "announcements-banner.jpg?v=20260428img1";
+            var defaultAnnouncementImageUrl = "https://i.ibb.co/1JZXKxQP/1778539756636.png";
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
@@ -72,7 +72,7 @@
             var announcementsCard = announcementsList ? announcementsList.closest(".card") : null;
             var announcementsCardBanner = announcementsCard ? announcementsCard.querySelector(".card-banner") : null;
             var announcementsBannerImg = announcementsCard ? announcementsCard.querySelector(".card-banner img") : null;
-            var DEFAULT_ANNOUNCEMENTS_BANNER_SRC = "announcements-banner.jpg?v=20260428img1";
+            var DEFAULT_ANNOUNCEMENTS_BANNER_SRC = "https://i.ibb.co/1JZXKxQP/1778539756636.png";
             var announcementsSubtitle = announcementsCard ? announcementsCard.querySelector("[data-i18n='home.announcementsSubtitle']") : null;
             var thisWeekCard = thisWeekEventsList ? thisWeekEventsList.closest(".card") : null;
             var eventsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
