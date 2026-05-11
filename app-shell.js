@@ -1134,6 +1134,8 @@
         "settings.updateUpToDate": "நீங்கள் புதுப்பிக்கப்பட்டுள்ளீர்கள்.",
         "settings.updateError": "சரிபார்க்க முடியவில்லை.",
         "settings.appVersion": "செயலி பதிப்பு",
+        "settings.appVersionActiveLabel": "செயலில்",
+        "settings.appVersionLatestLabel": "எதிர்பார்க்கப்படும் புதியது",
         "settings.largerText": "பெரிய உரை",
         "settings.largerTextOn": "ஆன்",
         "settings.largerTextOff": "ஆஃப்",
@@ -2243,6 +2245,18 @@
         return id;
     }
 
+    function setSettingsVersionValue(versionValue, activeCacheId) {
+        var active = formatSettingsAppVersionLabel(activeCacheId);
+        var latest = formatSettingsAppVersionLabel("njc-app-cache-v" + SW_REGISTER_VERSION_FALLBACK);
+        var activeLabel = t("settings.appVersionActiveLabel", "Active");
+        var latestLabel = t("settings.appVersionLatestLabel", "Latest expected");
+        if (active) {
+            versionValue.textContent = activeLabel + ": " + active + " | " + latestLabel + ": " + latest;
+            return;
+        }
+        versionValue.textContent = latestLabel + ": " + latest;
+    }
+
     function refreshSettingsAppVersionDisplay() {
         var versionValue = document.getElementById("settings-version-value");
         if (!versionValue) {
@@ -2252,20 +2266,20 @@
             var v = meta && meta.version ? String(meta.version).trim() : "";
             if (v) {
                 lastKnownAppCacheId = v;
-                versionValue.textContent = formatSettingsAppVersionLabel(v);
+                setSettingsVersionValue(versionValue, v);
                 return;
             }
             if (lastKnownAppCacheId) {
-                versionValue.textContent = formatSettingsAppVersionLabel(lastKnownAppCacheId);
+                setSettingsVersionValue(versionValue, lastKnownAppCacheId);
                 return;
             }
             fetchServiceWorkerAppCacheId().then(function (cid) {
                 if (cid) {
                     lastKnownAppCacheId = cid;
-                    versionValue.textContent = formatSettingsAppVersionLabel(cid);
+                    setSettingsVersionValue(versionValue, cid);
                     return;
                 }
-                versionValue.textContent = SW_REGISTER_VERSION_FALLBACK;
+                setSettingsVersionValue(versionValue, "");
             });
         });
     }
