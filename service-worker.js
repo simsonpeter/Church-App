@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v376newsletter1";
-const RUNTIME_CACHE = "njc-runtime-cache-v376newsletter1";
+const APP_CACHE = "njc-app-cache-v377newsletterbanner";
+const RUNTIME_CACHE = "njc-runtime-cache-v377newsletterbanner";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Newsletter: monthly message in Admin (Firestore) and a dedicated app page.";
+    "Newsletter: banner image on Newsletter page and Home announcements; home-page cache bump.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260511newsletter1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260414sermonannounce1",
+    "./home-page.js?v=20260609newsletterbanner1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260611offlinebible1",
@@ -77,7 +77,6 @@ const CORE_ASSETS = [
     "./logo.png?v=20260318de",
     "./achievements-banner.jpg?v=20260331achimg1",
     "./admin-banner.jpg?v=20260411cb1",
-    "./announcements-banner.jpg?v=20260428img1",
     "./archive-banner.jpg?v=20260331achimg1",
     "./bible-reader-banner.jpg?v=20260411cb1",
     "./chat-banner.jpg?v=20260411cb1",
