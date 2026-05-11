@@ -9,6 +9,7 @@
     var FONT_TA_KEY = "njc_font_preset_ta_v1";
     var FONT_PANEL_OPEN_KEY = "njc_font_settings_panel_open_v1";
     var NOTIFICATION_SETTINGS_KEY = "njc_notification_settings_v1";
+    var AUTO_UPDATE_SETTINGS_KEY = "njc_auto_update_settings_v1";
     var NOTIFICATION_SENT_KEY = "njc_notification_sent_v1";
     var CARD_LANGUAGE_MAP_KEY = "njc_card_language_map_v1";
     var PROFILE_STORAGE_KEY = "njc_user_profiles_v1";
@@ -1122,6 +1123,11 @@
         "settings.notificationsOff": "நிறுத்தப்பட்டுள்ளது",
         "settings.notificationsBlocked": "தடுக்கப்பட்டுள்ளது",
         "settings.notificationsUnsupported": "ஆதரவு இல்லை",
+        "settings.autoUpdate": "தானியங்கி புதுப்பிப்பு",
+        "settings.autoUpdateOn": "இயக்கத்தில்",
+        "settings.autoUpdateOff": "நிறுத்தப்பட்டுள்ளது",
+        "settings.autoUpdateInfo": "இயக்கத்தில் இருந்தால் புதுப்பிப்புகள் பின்புலத்தில் தானாக நிறுவப்படும். நிறுத்தப்பட்டால் ஒவ்வொரு முறையும் உங்கள் அனுமதி கேட்கப்படும்.",
+        "settings.updateBackgrounding": "பின்புலத்தில் புதுப்பிக்கிறது...",
         "settings.checkForUpdates": "புதுப்பிப்புகளை சரிபார்க்கவும்",
         "settings.updateChecking": "சரிபார்க்கிறது...",
         "settings.updateAvailable": "புதிய பதிப்பு கிடைக்கிறது!",
@@ -2373,6 +2379,10 @@
         if (!registration || !registration.waiting) {
             return;
         }
+        if (isAutoUpdateEnabled()) {
+            applyWaitingUpdateInBackground(registration);
+            return;
+        }
         if (isUpdateSnoozeActive()) {
             return;
         }
@@ -2767,6 +2777,39 @@
         }
         overlay.hidden = true;
         document.body.classList.remove("app-update-open");
+    }
+
+    function isAutoUpdateEnabled() {
+        try {
+            var raw = window.localStorage.getItem(AUTO_UPDATE_SETTINGS_KEY);
+            if (raw === null) {
+                return true;
+            }
+            return raw === "1";
+        } catch (err) {
+            return true;
+        }
+    }
+
+    function setAutoUpdateEnabled(enabled) {
+        try {
+            window.localStorage.setItem(AUTO_UPDATE_SETTINGS_KEY, enabled ? "1" : "0");
+        } catch (err) {
+            return null;
+        }
+        return null;
+    }
+
+    function applyWaitingUpdateInBackground(registration) {
+        if (!registration || !registration.waiting) {
+            return false;
+        }
+        try {
+            registration.waiting.postMessage({ type: "SKIP_WAITING" });
+            return true;
+        } catch (err) {
+            return false;
+        }
     }
 
     function showUpdateModal(registration, options) {
@@ -5187,6 +5230,12 @@
                 : t("settings.notificationsOff", "Off");
         }
 
+        function getAutoUpdateStateLabel() {
+            return isAutoUpdateEnabled()
+                ? t("settings.autoUpdateOn", "On")
+                : t("settings.autoUpdateOff", "Off");
+        }
+
         function createSettingsItem(button, titleKey, titleFallback, getStateLabel) {
             if (!button) {
                 return null;
@@ -5300,6 +5349,44 @@
                 items.push(notifyItem);
             }
         }
+
+        var autoUpdateBtn = document.createElement("button");
+        autoUpdateBtn.id = "settings-auto-update-btn";
+        autoUpdateBtn.className = "lang-toggle";
+        autoUpdateBtn.type = "button";
+        autoUpdateBtn.setAttribute("aria-label", t("settings.autoUpdate", "Auto update"));
+        autoUpdateBtn.innerHTML = "<i class=\"fa-solid fa-rotate\" aria-hidden=\"true\"></i>";
+        var autoUpdateItem = createSettingsItem(autoUpdateBtn, "settings.autoUpdate", "Auto update", getAutoUpdateStateLabel);
+        autoUpdateBtn.addEventListener("click", function () {
+            var nextEnabled = !isAutoUpdateEnabled();
+            setAutoUpdateEnabled(nextEnabled);
+            if (nextEnabled && "serviceWorker" in navigator) {
+                navigator.serviceWorker.getRegistration().then(function (reg) {
+                    if (reg && reg.waiting) {
+                        applyWaitingUpdateInBackground(reg);
+                    }
+                }).catch(function () {
+                    return null;
+                });
+            }
+            refreshSettingsItems();
+        });
+        if (autoUpdateItem) {
+            controls.appendChild(autoUpdateItem.node);
+            items.push(autoUpdateItem);
+        }
+        var autoUpdateInfo = document.createElement("p");
+        autoUpdateInfo.className = "page-note settings-auto-update-info";
+        autoUpdateInfo.setAttribute("data-i18n", "settings.autoUpdateInfo");
+        autoUpdateInfo.setAttribute(
+            "data-i18n-fallback",
+            "When on, updates install silently in the background. When off, you will be asked every time."
+        );
+        autoUpdateInfo.textContent = t(
+            "settings.autoUpdateInfo",
+            "When on, updates install silently in the background. When off, you will be asked every time."
+        );
+        controls.appendChild(autoUpdateInfo);
 
         var LARGER_TEXT_KEY = "njc_larger_text_v1";
         function getLargerText() {
@@ -5502,9 +5589,33 @@
                         return;
                     }
                     reg.update().then(function () {
-                        if (reg.waiting || reg.installing) {
+                        if (reg.waiting) {
                             updateStatus.textContent = t("settings.updateAvailable", "New version available!");
-                            tryShowUpdateModal(reg, { fromSettings: true });
+                            if (isAutoUpdateEnabled()) {
+                                applyWaitingUpdateInBackground(reg);
+                                updateStatus.textContent = t("settings.updateBackgrounding", "Updating in background...");
+                            } else {
+                                tryShowUpdateModal(reg, { fromSettings: true });
+                            }
+                        } else if (reg.installing) {
+                            var installing = reg.installing;
+                            installing.addEventListener("statechange", function onStateChange() {
+                                if (installing.state !== "installed") {
+                                    return;
+                                }
+                                if (!reg.waiting) {
+                                    updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
+                                    return;
+                                }
+                                if (isAutoUpdateEnabled()) {
+                                    applyWaitingUpdateInBackground(reg);
+                                    updateStatus.textContent = t("settings.updateBackgrounding", "Updating in background...");
+                                } else {
+                                    updateStatus.textContent = t("settings.updateAvailable", "New version available!");
+                                    tryShowUpdateModal(reg, { fromSettings: true });
+                                }
+                            }, { once: true });
+                            updateStatus.textContent = t("settings.updateChecking", "Checking...");
                         } else {
                             updateStatus.textContent = t("settings.updateUpToDate", "You're up to date.");
                         }
