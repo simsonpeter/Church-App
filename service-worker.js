@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v374prayeransweredtabs";
-const RUNTIME_CACHE = "njc-runtime-cache-v374prayeransweredtabs";
+const APP_CACHE = "njc-app-cache-v375offlinebible";
+const RUNTIME_CACHE = "njc-runtime-cache-v375offlinebible";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: requests marked answered appear only under Answered — removed from Urgent, Daily, and My prayer lists.";
+    "Bible reader: stable JSON URLs so offline mode can use cached Bibles after one online visit.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,13 +44,13 @@ const CORE_ASSETS = [
     "./styles.css?v=20260608prayerpastoral1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260611autoupdate1",
+    "./app-shell.js?v=20260611offlinebible1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
-    "./bible-page.js?v=20260414feedprobe1",
+    "./bible-page.js?v=20260611offlinebible1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",

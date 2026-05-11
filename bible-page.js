@@ -4,6 +4,14 @@
     var DUTCH_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/dutchbible.json";
     var ROMANIZED_TAMIL_BIBLE_URL = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/bibles/tamilromanizedbible.json";
 
+    /** Stable URLs required so the service worker can match cached copies offline (no per-request ?ts=). */
+    var BIBLE_JSON_URLS = {
+        en: ENGLISH_BIBLE_URL,
+        ta: TAMIL_BIBLE_URL,
+        nl: DUTCH_BIBLE_URL,
+        tr: ROMANIZED_TAMIL_BIBLE_URL
+    };
+
     var BIBLE_STATE_KEY = "njc_bible_reader_state_v1";
     var languageEnButton = document.getElementById("bible-language-en");
     var languageTaButton = document.getElementById("bible-language-ta");
@@ -2209,6 +2217,30 @@
         }
     }
 
+    function prefetchOtherBibleJsonForOffline(currentLang) {
+        if (!("fetch" in window) || typeof window.navigator === "undefined" || window.navigator.onLine === false) {
+            return;
+        }
+        var langs = ["en", "ta", "nl", "tr"];
+        function run() {
+            langs.forEach(function (lang) {
+                if (lang === currentLang || cache[lang] || loadingPromise[lang]) {
+                    return;
+                }
+                var u = BIBLE_JSON_URLS[lang];
+                if (!u) {
+                    return;
+                }
+                fetch(u, { mode: "cors", credentials: "omit" }).catch(function () {});
+            });
+        }
+        if (typeof window.requestIdleCallback === "function") {
+            window.requestIdleCallback(run, { timeout: 8000 });
+        } else {
+            window.setTimeout(run, 1200);
+        }
+    }
+
     function clampLocation(data, location) {
         var source = location && typeof location === "object" ? location : { book: 0, chapter: 0 };
         var books = data && Array.isArray(data.Book) ? data.Book : [];
@@ -2239,7 +2271,7 @@
         } else {
             url = ENGLISH_BIBLE_URL;
         }
-        loadingPromise[lang] = fetch(url + "?ts=" + String(Date.now()), { cache: "no-store" })
+        loadingPromise[lang] = fetch(url, { mode: "cors", credentials: "omit" })
             .then(function (response) {
                 if (!response.ok) {
                     throw new Error("Bible load failed");
@@ -2251,6 +2283,7 @@
                     throw new Error("Invalid bible shape");
                 }
                 cache[lang] = payload;
+                prefetchOtherBibleJsonForOffline(lang);
                 return payload;
             })
             .finally(function () {
