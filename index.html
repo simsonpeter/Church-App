@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260511newsletter1">
+    <link rel="stylesheet" href="styles.css?v=20260610newslettertts1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -604,6 +604,16 @@
                 <p class="page-note" id="newsletter-active-range" aria-live="polite"></p>
                 <p class="page-note" id="newsletter-status" aria-live="polite"></p>
                 <div id="newsletter-content" hidden>
+                    <div class="newsletter-tts-row" role="group" data-i18n-aria-label="newsletter.ttsGroupAria" data-i18n-aria-fallback="Listen to newsletter" aria-label="Listen to newsletter">
+                        <button type="button" class="button-link button-secondary newsletter-tts-toggle" id="newsletter-tts-toggle" disabled data-i18n-aria-label="newsletter.ttsPlayAria" data-i18n-aria-fallback="Listen" aria-label="Listen">
+                            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                            <span data-i18n="newsletter.ttsListen" data-i18n-fallback="Listen">Listen</span>
+                        </button>
+                        <button type="button" class="button-link button-secondary newsletter-tts-stop" id="newsletter-tts-stop" disabled data-i18n-aria-label="newsletter.ttsStopAria" data-i18n-aria-fallback="Stop" aria-label="Stop">
+                            <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                            <span data-i18n="newsletter.ttsStop" data-i18n-fallback="Stop">Stop</span>
+                        </button>
+                    </div>
                     <h3 id="newsletter-heading" class="newsletter-heading"></h3>
                     <div id="newsletter-body" class="newsletter-body"></div>
                 </div>
@@ -2111,7 +2121,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260511newsletter1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260511newsletter1"></script>
+    <script src="app-shell.js?v=20260610newslettertts1"></script>
     <script src="events-engine.js?v=20260414feedprobe1"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260609newsletterbanner1"></script>
@@ -2121,7 +2131,7 @@
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260609answeredtabs1"></script>
     <script src="daily-bread-page.js?v=20260414feedprobe1"></script>
-    <script src="newsletter-page.js?v=20260511newsletter1"></script>
+    <script src="newsletter-page.js?v=20260610newslettertts1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260511newsletter1"></script>
     <script src="admin-modules-page.js?v=20260421mainmerge"></script>

@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v377newsletterbanner";
-const RUNTIME_CACHE = "njc-runtime-cache-v377newsletterbanner";
+const APP_CACHE = "njc-app-cache-v378newslettertts";
+const RUNTIME_CACHE = "njc-runtime-cache-v378newslettertts";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Newsletter: banner image on Newsletter page and Home announcements; home-page cache bump.";
+    "Newsletter: read-aloud (listen / pause / stop) for the current issue, with lock-screen controls where supported.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260511newsletter1",
+    "./styles.css?v=20260610newslettertts1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260511newsletter1",
+    "./app-shell.js?v=20260610newslettertts1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260609newsletterbanner1",
@@ -54,7 +54,7 @@ const CORE_ASSETS = [
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",
-    "./newsletter-page.js?v=20260511newsletter1",
+    "./newsletter-page.js?v=20260610newslettertts1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260511newsletter1",
     "./admin-modules-page.js?v=20260421mainmerge",

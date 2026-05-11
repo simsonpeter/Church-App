@@ -827,7 +827,8 @@ a.card:hover > h2:not(:first-child) i {
     -webkit-backdrop-filter: blur(8px);
 }
 
-.daily-bread-tts-row {
+.daily-bread-tts-row,
+.newsletter-tts-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -836,7 +837,9 @@ a.card:hover > h2:not(:first-child) i {
 }
 
 .daily-bread-tts-toggle,
-.daily-bread-tts-stop {
+.daily-bread-tts-stop,
+.newsletter-tts-toggle,
+.newsletter-tts-stop {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -844,7 +847,9 @@ a.card:hover > h2:not(:first-child) i {
 }
 
 .daily-bread-tts-toggle i,
-.daily-bread-tts-stop i {
+.daily-bread-tts-stop i,
+.newsletter-tts-toggle i,
+.newsletter-tts-stop i {
     font-size: 1rem;
     opacity: 0.92;
 }
