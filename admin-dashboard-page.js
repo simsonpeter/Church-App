@@ -131,9 +131,24 @@
     var cachedDailyBread = [];
     var cachedBookShelf = [];
     var cachedKidsAudio = [];
+    var cachedNewsletters = [];
+    var newslettersCacheLoaded = false;
     var busy = false;
 
-    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !bookShelfList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !bookShelfForm || !kidsAudioForm || !kidsAudioList) {
+    var newsletterForm = document.getElementById("admin-newsletter-form");
+    var newsletterEditIdInput = document.getElementById("admin-newsletter-edit-id");
+    var newsletterMonthPick = document.getElementById("admin-newsletter-month-pick");
+    var newsletterVisibleFromInput = document.getElementById("admin-newsletter-visible-from");
+    var newsletterVisibleUntilInput = document.getElementById("admin-newsletter-visible-until");
+    var newsletterTitleInput = document.getElementById("admin-newsletter-title");
+    var newsletterTitleTaInput = document.getElementById("admin-newsletter-title-ta");
+    var newsletterBodyInput = document.getElementById("admin-newsletter-body");
+    var newsletterBodyTaInput = document.getElementById("admin-newsletter-body-ta");
+    var newsletterSubmit = document.getElementById("admin-newsletter-submit");
+    var newsletterCancelEditBtn = document.getElementById("admin-newsletter-cancel-edit");
+    var newsletterList = document.getElementById("admin-newsletter-list");
+
+    if (!refreshButton || !note || !noticeList || !broadcastList || !eventList || !sermonList || !prayerList || !dailyBreadList || !bookShelfList || !noticeForm || !broadcastForm || !eventForm || !sermonForm || !dailyBreadForm || !bookShelfForm || !kidsAudioForm || !kidsAudioList || !newsletterForm || !newsletterList) {
         return;
     }
 
@@ -195,6 +210,126 @@
         return normalizeEmail(user && user.email) === ADMIN_EMAIL;
     }
 
+    var NEWSLETTER_COLLECTION = "churchNewsletters";
+
+    function getFirestoreDb() {
+        var fb = window.firebase;
+        if (!fb || !fb.apps || !fb.apps.length || !fb.firestore) {
+            return null;
+        }
+        try {
+            return fb.firestore();
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function fetchNewslettersFromFirestore() {
+        var db = getFirestoreDb();
+        if (!db) {
+            return Promise.resolve([]);
+        }
+        return db.collection(NEWSLETTER_COLLECTION)
+            .orderBy("visibleFrom", "desc")
+            .limit(60)
+            .get()
+            .then(function (snap) {
+                var rows = [];
+                snap.forEach(function (doc) {
+                    var d = doc.data() || {};
+                    rows.push({
+                        id: doc.id,
+                        title: String(d.title || "").trim(),
+                        body: String(d.body || "").trim(),
+                        titleTa: String(d.titleTa || "").trim(),
+                        bodyTa: String(d.bodyTa || "").trim(),
+                        visibleFrom: String(d.visibleFrom || "").trim(),
+                        visibleUntil: String(d.visibleUntil || "").trim(),
+                        monthKey: String(d.monthKey || "").trim()
+                    });
+                });
+                return rows;
+            })
+            .catch(function () {
+                return [];
+            });
+    }
+
+    function clearNewsletterForm() {
+        if (newsletterEditIdInput) {
+            newsletterEditIdInput.value = "";
+        }
+        if (newsletterMonthPick) {
+            newsletterMonthPick.value = "";
+        }
+        if (newsletterVisibleFromInput) {
+            newsletterVisibleFromInput.value = "";
+        }
+        if (newsletterVisibleUntilInput) {
+            newsletterVisibleUntilInput.value = "";
+        }
+        if (newsletterTitleInput) {
+            newsletterTitleInput.value = "";
+        }
+        if (newsletterTitleTaInput) {
+            newsletterTitleTaInput.value = "";
+        }
+        if (newsletterBodyInput) {
+            newsletterBodyInput.value = "";
+        }
+        if (newsletterBodyTaInput) {
+            newsletterBodyTaInput.value = "";
+        }
+        if (newsletterSubmit) {
+            newsletterSubmit.textContent = T("admin.newsletterPublish", "Save newsletter");
+        }
+    }
+
+    function renderNewsletterList() {
+        if (!newsletterList) {
+            return;
+        }
+        if (!cachedNewsletters.length) {
+            newsletterList.innerHTML = "" +
+                "<li><h3>" + escapeHtml(T("admin.newsletterEmptyTitle", "No newsletters yet")) + "</h3>" +
+                "<p class=\"page-note\">" + escapeHtml(T("admin.newsletterEmptyBody", "Add one above. Members see it when today is between Visible from and Until (Brussels date).")) + "</p></li>";
+            return;
+        }
+        newsletterList.innerHTML = cachedNewsletters.map(function (row) {
+            var title = escapeHtml(row.title || T("admin.newsletterUntitled", "(No title)"));
+            var range = escapeHtml((row.visibleFrom || "?") + " → " + (row.visibleUntil || "?"));
+            return "" +
+                "<li class=\"admin-newsletter-row\" data-newsletter-id=\"" + escapeHtml(row.id) + "\">" +
+                "  <div class=\"admin-newsletter-row-head\">" +
+                "    <strong>" + title + "</strong>" +
+                "    <span class=\"page-note\">" + range + "</span>" +
+                "  </div>" +
+                "  <div class=\"admin-newsletter-row-actions\">" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-newsletter-action=\"edit\">" + escapeHtml(T("admin.newsletterEdit", "Edit")) + "</button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" data-newsletter-action=\"delete\">" + escapeHtml(T("admin.newsletterDelete", "Delete")) + "</button>" +
+                "  </div>" +
+                "</li>";
+        }).join("");
+    }
+
+    function applyNewsletterMonthToDates() {
+        if (!newsletterMonthPick || !newsletterVisibleFromInput || !newsletterVisibleUntilInput) {
+            return;
+        }
+        var v = String(newsletterMonthPick.value || "").trim();
+        if (!/^\d{4}-\d{2}$/.test(v)) {
+            return;
+        }
+        var y = Number(v.slice(0, 4));
+        var m = Number(v.slice(5, 7));
+        if (!y || !m || m < 1 || m > 12) {
+            return;
+        }
+        var dim = new Date(y, m, 0).getDate();
+        newsletterVisibleFromInput.value = v + "-01";
+        newsletterVisibleUntilInput.value = v + "-" + String(dim).padStart(2, "0");
+    }
+
     function invokeBroadcastPushNotification(payload) {
         var fb = window.firebase;
         if (!fb || !fb.functions || !fb.auth || typeof fb.app !== "function") {
@@ -242,6 +377,12 @@
         }
         if (kidsAudioSubmit) {
             kidsAudioSubmit.disabled = busy;
+        }
+        if (newsletterSubmit) {
+            newsletterSubmit.disabled = busy;
+        }
+        if (newsletterCancelEditBtn) {
+            newsletterCancelEditBtn.disabled = busy;
         }
         if (bookShelfDetectSizeBtn) {
             bookShelfDetectSizeBtn.disabled = busy;
@@ -1603,6 +1744,11 @@
                 node.disabled = !active;
             });
         }
+        if (newsletterForm) {
+            newsletterForm.querySelectorAll("input,textarea,button").forEach(function (node) {
+                node.disabled = !active;
+            });
+        }
         refreshButton.disabled = !active || busy;
     }
 
@@ -1616,7 +1762,7 @@
             return;
         }
         setFormsEnabled(true);
-        if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length + cachedKidsAudio.length > 0)) {
+        if (!force && newslettersCacheLoaded && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length + cachedKidsAudio.length > 0)) {
             renderStats();
             renderNoticeList();
             renderBroadcastList();
@@ -1627,6 +1773,7 @@
             renderDailyBreadList();
             renderBookShelfList();
             renderKidsAudioList();
+            renderNewsletterList();
             return;
         }
         setBusyState(true);
@@ -1667,20 +1814,31 @@
             cachedKidsAudio = extract(8).map(function (row, idx) {
                 return normalizeKidsAudioEntry(row, idx);
             });
-            renderStats();
-            renderNoticeList();
-            renderBroadcastList();
-            renderEventList();
-            renderSermonList();
-            renderPrayerList();
-            renderTriviaList();
-            renderDailyBreadList();
-            renderBookShelfList();
-            renderKidsAudioList();
-            var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
-            if (failed > 0) {
-                showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
-            }
+            return fetchNewslettersFromFirestore().then(function (nl) {
+                cachedNewsletters = Array.isArray(nl) ? nl : [];
+                newslettersCacheLoaded = true;
+                return null;
+            }).catch(function () {
+                cachedNewsletters = [];
+                newslettersCacheLoaded = true;
+                return null;
+            }).then(function () {
+                renderStats();
+                renderNoticeList();
+                renderBroadcastList();
+                renderEventList();
+                renderSermonList();
+                renderPrayerList();
+                renderTriviaList();
+                renderDailyBreadList();
+                renderBookShelfList();
+                renderKidsAudioList();
+                renderNewsletterList();
+                var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
+                if (failed > 0) {
+                    showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");
+                }
+            });
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not load. Tap Refresh.");
             renderNoticeList();
@@ -1692,6 +1850,15 @@
             renderDailyBreadList();
             renderBookShelfList();
             renderKidsAudioList();
+            fetchNewslettersFromFirestore().then(function (nl) {
+                cachedNewsletters = Array.isArray(nl) ? nl : [];
+                newslettersCacheLoaded = true;
+                renderNewsletterList();
+            }).catch(function () {
+                cachedNewsletters = [];
+                newslettersCacheLoaded = true;
+                renderNewsletterList();
+            });
         }).finally(function () {
             setBusyState(false);
         });
@@ -3303,6 +3470,152 @@
         });
     }
 
+    if (newsletterMonthPick) {
+        newsletterMonthPick.addEventListener("change", applyNewsletterMonthToDates);
+    }
+    if (newsletterCancelEditBtn) {
+        newsletterCancelEditBtn.addEventListener("click", function () {
+            clearNewsletterForm();
+        });
+    }
+    newsletterForm.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var db = getFirestoreDb();
+        var fv = window.firebase && window.firebase.firestore && window.firebase.firestore.FieldValue;
+        if (!db || !fv) {
+            showNote("error", "admin.newsletterNoFirebase", "Firebase is not ready.");
+            return;
+        }
+        var fromY = String(newsletterVisibleFromInput && newsletterVisibleFromInput.value || "").trim();
+        var untilY = String(newsletterVisibleUntilInput && newsletterVisibleUntilInput.value || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fromY) || !/^\d{4}-\d{2}-\d{2}$/.test(untilY)) {
+            showNote("validation", "admin.newsletterNeedDates", "Please set Visible from and Until (YYYY-MM-DD).");
+            return;
+        }
+        if (fromY > untilY) {
+            showNote("validation", "admin.newsletterDateOrder", "Visible from must be on or before Until.");
+            return;
+        }
+        var titleEn = String(newsletterTitleInput && newsletterTitleInput.value || "").trim();
+        var titleTa = String(newsletterTitleTaInput && newsletterTitleTaInput.value || "").trim();
+        var bodyEn = String(newsletterBodyInput && newsletterBodyInput.value || "").trim();
+        var bodyTa = String(newsletterBodyTaInput && newsletterBodyTaInput.value || "").trim();
+        if (!bodyEn && !bodyTa) {
+            showNote("validation", "admin.newsletterNeedBody", "Enter newsletter text (English or Tamil).");
+            return;
+        }
+        if (!titleEn && !titleTa) {
+            showNote("validation", "admin.newsletterNeedTitle", "Enter a title (English or Tamil).");
+            return;
+        }
+        var monthKey = fromY.slice(0, 7);
+        var payload = {
+            title: titleEn || titleTa || "Newsletter",
+            titleTa: titleTa,
+            body: bodyEn,
+            bodyTa: bodyTa,
+            visibleFrom: fromY,
+            visibleUntil: untilY,
+            monthKey: monthKey,
+            updatedAt: fv.serverTimestamp()
+        };
+        setBusyState(true);
+        var editId = String(newsletterEditIdInput && newsletterEditIdInput.value || "").trim();
+        var op;
+        if (editId) {
+            op = db.collection(NEWSLETTER_COLLECTION).doc(editId).set(payload, { merge: true });
+        } else {
+            op = db.collection(NEWSLETTER_COLLECTION).add(payload);
+        }
+        op.then(function () {
+            clearNewsletterForm();
+            return fetchNewslettersFromFirestore();
+        }).then(function (nl) {
+            cachedNewsletters = Array.isArray(nl) ? nl : [];
+            renderNewsletterList();
+            showNote("success", "admin.newsletterSaved", "Newsletter saved.");
+            document.dispatchEvent(new CustomEvent("njc:newsletter-updated"));
+        }).catch(function () {
+            showNote("error", "admin.newsletterSaveError", "Could not save. Publish Firestore rules for churchNewsletters or try again.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    });
+
+    if (newsletterList) {
+        newsletterList.addEventListener("click", function (event) {
+            var btn = event.target.closest("button[data-newsletter-action]");
+            if (!btn || busy || !isAdminUser()) {
+                return;
+            }
+            var row = btn.closest("[data-newsletter-id]");
+            var id = row && row.getAttribute("data-newsletter-id");
+            if (!id) {
+                return;
+            }
+            var action = btn.getAttribute("data-newsletter-action");
+            if (action === "edit") {
+                var found = cachedNewsletters.find(function (r) {
+                    return r.id === id;
+                });
+                if (!found) {
+                    return;
+                }
+                if (newsletterEditIdInput) {
+                    newsletterEditIdInput.value = id;
+                }
+                if (newsletterVisibleFromInput) {
+                    newsletterVisibleFromInput.value = found.visibleFrom || "";
+                }
+                if (newsletterVisibleUntilInput) {
+                    newsletterVisibleUntilInput.value = found.visibleUntil || "";
+                }
+                if (newsletterMonthPick) {
+                    newsletterMonthPick.value = (found.monthKey && /^\d{4}-\d{2}$/.test(found.monthKey))
+                        ? found.monthKey
+                        : (found.visibleFrom ? found.visibleFrom.slice(0, 7) : "");
+                }
+                if (newsletterTitleInput) {
+                    newsletterTitleInput.value = found.title || "";
+                }
+                if (newsletterTitleTaInput) {
+                    newsletterTitleTaInput.value = found.titleTa || "";
+                }
+                if (newsletterBodyInput) {
+                    newsletterBodyInput.value = found.body || "";
+                }
+                if (newsletterBodyTaInput) {
+                    newsletterBodyTaInput.value = found.bodyTa || "";
+                }
+                if (newsletterSubmit) {
+                    newsletterSubmit.textContent = T("admin.newsletterUpdate", "Update newsletter");
+                }
+                return;
+            }
+            if (action === "delete") {
+                if (!window.confirm(T("admin.newsletterDeleteConfirm", "Delete this newsletter?"))) {
+                    return;
+                }
+                setBusyState(true);
+                getFirestoreDb().collection(NEWSLETTER_COLLECTION).doc(id).delete().then(function () {
+                    return fetchNewslettersFromFirestore();
+                }).then(function (nl) {
+                    cachedNewsletters = Array.isArray(nl) ? nl : [];
+                    renderNewsletterList();
+                    showNote("success", "admin.newsletterDeleted", "Newsletter deleted.");
+                    document.dispatchEvent(new CustomEvent("njc:newsletter-updated"));
+                }).catch(function () {
+                    showNote("error", "admin.newsletterDeleteError", "Could not delete.");
+                }).finally(function () {
+                    setBusyState(false);
+                });
+            }
+        });
+    }
+
     refreshButton.addEventListener("click", function () {
         loadDashboard(true);
     });
@@ -3337,6 +3650,7 @@
             renderPrayerList();
             renderTriviaList();
             renderDailyBreadList();
+            renderNewsletterList();
         }
     });
 

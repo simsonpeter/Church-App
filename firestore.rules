@@ -23,6 +23,7 @@ rules_version = '2';
 //   celebrationWishes/{msgId} — daily thread (registered member read; create/delete when signed in)
 //   celebrationProfiles/{uid} — celebration fields; registered member read (token.email); owner write
 //   chatMessages/{msgId} — church group chat: text only, signed-in users; admin may delete any message
+//   churchNewsletters/{id} — church monthly newsletter (public read; admin write/delete)
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
@@ -168,7 +169,7 @@ service cloud.firestore {
         && request.resource.data.moduleGrants.keys().hasOnly([
           "announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek",
           "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events",
-          "sermons", "contact", "celebrations", "chat", "userAchievements", "kids"
+          "sermons", "contact", "celebrations", "chat", "userAchievements", "kids", "newsletter"
         ]);
     }
 
@@ -286,6 +287,35 @@ service cloud.firestore {
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() < 5000;
       allow update: if false;
+      allow delete: if isAdmin();
+    }
+
+    function isChurchNewsletterWritePayload() {
+      return request.resource.data.keys().hasOnly([
+          "title", "body", "titleTa", "bodyTa", "visibleFrom", "visibleUntil", "monthKey", "updatedAt"
+        ])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() >= 1
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.body is string
+        && request.resource.data.body.size() >= 1
+        && request.resource.data.body.size() <= 80000
+        && request.resource.data.visibleFrom is string
+        && request.resource.data.visibleFrom.matches("^\\d{4}-\\d{2}-\\d{2}$")
+        && request.resource.data.visibleUntil is string
+        && request.resource.data.visibleUntil.matches("^\\d{4}-\\d{2}-\\d{2}$")
+        && request.resource.data.visibleUntil >= request.resource.data.visibleFrom
+        && request.resource.data.monthKey is string
+        && request.resource.data.monthKey.matches("^\\d{4}-\\d{2}$")
+        && request.resource.data.titleTa is string
+        && request.resource.data.titleTa.size() <= 200
+        && request.resource.data.bodyTa is string
+        && request.resource.data.bodyTa.size() <= 80000;
+    }
+
+    match /churchNewsletters/{newsletterId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && isChurchNewsletterWritePayload();
       allow delete: if isAdmin();
     }
   }

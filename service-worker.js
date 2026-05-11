@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v375offlinebible";
-const RUNTIME_CACHE = "njc-runtime-cache-v375offlinebible";
+const APP_CACHE = "njc-app-cache-v376newsletter1";
+const RUNTIME_CACHE = "njc-runtime-cache-v376newsletter1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Bible reader: stable JSON URLs so offline mode can use cached Bibles after one online visit.";
+    "Newsletter: monthly message in Admin (Firestore) and a dedicated app page.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260608prayerpastoral1",
+    "./styles.css?v=20260511newsletter1",
     "./user-auth.js?v=20260411mainmerge1",
-    "./app-modules.js?v=20260411kids1",
-    "./app-shell.js?v=20260611offlinebible1",
+    "./app-modules.js?v=20260511newsletter1",
+    "./app-shell.js?v=20260511newsletter1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260414sermonannounce1",
@@ -54,8 +54,9 @@ const CORE_ASSETS = [
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",
+    "./newsletter-page.js?v=20260511newsletter1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260608prayerpastoral1",
+    "./admin-dashboard-page.js?v=20260511newsletter1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260411mainmerge1",
@@ -65,7 +66,7 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
-    "./spa-router.js?v=20260411kidsworld",
+    "./spa-router.js?v=20260511newsletter1",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

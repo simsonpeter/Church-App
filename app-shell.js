@@ -138,6 +138,17 @@
         "dailyBread.ttsNoText": "கேட்க உரை இல்லை.",
         "dailyBread.byAuthor": "எழுத்தாளர்: {author}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
+        "menu.newsletter": "செய்திமடல்",
+        "newsletter.eyebrow": "செய்திமடல்",
+        "newsletter.title": "செய்திமடல்",
+        "newsletter.subtitle": "சபையின் மாதாந்திர செய்தி",
+        "newsletter.untitled": "சபை செய்திமடல்",
+        "newsletter.activeRange": "காட்டும் காலம்: {from} – {until}",
+        "newsletter.moduleOff": "இந்தப் பகுதி முடக்கப்பட்டுள்ளது.",
+        "newsletter.noFirebase": "செய்திமடலை ஏற்ற முடியவில்லை. இணைப்பைச் சரிபார்க்கவும்.",
+        "newsletter.loading": "ஏற்றுகிறது…",
+        "newsletter.noneScheduled": "இந்த காலத்திற்கு இன்னும் செய்திமடல் இல்லை.",
+        "newsletter.loadError": "செய்திமடலை ஏற்ற முடியவில்லை.",
         "admin.scheduleHintBookShelf": "நூலகம்: ஆங்கிலம், தமிழ் அல்லது சிறுவர் உலகம். ஆங்கில/தமிழ் முக்கிய நூலகத்தில்; சிறுவர் உலகம் மட்டும் சிறுவர் உலகம் → புத்தகங்கள். பெட்டி njc-belgium-admin-library.",
         "admin.scheduleHintKidsAudio": "சிறுவர் உலகம் ஆடியோ: HTTPS ஆடியோ இணைப்புகளைச் சேர்; சிறுவர் உலகம் → ஆடியோவில் காட்டும். பெட்டி njc-belgium-kids-audio.",
         "admin.bookShelfTitle": "நூலகம்",
@@ -224,6 +235,36 @@
         "admin.bookShelfEditPromptDesc": "விளக்கம் (விருப்பம்)",
         "admin.bookShelfEditPromptDescTa": "விளக்கம் தமிழ் (விருப்பம்)",
         "admin.scheduleHintDailyBread": "அன்றன்றுள்ள அப்பம்: தேதி சேர்த்து சேமிக்கவும்; Daily bread தாவல் இன்றைய பெல்ஜியம் தேதிக்கு காட்டும். MantleDB பெட்டி njc-belgium-admin-daily-bread தேவை.",
+        "admin.scheduleHintNewsletter": "செய்திமடல்: இதிலிருந்து / வரை (பெல்ஜியம் நாள்) அமைக்கவும்; இன்று அந்த வரம்பில் இருக்கும்போது உறுப்பினர்கள் காண்பர். Firestore churchNewsletters; விதிகளை வெளியிடவும்.",
+        "admin.newsletterTitle": "செய்திமடல் (மாதாந்திரம்)",
+        "admin.newsletterInfo": "காணும் தேதிகளை (YYYY-MM-DD, பெல்ஜியம் நாள்) அமைத்து முன்கூட்டியே திட்டமிடலாம். மாதத்தைத் தேர்ந்து முதல்/கடைசி நாளை நிரப்பி தேவைப்பட்டால் திருத்தவும். ஆங்கிலம் மற்றும் தமிழ்.",
+        "admin.newsletterMonthLabel": "விரைவு நிரப்பு: மாதம்",
+        "admin.newsletterVisibleFromLabel": "இதிலிருந்து காட்டு",
+        "admin.newsletterVisibleUntilLabel": "இந்த தேதி வரை காட்டு",
+        "admin.newsletterTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
+        "admin.newsletterTitleTaPlaceholder": "தலைப்பு (தமிழ், விருப்பம்)",
+        "admin.newsletterBodyEnPlaceholder": "உள்ளடக்கம் (ஆங்கிலம்). வரிகள் வைக்கப்படும்.",
+        "admin.newsletterBodyTaPlaceholder": "உள்ளடக்கம் (தமிழ், விருப்பம்)",
+        "admin.newsletterPublish": "செய்திமடலைச் சேமி",
+        "admin.newsletterCancelEdit": "திருத்தத்தை ரத்து",
+        "admin.newsletterManageTitle": "திட்டமிடப்பட்ட செய்திமடல்கள்",
+        "admin.newsletterManageInfo": "திருத்த அல்லது நீக்க. Firestore churchNewsletters.",
+        "admin.newsletterUpdate": "செய்திமடலைப் புதுப்பி",
+        "admin.newsletterEdit": "திருத்து",
+        "admin.newsletterDelete": "நீக்கு",
+        "admin.newsletterEmptyTitle": "இன்னும் செய்திமடல் இல்லை",
+        "admin.newsletterEmptyBody": "மேலே படிவத்தில் சேர்க்கவும். இன்று இடைப்பட்ட நாட்களில் உறுப்பினர்கள் காண்பர் (பெல்ஜியம் தேதி).",
+        "admin.newsletterSaved": "செய்திமடல் சேமிக்கப்பட்டது.",
+        "admin.newsletterSaveError": "சேமிக்க முடியவில்லை. churchNewsletters-க்கான Firestore விதிகளை வெளியிடவும் அல்லது மீண்டும் முயற்சிக்கவும்.",
+        "admin.newsletterDeleteConfirm": "இந்த செய்திமடலை நீக்கவா?",
+        "admin.newsletterDeleted": "செய்திமடல் நீக்கப்பட்டது.",
+        "admin.newsletterDeleteError": "நீக்க முடியவில்லை.",
+        "admin.newsletterNeedDates": "இதிலிருந்து மற்றும் வரை தேதிகளை (YYYY-MM-DD) அமைக்கவும்.",
+        "admin.newsletterDateOrder": "தொடக்க தேதி முடிவு தேதிக்கு முன் அல்லது சமமாக இருக்க வேண்டும்.",
+        "admin.newsletterNeedBody": "செய்திமடல் உரையை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
+        "admin.newsletterNeedTitle": "தலைப்பை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
+        "admin.newsletterNoFirebase": "Firebase தயாராக இல்லை.",
+        "admin.newsletterUntitled": "(தலைப்பு இல்லை)",
         "admin.dailyBreadTitle": "அன்றன்றுள்ள அப்பம் (தேதி)",
         "admin.dailyBreadInfo": "முன்கூட்டியே உள்ளடக்கம் சேர்க்கவும். ஒரு நாளுக்கு ஒரு பதிவு (YYYY-MM-DD). தமிழ் விருப்பம்.",
         "admin.dailyBreadTitleEnPlaceholder": "தலைப்பு (ஆங்கிலம்)",
@@ -836,6 +877,7 @@
         "admin.moduleChat": "அரட்டை",
         "admin.moduleUserAchievements": "பயனர் சாதனைகள்",
         "admin.moduleKids": "சிறுவர் உலகம்",
+        "admin.moduleNewsletter": "செய்திமடல்",
         "admin.modulesSave": "தொகுப்பு அமைப்புகளைச் சேமி",
         "admin.modulesSaved": "தொகுப்பு அமைப்புகள் சேமிக்கப்பட்டன.",
         "admin.modulesLoadError": "தொகுப்பு அமைப்புகளை ஏற்ற முடியவில்லை.",
@@ -2175,7 +2217,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "375offlinebible";
+    var SW_REGISTER_VERSION_FALLBACK = "376newsletter1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
@@ -4560,6 +4602,12 @@
         dailyBreadMenuLink.innerHTML = "<i class=\"fa-solid fa-bread-slice\"></i><span></span>";
         bibleSongLinksContainer.appendChild(dailyBreadMenuLink);
 
+        var newsletterMenuLink = document.createElement("a");
+        newsletterMenuLink.className = "header-menu-link";
+        newsletterMenuLink.href = "#newsletter";
+        newsletterMenuLink.innerHTML = "<i class=\"fa-solid fa-newspaper\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(newsletterMenuLink);
+
         var bookShelfLink = document.createElement("a");
         bookShelfLink.className = "header-menu-link";
         bookShelfLink.href = "#book-shelf";
@@ -4700,6 +4748,7 @@
             bookShelfLink.hidden = !m.isModuleEnabled("bookShelf");
             kidsLink.hidden = !m.isModuleEnabled("kids");
             dailyBreadMenuLink.hidden = !m.isModuleEnabled("dailyBread");
+            newsletterMenuLink.hidden = !m.isModuleEnabled("newsletter");
             triviaLink.hidden = !m.isModuleEnabled("trivia");
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
             chatLink.hidden = !m.isModuleEnabled("chat");
@@ -4829,6 +4878,7 @@
             var bookShelfLabel = t("menu.bookShelf", "Book shelf");
             var kidsLabel = t("menu.kids", "Kids World");
             var dailyBreadMenuLabel = t("menu.dailyBread", "Daily bread");
+            var newsletterMenuLabel = t("menu.newsletter", "Newsletter");
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
             var chatLabel = t("menu.chat", "Chat");
@@ -4896,6 +4946,10 @@
             if (dailyBreadNode) {
                 dailyBreadNode.textContent = dailyBreadMenuLabel;
             }
+            var newsletterMenuNode = newsletterMenuLink.querySelector("span");
+            if (newsletterMenuNode) {
+                newsletterMenuNode.textContent = newsletterMenuLabel;
+            }
             var triviaNode = triviaLink.querySelector("span");
             if (triviaNode) {
                 triviaNode.textContent = triviaLabel;
@@ -4945,6 +4999,7 @@
             var isBookShelf = getCurrentRoute() === "book-shelf";
             var isKids = getCurrentRoute() === "kids";
             var isDailyBread = getCurrentRoute() === "daily-bread";
+            var isNewsletter = getCurrentRoute() === "newsletter";
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
@@ -4959,6 +5014,7 @@
             bookShelfLink.classList.toggle("active", isBookShelf);
             kidsLink.classList.toggle("active", isKids);
             dailyBreadMenuLink.classList.toggle("active", isDailyBread);
+            newsletterMenuLink.classList.toggle("active", isNewsletter);
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);

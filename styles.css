@@ -896,6 +896,23 @@ a.card:hover > h2:not(:first-child) i {
     -webkit-hyphens: auto;
 }
 
+.newsletter-heading {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0.5rem 0 0.35rem;
+    color: var(--text);
+}
+
+.newsletter-body {
+    color: var(--text);
+    font-size: 0.94rem;
+    line-height: 1.58;
+    white-space: pre-wrap;
+    word-break: break-word;
+    text-align: justify;
+    text-wrap: pretty;
+}
+
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme="light"]) .daily-bread-page-card .daily-bread-heading {
         color: #f87171;

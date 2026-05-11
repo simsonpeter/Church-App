@@ -83,6 +83,15 @@
             subtitleKey: "dailyBread.headerSubtitle",
             subtitleText: "Today’s verse · Devotion"
         },
+        newsletter: {
+            icon: "fa-newspaper",
+            eyebrowKey: "newsletter.eyebrow",
+            eyebrowText: "Newsletter",
+            titleKey: "newsletter.title",
+            titleText: "Newsletter",
+            subtitleKey: "newsletter.subtitle",
+            subtitleText: "Monthly message from the church"
+        },
         trivia: {
             icon: "fa-question-circle",
             eyebrowKey: "trivia.eyebrow",
