@@ -2173,7 +2173,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "20260414sermonannounce1";
+    var SW_REGISTER_VERSION_FALLBACK = "374prayeransweredtabs";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
