@@ -589,6 +589,39 @@
         return /^\d{4}-\d{2}-\d{2}$/.test(String(s || ""));
     }
 
+    function isYm(s) {
+        return /^\d{4}-\d{2}$/.test(String(s || ""));
+    }
+
+    function formatLocalizedMonthYearFromYmd(ymd) {
+        if (!isYmd(ymd)) {
+            return "";
+        }
+        var y = parseInt(ymd.slice(0, 4), 10);
+        var m = parseInt(ymd.slice(5, 7), 10);
+        if (!y || m < 1 || m > 12) {
+            return "";
+        }
+        var locale = getNewsletterContentLanguage() === "ta" ? "ta-IN" : "en-GB";
+        var anchor = new Date(Date.UTC(y, m - 1, 15, 12, 0, 0));
+        return new Intl.DateTimeFormat(locale, {
+            month: "long",
+            year: "numeric",
+            timeZone: "UTC"
+        }).format(anchor);
+    }
+
+    function formatNewsletterMonthLine(entry) {
+        var monthYear = formatLocalizedMonthYearFromYmd(entry.visibleFrom);
+        if (!monthYear && isYm(entry.monthKey)) {
+            monthYear = formatLocalizedMonthYearFromYmd(entry.monthKey + "-01");
+        }
+        if (!monthYear) {
+            return "";
+        }
+        return T("newsletter.monthLabel", "Newsletter of {monthYear}").replace(/\{monthYear\}/g, monthYear);
+    }
+
     function pickActiveNewsletter(rows, todayYmd) {
         if (!todayYmd || !Array.isArray(rows)) {
             return null;
@@ -647,9 +680,14 @@
         currentSpeechTitle = displayTitle;
         currentReadLang = picked.readLang;
         currentReadPlain = sanitizeTextForSpeech([displayTitle, picked.body].filter(Boolean).join(". "));
-        rangeEl.textContent = T("newsletter.activeRange", "Visible {from} – {until}")
-            .replace("{from}", entry.visibleFrom)
-            .replace("{until}", entry.visibleUntil);
+        var monthLine = formatNewsletterMonthLine(entry);
+        if (monthLine) {
+            rangeEl.textContent = monthLine;
+            rangeEl.hidden = false;
+        } else {
+            rangeEl.textContent = "";
+            rangeEl.hidden = true;
+        }
         contentWrap.hidden = false;
         statusEl.hidden = true;
         updateTtsUi();
@@ -664,6 +702,7 @@
         headingEl.textContent = "";
         bodyEl.textContent = "";
         rangeEl.textContent = "";
+        rangeEl.hidden = true;
         statusEl.hidden = false;
         statusEl.textContent = message;
     }

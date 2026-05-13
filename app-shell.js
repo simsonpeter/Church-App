@@ -143,7 +143,7 @@
         "newsletter.title": "செய்திமடல்",
         "newsletter.subtitle": "சபையின் மாதாந்திர செய்தி",
         "newsletter.untitled": "சபை செய்திமடல்",
-        "newsletter.activeRange": "காட்டும் காலம்: {from} – {until}",
+        "newsletter.monthLabel": "{monthYear} — செய்திமடல்",
         "newsletter.moduleOff": "இந்தப் பகுதி முடக்கப்பட்டுள்ளது.",
         "newsletter.noFirebase": "செய்திமடலை ஏற்ற முடியவில்லை. இணைப்பைச் சரிபார்க்கவும்.",
         "newsletter.loading": "ஏற்றுகிறது…",
