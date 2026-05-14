@@ -161,8 +161,8 @@
             eyebrowText: "Apps",
             titleKey: "ourApps.title",
             titleText: "Our apps",
-            subtitleKey: "ourApps.subtitle",
-            subtitleText: "Android and iOS — same row"
+            subtitleKey: "",
+            subtitleText: ""
         },
         admin: {
             icon: "fa-screwdriver-wrench",
