@@ -37,6 +37,7 @@
     var parallelHeading = document.getElementById("bible-parallel-heading");
     var parallelEnabledInput = document.getElementById("bible-parallel-enabled");
     var parallelLangSelect = document.getElementById("bible-parallel-lang");
+    var bibleVerseColumns = document.getElementById("bible-verse-columns");
     var verseListWrap = document.getElementById("bible-verse-list-wrap");
     var bibleCard = verseList ? verseList.closest(".card") : null;
     var searchPanel = document.getElementById("bible-search-panel");
@@ -1744,7 +1745,38 @@
         }
     }
 
+    function ensureParallelStateFromControls() {
+        if (!parallelEnabledInput) {
+            return;
+        }
+        state.parallelOn = Boolean(parallelEnabledInput.checked);
+        if (state.parallelOn && parallelLangSelect) {
+            state.parallelLang = normalizeLanguage(parallelLangSelect.value);
+            reconcileParallelLangWithPrimary();
+        }
+    }
+
+    function setParallelShellVisible(want) {
+        if (bibleVerseColumns) {
+            bibleVerseColumns.classList.toggle("bible-verse-columns--parallel-on", Boolean(want));
+        }
+        if (!parallelColumn) {
+            return;
+        }
+        if (want) {
+            parallelColumn.hidden = false;
+            try {
+                parallelColumn.removeAttribute("hidden");
+            } catch (eRm) {
+                // ignore
+            }
+        } else {
+            parallelColumn.hidden = true;
+        }
+    }
+
     function isParallelViewActive() {
+        ensureParallelStateFromControls();
         return Boolean(
             verseListParallel &&
                 parallelColumn &&
@@ -1889,6 +1921,7 @@
         if (parallelColumn) {
             parallelColumn.hidden = true;
         }
+        setParallelShellVisible(false);
         if (verseListParallel) {
             verseListParallel.innerHTML = "";
         }
@@ -1915,6 +1948,7 @@
         if (parallelColumn) {
             parallelColumn.hidden = true;
         }
+        setParallelShellVisible(false);
         if (verseListParallel) {
             verseListParallel.innerHTML = "";
         }
@@ -2535,14 +2569,14 @@
             return;
         }
         if (!isParallelViewActive()) {
-            parallelColumn.hidden = true;
+            setParallelShellVisible(false);
             verseListParallel.innerHTML = "";
             if (parallelHeading) {
                 parallelHeading.textContent = "";
             }
             return;
         }
-        parallelColumn.hidden = false;
+        setParallelShellVisible(true);
         var plang = normalizeLanguage(state.parallelLang);
         var loc = location || { book: 0, chapter: 0 };
         loadBible(plang).then(function (secData) {
@@ -2578,6 +2612,7 @@
     function paintVersesIntoDom(data, options) {
         var config = options && typeof options === "object" ? options : {};
         var resetPosition = Boolean(config.resetPosition);
+        ensureParallelStateFromControls();
         var language = normalizeLanguage(state.language);
         var location = clampLocation(data, getCurrentLangState());
         state[language] = { book: location.book, chapter: location.chapter };
@@ -2922,19 +2957,28 @@
         });
     }
 
+    function onParallelControlsChanged() {
+        if (!parallelEnabledInput) {
+            return;
+        }
+        state.parallelOn = Boolean(parallelEnabledInput.checked);
+        if (state.parallelOn && parallelLangSelect) {
+            state.parallelLang = normalizeLanguage(parallelLangSelect.value);
+        }
+        reconcileParallelLangWithPrimary();
+        populateParallelLangSelect();
+        syncParallelControlsFromState();
+        saveState();
+        if (isBibleRouteActive()) {
+            renderBible();
+        }
+    }
+
     populateParallelLangSelect();
     syncParallelControlsFromState();
     if (parallelEnabledInput) {
-        parallelEnabledInput.addEventListener("change", function () {
-            state.parallelOn = Boolean(parallelEnabledInput.checked);
-            reconcileParallelLangWithPrimary();
-            populateParallelLangSelect();
-            syncParallelControlsFromState();
-            saveState();
-            if (isBibleRouteActive()) {
-                renderBible();
-            }
-        });
+        parallelEnabledInput.addEventListener("change", onParallelControlsChanged);
+        parallelEnabledInput.addEventListener("input", onParallelControlsChanged);
     }
     if (parallelLangSelect) {
         parallelLangSelect.addEventListener("change", function () {

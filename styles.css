@@ -4598,6 +4598,20 @@ button.button-link.bible-lang-btn {
     margin-top: 0;
 }
 
+/* Force two readable columns when parallel view is on (flex min-width:0 could hide the second column). */
+.bible-verse-columns.bible-verse-columns--parallel-on {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 14px;
+    width: 100%;
+    align-items: start;
+}
+
+.bible-card.bible-card-fullscreen .bible-verse-columns.bible-verse-columns--parallel-on {
+    flex: 1 1 0%;
+    min-height: 0;
+}
+
 .bible-parallel-row {
     display: flex;
     flex-wrap: wrap;
@@ -4646,6 +4660,10 @@ button.button-link.bible-lang-btn {
 @media (max-width: 640px) {
     .bible-verse-columns {
         flex-direction: column;
+    }
+
+    .bible-verse-columns.bible-verse-columns--parallel-on {
+        grid-template-columns: minmax(0, 1fr);
     }
 }
 
