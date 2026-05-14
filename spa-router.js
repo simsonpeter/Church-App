@@ -162,7 +162,7 @@
             titleKey: "ourApps.title",
             titleText: "Our apps",
             subtitleKey: "ourApps.subtitle",
-            subtitleText: "More from our church on Google Play"
+            subtitleText: "Google Play (Android) and iPhone"
         },
         admin: {
             icon: "fa-screwdriver-wrench",
