@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v379newslettermonthline";
-const RUNTIME_CACHE = "njc-runtime-cache-v379newslettermonthline";
+const APP_CACHE = "njc-app-cache-v380newslettershare";
+const RUNTIME_CACHE = "njc-runtime-cache-v380newslettershare";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Newsletter: show month and year (e.g. Newsletter of May 2026) instead of admin visibility date range.";
+    "Newsletter: Share button (Web Share + copy fallback) and deep links #newsletter/{id} for the same issue.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260610newslettertts1",
+    "./styles.css?v=20260610newslettershare1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260610newslettermonth1",
+    "./app-shell.js?v=20260610newslettershare1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260609newsletterbanner1",
@@ -54,7 +54,7 @@ const CORE_ASSETS = [
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",
-    "./newsletter-page.js?v=20260610newslettermonth1",
+    "./newsletter-page.js?v=20260610newslettershare1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260511newsletter1",
     "./admin-modules-page.js?v=20260421mainmerge",

@@ -836,6 +836,38 @@ a.card:hover > h2:not(:first-child) i {
     margin: 0 0 14px;
 }
 
+.newsletter-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 10px;
+}
+
+.newsletter-actions-row .newsletter-tts-row {
+    margin-bottom: 0;
+    flex: 1 1 auto;
+}
+
+.newsletter-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    flex-shrink: 0;
+}
+
+.newsletter-share-btn i {
+    font-size: 1rem;
+    opacity: 0.92;
+}
+
+.newsletter-share-feedback {
+    margin: 0 0 12px;
+    min-height: 1.25em;
+}
+
 .daily-bread-tts-toggle,
 .daily-bread-tts-stop,
 .newsletter-tts-toggle,

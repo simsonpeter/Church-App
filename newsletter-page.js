@@ -14,6 +14,8 @@
     var bodyEl = document.getElementById("newsletter-body");
     var ttsToggle = document.getElementById("newsletter-tts-toggle");
     var ttsStop = document.getElementById("newsletter-tts-stop");
+    var shareBtn = document.getElementById("newsletter-share-btn");
+    var shareFeedback = document.getElementById("newsletter-share-feedback");
 
     if (!rangeEl || !statusEl || !contentWrap || !headingEl || !bodyEl) {
         return;
@@ -37,6 +39,10 @@
     var currentReadPlain = "";
     var currentSpeechTitle = "";
     var mediaSessionBound = false;
+    var shareFeedbackTimerId = null;
+    var currentShareEntryId = "";
+    var currentShareTitleText = "";
+    var currentShareBodyPreview = "";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -556,6 +562,190 @@
         startSpeechFromPlain(currentReadPlain, currentReadLang);
     }
 
+    function clearShareFeedbackTimer() {
+        if (shareFeedbackTimerId !== null) {
+            window.clearTimeout(shareFeedbackTimerId);
+            shareFeedbackTimerId = null;
+        }
+    }
+
+    function clearShareFeedback() {
+        clearShareFeedbackTimer();
+        if (shareFeedback) {
+            shareFeedback.textContent = "";
+            shareFeedback.hidden = true;
+        }
+    }
+
+    function showShareFeedback(key, fallback) {
+        if (!shareFeedback) {
+            return;
+        }
+        shareFeedback.textContent = T(key, fallback);
+        shareFeedback.hidden = false;
+        clearShareFeedbackTimer();
+        shareFeedbackTimerId = window.setTimeout(function () {
+            shareFeedbackTimerId = null;
+            if (shareFeedback) {
+                shareFeedback.textContent = "";
+                shareFeedback.hidden = true;
+            }
+        }, 4200);
+    }
+
+    function previewPlainBody(body, maxLen) {
+        var s = String(body || "").replace(/\s+/g, " ").trim();
+        if (!s) {
+            return "";
+        }
+        var cap = typeof maxLen === "number" ? maxLen : 220;
+        if (s.length <= cap) {
+            return s;
+        }
+        return s.slice(0, Math.max(0, cap - 3)).trim() + "...";
+    }
+
+    function copyTextToClipboard(text) {
+        var t = String(text || "");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(t);
+        }
+        return new Promise(function (resolve, reject) {
+            var area = document.createElement("textarea");
+            area.value = t;
+            area.setAttribute("readonly", "");
+            area.style.position = "fixed";
+            area.style.left = "-5000px";
+            document.body.appendChild(area);
+            try {
+                area.select();
+                area.setSelectionRange(0, 99999);
+                var ok = document.execCommand("copy");
+                document.body.removeChild(area);
+                if (ok) {
+                    resolve();
+                } else {
+                    reject(new Error("copy"));
+                }
+            } catch (err) {
+                try {
+                    document.body.removeChild(area);
+                } catch (e2) {
+                    // ignore
+                }
+                reject(err);
+            }
+        });
+    }
+
+    function safeDecodeNewsletterId(value) {
+        var raw = String(value || "").trim();
+        if (!raw) {
+            return "";
+        }
+        try {
+            return decodeURIComponent(raw);
+        } catch (e) {
+            return raw;
+        }
+    }
+
+    function getNewsletterIdFromHash() {
+        if (window.NjcSpaRouter && typeof window.NjcSpaRouter.splitHashRoute === "function") {
+            var parts = window.NjcSpaRouter.splitHashRoute();
+            if ((parts.baseRoute || "").toLowerCase() !== "newsletter") {
+                return "";
+            }
+            if (parts.segments && parts.segments.length > 1) {
+                return safeDecodeNewsletterId(parts.segments[1] || "");
+            }
+            var sub = String(parts.subPath || "").trim();
+            if (sub) {
+                var first = sub.split("/").map(function (s) {
+                    return s.trim();
+                }).filter(Boolean)[0];
+                return safeDecodeNewsletterId(first || "");
+            }
+        }
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim();
+        var path = raw.split("?")[0];
+        if (path.toLowerCase().indexOf("newsletter/") !== 0) {
+            return "";
+        }
+        var rest = path.slice("newsletter/".length);
+        return safeDecodeNewsletterId(rest.split("/")[0] || "");
+    }
+
+    function getNewsletterShareUrl(entryId) {
+        var id = String(entryId || "").trim();
+        if (!id) {
+            return "";
+        }
+        try {
+            var u = new URL(String(window.location.href));
+            u.hash = "newsletter/" + encodeURIComponent(id);
+            return u.toString();
+        } catch (err) {
+            return "";
+        }
+    }
+
+    function buildPlainShareText(title, preview, url) {
+        var lines = [];
+        if (title) {
+            lines.push(title);
+        }
+        if (preview) {
+            lines.push(preview);
+        }
+        if (url) {
+            lines.push(url);
+        }
+        return lines.join("\n\n");
+    }
+
+    function runNewsletterShare() {
+        var id = String(currentShareEntryId || "").trim();
+        if (!id) {
+            return;
+        }
+        var url = getNewsletterShareUrl(id);
+        if (!url) {
+            return;
+        }
+        var title = String(currentShareTitleText || "").trim() || T("newsletter.title", "Newsletter");
+        var preview = String(currentShareBodyPreview || "").trim();
+        if (typeof navigator !== "undefined" && navigator.share) {
+            var p = navigator.share({ title: title, text: preview || title, url: url });
+            if (p && typeof p.then === "function" && typeof p.catch === "function") {
+                p.catch(function (err) {
+                    if (err && err.name === "AbortError") {
+                        return;
+                    }
+                    copyTextToClipboard(url).then(function () {
+                        showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
+                    }, function () {
+                        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+                            showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
+                        }, function () {
+                            showShareFeedback("newsletter.shareFailed", "Could not share or copy. Try again.");
+                        });
+                    });
+                });
+            }
+            return;
+        }
+        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+            showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
+        }, function () {
+            copyTextToClipboard(url).then(function () {
+                showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
+            }, function () {
+                showShareFeedback("newsletter.shareFailed", "Could not share or copy. Try again.");
+            });
+        });
+    }
+
     function getFirestoreDb() {
         var fb = window.firebase;
         if (!fb || !fb.apps || !fb.apps.length || !fb.firestore) {
@@ -688,6 +878,13 @@
             rangeEl.textContent = "";
             rangeEl.hidden = true;
         }
+        clearShareFeedback();
+        currentShareEntryId = String(entry.id || "").trim();
+        currentShareTitleText = displayTitle;
+        currentShareBodyPreview = previewPlainBody(picked.body, 220);
+        if (shareBtn) {
+            shareBtn.hidden = !currentShareEntryId;
+        }
         contentWrap.hidden = false;
         statusEl.hidden = true;
         updateTtsUi();
@@ -697,6 +894,13 @@
         stopSpeechPlayback();
         currentReadPlain = "";
         currentSpeechTitle = "";
+        clearShareFeedback();
+        currentShareEntryId = "";
+        currentShareTitleText = "";
+        currentShareBodyPreview = "";
+        if (shareBtn) {
+            shareBtn.hidden = true;
+        }
         updateTtsUi();
         contentWrap.hidden = true;
         headingEl.textContent = "";
@@ -720,25 +924,49 @@
         }
         showEmpty(T("newsletter.loading", "Loading…"));
         var todayYmd = getBrusselsYmd();
+        var wantId = getNewsletterIdFromHash();
+
+        function applyRowsSnapshot(snap) {
+            var rows = [];
+            snap.forEach(function (doc) {
+                var n = normalizeDoc(doc);
+                if (n) {
+                    rows.push(n);
+                }
+            });
+            var pick = pickActiveNewsletter(rows, todayYmd);
+            if (!pick) {
+                showEmpty(T("newsletter.noneScheduled", "There is no newsletter for this period yet."));
+                return;
+            }
+            renderNewsletter(pick);
+        }
+
+        if (wantId) {
+            db.collection(NEWSLETTER_COLLECTION).doc(wantId).get()
+                .then(function (doc) {
+                    var n = normalizeDoc(doc);
+                    if (n && doc.exists) {
+                        renderNewsletter(n);
+                        return;
+                    }
+                    return db.collection(NEWSLETTER_COLLECTION)
+                        .orderBy("visibleFrom", "desc")
+                        .limit(48)
+                        .get()
+                        .then(applyRowsSnapshot);
+                })
+                .catch(function () {
+                    showEmpty(T("newsletter.loadError", "Could not load newsletter."));
+                });
+            return;
+        }
+
         db.collection(NEWSLETTER_COLLECTION)
             .orderBy("visibleFrom", "desc")
             .limit(48)
             .get()
-            .then(function (snap) {
-                var rows = [];
-                snap.forEach(function (doc) {
-                    var n = normalizeDoc(doc);
-                    if (n) {
-                        rows.push(n);
-                    }
-                });
-                var pick = pickActiveNewsletter(rows, todayYmd);
-                if (!pick) {
-                    showEmpty(T("newsletter.noneScheduled", "There is no newsletter for this period yet."));
-                    return;
-                }
-                renderNewsletter(pick);
-            })
+            .then(applyRowsSnapshot)
             .catch(function () {
                 showEmpty(T("newsletter.loadError", "Could not load newsletter."));
             });
@@ -747,7 +975,7 @@
     function currentRouteIsNewsletter() {
         var raw = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
         var path = raw.split("?")[0];
-        return path === "newsletter";
+        return path === "newsletter" || path.indexOf("newsletter/") === 0;
     }
 
     function onRoute() {
@@ -807,6 +1035,11 @@
     if (ttsStop) {
         ttsStop.addEventListener("click", function () {
             stopSpeechPlayback();
+        });
+    }
+    if (shareBtn) {
+        shareBtn.addEventListener("click", function () {
+            runNewsletterShare();
         });
     }
 
