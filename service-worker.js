@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v386ourappsonerow";
-const RUNTIME_CACHE = "njc-runtime-cache-v386ourappsonerow";
+const APP_CACHE = "njc-app-cache-v389ourappsrow";
+const RUNTIME_CACHE = "njc-runtime-cache-v389ourappsrow";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Our apps: TC Radios in one row with Google Play and iPhone buttons side by side.";
+    "Our apps: one row per app with Android and iOS links side by side (no double list card).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260613ourapps3",
+    "./styles.css?v=20260614ourapps1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260613ourapps3",
+    "./app-shell.js?v=20260614ourapps1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260611bibleparallel1",
@@ -66,7 +66,7 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
-    "./spa-router.js?v=20260613ourapps2",
+    "./spa-router.js?v=20260614ourapps1",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

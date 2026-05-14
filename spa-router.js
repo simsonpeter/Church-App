@@ -162,7 +162,7 @@
             titleKey: "ourApps.title",
             titleText: "Our apps",
             subtitleKey: "ourApps.subtitle",
-            subtitleText: "Google Play (Android) and iPhone"
+            subtitleText: "Android and iOS — same row"
         },
         admin: {
             icon: "fa-screwdriver-wrench",
