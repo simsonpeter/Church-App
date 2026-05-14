@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v385ourappsiphone";
-const RUNTIME_CACHE = "njc-runtime-cache-v385ourappsiphone";
+const APP_CACHE = "njc-app-cache-v386ourappsonerow";
+const RUNTIME_CACHE = "njc-runtime-cache-v386ourappsonerow";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Our apps: TC Radios on Google Play plus iPhone row (opens web app without showing the URL on screen).";
+    "Our apps: TC Radios in one row with Google Play and iPhone buttons side by side.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260613ourapps2",
+    "./styles.css?v=20260613ourapps3",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260613ourapps2",
+    "./app-shell.js?v=20260613ourapps3",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260611bibleparallel1",
