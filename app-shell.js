@@ -139,6 +139,13 @@
         "dailyBread.byAuthor": "எழுத்தாளர்: {author}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "menu.newsletter": "செய்திமடல்",
+        "menu.ourApps": "எங்கள் செயலிகள்",
+        "ourApps.eyebrow": "செயலிகள்",
+        "ourApps.title": "எங்கள் செயலிகள்",
+        "ourApps.intro": "எங்கள் சபையின் மற்ற மொபைல் செயலிகள் — கூகுள் பிளே கடையில் திறக்கவும்.",
+        "ourApps.tcRadiosName": "TC Radios",
+        "ourApps.googlePlay": "கூகுள் பிளே",
+        "ourApps.subtitle": "கூகுள் பிளேயில் மேலும் செயலிகள்",
         "newsletter.eyebrow": "செய்திமடல்",
         "newsletter.title": "செய்திமடல்",
         "newsletter.subtitle": "சபையின் மாதாந்திர செய்தி",
@@ -4691,6 +4698,12 @@
         settingsLink.innerHTML = "<i class=\"fa-solid fa-sliders\"></i><span></span>";
         utilityLinksContainer.appendChild(settingsLink);
 
+        var ourAppsLink = document.createElement("a");
+        ourAppsLink.className = "header-menu-link";
+        ourAppsLink.href = "#our-apps";
+        ourAppsLink.innerHTML = "<i class=\"fa-brands fa-google-play\"></i><span></span>";
+        utilityLinksContainer.appendChild(ourAppsLink);
+
         var contactMenuLink = document.createElement("a");
         contactMenuLink.className = "header-menu-link";
         contactMenuLink.href = "#contact";
@@ -4900,6 +4913,7 @@
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
+            var ourAppsLabel = t("menu.ourApps", "Our apps");
             var celebrationsLabel = t("menu.celebrations", "Celebrations");
             var contactMenuLabel = t("menu.contact", "Contact us");
             var authApi = window.NjcAuth;
@@ -4981,6 +4995,10 @@
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
             }
+            var ourAppsNode = ourAppsLink.querySelector("span");
+            if (ourAppsNode) {
+                ourAppsNode.textContent = ourAppsLabel;
+            }
             var celebrationsNode = celebrationsLink.querySelector("span");
             if (celebrationsNode) {
                 celebrationsNode.textContent = celebrationsLabel;
@@ -5019,6 +5037,7 @@
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
             var isSettings = getCurrentRoute() === "settings";
+            var isOurApps = getCurrentRoute() === "our-apps";
             var isCelebrations = getCurrentRoute() === "celebrations";
             var isMailbox = getCurrentRoute() === "mailbox";
             var isAdminRoute = getCurrentRoute() === "admin";
@@ -5034,6 +5053,7 @@
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
             settingsLink.classList.toggle("active", isSettings);
+            ourAppsLink.classList.toggle("active", isOurApps);
             celebrationsLink.classList.toggle("active", isCelebrations);
             mailboxLink.classList.toggle("active", isMailbox);
             adminLink.classList.toggle("active", isAdminRoute);

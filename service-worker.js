@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v383nobibleparallel";
-const RUNTIME_CACHE = "njc-runtime-cache-v383nobibleparallel";
+const APP_CACHE = "njc-app-cache-v384ourapps1";
+const RUNTIME_CACHE = "njc-runtime-cache-v384ourapps1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Bible reader: removed parallel two-column mode; single-language reading layout restored.";
+    "Side menu: new Our apps page with Google Play link to TC Radios.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260613nobibleparallel1",
+    "./styles.css?v=20260613ourapps1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260613nobibleparallel1",
+    "./app-shell.js?v=20260613ourapps1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260611bibleparallel1",
@@ -66,7 +66,7 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260411celemember",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
-    "./spa-router.js?v=20260511newsletter1",
+    "./spa-router.js?v=20260613ourapps1",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

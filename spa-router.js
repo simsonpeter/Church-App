@@ -155,6 +155,15 @@
             subtitleKey: "",
             subtitleText: ""
         },
+        "our-apps": {
+            icon: "fa-mobile-screen-button",
+            eyebrowKey: "ourApps.eyebrow",
+            eyebrowText: "Apps",
+            titleKey: "ourApps.title",
+            titleText: "Our apps",
+            subtitleKey: "ourApps.subtitle",
+            subtitleText: "More from our church on Google Play"
+        },
         admin: {
             icon: "fa-screwdriver-wrench",
             eyebrowKey: "admin.eyebrow",
