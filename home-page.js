@@ -17,6 +17,7 @@
             var readingStreakLine = document.getElementById("reading-streak-line");
             var readingNudgeLine = document.getElementById("reading-nudge-line");
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
+            var readingExportCsvBtn = document.getElementById("reading-export-csv-btn");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
@@ -863,6 +864,43 @@
                     return null;
                 }
                 return null;
+            }
+
+            function exportReadingProgressCsv() {
+                var map = getProgressMap();
+                var keys = Object.keys(map).filter(function (k) {
+                    return /^\d{4}-\d{2}-\d{2}$/.test(k);
+                }).sort();
+                var header = "date,morning,evening";
+                var lines = [header];
+                keys.forEach(function (k) {
+                    var e = map[k] || {};
+                    var m = e.morning ? "yes" : "no";
+                    var ev = e.evening ? "yes" : "no";
+                    lines.push(String(k) + "," + m + "," + ev);
+                });
+                var csv = lines.join("\r\n");
+                var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+                var url = URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                var stamp = getTodayKey().replace(/-/g, "");
+                a.href = url;
+                a.download = "njc-reading-log-" + stamp + ".csv";
+                a.rel = "noopener";
+                document.body.appendChild(a);
+                try {
+                    a.click();
+                } catch (e1) {
+                    // ignore
+                }
+                document.body.removeChild(a);
+                window.setTimeout(function () {
+                    try {
+                        URL.revokeObjectURL(url);
+                    } catch (e2) {
+                        // ignore
+                    }
+                }, 4000);
             }
 
             function getTodayProgress() {
@@ -3178,6 +3216,12 @@
                             navigator.clipboard.writeText(line);
                         } catch (e) {}
                     }
+                });
+            }
+
+            if (readingExportCsvBtn) {
+                readingExportCsvBtn.addEventListener("click", function () {
+                    exportReadingProgressCsv();
                 });
             }
 
