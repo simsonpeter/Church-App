@@ -31,13 +31,6 @@
     var fullScreenToggleIcon = fullScreenToggleButton ? fullScreenToggleButton.querySelector("i") : null;
     var statusNote = document.getElementById("bible-status-note");
     var verseList = document.getElementById("bible-verse-list");
-    var verseListParallel = document.getElementById("bible-verse-list-parallel");
-    var verseListWrapParallel = document.getElementById("bible-verse-list-wrap-parallel");
-    var parallelColumn = document.getElementById("bible-verse-column-parallel");
-    var parallelHeading = document.getElementById("bible-parallel-heading");
-    var parallelEnabledInput = document.getElementById("bible-parallel-enabled");
-    var parallelLangSelect = document.getElementById("bible-parallel-lang");
-    var bibleVerseColumns = document.getElementById("bible-verse-columns");
     var verseListWrap = document.getElementById("bible-verse-list-wrap");
     var bibleCard = verseList ? verseList.closest(".card") : null;
     var searchPanel = document.getElementById("bible-search-panel");
@@ -719,11 +712,6 @@
         verseList.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
             node.classList.remove("tts-reading");
         });
-        if (verseListParallel) {
-            verseListParallel.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
-                node.classList.remove("tts-reading");
-            });
-        }
         if (!speechState.active && !speechState.paused) {
             return;
         }
@@ -740,20 +728,13 @@
         if (Number(loc.book) !== Number(langState.book) || Number(loc.chapter) !== Number(langState.chapter)) {
             return;
         }
-        var dual = isParallelViewActive();
         var speechLang = normalizeLanguage(ctx.language || state.language);
-        var primaryHighlight = dual || speechLang === normalizeLanguage(state.language);
-        if (primaryHighlight) {
-            var row = verseList.querySelector("#bible-verse-" + String(verseNum));
-            if (row) {
-                row.classList.add("tts-reading");
-            }
+        if (speechLang !== normalizeLanguage(state.language)) {
+            return;
         }
-        if (dual && verseListParallel) {
-            var rowP = verseListParallel.querySelector("#bible-verse-par-" + String(verseNum));
-            if (rowP) {
-                rowP.classList.add("tts-reading");
-            }
+        var row = verseList.querySelector("#bible-verse-" + String(verseNum));
+        if (row) {
+            row.classList.add("tts-reading");
         }
     }
 
@@ -1725,66 +1706,6 @@
         return "en";
     }
 
-    function defaultParallelLang(primary) {
-        var p = normalizeLanguage(primary);
-        var order = ["en", "ta", "nl", "tr"];
-        for (var i = 0; i < order.length; i += 1) {
-            if (order[i] !== p) {
-                return order[i];
-            }
-        }
-        return "ta";
-    }
-
-    function reconcileParallelLangWithPrimary() {
-        if (!state.parallelOn) {
-            return;
-        }
-        if (normalizeLanguage(state.parallelLang) === normalizeLanguage(state.language)) {
-            state.parallelLang = defaultParallelLang(state.language);
-        }
-    }
-
-    function ensureParallelStateFromControls() {
-        if (!parallelEnabledInput) {
-            return;
-        }
-        state.parallelOn = Boolean(parallelEnabledInput.checked);
-        if (state.parallelOn && parallelLangSelect) {
-            state.parallelLang = normalizeLanguage(parallelLangSelect.value);
-            reconcileParallelLangWithPrimary();
-        }
-    }
-
-    function setParallelShellVisible(want) {
-        if (bibleVerseColumns) {
-            bibleVerseColumns.classList.toggle("bible-verse-columns--parallel-on", Boolean(want));
-        }
-        if (!parallelColumn) {
-            return;
-        }
-        if (want) {
-            parallelColumn.hidden = false;
-            try {
-                parallelColumn.removeAttribute("hidden");
-            } catch (eRm) {
-                // ignore
-            }
-        } else {
-            parallelColumn.hidden = true;
-        }
-    }
-
-    function isParallelViewActive() {
-        ensureParallelStateFromControls();
-        return Boolean(
-            verseListParallel &&
-                parallelColumn &&
-                state.parallelOn &&
-                normalizeLanguage(state.parallelLang) !== normalizeLanguage(state.language)
-        );
-    }
-
     function normalizeNumber(value, fallback) {
         var num = Number(value);
         return Number.isInteger(num) && num >= 0 ? num : fallback;
@@ -1793,8 +1714,6 @@
     function getStoredState() {
         var defaults = {
             language: "en",
-            parallelOn: false,
-            parallelLang: "ta",
             en: { book: 0, chapter: 0 },
             ta: { book: 0, chapter: 0 },
             nl: { book: 0, chapter: 0 },
@@ -1821,13 +1740,8 @@
                 tr: {
                     book: normalizeNumber(source.tr && source.tr.book, 0),
                     chapter: normalizeNumber(source.tr && source.tr.chapter, 0)
-                },
-                parallelOn: Boolean(source.parallelOn),
-                parallelLang: normalizeLanguage(source.parallelLang || defaultParallelLang(normalizeLanguage(source.language)))
+                }
             };
-            if (out.parallelLang === out.language) {
-                out.parallelLang = defaultParallelLang(out.language);
-            }
             if (!source.nl && source.en) {
                 out.nl.book = out.en.book;
                 out.nl.chapter = out.en.chapter;
@@ -1851,28 +1765,6 @@
         return null;
     }
 
-    function populateParallelLangSelect() {
-        if (!parallelLangSelect) {
-            return;
-        }
-        var current = normalizeLanguage(state.parallelLang);
-        parallelLangSelect.innerHTML = BIBLE_SEARCH_LANGS.map(function (row) {
-            return "<option value=\"" + row.id + "\">" + escapeHtml(T(row.labelKey, row.labelFallback)) + "</option>";
-        }).join("");
-        parallelLangSelect.value = current;
-    }
-
-    function syncParallelControlsFromState() {
-        reconcileParallelLangWithPrimary();
-        if (parallelEnabledInput) {
-            parallelEnabledInput.checked = Boolean(state.parallelOn);
-        }
-        if (parallelLangSelect) {
-            parallelLangSelect.value = normalizeLanguage(state.parallelLang);
-            parallelLangSelect.disabled = !state.parallelOn;
-        }
-    }
-
     function setLanguageButtons() {
         var active = normalizeLanguage(state.language);
         if (languageEnButton) {
@@ -1891,7 +1783,6 @@
             languageTrButton.classList.toggle("active", active === "tr");
             languageTrButton.setAttribute("aria-pressed", active === "tr" ? "true" : "false");
         }
-        syncParallelControlsFromState();
     }
 
     function getBooksForLanguage(language) {
@@ -1918,16 +1809,6 @@
         setStatus(T("bible.loading", "Loading Bible..."), false);
         updateShareControls();
         clearChapterTransitionClasses();
-        if (parallelColumn) {
-            parallelColumn.hidden = true;
-        }
-        setParallelShellVisible(false);
-        if (verseListParallel) {
-            verseListParallel.innerHTML = "";
-        }
-        if (parallelHeading) {
-            parallelHeading.textContent = "";
-        }
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.loading", "Loading Bible...")) + "</p>" +
@@ -1945,16 +1826,6 @@
         stopSpeechPlayback();
         updateShareControls();
         clearChapterTransitionClasses();
-        if (parallelColumn) {
-            parallelColumn.hidden = true;
-        }
-        setParallelShellVisible(false);
-        if (verseListParallel) {
-            verseListParallel.innerHTML = "";
-        }
-        if (parallelHeading) {
-            parallelHeading.textContent = "";
-        }
         verseList.innerHTML = "" +
             "<li>" +
             "  <p>" + escapeHtml(T("bible.error", "Could not load Bible right now.")) + "</p>" +
@@ -2458,22 +2329,11 @@
         if (scrollHost) {
             scrollHost.scrollTop = 0;
         }
-        if (verseListWrapParallel) {
-            verseListWrapParallel.scrollTop = 0;
-        }
         if (verseList) {
             verseList.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
                 node.classList.remove("highlight");
             });
             verseList.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
-                node.classList.remove("tts-reading");
-            });
-        }
-        if (verseListParallel) {
-            verseListParallel.querySelectorAll(".bible-verse-item.highlight").forEach(function (node) {
-                node.classList.remove("highlight");
-            });
-            verseListParallel.querySelectorAll(".bible-verse-item.tts-reading").forEach(function (node) {
                 node.classList.remove("tts-reading");
             });
         }
@@ -2564,55 +2424,9 @@
         chapterTransitionFallbackTimer = window.setTimeout(finishAndPaint, 320);
     }
 
-    function paintParallelVersesIfNeeded(location) {
-        if (!verseListParallel || !parallelColumn) {
-            return;
-        }
-        if (!isParallelViewActive()) {
-            setParallelShellVisible(false);
-            verseListParallel.innerHTML = "";
-            if (parallelHeading) {
-                parallelHeading.textContent = "";
-            }
-            return;
-        }
-        setParallelShellVisible(true);
-        var plang = normalizeLanguage(state.parallelLang);
-        var loc = location || { book: 0, chapter: 0 };
-        loadBible(plang).then(function (secData) {
-            var secLocation = clampLocation(secData, { book: loc.book, chapter: loc.chapter });
-            var books = secData && Array.isArray(secData.Book) ? secData.Book : [];
-            var book = books[secLocation.book] || {};
-            var chapters = Array.isArray(book.Chapter) ? book.Chapter : [];
-            var chapter = chapters[secLocation.chapter] || {};
-            var pverses = Array.isArray(chapter.Verse) ? chapter.Verse : [];
-            if (parallelHeading) {
-                parallelHeading.textContent = getBookName(plang, secLocation.book) + " " + String(secLocation.chapter + 1);
-            }
-            if (!pverses.length) {
-                verseListParallel.innerHTML = "<li><p>" + escapeHtml(T("bible.parallelNoVerses", "No verses for this chapter in the second language.")) + "</p></li>";
-            } else {
-                verseListParallel.innerHTML = pverses.map(function (verseItem, index) {
-                    var safeNumber = index + 1;
-                    var text = String(verseItem && verseItem.Verse || "").trim();
-                    return "" +
-                        "<li class=\"bible-verse-item\" id=\"bible-verse-par-" + String(safeNumber) + "\" data-verse-number=\"" + String(safeNumber) + "\">" +
-                        "  <span class=\"bible-verse-num\">" + String(safeNumber) + "</span>" +
-                        "  <p class=\"bible-verse-text\">" + escapeHtml(text) + "</p>" +
-                        "</li>";
-                }).join("");
-            }
-            syncTtsReadingHighlight();
-        }).catch(function () {
-            verseListParallel.innerHTML = "<li><p>" + escapeHtml(T("bible.parallelLoadError", "Could not load the second column.")) + "</p></li>";
-            syncTtsReadingHighlight();
-        });
-    }
-
     function paintVersesIntoDom(data, options) {
         var config = options && typeof options === "object" ? options : {};
         var resetPosition = Boolean(config.resetPosition);
-        ensureParallelStateFromControls();
         var language = normalizeLanguage(state.language);
         var location = clampLocation(data, getCurrentLangState());
         state[language] = { book: location.book, chapter: location.chapter };
@@ -2638,7 +2452,6 @@
                 "<li>" +
                 "  <p>" + escapeHtml(T("bible.noData", "No verses available for this chapter.")) + "</p>" +
                 "</li>";
-            paintParallelVersesIfNeeded({ book: location.book, chapter: location.chapter });
             if (resetPosition) {
                 resetChapterViewPosition();
             }
@@ -2669,7 +2482,6 @@
             resetChapterViewPosition();
             updateSpeechTextFromSelection();
         }
-        paintParallelVersesIfNeeded({ book: location.book, chapter: location.chapter });
         syncTtsReadingHighlight();
     }
 
@@ -2700,7 +2512,6 @@
         stopSpeechPlayback();
         closeBibleSearchPanel();
         state.language = normalizeLanguage(language);
-        reconcileParallelLangWithPrimary();
         setLanguageButtons();
         saveState();
         renderBible();
@@ -2957,41 +2768,6 @@
         });
     }
 
-    function onParallelControlsChanged() {
-        if (!parallelEnabledInput) {
-            return;
-        }
-        state.parallelOn = Boolean(parallelEnabledInput.checked);
-        if (state.parallelOn && parallelLangSelect) {
-            state.parallelLang = normalizeLanguage(parallelLangSelect.value);
-        }
-        reconcileParallelLangWithPrimary();
-        populateParallelLangSelect();
-        syncParallelControlsFromState();
-        saveState();
-        if (isBibleRouteActive()) {
-            renderBible();
-        }
-    }
-
-    populateParallelLangSelect();
-    syncParallelControlsFromState();
-    if (parallelEnabledInput) {
-        parallelEnabledInput.addEventListener("change", onParallelControlsChanged);
-        parallelEnabledInput.addEventListener("input", onParallelControlsChanged);
-    }
-    if (parallelLangSelect) {
-        parallelLangSelect.addEventListener("change", function () {
-            state.parallelLang = normalizeLanguage(parallelLangSelect.value);
-            reconcileParallelLangWithPrimary();
-            syncParallelControlsFromState();
-            saveState();
-            if (isBibleRouteActive()) {
-                renderBible();
-            }
-        });
-    }
-
     document.addEventListener("njc:data-refresh", function () {
         ["en", "ta", "nl", "tr"].forEach(function (l) {
             cache[l] = null;
@@ -3057,8 +2833,6 @@
     });
 
     document.addEventListener("njc:langchange", function () {
-        populateParallelLangSelect();
-        syncParallelControlsFromState();
         if (isBibleRouteActive() && !speechState.active && !speechState.paused) {
             renderBible();
             return;

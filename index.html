@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260612bibleparallel2">
+    <link rel="stylesheet" href="styles.css?v=20260613nobibleparallel1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -681,16 +681,6 @@
                         </button>
                     </div>
                 </div>
-                <div class="bible-parallel-row" id="bible-parallel-controls">
-                    <label class="bible-parallel-check">
-                        <input type="checkbox" id="bible-parallel-enabled" />
-                        <span data-i18n="bible.parallelToggle" data-i18n-fallback="Parallel view">Parallel view</span>
-                    </label>
-                    <label class="bible-parallel-lang-field">
-                        <span class="bible-parallel-lang-label" data-i18n="bible.parallelLanguageLabel" data-i18n-fallback="Second column">Second column</span>
-                        <select id="bible-parallel-lang" class="search-input bible-parallel-select" aria-label="Second Bible language"></select>
-                    </label>
-                </div>
                 <div class="bible-inline-row">
                     <label class="bible-field">
                         <span data-i18n="bible.book">Book</span>
@@ -722,22 +712,12 @@
                     <button type="button" class="button-link button-secondary" id="bible-next-chapter" data-i18n="bible.next">Next chapter</button>
                 </div>
                 <p class="page-note" id="bible-status-note" data-i18n="bible.loading">Loading Bible...</p>
-                <div class="bible-verse-columns" id="bible-verse-columns">
-                    <div class="bible-verse-column bible-verse-column--primary">
-                        <div class="bible-verse-list-wrap" id="bible-verse-list-wrap">
-                            <ul class="list bible-verse-list" id="bible-verse-list">
-                                <li>
-                                    <p data-i18n="bible.loading">Loading Bible...</p>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="bible-verse-column bible-verse-column--parallel" id="bible-verse-column-parallel" hidden>
-                        <p class="bible-parallel-heading" id="bible-parallel-heading"></p>
-                        <div class="bible-verse-list-wrap bible-verse-list-wrap--parallel" id="bible-verse-list-wrap-parallel">
-                            <ul class="list bible-verse-list" id="bible-verse-list-parallel"></ul>
-                        </div>
-                    </div>
+                <div class="bible-verse-list-wrap" id="bible-verse-list-wrap">
+                    <ul class="list bible-verse-list" id="bible-verse-list">
+                        <li>
+                            <p data-i18n="bible.loading">Loading Bible...</p>
+                        </li>
+                    </ul>
                 </div>
             </section>
             </main>
@@ -2151,13 +2131,13 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260511newsletter1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260611bibleparallel1"></script>
+    <script src="app-shell.js?v=20260613nobibleparallel1"></script>
     <script src="events-engine.js?v=20260414feedprobe1"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260611bibleparallel1"></script>
     <script src="events-page.js?v=20260414feedprobe1"></script>
     <script src="sermons-page.js?v=20260414sermonannounce1"></script>
-    <script src="bible-page.js?v=20260612bibleparallel2"></script>
+    <script src="bible-page.js?v=20260613nobibleparallel1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260609answeredtabs1"></script>
     <script src="daily-bread-page.js?v=20260414feedprobe1"></script>
