@@ -2209,6 +2209,64 @@
                 return String(Math.round(x * 10) / 10);
             }
 
+            function wrapReadingShareVerseLines(ctx, text, maxWidth, maxLines) {
+                var words = String(text || "").trim().split(/\s+/).filter(Boolean);
+                if (!words.length) {
+                    return [];
+                }
+                var lines = [];
+                var line = "";
+                words.forEach(function (word) {
+                    var candidate = line ? (line + " " + word) : word;
+                    if (ctx.measureText(candidate).width <= maxWidth) {
+                        line = candidate;
+                        return;
+                    }
+                    if (line) {
+                        lines.push(line);
+                    }
+                    line = word;
+                });
+                if (line) {
+                    lines.push(line);
+                }
+                var cap = maxLines > 0 ? maxLines : 6;
+                if (lines.length > cap) {
+                    var clipped = lines.slice(0, cap);
+                    var tail = clipped[cap - 1];
+                    while (tail.length > 3 && ctx.measureText(tail + "…").width > maxWidth) {
+                        tail = tail.slice(0, -1).trim();
+                    }
+                    clipped[cap - 1] = tail + "…";
+                    return clipped;
+                }
+                if (lines.length === 1 && ctx.measureText(lines[0]).width > maxWidth * 1.02) {
+                    var out = [];
+                    var s = lines[0];
+                    var chunk = "";
+                    for (var i = 0; i < s.length; i++) {
+                        var next = chunk + s.charAt(i);
+                        if (ctx.measureText(next).width > maxWidth && chunk) {
+                            out.push(chunk);
+                            chunk = s.charAt(i);
+                            if (out.length >= cap) {
+                                break;
+                            }
+                        } else {
+                            chunk = next;
+                        }
+                    }
+                    if (chunk && out.length < cap) {
+                        out.push(chunk);
+                    }
+                    if (out.length > cap) {
+                        out = out.slice(0, cap);
+                    }
+                    return out;
+                }
+                return lines;
+            }
+
             function drawReadingShareRoundedRect(ctx, x, y, width, height, radius) {
                 var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
                 ctx.beginPath();
@@ -2378,9 +2436,31 @@
                         ctx.fillText(streakText, cx, cardY + 558);
                     }
 
+                    var verseRef = T("home.readingShareCardVerseRef", "Psalm 119:31", readingCard);
+                    var verseBody = T(
+                        "home.readingShareCardVerseText",
+                        "I cling to your testimonies, O LORD; let me not be put to shame.",
+                        readingCard
+                    );
+                    var verseTop = cardY + (streak > 0 ? 598 : 548);
+                    var verseMaxW = cardW - 96;
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#6d4c41";
+                    ctx.font = "700 22px " + fontUi;
+                    ctx.fillText(verseRef, cx, verseTop);
+
+                    ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
+                    ctx.font = "italic 500 26px " + fontUi;
+                    var verseLines = wrapReadingShareVerseLines(ctx, verseBody, verseMaxW, 5);
+                    var vy = verseTop + 32;
+                    verseLines.forEach(function (ln) {
+                        ctx.fillText(ln, cx, vy);
+                        vy += 30;
+                    });
+
                     ctx.fillStyle = "rgba(93,64,55,0.85)";
-                    ctx.font = "600 30px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardFooter", "Shared from NJC Belgium", readingCard), cx, cardY + cardH - 56);
+                    ctx.font = "600 28px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardFooter", "Shared from NJC Belgium", readingCard), cx, cardY + cardH - 44);
 
                     readingShareCanvasToBlob(canvas).then(resolve).catch(reject);
                 });
@@ -2416,6 +2496,12 @@
                 var remaining = prog ? prog.remainingDays : 0;
                 var userName = getReadingShareUserLabel();
                 var pointsStr = formatReadingPointsForShare(getReadingSharePointsTotal());
+                var verseRefPlain = T("home.readingShareCardVerseRef", "Psalm 119:31", readingCard);
+                var verseTextPlain = T(
+                    "home.readingShareCardVerseText",
+                    "I cling to your testimonies, O LORD; let me not be put to shame.",
+                    readingCard
+                );
                 var line = T("home.readingShareLine", "My Bible reading plan ({name}): {done}/{total} days, {remaining} days to go, {points} pts ({pct}%) — NJC App", readingCard)
                     .replace("{name}", userName)
                     .replace("{done}", String(done))
@@ -2423,6 +2509,7 @@
                     .replace("{remaining}", String(remaining))
                     .replace("{points}", pointsStr)
                     .replace("{pct}", String(pct));
+                line += "\n\n" + verseRefPlain + " — " + verseTextPlain;
                 var title = T("home.readingShareImageTitle", "My Bible reading progress", readingCard);
 
                 waitForFontsOptional().then(function () {

@@ -1585,6 +1585,8 @@
         "home.readingShareCardRemaining": "இன்னும் {count} நாட்கள் உள்ளது",
         "home.readingShareCardPoints": "{points} வாசிப்புப் புள்ளிகள் பெற்றுள்ளேன்",
         "home.readingShareCardStreak": "{count} நாள் தொடர்",
+        "home.readingShareCardVerseRef": "சங்கீதம் 119:31",
+        "home.readingShareCardVerseText": "உம்முடைய சாட்சிப்பிரமாணங்களை நான் பற்றிக்கொண்டிருக்கிறேன்; என்னை நாணடையப் பண்ணாதேயும்.",
         "home.readingShareCardFooter": "NJC பெல்ஜியம் செயலியிலிருந்து பகிரப்பட்டது",
         "home.readingExportCsvAria": "வாசிப்புப் பதிவை CSV ஆக ஏற்றுமதி",
         "home.readingExportCsvTitle": "CSV ஏற்றுமதி",
