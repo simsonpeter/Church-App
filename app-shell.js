@@ -1589,6 +1589,7 @@
         "home.readingShareCardVerseEn": "The law of thy mouth is better unto me than thousands of gold and silver.",
         "home.readingShareCardVerseTa": "அநேகமாயிரம் பொன் வெள்ளியைப் பார்க்கிலும், நீர் விளம்பின வேதமே எனக்கு நலம்.",
         "home.readingShareCardNudgeQuestion": "இன்று உங்கள் வேதாகமத்தை வாசித்தீர்களா?",
+        "home.readingShareCardNotReadIntro": "இன்னும் வாசிக்கவில்லையெனில், இன்றைய காலை / மாலை வாசிப்பை வாசிக்கவும்:",
         "home.readingShareCardFooter": "NJC பெல்ஜியம் செயலியிலிருந்து பகிரப்பட்டது",
         "home.readingExportCsvAria": "வாசிப்புப் பதிவை CSV ஆக ஏற்றுமதி",
         "home.readingExportCsvTitle": "CSV ஏற்றுமதி",

@@ -2370,6 +2370,63 @@
                     var nudgeLineStep = 28;
                     var nudgeLines = wrapReadingShareVerseLines(mctx, nudgeQuestion, verseMaxW, 4);
 
+                    var showCatchUp = false;
+                    var catchIntroLines = [];
+                    var catchMorningLines = [];
+                    var catchEveningLines = [];
+                    var catchUpLineStep = 26;
+                    var catchUpFontCss = "600 22px " + fontUi;
+                    var tpCatch = todayPlanData;
+                    if (tpCatch && !readingPlanError) {
+                        var progCatch = getTodayProgress();
+                        var mRefsC = getRefsForPart(tpCatch, "morning");
+                        var eRefsC = getRefsForPart(tpCatch, "evening");
+                        var mMissC = mRefsC.length > 0 && !progCatch.morning;
+                        var eMissC = eRefsC.length > 0 && !progCatch.evening;
+                        showCatchUp = mMissC || eMissC;
+                        if (showCatchUp) {
+                            mctx.font = catchUpFontCss;
+                            var introCatch = T(
+                                "home.readingShareCardNotReadIntro",
+                                "If you have not read yet, please read today’s passages:",
+                                readingCard
+                            );
+                            catchIntroLines = wrapReadingShareVerseLines(mctx, introCatch, verseMaxW, 4);
+                            if (mMissC) {
+                                var mLineC =
+                                    T("home.morningShort", "Morning", readingCard) +
+                                    ": " +
+                                    mRefsC
+                                        .map(function (r) {
+                                            return toFriendlyReference(r, readingCard);
+                                        })
+                                        .join(", ");
+                                catchMorningLines = wrapReadingShareVerseLines(mctx, mLineC, verseMaxW, 6);
+                            }
+                            if (eMissC) {
+                                var eLineC =
+                                    T("home.eveningShort", "Evening", readingCard) +
+                                    ": " +
+                                    eRefsC
+                                        .map(function (r) {
+                                            return toFriendlyReference(r, readingCard);
+                                        })
+                                        .join(", ");
+                                catchEveningLines = wrapReadingShareVerseLines(mctx, eLineC, verseMaxW, 6);
+                            }
+                        }
+                    }
+                    var catchUpBlockH = 0;
+                    if (showCatchUp) {
+                        catchUpBlockH =
+                            gapMd +
+                            catchIntroLines.length * catchUpLineStep +
+                            gapSm +
+                            (catchMorningLines.length ? catchMorningLines.length * catchUpLineStep + gapSm : 0) +
+                            (catchEveningLines.length ? catchEveningLines.length * catchUpLineStep + gapSm : 0) +
+                            gapMd;
+                    }
+
                     var padY = 46;
                     var gapSm = 12;
                     var gapMd = 18;
@@ -2407,6 +2464,7 @@
                         gapMd +
                         nudgeLines.length * nudgeLineStep +
                         gapSm +
+                        catchUpBlockH +
                         28 +
                         padY +
                         12;
@@ -2548,6 +2606,31 @@
                         b += nudgeLineStep;
                     });
                     b += gapSm;
+
+                    if (showCatchUp) {
+                        b += gapMd;
+                        ctx.fillStyle = "#4e342e";
+                        ctx.font = catchUpFontCss;
+                        catchIntroLines.forEach(function (ln) {
+                            ctx.fillText(ln, cx, b);
+                            b += catchUpLineStep;
+                        });
+                        if (catchMorningLines.length) {
+                            b += gapSm;
+                            catchMorningLines.forEach(function (ln) {
+                                ctx.fillText(ln, cx, b);
+                                b += catchUpLineStep;
+                            });
+                        }
+                        if (catchEveningLines.length) {
+                            b += gapSm;
+                            catchEveningLines.forEach(function (ln) {
+                                ctx.fillText(ln, cx, b);
+                                b += catchUpLineStep;
+                            });
+                        }
+                        b += gapMd;
+                    }
 
                     ctx.fillStyle = "rgba(93,64,55,0.82)";
                     ctx.font = "600 26px " + fontUi;

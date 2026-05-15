@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v400readingsharebibletoday";
-const RUNTIME_CACHE = "njc-runtime-cache-v400readingsharebibletoday";
+const APP_CACHE = "njc-app-cache-v401readingsharecatchup";
+const RUNTIME_CACHE = "njc-runtime-cache-v401readingsharecatchup";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share card asks whether you read your Bible today (Tamil or English by UI).";
+    "Home: reading share card can list today’s morning/evening passages when still unread.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,10 +44,10 @@ const CORE_ASSETS = [
     "./styles.css?v=20260614ourapps2",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260614readingsharebibletoday1",
+    "./app-shell.js?v=20260614readingsharecatchup1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingsharebibletoday1",
+    "./home-page.js?v=20260614readingsharecatchup1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",
