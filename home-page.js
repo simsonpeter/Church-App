@@ -2328,37 +2328,92 @@
                     var userName = getReadingShareUserLabel();
                     var pointsStr = formatReadingPointsForShare(getReadingSharePointsTotal());
 
+                    var w = 1080;
+                    var cardX = 48;
+                    var cardW = w - cardX * 2;
+                    var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
+                    var verseBody = T(
+                        "home.readingShareCardVerseText",
+                        "I cling to your testimonies, O LORD; let me not be put to shame.",
+                        readingCard
+                    );
+                    var verseMaxW = cardW - 72;
+
+                    var measureCv = document.createElement("canvas");
+                    measureCv.width = w;
+                    measureCv.height = 64;
+                    var mctx = measureCv.getContext("2d");
+                    if (!mctx) {
+                        reject(new Error("canvas-unavailable"));
+                        return;
+                    }
+                    mctx.font = "italic 500 28px " + fontUi;
+                    var verseLines = wrapReadingShareVerseLines(mctx, verseBody, verseMaxW, 6);
+
+                    var padY = 46;
+                    var gapSm = 12;
+                    var gapMd = 18;
+                    var gapLg = 24;
+                    var pctTail = 72;
+                    var barLead = 14;
+                    var cardH =
+                        padY +
+                        26 +
+                        gapMd +
+                        34 +
+                        gapSm +
+                        40 +
+                        gapMd +
+                        118 +
+                        pctTail +
+                        gapLg +
+                        36 +
+                        gapSm +
+                        32 +
+                        gapSm +
+                        32 +
+                        gapMd +
+                        barLead +
+                        34 +
+                        gapMd +
+                        (streak > 0 ? 34 + gapMd : gapSm) +
+                        22 +
+                        gapSm +
+                        verseLines.length * 30 +
+                        gapLg +
+                        28 +
+                        padY +
+                        12;
+
+                    var marginOut = 36;
+                    var canvasH = cardH + marginOut * 2;
+                    var cardY = marginOut;
+
                     var canvas = document.createElement("canvas");
-                    canvas.width = 1080;
-                    canvas.height = 1350;
+                    canvas.width = w;
+                    canvas.height = canvasH;
                     var ctx = canvas.getContext("2d");
                     if (!ctx) {
                         reject(new Error("canvas-unavailable"));
                         return;
                     }
 
-                    var w = canvas.width;
-                    var h = canvas.height;
-                    var bg = ctx.createLinearGradient(0, 0, w, h);
+                    var bg = ctx.createLinearGradient(0, 0, w, canvasH);
                     bg.addColorStop(0, "#4a0c0c");
                     bg.addColorStop(0.45, "#8d1f1f");
                     bg.addColorStop(1, "#d45858");
                     ctx.fillStyle = bg;
-                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillRect(0, 0, w, canvasH);
 
-                    ctx.globalAlpha = 0.16;
-                    var glow = ctx.createRadialGradient(w * 0.78, h * 0.18, 20, w * 0.78, h * 0.22, 520);
+                    ctx.globalAlpha = 0.14;
+                    var glow = ctx.createRadialGradient(w * 0.78, canvasH * 0.12, 20, w * 0.78, canvasH * 0.2, Math.min(520, canvasH * 0.85));
                     glow.addColorStop(0, "#ffffff");
                     glow.addColorStop(1, "rgba(255,255,255,0)");
                     ctx.fillStyle = glow;
-                    ctx.fillRect(0, 0, w, h);
+                    ctx.fillRect(0, 0, w, canvasH);
                     ctx.globalAlpha = 1;
 
-                    var cardX = 56;
-                    var cardY = 88;
-                    var cardW = w - cardX * 2;
-                    var cardH = h - cardY - 100;
-                    drawReadingShareRoundedRect(ctx, cardX, cardY, cardW, cardH, 40);
+                    drawReadingShareRoundedRect(ctx, cardX, cardY, cardW, cardH, 36);
                     ctx.fillStyle = "#fffaf8";
                     ctx.fill();
                     ctx.strokeStyle = "rgba(255,255,255,0.35)";
@@ -2366,48 +2421,55 @@
                     ctx.stroke();
 
                     var cx = w / 2;
-                    var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
+                    var b = cardY + padY + 22;
 
                     ctx.textAlign = "center";
                     ctx.fillStyle = "#7f1d1d";
                     ctx.font = "700 24px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", readingCard), cx, cardY + 58);
+                    ctx.fillText(T("home.readingShareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", readingCard), cx, b);
+                    b += 26 + gapMd;
 
                     ctx.fillStyle = "#5d4037";
-                    ctx.font = "700 34px " + fontUi;
-                    ctx.fillText(userName, cx, cardY + 102);
+                    ctx.font = "700 32px " + fontUi;
+                    ctx.fillText(userName, cx, b);
+                    b += 34 + gapSm;
 
                     ctx.fillStyle = "#3e2723";
-                    ctx.font = "800 40px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, cardY + 148);
+                    ctx.font = "800 38px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, b);
+                    b += 40 + gapMd;
 
                     ctx.fillStyle = "#c62828";
-                    ctx.font = "900 150px " + fontUi;
-                    ctx.fillText(String(pct) + "%", cx, cardY + 292);
+                    ctx.font = "900 118px " + fontUi;
+                    ctx.fillText(String(pct) + "%", cx, b);
+                    b += pctTail + gapLg;
 
                     ctx.fillStyle = "#5d4037";
-                    ctx.font = "600 36px " + fontUi;
+                    ctx.font = "600 34px " + fontUi;
                     var daysLine = T("home.readingShareCardDays", "{done} of {total} days complete", readingCard)
                         .replace("{done}", String(done))
                         .replace("{total}", String(tot));
-                    ctx.fillText(daysLine, cx, cardY + 352);
+                    ctx.fillText(daysLine, cx, b);
+                    b += 36 + gapSm;
 
-                    ctx.font = "600 32px " + fontUi;
+                    ctx.font = "600 30px " + fontUi;
                     ctx.fillStyle = "#6d4c41";
                     var remainLine = formatCount(T("home.readingShareCardRemaining", "{count} days to go", readingCard), remaining);
-                    ctx.fillText(remainLine, cx, cardY + 398);
+                    ctx.fillText(remainLine, cx, b);
+                    b += 32 + gapSm;
 
                     ctx.fillStyle = "#e65100";
-                    ctx.font = "700 32px " + fontUi;
+                    ctx.font = "700 30px " + fontUi;
                     var ptsLine = T("home.readingShareCardPoints", "{points} reading points earned", readingCard)
                         .replace("{points}", pointsStr);
-                    ctx.fillText(ptsLine, cx, cardY + 442);
+                    ctx.fillText(ptsLine, cx, b);
+                    b += 32 + gapMd;
 
-                    var bx = cardX + 72;
-                    var by = cardY + 472;
-                    var bw = cardW - 144;
-                    var bh = 32;
-                    var br = 16;
+                    var bx = cardX + 56;
+                    var bw = cardW - 112;
+                    var bh = 34;
+                    var br = 17;
+                    var by = b + barLead;
                     drawReadingShareRoundedRect(ctx, bx, by, bw, bh, br);
                     ctx.fillStyle = "#f1dede";
                     ctx.fill();
@@ -2428,39 +2490,35 @@
                         ctx.fillStyle = pg;
                         ctx.fill();
                     }
+                    b = by + bh + gapMd;
 
                     if (streak > 0) {
                         ctx.fillStyle = "#e65100";
-                        ctx.font = "700 34px " + fontUi;
+                        ctx.font = "700 30px " + fontUi;
                         var streakText = formatCount(T("home.readingShareCardStreak", "{count}-day streak", readingCard), streak);
-                        ctx.fillText(streakText, cx, cardY + 558);
+                        ctx.fillText(streakText, cx, b);
+                        b += 34 + gapMd;
+                    } else {
+                        b += gapSm;
                     }
 
                     var verseRef = T("home.readingShareCardVerseRef", "Psalm 119:31", readingCard);
-                    var verseBody = T(
-                        "home.readingShareCardVerseText",
-                        "I cling to your testimonies, O LORD; let me not be put to shame.",
-                        readingCard
-                    );
-                    var verseTop = cardY + (streak > 0 ? 598 : 548);
-                    var verseMaxW = cardW - 96;
-                    ctx.textAlign = "center";
                     ctx.fillStyle = "#6d4c41";
                     ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(verseRef, cx, verseTop);
+                    ctx.fillText(verseRef, cx, b);
+                    b += 22 + gapSm;
 
                     ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
-                    ctx.font = "italic 500 26px " + fontUi;
-                    var verseLines = wrapReadingShareVerseLines(ctx, verseBody, verseMaxW, 5);
-                    var vy = verseTop + 32;
+                    ctx.font = "italic 500 28px " + fontUi;
                     verseLines.forEach(function (ln) {
-                        ctx.fillText(ln, cx, vy);
-                        vy += 30;
+                        ctx.fillText(ln, cx, b);
+                        b += 30;
                     });
+                    b += gapLg - 6;
 
-                    ctx.fillStyle = "rgba(93,64,55,0.85)";
-                    ctx.font = "600 28px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardFooter", "Shared from NJC Belgium", readingCard), cx, cardY + cardH - 44);
+                    ctx.fillStyle = "rgba(93,64,55,0.82)";
+                    ctx.font = "600 26px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardFooter", "Shared from NJC Belgium", readingCard), cx, b);
 
                     readingShareCanvasToBlob(canvas).then(resolve).catch(reject);
                 });
@@ -2489,27 +2547,6 @@
             }
 
             function shareReadingProgressCard() {
-                var prog = buildReadingProgressData();
-                var pct = prog ? prog.percentComplete : 0;
-                var done = prog ? prog.completedDays : 0;
-                var tot = prog ? prog.totalDays : 0;
-                var remaining = prog ? prog.remainingDays : 0;
-                var userName = getReadingShareUserLabel();
-                var pointsStr = formatReadingPointsForShare(getReadingSharePointsTotal());
-                var verseRefPlain = T("home.readingShareCardVerseRef", "Psalm 119:31", readingCard);
-                var verseTextPlain = T(
-                    "home.readingShareCardVerseText",
-                    "I cling to your testimonies, O LORD; let me not be put to shame.",
-                    readingCard
-                );
-                var line = T("home.readingShareLine", "My Bible reading plan ({name}): {done}/{total} days, {remaining} days to go, {points} pts ({pct}%) — NJC App", readingCard)
-                    .replace("{name}", userName)
-                    .replace("{done}", String(done))
-                    .replace("{total}", String(tot))
-                    .replace("{remaining}", String(remaining))
-                    .replace("{points}", pointsStr)
-                    .replace("{pct}", String(pct));
-                line += "\n\n" + verseRefPlain + " — " + verseTextPlain;
                 var title = T("home.readingShareImageTitle", "My Bible reading progress", readingCard);
 
                 waitForFontsOptional().then(function () {
@@ -2517,38 +2554,38 @@
                 }).then(function (blob) {
                     if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
                         var file = new File([blob], "njc-reading-plan.png", { type: "image/png" });
-                        var payload = { title: title, text: line, files: [file] };
-                        var can = true;
-                        if (typeof navigator.canShare === "function") {
-                            can = navigator.canShare(payload);
+                        var fileOnly = { files: [file] };
+                        var withTitle = { title: title, files: [file] };
+                        function canSharePayload(payload) {
+                            if (typeof navigator.canShare !== "function") {
+                                return true;
+                            }
+                            return navigator.canShare(payload);
                         }
-                        if (can) {
+                        function runShare(payload) {
                             return navigator.share(payload).catch(function (err) {
                                 if (err && err.name === "AbortError") {
                                     return;
                                 }
-                                downloadReadingShareBlob(blob);
+                                throw err;
                             });
                         }
-                        return navigator.share({ title: title, text: line }).catch(function () {
-                            try {
-                                navigator.clipboard.writeText(line);
-                            } catch (e1) {}
+                        var p;
+                        if (canSharePayload(fileOnly)) {
+                            p = runShare(fileOnly);
+                        } else if (canSharePayload(withTitle)) {
+                            p = runShare(withTitle);
+                        } else {
+                            downloadReadingShareBlob(blob);
+                            return;
+                        }
+                        return p.catch(function () {
+                            downloadReadingShareBlob(blob);
                         });
                     }
                     downloadReadingShareBlob(blob);
                 }).catch(function () {
-                    if (typeof navigator !== "undefined" && navigator.share) {
-                        navigator.share({ title: title, text: line }).catch(function () {
-                            try {
-                                navigator.clipboard.writeText(line);
-                            } catch (e2) {}
-                        });
-                    } else {
-                        try {
-                            navigator.clipboard.writeText(line);
-                        } catch (e3) {}
-                    }
+                    return null;
                 });
             }
 

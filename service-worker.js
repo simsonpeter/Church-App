@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v394readingsharenonemail";
-const RUNTIME_CACHE = "njc-runtime-cache-v394readingsharenonemail";
+const APP_CACHE = "njc-app-cache-v395readingsharecardtight";
+const RUNTIME_CACHE = "njc-runtime-cache-v395readingsharecardtight";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share card uses profile or display name only (no address fallback).";
+    "Home: reading share PNG fits the card layout; system share sends the image without extra caption text.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260614readingsharepsalm1191",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingsharenonemail1",
+    "./home-page.js?v=20260614readingsharecardtight1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",
