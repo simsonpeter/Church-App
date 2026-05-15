@@ -2333,6 +2333,10 @@
                     var cardW = w - cardX * 2;
                     var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
                     var verseMaxW = cardW - 72;
+                    var padY = 46;
+                    var gapSm = 12;
+                    var gapMd = 18;
+                    var gapLg = 24;
                     var shareTamil = isTamilLanguage(readingCard);
                     var verseBody = shareTamil
                         ? T(
@@ -2427,10 +2431,6 @@
                             gapMd;
                     }
 
-                    var padY = 46;
-                    var gapSm = 12;
-                    var gapMd = 18;
-                    var gapLg = 24;
                     /* Large % is drawn on baseline; most of the glyph sits above it — leave room so it never overlaps the heading. */
                     var pctHeadroom = 108;
                     var pctTail = 72;
