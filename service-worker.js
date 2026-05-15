@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v397readingoneyearkvjovt";
-const RUNTIME_CACHE = "njc-runtime-cache-v397readingoneyearkvjovt";
+const APP_CACHE = "njc-app-cache-v398readingps11972";
+const RUNTIME_CACHE = "njc-runtime-cache-v398readingps11972";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share card says one-year Bible reading; Psalm 119:31 shown as KJV + OVT (Tamil from app Bible).";
+    "Home: reading share card Tamil title wording; Psalm 119:72 English + Tamil verse without version labels.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,10 +44,10 @@ const CORE_ASSETS = [
     "./styles.css?v=20260614ourapps2",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260614readingoneyearkvjovt1",
+    "./app-shell.js?v=20260614readingps11972a1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingoneyearkvjovt1",
+    "./home-page.js?v=20260614readingps11972a1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",

@@ -2333,14 +2333,14 @@
                     var cardW = w - cardX * 2;
                     var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
                     var verseMaxW = cardW - 72;
-                    var kjvVerse = T(
-                        "home.readingShareCardVerseKjvText",
-                        "I have stuck unto thy testimonies: O LORD, put me not to shame.",
+                    var verseEn = T(
+                        "home.readingShareCardVerseEn",
+                        "The law of thy mouth is better unto me than thousands of gold and silver.",
                         readingCard
                     );
-                    var ovtVerse = T(
-                        "home.readingShareCardVerseOvtText",
-                        "உமது சாட்சிகள்மேல் பற்றுதலாயிருக்கிறேன்; கர்த்தாவே, என்னை வெட்கத்திற்குட்படப்பண்ணாதேயும்.",
+                    var verseTa = T(
+                        "home.readingShareCardVerseTa",
+                        "அநேகமாயிரம் பொன் வெள்ளியைப் பார்க்கிலும், நீர் விளம்பின வேதமே எனக்கு நலம்.",
                         readingCard
                     );
 
@@ -2353,9 +2353,9 @@
                         return;
                     }
                     mctx.font = "italic 500 26px " + fontUi;
-                    var kjvLines = wrapReadingShareVerseLines(mctx, kjvVerse, verseMaxW, 5);
+                    var verseEnLines = wrapReadingShareVerseLines(mctx, verseEn, verseMaxW, 5);
                     mctx.font = "italic 500 28px " + fontUi;
-                    var ovtLines = wrapReadingShareVerseLines(mctx, ovtVerse, verseMaxW, 6);
+                    var verseTaLines = wrapReadingShareVerseLines(mctx, verseTa, verseMaxW, 6);
 
                     var padY = 46;
                     var gapSm = 12;
@@ -2389,11 +2389,9 @@
                         (streak > 0 ? 34 + gapMd : gapSm) +
                         22 +
                         gapSm +
-                        kjvLines.length * 28 +
+                        verseEnLines.length * 28 +
                         gapMd +
-                        22 +
-                        gapSm +
-                        ovtLines.length * 30 +
+                        verseTaLines.length * 30 +
                         gapLg +
                         28 +
                         padY +
@@ -2516,29 +2514,23 @@
                         b += gapSm;
                     }
 
-                    var kjvCaption = T("home.readingShareCardVerseKjvCaption", "Psalm 119:31 · KJV", readingCard);
-                    var ovtCaption = T("home.readingShareCardVerseOvtCaption", "Psalm 119:31 · OVT", readingCard);
+                    var verseRef = T("home.readingShareCardVerseRef", "Psalm 119:72", readingCard);
                     ctx.fillStyle = "#6d4c41";
                     ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(kjvCaption, cx, b);
+                    ctx.fillText(verseRef, cx, b);
                     b += 22 + gapSm;
 
                     ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
                     ctx.font = "italic 500 26px " + fontUi;
-                    kjvLines.forEach(function (ln) {
+                    verseEnLines.forEach(function (ln) {
                         ctx.fillText(ln, cx, b);
                         b += 28;
                     });
                     b += gapMd;
 
-                    ctx.fillStyle = "#6d4c41";
-                    ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(ovtCaption, cx, b);
-                    b += 22 + gapSm;
-
                     ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
                     ctx.font = "italic 500 28px " + fontUi;
-                    ovtLines.forEach(function (ln) {
+                    verseTaLines.forEach(function (ln) {
                         ctx.fillText(ln, cx, b);
                         b += 30;
                     });
