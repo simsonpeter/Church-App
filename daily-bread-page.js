@@ -52,6 +52,7 @@
     var shareFeedbackTimerId = null;
     var currentShareTitleText = "";
     var currentShareBodyPreview = "";
+    var currentShareDateFormatted = "";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -83,6 +84,29 @@
             return window.NjcI18n.getLanguageForElement(pageCard) === "ta" ? "ta" : "en";
         }
         return getAppLanguage();
+    }
+
+    function formatBrusselsLongDate(ymdKey) {
+        var raw = String(ymdKey || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+            return "";
+        }
+        var parts = raw.split("-");
+        var y = Number(parts[0]);
+        var m = Number(parts[1]);
+        var d = Number(parts[2]);
+        if (!y || m < 1 || m > 12 || d < 1 || d > 31) {
+            return "";
+        }
+        var locale = getLocale();
+        var dateObj = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
+        return new Intl.DateTimeFormat(locale, {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            timeZone: BRUSSELS_TZ
+        }).format(dateObj);
     }
 
     function getBrusselsYmd() {
@@ -273,10 +297,26 @@
         if (!url) {
             return;
         }
-        var title = String(currentShareTitleText || "").trim() || T("dailyBread.title", "Daily bread");
+        var section = T("dailyBread.title", "Daily bread");
+        var dateStr = String(currentShareDateFormatted || "").trim();
+        if (!dateStr) {
+            dateStr = formatBrusselsLongDate(getBrusselsYmd().key);
+        }
+        var sectionDateLine = dateStr
+            ? T("dailyBread.shareSectionDate", "{section} — {date}")
+                .replace(/\{section\}/g, section)
+                .replace(/\{date\}/g, dateStr)
+            : section;
+        var devotionTitle = String(currentShareTitleText || "").trim();
+        var headline = devotionTitle ? (sectionDateLine + "\n" + devotionTitle) : sectionDateLine;
         var preview = String(currentShareBodyPreview || "").trim();
+        var shareText = preview ? (headline + "\n\n" + preview) : headline;
+        var shareTitle = devotionTitle ? (sectionDateLine + " — " + devotionTitle) : sectionDateLine;
+        if (shareTitle.length > 280) {
+            shareTitle = shareTitle.slice(0, 277).trim() + "...";
+        }
         if (typeof navigator !== "undefined" && navigator.share) {
-            var p = navigator.share({ title: title, text: preview || title, url: url });
+            var p = navigator.share({ title: shareTitle, text: shareText, url: url });
             if (p && typeof p.then === "function" && typeof p.catch === "function") {
                 p.catch(function (err) {
                     if (err && err.name === "AbortError") {
@@ -285,7 +325,7 @@
                     copyTextToClipboard(url).then(function () {
                         showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
-                        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+                        copyTextToClipboard(buildPlainShareText(headline, preview, url)).then(function () {
                             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                         }, function () {
                             showShareFeedback("dailyBread.shareFailed", "Could not share or copy. Try again.");
@@ -295,7 +335,7 @@
             }
             return;
         }
-        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+        copyTextToClipboard(buildPlainShareText(headline, preview, url)).then(function () {
             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
         }, function () {
             copyTextToClipboard(url).then(function () {
@@ -1025,6 +1065,7 @@
         }
         currentShareTitleText = "";
         currentShareBodyPreview = "";
+        currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
         updateTtsUi();
@@ -1043,6 +1084,7 @@
         }
         currentShareTitleText = "";
         currentShareBodyPreview = "";
+        currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
         updateTtsUi();
@@ -1061,6 +1103,7 @@
         }
         currentShareTitleText = "";
         currentShareBodyPreview = "";
+        currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
         updateTtsUi();
@@ -1088,7 +1131,10 @@
         var authorPart = authorText;
         var bodyPart = String(picked.body || "").trim();
         currentReadPlain = sanitizeTextForSpeech([titlePart, authorPart, bodyPart].filter(Boolean).join(". "));
-        currentShareTitleText = currentSpeechTitle;
+        var entryDateRaw = entry && entry.date ? String(entry.date).trim() : "";
+        var ymdForShare = /^\d{4}-\d{2}-\d{2}$/.test(entryDateRaw) ? entryDateRaw : getBrusselsYmd().key;
+        currentShareDateFormatted = formatBrusselsLongDate(ymdForShare);
+        currentShareTitleText = titlePart;
         currentShareBodyPreview = previewPlainBody(picked.body || "", 260);
         statusEl.hidden = true;
         contentWrap.hidden = false;

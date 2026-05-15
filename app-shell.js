@@ -142,6 +142,7 @@
         "dailyBread.shareGuestsDisabled": "அன்றன்றுள்ள அப்பத்தைப் பகிர உள்நுழைந்த பயனர் கணக்கு தேவை.",
         "dailyBread.linkCopied": "இணைப்பு நகலெடுக்கப்பட்டது. உரையாடல் அல்லது மின்னஞ்சலில் ஒட்டவும்.",
         "dailyBread.shareFailed": "பகிர முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "dailyBread.shareSectionDate": "{section} — {date}",
         "menu.dailyBread": "அன்றன்றுள்ள அப்பம்",
         "menu.newsletter": "செய்திமடல்",
         "menu.ourApps": "எங்கள் செயலிகள்",

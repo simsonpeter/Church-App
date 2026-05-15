@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v406dailybreadsharesignin";
-const RUNTIME_CACHE = "njc-runtime-cache-v406dailybreadsharesignin";
+const APP_CACHE = "njc-app-cache-v407dailybreadsharedated";
+const RUNTIME_CACHE = "njc-runtime-cache-v407dailybreadsharedated";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Daily bread: share link to the Bread tab (signed-in users only; guests see a disabled share button).";
+    "Daily bread: share includes section name and long date in the title and message text.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260606dailybreadshare1",
+    "./styles.css?v=20260607dailybreadsharedated1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260606dailybreadshare1",
+    "./app-shell.js?v=20260607dailybreadsharedated1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260614readingsharesignedin1",
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260613nobibleparallel1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
-    "./daily-bread-page.js?v=20260606dailybreadshare1",
+    "./daily-bread-page.js?v=20260607dailybreadsharedated1",
     "./newsletter-page.js?v=20260610newslettershare1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260511newsletter1",
