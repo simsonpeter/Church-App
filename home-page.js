@@ -2361,6 +2361,15 @@
                     mctx.font = (shareTamil ? "italic 500 28px " : "italic 500 26px ") + fontUi;
                     var verseLines = wrapReadingShareVerseLines(mctx, verseBody, verseMaxW, shareTamil ? 6 : 5);
 
+                    var nudgeQuestion = T(
+                        "home.readingShareCardNudgeQuestion",
+                        "Did you read your Bible today?",
+                        readingCard
+                    );
+                    mctx.font = "600 24px " + fontUi;
+                    var nudgeLineStep = 28;
+                    var nudgeLines = wrapReadingShareVerseLines(mctx, nudgeQuestion, verseMaxW, 4);
+
                     var padY = 46;
                     var gapSm = 12;
                     var gapMd = 18;
@@ -2395,6 +2404,9 @@
                         gapSm +
                         verseLines.length * verseLineStep +
                         gapLg +
+                        gapMd +
+                        nudgeLines.length * nudgeLineStep +
+                        gapSm +
                         28 +
                         padY +
                         12;
@@ -2528,6 +2540,14 @@
                         b += verseLineStep;
                     });
                     b += gapLg - 6;
+
+                    ctx.fillStyle = "#5d4037";
+                    ctx.font = "600 24px " + fontUi;
+                    nudgeLines.forEach(function (ln) {
+                        ctx.fillText(ln, cx, b);
+                        b += nudgeLineStep;
+                    });
+                    b += gapSm;
 
                     ctx.fillStyle = "rgba(93,64,55,0.82)";
                     ctx.font = "600 26px " + fontUi;
