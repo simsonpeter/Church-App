@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v407dailybreadsharedated";
-const RUNTIME_CACHE = "njc-runtime-cache-v407dailybreadsharedated";
+const APP_CACHE = "njc-app-cache-v408colorfulpalettes";
+const RUNTIME_CACHE = "njc-runtime-cache-v408colorfulpalettes";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Daily bread: share includes section name and long date in the title and message text.";
+    "Settings: five new vivid color themes (Berry, Royal, Lagoon, Orchid, Cherry) plus existing palettes.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260607dailybreadsharedated1",
+    "./styles.css?v=20260606colorfulpalettes1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260607dailybreadsharedated1",
+    "./app-shell.js?v=20260606colorfulpalettes1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260614readingsharesignedin1",

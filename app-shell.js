@@ -1180,6 +1180,11 @@
         "settings.paletteForest": "காடு (பச்சை)",
         "settings.paletteSunset": "சன்செட் (நாரஞ்சு)",
         "settings.paletteSlate": "ஸ்லேட் (சாம்பல்-நீலம்)",
+        "settings.paletteBerry": "பெர்ரி (இளஞ்சிவப்பு & மெஜெண்டா)",
+        "settings.paletteRoyal": "ராயல் (இண்டிகோ & ஊதா)",
+        "settings.paletteLagoon": "லகூன் (பிரகாச சியான்)",
+        "settings.paletteOrchid": "ஆர்க்கிட் (ஊதா)",
+        "settings.paletteCherry": "செர்ரி (ரோஜ் சிவப்பு)",
         "settings.themeLight": "ஒளி நிலை",
         "settings.themeDark": "இருள் நிலை",
         "settings.language": "மொழி",
@@ -6024,7 +6029,12 @@
         { id: "ocean", key: "settings.paletteOcean", fallback: "Ocean (teal)" },
         { id: "forest", key: "settings.paletteForest", fallback: "Forest (green)" },
         { id: "sunset", key: "settings.paletteSunset", fallback: "Sunset (amber)" },
-        { id: "slate", key: "settings.paletteSlate", fallback: "Slate (blue-gray)" }
+        { id: "slate", key: "settings.paletteSlate", fallback: "Slate (blue-gray)" },
+        { id: "berry", key: "settings.paletteBerry", fallback: "Berry (fuchsia & magenta)" },
+        { id: "royal", key: "settings.paletteRoyal", fallback: "Royal (indigo & violet)" },
+        { id: "lagoon", key: "settings.paletteLagoon", fallback: "Lagoon (bright cyan)" },
+        { id: "orchid", key: "settings.paletteOrchid", fallback: "Orchid (purple)" },
+        { id: "cherry", key: "settings.paletteCherry", fallback: "Cherry (rose red)" }
     ];
 
     function getStoredPalette() {
