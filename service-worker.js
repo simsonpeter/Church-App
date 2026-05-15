@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v404readingsharesignedin";
-const RUNTIME_CACHE = "njc-runtime-cache-v404readingsharesignedin";
+const APP_CACHE = "njc-app-cache-v405biblettskeepalive";
+const RUNTIME_CACHE = "njc-runtime-cache-v405biblettskeepalive";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share button disabled for guests; signed-in users only.";
+    "Bible reader: keep Web Speech TTS alive when the screen sleeps (silent audio session + playback audio session).";
 
 const CORE_ASSETS = [
     "./",
@@ -50,7 +50,7 @@ const CORE_ASSETS = [
     "./home-page.js?v=20260614readingsharesignedin1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
-    "./bible-page.js?v=20260613nobibleparallel1",
+    "./bible-page.js?v=20260606biblettskeepalive1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
     "./daily-bread-page.js?v=20260414feedprobe1",
