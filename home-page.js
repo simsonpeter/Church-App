@@ -2332,12 +2332,17 @@
                     var cardX = 48;
                     var cardW = w - cardX * 2;
                     var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
-                    var verseBody = T(
-                        "home.readingShareCardVerseText",
-                        "I cling to your testimonies, O LORD; let me not be put to shame.",
+                    var verseMaxW = cardW - 72;
+                    var kjvVerse = T(
+                        "home.readingShareCardVerseKjvText",
+                        "I have stuck unto thy testimonies: O LORD, put me not to shame.",
                         readingCard
                     );
-                    var verseMaxW = cardW - 72;
+                    var ovtVerse = T(
+                        "home.readingShareCardVerseOvtText",
+                        "உமது சாட்சிகள்மேல் பற்றுதலாயிருக்கிறேன்; கர்த்தாவே, என்னை வெட்கத்திற்குட்படப்பண்ணாதேயும்.",
+                        readingCard
+                    );
 
                     var measureCv = document.createElement("canvas");
                     measureCv.width = w;
@@ -2347,8 +2352,10 @@
                         reject(new Error("canvas-unavailable"));
                         return;
                     }
+                    mctx.font = "italic 500 26px " + fontUi;
+                    var kjvLines = wrapReadingShareVerseLines(mctx, kjvVerse, verseMaxW, 5);
                     mctx.font = "italic 500 28px " + fontUi;
-                    var verseLines = wrapReadingShareVerseLines(mctx, verseBody, verseMaxW, 6);
+                    var ovtLines = wrapReadingShareVerseLines(mctx, ovtVerse, verseMaxW, 6);
 
                     var padY = 46;
                     var gapSm = 12;
@@ -2382,7 +2389,11 @@
                         (streak > 0 ? 34 + gapMd : gapSm) +
                         22 +
                         gapSm +
-                        verseLines.length * 30 +
+                        kjvLines.length * 28 +
+                        gapMd +
+                        22 +
+                        gapSm +
+                        ovtLines.length * 30 +
                         gapLg +
                         28 +
                         padY +
@@ -2439,7 +2450,7 @@
 
                     ctx.fillStyle = "#3e2723";
                     ctx.font = "800 38px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, b);
+                    ctx.fillText(T("home.readingShareCardHeading", "One-year Bible reading plan", readingCard), cx, b);
                     b += 40 + gapMd + pctHeadroom;
 
                     ctx.fillStyle = "#c62828";
@@ -2505,15 +2516,29 @@
                         b += gapSm;
                     }
 
-                    var verseRef = T("home.readingShareCardVerseRef", "Psalm 119:31", readingCard);
+                    var kjvCaption = T("home.readingShareCardVerseKjvCaption", "Psalm 119:31 · KJV", readingCard);
+                    var ovtCaption = T("home.readingShareCardVerseOvtCaption", "Psalm 119:31 · OVT", readingCard);
                     ctx.fillStyle = "#6d4c41";
                     ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(verseRef, cx, b);
+                    ctx.fillText(kjvCaption, cx, b);
+                    b += 22 + gapSm;
+
+                    ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
+                    ctx.font = "italic 500 26px " + fontUi;
+                    kjvLines.forEach(function (ln) {
+                        ctx.fillText(ln, cx, b);
+                        b += 28;
+                    });
+                    b += gapMd;
+
+                    ctx.fillStyle = "#6d4c41";
+                    ctx.font = "700 22px " + fontUi;
+                    ctx.fillText(ovtCaption, cx, b);
                     b += 22 + gapSm;
 
                     ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
                     ctx.font = "italic 500 28px " + fontUi;
-                    verseLines.forEach(function (ln) {
+                    ovtLines.forEach(function (ln) {
                         ctx.fillText(ln, cx, b);
                         b += 30;
                     });
@@ -2550,7 +2575,7 @@
             }
 
             function shareReadingProgressCard() {
-                var title = T("home.readingShareImageTitle", "My Bible reading progress", readingCard);
+                var title = T("home.readingShareImageTitle", "One-year Bible reading progress", readingCard);
 
                 waitForFontsOptional().then(function () {
                     return buildReadingProgressShareImageBlob();
