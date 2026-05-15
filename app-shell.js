@@ -408,6 +408,7 @@
         "celebrations.wishThreadMessagesTitle": "அனைவரின் வாழ்த்துக்கள்",
         "celebrations.wishThreadSent": "அனுப்பப்பட்டது!",
         "celebrations.wishThreadIntro": "இன்று பிறந்தநாள்/திருமண நாள் கொண்டாடுபவர்களுக்கு அன்புடன் எழுதுங்கள்.",
+        "celebrations.wishThreadDayHint": "பெல்ஜியம் நேரப்படி ஒவ்வொரு நாளுக்கும் வாழ்த்துக்கள் தனிப் பட்டியலில் சேமிக்கப்படும். நள்ளிரவுக்குப் பிறகு புதிய நாள் பட்டியல் தொடங்கும்; இன்றைய செய்திகளைப் படிக்க “வாழ்த்துக்களைக் காட்டு” (▼) ஐத் தட்டவும்.",
         "celebrations.wishThreadPlaceholder": "வாழ்த்துச் செய்தியை எழுதுங்கள்…",
         "celebrations.wishThreadSend": "அனுப்பு",
         "celebrations.wishThreadLogin": "வாழ்த்து இடுவதற்கு உள்நுழையவும்.",

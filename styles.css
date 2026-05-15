@@ -4387,6 +4387,13 @@ html[data-theme="dark"] .our-apps-pill:hover {
     padding: 12px 12px 14px;
 }
 
+.celebration-wish-day-hint {
+    margin: 0 0 10px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--muted);
+}
+
 .celebration-wish-toolbar {
     display: flex;
     flex-wrap: wrap;

@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v408colorfulpalettes";
-const RUNTIME_CACHE = "njc-runtime-cache-v408colorfulpalettes";
+const APP_CACHE = "njc-app-cache-v409celebrationswishesvisible";
+const RUNTIME_CACHE = "njc-runtime-cache-v409celebrationswishesvisible";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Settings: five new vivid color themes (Berry, Royal, Lagoon, Orchid, Cherry) plus existing palettes.";
+    "Celebrations: wish list opens when there are messages; note that wishes are grouped by Belgium calendar day.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260606colorfulpalettes1",
+    "./styles.css?v=20260606celebwishesvisible1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260606colorfulpalettes1",
+    "./app-shell.js?v=20260606celebwishesvisible1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260614readingsharesignedin1",
@@ -63,7 +63,7 @@ const CORE_ASSETS = [
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260411kidsworld",
-    "./celebration-wish-thread.js?v=20260411celemember",
+    "./celebration-wish-thread.js?v=20260606celebwishesvisible1",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
     "./spa-router.js?v=20260614ourapps2",

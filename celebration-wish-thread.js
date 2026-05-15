@@ -146,6 +146,7 @@
             "<div class=\"celebration-wish-thread celebration-wish-thread--panel\" data-celebration-wish-suffix=\"" + sid + "\">" +
             "  <p class=\"page-note celebration-wish-status\" id=\"celebration-wish-status-" + sid + "\" hidden></p>" +
             "  <p class=\"page-note celebration-wish-login\" id=\"celebration-wish-login-" + sid + "\" hidden></p>" +
+            "  <p class=\"page-note celebration-wish-day-hint\" id=\"celebration-wish-day-hint-" + sid + "\"></p>" +
             "  <div class=\"celebration-wish-toolbar\">" +
             "    <input type=\"text\" id=\"celebration-wish-input-" + sid + "\" class=\"search-input celebration-wish-input\" maxlength=\"" + String(MAX_TEXT) + "\" autocomplete=\"off\" aria-label=\"\">" +
             "    <button type=\"button\" class=\"celebration-wish-chevron\" id=\"celebration-wish-chevron-" + sid + "\" aria-expanded=\"false\" aria-controls=\"celebration-wish-dropdown-" + sid + "\" title=\"\"><i class=\"fa-solid fa-chevron-down\" aria-hidden=\"true\"></i></button>" +
@@ -171,6 +172,13 @@
         var dropdownEl = rootEl.querySelector("#celebration-wish-dropdown-" + sid);
         var clearBtn = rootEl.querySelector("#celebration-wish-clear-" + sid);
         var dropTitleEl = rootEl.querySelector("#celebration-wish-drop-title-" + sid);
+        var dayHintEl = rootEl.querySelector("#celebration-wish-day-hint-" + sid);
+        if (dayHintEl) {
+            dayHintEl.textContent = tLocal(
+                "celebrations.wishThreadDayHint",
+                "Wishes are saved by calendar day (Belgium time). After midnight a new day starts a fresh list; tap Show wishes (below) to read messages."
+            );
+        }
 
         if (inputEl) {
             inputEl.setAttribute("placeholder", tLocal("celebrations.wishThreadPlaceholder", "Write a wish…"));
@@ -271,6 +279,7 @@
             if (!rows.length) {
                 messagesEl.innerHTML = "<p class=\"page-note celebration-wish-empty\">" + escapeHtml(tLocal("celebrations.wishThreadEmpty", "No wishes yet — be the first!")) + "</p>";
                 scrollBottom();
+                setDropdownOpen(false);
                 return;
             }
             var delLabel = tLocal("celebrations.deleteWish", "Delete");
@@ -298,6 +307,7 @@
                     "</div>";
             }).join("");
             scrollBottom();
+            setDropdownOpen(true);
         }
 
         function stopListen() {
@@ -338,6 +348,7 @@
                     messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadMembersOnly", "Sign in to see community wishes.")) + "</p>";
                 }
                 setStatus("");
+                setDropdownOpen(true);
                 updateGuestUi();
                 return;
             }
@@ -345,6 +356,7 @@
                 if (messagesEl) {
                     messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadUnavailable", "Wishes are unavailable right now.")) + "</p>";
                 }
+                setDropdownOpen(true);
                 return;
             }
             try {
@@ -368,9 +380,14 @@
                     if (messagesEl) {
                         messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadLoadError", "Could not load wishes.")) + "</p>";
                     }
+                    setDropdownOpen(true);
                 });
             } catch (e3) {
                 setStatus(tLocal("celebrations.wishThreadLoadError", "Could not load wishes."), true);
+                if (messagesEl) {
+                    messagesEl.innerHTML = "<p class=\"page-note\">" + escapeHtml(tLocal("celebrations.wishThreadLoadError", "Could not load wishes.")) + "</p>";
+                }
+                setDropdownOpen(true);
             }
         }
 
@@ -549,6 +566,12 @@
             }
             if (clearBtn) {
                 clearBtn.textContent = tLocal("celebrations.clearThread", "Clear all");
+            }
+            if (dayHintEl) {
+                dayHintEl.textContent = tLocal(
+                    "celebrations.wishThreadDayHint",
+                    "Wishes are saved by calendar day (Belgium time). After midnight a new day starts a fresh list; tap Show wishes (below) to read messages."
+                );
             }
             if (loginEl && !getUser()) {
                 loginEl.textContent = tLocal("celebrations.wishThreadSignInToView", "Sign in to view and post celebration wishes.");
