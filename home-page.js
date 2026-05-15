@@ -2354,6 +2354,8 @@
                     var gapSm = 12;
                     var gapMd = 18;
                     var gapLg = 24;
+                    /* Large % is drawn on baseline; most of the glyph sits above it — leave room so it never overlaps the heading. */
+                    var pctHeadroom = 108;
                     var pctTail = 72;
                     var barLead = 14;
                     var cardH =
@@ -2364,6 +2366,7 @@
                         gapSm +
                         40 +
                         gapMd +
+                        pctHeadroom +
                         118 +
                         pctTail +
                         gapLg +
@@ -2437,7 +2440,7 @@
                     ctx.fillStyle = "#3e2723";
                     ctx.font = "800 38px " + fontUi;
                     ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, b);
-                    b += 40 + gapMd;
+                    b += 40 + gapMd + pctHeadroom;
 
                     ctx.fillStyle = "#c62828";
                     ctx.font = "900 118px " + fontUi;
