@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260614readingsharesignedin1">
+    <link rel="stylesheet" href="styles.css?v=20260606dailybreadshare1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -579,16 +579,23 @@
                 <p class="page-note daily-bread-date-line" id="daily-bread-date-line" aria-live="polite"></p>
                 <p class="page-note" id="daily-bread-status" aria-live="polite" hidden></p>
                 <div id="daily-bread-content" class="daily-bread-content" hidden>
-                    <div class="daily-bread-tts-row" role="group" aria-label="Listen to daily bread">
-                        <button type="button" class="button-link button-secondary daily-bread-tts-toggle" id="daily-bread-tts-toggle" disabled data-i18n-aria-label="dailyBread.ttsPlayAria" data-i18n-aria-fallback="Listen" aria-label="Listen">
-                            <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
-                            <span data-i18n="dailyBread.ttsListen">Listen</span>
-                        </button>
-                        <button type="button" class="button-link button-secondary daily-bread-tts-stop" id="daily-bread-tts-stop" disabled data-i18n-aria-label="dailyBread.ttsStopAria" data-i18n-aria-fallback="Stop" aria-label="Stop">
-                            <i class="fa-solid fa-stop" aria-hidden="true"></i>
-                            <span data-i18n="dailyBread.ttsStop">Stop</span>
+                    <div class="daily-bread-actions-row">
+                        <div class="daily-bread-tts-row" role="group" aria-label="Listen to daily bread">
+                            <button type="button" class="button-link button-secondary daily-bread-tts-toggle" id="daily-bread-tts-toggle" disabled data-i18n-aria-label="dailyBread.ttsPlayAria" data-i18n-aria-fallback="Listen" aria-label="Listen">
+                                <i class="fa-solid fa-volume-high" aria-hidden="true"></i>
+                                <span data-i18n="dailyBread.ttsListen">Listen</span>
+                            </button>
+                            <button type="button" class="button-link button-secondary daily-bread-tts-stop" id="daily-bread-tts-stop" disabled data-i18n-aria-label="dailyBread.ttsStopAria" data-i18n-aria-fallback="Stop" aria-label="Stop">
+                                <i class="fa-solid fa-stop" aria-hidden="true"></i>
+                                <span data-i18n="dailyBread.ttsStop">Stop</span>
+                            </button>
+                        </div>
+                        <button type="button" class="button-link button-secondary daily-bread-share-btn" id="daily-bread-share-btn" hidden>
+                            <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
+                            <span data-i18n="dailyBread.share" data-i18n-fallback="Share">Share</span>
                         </button>
                     </div>
+                    <p class="page-note daily-bread-share-feedback" id="daily-bread-share-feedback" role="status" aria-live="polite" hidden></p>
                     <h3 id="daily-bread-heading" class="daily-bread-heading"></h3>
                     <p id="daily-bread-author-line" class="daily-bread-author-line" hidden></p>
                     <div id="daily-bread-body" class="daily-bread-body"></div>
@@ -2158,7 +2165,7 @@
     <script src="user-auth.js?v=20260411mainmerge1"></script>
     <script src="app-modules.js?v=20260511newsletter1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260614readingsharesignedin1"></script>
+    <script src="app-shell.js?v=20260606dailybreadshare1"></script>
     <script src="events-engine.js?v=20260414feedprobe1"></script>
     <script src="celebration-wish-thread.js?v=20260411celemember"></script>
     <script src="home-page.js?v=20260614readingsharesignedin1"></script>
@@ -2167,7 +2174,7 @@
     <script src="bible-page.js?v=20260613nobibleparallel1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260609answeredtabs1"></script>
-    <script src="daily-bread-page.js?v=20260414feedprobe1"></script>
+    <script src="daily-bread-page.js?v=20260606dailybreadshare1"></script>
     <script src="newsletter-page.js?v=20260610newslettershare1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260511newsletter1"></script>

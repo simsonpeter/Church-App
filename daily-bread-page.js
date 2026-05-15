@@ -24,6 +24,8 @@
     var pageCard = document.querySelector(".daily-bread-page-card");
     var ttsToggle = document.getElementById("daily-bread-tts-toggle");
     var ttsStop = document.getElementById("daily-bread-tts-stop");
+    var shareBtn = document.getElementById("daily-bread-share-btn");
+    var shareFeedback = document.getElementById("daily-bread-share-feedback");
 
     if (!dateLine || !statusEl || !contentWrap || !headingEl || !bodyEl) {
         return;
@@ -47,6 +49,9 @@
     var currentReadPlain = "";
     var currentSpeechTitle = "";
     var mediaSessionBound = false;
+    var shareFeedbackTimerId = null;
+    var currentShareTitleText = "";
+    var currentShareBodyPreview = "";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -128,6 +133,177 @@
         var m = String(date.getMonth() + 1).padStart(2, "0");
         var d = String(date.getDate()).padStart(2, "0");
         return String(y) + "-" + m + "-" + d;
+    }
+
+    function previewPlainBody(body, maxLen) {
+        var s = String(body || "").replace(/\s+/g, " ").trim();
+        if (!s) {
+            return "";
+        }
+        var cap = typeof maxLen === "number" ? maxLen : 220;
+        if (s.length <= cap) {
+            return s;
+        }
+        return s.slice(0, Math.max(0, cap - 3)).trim() + "...";
+    }
+
+    function copyTextToClipboard(text) {
+        var t = String(text || "");
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(t);
+        }
+        return new Promise(function (resolve, reject) {
+            var area = document.createElement("textarea");
+            area.value = t;
+            area.setAttribute("readonly", "");
+            area.style.position = "fixed";
+            area.style.left = "-5000px";
+            document.body.appendChild(area);
+            try {
+                area.select();
+                area.setSelectionRange(0, 99999);
+                var ok = document.execCommand("copy");
+                document.body.removeChild(area);
+                if (ok) {
+                    resolve();
+                } else {
+                    reject(new Error("copy"));
+                }
+            } catch (err) {
+                try {
+                    document.body.removeChild(area);
+                } catch (e2) {
+                    return;
+                }
+                reject(err);
+            }
+        });
+    }
+
+    function clearShareFeedbackTimer() {
+        if (shareFeedbackTimerId !== null) {
+            window.clearTimeout(shareFeedbackTimerId);
+            shareFeedbackTimerId = null;
+        }
+    }
+
+    function clearShareFeedback() {
+        clearShareFeedbackTimer();
+        if (shareFeedback) {
+            shareFeedback.textContent = "";
+            shareFeedback.hidden = true;
+        }
+    }
+
+    function showShareFeedback(key, fallback) {
+        if (!shareFeedback) {
+            return;
+        }
+        shareFeedback.textContent = T(key, fallback);
+        shareFeedback.hidden = false;
+        clearShareFeedbackTimer();
+        shareFeedbackTimerId = window.setTimeout(function () {
+            shareFeedbackTimerId = null;
+            if (shareFeedback) {
+                shareFeedback.textContent = "";
+                shareFeedback.hidden = true;
+            }
+        }, 4200);
+    }
+
+    function getDailyBreadShareUrl() {
+        try {
+            var u = new URL(String(window.location.href));
+            u.hash = "daily-bread";
+            return u.toString();
+        } catch (errUrl) {
+            return "";
+        }
+    }
+
+    function buildPlainShareText(title, preview, url) {
+        var lines = [];
+        if (title) {
+            lines.push(title);
+        }
+        if (preview) {
+            lines.push(preview);
+        }
+        if (url) {
+            lines.push(url);
+        }
+        return lines.join("\n\n");
+    }
+
+    function syncDailyBreadShareButton() {
+        if (!shareBtn) {
+            return;
+        }
+        var contentVisible = Boolean(contentWrap && !contentWrap.hidden);
+        if (!contentVisible) {
+            shareBtn.hidden = true;
+            return;
+        }
+        shareBtn.hidden = false;
+        var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        var signedIn = Boolean(user && user.uid);
+        shareBtn.disabled = !signedIn;
+        shareBtn.setAttribute("aria-disabled", signedIn ? "false" : "true");
+        if (signedIn) {
+            shareBtn.setAttribute("aria-label", T("dailyBread.shareAria", "Share daily bread"));
+            shareBtn.title = T("dailyBread.shareAria", "Share daily bread");
+        } else {
+            shareBtn.setAttribute(
+                "aria-label",
+                T("dailyBread.shareGuestsDisabled", "Sign in with a registered account to share daily bread.")
+            );
+            shareBtn.title = T("dailyBread.shareGuestsDisabled", "Sign in with a registered account to share daily bread.");
+        }
+    }
+
+    function runDailyBreadShare() {
+        if (!shareBtn || shareBtn.disabled) {
+            return;
+        }
+        var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+        if (!user || !user.uid) {
+            return;
+        }
+        var url = getDailyBreadShareUrl();
+        if (!url) {
+            return;
+        }
+        var title = String(currentShareTitleText || "").trim() || T("dailyBread.title", "Daily bread");
+        var preview = String(currentShareBodyPreview || "").trim();
+        if (typeof navigator !== "undefined" && navigator.share) {
+            var p = navigator.share({ title: title, text: preview || title, url: url });
+            if (p && typeof p.then === "function" && typeof p.catch === "function") {
+                p.catch(function (err) {
+                    if (err && err.name === "AbortError") {
+                        return;
+                    }
+                    copyTextToClipboard(url).then(function () {
+                        showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
+                    }, function () {
+                        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+                            showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
+                        }, function () {
+                            showShareFeedback("dailyBread.shareFailed", "Could not share or copy. Try again.");
+                        });
+                    });
+                });
+            }
+            return;
+        }
+        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+            showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
+        }, function () {
+            copyTextToClipboard(url).then(function () {
+                showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
+            }, function () {
+                showShareFeedback("dailyBread.shareFailed", "Could not share or copy. Try again.");
+            });
+        });
     }
 
     function normalizeEntry(row, index) {
@@ -847,6 +1023,10 @@
             authorLineEl.hidden = true;
             authorLineEl.textContent = "";
         }
+        currentShareTitleText = "";
+        currentShareBodyPreview = "";
+        clearShareFeedback();
+        syncDailyBreadShareButton();
         updateTtsUi();
     }
 
@@ -861,6 +1041,10 @@
             authorLineEl.hidden = true;
             authorLineEl.textContent = "";
         }
+        currentShareTitleText = "";
+        currentShareBodyPreview = "";
+        clearShareFeedback();
+        syncDailyBreadShareButton();
         updateTtsUi();
     }
 
@@ -875,6 +1059,10 @@
             authorLineEl.hidden = true;
             authorLineEl.textContent = "";
         }
+        currentShareTitleText = "";
+        currentShareBodyPreview = "";
+        clearShareFeedback();
+        syncDailyBreadShareButton();
         updateTtsUi();
     }
 
@@ -900,9 +1088,12 @@
         var authorPart = authorText;
         var bodyPart = String(picked.body || "").trim();
         currentReadPlain = sanitizeTextForSpeech([titlePart, authorPart, bodyPart].filter(Boolean).join(". "));
+        currentShareTitleText = currentSpeechTitle;
+        currentShareBodyPreview = previewPlainBody(picked.body || "", 260);
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();
+        syncDailyBreadShareButton();
     }
 
     function updateDateLine(ymdKey) {
@@ -1001,6 +1192,14 @@
             stopSpeechPlayback();
         });
     }
+    if (shareBtn) {
+        shareBtn.addEventListener("click", function () {
+            if (shareBtn.disabled) {
+                return;
+            }
+            runDailyBreadShare();
+        });
+    }
 
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:routechange", function (event) {
@@ -1014,6 +1213,7 @@
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
             loadDailyBread();
         }
+        syncDailyBreadShareButton();
     });
     document.addEventListener("njc:cardlangchange", function (ev) {
         var d = ev && ev.detail;
@@ -1024,6 +1224,10 @@
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
             loadDailyBread();
         }
+        syncDailyBreadShareButton();
+    });
+    document.addEventListener("njc:authchange", function () {
+        syncDailyBreadShareButton();
     });
     document.addEventListener("njc:admin-daily-bread-updated", function () {
         if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
@@ -1042,6 +1246,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         setupDailyBreadMediaSession();
         updateTtsUi();
+        syncDailyBreadShareButton();
         onRoute();
     });
 })();

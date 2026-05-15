@@ -827,6 +827,38 @@ a.card:hover > h2:not(:first-child) i {
     -webkit-backdrop-filter: blur(8px);
 }
 
+.daily-bread-actions-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 0 0 10px;
+}
+
+.daily-bread-actions-row .daily-bread-tts-row {
+    margin-bottom: 0;
+    flex: 1 1 auto;
+}
+
+.daily-bread-share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 40px;
+    flex-shrink: 0;
+}
+
+.daily-bread-share-btn i {
+    font-size: 1rem;
+    opacity: 0.92;
+}
+
+.daily-bread-share-feedback {
+    margin: 0 0 12px;
+    min-height: 1.25em;
+}
+
 .daily-bread-tts-row,
 .newsletter-tts-row {
     display: flex;
