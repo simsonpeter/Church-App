@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v398readingps11972";
-const RUNTIME_CACHE = "njc-runtime-cache-v398readingps11972";
+const APP_CACHE = "njc-app-cache-v399readingshareverseonelang";
+const RUNTIME_CACHE = "njc-runtime-cache-v399readingshareverseonelang";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share card Tamil title wording; Psalm 119:72 English + Tamil verse without version labels.";
+    "Home: reading share verse block matches UI language (English or Tamil only, not mixed).";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260614readingps11972a1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingps11972a1",
+    "./home-page.js?v=20260614readingshareverseonelang1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",

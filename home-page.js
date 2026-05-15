@@ -2333,16 +2333,21 @@
                     var cardW = w - cardX * 2;
                     var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
                     var verseMaxW = cardW - 72;
-                    var verseEn = T(
-                        "home.readingShareCardVerseEn",
-                        "The law of thy mouth is better unto me than thousands of gold and silver.",
-                        readingCard
-                    );
-                    var verseTa = T(
-                        "home.readingShareCardVerseTa",
-                        "அநேகமாயிரம் பொன் வெள்ளியைப் பார்க்கிலும், நீர் விளம்பின வேதமே எனக்கு நலம்.",
-                        readingCard
-                    );
+                    var shareTamil = isTamilLanguage(readingCard);
+                    var verseBody = shareTamil
+                        ? T(
+                              "home.readingShareCardVerseTa",
+                              "அநேகமாயிரம் பொன் வெள்ளியைப் பார்க்கிலும், நீர் விளம்பின வேதமே எனக்கு நலம்.",
+                              readingCard
+                          )
+                        : T(
+                              "home.readingShareCardVerseEn",
+                              "The law of thy mouth is better unto me than thousands of gold and silver.",
+                              readingCard
+                          );
+                    var verseRefText = shareTamil
+                        ? T("home.readingShareCardVerseRef", "சங்கீதம் 119:72", readingCard)
+                        : T("home.readingShareCardVerseRefEn", "Psalm 119:72", readingCard);
 
                     var measureCv = document.createElement("canvas");
                     measureCv.width = w;
@@ -2352,10 +2357,9 @@
                         reject(new Error("canvas-unavailable"));
                         return;
                     }
-                    mctx.font = "italic 500 26px " + fontUi;
-                    var verseEnLines = wrapReadingShareVerseLines(mctx, verseEn, verseMaxW, 5);
-                    mctx.font = "italic 500 28px " + fontUi;
-                    var verseTaLines = wrapReadingShareVerseLines(mctx, verseTa, verseMaxW, 6);
+                    var verseLineStep = shareTamil ? 30 : 28;
+                    mctx.font = (shareTamil ? "italic 500 28px " : "italic 500 26px ") + fontUi;
+                    var verseLines = wrapReadingShareVerseLines(mctx, verseBody, verseMaxW, shareTamil ? 6 : 5);
 
                     var padY = 46;
                     var gapSm = 12;
@@ -2389,9 +2393,7 @@
                         (streak > 0 ? 34 + gapMd : gapSm) +
                         22 +
                         gapSm +
-                        verseEnLines.length * 28 +
-                        gapMd +
-                        verseTaLines.length * 30 +
+                        verseLines.length * verseLineStep +
                         gapLg +
                         28 +
                         padY +
@@ -2514,25 +2516,16 @@
                         b += gapSm;
                     }
 
-                    var verseRef = T("home.readingShareCardVerseRef", "Psalm 119:72", readingCard);
                     ctx.fillStyle = "#6d4c41";
                     ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(verseRef, cx, b);
+                    ctx.fillText(verseRefText, cx, b);
                     b += 22 + gapSm;
 
                     ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
-                    ctx.font = "italic 500 26px " + fontUi;
-                    verseEnLines.forEach(function (ln) {
+                    ctx.font = (shareTamil ? "italic 500 28px " : "italic 500 26px ") + fontUi;
+                    verseLines.forEach(function (ln) {
                         ctx.fillText(ln, cx, b);
-                        b += 28;
-                    });
-                    b += gapMd;
-
-                    ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
-                    ctx.font = "italic 500 28px " + fontUi;
-                    verseTaLines.forEach(function (ln) {
-                        ctx.fillText(ln, cx, b);
-                        b += 30;
+                        b += verseLineStep;
                     });
                     b += gapLg - 6;
 
