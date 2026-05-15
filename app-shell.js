@@ -1574,6 +1574,7 @@
         "home.readingNudgeMorning": "இன்றைய காலை வாசிப்பை மறக்க வேண்டாம்.",
         "home.readingNudgeEvening": "இன்றைய மாலை வாசிப்பை மறக்க வேண்டாம்.",
         "home.readingShareProgress": "வாசிப்பு அட்டையைப் பகிர்",
+        "home.readingShareProgressGuestsDisabled": "வாசிப்பு அட்டையைப் பகிர உள்நுழைந்த பயனராக இருக்கவும்.",
         "home.readingHeatmapToggle": "இந்த மாதம்",
         "home.readingHeatmapTitle": "இந்த மாத வாசிப்பு (அடர் = அதிகம்)",
         "home.readingShareLine": "ஒரு வருட வேத வாசிப்பு ({name}): {done}/{total} நாட்கள், இன்னும் {remaining} நாட்கள், {points} வாசிப்புப் புள்ளிகள் ({pct}%) — NJC செயலி",

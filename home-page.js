@@ -2175,6 +2175,29 @@
                 return streak;
             }
 
+            function syncReadingShareProgressButton() {
+                if (!readingShareProgressBtn) {
+                    return;
+                }
+                var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                var signedIn = Boolean(user && user.uid);
+                readingShareProgressBtn.disabled = !signedIn;
+                readingShareProgressBtn.setAttribute("aria-disabled", signedIn ? "false" : "true");
+                if (signedIn) {
+                    readingShareProgressBtn.setAttribute(
+                        "aria-label",
+                        T("home.readingShareProgress", "Share reading progress as a card image", readingCard)
+                    );
+                    readingShareProgressBtn.title = T("home.readingShareProgress", "Share progress card", readingCard);
+                } else {
+                    readingShareProgressBtn.setAttribute(
+                        "aria-label",
+                        T("home.readingShareProgressGuestsDisabled", "Sign in with a registered account to share your reading card.", readingCard)
+                    );
+                    readingShareProgressBtn.title = T("home.readingShareProgressGuestsDisabled", "Sign in with a registered account to share your reading card.", readingCard);
+                }
+            }
+
             function getReadingShareUserLabel() {
                 var el = readingCard;
                 var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
@@ -2459,6 +2482,10 @@
             }
 
             function shareReadingProgressCard() {
+                var user = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                if (!user || !user.uid) {
+                    return;
+                }
                 var title = T("home.readingShareImageTitle", "One-year Bible reading progress", readingCard);
 
                 waitForFontsOptional().then(function () {
@@ -2860,6 +2887,7 @@
                 if (modOn("eventsWeek")) {
                     loadThisWeekEvents();
                 }
+                syncReadingShareProgressButton();
             }
 
             document.addEventListener("njc:latest-sermon-announcement-updated", function () {
@@ -2879,6 +2907,7 @@
                 mergeHomeAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
+                syncReadingShareProgressButton();
             });
 
             document.addEventListener("njc:cardlangchange", function (ev) {
@@ -2893,6 +2922,7 @@
                 mergeHomeAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
+                syncReadingShareProgressButton();
             });
 
             document.addEventListener("njc:userdata-updated", function () {
@@ -3039,6 +3069,7 @@
                 syncTriviaPointsForUser();
                 recalcAndStoreReadingPoints();
                 loadAnnouncements();
+                syncReadingShareProgressButton();
                 try {
                     mergeHomeAnnouncements();
                 } catch (eAuthAnn) {}
@@ -3530,6 +3561,9 @@
 
             if (readingShareProgressBtn) {
                 readingShareProgressBtn.addEventListener("click", function () {
+                    if (readingShareProgressBtn.disabled) {
+                        return;
+                    }
                     shareReadingProgressCard();
                 });
             }
@@ -3611,6 +3645,7 @@
             applyAnnouncementsCardGradient();
             recalcAndStoreReadingPoints();
             applyHomeModulesFromFlags();
+            syncReadingShareProgressButton();
             if (window.NjcCommunityCelebrations && typeof window.NjcCommunityCelebrations.startListen === "function") {
                 window.NjcCommunityCelebrations.startListen(function () {
                     if (modOn("announcements")) {

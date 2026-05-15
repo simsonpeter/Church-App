@@ -8012,6 +8012,25 @@ html[data-theme="dark"] .reading-share-icon-btn:hover {
     background: rgba(255, 255, 255, 0.1);
 }
 
+.reading-share-icon-btn:disabled,
+.reading-share-icon-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.reading-share-icon-btn:disabled:hover,
+.reading-share-icon-btn[disabled]:hover {
+    background: var(--surface-soft);
+    border-color: var(--line);
+    transform: none;
+}
+
+html[data-theme="dark"] .reading-share-icon-btn:disabled,
+html[data-theme="dark"] .reading-share-icon-btn[disabled] {
+    opacity: 0.4;
+}
+
 .reading-share-icon-btn i {
     font-size: 1rem;
 }
