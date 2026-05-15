@@ -2209,64 +2209,6 @@
                 return String(Math.round(x * 10) / 10);
             }
 
-            function wrapReadingShareVerseLines(ctx, text, maxWidth, maxLines) {
-                var words = String(text || "").trim().split(/\s+/).filter(Boolean);
-                if (!words.length) {
-                    return [];
-                }
-                var lines = [];
-                var line = "";
-                words.forEach(function (word) {
-                    var candidate = line ? (line + " " + word) : word;
-                    if (ctx.measureText(candidate).width <= maxWidth) {
-                        line = candidate;
-                        return;
-                    }
-                    if (line) {
-                        lines.push(line);
-                    }
-                    line = word;
-                });
-                if (line) {
-                    lines.push(line);
-                }
-                var cap = maxLines > 0 ? maxLines : 6;
-                if (lines.length > cap) {
-                    var clipped = lines.slice(0, cap);
-                    var tail = clipped[cap - 1];
-                    while (tail.length > 3 && ctx.measureText(tail + "…").width > maxWidth) {
-                        tail = tail.slice(0, -1).trim();
-                    }
-                    clipped[cap - 1] = tail + "…";
-                    return clipped;
-                }
-                if (lines.length === 1 && ctx.measureText(lines[0]).width > maxWidth * 1.02) {
-                    var out = [];
-                    var s = lines[0];
-                    var chunk = "";
-                    for (var i = 0; i < s.length; i++) {
-                        var next = chunk + s.charAt(i);
-                        if (ctx.measureText(next).width > maxWidth && chunk) {
-                            out.push(chunk);
-                            chunk = s.charAt(i);
-                            if (out.length >= cap) {
-                                break;
-                            }
-                        } else {
-                            chunk = next;
-                        }
-                    }
-                    if (chunk && out.length < cap) {
-                        out.push(chunk);
-                    }
-                    if (out.length > cap) {
-                        out = out.slice(0, cap);
-                    }
-                    return out;
-                }
-                return lines;
-            }
-
             function drawReadingShareRoundedRect(ctx, x, y, width, height, radius) {
                 var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
                 ctx.beginPath();
@@ -2332,104 +2274,10 @@
                     var cardX = 48;
                     var cardW = w - cardX * 2;
                     var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
-                    var verseMaxW = cardW - 72;
                     var padY = 46;
                     var gapSm = 12;
                     var gapMd = 18;
                     var gapLg = 24;
-                    var shareTamil = isTamilLanguage(readingCard);
-                    var verseBody = shareTamil
-                        ? T(
-                              "home.readingShareCardVerseTa",
-                              "அநேகமாயிரம் பொன் வெள்ளியைப் பார்க்கிலும், நீர் விளம்பின வேதமே எனக்கு நலம்.",
-                              readingCard
-                          )
-                        : T(
-                              "home.readingShareCardVerseEn",
-                              "The law of thy mouth is better unto me than thousands of gold and silver.",
-                              readingCard
-                          );
-                    var verseRefText = shareTamil
-                        ? T("home.readingShareCardVerseRef", "சங்கீதம் 119:72", readingCard)
-                        : T("home.readingShareCardVerseRefEn", "Psalm 119:72", readingCard);
-
-                    var measureCv = document.createElement("canvas");
-                    measureCv.width = w;
-                    measureCv.height = 64;
-                    var mctx = measureCv.getContext("2d");
-                    if (!mctx) {
-                        reject(new Error("canvas-unavailable"));
-                        return;
-                    }
-                    var verseLineStep = shareTamil ? 30 : 28;
-                    mctx.font = (shareTamil ? "italic 500 28px " : "italic 500 26px ") + fontUi;
-                    var verseLines = wrapReadingShareVerseLines(mctx, verseBody, verseMaxW, shareTamil ? 6 : 5);
-
-                    var nudgeQuestion = T(
-                        "home.readingShareCardNudgeQuestion",
-                        "Did you read your Bible today?",
-                        readingCard
-                    );
-                    mctx.font = "600 24px " + fontUi;
-                    var nudgeLineStep = 28;
-                    var nudgeLines = wrapReadingShareVerseLines(mctx, nudgeQuestion, verseMaxW, 4);
-
-                    var showCatchUp = false;
-                    var catchIntroLines = [];
-                    var catchMorningLines = [];
-                    var catchEveningLines = [];
-                    var catchUpLineStep = 26;
-                    var catchUpFontCss = "600 22px " + fontUi;
-                    var tpCatch = todayPlanData;
-                    if (tpCatch && !readingPlanError) {
-                        var progCatch = getTodayProgress();
-                        var mRefsC = getRefsForPart(tpCatch, "morning");
-                        var eRefsC = getRefsForPart(tpCatch, "evening");
-                        var mMissC = mRefsC.length > 0 && !progCatch.morning;
-                        var eMissC = eRefsC.length > 0 && !progCatch.evening;
-                        showCatchUp = mMissC || eMissC;
-                        if (showCatchUp) {
-                            mctx.font = catchUpFontCss;
-                            var introCatch = T(
-                                "home.readingShareCardNotReadIntro",
-                                "If you have not read yet, please read today’s passages:",
-                                readingCard
-                            );
-                            catchIntroLines = wrapReadingShareVerseLines(mctx, introCatch, verseMaxW, 4);
-                            if (mMissC) {
-                                var mLineC =
-                                    T("home.morningShort", "Morning", readingCard) +
-                                    ": " +
-                                    mRefsC
-                                        .map(function (r) {
-                                            return toFriendlyReference(r, readingCard);
-                                        })
-                                        .join(", ");
-                                catchMorningLines = wrapReadingShareVerseLines(mctx, mLineC, verseMaxW, 6);
-                            }
-                            if (eMissC) {
-                                var eLineC =
-                                    T("home.eveningShort", "Evening", readingCard) +
-                                    ": " +
-                                    eRefsC
-                                        .map(function (r) {
-                                            return toFriendlyReference(r, readingCard);
-                                        })
-                                        .join(", ");
-                                catchEveningLines = wrapReadingShareVerseLines(mctx, eLineC, verseMaxW, 6);
-                            }
-                        }
-                    }
-                    var catchUpBlockH = 0;
-                    if (showCatchUp) {
-                        catchUpBlockH =
-                            gapMd +
-                            catchIntroLines.length * catchUpLineStep +
-                            gapSm +
-                            (catchMorningLines.length ? catchMorningLines.length * catchUpLineStep + gapSm : 0) +
-                            (catchEveningLines.length ? catchEveningLines.length * catchUpLineStep + gapSm : 0) +
-                            gapMd;
-                    }
 
                     /* Large % is drawn on baseline; most of the glyph sits above it — leave room so it never overlaps the heading. */
                     var pctHeadroom = 108;
@@ -2457,14 +2305,7 @@
                         34 +
                         gapMd +
                         (streak > 0 ? 34 + gapMd : gapSm) +
-                        22 +
-                        gapSm +
-                        verseLines.length * verseLineStep +
                         gapLg +
-                        gapMd +
-                        nudgeLines.length * nudgeLineStep +
-                        gapSm +
-                        catchUpBlockH +
                         28 +
                         padY +
                         12;
@@ -2585,52 +2426,7 @@
                     } else {
                         b += gapSm;
                     }
-
-                    ctx.fillStyle = "#6d4c41";
-                    ctx.font = "700 22px " + fontUi;
-                    ctx.fillText(verseRefText, cx, b);
-                    b += 22 + gapSm;
-
-                    ctx.fillStyle = "rgba(62, 39, 35, 0.9)";
-                    ctx.font = (shareTamil ? "italic 500 28px " : "italic 500 26px ") + fontUi;
-                    verseLines.forEach(function (ln) {
-                        ctx.fillText(ln, cx, b);
-                        b += verseLineStep;
-                    });
-                    b += gapLg - 6;
-
-                    ctx.fillStyle = "#5d4037";
-                    ctx.font = "600 24px " + fontUi;
-                    nudgeLines.forEach(function (ln) {
-                        ctx.fillText(ln, cx, b);
-                        b += nudgeLineStep;
-                    });
-                    b += gapSm;
-
-                    if (showCatchUp) {
-                        b += gapMd;
-                        ctx.fillStyle = "#4e342e";
-                        ctx.font = catchUpFontCss;
-                        catchIntroLines.forEach(function (ln) {
-                            ctx.fillText(ln, cx, b);
-                            b += catchUpLineStep;
-                        });
-                        if (catchMorningLines.length) {
-                            b += gapSm;
-                            catchMorningLines.forEach(function (ln) {
-                                ctx.fillText(ln, cx, b);
-                                b += catchUpLineStep;
-                            });
-                        }
-                        if (catchEveningLines.length) {
-                            b += gapSm;
-                            catchEveningLines.forEach(function (ln) {
-                                ctx.fillText(ln, cx, b);
-                                b += catchUpLineStep;
-                            });
-                        }
-                        b += gapMd;
-                    }
+                    b += gapLg;
 
                     ctx.fillStyle = "rgba(93,64,55,0.82)";
                     ctx.font = "600 26px " + fontUi;
