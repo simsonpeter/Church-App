@@ -2185,7 +2185,7 @@
                 var dn = pickWishDisplayName(
                     String(profile && profile.fullName || "").trim(),
                     String(auth.displayName || "").trim(),
-                    String(auth.email || "").trim()
+                    ""
                 );
                 return dn || T("home.readingShareGuestName", "Guest", el);
             }

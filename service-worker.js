@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v393readingsharepsalm119";
-const RUNTIME_CACHE = "njc-runtime-cache-v393readingsharepsalm119";
+const APP_CACHE = "njc-app-cache-v394readingsharenonemail";
+const RUNTIME_CACHE = "njc-runtime-cache-v394readingsharenonemail";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: reading share card includes Psalm 119:31 with name, days left, and points.";
+    "Home: reading share card uses profile or display name only (no address fallback).";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260614readingsharepsalm1191",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingsharepsalm1191",
+    "./home-page.js?v=20260614readingsharenonemail1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",
