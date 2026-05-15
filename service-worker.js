@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v391readingsharecard";
-const RUNTIME_CACHE = "njc-runtime-cache-v391readingsharecard";
+const APP_CACHE = "njc-app-cache-v392readingsharecardv2";
+const RUNTIME_CACHE = "njc-runtime-cache-v392readingsharecardv2";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: share Bible reading plan as a styled image card (with text fallback).";
+    "Home: reading share card shows name, days remaining, and earned reading points.";
 
 const CORE_ASSETS = [
     "./",
@@ -44,10 +44,10 @@ const CORE_ASSETS = [
     "./styles.css?v=20260614ourapps2",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260614readingsharecard1",
+    "./app-shell.js?v=20260614readingsharecard2",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingsharecard1",
+    "./home-page.js?v=20260614readingsharecard2",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260414sermonannounce1",
     "./bible-page.js?v=20260613nobibleparallel1",

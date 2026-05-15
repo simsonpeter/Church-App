@@ -2175,6 +2175,40 @@
                 return streak;
             }
 
+            function getReadingShareUserLabel() {
+                var el = readingCard;
+                var auth = window.NjcAuth && typeof window.NjcAuth.getUser === "function" ? window.NjcAuth.getUser() : null;
+                if (!auth || !auth.uid) {
+                    return T("home.readingShareGuestName", "Guest", el);
+                }
+                var profile = getSavedUserProfile(String(auth.uid));
+                var dn = pickWishDisplayName(
+                    String(profile && profile.fullName || "").trim(),
+                    String(auth.displayName || "").trim(),
+                    String(auth.email || "").trim()
+                );
+                return dn || T("home.readingShareGuestName", "Guest", el);
+            }
+
+            function getReadingSharePointsTotal() {
+                var uid = getTriviaUserId();
+                try {
+                    var raw = window.localStorage.getItem(READING_POINTS_KEY);
+                    var data = raw ? JSON.parse(raw) : {};
+                    return Number(data[uid]) || 0;
+                } catch (e) {
+                    return 0;
+                }
+            }
+
+            function formatReadingPointsForShare(n) {
+                var x = Number(n) || 0;
+                if (Math.abs(x - Math.round(x)) < 0.001) {
+                    return String(Math.round(x));
+                }
+                return String(Math.round(x * 10) / 10);
+            }
+
             function drawReadingShareRoundedRect(ctx, x, y, width, height, radius) {
                 var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
                 ctx.beginPath();
@@ -2231,7 +2265,10 @@
                     var done = prog ? prog.completedDays : 0;
                     var tot = prog ? prog.totalDays : 0;
                     var pct = prog ? prog.percentComplete : 0;
+                    var remaining = prog ? prog.remainingDays : 0;
                     var streak = computeReadingDayStreakBrussels();
+                    var userName = getReadingShareUserLabel();
+                    var pointsStr = formatReadingPointsForShare(getReadingSharePointsTotal());
 
                     var canvas = document.createElement("canvas");
                     canvas.width = 1080;
@@ -2275,26 +2312,41 @@
 
                     ctx.textAlign = "center";
                     ctx.fillStyle = "#7f1d1d";
-                    ctx.font = "700 26px " + fontUi;
-                    ctx.fillText(T("home.readingShareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", readingCard), cx, cardY + 72);
+                    ctx.font = "700 24px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", readingCard), cx, cardY + 58);
+
+                    ctx.fillStyle = "#5d4037";
+                    ctx.font = "700 34px " + fontUi;
+                    ctx.fillText(userName, cx, cardY + 102);
 
                     ctx.fillStyle = "#3e2723";
-                    ctx.font = "800 46px " + fontUi;
+                    ctx.font = "800 40px " + fontUi;
                     ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, cardY + 148);
 
                     ctx.fillStyle = "#c62828";
-                    ctx.font = "900 200px " + fontUi;
-                    ctx.fillText(String(pct) + "%", cx, cardY + 360);
+                    ctx.font = "900 150px " + fontUi;
+                    ctx.fillText(String(pct) + "%", cx, cardY + 292);
 
                     ctx.fillStyle = "#5d4037";
-                    ctx.font = "600 44px " + fontUi;
+                    ctx.font = "600 36px " + fontUi;
                     var daysLine = T("home.readingShareCardDays", "{done} of {total} days complete", readingCard)
                         .replace("{done}", String(done))
                         .replace("{total}", String(tot));
-                    ctx.fillText(daysLine, cx, cardY + 430);
+                    ctx.fillText(daysLine, cx, cardY + 352);
+
+                    ctx.font = "600 32px " + fontUi;
+                    ctx.fillStyle = "#6d4c41";
+                    var remainLine = formatCount(T("home.readingShareCardRemaining", "{count} days to go", readingCard), remaining);
+                    ctx.fillText(remainLine, cx, cardY + 398);
+
+                    ctx.fillStyle = "#e65100";
+                    ctx.font = "700 32px " + fontUi;
+                    var ptsLine = T("home.readingShareCardPoints", "{points} reading points earned", readingCard)
+                        .replace("{points}", pointsStr);
+                    ctx.fillText(ptsLine, cx, cardY + 442);
 
                     var bx = cardX + 72;
-                    var by = cardY + 480;
+                    var by = cardY + 472;
                     var bw = cardW - 144;
                     var bh = 32;
                     var br = 16;
@@ -2321,9 +2373,9 @@
 
                     if (streak > 0) {
                         ctx.fillStyle = "#e65100";
-                        ctx.font = "700 38px " + fontUi;
+                        ctx.font = "700 34px " + fontUi;
                         var streakText = formatCount(T("home.readingShareCardStreak", "{count}-day streak", readingCard), streak);
-                        ctx.fillText(streakText, cx, cardY + 580);
+                        ctx.fillText(streakText, cx, cardY + 558);
                     }
 
                     ctx.fillStyle = "rgba(93,64,55,0.85)";
@@ -2361,9 +2413,15 @@
                 var pct = prog ? prog.percentComplete : 0;
                 var done = prog ? prog.completedDays : 0;
                 var tot = prog ? prog.totalDays : 0;
-                var line = T("home.readingShareLine", "My Bible reading plan: {done}/{total} days ({pct}%) — NJC App", readingCard)
+                var remaining = prog ? prog.remainingDays : 0;
+                var userName = getReadingShareUserLabel();
+                var pointsStr = formatReadingPointsForShare(getReadingSharePointsTotal());
+                var line = T("home.readingShareLine", "My Bible reading plan ({name}): {done}/{total} days, {remaining} days to go, {points} pts ({pct}%) — NJC App", readingCard)
+                    .replace("{name}", userName)
                     .replace("{done}", String(done))
                     .replace("{total}", String(tot))
+                    .replace("{remaining}", String(remaining))
+                    .replace("{points}", pointsStr)
                     .replace("{pct}", String(pct));
                 var title = T("home.readingShareImageTitle", "My Bible reading progress", readingCard);
 
