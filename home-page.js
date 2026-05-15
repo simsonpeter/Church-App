@@ -2175,6 +2175,238 @@
                 return streak;
             }
 
+            function drawReadingShareRoundedRect(ctx, x, y, width, height, radius) {
+                var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + width - r, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+                ctx.lineTo(x + width, y + height - r);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+                ctx.lineTo(x + r, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+
+            function readingShareCanvasToBlob(canvas) {
+                return new Promise(function (resolve, reject) {
+                    function fromDataUrl() {
+                        try {
+                            var dataUrl = canvas.toDataURL("image/png");
+                            var parts = dataUrl.split(",");
+                            var bstr = atob(parts.length > 1 ? parts[1] : parts[0]);
+                            var n = bstr.length;
+                            var u8 = new Uint8Array(n);
+                            while (n--) {
+                                u8[n] = bstr.charCodeAt(n);
+                            }
+                            resolve(new Blob([u8], { type: "image/png" }));
+                        } catch (err2) {
+                            reject(err2);
+                        }
+                    }
+                    try {
+                        if (typeof canvas.toBlob === "function") {
+                            canvas.toBlob(function (blob) {
+                                if (blob) {
+                                    resolve(blob);
+                                    return;
+                                }
+                                fromDataUrl();
+                            }, "image/png", 0.92);
+                        } else {
+                            fromDataUrl();
+                        }
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+
+            function buildReadingProgressShareImageBlob() {
+                return new Promise(function (resolve, reject) {
+                    var prog = buildReadingProgressData();
+                    var done = prog ? prog.completedDays : 0;
+                    var tot = prog ? prog.totalDays : 0;
+                    var pct = prog ? prog.percentComplete : 0;
+                    var streak = computeReadingDayStreakBrussels();
+
+                    var canvas = document.createElement("canvas");
+                    canvas.width = 1080;
+                    canvas.height = 1350;
+                    var ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        reject(new Error("canvas-unavailable"));
+                        return;
+                    }
+
+                    var w = canvas.width;
+                    var h = canvas.height;
+                    var bg = ctx.createLinearGradient(0, 0, w, h);
+                    bg.addColorStop(0, "#4a0c0c");
+                    bg.addColorStop(0.45, "#8d1f1f");
+                    bg.addColorStop(1, "#d45858");
+                    ctx.fillStyle = bg;
+                    ctx.fillRect(0, 0, w, h);
+
+                    ctx.globalAlpha = 0.16;
+                    var glow = ctx.createRadialGradient(w * 0.78, h * 0.18, 20, w * 0.78, h * 0.22, 520);
+                    glow.addColorStop(0, "#ffffff");
+                    glow.addColorStop(1, "rgba(255,255,255,0)");
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(0, 0, w, h);
+                    ctx.globalAlpha = 1;
+
+                    var cardX = 56;
+                    var cardY = 88;
+                    var cardW = w - cardX * 2;
+                    var cardH = h - cardY - 100;
+                    drawReadingShareRoundedRect(ctx, cardX, cardY, cardW, cardH, 40);
+                    ctx.fillStyle = "#fffaf8";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.35)";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    var cx = w / 2;
+                    var fontUi = "'Segoe UI', 'Noto Sans Tamil', system-ui, sans-serif";
+
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#7f1d1d";
+                    ctx.font = "700 26px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", readingCard), cx, cardY + 72);
+
+                    ctx.fillStyle = "#3e2723";
+                    ctx.font = "800 46px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardHeading", "My Bible reading plan", readingCard), cx, cardY + 148);
+
+                    ctx.fillStyle = "#c62828";
+                    ctx.font = "900 200px " + fontUi;
+                    ctx.fillText(String(pct) + "%", cx, cardY + 360);
+
+                    ctx.fillStyle = "#5d4037";
+                    ctx.font = "600 44px " + fontUi;
+                    var daysLine = T("home.readingShareCardDays", "{done} of {total} days complete", readingCard)
+                        .replace("{done}", String(done))
+                        .replace("{total}", String(tot));
+                    ctx.fillText(daysLine, cx, cardY + 430);
+
+                    var bx = cardX + 72;
+                    var by = cardY + 480;
+                    var bw = cardW - 144;
+                    var bh = 32;
+                    var br = 16;
+                    drawReadingShareRoundedRect(ctx, bx, by, bw, bh, br);
+                    ctx.fillStyle = "#f1dede";
+                    ctx.fill();
+
+                    var pad = 5;
+                    var innerX = bx + pad;
+                    var innerY = by + pad;
+                    var innerW = bw - pad * 2;
+                    var innerH = bh - pad * 2;
+                    var innerR = Math.max(0, br - pad);
+                    var ratio = Math.max(0, Math.min(1, pct / 100));
+                    var fillW = Math.max(ratio > 0 ? innerR * 2 : 0, innerW * ratio);
+                    if (fillW > 0) {
+                        drawReadingShareRoundedRect(ctx, innerX, innerY, fillW, innerH, innerR);
+                        var pg = ctx.createLinearGradient(innerX, innerY, innerX + innerW, innerY);
+                        pg.addColorStop(0, "#ff7961");
+                        pg.addColorStop(1, "#b71c1c");
+                        ctx.fillStyle = pg;
+                        ctx.fill();
+                    }
+
+                    if (streak > 0) {
+                        ctx.fillStyle = "#e65100";
+                        ctx.font = "700 38px " + fontUi;
+                        var streakText = formatCount(T("home.readingShareCardStreak", "{count}-day streak", readingCard), streak);
+                        ctx.fillText(streakText, cx, cardY + 580);
+                    }
+
+                    ctx.fillStyle = "rgba(93,64,55,0.85)";
+                    ctx.font = "600 30px " + fontUi;
+                    ctx.fillText(T("home.readingShareCardFooter", "Shared from NJC Belgium", readingCard), cx, cardY + cardH - 56);
+
+                    readingShareCanvasToBlob(canvas).then(resolve).catch(reject);
+                });
+            }
+
+            function waitForFontsOptional() {
+                if (document.fonts && typeof document.fonts.ready === "object" && typeof document.fonts.ready.then === "function") {
+                    return document.fonts.ready.catch(function () {
+                        return null;
+                    });
+                }
+                return Promise.resolve(null);
+            }
+
+            function downloadReadingShareBlob(blob) {
+                var url = URL.createObjectURL(blob);
+                var anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = "njc-reading-plan.png";
+                document.body.appendChild(anchor);
+                anchor.click();
+                window.setTimeout(function () {
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
+                }, 0);
+            }
+
+            function shareReadingProgressCard() {
+                var prog = buildReadingProgressData();
+                var pct = prog ? prog.percentComplete : 0;
+                var done = prog ? prog.completedDays : 0;
+                var tot = prog ? prog.totalDays : 0;
+                var line = T("home.readingShareLine", "My Bible reading plan: {done}/{total} days ({pct}%) — NJC App", readingCard)
+                    .replace("{done}", String(done))
+                    .replace("{total}", String(tot))
+                    .replace("{pct}", String(pct));
+                var title = T("home.readingShareImageTitle", "My Bible reading progress", readingCard);
+
+                waitForFontsOptional().then(function () {
+                    return buildReadingProgressShareImageBlob();
+                }).then(function (blob) {
+                    if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
+                        var file = new File([blob], "njc-reading-plan.png", { type: "image/png" });
+                        var payload = { title: title, text: line, files: [file] };
+                        var can = true;
+                        if (typeof navigator.canShare === "function") {
+                            can = navigator.canShare(payload);
+                        }
+                        if (can) {
+                            return navigator.share(payload).catch(function (err) {
+                                if (err && err.name === "AbortError") {
+                                    return;
+                                }
+                                downloadReadingShareBlob(blob);
+                            });
+                        }
+                        return navigator.share({ title: title, text: line }).catch(function () {
+                            try {
+                                navigator.clipboard.writeText(line);
+                            } catch (e1) {}
+                        });
+                    }
+                    downloadReadingShareBlob(blob);
+                }).catch(function () {
+                    if (typeof navigator !== "undefined" && navigator.share) {
+                        navigator.share({ title: title, text: line }).catch(function () {
+                            try {
+                                navigator.clipboard.writeText(line);
+                            } catch (e2) {}
+                        });
+                    } else {
+                        try {
+                            navigator.clipboard.writeText(line);
+                        } catch (e3) {}
+                    }
+                });
+            }
+
             function renderReadingStreakAndNudge() {
                 if (readingStreakLine) {
                     var streak = computeReadingDayStreakBrussels();
@@ -3204,18 +3436,7 @@
 
             if (readingShareProgressBtn) {
                 readingShareProgressBtn.addEventListener("click", function () {
-                    var prog = buildReadingProgressData();
-                    var pct = prog ? prog.percentComplete : 0;
-                    var done = prog ? prog.completedDays : 0;
-                    var tot = prog ? prog.totalDays : 0;
-                    var line = T("home.readingShareLine", "My Bible reading plan: {done}/{total} days ({pct}%) — NJC App").replace("{done}", String(done)).replace("{total}", String(tot)).replace("{pct}", String(pct));
-                    if (navigator.share) {
-                        navigator.share({ text: line }).catch(function () {});
-                    } else {
-                        try {
-                            navigator.clipboard.writeText(line);
-                        } catch (e) {}
-                    }
+                    shareReadingProgressCard();
                 });
             }
 
