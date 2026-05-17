@@ -2110,9 +2110,19 @@ html[data-theme="dark"] .card .sermon-open-btn:hover {
 }
 
 .sermon-line-speaker,
-.sermon-line-date {
+.sermon-line-date,
+.sermon-line-listens {
     font-size: 0.8rem;
     color: var(--muted);
+}
+
+.sermon-line-listens {
+    margin-top: 2px;
+}
+
+.sermon-listen-meta {
+    margin-top: 4px;
+    font-size: 0.82rem;
 }
 
 .sermon-open-btn[aria-disabled="true"] {
