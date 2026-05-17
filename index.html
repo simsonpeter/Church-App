@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260411mod1">
+    <link rel="stylesheet" href="styles.css?v=20260506sermonshare1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -1418,7 +1418,10 @@
         <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
             <div class="sermon-player-top">
                 <strong data-i18n="sermons.nowPlaying">Now Playing</strong>
-                <div>
+                <div class="sermon-player-top-tray">
+                    <button type="button" id="sermon-player-share" class="sermon-player-share" disabled aria-label="Share sermon">
+                        <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
+                    </button>
                     <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player" data-i18n-aria-label="player.minimize">
                         <i class="fa-solid fa-window-minimize"></i>
                     </button>
@@ -1428,6 +1431,7 @@
                 </div>
             </div>
             <div class="sermon-player-display">
+                <p class="page-note sermon-share-feedback" id="sermon-share-feedback" role="status" aria-live="polite" hidden></p>
                 <h3 id="player-sermon-title">Sermon title</h3>
                 <p id="player-sermon-subtitle">Subtitle</p>
                 <p class="sermon-meta" id="player-sermon-date">Date</p>
@@ -1527,12 +1531,12 @@
     </script>
     <script src="user-auth.js?v=20260412commceleb1"></script>
     <script src="app-modules.js?v=20260411mod1"></script>
-    <script src="app-shell.js?v=20260411mod1"></script>
+    <script src="app-shell.js?v=20260506sermonshare1"></script>
     <script src="events-engine.js?v=20260318de"></script>
     <script src="celebration-wish-thread.js?v=20260412guestcele1"></script>
     <script src="home-page.js?v=20260411mod1"></script>
     <script src="events-page.js?v=20260414u2"></script>
-    <script src="sermons-page.js?v=20260324u1"></script>
+    <script src="sermons-page.js?v=20260506sermonshare1"></script>
     <script src="bible-page.js?v=20260413tts1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260330pw1"></script>
