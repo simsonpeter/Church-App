@@ -1,12 +1,7 @@
 /**
  * Dynamic Open Graph image (1200×630) for sermon share links.
- * Edge + @vercel/og — GET /api/sermon-og/:hash
+ * Node.js runtime + @vercel/og (Edge runtime does not support @vercel/og/edge here).
  */
-import React from "react";
-import { ImageResponse } from "@vercel/og/edge";
-
-export const config = { runtime: "edge" };
-
 const REMOTE_SERMONS = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
 const ADMIN_SERMONS = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
 
@@ -116,7 +111,7 @@ async function loadGoogleFontWoff2(family, weight, textSubset) {
     return fontRes.arrayBuffer();
 }
 
-function buildCardElement(title, subtitle, metaLine) {
+function buildCardElement(React, title, subtitle, metaLine) {
     return React.createElement(
         "div",
         {
@@ -224,14 +219,19 @@ function buildCardElement(title, subtitle, metaLine) {
     );
 }
 
-export default async function handler(request) {
-    const url = new URL(request.url);
-    const segs = url.pathname.split("/").filter(Boolean);
-    const hashRaw = segs[segs.length - 1] || "";
-    const hash = String(hashRaw).trim().toLowerCase();
+module.exports = async function handler(req, res) {
+    const hash = String((req.query && req.query.hash) || "").trim().toLowerCase();
     if (!/^[a-f0-9]{64}$/.test(hash)) {
-        return new Response("Not found", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
+        res.statusCode = 404;
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.end("Not found");
+        return;
     }
+
+    const [{ ImageResponse }, { default: React }] = await Promise.all([
+        import("@vercel/og"),
+        import("react"),
+    ]);
 
     const match = await findSermonByShareHash(hash);
     const title = trunc(match ? String(match.title || "").trim() : "Sermon", 140) || "Sermon";
@@ -279,5 +279,16 @@ export default async function handler(request) {
         opts.fonts = fonts;
     }
 
-    return new ImageResponse(buildCardElement(title, subtitle, metaLine), opts);
-}
+    try {
+        const imageResponse = new ImageResponse(buildCardElement(React, title, subtitle, metaLine), opts);
+        const buf = Buffer.from(await imageResponse.arrayBuffer());
+        res.statusCode = 200;
+        res.setHeader("Content-Type", "image/png");
+        res.setHeader("Cache-Control", "public, s-maxage=86400, stale-while-revalidate=604800");
+        res.end(buf);
+    } catch (eRender) {
+        res.statusCode = 500;
+        res.setHeader("Content-Type", "text/plain; charset=utf-8");
+        res.end("Image render error");
+    }
+};

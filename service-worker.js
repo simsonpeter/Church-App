@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v413sermonogdynamic";
-const RUNTIME_CACHE = "njc-runtime-cache-v413sermonogdynamic";
+const APP_CACHE = "njc-app-cache-v414sermonognode";
+const RUNTIME_CACHE = "njc-runtime-cache-v414sermonognode";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermon share cards: each sermon gets its own preview image (title, subtitle, date). Install npm deps on Vercel for OG generation.";
+    "Fix: sermon share preview images now run on Node (Vercel Edge did not support @vercel/og).";
 
 const CORE_ASSETS = [
     "./",

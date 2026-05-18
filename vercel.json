@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/sermon-og/[hash].js": {
+      "memory": 1024,
+      "maxDuration": 20
+    }
+  },
   "rewrites": [
     {
       "source": "/.well-known/assetlinks.json",
