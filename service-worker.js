@@ -31,25 +31,25 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v409celebrationswishesvisible";
-const RUNTIME_CACHE = "njc-runtime-cache-v409celebrationswishesvisible";
+const APP_CACHE = "njc-app-cache-v410mainsermonlistens";
+const RUNTIME_CACHE = "njc-runtime-cache-v410mainsermonlistens";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Celebrations: wish list opens when there are messages; note that wishes are grouped by Belgium calendar day.";
+    "Sermons: share link (signed-in), listen counts, and deep links. Celebrations: wish list opens when there are messages; wishes grouped by Belgium calendar day.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260606celebwishesvisible1",
+    "./styles.css?v=20260614sermonsharelistens1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260606celebwishesvisible1",
+    "./app-shell.js?v=20260614sermonsharelistens1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260614readingsharesignedin1",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260414sermonannounce1",
+    "./sermons-page.js?v=20260614sermonsharelistens1",
     "./bible-page.js?v=20260613nobibleparallel1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",

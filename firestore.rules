@@ -25,6 +25,7 @@ rules_version = '2';
 //   chatMessages/{msgId} — church group chat: text only, signed-in users; admin may delete any message
 //   churchNewsletters/{id} — church monthly newsletter (public read; admin write/delete)
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
+//   sermonListenStats/{sermonKey} — aggregate play count per sermon audio URL (public read; +1 listenCount only)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
 // for THIS Firebase project yet. Fix:
@@ -317,6 +318,23 @@ service cloud.firestore {
       allow read: if true;
       allow create, update: if isAdmin() && isChurchNewsletterWritePayload();
       allow delete: if isAdmin();
+    }
+
+    // Sermon audio aggregate listens (doc id = SHA-256 hex of audioUrl, 64 chars). Anyone may read;
+    // writes only allow creating with count 1 or incrementing listenCount by exactly 1.
+    match /sermonListenStats/{sermonKey} {
+      allow read: if true;
+      allow create: if sermonKey.matches("^[a-f0-9]{64}$")
+        && request.resource.data.keys().hasOnly(["listenCount"])
+        && request.resource.data.listenCount is int
+        && request.resource.data.listenCount == 1;
+      allow update: if sermonKey.matches("^[a-f0-9]{64}$")
+        && request.resource.data.keys().hasOnly(["listenCount"])
+        && resource.data.keys().hasOnly(["listenCount"])
+        && resource.data.listenCount is int
+        && request.resource.data.listenCount is int
+        && request.resource.data.listenCount == resource.data.listenCount + 1;
+      allow delete: if false;
     }
   }
 }

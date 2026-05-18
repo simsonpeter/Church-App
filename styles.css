@@ -2196,9 +2196,19 @@ html[data-theme="dark"] .card .sermon-open-btn:hover {
 }
 
 .sermon-line-speaker,
-.sermon-line-date {
+.sermon-line-date,
+.sermon-line-listens {
     font-size: 0.8rem;
     color: var(--muted);
+}
+
+.sermon-line-listens {
+    margin-top: 2px;
+}
+
+.sermon-listen-meta {
+    margin-top: 4px;
+    font-size: 0.82rem;
 }
 
 .sermon-open-btn[aria-disabled="true"] {
@@ -2258,9 +2268,40 @@ body.sermon-player-open {
     color: #ac3636;
 }
 
-.sermon-player-top > div {
+.sermon-player-top > div,
+.sermon-player-top-tray {
     display: inline-flex;
     gap: 8px;
+    align-items: center;
+}
+
+.sermon-player-share {
+    border: 0;
+    background: #ffd9d9;
+    color: #9f2222;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.sermon-player-share i {
+    font-size: 0.95rem;
+}
+
+.sermon-player-share:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.sermon-share-feedback {
+    margin: 0 0 10px;
+    min-height: 1.2em;
+    font-size: 0.82rem;
 }
 
 .sermon-player-close {
