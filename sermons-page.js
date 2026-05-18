@@ -237,9 +237,11 @@
                     return "";
                 }
                 try {
-                    var page = new URL(String(window.location.href));
-                    page.hash = "sermons?s=" + id;
-                    return page.toString();
+                    var origin = String(window.location.origin || "").replace(/\/$/, "");
+                    if (!origin) {
+                        return "";
+                    }
+                    return origin + "/share/sermon/" + id;
                 } catch (errBuild) {
                     return "";
                 }

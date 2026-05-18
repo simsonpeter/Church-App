@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v411sermonsharecard";
-const RUNTIME_CACHE = "njc-runtime-cache-v411sermonsharecard";
+const APP_CACHE = "njc-app-cache-v412sermonogshare";
+const RUNTIME_CACHE = "njc-runtime-cache-v412sermonogshare";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermons: shorter share links and cleaner share text. Sermon share, listen counts, and deep links. Celebrations: wish list opens when there are messages.";
+    "Sermon shares: rich link preview (Open Graph) on WhatsApp and similar apps. Opens the sermon in the NJC app.";
 
 const CORE_ASSETS = [
     "./",
@@ -49,7 +49,7 @@ const CORE_ASSETS = [
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260614readingsharesignedin1",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260615sermonsharecard1",
+    "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260609answeredtabs1",
@@ -200,6 +200,11 @@ self.addEventListener("fetch", function (event) {
     const isImgBb = url.origin === "https://i.ibb.co";
 
     if (event.request.mode === "navigate") {
+        var navPath = String(url.pathname || "").toLowerCase();
+        if (navPath.indexOf("/share/sermon/") === 0) {
+            event.respondWith(fetch(event.request));
+            return;
+        }
         event.respondWith(
             fetch(event.request)
                 .then(function (response) {
@@ -216,6 +221,11 @@ self.addEventListener("fetch", function (event) {
                     });
                 })
         );
+        return;
+    }
+
+    if (isSameOrigin && String(url.pathname || "").indexOf("/api/") === 0) {
+        event.respondWith(fetch(event.request));
         return;
     }
 
