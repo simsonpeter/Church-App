@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "description": "Minimal deps for Vercel Edge OG images (sermon share cards).",
+  "dependencies": {
+    "@vercel/og": "^0.6.4",
+    "react": "^18.3.1"
+  }
+}

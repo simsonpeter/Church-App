@@ -93,7 +93,7 @@ module.exports = async function handler(req, res) {
     var siteOrigin = proto + "://" + host;
     var deepLink = siteOrigin + "/#sermons?s=" + hash;
     var sharePath = siteOrigin + "/share/sermon/" + hash;
-    var ogImage = siteOrigin + "/sermons-banner.jpg?v=20260411cb1";
+    var ogImage = siteOrigin + "/api/sermon-og/" + hash;
 
     var remoteUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var adminUrl = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries?ts=" + String(Date.now());

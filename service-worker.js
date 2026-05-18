@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v412sermonogshare";
-const RUNTIME_CACHE = "njc-runtime-cache-v412sermonogshare";
+const APP_CACHE = "njc-app-cache-v413sermonogdynamic";
+const RUNTIME_CACHE = "njc-runtime-cache-v413sermonogdynamic";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermon shares: rich link preview (Open Graph) on WhatsApp and similar apps. Opens the sermon in the NJC app.";
+    "Sermon share cards: each sermon gets its own preview image (title, subtitle, date). Install npm deps on Vercel for OG generation.";
 
 const CORE_ASSETS = [
     "./",
