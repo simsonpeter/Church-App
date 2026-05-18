@@ -215,6 +215,36 @@
                 });
             }
 
+            function ensureShareHashForSermon(sermon) {
+                if (!sermon || !String(sermon.audioUrl || "").trim()) {
+                    return Promise.resolve("");
+                }
+                if (sermon._njcShareHash) {
+                    return Promise.resolve(sermon._njcShareHash);
+                }
+                return hashSermonStatDocId(sermon.audioUrl).then(function (id) {
+                    sermon._njcShareHash = id || "";
+                    return sermon._njcShareHash;
+                }).catch(function () {
+                    sermon._njcShareHash = "";
+                    return "";
+                });
+            }
+
+            function buildSermonAppShareUrl(shareHashId) {
+                var id = String(shareHashId || "").trim().toLowerCase();
+                if (!/^[a-f0-9]{64}$/.test(id)) {
+                    return "";
+                }
+                try {
+                    var page = new URL(String(window.location.href));
+                    page.hash = "sermons?s=" + id;
+                    return page.toString();
+                } catch (errBuild) {
+                    return "";
+                }
+            }
+
             function getFirestoreForListenStats() {
                 if (!window.firebase || typeof window.firebase.firestore !== "function") {
                     return null;
@@ -419,7 +449,7 @@
                 });
             }
 
-            function buildPlainShareText(title, preview, url) {
+            function buildPlainShareText(title, preview, url, playLine) {
                 var lines = [];
                 if (title) {
                     lines.push(title);
@@ -427,50 +457,52 @@
                 if (preview) {
                     lines.push(preview);
                 }
+                if (playLine) {
+                    lines.push(playLine);
+                }
                 if (url) {
                     lines.push(url);
                 }
                 return lines.join("\n\n");
             }
 
-            function getSermonAudioParamFromHash() {
+            function parseSermonDeepLinkFromHash() {
                 var h = String(window.location.hash || "");
                 var q = h.indexOf("?");
                 if (q < 0) {
-                    return "";
+                    return { legacyUrl: "", shareId: "" };
                 }
                 try {
                     var sp = new URLSearchParams(h.slice(q + 1));
-                    return String(sp.get("sermon") || "").trim();
-                } catch (err) {
-                    return "";
+                    var s = String(sp.get("s") || "").trim().toLowerCase();
+                    if (/^[a-f0-9]{64}$/.test(s)) {
+                        return { legacyUrl: "", shareId: s };
+                    }
+                    var legacy = String(sp.get("sermon") || "").trim();
+                    if (legacy) {
+                        return { legacyUrl: legacy, shareId: "" };
+                    }
+                } catch (errParse) {
+                    return { legacyUrl: "", shareId: "" };
                 }
+                return { legacyUrl: "", shareId: "" };
             }
 
             function stripSermonQueryFromHash() {
                 try {
                     var h = String(window.location.hash || "");
-                    if (h.indexOf("sermon=") < 0) {
+                    var qMark = h.indexOf("?");
+                    if (qMark < 0) {
+                        return;
+                    }
+                    var sp = new URLSearchParams(h.slice(qMark + 1));
+                    if (!sp.has("sermon") && !sp.has("s")) {
                         return;
                     }
                     var base = window.location.pathname + window.location.search;
                     window.history.replaceState(null, "", base + "#sermons");
                 } catch (eStrip) {
                     return;
-                }
-            }
-
-            function getSermonShareUrl(audioUrl) {
-                var u = String(audioUrl || "").trim();
-                if (!u) {
-                    return "";
-                }
-                try {
-                    var page = new URL(String(window.location.href));
-                    page.hash = "sermons?sermon=" + encodeURIComponent(u);
-                    return page.toString();
-                } catch (errUrl) {
-                    return "";
                 }
             }
 
@@ -545,50 +577,51 @@
                 if (!audioUrl) {
                     return;
                 }
-                var url = getSermonShareUrl(audioUrl);
-                if (!url) {
-                    return;
-                }
                 var title = String(currentSermon.title || "").trim() || T("sermons.eyebrow", "Sermon", latestSermonsCard);
                 var sub = String(currentSermon.subtitle || "").trim();
-                var speaker = String(currentSermon.speaker || "").trim();
                 var dateLine = toPlayerDateLine(currentSermon);
                 var previewParts = [dateLine];
                 if (sub) {
                     previewParts.push(sub);
                 }
-                if (speaker) {
-                    previewParts.push(T("sermons.speakerPrefix", "Speaker", latestSermonsCard) + ": " + speaker);
-                }
                 var preview = previewParts.filter(Boolean).join("\n");
-                var shareText = preview ? (title + "\n\n" + preview) : title;
-                if (typeof navigator !== "undefined" && navigator.share) {
-                    var p = navigator.share({ title: title, text: shareText, url: url });
-                    if (p && typeof p.then === "function" && typeof p.catch === "function") {
-                        p.catch(function (err) {
-                            if (err && err.name === "AbortError") {
-                                return;
-                            }
-                            copyTextToClipboard(url).then(function () {
-                                showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
-                            }, function () {
-                                copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+                var playLine = T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard);
+                var shareText = preview ? (title + "\n\n" + preview + "\n\n" + playLine) : (title + "\n\n" + playLine);
+
+                ensureShareHashForSermon(currentSermon).then(function (shareId) {
+                    var url = buildSermonAppShareUrl(shareId);
+                    if (!url) {
+                        showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                        return;
+                    }
+                    if (typeof navigator !== "undefined" && navigator.share) {
+                        var p = navigator.share({ title: title, text: shareText, url: url });
+                        if (p && typeof p.then === "function" && typeof p.catch === "function") {
+                            p.catch(function (err) {
+                                if (err && err.name === "AbortError") {
+                                    return;
+                                }
+                                copyTextToClipboard(buildPlainShareText(title, preview, url, playLine)).then(function () {
                                     showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                                 }, function () {
-                                    showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                                    copyTextToClipboard(url).then(function () {
+                                        showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
+                                    }, function () {
+                                        showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                                    });
                                 });
                             });
-                        });
+                        }
+                        return;
                     }
-                    return;
-                }
-                copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
-                    showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
-                }, function () {
-                    copyTextToClipboard(url).then(function () {
+                    copyTextToClipboard(buildPlainShareText(title, preview, url, playLine)).then(function () {
                         showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
-                        showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                        copyTextToClipboard(url).then(function () {
+                            showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
+                        }, function () {
+                            showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                        });
                     });
                 });
             }
@@ -597,13 +630,18 @@
                 if (!sermonsLoaded || sermonsLoadFailed || !allSermons.length) {
                     return;
                 }
-                var param = getSermonAudioParamFromHash();
-                if (!param) {
-                    return;
+                var link = parseSermonDeepLinkFromHash();
+                var idx = -1;
+                if (link.shareId) {
+                    idx = allSermons.findIndex(function (item) {
+                        return item && String(item._njcShareHash || "").toLowerCase() === link.shareId;
+                    });
                 }
-                var idx = allSermons.findIndex(function (item) {
-                    return item && item.audioUrl === param;
-                });
+                if (idx < 0 && link.legacyUrl) {
+                    idx = allSermons.findIndex(function (item) {
+                        return item && item.audioUrl === link.legacyUrl;
+                    });
+                }
                 if (idx < 0) {
                     return;
                 }
@@ -1481,53 +1519,66 @@
                         maybePublishLatestSermonAnnouncement(allSermons);
                     } catch (ePub) {}
 
-                    sermonsLoaded = true;
-                    sermonsLoadFailed = false;
-                    renderSermons();
+                    var primeShareHashes = !allSermons.length
+                        ? Promise.resolve()
+                        : Promise.all(allSermons.map(function (sermon) {
+                            return ensureShareHashForSermon(sermon);
+                        }));
 
-                    var storedState = getStoredState();
-                    var hashAudio = getSermonAudioParamFromHash();
-                    var hashIndex = -1;
-                    if (hashAudio) {
-                        hashIndex = allSermons.findIndex(function (item) {
-                            return item && item.audioUrl === hashAudio;
-                        });
-                    }
+                    return primeShareHashes.then(function () {
+                        sermonsLoaded = true;
+                        sermonsLoadFailed = false;
+                        renderSermons();
 
-                    if (hashIndex >= 0) {
-                        hasRestoredPlayerState = true;
-                        openPlayer(hashIndex, false);
-                        stripSermonQueryFromHash();
-                    } else if (!hasRestoredPlayerState && storedState && storedState.audioUrl) {
-                        hasRestoredPlayerState = true;
-                        var restoredIndex = allSermons.findIndex(function (item) {
-                            return item.audioUrl === storedState.audioUrl;
-                        });
+                        var storedState = getStoredState();
+                        var link = parseSermonDeepLinkFromHash();
+                        var hashIndex = -1;
+                        if (link.shareId) {
+                            hashIndex = allSermons.findIndex(function (item) {
+                                return item && String(item._njcShareHash || "").toLowerCase() === link.shareId;
+                            });
+                        }
+                        if (hashIndex < 0 && link.legacyUrl) {
+                            hashIndex = allSermons.findIndex(function (item) {
+                                return item && item.audioUrl === link.legacyUrl;
+                            });
+                        }
 
-                        if (restoredIndex >= 0) {
-                            openPlayer(restoredIndex, false);
-                            if (Number.isFinite(storedState.currentTime) && storedState.currentTime > 0) {
-                                sermonAudio.addEventListener("loadedmetadata", function restoreTimeOnce() {
-                                    try {
-                                        sermonAudio.currentTime = Math.min(storedState.currentTime, sermonAudio.duration || storedState.currentTime);
-                                    } catch (err) {
-                                        return null;
-                                    }
-                                }, { once: true });
-                            }
+                        if (hashIndex >= 0) {
+                            hasRestoredPlayerState = true;
+                            openPlayer(hashIndex, false);
+                            stripSermonQueryFromHash();
+                        } else if (!hasRestoredPlayerState && storedState && storedState.audioUrl) {
+                            hasRestoredPlayerState = true;
+                            var restoredIndex = allSermons.findIndex(function (item) {
+                                return item.audioUrl === storedState.audioUrl;
+                            });
 
-                            if (storedState.minimized) {
-                                minimizePlayer();
-                            }
+                            if (restoredIndex >= 0) {
+                                openPlayer(restoredIndex, false);
+                                if (Number.isFinite(storedState.currentTime) && storedState.currentTime > 0) {
+                                    sermonAudio.addEventListener("loadedmetadata", function restoreTimeOnce() {
+                                        try {
+                                            sermonAudio.currentTime = Math.min(storedState.currentTime, sermonAudio.duration || storedState.currentTime);
+                                        } catch (err) {
+                                            return null;
+                                        }
+                                    }, { once: true });
+                                }
 
-                            if (storedState.isPlaying) {
-                                sermonAudio.play().catch(function () {
-                                    updatePlayerButtonState();
-                                });
+                                if (storedState.minimized) {
+                                    minimizePlayer();
+                                }
+
+                                if (storedState.isPlaying) {
+                                    sermonAudio.play().catch(function () {
+                                        updatePlayerButtonState();
+                                    });
+                                }
                             }
                         }
-                    }
-                    syncSermonShareButton();
+                        syncSermonShareButton();
+                    });
                 }).catch(function () {
                     sermonsLoaded = true;
                     sermonsLoadFailed = true;

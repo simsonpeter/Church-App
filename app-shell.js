@@ -654,6 +654,7 @@
         "sermons.shareGuestsDisabled": "இந்த பிரசங்கத்தை பகிர பதிவுசெய்யப்பட்ட கணக்கில் உள்நுழையவும்.",
         "sermons.shareLinkCopied": "இணைப்பு நகலெடுக்கப்பட்டது. செய்தி அல்லது மின்னஞ்சலில் ஒட்டி பகிரலாம்.",
         "sermons.shareFailed": "பகிரவோ நகலெடுக்கவோ முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "sermons.sharePlayLine": "▶ NJC செயலியில் கேளுங்கள்",
         "sermons.listenCount": "{count} முறை கேட்கப்பட்டது",
         "songbook.eyebrow": "பாடல்கள்",
         "songbook.title": "NJC பாடல் தொகுப்பு",
