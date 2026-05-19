@@ -16,6 +16,8 @@
             var readingStreakLine = document.getElementById("reading-streak-line");
             var readingNudgeLine = document.getElementById("reading-nudge-line");
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
+            var readingSharePlanBtn = document.getElementById("reading-share-plan-image-btn");
+            var readingSharePlanStatus = document.getElementById("reading-share-plan-status");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
@@ -81,6 +83,7 @@
             var todayPlanData = null;
             var fullReadingPlan = [];
             var readingPlanError = false;
+            var readingPlanImageBusy = false;
             var unreadListOpen = false;
             var allUpcomingEvents = [];
             var allAnnouncements = [];
@@ -1912,6 +1915,335 @@
                 return morningDone && eveningDone;
             }
 
+            function hasReadablePlanEntries(plan) {
+                if (!plan) {
+                    return false;
+                }
+                return getRefsForPart(plan, "morning").length > 0 || getRefsForPart(plan, "evening").length > 0;
+            }
+
+            function syncReadingSharePlanButton() {
+                if (!readingSharePlanBtn) {
+                    return;
+                }
+                var canShare = Boolean(
+                    !readingPlanImageBusy
+                        && !readingPlanError
+                        && todayPlanData
+                        && hasReadablePlanEntries(todayPlanData)
+                );
+                readingSharePlanBtn.disabled = !canShare;
+                readingSharePlanBtn.setAttribute("aria-disabled", canShare ? "false" : "true");
+            }
+
+            function setReadingPlanShareStatus(message, isError) {
+                if (!readingSharePlanStatus) {
+                    return;
+                }
+                if (!message) {
+                    readingSharePlanStatus.textContent = "";
+                    readingSharePlanStatus.hidden = true;
+                    readingSharePlanStatus.classList.remove("reading-share-plan-status--error");
+                    return;
+                }
+                readingSharePlanStatus.textContent = message;
+                readingSharePlanStatus.hidden = false;
+                readingSharePlanStatus.classList.toggle("reading-share-plan-status--error", Boolean(isError));
+                window.clearTimeout(setReadingPlanShareStatus._t);
+                setReadingPlanShareStatus._t = window.setTimeout(function () {
+                    readingSharePlanStatus.textContent = "";
+                    readingSharePlanStatus.hidden = true;
+                    readingSharePlanStatus.classList.remove("reading-share-plan-status--error");
+                }, 4500);
+            }
+
+            function drawRoundedRectReading(ctx, x, y, width, height, radius) {
+                var r = Math.max(0, Math.min(radius, Math.min(width, height) / 2));
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.lineTo(x + width - r, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+                ctx.lineTo(x + width, y + height - r);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+                ctx.lineTo(x + r, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+                ctx.lineTo(x, y + r);
+                ctx.quadraticCurveTo(x, y, x + r, y);
+                ctx.closePath();
+            }
+
+            function wrapReadingImageLines(ctx, text, maxWidth, maxLines) {
+                var t = String(text || "").trim();
+                if (!t) {
+                    return [];
+                }
+                if (isTamilLanguage(readingCard)) {
+                    var taLines = [];
+                    var taLine = "";
+                    for (var ci = 0; ci < t.length; ci += 1) {
+                        var ch = t.charAt(ci);
+                        var taCand = taLine + ch;
+                        if (ctx.measureText(taCand).width <= maxWidth) {
+                            taLine = taCand;
+                        } else {
+                            if (taLine) {
+                                taLines.push(taLine);
+                            }
+                            taLine = ch;
+                        }
+                        if (maxLines > 0 && taLines.length >= maxLines) {
+                            break;
+                        }
+                    }
+                    if (taLine && (maxLines <= 0 || taLines.length < maxLines)) {
+                        taLines.push(taLine);
+                    }
+                    if (maxLines > 0 && taLines.length > maxLines) {
+                        taLines = taLines.slice(0, maxLines);
+                    }
+                    var taJoinedLen = taLines.join("").length;
+                    if (maxLines > 0 && taLines.length === maxLines && taJoinedLen < t.length) {
+                        var lastTa = taLines[maxLines - 1];
+                        taLines[maxLines - 1] = lastTa.replace(/\s+$/, "") + "…";
+                    }
+                    return taLines;
+                }
+                var words = t.split(/\s+/).filter(Boolean);
+                var lines = [];
+                var line = "";
+                words.forEach(function (word) {
+                    var candidate = line ? (line + " " + word) : word;
+                    if (ctx.measureText(candidate).width <= maxWidth) {
+                        line = candidate;
+                        return;
+                    }
+                    if (line) {
+                        lines.push(line);
+                    }
+                    line = word;
+                });
+                if (line) {
+                    lines.push(line);
+                }
+                if (maxLines > 0 && lines.length > maxLines) {
+                    var clipped = lines.slice(0, maxLines);
+                    var tail = clipped[maxLines - 1];
+                    while (tail.length > 3 && ctx.measureText(tail + "…").width > maxWidth) {
+                        tail = tail.slice(0, -1).trim();
+                    }
+                    clipped[maxLines - 1] = tail + "…";
+                    return clipped;
+                }
+                return lines;
+            }
+
+            function formatRefsLineForShareImage(refs) {
+                var clean = Array.isArray(refs)
+                    ? refs.filter(Boolean).map(function (ref) {
+                        return toFriendlyReference(ref, readingCard);
+                    })
+                    : [];
+                return clean.join(" · ");
+            }
+
+            function downloadReadingPlanBlob(blob, fileName) {
+                var url = URL.createObjectURL(blob);
+                var anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = fileName;
+                document.body.appendChild(anchor);
+                anchor.click();
+                window.setTimeout(function () {
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
+                }, 0);
+            }
+
+            function buildReadingPlanShareImageBlob() {
+                return new Promise(function (resolve, reject) {
+                    if (!todayPlanData || !hasReadablePlanEntries(todayPlanData)) {
+                        reject(new Error("no-plan"));
+                        return;
+                    }
+                    var canvas = document.createElement("canvas");
+                    canvas.width = 1080;
+                    canvas.height = 1350;
+                    var ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        reject(new Error("canvas"));
+                        return;
+                    }
+
+                    var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+                    bg.addColorStop(0, "#0c1f38");
+                    bg.addColorStop(0.45, "#153a5c");
+                    bg.addColorStop(1, "#0f2840");
+                    ctx.fillStyle = bg;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.globalAlpha = 0.2;
+                    var glow = ctx.createRadialGradient(900, 200, 40, 900, 200, 520);
+                    glow.addColorStop(0, "#7ecbff");
+                    glow.addColorStop(1, "rgba(0,0,0,0)");
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.globalAlpha = 1;
+
+                    drawRoundedRectReading(ctx, 64, 88, 952, 1180, 40);
+                    ctx.fillStyle = "rgba(255,255,255,0.12)";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.textAlign = "center";
+                    var ta = isTamilLanguage(readingCard);
+                    var titleFont = ta
+                        ? "700 44px 'Noto Sans Tamil','Latha','Segoe UI',sans-serif"
+                        : "700 44px 'Segoe UI',Arial,sans-serif";
+                    var bodyFont = ta
+                        ? "600 40px 'Noto Sans Tamil','Latha','Segoe UI',sans-serif"
+                        : "600 38px 'Segoe UI',Arial,sans-serif";
+                    var labelFont = ta
+                        ? "800 36px 'Noto Sans Tamil','Latha','Segoe UI',sans-serif"
+                        : "800 36px 'Segoe UI',Arial,sans-serif";
+                    var smallFont = "600 30px 'Segoe UI',Arial,sans-serif";
+
+                    ctx.fillStyle = "#e3f0ff";
+                    ctx.font = titleFont;
+                    var head = T("home.readingPlanShareImageHeadline", "Today's Bible reading plan", readingCard);
+                    ctx.fillText(head, 540, 175);
+
+                    ctx.fillStyle = "#b8cfe8";
+                    ctx.font = smallFont;
+                    var dateLine = todayReadingPlanMeta ? String(todayReadingPlanMeta.textContent || "").trim() : "";
+                    var dateLines = wrapReadingImageLines(ctx, dateLine, 900, 2);
+                    var dy = 228;
+                    dateLines.forEach(function (dl, di) {
+                        ctx.fillText(dl, 540, dy + di * 40);
+                    });
+                    var yAfterDate = dy + dateLines.length * 40 + 36;
+
+                    ctx.font = labelFont;
+                    ctx.fillStyle = "#ffffff";
+                    var mRefs = getRefsForPart(todayPlanData, "morning");
+                    var eRefs = getRefsForPart(todayPlanData, "evening");
+                    var y = yAfterDate;
+
+                    if (mRefs.length) {
+                        ctx.fillText(T("home.morningShort", "Morning", readingCard), 540, y);
+                        y += 48;
+                        ctx.font = bodyFont;
+                        ctx.fillStyle = "#eaf3ff";
+                        var mText = formatRefsLineForShareImage(mRefs);
+                        var mLines = wrapReadingImageLines(ctx, mText, 920, 7);
+                        var lh = ta ? 52 : 48;
+                        mLines.forEach(function (ml, mi) {
+                            ctx.fillText(ml, 540, y + mi * lh);
+                        });
+                        y += mLines.length * lh + 40;
+                    }
+
+                    if (eRefs.length) {
+                        ctx.font = labelFont;
+                        ctx.fillStyle = "#ffffff";
+                        ctx.fillText(T("home.eveningShort", "Evening", readingCard), 540, y);
+                        y += 48;
+                        ctx.font = bodyFont;
+                        ctx.fillStyle = "#eaf3ff";
+                        var eText = formatRefsLineForShareImage(eRefs);
+                        var eLines = wrapReadingImageLines(ctx, eText, 920, 7);
+                        var lhE = ta ? 52 : 48;
+                        eLines.forEach(function (el, ei) {
+                            ctx.fillText(el, 540, y + ei * lhE);
+                        });
+                        y += eLines.length * lhE + 36;
+                    }
+
+                    drawRoundedRectReading(ctx, 300, 1188, 480, 88, 36);
+                    ctx.fillStyle = "rgba(255,255,255,0.14)";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.2)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "600 32px 'Segoe UI',Arial,sans-serif";
+                    ctx.fillText(T("home.readingPlanShareImageFooter", "NJC Belgium · Bible reading plan", readingCard), 540, 1242);
+
+                    canvas.toBlob(function (blob) {
+                        if (!blob) {
+                            reject(new Error("blob"));
+                            return;
+                        }
+                        resolve(blob);
+                    }, "image/png");
+                });
+            }
+
+            function shareReadingPlanAsImage() {
+                if (readingPlanImageBusy || !readingSharePlanBtn || readingSharePlanBtn.disabled) {
+                    return;
+                }
+                readingPlanImageBusy = true;
+                syncReadingSharePlanButton();
+                setReadingPlanShareStatus(T("home.readingPlanShareImageGenerating", "Creating share image…", readingCard), false);
+                buildReadingPlanShareImageBlob().then(function (blob) {
+                    var ymd = String(todayYmd.year)
+                        + String(todayYmd.month).padStart(2, "0")
+                        + String(todayYmd.day).padStart(2, "0");
+                    var fileName = "njc-reading-plan-" + ymd + ".png";
+                    var shared = false;
+                    if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
+                        var file = new File([blob], fileName, { type: "image/png" });
+                        var canShareFiles = true;
+                        if (typeof navigator.canShare === "function") {
+                            canShareFiles = navigator.canShare({ files: [file] });
+                        }
+                        if (canShareFiles) {
+                            return navigator.share({
+                                title: T("home.readingPlanShareImageShareTitle", "Today's Bible reading", readingCard),
+                                text: T("home.readingPlanShareImageShareText", "Today's Bible reading plan — NJC App", readingCard),
+                                files: [file]
+                            }).then(function () {
+                                shared = true;
+                            }).catch(function (err) {
+                                if (err && err.name === "AbortError") {
+                                    throw err;
+                                }
+                            }).then(function () {
+                                if (!shared) {
+                                    downloadReadingPlanBlob(blob, fileName);
+                                    setReadingPlanShareStatus(
+                                        T("home.readingPlanShareImageDownloaded", "Image saved. Attach it in WhatsApp to share.", readingCard),
+                                        false
+                                    );
+                                    return;
+                                }
+                                setReadingPlanShareStatus(
+                                    T("home.readingPlanShareImageReady", "Image ready to share.", readingCard),
+                                    false
+                                );
+                            });
+                        }
+                    }
+                    downloadReadingPlanBlob(blob, fileName);
+                    setReadingPlanShareStatus(
+                        T("home.readingPlanShareImageDownloaded", "Image saved. Attach it in WhatsApp to share.", readingCard),
+                        false
+                    );
+                    return null;
+                }).catch(function (err) {
+                    if (err && err.name === "AbortError") {
+                        setReadingPlanShareStatus(T("home.readingPlanShareImageCancelled", "Share cancelled.", readingCard), false);
+                        return;
+                    }
+                    setReadingPlanShareStatus(T("home.readingPlanShareImageError", "Could not create the image. Try again.", readingCard), true);
+                }).finally(function () {
+                    readingPlanImageBusy = false;
+                    syncReadingSharePlanButton();
+                });
+            }
+
             function buildReadingProgressData() {
                 if (!Array.isArray(fullReadingPlan) || fullReadingPlan.length === 0) {
                     return null;
@@ -2181,38 +2513,42 @@
             }
 
             function renderReadingPlan() {
-                if (readingPlanError) {
-                    todayReadingPlanList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan", readingCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.", readingCard)) + "</p>" +
-                        "</li>";
+                try {
+                    if (readingPlanError) {
+                        todayReadingPlanList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan", readingCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.", readingCard)) + "</p>" +
+                            "</li>";
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    if (!todayPlanData) {
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    var progress = getTodayProgress();
+                    var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
+                    var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
+                    var compactHtml = morningBlock + eveningBlock;
+
+                    if (!compactHtml) {
+                        todayReadingPlanList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today", readingCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.", readingCard)) + "</p>" +
+                            "</li>";
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
                     renderReadingProgress();
-                    return;
+                } finally {
+                    syncReadingSharePlanButton();
                 }
-
-                if (!todayPlanData) {
-                    renderReadingProgress();
-                    return;
-                }
-
-                var progress = getTodayProgress();
-                var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
-                var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
-                var compactHtml = morningBlock + eveningBlock;
-
-                if (!compactHtml) {
-                    todayReadingPlanList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today", readingCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.", readingCard)) + "</p>" +
-                        "</li>";
-                    renderReadingProgress();
-                    return;
-                }
-
-                todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
-                renderReadingProgress();
             }
 
             function loadTodayReadingPlan() {
@@ -2241,11 +2577,13 @@
                         if (!todayPlan) {
                             throw new Error("No plan for today");
                         }
+                        readingPlanError = false;
                         todayPlanData = todayPlan;
                         renderReadingPlan();
                     })
                     .catch(function () {
                         fullReadingPlan = [];
+                        todayPlanData = null;
                         readingPlanError = true;
                         renderReadingPlan();
                     });
@@ -3028,6 +3366,12 @@
                             navigator.clipboard.writeText(line);
                         } catch (e) {}
                     }
+                });
+            }
+
+            if (readingSharePlanBtn) {
+                readingSharePlanBtn.addEventListener("click", function () {
+                    shareReadingPlanAsImage();
                 });
             }
 
