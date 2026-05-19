@@ -31,17 +31,17 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v304readingplanimg";
-const RUNTIME_CACHE = "njc-runtime-cache-v304readingplanimg";
+const APP_CACHE = "njc-app-cache-v305readingplanimg2";
+const RUNTIME_CACHE = "njc-runtime-cache-v305readingplanimg2";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260519readingplanimg1",
+    "./styles.css?v=20260519readingplanimg2",
     "./user-auth.js?v=20260412commceleb1",
-    "./app-shell.js?v=20260519readingplanimg1",
+    "./app-shell.js?v=20260519readingplanimg2",
     "./events-engine.js?v=20260318de",
-    "./home-page.js?v=20260519readingplanimg1",
+    "./home-page.js?v=20260519readingplanimg2",
     "./events-page.js?v=20260414u2",
     "./sermons-page.js?v=20260324u1",
     "./bible-page.js?v=20260413tts1",

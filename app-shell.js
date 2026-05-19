@@ -1076,6 +1076,8 @@
         "home.readingNudgeEvening": "இன்றைய மாலை வாசிப்பை மறக்க வேண்டாம்.",
         "home.readingShareProgress": "முன்னேற்றத்தை பகிர்",
         "home.readingSharePlanImage": "இன்றைய வாசிப்பை படமாக பகிர்",
+        "home.readingPlanShareCardBrand": "ஒரு வருட வேதாகமம்",
+        "home.readingPlanShareCardFooter": "— புதிய எருசலேம் சபை",
         "home.readingPlanShareImageHeadline": "இன்றைய வேத வாசிப்பு திட்டம்",
         "home.readingPlanShareImageFooter": "NJC Belgium · வேத வாசிப்பு திட்டம்",
         "home.readingPlanShareImageGenerating": "பகிர் படத்தை உருவாக்குகிறது…",
