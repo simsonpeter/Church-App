@@ -8115,6 +8115,18 @@ html[data-theme="dark"] .reading-share-icon-btn[disabled] {
     font-size: 1rem;
 }
 
+.reading-share-plan-status {
+    margin-top: 6px;
+}
+
+.reading-share-plan-status--error {
+    color: #b42318;
+}
+
+html[data-theme="dark"] .reading-share-plan-status--error {
+    color: #ffb4a9;
+}
+
 .reading-actions-row .reading-unread-toggle {
     flex: 1 1 auto;
     min-width: min(140px, 100%);

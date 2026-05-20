@@ -18,6 +18,8 @@
             var readingNudgeLine = document.getElementById("reading-nudge-line");
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
             var readingExportCsvBtn = document.getElementById("reading-export-csv-btn");
+            var readingSharePlanBtn = document.getElementById("reading-share-plan-image-btn");
+            var readingSharePlanStatus = document.getElementById("reading-share-plan-status");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
@@ -83,6 +85,8 @@
             var todayPlanData = null;
             var fullReadingPlan = [];
             var readingPlanError = false;
+            var readingPlanImageBusy = false;
+            var html2canvasLoadPromise = null;
             var unreadListOpen = false;
             var allUpcomingEvents = [];
             var allAnnouncements = [];
@@ -1970,11 +1974,16 @@
                     });
             }
 
-            function toFriendlyReference(ref, sourceElement) {
+            function toFriendlyReference(ref, sourceElement, forceLang) {
                 var value = String(ref || "").trim();
+                var useTamil = forceLang === "ta"
+                    ? true
+                    : forceLang === "en"
+                        ? false
+                        : isTamilLanguage(sourceElement);
                 var match = value.match(/^(\d+\s+)?([A-Za-z]+)\.(.+)$/);
                 if (!match) {
-                    if (isTamilLanguage(sourceElement)) {
+                    if (useTamil) {
                         var plainMatch = value.match(/^([1-3]\s+[A-Za-z]+|[A-Za-z][A-Za-z\s]+)\s+(.+)$/);
                         if (plainMatch) {
                             var englishBook = plainMatch[1].trim();
@@ -1991,7 +2000,7 @@
                 var prefix = match[1] ? match[1].trim() + " " : "";
                 var shortBook = prefix + match[2] + ".";
                 var tail = match[3].trim();
-                var selectedMap = isTamilLanguage(sourceElement) ? bookMapTamil : bookMapEnglish;
+                var selectedMap = useTamil ? bookMapTamil : bookMapEnglish;
                 var fullBook = selectedMap[shortBook] || bookMapEnglish[shortBook] || shortBook;
                 return fullBook + " " + tail;
             }
@@ -2043,6 +2052,258 @@
                 var morningDone = morningRefs.length === 0 || Boolean(progress && progress.morning);
                 var eveningDone = eveningRefs.length === 0 || Boolean(progress && progress.evening);
                 return morningDone && eveningDone;
+            }
+
+            function hasReadablePlanEntries(plan) {
+                if (!plan) {
+                    return false;
+                }
+                return getRefsForPart(plan, "morning").length > 0 || getRefsForPart(plan, "evening").length > 0;
+            }
+
+            function syncReadingSharePlanButton() {
+                if (!readingSharePlanBtn) {
+                    return;
+                }
+                var canShare = Boolean(
+                    !readingPlanImageBusy
+                        && !readingPlanError
+                        && todayPlanData
+                        && hasReadablePlanEntries(todayPlanData)
+                );
+                readingSharePlanBtn.disabled = !canShare;
+                readingSharePlanBtn.setAttribute("aria-disabled", canShare ? "false" : "true");
+            }
+
+            function setReadingPlanShareStatus(message, isError) {
+                if (!readingSharePlanStatus) {
+                    return;
+                }
+                if (!message) {
+                    readingSharePlanStatus.textContent = "";
+                    readingSharePlanStatus.hidden = true;
+                    readingSharePlanStatus.classList.remove("reading-share-plan-status--error");
+                    return;
+                }
+                readingSharePlanStatus.textContent = message;
+                readingSharePlanStatus.hidden = false;
+                readingSharePlanStatus.classList.toggle("reading-share-plan-status--error", Boolean(isError));
+                window.clearTimeout(setReadingPlanShareStatus._t);
+                setReadingPlanShareStatus._t = window.setTimeout(function () {
+                    readingSharePlanStatus.textContent = "";
+                    readingSharePlanStatus.hidden = true;
+                    readingSharePlanStatus.classList.remove("reading-share-plan-status--error");
+                }, 4500);
+            }
+
+            function formatRefsLineForShareImageLang(refs, lang) {
+                var clean = Array.isArray(refs)
+                    ? refs.filter(Boolean).map(function (ref) {
+                        return toFriendlyReference(ref, readingCard, lang);
+                    })
+                    : [];
+                return clean.join(", ");
+            }
+
+            function downloadReadingPlanBlob(blob, fileName) {
+                var url = URL.createObjectURL(blob);
+                var anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = fileName;
+                document.body.appendChild(anchor);
+                anchor.click();
+                window.setTimeout(function () {
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
+                }, 0);
+            }
+
+            function ensureHtml2CanvasReadingShare() {
+                if (typeof window.html2canvas === "function") {
+                    return Promise.resolve(window.html2canvas);
+                }
+                if (html2canvasLoadPromise) {
+                    return html2canvasLoadPromise;
+                }
+                html2canvasLoadPromise = new Promise(function (resolve, reject) {
+                    var script = document.createElement("script");
+                    script.async = true;
+                    script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js";
+                    script.onload = function () {
+                        if (typeof window.html2canvas === "function") {
+                            resolve(window.html2canvas);
+                        } else {
+                            html2canvasLoadPromise = null;
+                            reject(new Error("html2canvas"));
+                        }
+                    };
+                    script.onerror = function () {
+                        html2canvasLoadPromise = null;
+                        reject(new Error("html2canvas-load"));
+                    };
+                    document.head.appendChild(script);
+                });
+                return html2canvasLoadPromise;
+            }
+
+            function buildReadingSharePlanCardSection(isEvening, primaryLine, secondaryLine, marginBottom) {
+                var icon = isEvening ? "fa-moon" : "fa-sun";
+                var iconColor = isEvening ? "#e0e7ff" : "#ffd700";
+                var iconShadow = isEvening ? "0 2px 8px rgba(224,231,255,0.5)" : "0 2px 8px rgba(255,215,0,0.5)";
+                var p = NjcEvents.escapeHtml(primaryLine);
+                var s = NjcEvents.escapeHtml(secondaryLine);
+                var second = (secondaryLine && secondaryLine !== primaryLine)
+                    ? "<div style=\"text-align:center;font-size:1.1rem;font-family:'Noto Sans Tamil','Latha',sans-serif;opacity:0.95;line-height:1.5;margin-top:8px\">" + s + "</div>"
+                    : "";
+                return "" +
+                    "<div style=\"margin-bottom:" + marginBottom + ";background:rgba(255,255,255,0.15);border-radius:12px;padding:20px\">" +
+                    "<div style=\"text-align:center;margin-bottom:12px\">" +
+                    "<i class=\"fa-solid " + icon + "\" style=\"font-size:3rem;color:" + iconColor + ";text-shadow:" + iconShadow + "\"></i>" +
+                    "</div>" +
+                    "<div style=\"text-align:center;font-size:1.15rem;font-weight:500;margin-bottom:8px\">" + p + "</div>" +
+                    second +
+                    "</div>";
+            }
+
+            function buildReadingPlanShareImageBlob() {
+                if (!todayPlanData || !hasReadablePlanEntries(todayPlanData)) {
+                    return Promise.reject(new Error("no-plan"));
+                }
+                var mRefs = getRefsForPart(todayPlanData, "morning");
+                var eRefs = getRefsForPart(todayPlanData, "evening");
+                var dateStr = todayReadingPlanMeta ? String(todayReadingPlanMeta.textContent || "").trim() : "";
+                var mEn = formatRefsLineForShareImageLang(mRefs, "en");
+                var mTa = formatRefsLineForShareImageLang(mRefs, "ta");
+                var eEn = formatRefsLineForShareImageLang(eRefs, "en");
+                var eTa = formatRefsLineForShareImageLang(eRefs, "ta");
+                var primaryIsTa = isTamilLanguage(readingCard);
+                var mPrimary = primaryIsTa ? mTa : mEn;
+                var mSecondary = primaryIsTa ? mEn : mTa;
+                var ePrimary = primaryIsTa ? eTa : eEn;
+                var eSecondary = primaryIsTa ? eEn : eTa;
+
+                return ensureHtml2CanvasReadingShare().then(function (html2canvas) {
+                    return new Promise(function (resolve, reject) {
+                        var card = document.createElement("div");
+                        card.setAttribute("aria-hidden", "true");
+                        card.style.cssText = "position:fixed;left:-10000px;top:0;width:380px;box-sizing:border-box;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:30px;border-radius:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#fff;line-height:1.6;box-shadow:0 8px 32px rgba(0,0,0,0.2)";
+                        var brand = NjcEvents.escapeHtml(T("home.readingPlanShareCardBrand", "One Year Bible", readingCard));
+                        var dateEsc = NjcEvents.escapeHtml(dateStr);
+                        var footer = NjcEvents.escapeHtml(T("home.readingPlanShareCardFooter", "— New Jerusalem Church", readingCard));
+                        var bodyHtml = "";
+                        if (mRefs.length) {
+                            bodyHtml += buildReadingSharePlanCardSection(false, mPrimary, mSecondary, eRefs.length ? "24px" : "0");
+                        }
+                        if (eRefs.length) {
+                            bodyHtml += buildReadingSharePlanCardSection(true, ePrimary, eSecondary, "0");
+                        }
+                        card.innerHTML = "" +
+                            "<div style=\"text-align:center;margin-bottom:20px\">" +
+                            "<div style=\"font-size:2.5rem;color:#ffd700;margin-bottom:8px\"><i class=\"fa-solid fa-book-open\"></i></div>" +
+                            "<div style=\"font-size:1.2rem;font-weight:700;margin-bottom:4px\">" + brand + "</div>" +
+                            "<div style=\"font-size:0.95rem;opacity:0.9\">" + dateEsc + "</div>" +
+                            "</div>" +
+                            bodyHtml +
+                            "<div style=\"margin-top:20px;text-align:center;font-size:0.85rem;opacity:0.8\">" + footer + "</div>";
+                        document.body.appendChild(card);
+                        var runCapture = function () {
+                            html2canvas(card, {
+                                scale: 2,
+                                backgroundColor: null,
+                                logging: false
+                            }).then(function (canvas) {
+                                try {
+                                    document.body.removeChild(card);
+                                } catch (removeErr) {
+                                    /* ignore */
+                                }
+                                canvas.toBlob(function (blob) {
+                                    if (!blob) {
+                                        reject(new Error("blob"));
+                                        return;
+                                    }
+                                    resolve(blob);
+                                }, "image/png");
+                            }).catch(function (err) {
+                                try {
+                                    document.body.removeChild(card);
+                                } catch (removeErr2) {
+                                    /* ignore */
+                                }
+                                reject(err || new Error("html2canvas"));
+                            });
+                        };
+                        if (document.fonts && document.fonts.ready) {
+                            document.fonts.ready.then(runCapture).catch(runCapture);
+                        } else {
+                            window.setTimeout(runCapture, 80);
+                        }
+                    });
+                });
+            }
+
+            function shareReadingPlanAsImage() {
+                if (readingPlanImageBusy || !readingSharePlanBtn || readingSharePlanBtn.disabled) {
+                    return;
+                }
+                readingPlanImageBusy = true;
+                syncReadingSharePlanButton();
+                setReadingPlanShareStatus(T("home.readingPlanShareImageGenerating", "Creating share image…", readingCard), false);
+                buildReadingPlanShareImageBlob().then(function (blob) {
+                    var ymd = String(todayYmd.year)
+                        + String(todayYmd.month).padStart(2, "0")
+                        + String(todayYmd.day).padStart(2, "0");
+                    var fileName = "NJC_Bible_Reading-" + ymd + ".png";
+                    var shared = false;
+                    if (typeof navigator !== "undefined" && navigator.share && typeof File === "function") {
+                        var file = new File([blob], fileName, { type: "image/png" });
+                        var canShareFiles = true;
+                        if (typeof navigator.canShare === "function") {
+                            canShareFiles = navigator.canShare({ files: [file] });
+                        }
+                        if (canShareFiles) {
+                            return navigator.share({
+                                title: T("home.readingPlanShareImageShareTitle", "Today's Bible reading", readingCard),
+                                text: T("home.readingPlanShareImageShareText", "Today's Bible reading plan — NJC App", readingCard),
+                                files: [file]
+                            }).then(function () {
+                                shared = true;
+                            }).catch(function (err) {
+                                if (err && err.name === "AbortError") {
+                                    throw err;
+                                }
+                            }).then(function () {
+                                if (!shared) {
+                                    downloadReadingPlanBlob(blob, fileName);
+                                    setReadingPlanShareStatus(
+                                        T("home.readingPlanShareImageDownloaded", "Image saved. Attach it in WhatsApp to share.", readingCard),
+                                        false
+                                    );
+                                    return;
+                                }
+                                setReadingPlanShareStatus(
+                                    T("home.readingPlanShareImageReady", "Image ready to share.", readingCard),
+                                    false
+                                );
+                            });
+                        }
+                    }
+                    downloadReadingPlanBlob(blob, fileName);
+                    setReadingPlanShareStatus(
+                        T("home.readingPlanShareImageDownloaded", "Image saved. Attach it in WhatsApp to share.", readingCard),
+                        false
+                    );
+                    return null;
+                }).catch(function (err) {
+                    if (err && err.name === "AbortError") {
+                        setReadingPlanShareStatus(T("home.readingPlanShareImageCancelled", "Share cancelled.", readingCard), false);
+                        return;
+                    }
+                    setReadingPlanShareStatus(T("home.readingPlanShareImageError", "Could not create the image. Try again.", readingCard), true);
+                }).finally(function () {
+                    readingPlanImageBusy = false;
+                    syncReadingSharePlanButton();
+                });
             }
 
             function buildReadingProgressData() {
@@ -2704,38 +2965,42 @@
             }
 
             function renderReadingPlan() {
-                if (readingPlanError) {
-                    todayReadingPlanList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan", readingCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.", readingCard)) + "</p>" +
-                        "</li>";
+                try {
+                    if (readingPlanError) {
+                        todayReadingPlanList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("home.loadReadingErrorTitle", "Could not load today's reading plan", readingCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("home.loadReadingErrorBody", "Please try again shortly.", readingCard)) + "</p>" +
+                            "</li>";
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    if (!todayPlanData) {
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    var progress = getTodayProgress();
+                    var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
+                    var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
+                    var compactHtml = morningBlock + eveningBlock;
+
+                    if (!compactHtml) {
+                        todayReadingPlanList.innerHTML = "" +
+                            "<li>" +
+                            "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today", readingCard)) + "</h3>" +
+                            "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.", readingCard)) + "</p>" +
+                            "</li>";
+                        renderReadingProgress();
+                        return;
+                    }
+
+                    todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
                     renderReadingProgress();
-                    return;
+                } finally {
+                    syncReadingSharePlanButton();
                 }
-
-                if (!todayPlanData) {
-                    renderReadingProgress();
-                    return;
-                }
-
-                var progress = getTodayProgress();
-                var morningBlock = planBlock("home.morningShort", "Morning", todayPlanData.morning, "morning", progress, readingCard);
-                var eveningBlock = planBlock("home.eveningShort", "Evening", todayPlanData.evening, "evening", progress, readingCard);
-                var compactHtml = morningBlock + eveningBlock;
-
-                if (!compactHtml) {
-                    todayReadingPlanList.innerHTML = "" +
-                        "<li>" +
-                        "  <h3>" + NjcEvents.escapeHtml(T("home.noReadingTitle", "No reading entries today", readingCard)) + "</h3>" +
-                        "  <p>" + NjcEvents.escapeHtml(T("home.noReadingBody", "Please check your Readingplan app.", readingCard)) + "</p>" +
-                        "</li>";
-                    renderReadingProgress();
-                    return;
-                }
-
-                todayReadingPlanList.innerHTML = "<li class=\"reading-compact-row\">" + compactHtml + "</li>";
-                renderReadingProgress();
             }
 
             function loadTodayReadingPlan() {
@@ -2768,11 +3033,13 @@
                         if (!todayPlan) {
                             throw new Error("No plan for today");
                         }
+                        readingPlanError = false;
                         todayPlanData = todayPlan;
                         renderReadingPlan();
                     })
                     .catch(function () {
                         fullReadingPlan = [];
+                        todayPlanData = null;
                         readingPlanError = true;
                         renderReadingPlan();
                     });
@@ -3571,6 +3838,12 @@
             if (readingExportCsvBtn) {
                 readingExportCsvBtn.addEventListener("click", function () {
                     exportReadingProgressCsv();
+                });
+            }
+
+            if (readingSharePlanBtn) {
+                readingSharePlanBtn.addEventListener("click", function () {
+                    shareReadingPlanAsImage();
                 });
             }
 

@@ -31,23 +31,23 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v414sermonognode";
-const RUNTIME_CACHE = "njc-runtime-cache-v414sermonognode";
+const APP_CACHE = "njc-app-cache-v415readingplanmerge";
+const RUNTIME_CACHE = "njc-runtime-cache-v415readingplanmerge";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Fix: sermon share preview images now run on Node (Vercel Edge did not support @vercel/og).";
+    "Reading plan: share today's passages as an image (same card style as the Readingplan app). Sermon share preview images run on Node (Vercel Edge did not support @vercel/og).";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260615sermonsharecard1",
+    "./styles.css?v=20260620readingplanmerge1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260615sermonsharecard1",
+    "./app-shell.js?v=20260620readingplanmerge1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260614readingsharesignedin1",
+    "./home-page.js?v=20260620readingplanmerge1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",
