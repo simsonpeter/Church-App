@@ -14,7 +14,6 @@
             var readingUnreadToggle = document.getElementById("reading-unread-toggle");
             var readingMarkAllReadBtn = document.getElementById("reading-mark-all-read");
             var readingUnreadList = document.getElementById("reading-unread-list");
-            var readingStreakLine = document.getElementById("reading-streak-line");
             var readingNudgeLine = document.getElementById("reading-nudge-line");
             var readingShareProgressBtn = document.getElementById("reading-share-progress-btn");
             var readingExportCsvBtn = document.getElementById("reading-export-csv-btn");
@@ -2790,16 +2789,6 @@
             }
 
             function renderReadingStreakAndNudge() {
-                if (readingStreakLine) {
-                    var streak = computeReadingDayStreakBrussels();
-                    if (streak > 0) {
-                        readingStreakLine.textContent = formatCount(T("home.readingStreakDays", "{count}-day reading streak (Brussels days)", readingCard), streak);
-                        readingStreakLine.hidden = false;
-                    } else {
-                        readingStreakLine.textContent = "";
-                        readingStreakLine.hidden = true;
-                    }
-                }
                 if (readingNudgeLine) {
                     var todayB = brusselsYmdFromDate(new Date());
                     var hour = new Date().getHours();
