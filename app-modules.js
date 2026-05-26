@@ -24,6 +24,7 @@
         contact: true,
         celebrations: true,
         chat: true,
+        testimony: true,
         userAchievements: true,
         kids: true,
         newsletter: true
@@ -41,6 +42,7 @@
         trivia: "trivia",
         "user-achievements": "userAchievements",
         chat: "chat",
+        testimony: "testimony",
         celebrations: "celebrations",
         kids: "kids",
         newsletter: "newsletter"

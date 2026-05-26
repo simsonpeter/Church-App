@@ -9556,4 +9556,99 @@ html[data-theme="dark"] .kids-toolbar {
     .kids-mem-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+}/* Testimonies (Firestore; signed-in post, public read) */
+.testimony-status--error {
+    color: #b42318;
+}
+
+html[data-theme="dark"] .testimony-status--error {
+    color: #ffb4a9;
+}
+
+.testimony-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 12px 0 16px;
+}
+
+.testimony-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.testimony-body {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.45;
+}
+
+.testimony-list-wrap {
+    margin-top: 8px;
+}
+
+.testimony-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.testimony-item {
+    margin: 0;
+}
+
+.testimony-card {
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 14px 12px;
+    background: var(--surface-soft);
+}
+
+.testimony-card-head {
+    margin-bottom: 10px;
+}
+
+.testimony-card-title {
+    margin: 0 0 6px;
+    font-size: 1.05rem;
+    line-height: 1.35;
+}
+
+.testimony-card-meta {
+    margin: 0;
+    font-size: 0.78rem;
+    opacity: 0.88;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+}
+
+.testimony-card-name {
+    font-weight: 700;
+}
+
+.testimony-card-body {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    word-break: break-word;
+}
+
+.testimony-card-body p {
+    margin: 0;
+}
+
+.testimony-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.testimony-empty {
+    text-align: center;
+    padding: 12px 8px;
 }

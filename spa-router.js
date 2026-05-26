@@ -128,6 +128,15 @@
             subtitleKey: "chat.subtitle",
             subtitleText: "Text only, members only"
         },
+        testimony: {
+            icon: "fa-heart",
+            eyebrowKey: "testimony.eyebrow",
+            eyebrowText: "Community",
+            titleKey: "testimony.title",
+            titleText: "Testimonies",
+            subtitleKey: "testimony.subtitle",
+            subtitleText: "Share how God has encouraged you"
+        },
         profile: {
             icon: "fa-user",
             eyebrowKey: "profile.eyebrow",

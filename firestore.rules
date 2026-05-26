@@ -24,6 +24,7 @@ rules_version = '2';
 //   celebrationProfiles/{uid} — celebration fields; registered member read (token.email); owner write
 //   chatMessages/{msgId} — church group chat: text only, signed-in users; admin may delete any message
 //   churchNewsletters/{id} — church monthly newsletter (public read; admin write/delete)
+//   testimonies/{id} — public read; signed-in create; delete own or admin
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //   sermonListenStats/{sermonKey} — aggregate play count per sermon audio URL (public read; +1 listenCount only)
 //
@@ -335,6 +336,25 @@ service cloud.firestore {
         && request.resource.data.listenCount is int
         && request.resource.data.listenCount == resource.data.listenCount + 1;
       allow delete: if false;
+    }
+
+    match /testimonies/{testimonyId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() > 0
+        && request.resource.data.authorName.size() < 200
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() < 8000
+        && (!request.resource.data.keys().hasAny(["title"])
+            || (request.resource.data.title is string
+                && request.resource.data.title.size() > 0
+                && request.resource.data.title.size() <= 200));
+      allow update: if false;
+      allow delete: if request.auth != null
+        && (resource.data.authorUid == request.auth.uid || isAdmin());
     }
   }
 }

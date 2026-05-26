@@ -31,20 +31,20 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v416nostreakline";
-const RUNTIME_CACHE = "njc-runtime-cache-v416nostreakline";
+const APP_CACHE = "njc-app-cache-v417maintestimony";
+const RUNTIME_CACHE = "njc-runtime-cache-v417maintestimony";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: hide the Brussels reading streak line on the reading card. Reading plan share image matches the Readingplan app. Sermon share preview images run on Node (Vercel Edge did not support @vercel/og).";
+    "Home: hide the Brussels reading streak line on the reading card. Reading plan share image matches the Readingplan app. Sermon share preview images run on Node (Vercel Edge did not support @vercel/og). Testimonies: public list, signed-in posts, share and copy.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260620nostreakline1",
+    "./styles.css?v=20260620maintestimony1",
     "./user-auth.js?v=20260411mainmerge1",
-    "./app-modules.js?v=20260511newsletter1",
-    "./app-shell.js?v=20260620readingplanmerge1",
+    "./app-modules.js?v=20260620maintestimony1",
+    "./app-shell.js?v=20260620maintestimony1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260620nostreakline1",
@@ -66,7 +66,8 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260606celebwishesvisible1",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
-    "./spa-router.js?v=20260614ourapps2",
+    "./testimony-page.js?v=20260620maintestimony1",
+    "./spa-router.js?v=20260620maintestimony1",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
