@@ -34,6 +34,13 @@
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
             var adminDailyBreadFeedUrl = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
+            /** Same Antantulla JSON sequence as daily-bread-page.js when Mantle has no row for today (Brussels date). */
+            var HOME_MANNA_GITHUB_TA = "https://raw.githubusercontent.com/yesudas/bible-devotions-app/main/antantulla-appam/meditations/%E0%AE%A4%E0%AE%AE%E0%AE%BF%E0%AE%B4%E0%AF%8D/";
+            var HOME_MANNA_GITHUB_EN = "https://raw.githubusercontent.com/yesudas/bible-devotions-app/main/antantulla-appam/meditations/English/";
+            var HOME_MANNA_INDEX_CACHE_TA = "njc_antantulla_index_cache_ta_v1";
+            var HOME_MANNA_INDEX_CACHE_EN = "njc_antantulla_index_cache_en_v1";
+            var HOME_MANNA_INDEX_CACHE_MS = 6 * 60 * 60 * 1000;
+            var HOME_MANNA_SEQ_ANCHOR_UTC = Date.UTC(2024, 0, 1, 12, 0, 0);
             var adminTriviaUrl = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var triviaContent = document.getElementById("trivia-content");
@@ -1872,10 +1879,209 @@
                 return s;
             }
 
-            function fetchHomeDailyMannaEntry() {
-                if (!modOn("dailyBread")) {
-                    return Promise.resolve(null);
+            function mannaGithubFilenameToNumber(name) {
+                var n = parseInt(String(name || "").replace(/\.json$/i, ""), 10);
+                return Number.isFinite(n) ? n : 0;
+            }
+
+            function mannaGithubFormatAntantullaBody(raw) {
+                var parts = [];
+                if (raw.memory_verse && String(raw.memory_verse.text || "").trim()) {
+                    parts.push(String(raw.memory_verse.text).trim());
                 }
+                if (raw.devotion && String(raw.devotion.text || "").trim()) {
+                    parts.push(String(raw.devotion.text).replace(/\r\n/g, "\n").trim());
+                }
+                if (raw.conclusion && raw.conclusion.text !== undefined && raw.conclusion.text !== null) {
+                    var ct = raw.conclusion.text;
+                    if (Array.isArray(ct)) {
+                        ct.forEach(function (line) {
+                            var t = String(line || "").trim();
+                            if (t) {
+                                parts.push(t);
+                            }
+                        });
+                    } else if (String(ct).trim()) {
+                        parts.push(String(ct).trim());
+                    }
+                }
+                return parts.join("\n\n");
+            }
+
+            function mannaGithubMapToEntry(raw, ymdKey, filename, langKey) {
+                var bodyText = mannaGithubFormatAntantullaBody(raw && typeof raw === "object" ? raw : {});
+                var authorText = "";
+                if (raw && raw.author) {
+                    authorText = String(raw.author.author || raw.author.name || "").trim();
+                }
+                var titleText = String((raw && raw.title) || "").trim();
+                var uid = String((raw && raw.uniqueid) || "").replace(/\s/g, "");
+                var fid = String(filename || "").replace(/[^\w.-]/g, "");
+                var idSuffix = (uid || fid || "x");
+                if (langKey === "ta") {
+                    return {
+                        id: "gh-antantulla-ta-" + idSuffix,
+                        date: ymdKey,
+                        title: "",
+                        titleTa: titleText,
+                        author: "",
+                        authorTa: authorText,
+                        body: "",
+                        bodyTa: bodyText
+                    };
+                }
+                return {
+                    id: "gh-antantulla-en-" + idSuffix,
+                    date: ymdKey,
+                    title: titleText,
+                    titleTa: "",
+                    author: authorText,
+                    authorTa: "",
+                    body: bodyText,
+                    bodyTa: ""
+                };
+            }
+
+            function mannaAntIndexKey(langKey) {
+                return langKey === "ta" ? HOME_MANNA_INDEX_CACHE_TA : HOME_MANNA_INDEX_CACHE_EN;
+            }
+
+            function mannaAntBase(langKey) {
+                return langKey === "ta" ? HOME_MANNA_GITHUB_TA : HOME_MANNA_GITHUB_EN;
+            }
+
+            function mannaReadCachedAntIndex(langKey) {
+                try {
+                    var raw = window.sessionStorage.getItem(mannaAntIndexKey(langKey));
+                    if (!raw) {
+                        return null;
+                    }
+                    var o = JSON.parse(raw);
+                    if (!o || typeof o.at !== "number" || !Array.isArray(o.rows)) {
+                        return null;
+                    }
+                    if (Date.now() - o.at > HOME_MANNA_INDEX_CACHE_MS) {
+                        return null;
+                    }
+                    return o.rows;
+                } catch (e) {
+                    return null;
+                }
+            }
+
+            function mannaWriteCachedAntIndex(langKey, rows) {
+                try {
+                    window.sessionStorage.setItem(mannaAntIndexKey(langKey), JSON.stringify({
+                        at: Date.now(),
+                        rows: rows
+                    }));
+                } catch (e) {}
+            }
+
+            function mannaFetchAntIndexRows(langKey) {
+                var cached = mannaReadCachedAntIndex(langKey);
+                if (cached) {
+                    return Promise.resolve(cached);
+                }
+                var indexUrl = mannaAntBase(langKey) + "all-meditations.json";
+                return fetch(indexUrl + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error("index");
+                    }
+                    return response.json();
+                }).then(function (rows) {
+                    var list = Array.isArray(rows) ? rows : [];
+                    mannaWriteCachedAntIndex(langKey, list);
+                    return list;
+                });
+            }
+
+            function mannaAntUniqueSortedNums(rows) {
+                var seen = {};
+                (rows || []).forEach(function (row) {
+                    var fn = row && String(row.filename || "").trim();
+                    if (!fn || !/\.json$/i.test(fn)) {
+                        return;
+                    }
+                    if (/^all-meditations\.json$/i.test(fn)) {
+                        return;
+                    }
+                    var n = mannaGithubFilenameToNumber(fn);
+                    if (n > 0) {
+                        seen[n] = true;
+                    }
+                });
+                return Object.keys(seen).map(function (k) {
+                    return parseInt(k, 10);
+                }).sort(function (a, b) {
+                    return a - b;
+                });
+            }
+
+            function mannaAntPickFilenameBySequence(rows, ymdKey) {
+                var nums = mannaAntUniqueSortedNums(rows);
+                if (!nums.length) {
+                    return "";
+                }
+                var parts = String(ymdKey || "").split("-");
+                var y = parseInt(parts[0], 10) || 2025;
+                var m = parseInt(parts[1], 10) || 1;
+                var d = parseInt(parts[2], 10) || 1;
+                var curUtc = Date.UTC(y, m - 1, d, 12, 0, 0);
+                var daySeq = Math.floor((curUtc - HOME_MANNA_SEQ_ANCHOR_UTC) / 86400000);
+                if (daySeq < 0) {
+                    daySeq = 0;
+                }
+                var idx = daySeq % nums.length;
+                var n = nums[idx];
+                return String(n) + ".json";
+            }
+
+            function mannaAntEntryToRaw(entry) {
+                if (!entry || typeof entry !== "object") {
+                    return null;
+                }
+                var tEn = String(entry.title || "").trim();
+                var tTa = String(entry.titleTa || "").trim();
+                var bEn = String(entry.body || "").trim();
+                var bTa = String(entry.bodyTa || "").trim();
+                if (!tEn && !tTa && !bEn && !bTa) {
+                    return null;
+                }
+                return {
+                    titleEn: tEn || tTa,
+                    titleTa: tTa || tEn,
+                    bodyRawEn: bEn || bTa,
+                    bodyRawTa: bTa || bEn
+                };
+            }
+
+            function fetchAntantullaFallbackForHomeManna(tk, langKey) {
+                return mannaFetchAntIndexRows(langKey).then(function (rows) {
+                    var fname = mannaAntPickFilenameBySequence(rows, tk);
+                    if (!fname) {
+                        return null;
+                    }
+                    var base = mannaAntBase(langKey);
+                    return fetch(base + encodeURIComponent(fname) + "?t=" + String(Date.now()), { cache: "no-store" }).then(function (response) {
+                        if (!response.ok) {
+                            return null;
+                        }
+                        return response.json();
+                    }).then(function (data) {
+                        if (!data || typeof data !== "object") {
+                            return null;
+                        }
+                        return mannaGithubMapToEntry(data, tk, fname, langKey);
+                    }).then(function (entry) {
+                        return mannaAntEntryToRaw(entry);
+                    });
+                }).catch(function () {
+                    return null;
+                });
+            }
+
+            function fetchMantleDailyMannaRawForToday() {
                 return fetch(adminDailyBreadFeedUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
                     .then(function (response) {
                         if (response.status === 404) {
@@ -1912,10 +2118,23 @@
                             bodyRawEn: hit.body || hit.bodyTa,
                             bodyRawTa: hit.bodyTa || hit.body
                         };
-                    })
-                    .catch(function () {
-                        return null;
                     });
+            }
+
+            function fetchHomeDailyMannaEntry() {
+                if (!modOn("dailyBread")) {
+                    return Promise.resolve(null);
+                }
+                var tk = getTodayKey();
+                var langKey = isTamilLanguage(announcementsCard) ? "ta" : "en";
+                return fetchMantleDailyMannaRawForToday().then(function (mantleRaw) {
+                    if (mantleRaw) {
+                        return mantleRaw;
+                    }
+                    return fetchAntantullaFallbackForHomeManna(tk, langKey);
+                }).catch(function () {
+                    return fetchAntantullaFallbackForHomeManna(tk, langKey);
+                });
             }
 
             function buildDailyMannaHomeAnnouncementItem() {

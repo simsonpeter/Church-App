@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v419userdir";
-const RUNTIME_CACHE = "njc-runtime-cache-v419userdir";
+const APP_CACHE = "njc-app-cache-v420mannaant";
+const RUNTIME_CACHE = "njc-runtime-cache-v420mannaant";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Admin registered users: publish updated Firestore rules; app refreshes auth token before listing userDirectory. Rules: admin email via token or firebase.identities; directory writes allow server timestamps; users may read own directory row. Earlier: Daily Manna on home announcements, testimonies, sermon OG cards, reading plan share.";
+    "Home announcements Daily Manna: when Mantle has no dated entry for today, use the same Antantulla GitHub sequence as the Daily bread tab so a devotion still shows every day. Earlier: admin userDirectory fixes, Daily Manna from Mantle, testimonies, sermon OG cards.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260620maintestimony1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260519dailymanna1",
+    "./home-page.js?v=20260527mannaant1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",
