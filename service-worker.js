@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v417maintestimony";
-const RUNTIME_CACHE = "njc-runtime-cache-v417maintestimony";
+const APP_CACHE = "njc-app-cache-v418dailymanna";
+const RUNTIME_CACHE = "njc-runtime-cache-v418dailymanna";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home: hide the Brussels reading streak line on the reading card. Reading plan share image matches the Readingplan app. Sermon share preview images run on Node (Vercel Edge did not support @vercel/og). Testimonies: public list, signed-in posts, share and copy.";
+    "Home announcements: Daily Manna slide for today’s dated devotion (Mantle daily bread), with title, short excerpt, and link to the Daily bread tab. Plus prior release notes: reading streak line, reading plan share image, sermon OG cards, testimonies.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260620maintestimony1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260620nostreakline1",
+    "./home-page.js?v=20260519dailymanna1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",

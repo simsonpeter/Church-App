@@ -33,6 +33,7 @@
             var ANNOUNCEMENT_TRANSLATION_CACHE_KEY = "njc_announcement_translation_cache_v1";
             var ANNOUNCEMENT_DISMISSED_KEY = "njc_announcement_dismissed_v1";
             var adminNoticesUrl = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
+            var adminDailyBreadFeedUrl = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
             var adminTriviaUrl = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
             var thisWeekEventsList = document.getElementById("this-week-events-list");
             var triviaContent = document.getElementById("trivia-content");
@@ -102,6 +103,9 @@
             var announcementTranslationSaveTimerId = null;
             var cachedHomeStaticAnnouncements = [];
             var cachedHomeAdminNotices = [];
+            /** Raw fields for today’s Mantle daily bread row, or null (filled when daily bread + announcements modules are on). */
+            var cachedHomeDailyMannaEntry = null;
+            var DAILY_MANNA_HOME_ID_PREFIX = "njc-home-daily-manna-";
             var SERMON_AUTO_ANNOUNCE_STORAGE_KEY = "njc_latest_sermon_announce_v1";
             var SERMON_AUTO_ANNOUNCE_ITEM_ID = "njc-auto-latest-sermon";
 
@@ -1194,7 +1198,8 @@
                     important: Boolean(source.important),
                     link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
-                    imageOnly: imageOnly
+                    imageOnly: imageOnly,
+                    skipDismiss: Boolean(source.skipDismiss)
                 };
             }
 
@@ -1577,7 +1582,7 @@
                 var wishCtaLine = item.personalWish
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-wish-celebrations-btn\">" + NjcEvents.escapeHtml(T("home.personalWishGoToCelebrationsPage", "Wish on Celebrations page", announcementsCard)) + "</button></p>")
                     : "";
-                var dismissBtn = !item.personalWish
+                var dismissBtn = !item.personalWish && !item.skipDismiss
                     ? ("<p><button type=\"button\" class=\"button-link button-secondary announcement-dismiss-btn\" data-announcement-dismiss=\"" + NjcEvents.escapeHtml(String(item.id || "")) + "\">" + NjcEvents.escapeHtml(T("home.announcementDismiss", "Mark as read", announcementsCard)) + "</button></p>")
                     : "";
                 var imageAltText = titleText || bodyText || T("home.announcementBannerAlt", "Announcement banner", announcementsCard);
@@ -1826,6 +1831,138 @@
                 return buildLatestSermonAnnouncementItem(stored);
             }
 
+            function extractDailyBreadFeedRows(payload) {
+                if (!payload) {
+                    return [];
+                }
+                if (Array.isArray(payload)) {
+                    return payload;
+                }
+                if (Array.isArray(payload.entries)) {
+                    return payload.entries;
+                }
+                if (payload.data && Array.isArray(payload.data.entries)) {
+                    return payload.data.entries;
+                }
+                return [];
+            }
+
+            function normalizeDailyBreadDbRow(row, index) {
+                var source = row && typeof row === "object" ? row : {};
+                var dateRaw = String(source.date || source.showDate || "").trim().slice(0, 10);
+                return {
+                    date: /^\d{4}-\d{2}-\d{2}$/.test(dateRaw) ? dateRaw : "",
+                    title: String(source.title || "").trim(),
+                    titleTa: String(source.titleTa || "").trim(),
+                    body: String(source.body || "").trim(),
+                    bodyTa: String(source.bodyTa || "").trim()
+                };
+            }
+
+            function previewPlainForManna(htmlOrText, maxLen) {
+                var max = Number(maxLen) || 240;
+                var s = String(htmlOrText || "")
+                    .replace(/<br\s*\/?>/gi, "\n")
+                    .replace(/<\/p>/gi, "\n\n")
+                    .replace(/<[^>]+>/g, " ");
+                s = s.replace(/\s+/g, " ").trim();
+                if (s.length > max) {
+                    s = s.slice(0, max - 1).trim() + "\u2026";
+                }
+                return s;
+            }
+
+            function fetchHomeDailyMannaEntry() {
+                if (!modOn("dailyBread")) {
+                    return Promise.resolve(null);
+                }
+                return fetch(adminDailyBreadFeedUrl + "?ts=" + String(Date.now()), { cache: "no-store" })
+                    .then(function (response) {
+                        if (response.status === 404) {
+                            return null;
+                        }
+                        if (!response.ok) {
+                            throw new Error("daily bread feed");
+                        }
+                        return response.json();
+                    })
+                    .then(function (payload) {
+                        var rows = extractDailyBreadFeedRows(payload)
+                            .map(normalizeDailyBreadDbRow)
+                            .filter(function (r) {
+                                return Boolean(r && r.date);
+                            });
+                        var tk = getTodayKey();
+                        var hit = null;
+                        for (var i = 0; i < rows.length; i++) {
+                            if (rows[i].date === tk) {
+                                hit = rows[i];
+                                break;
+                            }
+                        }
+                        if (!hit) {
+                            return null;
+                        }
+                        if (!hit.title && !hit.titleTa && !hit.body && !hit.bodyTa) {
+                            return null;
+                        }
+                        return {
+                            titleEn: hit.title || hit.titleTa,
+                            titleTa: hit.titleTa || hit.title,
+                            bodyRawEn: hit.body || hit.bodyTa,
+                            bodyRawTa: hit.bodyTa || hit.body
+                        };
+                    })
+                    .catch(function () {
+                        return null;
+                    });
+            }
+
+            function buildDailyMannaHomeAnnouncementItem() {
+                if (!modOn("dailyBread") || !announcementsCard) {
+                    return null;
+                }
+                var raw = cachedHomeDailyMannaEntry;
+                if (!raw || typeof raw !== "object") {
+                    return null;
+                }
+                var titleEn = String(raw.titleEn || "").trim();
+                var titleTa = String(raw.titleTa || "").trim();
+                var excerptEn = previewPlainForManna(raw.bodyRawEn, 260);
+                var excerptTa = previewPlainForManna(raw.bodyRawTa, 260);
+                var kicker = T("home.dailyMannaKicker", "Daily Manna", announcementsCard);
+                if (!titleEn && !titleTa) {
+                    titleEn = kicker;
+                    titleTa = kicker;
+                }
+                var fallback = T("home.dailyMannaTeaserFallback", "Read the full devotion on the Daily bread page.", announcementsCard);
+                var tailEn = excerptEn || fallback;
+                var tailTa = excerptTa || excerptEn || fallback;
+                var bodyEn;
+                var bodyTa;
+                var titleIsKickerOnly = titleEn === kicker && titleTa === kicker;
+                if (titleIsKickerOnly) {
+                    bodyEn = tailEn;
+                    bodyTa = excerptTa ? tailTa : "";
+                } else {
+                    bodyEn = kicker + "\n\n" + tailEn;
+                    bodyTa = excerptTa ? (kicker + "\n\n" + tailTa) : "";
+                }
+                var todayKey = getTodayKey();
+                return normalizeAnnouncement({
+                    id: DAILY_MANNA_HOME_ID_PREFIX + todayKey,
+                    title: titleEn || titleTa,
+                    titleTa: titleTa || titleEn,
+                    body: bodyEn,
+                    bodyTa: bodyTa,
+                    date: todayKey,
+                    important: true,
+                    link: "#daily-bread",
+                    imageUrl: "daily-bread-banner.jpg?v=20260330img1",
+                    skipDismiss: true
+                }, 0);
+            }
+
             function mergeHomeAnnouncements() {
                 if (!modOn("announcements")) {
                     return;
@@ -1848,7 +1985,9 @@
                     mergedPersonalCommunity = window.NjcCommunityCelebrations.dedupeCelebrationAnnouncements(mergedPersonalCommunity, todayYmd);
                 }
                 var sermonAnn = getLatestSermonAnnouncementMergedItem();
+                var mannaAnn = buildDailyMannaHomeAnnouncementItem();
                 var merged = mergedPersonalCommunity
+                    .concat(mannaAnn ? [mannaAnn] : [])
                     .concat(sermonAnn ? [sermonAnn] : [])
                     .concat(cachedHomeStaticAnnouncements || [])
                     .concat(cachedHomeAdminNotices || []);
@@ -1965,10 +2104,11 @@
                         });
                 }
 
-                Promise.allSettled([fetchStaticAnnouncements(), fetchAdminNotices()])
+                Promise.allSettled([fetchStaticAnnouncements(), fetchAdminNotices(), fetchHomeDailyMannaEntry()])
                     .then(function (results) {
                         cachedHomeStaticAnnouncements = results[0] && results[0].status === "fulfilled" ? results[0].value : [];
                         cachedHomeAdminNotices = results[1] && results[1].status === "fulfilled" ? results[1].value : [];
+                        cachedHomeDailyMannaEntry = results[2] && results[2].status === "fulfilled" ? results[2].value : null;
                         mergeHomeAnnouncements();
                     });
             }

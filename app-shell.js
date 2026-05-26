@@ -364,6 +364,8 @@
         "home.noAnnouncementsBody": "புதிய தகவல்களுக்கு பின்னர் பார்க்கவும்.",
         "home.loadAnnouncementsErrorTitle": "அறிவிப்புகளை ஏற்ற முடியவில்லை",
         "home.loadAnnouncementsErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+        "home.dailyMannaKicker": "தினசரி மன்னா",
+        "home.dailyMannaTeaserFallback": "முழு பக்தனையும் அன்றன்றுள்ள அப்பம் தாவலில் வாசிக்கவும்.",
         "home.announcementUrgent": "அவசரம்",
         "home.announcementImportant": "முக்கியம்",
         "home.announcementBannerImageAlt": "அறிவிப்பு படம்",
