@@ -31,15 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v303dobmerge";
-const RUNTIME_CACHE = "njc-runtime-cache-v303dobmerge";
+const APP_CACHE = "njc-app-cache-v304testimony1";
+const RUNTIME_CACHE = "njc-runtime-cache-v304testimony1";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260411celeui1",
+    "./styles.css?v=20260620testimony1",
     "./user-auth.js?v=20260412commceleb1",
-    "./app-shell.js?v=20260413dobmerge1",
+    "./app-modules.js?v=20260620testimony1",
+    "./app-shell.js?v=20260620testimony1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260412annpartner1",
     "./events-page.js?v=20260414u2",
@@ -56,7 +57,8 @@ const CORE_ASSETS = [
     "./celebration-wish-thread.js?v=20260412guestcele1",
     "./celebrations-page.js?v=20260412annpartner1",
     "./chat-page.js?v=20260330u1",
-    "./spa-router.js?v=20260412celecopy1",
+    "./testimony-page.js?v=20260620testimony1",
+    "./spa-router.js?v=20260620testimony1",
     "./book-shelf-page.js?v=20260331bsfile1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

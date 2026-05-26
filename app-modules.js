@@ -20,6 +20,7 @@
         contact: true,
         celebrations: true,
         chat: true,
+        testimony: true,
         userAchievements: true
     };
 
@@ -35,6 +36,7 @@
         trivia: "trivia",
         "user-achievements": "userAchievements",
         chat: "chat",
+        testimony: "testimony",
         celebrations: "celebrations"
     };
 

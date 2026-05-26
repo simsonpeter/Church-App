@@ -61,6 +61,7 @@
         "menu.trivia": "வேதாகமக் கேள்விகள்",
         "menu.userAchievements": "பயனர் சாதனைகள்",
         "menu.chat": "அரட்டை",
+        "menu.testimony": "சாட்சிகள்",
         "menu.celebrations": "இன்றைய விழாக்கள்",
         "menu.profile": "சுயவிவரம்",
         "menu.profileGuest": "விருந்தினர்",
@@ -724,6 +725,7 @@
         "admin.moduleContact": "தொடர்பு",
         "admin.moduleCelebrations": "விழாக்கள்",
         "admin.moduleChat": "அரட்டை",
+        "admin.moduleTestimony": "சாட்சிகள்",
         "admin.moduleUserAchievements": "பயனர் சாதனைகள்",
         "admin.modulesSave": "தொகுப்பு அமைப்புகளைச் சேமி",
         "admin.modulesSaved": "தொகுப்பு அமைப்புகள் சேமிக்கப்பட்டன.",
@@ -1050,6 +1052,33 @@
         "chat.sendingQueued": "வரிசையிலுள்ள செய்திகளை அனுப்புகிறது…",
         "chat.pendingHint": "இணையம் வந்ததும் அனுப்பப்படும்",
         "chat.legacyImage": "[புகைப்படம் — பட பகிர்வு அணைக்கப்பட்டுள்ளது.]",
+        "testimony.eyebrow": "சமூகம்",
+        "testimony.title": "சாட்சிகள்",
+        "testimony.subtitle": "தேவன் உங்கள் வாழ்க்கையில் செய்ததைப் பகிருங்கள்.",
+        "testimony.intro": "உள்நுழைந்த உறுப்பினர்கள் சாட்சியை இடலாம். அனைவரும் படிக்கவும் பகிரவும் முடியும்.",
+        "testimony.titleOptional": "தலைப்பு (விருப்பம்)",
+        "testimony.titlePlaceholder": "எ.கா. தேவன் ஜெபத்திற்கு பதிலளித்தார்",
+        "testimony.bodyLabel": "உங்கள் சாட்சி",
+        "testimony.bodyPlaceholder": "தேவன் உங்கள் வாழ்க்கையில் செய்ததை எழுதுங்கள்…",
+        "testimony.submit": "சாட்சியை வெளியிடு",
+        "testimony.loginHint": "சாட்சி சேர்க்க உள்நுழையவும்.",
+        "testimony.empty": "இன்னும் சாட்சிகள் இல்லை — முதலில் நீங்கள் பகிருங்கள்!",
+        "testimony.share": "பகிர்",
+        "testimony.copy": "உரையை நகலெடு",
+        "testimony.delete": "நீக்கு",
+        "testimony.cardNoTitle": "சாட்சி",
+        "testimony.shareUntitled": "சாட்சி",
+        "testimony.shareTitle": "சாட்சி — NJC Belgium",
+        "testimony.copied": "நகலெடுக்கப்பட்டது.",
+        "testimony.copyFallback": "இந்த உரையை நகலெடுக்கவும்:",
+        "testimony.deleteConfirm": "இந்தச் சாட்சியை நீக்கவா?",
+        "testimony.deleteFailed": "நீக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "testimony.loadError": "சாட்சிகளை ஏற்ற முடியவில்லை. Firestore விதிகளை சரிபார்க்கவும்.",
+        "testimony.bodyRequired": "சாட்சியை எழுதவும்.",
+        "testimony.bodyTooLong": "சாட்சி மிக நீளமாக உள்ளது.",
+        "testimony.sending": "வெளியிடுகிறது…",
+        "testimony.sent": "நன்றி! உங்கள் சாட்சி வெளியிடப்பட்டது.",
+        "testimony.sendFailed": "வெளியிட முடியவில்லை. இணைப்பு மற்றும் Firestore விதிகளை சரிபார்க்கவும்.",
         "profile.groupId": "சிறு குழு / அணி குறியீடு (விருப்பம்)",
         "profile.groupIdHelp": "ஒரே குறியீடு = பயனர் சாதனைகளில் ஒருங்கிணைந்த புள்ளிகள்.",
         "profile.leaderboardAnonymous": "பொது பட்டியலில் \"Anonymous\" என காட்டு",
@@ -3746,6 +3775,13 @@
         chatLink.innerHTML = "<i class=\"fa-solid fa-comments\"></i><span></span>";
         bibleSongLinksContainer.appendChild(chatLink);
 
+        var testimonyLink = document.createElement("a");
+        testimonyLink.className = "header-menu-link";
+        testimonyLink.href = "#testimony";
+        testimonyLink.setAttribute("data-route", "testimony");
+        testimonyLink.innerHTML = "<i class=\"fa-solid fa-heart\"></i><span></span>";
+        bibleSongLinksContainer.appendChild(testimonyLink);
+
         var utilityCard = document.createElement("section");
         utilityCard.className = "header-menu-card";
         menuScroll.appendChild(utilityCard);
@@ -3839,6 +3875,7 @@
             triviaLink.hidden = !m.isModuleEnabled("trivia");
             achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
             chatLink.hidden = !m.isModuleEnabled("chat");
+            testimonyLink.hidden = !m.isModuleEnabled("testimony");
             celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
         }
 
@@ -4016,6 +4053,7 @@
             var triviaLabel = t("menu.trivia", "Bible Quiz");
             var achievementsLabel = t("menu.userAchievements", "User achievements");
             var chatLabel = t("menu.chat", "Chat");
+            var testimonyLabel = t("menu.testimony", "Testimonies");
             var mailboxLabel = t("menu.mailbox", "Mailbox");
             var adminLabel = t("menu.admin", "Admin Dashboard");
             var settingsLabel = t("menu.settings", "Settings");
@@ -4087,6 +4125,10 @@
             if (chatNode) {
                 chatNode.textContent = chatLabel;
             }
+            var testimonyNode = testimonyLink.querySelector("span");
+            if (testimonyNode) {
+                testimonyNode.textContent = testimonyLabel;
+            }
             var settingsNode = settingsLink.querySelector("span");
             if (settingsNode) {
                 settingsNode.textContent = settingsLabel;
@@ -4127,6 +4169,7 @@
             var isTrivia = getCurrentRoute() === "trivia";
             var isAchievements = getCurrentRoute() === "user-achievements";
             var isChat = getCurrentRoute() === "chat";
+            var isTestimony = getCurrentRoute() === "testimony";
             var isSettings = getCurrentRoute() === "settings";
             var isCelebrations = getCurrentRoute() === "celebrations";
             var isMailbox = getCurrentRoute() === "mailbox";
@@ -4139,6 +4182,7 @@
             triviaLink.classList.toggle("active", isTrivia);
             achievementsLink.classList.toggle("active", isAchievements);
             chatLink.classList.toggle("active", isChat);
+            testimonyLink.classList.toggle("active", isTestimony);
             settingsLink.classList.toggle("active", isSettings);
             celebrationsLink.classList.toggle("active", isCelebrations);
             mailboxLink.classList.toggle("active", isMailbox);

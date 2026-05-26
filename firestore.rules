@@ -17,7 +17,8 @@ rules_version = '2';
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
 //   celebrationWishes/{msgId} — daily thread (public read; create/delete when signed in)
 //   celebrationProfiles/{uid} — public celebration fields (dob, anniversary, anniversaryPartnerName, familyMembers)
-//   chatMessages/{msgId} — church group chat: text only, signed-in users
+//   chatMessages/{msgId} — church group chat (signed-in read; signed-in create)
+//   testimonies/{id} — public read; signed-in create; delete own or admin
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
@@ -170,6 +171,25 @@ service cloud.firestore {
         && request.resource.data.text.size() > 0
         && request.resource.data.text.size() < 5000;
       allow update, delete: if false;
+    }
+
+    match /testimonies/{testimonyId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.authorUid == request.auth.uid
+        && request.resource.data.authorName is string
+        && request.resource.data.authorName.size() > 0
+        && request.resource.data.authorName.size() < 200
+        && request.resource.data.text is string
+        && request.resource.data.text.size() > 0
+        && request.resource.data.text.size() < 8000
+        && (!request.resource.data.keys().hasAny(["title"])
+            || (request.resource.data.title is string
+                && request.resource.data.title.size() > 0
+                && request.resource.data.title.size() <= 200));
+      allow update: if false;
+      allow delete: if request.auth != null
+        && (resource.data.authorUid == request.auth.uid || isAdmin());
     }
   }
 }
