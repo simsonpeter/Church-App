@@ -39,10 +39,26 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAdmin() {
+    /** Admin check: prefer standard `email` claim; some sign-in paths only expose email under `firebase.identities`. */
+    function adminEmailLowerFromAuth() {
       return request.auth != null
-        && request.auth.token.email != null
+        && request.auth.token.email is string
+        && request.auth.token.email.size() > 0
         && request.auth.token.email.lower() == "simsonpeter@gmail.com";
+    }
+
+    function adminEmailLowerFromFirebaseIdentities() {
+      return request.auth != null
+        && request.auth.token.firebase is map
+        && request.auth.token.firebase.identities is map
+        && request.auth.token.firebase.identities.email is list
+        && request.auth.token.firebase.identities.email.size() > 0
+        && request.auth.token.firebase.identities.email[0] is string
+        && request.auth.token.firebase.identities.email[0].lower() == "simsonpeter@gmail.com";
+    }
+
+    function isAdmin() {
+      return adminEmailLowerFromAuth() || adminEmailLowerFromFirebaseIdentities();
     }
 
     // Email/password (or OAuth) users have token.email; anonymous sessions do not — keeps celebrations off non-registered clients.
@@ -106,15 +122,28 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    function userDirectoryEmailMatchesSignedInUser() {
+      return (request.auth.token.email is string && request.auth.token.email.size() > 0
+          && request.resource.data.email == request.auth.token.email.lower())
+        || (
+          request.auth.token.firebase is map
+          && request.auth.token.firebase.identities is map
+          && request.auth.token.firebase.identities.email is list
+          && request.auth.token.firebase.identities.email.size() > 0
+          && request.auth.token.firebase.identities.email[0] is string
+          && request.resource.data.email == request.auth.token.firebase.identities.email[0].lower()
+        );
+    }
+
     function isUserDirectoryDocument() {
       return request.resource.data.keys().hasOnly(["displayName", "email", "lastSeenAt", "updatedAt"])
         && request.resource.data.displayName is string
         && request.resource.data.displayName.size() > 0
         && request.resource.data.displayName.size() <= 120
         && request.resource.data.email is string
-        && request.resource.data.email == request.auth.token.email.lower()
-        && request.resource.data.lastSeenAt is timestamp
-        && request.resource.data.updatedAt is timestamp;
+        && userDirectoryEmailMatchesSignedInUser()
+        // lastSeenAt / updatedAt use FieldValue.serverTimestamp() — sentinel is not a timestamp at rule eval time.
+        && request.resource.data.keys().hasAll(["lastSeenAt", "updatedAt"]);
     }
 
     function isAdminUserDirectoryDocument() {
@@ -125,12 +154,12 @@ service cloud.firestore {
         && request.resource.data.email is string
         && request.resource.data.email.size() > 3
         && request.resource.data.email.size() <= 320
-        && request.resource.data.lastSeenAt is timestamp
-        && request.resource.data.updatedAt is timestamp;
+        && request.resource.data.keys().hasAll(["lastSeenAt", "updatedAt"]);
     }
 
     match /userDirectory/{userId} {
-      allow read: if isAdmin();
+      allow read: if isAdmin()
+        || (request.auth != null && request.auth.uid == userId);
       allow create, update: if (request.auth != null
         && request.auth.uid == userId
         && isUserDirectoryDocument())

@@ -48,6 +48,25 @@
         }
     }
 
+    /** Ensures the ID token includes up-to-date claims (e.g. email) before Firestore evaluates isAdmin() rules. */
+    function refreshAuthIdTokenForFirestore() {
+        var fb = window.firebase;
+        if (!fb || typeof fb.auth !== "function") {
+            return Promise.resolve();
+        }
+        try {
+            var user = fb.auth().currentUser;
+            if (user && typeof user.getIdToken === "function") {
+                return user.getIdToken(true).then(function () {
+                    return null;
+                });
+            }
+        } catch (e) {
+            return Promise.resolve();
+        }
+        return Promise.resolve();
+    }
+
     function escapeHtml(value) {
         return String(value || "")
             .replace(/&/g, "&amp;")
@@ -105,7 +124,9 @@
         }
         setBusy(true);
         setStatus("working", "auth.working", "Please wait...");
-        return db.collection("userDirectory").limit(MAX_ROWS).get().then(function (snap) {
+        return refreshAuthIdTokenForFirestore().then(function () {
+            return db.collection("userDirectory").limit(MAX_ROWS).get();
+        }).then(function (snap) {
             if (!snap || snap.empty) {
                 wrapEl.hidden = true;
                 tbody.innerHTML = "";

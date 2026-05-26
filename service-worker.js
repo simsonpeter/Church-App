@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v418dailymanna";
-const RUNTIME_CACHE = "njc-runtime-cache-v418dailymanna";
+const APP_CACHE = "njc-app-cache-v419userdir";
+const RUNTIME_CACHE = "njc-runtime-cache-v419userdir";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home announcements: Daily Manna slide for today’s dated devotion (Mantle daily bread), with title, short excerpt, and link to the Daily bread tab. Plus prior release notes: reading streak line, reading plan share image, sermon OG cards, testimonies.";
+    "Admin registered users: publish updated Firestore rules; app refreshes auth token before listing userDirectory. Rules: admin email via token or firebase.identities; directory writes allow server timestamps; users may read own directory row. Earlier: Daily Manna on home announcements, testimonies, sermon OG cards, reading plan share.";
 
 const CORE_ASSETS = [
     "./",
@@ -59,7 +59,7 @@ const CORE_ASSETS = [
     "./admin-dashboard-page.js?v=20260511newsletter1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
-    "./admin-users-page.js?v=20260411mainmerge1",
+    "./admin-users-page.js?v=20260526userdir1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260411kidsworld",
