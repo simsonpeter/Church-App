@@ -22,6 +22,8 @@
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
+            /** Per-card language for home announcements (Daily Manna fetch + carousel copy). */
+            var ANNOUNCEMENTS_CARD_LANG_ID = "home-announcements";
             var CARD_LANG_MAP_KEY = "njc_card_language_map_v1";
             var announcementsList = document.getElementById("home-announcements-list");
             var readingPlanUrl = "https://raw.githubusercontent.com/simsonpeter/Readingplan/main/plan/njcplan.json";
@@ -2121,6 +2123,13 @@
                     });
             }
 
+            function hasUsefulTamilMannaRaw(raw) {
+                if (!raw || typeof raw !== "object") {
+                    return false;
+                }
+                return Boolean(String(raw.titleTa || "").trim() || String(raw.bodyRawTa || "").trim());
+            }
+
             function fetchHomeDailyMannaEntry() {
                 if (!modOn("dailyBread")) {
                     return Promise.resolve(null);
@@ -2128,12 +2137,31 @@
                 var tk = getTodayKey();
                 var langKey = isTamilLanguage(announcementsCard) ? "ta" : "en";
                 return fetchMantleDailyMannaRawForToday().then(function (mantleRaw) {
+                    if (langKey === "ta") {
+                        if (hasUsefulTamilMannaRaw(mantleRaw)) {
+                            return mantleRaw;
+                        }
+                        return fetchAntantullaFallbackForHomeManna(tk, "ta").then(function (antRaw) {
+                            if (antRaw) {
+                                return antRaw;
+                            }
+                            if (mantleRaw) {
+                                return mantleRaw;
+                            }
+                            return fetchAntantullaFallbackForHomeManna(tk, "en");
+                        });
+                    }
                     if (mantleRaw) {
                         return mantleRaw;
                     }
-                    return fetchAntantullaFallbackForHomeManna(tk, langKey);
+                    return fetchAntantullaFallbackForHomeManna(tk, "en");
                 }).catch(function () {
-                    return fetchAntantullaFallbackForHomeManna(tk, langKey);
+                    if (langKey === "ta") {
+                        return fetchAntantullaFallbackForHomeManna(tk, "ta").then(function (antRaw) {
+                            return antRaw || fetchAntantullaFallbackForHomeManna(tk, "en");
+                        });
+                    }
+                    return fetchAntantullaFallbackForHomeManna(tk, "en");
                 });
             }
 
@@ -3519,7 +3547,7 @@
                 updateReadingPlanMeta();
                 renderReadingPlan();
                 renderDailyVerse();
-                mergeHomeAnnouncements();
+                loadAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
                 syncReadingShareProgressButton();
@@ -3534,7 +3562,11 @@
                 }
                 updateReadingPlanMeta();
                 renderReadingPlan();
-                mergeHomeAnnouncements();
+                if (d && d.cardId === ANNOUNCEMENTS_CARD_LANG_ID) {
+                    loadAnnouncements();
+                } else {
+                    mergeHomeAnnouncements();
+                }
                 loadTrivia();
                 renderThisWeekEvents();
                 syncReadingShareProgressButton();

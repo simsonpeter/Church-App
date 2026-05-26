@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v420mannaant";
-const RUNTIME_CACHE = "njc-runtime-cache-v420mannaant";
+const APP_CACHE = "njc-app-cache-v421mannata";
+const RUNTIME_CACHE = "njc-runtime-cache-v421mannata";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home announcements Daily Manna: when Mantle has no dated entry for today, use the same Antantulla GitHub sequence as the Daily bread tab so a devotion still shows every day. Earlier: admin userDirectory fixes, Daily Manna from Mantle, testimonies, sermon OG cards.";
+    "Home announcements Daily Manna: Tamil UI uses Mantle Tamil fields when present; otherwise Tamil Antantulla JSON (same as Daily bread tab). Stable data-card-lang-id home-announcements; refetch manna on app or announcements card language change. Earlier: Antantulla fallback when Mantle empty, admin userDirectory, testimonies.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260620maintestimony1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260527mannaant1",
+    "./home-page.js?v=20260528mannata1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",
