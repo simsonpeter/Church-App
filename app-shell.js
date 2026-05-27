@@ -367,6 +367,7 @@
         "home.loadAnnouncementsErrorBody": "சற்று நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
         "home.dailyMannaKicker": "தினசரி மன்னா",
         "home.dailyMannaTeaserFallback": "முழு பக்தனையும் அன்றன்றுள்ள அப்பம் தாவலில் வாசிக்கவும்.",
+        "home.dailyMannaTeaserShort": "இன்றைய பக்தனையை அன்றன்றுள்ள அப்பம் பக்கத்தில் வாசிக்கவும்.",
         "home.announcementUrgent": "அவசரம்",
         "home.announcementImportant": "முக்கியம்",
         "home.announcementBannerImageAlt": "அறிவிப்பு படம்",

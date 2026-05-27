@@ -1639,6 +1639,20 @@ body.app-update-open {
     object-position: center;
 }
 
+/* Daily Manna on home: same footprint as other short text announcements */
+.announcement-carousel-item.announcement-daily-manna .announcement-body {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin: 0.35rem 0 0;
+    line-height: 1.45;
+}
+
+.announcement-carousel-item.announcement-daily-manna .announcement-title {
+    line-height: 1.35;
+}
+
 .announcement-carousel-item.announcement-personal-wish {
     border-left: 4px solid #c9a227;
     padding-left: 12px;

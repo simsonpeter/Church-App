@@ -115,6 +115,9 @@
             /** Raw fields for today’s Mantle daily bread row, or null (filled when daily bread + announcements modules are on). */
             var cachedHomeDailyMannaEntry = null;
             var DAILY_MANNA_HOME_ID_PREFIX = "njc-home-daily-manna-";
+            /** Keep home carousel Daily Manna slide compact (matches short static announcements). */
+            var DAILY_MANNA_HOME_EXCERPT_MAX = 88;
+            var DAILY_MANNA_HOME_TITLE_MAX = 72;
             var SERMON_AUTO_ANNOUNCE_STORAGE_KEY = "njc_latest_sermon_announce_v1";
             var SERMON_AUTO_ANNOUNCE_ITEM_ID = "njc-auto-latest-sermon";
 
@@ -1208,7 +1211,8 @@
                     link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
                     imageOnly: imageOnly,
-                    skipDismiss: Boolean(source.skipDismiss)
+                    skipDismiss: Boolean(source.skipDismiss),
+                    hideDate: Boolean(source.hideDate)
                 };
             }
 
@@ -1573,7 +1577,8 @@
                         ? (item.bodyTa || item.bodyTaAuto || item.body)
                         : (item.body || item.bodyEnAuto || item.bodyTa || item.bodyTaAuto);
                 }
-                var dateText = formatYmdForLocale(item.date, announcementsCard);
+                var dateText = item.hideDate ? "" : formatYmdForLocale(item.date, announcementsCard);
+                var isDailyMannaSlide = String(item.id || "").indexOf(DAILY_MANNA_HOME_ID_PREFIX) === 0;
                 var importantBadge = !item.personalWish && item.important
                     ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
                     : "";
@@ -1619,6 +1624,7 @@
 
                 var liClass = "announcement-carousel-item" +
                     (item.personalWish ? " announcement-personal-wish" : "") +
+                    (isDailyMannaSlide ? " announcement-daily-manna" : "") +
                     (isImageOnly ? " announcement-image-only" : "") +
                     slideAnimClass;
                 var srHeading = "<h3 class=\"announcement-title announcement-title-sr-only\">" + NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard)) + "</h3>";
@@ -2173,39 +2179,42 @@
                 if (!raw || typeof raw !== "object") {
                     return null;
                 }
+                var kicker = T("home.dailyMannaKicker", "Daily Manna", announcementsCard);
+                var shortTeaser = T(
+                    "home.dailyMannaTeaserShort",
+                    "Read today’s devotion on Daily bread.",
+                    announcementsCard
+                );
                 var titleEn = String(raw.titleEn || "").trim();
                 var titleTa = String(raw.titleTa || "").trim();
-                var excerptEn = previewPlainForManna(raw.bodyRawEn, 260);
-                var excerptTa = previewPlainForManna(raw.bodyRawTa, 260);
-                var kicker = T("home.dailyMannaKicker", "Daily Manna", announcementsCard);
-                if (!titleEn && !titleTa) {
-                    titleEn = kicker;
-                    titleTa = kicker;
-                }
-                var fallback = T("home.dailyMannaTeaserFallback", "Read the full devotion on the Daily bread page.", announcementsCard);
-                var tailEn = excerptEn || fallback;
-                var tailTa = excerptTa || excerptEn || fallback;
-                var bodyEn;
-                var bodyTa;
-                var titleIsKickerOnly = titleEn === kicker && titleTa === kicker;
-                if (titleIsKickerOnly) {
-                    bodyEn = tailEn;
-                    bodyTa = excerptTa ? tailTa : "";
-                } else {
-                    bodyEn = kicker + "\n\n" + tailEn;
-                    bodyTa = excerptTa ? (kicker + "\n\n" + tailTa) : "";
-                }
+                var devotionEn = titleEn && titleEn !== kicker ? titleEn : "";
+                var devotionTa = titleTa && titleTa !== kicker ? titleTa : "";
+                var excerptEn = previewPlainForManna(raw.bodyRawEn, DAILY_MANNA_HOME_EXCERPT_MAX);
+                var excerptTa = previewPlainForManna(raw.bodyRawTa, DAILY_MANNA_HOME_EXCERPT_MAX);
+                var displayTitleEn = devotionEn
+                    ? previewPlainForManna(devotionEn, DAILY_MANNA_HOME_TITLE_MAX)
+                    : kicker;
+                var displayTitleTa = devotionTa
+                    ? previewPlainForManna(devotionTa, DAILY_MANNA_HOME_TITLE_MAX)
+                    : kicker;
+                var bodyEn = devotionEn
+                    ? (excerptEn || shortTeaser)
+                    : (excerptEn || shortTeaser);
+                var bodyTa = devotionTa
+                    ? (excerptTa || excerptEn || shortTeaser)
+                    : (excerptTa || excerptEn || shortTeaser);
                 var todayKey = getTodayKey();
                 return normalizeAnnouncement({
                     id: DAILY_MANNA_HOME_ID_PREFIX + todayKey,
-                    title: titleEn || titleTa,
-                    titleTa: titleTa || titleEn,
+                    title: displayTitleEn,
+                    titleTa: displayTitleTa,
                     body: bodyEn,
                     bodyTa: bodyTa,
                     date: todayKey,
-                    important: true,
+                    important: false,
+                    hideDate: true,
                     link: "#daily-bread",
-                    imageUrl: "daily-bread-banner.jpg?v=20260330img1",
+                    imageUrl: "",
                     skipDismiss: true
                 }, 0);
             }

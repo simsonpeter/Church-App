@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v422newsletteredit";
-const RUNTIME_CACHE = "njc-runtime-cache-v422newsletteredit";
+const APP_CACHE = "njc-app-cache-v423mannashort";
+const RUNTIME_CACHE = "njc-runtime-cache-v423mannashort";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -47,7 +47,7 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260620maintestimony1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260528mannata1",
+    "./home-page.js?v=20260519mannashort1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260620sermonogcard1",
     "./bible-page.js?v=20260613nobibleparallel1",
