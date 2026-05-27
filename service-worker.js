@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v421mannata";
-const RUNTIME_CACHE = "njc-runtime-cache-v421mannata";
+const APP_CACHE = "njc-app-cache-v422newsletteredit";
+const RUNTIME_CACHE = "njc-runtime-cache-v422newsletteredit";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -56,7 +56,7 @@ const CORE_ASSETS = [
     "./daily-bread-page.js?v=20260607dailybreadsharedated1",
     "./newsletter-page.js?v=20260610newslettershare1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260511newsletter1",
+    "./admin-dashboard-page.js?v=20260519newsletteredit1",
     "./admin-modules-page.js?v=20260421mainmerge",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260526userdir1",

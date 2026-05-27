@@ -255,6 +255,25 @@
             });
     }
 
+    function openNewsletterFormSection() {
+        var formSection = newsletterForm && newsletterForm.closest("details");
+        if (formSection) {
+            formSection.open = true;
+        }
+    }
+
+    function focusNewsletterFormForEdit() {
+        openNewsletterFormSection();
+        if (!newsletterForm) {
+            return;
+        }
+        try {
+            newsletterForm.scrollIntoView({ behavior: "smooth", block: "start" });
+        } catch (e) {
+            newsletterForm.scrollIntoView();
+        }
+    }
+
     function clearNewsletterForm() {
         if (newsletterEditIdInput) {
             newsletterEditIdInput.value = "";
@@ -3526,7 +3545,7 @@
         var editId = String(newsletterEditIdInput && newsletterEditIdInput.value || "").trim();
         var op;
         if (editId) {
-            op = db.collection(NEWSLETTER_COLLECTION).doc(editId).set(payload, { merge: true });
+            op = db.collection(NEWSLETTER_COLLECTION).doc(editId).set(payload);
         } else {
             op = db.collection(NEWSLETTER_COLLECTION).add(payload);
         }
@@ -3593,6 +3612,12 @@
                 if (newsletterSubmit) {
                     newsletterSubmit.textContent = T("admin.newsletterUpdate", "Update newsletter");
                 }
+                focusNewsletterFormForEdit();
+                showNote(
+                    "validation",
+                    "admin.newsletterEditing",
+                    "Editing loaded in the form above — change fields, then click Update newsletter."
+                );
                 return;
             }
             if (action === "delete") {

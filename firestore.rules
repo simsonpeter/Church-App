@@ -326,10 +326,8 @@ service cloud.firestore {
           "title", "body", "titleTa", "bodyTa", "visibleFrom", "visibleUntil", "monthKey", "updatedAt"
         ])
         && request.resource.data.title is string
-        && request.resource.data.title.size() >= 1
         && request.resource.data.title.size() <= 200
         && request.resource.data.body is string
-        && request.resource.data.body.size() >= 1
         && request.resource.data.body.size() <= 80000
         && request.resource.data.visibleFrom is string
         && request.resource.data.visibleFrom.matches("^\\d{4}-\\d{2}-\\d{2}$")
@@ -341,7 +339,9 @@ service cloud.firestore {
         && request.resource.data.titleTa is string
         && request.resource.data.titleTa.size() <= 200
         && request.resource.data.bodyTa is string
-        && request.resource.data.bodyTa.size() <= 80000;
+        && request.resource.data.bodyTa.size() <= 80000
+        && (request.resource.data.title.size() >= 1 || request.resource.data.titleTa.size() >= 1)
+        && (request.resource.data.body.size() >= 1 || request.resource.data.bodyTa.size() >= 1);
     }
 
     match /churchNewsletters/{newsletterId} {
