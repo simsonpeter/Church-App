@@ -2641,7 +2641,6 @@
         var urls = [
             EVENTS_FEED_URL,
             SERMONS_FEED_URL,
-            ADMIN_SERMONS_URL,
             PRAYER_WALL_FEED_URL,
             ADMIN_NOTICES_FEED_URL
         ];
@@ -2656,34 +2655,8 @@
                     throw new Error(String(r && r.status || "fail"));
                 }
             });
-        })).then(function (results) {
-            var bad = results.filter(function (r) {
-                return !r || r.status !== "fulfilled";
-            }).length;
-            var banner = document.getElementById("offline-banner");
-            var main = document.getElementById("offline-banner-main");
-            var sub = document.getElementById("offline-banner-sub");
-            if (!banner || !sub) {
-                return;
-            }
-            if (navigator.onLine === false) {
-                return;
-            }
-            if (bad === 0) {
-                if (main) {
-                    main.hidden = false;
-                }
-                sub.hidden = true;
-                sub.textContent = "";
-                banner.hidden = true;
-                return;
-            }
-            if (main) {
-                main.hidden = true;
-            }
-            sub.textContent = t("app.feedCheckPartial", "Some content links did not respond. Check your connection.");
-            sub.hidden = false;
-            banner.hidden = false;
+        }).then(function () {
+            /* Silent probe only — never show the offline banner (404/timeout false positives). */
         }).finally(function () {
             feedProbeInFlight = false;
         });
