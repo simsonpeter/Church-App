@@ -4307,7 +4307,7 @@
 
     function setupNotificationQuickButton() {
         var header = document.querySelector(".app-header");
-        if (!header || document.getElementById("notification-quick-btn")) {
+        if (!header || document.getElementById("notification-quick-btn") || document.getElementById("header-menu-btn")) {
             return;
         }
 
@@ -4533,7 +4533,7 @@
         button.id = "header-menu-btn";
         button.className = "menu-toggle";
         button.type = "button";
-        button.innerHTML = "<i class=\"fa-solid fa-bars\"></i>";
+        button.innerHTML = "<i class=\"fa-solid fa-bars\" aria-hidden=\"true\"></i><span class=\"menu-toggle-label\">Menu</span>";
         controls.appendChild(button);
 
         var notificationsButton = document.createElement("button");
@@ -6512,9 +6512,9 @@
         }
         setupThemeToggle();
         setupNotifications();
+        setupHeaderHamburgerMenu();
         setupNotificationQuickButton();
         setupSettingsPage();
-        setupHeaderHamburgerMenu();
         setupCardLanguageSwitchers();
         setupOfflineBadge();
         showSplashScreenOnce();
