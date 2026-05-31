@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v423mannashort";
-const RUNTIME_CACHE = "njc-runtime-cache-v423mannashort";
+const APP_CACHE = "njc-app-cache-v428noofflinemsg";
+const RUNTIME_CACHE = "njc-runtime-cache-v428noofflinemsg";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -44,7 +44,7 @@ const CORE_ASSETS = [
     "./styles.css?v=20260620maintestimony1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260620maintestimony1",
-    "./app-shell.js?v=20260620maintestimony1",
+    "./app-shell.js?v=20260519noofflinemsg1",
     "./events-engine.js?v=20260414feedprobe1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260519mannashort1",

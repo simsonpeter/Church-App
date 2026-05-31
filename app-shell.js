@@ -2618,29 +2618,15 @@
                 cache: "no-store",
                 credentials: "omit"
             }).then(function (r) {
+                // Mantle collections return 404 when empty — same as sermon/admin loaders.
+                if (r.status === 404) {
+                    return;
+                }
                 if (!r.ok) {
                     throw new Error(String(r.status));
                 }
             });
-        })).then(function (results) {
-            var bad = results.filter(function (r) {
-                return !r || r.status !== "fulfilled";
-            }).length;
-            var banner = document.getElementById("offline-banner");
-            var sub = document.getElementById("offline-banner-sub");
-            if (!banner || !sub) {
-                return;
-            }
-            if (navigator.onLine === false) {
-                return;
-            }
-            if (bad === 0) {
-                return;
-            }
-            sub.textContent = t("app.feedCheckPartial", "Some content links did not respond. Check your connection.");
-            sub.hidden = false;
-            banner.hidden = false;
-        }).finally(function () {
+        })).finally(function () {
             feedProbeInFlight = false;
         });
     }
