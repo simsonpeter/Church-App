@@ -1610,7 +1610,7 @@
         "profile.badgeTrivia10": "வேதாகமக் கேள்வி வீரர் (10+ புள்ளிகள்)",
         "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
         "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
-        "app.feedCheckPartial": "சில உள்ளடக்க இணைப்புகள் பதிலளிக்கவில்லை. இணையத்தை சரிபார்க்கவும்.",
+        "app.feedCheckPartial": "சில புதுப்பிப்புகளை ஏற்ற முடியவில்லை. இணையத்தை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
         "app.installBannerRegionAria": "செயலியை நிறுவு",
         "app.installBannerTitle": "NJC செயலியை நிறுவவும்",
         "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
@@ -2573,21 +2573,55 @@
 
     function setupOfflineBanner() {
         var banner = document.getElementById("offline-banner");
+        var main = document.getElementById("offline-banner-main");
         var sub = document.getElementById("offline-banner-sub");
         if (!banner) {
             return;
         }
-        function sync() {
-            var offline = navigator.onLine === false;
-            banner.hidden = !offline;
+        function showOfflineState() {
+            if (main) {
+                main.hidden = false;
+            }
             if (sub) {
                 sub.hidden = true;
                 sub.textContent = "";
             }
+            banner.hidden = false;
+        }
+        function hideBannerState() {
+            if (main) {
+                main.hidden = false;
+            }
+            if (sub) {
+                sub.hidden = true;
+                sub.textContent = "";
+            }
+            banner.hidden = true;
+        }
+        function sync() {
+            if (navigator.onLine === false) {
+                showOfflineState();
+                return;
+            }
+            hideBannerState();
         }
         sync();
-        window.addEventListener("online", sync);
+        window.addEventListener("online", function () {
+            sync();
+            runFeedConnectivityProbe("online");
+        });
         window.addEventListener("offline", sync);
+    }
+
+    function feedProbeResponseOk(response) {
+        if (!response) {
+            return false;
+        }
+        // Mantle feeds often return 404 when a collection has no rows yet (same as app loaders).
+        if (response.status === 404) {
+            return true;
+        }
+        return response.ok;
     }
 
     var FEED_PROBE_MIN_MS = 4 * 60 * 1000;
@@ -2618,8 +2652,8 @@
                 cache: "no-store",
                 credentials: "omit"
             }).then(function (r) {
-                if (!r.ok) {
-                    throw new Error(String(r.status));
+                if (!feedProbeResponseOk(r)) {
+                    throw new Error(String(r && r.status || "fail"));
                 }
             });
         })).then(function (results) {
@@ -2627,6 +2661,7 @@
                 return !r || r.status !== "fulfilled";
             }).length;
             var banner = document.getElementById("offline-banner");
+            var main = document.getElementById("offline-banner-main");
             var sub = document.getElementById("offline-banner-sub");
             if (!banner || !sub) {
                 return;
@@ -2635,7 +2670,16 @@
                 return;
             }
             if (bad === 0) {
+                if (main) {
+                    main.hidden = false;
+                }
+                sub.hidden = true;
+                sub.textContent = "";
+                banner.hidden = true;
                 return;
+            }
+            if (main) {
+                main.hidden = true;
             }
             sub.textContent = t("app.feedCheckPartial", "Some content links did not respond. Check your connection.");
             sub.hidden = false;
