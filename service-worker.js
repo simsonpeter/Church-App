@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v426headermenu";
-const RUNTIME_CACHE = "njc-runtime-cache-v426headermenu";
+const APP_CACHE = "njc-app-cache-v427syntaxfix";
+const RUNTIME_CACHE = "njc-runtime-cache-v427syntaxfix";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
