@@ -2655,7 +2655,7 @@
                     throw new Error(String(r && r.status || "fail"));
                 }
             });
-        }).then(function () {
+        })).then(function () {
             /* Silent probe only — never show the offline banner (404/timeout false positives). */
         }).finally(function () {
             feedProbeInFlight = false;
