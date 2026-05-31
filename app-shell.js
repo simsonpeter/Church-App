@@ -1610,7 +1610,7 @@
         "profile.badgeTrivia10": "வேதாகமக் கேள்வி வீரர் (10+ புள்ளிகள்)",
         "profile.badgeAllStar": "அனைத்து நட்சத்திரம் (25+ மொத்தம்)",
         "app.offlineBanner": "இணையம் இல்லை — சேமித்த உள்ளடக்கம் காட்டப்படுகிறது.",
-        "app.feedCheckPartial": "சில புதுப்பிப்புகளை ஏற்ற முடியவில்லை. இணையத்தை சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
+        "app.feedCheckPartial": "சில உள்ளடக்க இணைப்புகள் பதிலளிக்கவில்லை. இணையத்தை சரிபார்க்கவும்.",
         "app.installBannerRegionAria": "செயலியை நிறுவு",
         "app.installBannerTitle": "NJC செயலியை நிறுவவும்",
         "app.installBannerBody": "விரைவான அணுகல் மற்றும் இணையம் இல்லாத பயன்பாட்டிற்கு முகப்புத் திரையில் சேர்க்கவும்.",
@@ -2573,55 +2573,21 @@
 
     function setupOfflineBanner() {
         var banner = document.getElementById("offline-banner");
-        var main = document.getElementById("offline-banner-main");
         var sub = document.getElementById("offline-banner-sub");
         if (!banner) {
             return;
         }
-        function showOfflineState() {
-            if (main) {
-                main.hidden = false;
-            }
-            if (sub) {
-                sub.hidden = true;
-                sub.textContent = "";
-            }
-            banner.hidden = false;
-        }
-        function hideBannerState() {
-            if (main) {
-                main.hidden = false;
-            }
-            if (sub) {
-                sub.hidden = true;
-                sub.textContent = "";
-            }
-            banner.hidden = true;
-        }
         function sync() {
-            if (navigator.onLine === false) {
-                showOfflineState();
-                return;
+            var offline = navigator.onLine === false;
+            banner.hidden = !offline;
+            if (sub) {
+                sub.hidden = true;
+                sub.textContent = "";
             }
-            hideBannerState();
         }
         sync();
-        window.addEventListener("online", function () {
-            sync();
-            runFeedConnectivityProbe("online");
-        });
+        window.addEventListener("online", sync);
         window.addEventListener("offline", sync);
-    }
-
-    function feedProbeResponseOk(response) {
-        if (!response) {
-            return false;
-        }
-        // Mantle feeds often return 404 when a collection has no rows yet (same as app loaders).
-        if (response.status === 404) {
-            return true;
-        }
-        return response.ok;
     }
 
     var FEED_PROBE_MIN_MS = 4 * 60 * 1000;
@@ -2641,6 +2607,7 @@
         var urls = [
             EVENTS_FEED_URL,
             SERMONS_FEED_URL,
+            ADMIN_SERMONS_URL,
             PRAYER_WALL_FEED_URL,
             ADMIN_NOTICES_FEED_URL
         ];
@@ -2651,12 +2618,28 @@
                 cache: "no-store",
                 credentials: "omit"
             }).then(function (r) {
-                if (!feedProbeResponseOk(r)) {
-                    throw new Error(String(r && r.status || "fail"));
+                if (!r.ok) {
+                    throw new Error(String(r.status));
                 }
             });
-        })).then(function () {
-            /* Silent probe only — never show the offline banner (404/timeout false positives). */
+        })).then(function (results) {
+            var bad = results.filter(function (r) {
+                return !r || r.status !== "fulfilled";
+            }).length;
+            var banner = document.getElementById("offline-banner");
+            var sub = document.getElementById("offline-banner-sub");
+            if (!banner || !sub) {
+                return;
+            }
+            if (navigator.onLine === false) {
+                return;
+            }
+            if (bad === 0) {
+                return;
+            }
+            sub.textContent = t("app.feedCheckPartial", "Some content links did not respond. Check your connection.");
+            sub.hidden = false;
+            banner.hidden = false;
         }).finally(function () {
             feedProbeInFlight = false;
         });
@@ -4307,7 +4290,7 @@
 
     function setupNotificationQuickButton() {
         var header = document.querySelector(".app-header");
-        if (!header || document.getElementById("notification-quick-btn") || document.getElementById("header-menu-btn")) {
+        if (!header || document.getElementById("notification-quick-btn")) {
             return;
         }
 
@@ -4533,7 +4516,7 @@
         button.id = "header-menu-btn";
         button.className = "menu-toggle";
         button.type = "button";
-        button.innerHTML = "<i class=\"fa-solid fa-bars\" aria-hidden=\"true\"></i><span class=\"menu-toggle-label\">Menu</span>";
+        button.innerHTML = "<i class=\"fa-solid fa-bars\"></i>";
         controls.appendChild(button);
 
         var notificationsButton = document.createElement("button");
@@ -6512,9 +6495,9 @@
         }
         setupThemeToggle();
         setupNotifications();
-        setupHeaderHamburgerMenu();
         setupNotificationQuickButton();
         setupSettingsPage();
+        setupHeaderHamburgerMenu();
         setupCardLanguageSwitchers();
         setupOfflineBadge();
         showSplashScreenOnce();
