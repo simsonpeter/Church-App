@@ -120,6 +120,12 @@
             var DAILY_MANNA_HOME_TITLE_MAX = 72;
             var SERMON_AUTO_ANNOUNCE_STORAGE_KEY = "njc_latest_sermon_announce_v1";
             var SERMON_AUTO_ANNOUNCE_ITEM_ID = "njc-auto-latest-sermon";
+            var NEWSLETTER_COLLECTION = "churchNewsletters";
+            var NEWSLETTER_HOME_ID_PREFIX = "njc-home-newsletter-";
+            var NEWSLETTER_HOME_EXCERPT_MAX = 88;
+            var NEWSLETTER_HOME_TITLE_MAX = 72;
+            /** Active Firestore newsletter row for home carousel, or null. */
+            var cachedHomeNewsletterEntry = null;
 
             function modOn(moduleKey) {
                 var m = window.NjcAppModules;
@@ -1187,6 +1193,59 @@
                 return "";
             }
 
+            function normalizeAnnouncementTagKey(raw) {
+                return String(raw || "").trim().toLowerCase().replace(/[^a-z0-9-]/g, "");
+            }
+
+            function getAnnouncementTagLabel(tagKey) {
+                var key = normalizeAnnouncementTagKey(tagKey);
+                if (key === "dailybread" || key === "daily-bread" || key === "manna") {
+                    return T("home.announcementTagDailyBread", "Daily bread", announcementsCard);
+                }
+                if (key === "sermon" || key === "sermons") {
+                    return T("home.announcementTagSermon", "Sermon", announcementsCard);
+                }
+                if (key === "newsletter") {
+                    return T("home.announcementTagNewsletter", "Newsletter", announcementsCard);
+                }
+                if (key === "notice") {
+                    return T("home.announcementTagNotice", "Notice", announcementsCard);
+                }
+                if (key === "celebration" || key === "celebrations") {
+                    return T("home.announcementTagCelebration", "Celebration", announcementsCard);
+                }
+                if (key === "event" || key === "events") {
+                    return T("home.announcementTagEvent", "Event", announcementsCard);
+                }
+                return T("home.announcementTagAnnouncement", "Announcement", announcementsCard);
+            }
+
+            function buildAnnouncementTagBadge(item) {
+                if (!item) {
+                    return "";
+                }
+                if (item.personalWish) {
+                    var celebMod = "celebration";
+                    return "<span class=\"announcement-badge announcement-badge-tag announcement-badge-tag-" + celebMod + "\">" +
+                        NjcEvents.escapeHtml(getAnnouncementTagLabel(celebMod)) +
+                        "</span>";
+                }
+                var tagKey = normalizeAnnouncementTagKey(item.announcementTag);
+                if (!tagKey) {
+                    if (item.important) {
+                        return "<span class=\"announcement-badge announcement-badge-important\">" +
+                            NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) +
+                            "</span>";
+                    }
+                    return "";
+                }
+                var mod = tagKey.replace(/[^a-z0-9-]/g, "");
+                return "<span class=\"announcement-badge announcement-badge-tag announcement-badge-tag-" +
+                    NjcEvents.escapeHtml(mod) + "\">" +
+                    NjcEvents.escapeHtml(getAnnouncementTagLabel(tagKey)) +
+                    "</span>";
+            }
+
             function normalizeAnnouncement(item, index) {
                 var source = item && typeof item === "object" ? item : {};
                 var title = String(source.title || "").trim();
@@ -1196,6 +1255,8 @@
                 var visibleFromYmd = pickAnnouncementScheduleStart(source);
                 var visibleUntilYmd = pickAnnouncementScheduleEnd(source);
                 var expiresLegacy = toYmdKey(source.expires);
+                var tagRaw = String(source.announcementTag || source.tag || "").trim();
+                var announcementTag = tagRaw ? normalizeAnnouncementTagKey(tagRaw) : "announcement";
                 return {
                     id: String(source.id || ("announcement-" + index)),
                     title: title,
@@ -1208,6 +1269,7 @@
                     visibleUntilYmd: visibleUntilYmd,
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
+                    announcementTag: announcementTag,
                     link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
                     imageOnly: imageOnly,
@@ -1227,6 +1289,8 @@
                 var visibleFromYmd = pickAnnouncementScheduleStart(source);
                 var visibleUntilYmd = pickAnnouncementScheduleEnd(source);
                 var expiresLegacy = toYmdKey(source.expires);
+                var tagRaw = String(source.announcementTag || source.tag || "").trim();
+                var announcementTag = tagRaw ? normalizeAnnouncementTagKey(tagRaw) : "notice";
                 return {
                     id: String(source.id || ("admin-notice-" + index)),
                     title: title,
@@ -1239,6 +1303,7 @@
                     visibleUntilYmd: visibleUntilYmd,
                     urgent: Boolean(source.urgent),
                     important: Boolean(source.important),
+                    announcementTag: announcementTag,
                     link: String(source.link || "").trim(),
                     imageUrl: imageUrl,
                     imageOnly: imageOnly
@@ -1386,6 +1451,7 @@
                         expires: "",
                         urgent: false,
                         important: false,
+                        announcementTag: "celebration",
                         imageUrl: "",
                         imageOnly: false,
                         link: ""
@@ -1579,13 +1645,12 @@
                 }
                 var dateText = item.hideDate ? "" : formatYmdForLocale(item.date, announcementsCard);
                 var isDailyMannaSlide = String(item.id || "").indexOf(DAILY_MANNA_HOME_ID_PREFIX) === 0;
-                var importantBadge = !item.personalWish && item.important
-                    ? ("<span class=\"announcement-badge announcement-badge-important\">" + NjcEvents.escapeHtml(T("home.announcementImportant", "Important", announcementsCard)) + "</span>")
-                    : "";
+                var isNewsletterSlide = String(item.id || "").indexOf(NEWSLETTER_HOME_ID_PREFIX) === 0;
                 var urgentBadge = item.urgent
-                    ? ("<span class=\"announcement-badge\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
+                    ? ("<span class=\"announcement-badge announcement-badge-urgent\">" + NjcEvents.escapeHtml(T("home.announcementUrgent", "Urgent", announcementsCard)) + "</span>")
                     : "";
-                var titleBadges = urgentBadge + importantBadge;
+                var tagBadge = buildAnnouncementTagBadge(item);
+                var titleBadges = urgentBadge + tagBadge;
                 var metaLine = dateText ? ("<p class=\"page-note\">" + NjcEvents.escapeHtml(dateText) + "</p>") : "";
                 var bodyLine = bodyText
                     ? ("<p class=\"announcement-body\">" + NjcEvents.escapeHtml(bodyText) + "</p>")
@@ -1625,6 +1690,7 @@
                 var liClass = "announcement-carousel-item" +
                     (item.personalWish ? " announcement-personal-wish" : "") +
                     (isDailyMannaSlide ? " announcement-daily-manna" : "") +
+                    (isNewsletterSlide ? " announcement-newsletter" : "") +
                     (isImageOnly ? " announcement-image-only" : "") +
                     slideAnimClass;
                 var srHeading = "<h3 class=\"announcement-title announcement-title-sr-only\">" + NjcEvents.escapeHtml(T("home.announcementBannerImageAlt", "Announcement image", announcementsCard)) + "</h3>";
@@ -1835,9 +1901,11 @@
                     bodyTa: bodyTa,
                     date: sermonYmd,
                     visibleUntilYmd: toYmdKey(stored.visibleUntilYmd),
-                    important: true,
+                    important: false,
+                    announcementTag: "sermon",
                     link: "#sermons",
-                    imageUrl: "sermons-banner.jpg?v=20260411cb1"
+                    imageUrl: "sermons-banner.jpg?v=20260411cb1",
+                    skipDismiss: true
                 }, 0);
             }
 
@@ -2212,8 +2280,136 @@
                     bodyTa: bodyTa,
                     date: todayKey,
                     important: false,
+                    announcementTag: "dailybread",
                     hideDate: true,
                     link: "#daily-bread",
+                    imageUrl: "",
+                    skipDismiss: true
+                }, 0);
+            }
+
+            function getHomeFirestoreDb() {
+                var fb = window.firebase;
+                if (!fb || !fb.apps || !fb.apps.length || !fb.firestore) {
+                    return null;
+                }
+                try {
+                    return fb.firestore();
+                } catch (eDb) {
+                    return null;
+                }
+            }
+
+            function normalizeNewsletterFirestoreDoc(doc) {
+                if (!doc || !doc.exists) {
+                    return null;
+                }
+                var d = doc.data() || {};
+                return {
+                    id: doc.id,
+                    title: String(d.title || "").trim(),
+                    titleTa: String(d.titleTa || "").trim(),
+                    body: String(d.body || "").trim(),
+                    bodyTa: String(d.bodyTa || "").trim(),
+                    visibleFrom: String(d.visibleFrom || "").trim(),
+                    visibleUntil: String(d.visibleUntil || "").trim(),
+                    monthKey: String(d.monthKey || "").trim()
+                };
+            }
+
+            function pickActiveNewsletterForHome(rows, todayKey) {
+                if (!todayKey || !Array.isArray(rows)) {
+                    return null;
+                }
+                var active = rows.filter(function (r) {
+                    if (!r) {
+                        return false;
+                    }
+                    var from = String(r.visibleFrom || "").trim();
+                    var until = String(r.visibleUntil || "").trim();
+                    if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(until)) {
+                        return false;
+                    }
+                    return from <= todayKey && todayKey <= until;
+                });
+                if (!active.length) {
+                    return null;
+                }
+                active.sort(function (a, b) {
+                    if (a.visibleFrom === b.visibleFrom) {
+                        return String(b.id).localeCompare(String(a.id));
+                    }
+                    return a.visibleFrom < b.visibleFrom ? 1 : -1;
+                });
+                return active[0];
+            }
+
+            function fetchHomeNewsletterEntry() {
+                if (!modOn("newsletter")) {
+                    return Promise.resolve(null);
+                }
+                var db = getHomeFirestoreDb();
+                if (!db) {
+                    return Promise.resolve(null);
+                }
+                var todayKey = getTodayKey();
+                return db.collection(NEWSLETTER_COLLECTION)
+                    .orderBy("visibleFrom", "desc")
+                    .limit(24)
+                    .get()
+                    .then(function (snap) {
+                        var rows = [];
+                        snap.forEach(function (doc) {
+                            var n = normalizeNewsletterFirestoreDoc(doc);
+                            if (n) {
+                                rows.push(n);
+                            }
+                        });
+                        return pickActiveNewsletterForHome(rows, todayKey);
+                    })
+                    .catch(function () {
+                        return null;
+                    });
+            }
+
+            function buildNewsletterHomeAnnouncementItem() {
+                if (!modOn("newsletter") || !announcementsCard) {
+                    return null;
+                }
+                var entry = cachedHomeNewsletterEntry;
+                if (!entry || typeof entry !== "object") {
+                    return null;
+                }
+                var shortTeaser = T(
+                    "home.newsletterTeaserShort",
+                    "Read the full newsletter on the Newsletter page.",
+                    announcementsCard
+                );
+                var titleEn = String(entry.title || "").trim();
+                var titleTa = String(entry.titleTa || "").trim();
+                var excerptEn = previewPlainForManna(entry.body, NEWSLETTER_HOME_EXCERPT_MAX);
+                var excerptTa = previewPlainForManna(entry.bodyTa, NEWSLETTER_HOME_EXCERPT_MAX);
+                var displayTitleEn = titleEn
+                    ? previewPlainForManna(titleEn, NEWSLETTER_HOME_TITLE_MAX)
+                    : T("home.announcementTagNewsletter", "Newsletter", announcementsCard);
+                var displayTitleTa = titleTa
+                    ? previewPlainForManna(titleTa, NEWSLETTER_HOME_TITLE_MAX)
+                    : displayTitleEn;
+                var bodyEn = excerptEn || shortTeaser;
+                var bodyTa = excerptTa || excerptEn || shortTeaser;
+                return normalizeAnnouncement({
+                    id: NEWSLETTER_HOME_ID_PREFIX + String(entry.id || getTodayKey()),
+                    title: displayTitleEn,
+                    titleTa: displayTitleTa,
+                    body: bodyEn,
+                    bodyTa: bodyTa,
+                    date: getTodayKey(),
+                    visibleFromYmd: entry.visibleFrom,
+                    visibleUntilYmd: entry.visibleUntil,
+                    important: false,
+                    announcementTag: "newsletter",
+                    hideDate: true,
+                    link: "#newsletter",
                     imageUrl: "",
                     skipDismiss: true
                 }, 0);
@@ -2242,8 +2438,10 @@
                 }
                 var sermonAnn = getLatestSermonAnnouncementMergedItem();
                 var mannaAnn = buildDailyMannaHomeAnnouncementItem();
+                var newsletterAnn = buildNewsletterHomeAnnouncementItem();
                 var merged = mergedPersonalCommunity
                     .concat(mannaAnn ? [mannaAnn] : [])
+                    .concat(newsletterAnn ? [newsletterAnn] : [])
                     .concat(sermonAnn ? [sermonAnn] : [])
                     .concat(cachedHomeStaticAnnouncements || [])
                     .concat(cachedHomeAdminNotices || []);
@@ -2360,11 +2558,17 @@
                         });
                 }
 
-                Promise.allSettled([fetchStaticAnnouncements(), fetchAdminNotices(), fetchHomeDailyMannaEntry()])
+                Promise.allSettled([
+                    fetchStaticAnnouncements(),
+                    fetchAdminNotices(),
+                    fetchHomeDailyMannaEntry(),
+                    fetchHomeNewsletterEntry()
+                ])
                     .then(function (results) {
                         cachedHomeStaticAnnouncements = results[0] && results[0].status === "fulfilled" ? results[0].value : [];
                         cachedHomeAdminNotices = results[1] && results[1].status === "fulfilled" ? results[1].value : [];
                         cachedHomeDailyMannaEntry = results[2] && results[2].status === "fulfilled" ? results[2].value : null;
+                        cachedHomeNewsletterEntry = results[3] && results[3].status === "fulfilled" ? results[3].value : null;
                         mergeHomeAnnouncements();
                     });
             }
@@ -3587,6 +3791,15 @@
             });
             document.addEventListener("njc:admin-notices-updated", function () {
                 loadAnnouncements();
+            });
+            document.addEventListener("njc:newsletter-updated", function () {
+                if (!modOn("announcements")) {
+                    return;
+                }
+                fetchHomeNewsletterEntry().then(function (row) {
+                    cachedHomeNewsletterEntry = row;
+                    mergeHomeAnnouncements();
+                });
             });
             document.addEventListener("njc:profile-updated", function () {
                 mergeHomeAnnouncements();

@@ -260,6 +260,7 @@
             expires: "",
             urgent: false,
             important: false,
+            announcementTag: "celebration",
             imageUrl: "",
             imageOnly: false,
             link: ""
