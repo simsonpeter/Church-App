@@ -95,8 +95,19 @@
         var title = String(d.title || "").trim();
         var body = String(d.text || "").trim();
         var name = String(d.authorName || "").trim();
-        var head = title ? title : T("testimony.shareUntitled", "Testimony");
-        var block = head + "\n\n" + body;
+        var sectionLabel = T("testimony.shareSectionLabel", "Testimony");
+        var subtitle = title || T("testimony.shareUntitled", "Testimony");
+        var extraLines = name ? ["— " + name] : [];
+        if (window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function") {
+            return window.NjcEvents.buildSharePlainText({
+                label: sectionLabel,
+                subtitle: subtitle,
+                body: body,
+                extraLines: extraLines,
+                url: shareBaseUrl()
+            });
+        }
+        var block = sectionLabel + "\n\n" + subtitle + "\n\n" + body;
         if (name) {
             block += "\n\n— " + name;
         }
@@ -105,22 +116,36 @@
     }
 
     function shareTestimony(d) {
-        var text = buildShareText(d);
-        if (navigator.share) {
-            navigator.share({
+        var title = String(d.title || "").trim();
+        var body = String(d.text || "").trim();
+        var name = String(d.authorName || "").trim();
+        var sectionLabel = T("testimony.shareSectionLabel", "Testimony");
+        var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+            ? window.NjcEvents.shareContent({
+                label: sectionLabel,
+                subtitle: title || T("testimony.shareUntitled", "Testimony"),
+                body: body,
+                extraLines: name ? ["— " + name] : [],
+                url: shareBaseUrl(),
+                fallbackTitle: T("testimony.shareTitle", "Testimony — NJC Belgium")
+            })
+            : {
                 title: T("testimony.shareTitle", "Testimony — NJC Belgium"),
-                text: text
-            }).catch(function () {});
+                text: buildShareText(d)
+            };
+        var clipboardText = sharePayload.text || buildShareText(d);
+        if (navigator.share) {
+            navigator.share(sharePayload).catch(function () {});
             return;
         }
         try {
-            navigator.clipboard.writeText(text);
+            navigator.clipboard.writeText(clipboardText);
             setStatus(T("testimony.copied", "Copied to clipboard."), false);
             window.setTimeout(function () {
                 setStatus("");
             }, 2500);
         } catch (e2) {
-            window.prompt(T("testimony.copyFallback", "Copy this text:"), text);
+            window.prompt(T("testimony.copyFallback", "Copy this text:"), clipboardText);
         }
     }
 

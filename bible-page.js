@@ -1110,11 +1110,15 @@
                 canShareFiles = navigator.canShare({ files: [file] });
             }
             if (canShareFiles) {
-                return navigator.share({
-                    title: payload.reference,
-                    text: payload.reference,
-                    files: [file]
-                }).then(function () {
+                var sectionLabel = T("bible.shareSectionLabel", "Bible verse");
+                var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                    ? window.NjcEvents.shareContent({
+                        label: sectionLabel,
+                        subtitle: payload.reference,
+                        files: [file]
+                    })
+                    : { title: sectionLabel + " — " + payload.reference, text: sectionLabel + "\n\n" + payload.reference, files: [file] };
+                return navigator.share(sharePayload).then(function () {
                     shared = true;
                 }).catch(function (error) {
                     if (error && error.name === "AbortError") {

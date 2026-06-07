@@ -579,6 +579,7 @@
                 if (!audioUrl) {
                     return;
                 }
+                var sectionLabel = T("sermons.shareSectionLabel", "Sermon", latestSermonsCard);
                 var title = String(currentSermon.title || "").trim() || T("sermons.eyebrow", "Sermon", latestSermonsCard);
                 var sub = String(currentSermon.subtitle || "").trim();
                 var dateLine = toPlayerDateLine(currentSermon);
@@ -588,7 +589,13 @@
                 }
                 var preview = previewParts.filter(Boolean).join("\n");
                 var playLine = T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard);
-                var shareText = preview ? (title + "\n\n" + preview + "\n\n" + playLine) : (title + "\n\n" + playLine);
+                var shareOpts = {
+                    label: sectionLabel,
+                    subtitle: title,
+                    body: preview,
+                    extraLines: [playLine],
+                    url: ""
+                };
 
                 ensureShareHashForSermon(currentSermon).then(function (shareId) {
                     var url = buildSermonAppShareUrl(shareId);
@@ -596,14 +603,21 @@
                         showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
                         return;
                     }
+                    shareOpts.url = url;
+                    var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                        ? window.NjcEvents.shareContent(shareOpts)
+                        : { title: sectionLabel + " — " + title, text: buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine), url: url };
                     if (typeof navigator !== "undefined" && navigator.share) {
-                        var p = navigator.share({ title: title, text: shareText, url: url });
+                        var p = navigator.share(sharePayload);
                         if (p && typeof p.then === "function" && typeof p.catch === "function") {
                             p.catch(function (err) {
                                 if (err && err.name === "AbortError") {
                                     return;
                                 }
-                                copyTextToClipboard(buildPlainShareText(title, preview, url, playLine)).then(function () {
+                                var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+                                    ? window.NjcEvents.buildSharePlainText(shareOpts)
+                                    : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine);
+                                copyTextToClipboard(plainText).then(function () {
                                     showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                                 }, function () {
                                     copyTextToClipboard(url).then(function () {
@@ -616,7 +630,10 @@
                         }
                         return;
                     }
-                    copyTextToClipboard(buildPlainShareText(title, preview, url, playLine)).then(function () {
+                    var clipboardText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+                        ? window.NjcEvents.buildSharePlainText(shareOpts)
+                        : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine);
+                    copyTextToClipboard(clipboardText).then(function () {
                         showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
                         copyTextToClipboard(url).then(function () {

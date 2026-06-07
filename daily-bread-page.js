@@ -308,15 +308,33 @@
                 .replace(/\{date\}/g, dateStr)
             : section;
         var devotionTitle = String(currentShareTitleText || "").trim();
-        var headline = devotionTitle ? (sectionDateLine + "\n" + devotionTitle) : sectionDateLine;
         var preview = String(currentShareBodyPreview || "").trim();
-        var shareText = preview ? (headline + "\n\n" + preview) : headline;
-        var shareTitle = devotionTitle ? (sectionDateLine + " — " + devotionTitle) : sectionDateLine;
-        if (shareTitle.length > 280) {
-            shareTitle = shareTitle.slice(0, 277).trim() + "...";
+        var shareBody = devotionTitle;
+        if (preview) {
+            shareBody = shareBody ? (shareBody + "\n\n" + preview) : preview;
+        }
+        var shareOpts = {
+            label: section,
+            subtitle: dateStr || "",
+            body: shareBody,
+            url: url
+        };
+        var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+            ? window.NjcEvents.shareContent(shareOpts)
+            : null;
+        if (!sharePayload) {
+            var headline = devotionTitle ? (sectionDateLine + "\n" + devotionTitle) : sectionDateLine;
+            var shareText = preview ? (headline + "\n\n" + preview) : headline;
+            var shareTitle = devotionTitle ? (sectionDateLine + " — " + devotionTitle) : sectionDateLine;
+            if (shareTitle.length > 280) {
+                shareTitle = shareTitle.slice(0, 277).trim() + "...";
+            }
+            sharePayload = { title: shareTitle, text: shareText, url: url };
+        } else if (sharePayload.title.length > 280) {
+            sharePayload.title = sharePayload.title.slice(0, 277).trim() + "...";
         }
         if (typeof navigator !== "undefined" && navigator.share) {
-            var p = navigator.share({ title: shareTitle, text: shareText, url: url });
+            var p = navigator.share(sharePayload);
             if (p && typeof p.then === "function" && typeof p.catch === "function") {
                 p.catch(function (err) {
                     if (err && err.name === "AbortError") {
@@ -325,7 +343,10 @@
                     copyTextToClipboard(url).then(function () {
                         showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
-                        copyTextToClipboard(buildPlainShareText(headline, preview, url)).then(function () {
+                        var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+                            ? window.NjcEvents.buildSharePlainText(shareOpts)
+                            : buildPlainShareText(sectionDateLine, preview, url);
+                        copyTextToClipboard(plainText).then(function () {
                             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                         }, function () {
                             showShareFeedback("dailyBread.shareFailed", "Could not share or copy. Try again.");
@@ -335,7 +356,10 @@
             }
             return;
         }
-        copyTextToClipboard(buildPlainShareText(headline, preview, url)).then(function () {
+        var clipboardText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+            ? window.NjcEvents.buildSharePlainText(shareOpts)
+            : buildPlainShareText(sectionDateLine, preview, url);
+        copyTextToClipboard(clipboardText).then(function () {
             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
         }, function () {
             copyTextToClipboard(url).then(function () {

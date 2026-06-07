@@ -696,10 +696,14 @@
                     if (navigator.canShare && navigator.share && typeof File !== "undefined") {
                         var fileForShare = new File([blob], filename, { type: "application/pdf" });
                         if (navigator.canShare({ files: [fileForShare] })) {
-                            await navigator.share({
-                                files: [fileForShare],
-                                title: filename
-                            });
+                            var pdfShareTitle = T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard);
+                            var pdfSharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                                ? window.NjcEvents.shareContent({
+                                    label: pdfShareTitle,
+                                    files: [fileForShare]
+                                })
+                                : { files: [fileForShare], title: pdfShareTitle, text: pdfShareTitle };
+                            await navigator.share(pdfSharePayload);
                             return true;
                         }
                     }
@@ -1045,6 +1049,7 @@
                         break;
                     }
                 }
+                var sectionLabel = T("contact.prayerShareSectionLabel", "Prayer request", prayerCard);
                 var nameLine = T("contact.prayerShareNameFallback", "Prayer request", prayerCard);
                 if (found) {
                     nameLine = getPrayerDisplayName(found, prayerCard);
@@ -1053,8 +1058,20 @@
                 if (String(textBody).length > 200) {
                     textBody = String(textBody).slice(0, 197) + "...";
                 }
+                var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                    ? window.NjcEvents.shareContent({
+                        label: sectionLabel,
+                        subtitle: nameLine !== sectionLabel ? nameLine : "",
+                        body: textBody !== sectionLabel ? textBody : "",
+                        url: url
+                    })
+                    : {
+                        title: sectionLabel,
+                        text: sectionLabel + "\n\n" + nameLine + "\n\n" + String(textBody || nameLine) + "\n\n" + url,
+                        url: url
+                    };
                 if (window.navigator && window.navigator.share) {
-                    var p = window.navigator.share({ title: nameLine, text: String(textBody || nameLine), url: url });
+                    var p = window.navigator.share(sharePayload);
                     if (p && typeof p.then === "function" && typeof p.catch === "function") {
                         p.catch(function (err) {
                             if (err && err.name === "AbortError") {

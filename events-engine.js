@@ -240,11 +240,81 @@
             });
     }
 
+    function trimShareLine(value) {
+        return String(value || "").trim();
+    }
+
+    function shareDisplayTitle(opts) {
+        var config = opts || {};
+        var label = trimShareLine(config.label);
+        var subtitle = trimShareLine(config.subtitle);
+        if (label && subtitle) {
+            return label + " — " + subtitle;
+        }
+        return label || subtitle || "";
+    }
+
+    function buildSharePlainText(opts) {
+        var config = opts || {};
+        var lines = [];
+        var label = trimShareLine(config.label);
+        var subtitle = trimShareLine(config.subtitle);
+        var body = trimShareLine(config.body);
+        var url = trimShareLine(config.url);
+        var extraLines = config.extraLines;
+
+        if (label) {
+            lines.push(label);
+        }
+        if (subtitle) {
+            lines.push(subtitle);
+        }
+        if (body) {
+            lines.push(body);
+        }
+        if (Array.isArray(extraLines)) {
+            extraLines.forEach(function (line) {
+                var trimmed = trimShareLine(line);
+                if (trimmed) {
+                    lines.push(trimmed);
+                }
+            });
+        }
+        if (url) {
+            lines.push(url);
+        }
+        return lines.join("\n\n");
+    }
+
+    function shareContent(opts) {
+        var config = opts || {};
+        var title = shareDisplayTitle({
+            label: config.label,
+            subtitle: config.subtitle || config.title
+        });
+        var text = buildSharePlainText(config);
+        var payload = {
+            title: title || trimShareLine(config.fallbackTitle),
+            text: text || title || trimShareLine(config.fallbackTitle)
+        };
+        var shareUrl = trimShareLine(config.url);
+        if (shareUrl) {
+            payload.url = shareUrl;
+        }
+        if (config.files) {
+            payload.files = config.files;
+        }
+        return payload;
+    }
+
     window.NjcEvents = {
         escapeHtml: escapeHtml,
         toDisplayDate: toDisplayDate,
         toDisplayTime: toDisplayTime,
         getWindowCutoffKey: getWindowCutoffKey,
-        mergeUpcomingEvents: mergeUpcomingEvents
+        mergeUpcomingEvents: mergeUpcomingEvents,
+        shareDisplayTitle: shareDisplayTitle,
+        buildSharePlainText: buildSharePlainText,
+        shareContent: shareContent
     };
 })();

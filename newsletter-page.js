@@ -713,10 +713,20 @@
         if (!url) {
             return;
         }
+        var sectionLabel = T("newsletter.shareSectionLabel", "Newsletter");
         var title = String(currentShareTitleText || "").trim() || T("newsletter.title", "Newsletter");
         var preview = String(currentShareBodyPreview || "").trim();
+        var shareOpts = {
+            label: sectionLabel,
+            subtitle: title,
+            body: preview,
+            url: url
+        };
+        var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+            ? window.NjcEvents.shareContent(shareOpts)
+            : { title: sectionLabel + " — " + title, text: buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url), url: url };
         if (typeof navigator !== "undefined" && navigator.share) {
-            var p = navigator.share({ title: title, text: preview || title, url: url });
+            var p = navigator.share(sharePayload);
             if (p && typeof p.then === "function" && typeof p.catch === "function") {
                 p.catch(function (err) {
                     if (err && err.name === "AbortError") {
@@ -725,7 +735,10 @@
                     copyTextToClipboard(url).then(function () {
                         showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
-                        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+                        var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+                            ? window.NjcEvents.buildSharePlainText(shareOpts)
+                            : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url);
+                        copyTextToClipboard(plainText).then(function () {
                             showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
                         }, function () {
                             showShareFeedback("newsletter.shareFailed", "Could not share or copy. Try again.");
@@ -735,7 +748,10 @@
             }
             return;
         }
-        copyTextToClipboard(buildPlainShareText(title, preview, url)).then(function () {
+        var clipboardText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+            ? window.NjcEvents.buildSharePlainText(shareOpts)
+            : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url);
+        copyTextToClipboard(clipboardText).then(function () {
             showShareFeedback("newsletter.linkCopied", "Link copied. Paste it in chat or email to share.");
         }, function () {
             copyTextToClipboard(url).then(function () {
