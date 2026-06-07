@@ -256,12 +256,30 @@
 
     function buildSharePlainText(opts) {
         var config = opts || {};
+        var sourceElement = config.sourceElement || config.element || null;
         var lines = [];
-        var label = trimShareLine(config.label);
-        var subtitle = trimShareLine(config.subtitle);
-        var body = trimShareLine(config.body);
+        var label = resolveShareLine(config.label, config.labelKey, config.labelFallback, sourceElement);
+        var subtitle = resolveShareLine(config.subtitle, config.subtitleKey, config.subtitleFallback, sourceElement);
+        var body = resolveShareLine(config.body, config.bodyKey, config.bodyFallback, sourceElement);
         var url = trimShareLine(config.url);
         var extraLines = config.extraLines;
+        if (Array.isArray(config.extraLineKeys)) {
+            extraLines = (extraLines || []).slice();
+            config.extraLineKeys.forEach(function (entry) {
+                if (!entry) {
+                    return;
+                }
+                var line = resolveShareLine(
+                    entry.line,
+                    entry.key,
+                    entry.fallback,
+                    sourceElement || entry.sourceElement || null
+                );
+                if (line) {
+                    extraLines.push(line);
+                }
+            });
+        }
 
         if (label) {
             lines.push(label);
@@ -286,13 +304,58 @@
         return lines.join("\n\n");
     }
 
+    function resolveShareLine(value, key, fallback, sourceElement) {
+        if (value !== undefined && value !== null && String(value).trim()) {
+            return trimShareLine(value);
+        }
+        if (!key || !window.NjcI18n) {
+            return trimShareLine(fallback);
+        }
+        if (sourceElement && typeof window.NjcI18n.tForElement === "function") {
+            return trimShareLine(window.NjcI18n.tForElement(sourceElement, key, fallback));
+        }
+        if (typeof window.NjcI18n.t === "function") {
+            return trimShareLine(window.NjcI18n.t(key, fallback));
+        }
+        return trimShareLine(fallback);
+    }
+
     function shareContent(opts) {
         var config = opts || {};
+        var sourceElement = config.sourceElement || config.element || null;
+        var label = resolveShareLine(config.label, config.labelKey, config.labelFallback, sourceElement);
+        var subtitle = resolveShareLine(config.subtitle, config.subtitleKey, config.subtitleFallback, sourceElement);
+        var body = resolveShareLine(config.body, config.bodyKey, config.bodyFallback, sourceElement);
+        var extraLines = config.extraLines;
+        if (Array.isArray(config.extraLineKeys)) {
+            extraLines = (extraLines || []).slice();
+            config.extraLineKeys.forEach(function (entry) {
+                if (!entry) {
+                    return;
+                }
+                var line = resolveShareLine(
+                    entry.line,
+                    entry.key,
+                    entry.fallback,
+                    sourceElement || entry.sourceElement || null
+                );
+                if (line) {
+                    extraLines.push(line);
+                }
+            });
+        }
+        var plainOpts = {
+            label: label,
+            subtitle: subtitle,
+            body: body,
+            url: config.url,
+            extraLines: extraLines
+        };
         var title = shareDisplayTitle({
-            label: config.label,
-            subtitle: config.subtitle || config.title
+            label: label,
+            subtitle: subtitle || config.title
         });
-        var text = buildSharePlainText(config);
+        var text = buildSharePlainText(plainOpts);
         var payload = {
             title: title || trimShareLine(config.fallbackTitle),
             text: text || title || trimShareLine(config.fallbackTitle)

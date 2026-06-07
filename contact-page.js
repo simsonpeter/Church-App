@@ -699,8 +699,10 @@
                             var pdfShareTitle = T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard);
                             var pdfSharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                                 ? window.NjcEvents.shareContent({
-                                    label: pdfShareTitle,
-                                    files: [fileForShare]
+                                    labelKey: "contact.prayerMinePdfTitle",
+                                    labelFallback: "My prayer list — NJC Belgium",
+                                    files: [fileForShare],
+                                    sourceElement: prayerCard
                                 })
                                 : { files: [fileForShare], title: pdfShareTitle, text: pdfShareTitle };
                             await navigator.share(pdfSharePayload);
@@ -1033,6 +1035,56 @@
                 });
             }
 
+            function deliverPrayerShare(nameLine, textBody, url) {
+                var sectionLabel = T("contact.prayerShareSectionLabel", "Prayer request", prayerCard);
+                var previewBody = String(textBody || "").trim();
+                if (previewBody.length > 200) {
+                    previewBody = previewBody.slice(0, 197) + "...";
+                }
+                var shareOpts = {
+                    labelKey: "contact.prayerShareSectionLabel",
+                    labelFallback: "Prayer request",
+                    subtitle: nameLine !== sectionLabel ? nameLine : "",
+                    body: previewBody && previewBody !== sectionLabel ? previewBody : "",
+                    url: url,
+                    sourceElement: prayerCard
+                };
+                var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                    ? window.NjcEvents.shareContent(shareOpts)
+                    : {
+                        title: sectionLabel,
+                        text: sectionLabel + "\n\n" + nameLine + (previewBody ? ("\n\n" + previewBody) : "") + "\n\n" + url,
+                        url: url
+                    };
+                if (window.navigator && window.navigator.share) {
+                    var p = window.navigator.share(sharePayload);
+                    if (p && typeof p.then === "function" && typeof p.catch === "function") {
+                        p.catch(function (err) {
+                            if (err && err.name === "AbortError") {
+                                return;
+                            }
+                            return copyTextToClipboard(sharePayload.text || url).then(
+                                function () {
+                                    showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
+                                },
+                                function () {
+                                    showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use Share from the menu.");
+                                }
+                            );
+                        });
+                    }
+                    return;
+                }
+                copyTextToClipboard(sharePayload.text || url).then(
+                    function () {
+                        showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
+                    },
+                    function () {
+                        showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use the browser menu to copy the address bar.");
+                    }
+                );
+            }
+
             function runPrayerShareForId(prayerId) {
                 var id = String(prayerId || "").trim();
                 if (!id) {
@@ -1049,54 +1101,17 @@
                         break;
                     }
                 }
-                var sectionLabel = T("contact.prayerShareSectionLabel", "Prayer request", prayerCard);
                 var nameLine = T("contact.prayerShareNameFallback", "Prayer request", prayerCard);
                 if (found) {
                     nameLine = getPrayerDisplayName(found, prayerCard);
                 }
-                var textBody = (found && found.message) ? toPreviewText(found.message) : nameLine;
-                if (String(textBody).length > 200) {
-                    textBody = String(textBody).slice(0, 197) + "...";
-                }
-                var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
-                    ? window.NjcEvents.shareContent({
-                        label: sectionLabel,
-                        subtitle: nameLine !== sectionLabel ? nameLine : "",
-                        body: textBody !== sectionLabel ? textBody : "",
-                        url: url
-                    })
-                    : {
-                        title: sectionLabel,
-                        text: sectionLabel + "\n\n" + nameLine + "\n\n" + String(textBody || nameLine) + "\n\n" + url,
-                        url: url
-                    };
-                if (window.navigator && window.navigator.share) {
-                    var p = window.navigator.share(sharePayload);
-                    if (p && typeof p.then === "function" && typeof p.catch === "function") {
-                        p.catch(function (err) {
-                            if (err && err.name === "AbortError") {
-                                return;
-                            }
-                            return copyTextToClipboard(url).then(
-                                function () {
-                                    showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
-                                },
-                                function () {
-                                    showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use Share from the menu.");
-                                }
-                            );
-                        });
-                    }
+                if (found && found.message) {
+                    getTranslatedPrayerMessage(found.message, prayerCard).then(function (translated) {
+                        deliverPrayerShare(nameLine, toPreviewText(translated || found.message || ""), url);
+                    });
                     return;
                 }
-                copyTextToClipboard(url).then(
-                    function () {
-                        showPrayerWallNote("linkCopied", "contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.");
-                    },
-                    function () {
-                        showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not copy. Try again or open in browser and use the browser menu to copy the address bar.");
-                    }
-                );
+                deliverPrayerShare(nameLine, nameLine, url);
             }
 
             function getPrayerPreviewNode(prayerId) {

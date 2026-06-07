@@ -1110,14 +1110,19 @@
                 canShareFiles = navigator.canShare({ files: [file] });
             }
             if (canShareFiles) {
-                var sectionLabel = T("bible.shareSectionLabel", "Bible verse");
                 var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                     ? window.NjcEvents.shareContent({
-                        label: sectionLabel,
+                        labelKey: "bible.shareSectionLabel",
+                        labelFallback: "Bible verse",
                         subtitle: payload.reference,
-                        files: [file]
+                        files: [file],
+                        sourceElement: bibleCard
                     })
-                    : { title: sectionLabel + " — " + payload.reference, text: sectionLabel + "\n\n" + payload.reference, files: [file] };
+                    : {
+                        title: T("bible.shareSectionLabel", "Bible verse") + " — " + payload.reference,
+                        text: T("bible.shareSectionLabel", "Bible verse") + "\n\n" + payload.reference,
+                        files: [file]
+                    };
                 return navigator.share(sharePayload).then(function () {
                     shared = true;
                 }).catch(function (error) {

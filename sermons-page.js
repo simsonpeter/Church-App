@@ -579,22 +579,23 @@
                 if (!audioUrl) {
                     return;
                 }
-                var sectionLabel = T("sermons.shareSectionLabel", "Sermon", latestSermonsCard);
-                var title = String(currentSermon.title || "").trim() || T("sermons.eyebrow", "Sermon", latestSermonsCard);
-                var sub = String(currentSermon.subtitle || "").trim();
-                var dateLine = toPlayerDateLine(currentSermon);
+                var displayFields = pickSermonDisplayFields(currentSermon, latestSermonsCard);
+                var title = displayFields.title || T("sermons.eyebrow", "Sermon", latestSermonsCard);
+                var sub = displayFields.subtitle;
+                var dateLine = toPlayerDateLine(currentSermon, latestSermonsCard);
                 var previewParts = [dateLine];
                 if (sub) {
                     previewParts.push(sub);
                 }
                 var preview = previewParts.filter(Boolean).join("\n");
-                var playLine = T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard);
                 var shareOpts = {
-                    label: sectionLabel,
+                    labelKey: "sermons.shareSectionLabel",
+                    labelFallback: "Sermon",
                     subtitle: title,
                     body: preview,
-                    extraLines: [playLine],
-                    url: ""
+                    extraLineKeys: [{ key: "sermons.sharePlayLine", fallback: "▶ Listen in NJC App" }],
+                    url: "",
+                    sourceElement: latestSermonsCard
                 };
 
                 ensureShareHashForSermon(currentSermon).then(function (shareId) {
@@ -606,7 +607,7 @@
                     shareOpts.url = url;
                     var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                         ? window.NjcEvents.shareContent(shareOpts)
-                        : { title: sectionLabel + " — " + title, text: buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine), url: url };
+                        : { title: T("sermons.shareSectionLabel", "Sermon", latestSermonsCard) + " — " + title, text: buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard)), url: url };
                     if (typeof navigator !== "undefined" && navigator.share) {
                         var p = navigator.share(sharePayload);
                         if (p && typeof p.then === "function" && typeof p.catch === "function") {
@@ -616,7 +617,7 @@
                                 }
                                 var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
                                     ? window.NjcEvents.buildSharePlainText(shareOpts)
-                                    : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine);
+                                    : buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard));
                                 copyTextToClipboard(plainText).then(function () {
                                     showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                                 }, function () {
@@ -632,7 +633,7 @@
                     }
                     var clipboardText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
                         ? window.NjcEvents.buildSharePlainText(shareOpts)
-                        : buildPlainShareText(sectionLabel, title + (preview ? "\n\n" + preview : ""), url, playLine);
+                        : buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard));
                     copyTextToClipboard(clipboardText).then(function () {
                         showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
@@ -671,6 +672,28 @@
             function toDateObject(value) {
                 var date = new Date(String(value || "") + "T00:00:00");
                 return Number.isNaN(date.getTime()) ? null : date;
+            }
+
+            function getSermonContentLanguage(sourceElement) {
+                if (window.NjcI18n && typeof window.NjcI18n.getLanguageForElement === "function" && sourceElement) {
+                    return window.NjcI18n.getLanguageForElement(sourceElement) === "ta" ? "ta" : "en";
+                }
+                if (window.NjcI18n && typeof window.NjcI18n.getLanguage === "function") {
+                    return window.NjcI18n.getLanguage() === "ta" ? "ta" : "en";
+                }
+                return "en";
+            }
+
+            function pickSermonDisplayFields(sermon, sourceElement) {
+                if (!sermon) {
+                    return { title: "", subtitle: "" };
+                }
+                var lang = getSermonContentLanguage(sourceElement || latestSermonsCard);
+                var title = lang === "ta" && sermon.titleTa ? sermon.titleTa : (sermon.title || "");
+                return {
+                    title: String(title || "").trim(),
+                    subtitle: String(sermon.subtitle || "").trim()
+                };
             }
 
             function toDisplayDate(dateObj, sourceElement) {
@@ -1070,12 +1093,13 @@
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             }
 
-            function toPlayerDateLine(sermon) {
-                var baseDate = toDisplayDate(sermon.dateObj);
+            function toPlayerDateLine(sermon, sourceElement) {
+                var card = sourceElement || latestSermonsCard;
+                var baseDate = toDisplayDate(sermon.dateObj, card);
                 if (!sermon.speaker) {
                     return baseDate;
                 }
-                return baseDate + " - " + T("sermons.speakerPrefix", "Speaker") + ": " + sermon.speaker;
+                return baseDate + " - " + T("sermons.speakerPrefix", "Speaker", card) + ": " + sermon.speaker;
             }
 
             function syncPlayerText() {

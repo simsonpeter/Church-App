@@ -122,12 +122,14 @@
         var sectionLabel = T("testimony.shareSectionLabel", "Testimony");
         var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
             ? window.NjcEvents.shareContent({
-                label: sectionLabel,
+                labelKey: "testimony.shareSectionLabel",
+                labelFallback: "Testimony",
                 subtitle: title || T("testimony.shareUntitled", "Testimony"),
                 body: body,
                 extraLines: name ? ["— " + name] : [],
                 url: shareBaseUrl(),
-                fallbackTitle: T("testimony.shareTitle", "Testimony — NJC Belgium")
+                fallbackTitle: T("testimony.shareTitle", "Testimony — NJC Belgium"),
+                sourceElement: testimonyCard
             })
             : {
                 title: T("testimony.shareTitle", "Testimony — NJC Belgium"),

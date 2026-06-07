@@ -65,6 +65,9 @@
     }
 
     function getLocale() {
+        if (window.NjcI18n && typeof window.NjcI18n.getLocaleForElement === "function" && pageCard) {
+            return window.NjcI18n.getLocaleForElement(pageCard);
+        }
         if (window.NjcI18n && typeof window.NjcI18n.getLocale === "function") {
             return window.NjcI18n.getLocale();
         }
@@ -297,16 +300,10 @@
         if (!url) {
             return;
         }
-        var section = T("dailyBread.title", "Daily bread");
         var dateStr = String(currentShareDateFormatted || "").trim();
         if (!dateStr) {
             dateStr = formatBrusselsLongDate(getBrusselsYmd().key);
         }
-        var sectionDateLine = dateStr
-            ? T("dailyBread.shareSectionDate", "{section} — {date}")
-                .replace(/\{section\}/g, section)
-                .replace(/\{date\}/g, dateStr)
-            : section;
         var devotionTitle = String(currentShareTitleText || "").trim();
         var preview = String(currentShareBodyPreview || "").trim();
         var shareBody = devotionTitle;
@@ -314,15 +311,23 @@
             shareBody = shareBody ? (shareBody + "\n\n" + preview) : preview;
         }
         var shareOpts = {
-            label: section,
+            labelKey: "dailyBread.title",
+            labelFallback: "Daily bread",
             subtitle: dateStr || "",
             body: shareBody,
-            url: url
+            url: url,
+            sourceElement: pageCard
         };
         var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
             ? window.NjcEvents.shareContent(shareOpts)
             : null;
         if (!sharePayload) {
+            var section = T("dailyBread.title", "Daily bread");
+            var sectionDateLine = dateStr
+                ? T("dailyBread.shareSectionDate", "{section} — {date}")
+                    .replace(/\{section\}/g, section)
+                    .replace(/\{date\}/g, dateStr)
+                : section;
             var headline = devotionTitle ? (sectionDateLine + "\n" + devotionTitle) : sectionDateLine;
             var shareText = preview ? (headline + "\n\n" + preview) : headline;
             var shareTitle = devotionTitle ? (sectionDateLine + " — " + devotionTitle) : sectionDateLine;
@@ -343,9 +348,9 @@
                     copyTextToClipboard(url).then(function () {
                         showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
-                        var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+                        var plainText = sharePayload.text || (window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
                             ? window.NjcEvents.buildSharePlainText(shareOpts)
-                            : buildPlainShareText(sectionDateLine, preview, url);
+                            : buildPlainShareText(T("dailyBread.title", "Daily bread"), preview, url));
                         copyTextToClipboard(plainText).then(function () {
                             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                         }, function () {
@@ -356,9 +361,9 @@
             }
             return;
         }
-        var clipboardText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
+        var clipboardText = sharePayload.text || (window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
             ? window.NjcEvents.buildSharePlainText(shareOpts)
-            : buildPlainShareText(sectionDateLine, preview, url);
+            : buildPlainShareText(T("dailyBread.title", "Daily bread"), preview, url));
         copyTextToClipboard(clipboardText).then(function () {
             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
         }, function () {

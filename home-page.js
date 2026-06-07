@@ -2863,9 +2863,12 @@
                         if (canShareFiles) {
                             var planSharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                                 ? window.NjcEvents.shareContent({
-                                    label: T("home.readingPlanShareImageShareTitle", "Today's Bible reading", readingCard),
-                                    body: T("home.readingPlanShareImageShareText", "Today's Bible reading plan — NJC App", readingCard),
-                                    files: [file]
+                                    labelKey: "home.readingPlanShareImageShareTitle",
+                                    labelFallback: "Today's Bible reading",
+                                    bodyKey: "home.readingPlanShareImageShareText",
+                                    bodyFallback: "Today's Bible reading plan — NJC App",
+                                    files: [file],
+                                    sourceElement: readingCard
                                 })
                                 : {
                                     title: T("home.readingPlanShareImageShareTitle", "Today's Bible reading", readingCard),
@@ -3357,7 +3360,11 @@
                 }
                 var title = T("home.readingShareImageTitle", "One-year Bible reading progress", readingCard);
                 var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
-                    ? window.NjcEvents.shareContent({ label: title })
+                    ? window.NjcEvents.shareContent({
+                        labelKey: "home.readingShareImageTitle",
+                        labelFallback: "One-year Bible reading progress",
+                        sourceElement: readingCard
+                    })
                     : { title: title, text: title };
 
                 waitForFontsOptional().then(function () {
@@ -4155,17 +4162,24 @@
             }
 
             function shareTriviaResult(card) {
-                var sectionLabel = T("home.triviaShareSection", "Bible Quiz", card);
-                var body = T("home.triviaShareText", "I got today's Bible Quiz correct! +1 point", card);
                 var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
-                    ? window.NjcEvents.shareContent({ label: sectionLabel, body: body })
-                    : { title: sectionLabel, text: sectionLabel + "\n\n" + body };
+                    ? window.NjcEvents.shareContent({
+                        labelKey: "home.triviaShareSection",
+                        labelFallback: "Bible Quiz",
+                        bodyKey: "home.triviaShareText",
+                        bodyFallback: "I got today's Bible Quiz correct! +1 point",
+                        sourceElement: card
+                    })
+                    : {
+                        title: T("home.triviaShareSection", "Bible Quiz", card),
+                        text: T("home.triviaShareSection", "Bible Quiz", card) + "\n\n" + T("home.triviaShareText", "I got today's Bible Quiz correct! +1 point", card)
+                    };
                 if (navigator.share && navigator.canShare && navigator.canShare(sharePayload)) {
                     navigator.share(sharePayload).catch(function () {
-                        copyTriviaShareToClipboard(sharePayload.text || body);
+                        copyTriviaShareToClipboard(sharePayload.text || "");
                     });
                 } else {
-                    copyTriviaShareToClipboard(sharePayload.text || (sectionLabel + "\n\n" + body));
+                    copyTriviaShareToClipboard(sharePayload.text || "");
                 }
             }
 
