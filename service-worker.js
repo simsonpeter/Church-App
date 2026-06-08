@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v431sharelang";
-const RUNTIME_CACHE = "njc-runtime-cache-v431sharelang";
+const APP_CACHE = "njc-app-cache-v432dailybreadfull";
+const RUNTIME_CACHE = "njc-runtime-cache-v432dailybreadfull";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =

@@ -51,7 +51,7 @@
     var mediaSessionBound = false;
     var shareFeedbackTimerId = null;
     var currentShareTitleText = "";
-    var currentShareBodyPreview = "";
+    var currentShareBodyText = "";
     var currentShareDateFormatted = "";
 
     function T(key, fallback) {
@@ -162,16 +162,11 @@
         return String(y) + "-" + m + "-" + d;
     }
 
-    function previewPlainBody(body, maxLen) {
-        var s = String(body || "").replace(/\s+/g, " ").trim();
-        if (!s) {
-            return "";
-        }
-        var cap = typeof maxLen === "number" ? maxLen : 220;
-        if (s.length <= cap) {
-            return s;
-        }
-        return s.slice(0, Math.max(0, cap - 3)).trim() + "...";
+    function plainBodyForShare(body) {
+        return String(body || "")
+            .replace(/\r\n/g, "\n")
+            .replace(/\n{3,}/g, "\n\n")
+            .trim();
     }
 
     function copyTextToClipboard(text) {
@@ -305,10 +300,10 @@
             dateStr = formatBrusselsLongDate(getBrusselsYmd().key);
         }
         var devotionTitle = String(currentShareTitleText || "").trim();
-        var preview = String(currentShareBodyPreview || "").trim();
+        var bodyText = String(currentShareBodyText || "").trim();
         var shareBody = devotionTitle;
-        if (preview) {
-            shareBody = shareBody ? (shareBody + "\n\n" + preview) : preview;
+        if (bodyText) {
+            shareBody = shareBody ? (shareBody + "\n\n" + bodyText) : bodyText;
         }
         var shareOpts = {
             labelKey: "dailyBread.title",
@@ -329,7 +324,7 @@
                     .replace(/\{date\}/g, dateStr)
                 : section;
             var headline = devotionTitle ? (sectionDateLine + "\n" + devotionTitle) : sectionDateLine;
-            var shareText = preview ? (headline + "\n\n" + preview) : headline;
+            var shareText = bodyText ? (headline + "\n\n" + bodyText) : headline;
             var shareTitle = devotionTitle ? (sectionDateLine + " — " + devotionTitle) : sectionDateLine;
             if (shareTitle.length > 280) {
                 shareTitle = shareTitle.slice(0, 277).trim() + "...";
@@ -350,7 +345,7 @@
                     }, function () {
                         var plainText = sharePayload.text || (window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
                             ? window.NjcEvents.buildSharePlainText(shareOpts)
-                            : buildPlainShareText(T("dailyBread.title", "Daily bread"), preview, url));
+                            : buildPlainShareText(T("dailyBread.title", "Daily bread"), bodyText, url));
                         copyTextToClipboard(plainText).then(function () {
                             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
                         }, function () {
@@ -363,7 +358,7 @@
         }
         var clipboardText = sharePayload.text || (window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
             ? window.NjcEvents.buildSharePlainText(shareOpts)
-            : buildPlainShareText(T("dailyBread.title", "Daily bread"), preview, url));
+            : buildPlainShareText(T("dailyBread.title", "Daily bread"), bodyText, url));
         copyTextToClipboard(clipboardText).then(function () {
             showShareFeedback("dailyBread.linkCopied", "Link copied. Paste it in chat or email to share.");
         }, function () {
@@ -1093,7 +1088,7 @@
             authorLineEl.textContent = "";
         }
         currentShareTitleText = "";
-        currentShareBodyPreview = "";
+        currentShareBodyText = "";
         currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
@@ -1112,7 +1107,7 @@
             authorLineEl.textContent = "";
         }
         currentShareTitleText = "";
-        currentShareBodyPreview = "";
+        currentShareBodyText = "";
         currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
@@ -1131,7 +1126,7 @@
             authorLineEl.textContent = "";
         }
         currentShareTitleText = "";
-        currentShareBodyPreview = "";
+        currentShareBodyText = "";
         currentShareDateFormatted = "";
         clearShareFeedback();
         syncDailyBreadShareButton();
@@ -1164,7 +1159,7 @@
         var ymdForShare = /^\d{4}-\d{2}-\d{2}$/.test(entryDateRaw) ? entryDateRaw : getBrusselsYmd().key;
         currentShareDateFormatted = formatBrusselsLongDate(ymdForShare);
         currentShareTitleText = titlePart;
-        currentShareBodyPreview = previewPlainBody(picked.body || "", 260);
+        currentShareBodyText = plainBodyForShare(picked.body || "");
         statusEl.hidden = true;
         contentWrap.hidden = false;
         updateTtsUi();
