@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v432dailybreadfull";
-const RUNTIME_CACHE = "njc-runtime-cache-v432dailybreadfull";
+const APP_CACHE = "njc-app-cache-v433dailybreadsharefull";
+const RUNTIME_CACHE = "njc-runtime-cache-v433dailybreadsharefull";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260531sharelang1",
-    "./daily-bread-page.js?v=20260531dailybreadfull1",
+    "./daily-bread-page.js?v=20260608dailybreadsharefull1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260519newsletteredit1",
