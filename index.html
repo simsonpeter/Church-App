@@ -1271,6 +1271,50 @@
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="kids" checked> <span data-i18n="admin.moduleKids">Kids World</span></label>
                             <label class="admin-module-toggle"><input type="checkbox" data-pool-key="newsletter" checked> <span data-i18n="admin.moduleNewsletter">Newsletter</span></label>
                         </fieldset>
+                        <h3 class="admin-access-subheading" data-i18n="admin.guestPoolHeading" data-i18n-fallback="Modules for guests (no registration)">Modules for guests (no registration)</h3>
+                        <p class="page-note" data-i18n="admin.guestPoolInfo" data-i18n-fallback="Visitors who tap Continue without login can only open modules you enable here (still respects global switches above).">Visitors who tap Continue without login can only open modules you enable here (still respects global switches above).</p>
+                        <fieldset class="admin-modules-fieldset" id="admin-guest-pool-fieldset" disabled>
+                            <legend class="page-note" data-i18n="admin.guestPoolLegend" data-i18n-fallback="Guest access">Guest access</legend>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="announcements" checked> <span data-i18n="admin.moduleAnnouncements">Announcements (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="bibleReading" checked> <span data-i18n="admin.moduleBibleReading">Today’s Bible reading (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="dailyVerse" checked> <span data-i18n="admin.moduleDailyVerse">Daily verse (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="trivia" checked> <span data-i18n="admin.moduleTrivia" data-i18n-fallback="Bible Quiz (home card, menu, #trivia)">Bible Quiz</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="eventsWeek" checked> <span data-i18n="admin.moduleEventsWeek">Events this week (home)</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="dailyBread" checked> <span data-i18n="admin.moduleDailyBread">Daily bread</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="bookShelf" checked> <span data-i18n="admin.moduleBookShelf">Book shelf</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="bible" checked> <span data-i18n="admin.moduleBible">Bible reader</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="songbook" checked> <span data-i18n="admin.moduleSongbook">Songbook</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="prayer" checked> <span data-i18n="admin.modulePrayer">Prayer wall</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="events" checked> <span data-i18n="admin.moduleEvents">Events tab</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="sermons" checked> <span data-i18n="admin.moduleSermons">Sermons</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="contact" checked> <span data-i18n="admin.moduleContact">Contact</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="celebrations"> <span data-i18n="admin.moduleCelebrations">Celebrations</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="chat"> <span data-i18n="admin.moduleChat">Chat</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="testimony"> <span data-i18n="admin.moduleTestimony">Testimonies</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="userAchievements"> <span data-i18n="admin.moduleUserAchievements">User achievements</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="kids" checked> <span data-i18n="admin.moduleKids">Kids World</span></label>
+                            <label class="admin-module-toggle"><input type="checkbox" data-guest-pool-key="newsletter" checked> <span data-i18n="admin.moduleNewsletter">Newsletter</span></label>
+                        </fieldset>
+                        <hr class="admin-access-divider" aria-hidden="true">
+                        <h3 class="admin-access-subheading" data-i18n="admin.guestInsightsHeading" data-i18n-fallback="Guest visitors">Guest visitors</h3>
+                        <p class="page-note" data-i18n="admin.guestInsightsInfo" data-i18n-fallback="Counts visitors who continue without login. Region is estimated from device timezone and language (not GPS).">Counts visitors who continue without login. Region is estimated from device timezone and language (not GPS).</p>
+                        <button type="button" class="button-link button-secondary" id="admin-guest-insights-refresh" data-i18n="admin.guestInsightsRefresh" data-i18n-fallback="Refresh guest stats">Refresh guest stats</button>
+                        <p class="page-note" id="admin-guest-insights-summary"></p>
+                        <p class="page-note" id="admin-guest-insights-status" hidden></p>
+                        <div class="admin-member-users-wrap" id="admin-guest-insights-wrap" hidden>
+                            <table class="admin-member-users-table" aria-describedby="admin-guest-insights-status">
+                                <thead>
+                                    <tr>
+                                        <th data-i18n="admin.guestInsightsColLastSeen" data-i18n-fallback="Last seen">Last seen</th>
+                                        <th data-i18n="admin.guestInsightsColRegion" data-i18n-fallback="Region">Region</th>
+                                        <th data-i18n="admin.guestInsightsColLanguage" data-i18n-fallback="Language">Language</th>
+                                        <th data-i18n="admin.guestInsightsColModules" data-i18n-fallback="Modules used">Modules used</th>
+                                        <th data-i18n="admin.guestInsightsColViews" data-i18n-fallback="Page views">Page views</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-guest-insights-tbody"></tbody>
+                            </table>
+                        </div>
                         <h3 class="admin-access-subheading" data-i18n="admin.memberCodesHeading" data-i18n-fallback="One-time member codes">One-time member codes</h3>
                         <p class="page-note" data-i18n="admin.memberCodesInfo" data-i18n-fallback="One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.">One code per line. Codes are removed when used. Users enter a code under Profile to become a church member in the app.</p>
                         <label class="admin-member-codes-label">
@@ -2200,9 +2244,10 @@
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
     <script src="user-auth.js?v=20260411mainmerge1"></script>
-    <script src="app-modules.js?v=20260620maintestimony1"></script>
+    <script src="app-modules.js?v=20260608guestmodules1"></script>
+    <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260531sharelang1"></script>
+    <script src="app-shell.js?v=20260608guestmodules1"></script>
     <script src="events-engine.js?v=20260531sharelang1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20260531sharelang1"></script>
@@ -2215,7 +2260,7 @@
     <script src="newsletter-page.js?v=20260531sharelang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
     <script src="admin-dashboard-page.js?v=20260519newsletteredit1"></script>
-    <script src="admin-modules-page.js?v=20260421mainmerge"></script>
+    <script src="admin-modules-page.js?v=20260608guestmodules1"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-users-page.js?v=20260526userdir1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>

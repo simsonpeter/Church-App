@@ -7,6 +7,12 @@
     var saveBtn = document.getElementById("admin-modules-save");
     var statusEl = document.getElementById("admin-modules-status");
     var poolFieldset = document.getElementById("admin-registration-pool-fieldset");
+    var guestPoolFieldset = document.getElementById("admin-guest-pool-fieldset");
+    var guestInsightsRefreshBtn = document.getElementById("admin-guest-insights-refresh");
+    var guestInsightsStatusEl = document.getElementById("admin-guest-insights-status");
+    var guestInsightsSummaryEl = document.getElementById("admin-guest-insights-summary");
+    var guestInsightsWrap = document.getElementById("admin-guest-insights-wrap");
+    var guestInsightsTbody = document.getElementById("admin-guest-insights-tbody");
     var codesTextarea = document.getElementById("admin-member-codes-text");
     var memberGrantUidInput = document.getElementById("admin-member-grant-uid");
     var memberGrantBtn = document.getElementById("admin-member-grant-btn");
@@ -20,7 +26,10 @@
     var MEMBER_CODES_DOC_ID = "memberCodes";
     var MAX_MEMBER_USERS = 300;
     var MEMBER_USERS_QUERY_TIMEOUT_MS = 12000;
+    var GUEST_INSIGHTS_LIMIT = 200;
+    var GUEST_ACTIVE_DAYS = 30;
     var memberUsersBusy = false;
+    var guestInsightsBusy = false;
     var latestMemberRows = {};
 
     if (!fieldset || !saveBtn || !window.NjcAppModules) {
@@ -106,6 +115,9 @@
         if (poolFieldset) {
             poolFieldset.disabled = Boolean(busy);
         }
+        if (guestPoolFieldset) {
+            guestPoolFieldset.disabled = Boolean(busy);
+        }
         if (accessSaveBtn) {
             accessSaveBtn.disabled = Boolean(busy);
         }
@@ -120,6 +132,9 @@
         }
         if (memberUsersRefreshBtn) {
             memberUsersRefreshBtn.disabled = Boolean(busy) || memberUsersBusy;
+        }
+        if (guestInsightsRefreshBtn) {
+            guestInsightsRefreshBtn.disabled = Boolean(busy) || guestInsightsBusy;
         }
         if (memberUsersTbody) {
             memberUsersTbody.querySelectorAll("button[data-admin-member-uid]").forEach(function (btn) {
@@ -176,6 +191,249 @@
             out[key] = input ? Boolean(input.checked) : false;
         });
         return out;
+    }
+
+    function applyGuestPoolFieldsetFromDoc(data) {
+        if (!guestPoolFieldset || !window.NjcAppModules) {
+            return;
+        }
+        var defs = window.NjcAppModules.DEFAULT_MODULES || {};
+        var raw = data && data.guestPool && typeof data.guestPool === "object" ? data.guestPool : null;
+        var defaults = window.NjcAppModules.normalizeGuestPool
+            ? window.NjcAppModules.normalizeGuestPool(null)
+            : {};
+        Object.keys(defs).forEach(function (key) {
+            var input = guestPoolFieldset.querySelector('input[data-guest-pool-key="' + key + '"]');
+            if (!input) {
+                return;
+            }
+            if (!raw) {
+                input.checked = defaults[key] === true;
+            } else {
+                input.checked = raw[key] === true;
+            }
+        });
+    }
+
+    function getGuestPoolFromForm() {
+        var out = {};
+        if (!guestPoolFieldset) {
+            return out;
+        }
+        var defs = window.NjcAppModules.DEFAULT_MODULES || {};
+        Object.keys(defs).forEach(function (key) {
+            var input = guestPoolFieldset.querySelector('input[data-guest-pool-key="' + key + '"]');
+            out[key] = input ? Boolean(input.checked) : false;
+        });
+        return out;
+    }
+
+    function moduleLabelKey(moduleKey) {
+        var map = {
+            home: "admin.guestInsightsModuleHome",
+            announcements: "admin.moduleAnnouncements",
+            bibleReading: "admin.moduleBibleReading",
+            dailyVerse: "admin.moduleDailyVerse",
+            trivia: "admin.moduleTrivia",
+            eventsWeek: "admin.moduleEventsWeek",
+            dailyBread: "admin.moduleDailyBread",
+            bookShelf: "admin.moduleBookShelf",
+            bible: "admin.moduleBible",
+            songbook: "admin.moduleSongbook",
+            prayer: "admin.modulePrayer",
+            events: "admin.moduleEvents",
+            sermons: "admin.moduleSermons",
+            contact: "admin.moduleContact",
+            celebrations: "admin.moduleCelebrations",
+            chat: "admin.moduleChat",
+            testimony: "admin.moduleTestimony",
+            userAchievements: "admin.moduleUserAchievements",
+            kids: "admin.moduleKids",
+            newsletter: "admin.moduleNewsletter"
+        };
+        return map[moduleKey] || "";
+    }
+
+    function formatModuleLabel(moduleKey) {
+        var key = moduleLabelKey(moduleKey);
+        if (key) {
+            return T(key, String(moduleKey || ""));
+        }
+        return String(moduleKey || "");
+    }
+
+    function formatGuestLastSeen(value) {
+        if (!value) {
+            return "—";
+        }
+        var date;
+        if (value.toDate && typeof value.toDate === "function") {
+            date = value.toDate();
+        } else {
+            date = new Date(value);
+        }
+        if (!date || Number.isNaN(date.getTime())) {
+            return "—";
+        }
+        try {
+            return date.toLocaleString(undefined, {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+        } catch (e) {
+            return date.toISOString().slice(0, 16).replace("T", " ");
+        }
+    }
+
+    function summarizeGuestModuleHits(hits) {
+        var src = hits && typeof hits === "object" ? hits : {};
+        var rows = Object.keys(src).map(function (key) {
+            return { key: key, count: Number(src[key]) || 0 };
+        }).filter(function (row) {
+            return row.count > 0;
+        }).sort(function (a, b) {
+            return b.count - a.count;
+        });
+        if (!rows.length) {
+            return "—";
+        }
+        return rows.slice(0, 4).map(function (row) {
+            return formatModuleLabel(row.key) + " (" + row.count + ")";
+        }).join(", ");
+    }
+
+    function setGuestInsightsStatus(kind, key, fallback) {
+        if (!guestInsightsStatusEl) {
+            return;
+        }
+        guestInsightsStatusEl.hidden = !fallback;
+        guestInsightsStatusEl.dataset.kind = kind || "";
+        guestInsightsStatusEl.textContent = fallback ? T(key, fallback) : "";
+    }
+
+    function renderGuestInsightsSummary(rows) {
+        if (!guestInsightsSummaryEl) {
+            return;
+        }
+        var now = Date.now();
+        var activeCutoff = now - (GUEST_ACTIVE_DAYS * 24 * 60 * 60 * 1000);
+        var activeCount = 0;
+        var moduleTotals = {};
+        rows.forEach(function (row) {
+            var last = row.lastSeenAt;
+            var date = last && last.toDate ? last.toDate() : new Date(last || 0);
+            if (date && !Number.isNaN(date.getTime()) && date.getTime() >= activeCutoff) {
+                activeCount += 1;
+            }
+            var hits = row.moduleHits || {};
+            Object.keys(hits).forEach(function (key) {
+                moduleTotals[key] = (moduleTotals[key] || 0) + (Number(hits[key]) || 0);
+            });
+        });
+        var topModules = Object.keys(moduleTotals).map(function (key) {
+            return { key: key, count: moduleTotals[key] };
+        }).sort(function (a, b) {
+            return b.count - a.count;
+        }).slice(0, 5);
+        var topText = topModules.length
+            ? topModules.map(function (item) {
+                return formatModuleLabel(item.key) + " (" + item.count + ")";
+            }).join(", ")
+            : T("admin.guestInsightsNoModules", "No module usage yet.");
+        guestInsightsSummaryEl.textContent = T(
+            "admin.guestInsightsSummary",
+            "Guests in last {days} days: {active} (showing {shown} recent sessions). Top modules: {modules}"
+        )
+            .replace(/\{days\}/g, String(GUEST_ACTIVE_DAYS))
+            .replace(/\{active\}/g, String(activeCount))
+            .replace(/\{shown\}/g, String(rows.length))
+            .replace(/\{modules\}/g, topText);
+    }
+
+    function renderGuestInsights(rows) {
+        if (!guestInsightsTbody || !guestInsightsWrap) {
+            return;
+        }
+        if (!rows.length) {
+            guestInsightsWrap.hidden = true;
+            guestInsightsTbody.innerHTML = "";
+            renderGuestInsightsSummary([]);
+            setGuestInsightsStatus("info", "admin.guestInsightsEmpty", "No guest activity recorded yet.");
+            return;
+        }
+        guestInsightsTbody.innerHTML = rows.map(function (row) {
+            var region = [row.timeZone, row.locale].filter(Boolean).join(" · ") || "—";
+            return "" +
+                "<tr>" +
+                "  <td>" + escapeHtml(formatGuestLastSeen(row.lastSeenAt)) + "</td>" +
+                "  <td>" + escapeHtml(region) + "</td>" +
+                "  <td>" + escapeHtml(String(row.language || row.locale || "—")) + "</td>" +
+                "  <td>" + escapeHtml(summarizeGuestModuleHits(row.moduleHits)) + "</td>" +
+                "  <td>" + escapeHtml(String(Number(row.pageViews) || 0)) + "</td>" +
+                "</tr>";
+        }).join("");
+        guestInsightsWrap.hidden = false;
+        renderGuestInsightsSummary(rows);
+    }
+
+    function loadGuestInsights() {
+        if (!guestInsightsTbody || !guestInsightsWrap) {
+            return Promise.resolve([]);
+        }
+        if (!isAdminUser()) {
+            guestInsightsWrap.hidden = true;
+            guestInsightsTbody.innerHTML = "";
+            if (guestInsightsSummaryEl) {
+                guestInsightsSummaryEl.textContent = "";
+            }
+            setGuestInsightsStatus("info", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+            return Promise.resolve([]);
+        }
+        var db = getFirestoreDb();
+        if (!db) {
+            setGuestInsightsStatus("error", "admin.modulesNoFirebase", "Firebase is not ready.");
+            return Promise.resolve([]);
+        }
+        guestInsightsBusy = true;
+        if (guestInsightsRefreshBtn) {
+            guestInsightsRefreshBtn.disabled = true;
+        }
+        setGuestInsightsStatus("working", "auth.working", "Please wait...");
+        return db.collection("guestSessions")
+            .orderBy("lastSeenAt", "desc")
+            .limit(GUEST_INSIGHTS_LIMIT)
+            .get()
+            .then(function (snap) {
+                var rows = [];
+                if (snap && !snap.empty) {
+                    snap.forEach(function (doc) {
+                        rows.push(doc.data() || {});
+                    });
+                }
+                renderGuestInsights(rows);
+                if (rows.length) {
+                    setGuestInsightsStatus("success", "admin.guestInsightsLoaded", "Guest stats loaded.");
+                }
+                return rows;
+            })
+            .catch(function () {
+                guestInsightsWrap.hidden = true;
+                guestInsightsTbody.innerHTML = "";
+                if (guestInsightsSummaryEl) {
+                    guestInsightsSummaryEl.textContent = "";
+                }
+                setGuestInsightsStatus("error", "admin.guestInsightsLoadError", "Could not load guest stats. Publish Firestore rules for guestSessions.");
+                return [];
+            })
+            .finally(function () {
+                guestInsightsBusy = false;
+                if (guestInsightsRefreshBtn) {
+                    guestInsightsRefreshBtn.disabled = false;
+                }
+            });
     }
 
     /** Must match Cloud Function `normalizeMemberCode` in functions/index.js (redeemMemberCode). */
@@ -482,6 +740,9 @@
             if (poolFieldset) {
                 poolFieldset.disabled = true;
             }
+            if (guestPoolFieldset) {
+                guestPoolFieldset.disabled = true;
+            }
             if (accessSaveBtn) {
                 accessSaveBtn.disabled = true;
             }
@@ -512,6 +773,9 @@
             saveBtn.disabled = false;
             if (poolFieldset) {
                 poolFieldset.disabled = false;
+            }
+            if (guestPoolFieldset) {
+                guestPoolFieldset.disabled = false;
             }
             if (accessSaveBtn) {
                 accessSaveBtn.disabled = false;
@@ -548,8 +812,12 @@
             applyFormFromModules(raw);
             if (accessSnap && accessSnap.exists) {
                 applyPoolFieldsetFromDoc(accessSnap.data());
-            } else if (poolFieldset) {
-                applyPoolFieldsetFromDoc(null);
+                applyGuestPoolFieldsetFromDoc(accessSnap.data());
+            } else {
+                if (poolFieldset) {
+                    applyPoolFieldsetFromDoc(null);
+                }
+                applyGuestPoolFieldsetFromDoc(null);
             }
             if (codesTextarea && codesSnap && codesSnap.exists) {
                 var cdata = codesSnap.data() || {};
@@ -558,7 +826,7 @@
             } else if (codesTextarea) {
                 codesTextarea.value = "";
             }
-            return loadMemberUsers();
+            return Promise.all([loadMemberUsers(), loadGuestInsights()]);
         }).catch(function () {
             var fallback = window.NjcAppModules.getGlobalSync && typeof window.NjcAppModules.getGlobalSync === "function"
                 ? window.NjcAppModules.getGlobalSync()
@@ -619,11 +887,13 @@
             setFormBusy(true);
             clearAccessStatus();
             var pool = getPoolFromForm();
+            var guestPool = getGuestPoolFromForm();
             var codes = codesTextarea ? parseCodesFromTextarea(codesTextarea.value) : [];
             var ts = window.firebase.firestore.FieldValue.serverTimestamp();
             Promise.all([
                 db.collection(COLLECTION).doc(ACCESS_DOC_ID).set({
                     registrationPool: pool,
+                    guestPool: guestPool,
                     updatedAt: ts
                 }, { merge: true }),
                 db.collection(COLLECTION).doc(MEMBER_CODES_DOC_ID).set({
@@ -638,7 +908,7 @@
                     ? window.NjcAppModules.refresh()
                     : null;
             }).then(function () {
-                setAccessStatus("success", "admin.accessSaved", "Registration pool and member codes saved.");
+                setAccessStatus("success", "admin.accessSaved", "Registration pool, guest access, and member codes saved.");
             }).catch(function () {
                 setAccessStatus("error", "admin.accessSaveError", "Could not save. Check Firestore rules (appConfig/access, appConfig/memberCodes).");
             }).finally(function () {
@@ -691,6 +961,18 @@
             }
             if (!memberUsersBusy) {
                 loadMemberUsers();
+            }
+        });
+    }
+
+    if (guestInsightsRefreshBtn) {
+        guestInsightsRefreshBtn.addEventListener("click", function () {
+            if (!isAdminUser()) {
+                setGuestInsightsStatus("error", "admin.modulesNeedAdmin", "Sign in as admin to edit module settings.");
+                return;
+            }
+            if (!guestInsightsBusy) {
+                loadGuestInsights();
             }
         });
     }

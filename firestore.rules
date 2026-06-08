@@ -79,9 +79,11 @@ service cloud.firestore {
           && request.resource.data.flags is map
           && request.resource.data.flags.size() <= 40)
         || (docId == "access"
-          && request.resource.data.keys().hasOnly(["registrationPool", "updatedAt"])
+          && request.resource.data.keys().hasOnly(["registrationPool", "guestPool", "updatedAt"])
           && request.resource.data.registrationPool is map
-          && request.resource.data.registrationPool.size() <= 40)
+          && request.resource.data.registrationPool.size() <= 40
+          && request.resource.data.guestPool is map
+          && request.resource.data.guestPool.size() <= 40)
         || (docId == "memberCodes"
           && request.resource.data.keys().hasOnly(["codes", "updatedAt"])
           && request.resource.data.codes is list
@@ -95,7 +97,10 @@ service cloud.firestore {
           && request.resource.data.flags.size() <= 40)
         || (docId == "access"
           && request.resource.data.registrationPool is map
-          && request.resource.data.registrationPool.size() <= 40)
+          && request.resource.data.registrationPool.size() <= 40
+          && (!("guestPool" in request.resource.data)
+            || (request.resource.data.guestPool is map
+              && request.resource.data.guestPool.size() <= 40)))
         || (docId == "memberCodes"
           && request.resource.data.codes is list
           && request.resource.data.codes.size() <= 500)
@@ -384,6 +389,39 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if request.auth != null
         && (resource.data.authorUid == request.auth.uid || isAdmin());
+    }
+
+    function isGuestSessionPayload(sessionId) {
+      return request.resource.data.keys().hasOnly([
+          "sessionId", "firstSeenAt", "lastSeenAt", "timeZone", "locale", "language",
+          "lastRoute", "moduleHits", "pageViews", "updatedAt"
+        ])
+        && request.resource.data.sessionId == sessionId
+        && request.resource.data.sessionId is string
+        && request.resource.data.sessionId.size() >= 8
+        && request.resource.data.sessionId.size() <= 80
+        && request.resource.data.timeZone is string
+        && request.resource.data.timeZone.size() <= 80
+        && request.resource.data.locale is string
+        && request.resource.data.locale.size() <= 32
+        && request.resource.data.language is string
+        && request.resource.data.language.size() <= 32
+        && request.resource.data.lastRoute is string
+        && request.resource.data.lastRoute.size() <= 48
+        && request.resource.data.moduleHits is map
+        && request.resource.data.moduleHits.size() <= 25
+        && request.resource.data.pageViews is number
+        && request.resource.data.pageViews >= 1
+        && request.resource.data.pageViews <= 100000;
+    }
+
+    // Anonymous visitors (continue without login): module usage + coarse region from timezone/locale.
+    match /guestSessions/{sessionId} {
+      allow read: if isAdmin();
+      allow create: if isGuestSessionPayload(sessionId);
+      allow update: if isGuestSessionPayload(sessionId)
+        && request.resource.data.pageViews >= resource.data.pageViews;
+      allow delete: if isAdmin();
     }
   }
 }

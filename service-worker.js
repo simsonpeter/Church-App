@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v433dailybreadsharefull";
-const RUNTIME_CACHE = "njc-runtime-cache-v433dailybreadsharefull";
+const APP_CACHE = "njc-app-cache-v434guestmodules";
+const RUNTIME_CACHE = "njc-runtime-cache-v434guestmodules";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -43,7 +43,8 @@ const CORE_ASSETS = [
     "./index.html",
     "./styles.css?v=20260620maintestimony1",
     "./user-auth.js?v=20260411mainmerge1",
-    "./app-modules.js?v=20260620maintestimony1",
+    "./app-modules.js?v=20260608guestmodules1",
+    "./guest-analytics.js?v=20260608guestmodules1",
     "./app-shell.js?v=20260531sharelang1",
     "./events-engine.js?v=20260531sharelang1",
     "./community-celebrations.js?v=20260411celemember",
@@ -57,7 +58,7 @@ const CORE_ASSETS = [
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260519newsletteredit1",
-    "./admin-modules-page.js?v=20260421mainmerge",
+    "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260526userdir1",
     "./admin-extras.js?v=20260331libtabs1",

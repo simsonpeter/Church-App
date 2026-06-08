@@ -49,6 +49,7 @@
     };
 
     var registrationPoolPublic = null;
+    var guestPoolPublic = null;
 
     var userAccessState = {
         uid: "",
@@ -97,6 +98,19 @@
         return o;
     }
 
+    function defaultGuestPool() {
+        var o = {};
+        ["announcements", "bibleReading", "dailyVerse", "trivia", "eventsWeek", "dailyBread", "bookShelf", "bible", "songbook", "prayer", "events", "sermons", "contact", "kids", "newsletter"].forEach(function (key) {
+            o[key] = true;
+        });
+        Object.keys(DEFAULT_MODULES).forEach(function (key) {
+            if (!Object.prototype.hasOwnProperty.call(o, key)) {
+                o[key] = false;
+            }
+        });
+        return o;
+    }
+
     function normalizeRegistrationPool(raw) {
         var base = {};
         Object.keys(DEFAULT_MODULES).forEach(function (key) {
@@ -116,6 +130,37 @@
             return defaultSignupPool();
         }
         return base;
+    }
+
+    function normalizeGuestPool(raw) {
+        var base = {};
+        Object.keys(DEFAULT_MODULES).forEach(function (key) {
+            base[key] = false;
+        });
+        if (raw && typeof raw === "object") {
+            Object.keys(DEFAULT_MODULES).forEach(function (key) {
+                if (raw[key] === true) {
+                    base[key] = true;
+                }
+            });
+        }
+        var any = Object.keys(base).some(function (k) {
+            return base[k];
+        });
+        if (!any) {
+            return defaultGuestPool();
+        }
+        return base;
+    }
+
+    function applyGuestPoolToFlags(globalFlags) {
+        var g = normalizeModules(globalFlags);
+        var pool = guestPoolPublic || normalizeGuestPool(null);
+        var out = cloneDefaults();
+        Object.keys(DEFAULT_MODULES).forEach(function (key) {
+            out[key] = Boolean(g[key] !== false && pool[key] === true);
+        });
+        return out;
     }
 
     function normalizeAllowedModuleList(raw) {
@@ -234,8 +279,9 @@
         if (!id || !isRegisteredWithEmail()) {
             lastUserAccess = null;
             lastUserAccessUid = "";
-            lastEffectiveFlags = g;
-            return g;
+            var guestFlags = applyGuestPoolToFlags(g);
+            lastEffectiveFlags = guestFlags;
+            return guestFlags;
         }
         var ua = topLevelUserAccess && typeof topLevelUserAccess === "object" ? normalizeUserAccessDoc(topLevelUserAccess) : null;
         lastUserAccess = ua && ua.accessType === "limited" ? ua : null;
@@ -285,7 +331,7 @@
         var pool = userAccessState.registrationPool || {};
         if (userAccessState.tier === "legacy") {
             if (!isRegisteredWithEmail()) {
-                return g;
+                return applyGuestPoolToFlags(g);
             }
             var outLegacy = cloneDefaults();
             Object.keys(DEFAULT_MODULES).forEach(function (key) {
@@ -388,21 +434,33 @@
         });
     }
 
+    function applyAccessDocPools(data) {
+        var pool = data && data.registrationPool && typeof data.registrationPool === "object"
+            ? data.registrationPool
+            : null;
+        var guestPool = data && data.guestPool && typeof data.guestPool === "object"
+            ? data.guestPool
+            : null;
+        registrationPoolPublic = normalizeRegistrationPool(pool);
+        guestPoolPublic = normalizeGuestPool(guestPool);
+        return {
+            registrationPool: registrationPoolPublic,
+            guestPool: guestPoolPublic
+        };
+    }
+
     function fetchRegistrationPoolOnly() {
         var db = getFirestoreDb();
         if (!db) {
-            registrationPoolPublic = normalizeRegistrationPool(null);
+            applyAccessDocPools(null);
             return Promise.resolve(registrationPoolPublic);
         }
         return db.collection(COLLECTION).doc(ACCESS_DOC_ID).get().then(function (snap) {
             var data = snap && snap.exists ? snap.data() : null;
-            var pool = data && data.registrationPool && typeof data.registrationPool === "object"
-                ? data.registrationPool
-                : null;
-            registrationPoolPublic = normalizeRegistrationPool(pool);
+            applyAccessDocPools(data);
             return registrationPoolPublic;
         }).catch(function () {
-            registrationPoolPublic = normalizeRegistrationPool(null);
+            applyAccessDocPools(null);
             return registrationPoolPublic;
         });
     }
@@ -553,6 +611,10 @@
         return registrationPoolPublic || normalizeRegistrationPool(null);
     }
 
+    function getGuestPoolSync() {
+        return guestPoolPublic || normalizeGuestPool(null);
+    }
+
     function getAccessSync() {
         return {
             uid: userAccessState.uid,
@@ -624,9 +686,11 @@
         ROUTE_TO_MODULE: ROUTE_TO_MODULE,
         normalizeModules: normalizeModules,
         normalizeRegistrationPool: normalizeRegistrationPool,
+        normalizeGuestPool: normalizeGuestPool,
         getSync: getAppModulesSync,
         getGlobalSync: getGlobalModulesSync,
         getRegistrationPoolSync: getRegistrationPoolSync,
+        getGuestPoolSync: getGuestPoolSync,
         getAccessSync: getAccessSync,
         getUserAccessSync: function () {
             return lastUserAccess;
@@ -644,6 +708,7 @@
                 window.localStorage.removeItem(CACHE_KEY);
             } catch (e) {}
             registrationPoolPublic = null;
+            guestPoolPublic = null;
             lastUserAccess = null;
             lastUserAccessUid = "";
             resetUserAccessState();
