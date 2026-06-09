@@ -3142,6 +3142,51 @@ body.header-menu-open {
     color: #a61f1f;
 }
 
+.header-menu-link-locked {
+    opacity: 0.72;
+    cursor: not-allowed;
+}
+
+.header-menu-link-locked::after {
+    content: "\f023";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-left: auto;
+    font-size: 0.82rem;
+    opacity: 0.72;
+}
+
+.tab-nav-locked {
+    opacity: 0.72;
+    cursor: not-allowed;
+}
+
+.tab-nav-locked .tab-icon::after {
+    content: "\f023";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 0.58rem;
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    opacity: 0.85;
+}
+
+.tab-nav-locked .tab-icon {
+    position: relative;
+}
+
+.guest-module-lock-card .guest-module-lock-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+body.guest-module-lock-open {
+    overflow: hidden;
+}
+
 .header-notification-toggle {
     position: relative;
 }

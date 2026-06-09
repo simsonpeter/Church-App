@@ -48,6 +48,28 @@
         newsletter: "newsletter"
     };
 
+    var MODULE_LABEL_I18N = {
+        announcements: { key: "admin.moduleAnnouncements", fallback: "Announcements" },
+        bibleReading: { key: "admin.moduleBibleReading", fallback: "Today's Bible reading" },
+        dailyVerse: { key: "admin.moduleDailyVerse", fallback: "Daily verse" },
+        trivia: { key: "menu.trivia", fallback: "Bible Quiz" },
+        eventsWeek: { key: "admin.moduleEventsWeek", fallback: "Events this week" },
+        dailyBread: { key: "menu.dailyBread", fallback: "Daily bread" },
+        bookShelf: { key: "menu.bookShelf", fallback: "Book shelf" },
+        bible: { key: "menu.bible", fallback: "Bible" },
+        songbook: { key: "menu.songbook", fallback: "Songbook" },
+        prayer: { key: "nav.prayer", fallback: "Prayer" },
+        events: { key: "nav.events", fallback: "Events" },
+        sermons: { key: "nav.sermons", fallback: "Sermons" },
+        contact: { key: "menu.contact", fallback: "Contact" },
+        celebrations: { key: "menu.celebrations", fallback: "Celebrations" },
+        chat: { key: "menu.chat", fallback: "Chat" },
+        testimony: { key: "menu.testimony", fallback: "Testimonies" },
+        userAchievements: { key: "menu.userAchievements", fallback: "User achievements" },
+        kids: { key: "menu.kids", fallback: "Kids World" },
+        newsletter: { key: "menu.newsletter", fallback: "Newsletter" }
+    };
+
     var registrationPoolPublic = null;
     var guestPoolPublic = null;
 
@@ -625,12 +647,68 @@
         };
     }
 
+    function isModuleGloballyEnabled(key) {
+        var k = String(key || "").trim();
+        if (!k || !Object.prototype.hasOwnProperty.call(DEFAULT_MODULES, k)) {
+            return true;
+        }
+        return getGlobalModulesSync()[k] !== false;
+    }
+
+    function isGuestViewer() {
+        return !isRegisteredWithEmail();
+    }
+
+    function isModuleGuestLocked(key) {
+        var k = String(key || "").trim();
+        if (!k || !Object.prototype.hasOwnProperty.call(DEFAULT_MODULES, k)) {
+            return false;
+        }
+        if (!isGuestViewer() || isChurchAdminAccount()) {
+            return false;
+        }
+        if (!isModuleGloballyEnabled(k)) {
+            return false;
+        }
+        var pool = guestPoolPublic || normalizeGuestPool(null);
+        return pool[k] !== true;
+    }
+
+    function isModuleVisible(key) {
+        var k = String(key || "").trim();
+        if (!k || !Object.prototype.hasOwnProperty.call(DEFAULT_MODULES, k)) {
+            return true;
+        }
+        if (isGuestViewer() && !isChurchAdminAccount()) {
+            return isModuleGloballyEnabled(k);
+        }
+        return isModuleEnabled(k);
+    }
+
     function isModuleEnabled(key) {
         var k = String(key || "").trim();
         if (!k || !Object.prototype.hasOwnProperty.call(DEFAULT_MODULES, k)) {
             return true;
         }
         return getAppModulesSync()[k] !== false;
+    }
+
+    function isRouteVisible(route) {
+        var r = String(route || "").trim().toLowerCase();
+        var mod = ROUTE_TO_MODULE[r];
+        if (!mod) {
+            return true;
+        }
+        return isModuleVisible(mod);
+    }
+
+    function isRouteGuestLocked(route) {
+        var r = String(route || "").trim().toLowerCase();
+        var mod = ROUTE_TO_MODULE[r];
+        if (!mod) {
+            return false;
+        }
+        return isModuleGuestLocked(mod);
     }
 
     function isRouteEnabled(route) {
@@ -640,6 +718,14 @@
             return true;
         }
         return isModuleEnabled(mod);
+    }
+
+    function getModuleLabelI18n(key) {
+        var k = String(key || "").trim();
+        if (MODULE_LABEL_I18N[k]) {
+            return Object.assign({}, MODULE_LABEL_I18N[k]);
+        }
+        return { key: "", fallback: k || "This section" };
     }
 
     function ensureRegistrationPoolLoaded() {
@@ -699,6 +785,13 @@
         getLimitedGrantModuleKeysSync: getLimitedGrantModuleKeysSync,
         getNormalPlusModuleGrantsSync: getNormalPlusModuleGrantsSync,
         isChurchAdminAccount: isChurchAdminAccount,
+        isGuestViewer: isGuestViewer,
+        isModuleGloballyEnabled: isModuleGloballyEnabled,
+        isModuleVisible: isModuleVisible,
+        isModuleGuestLocked: isModuleGuestLocked,
+        isRouteVisible: isRouteVisible,
+        isRouteGuestLocked: isRouteGuestLocked,
+        getModuleLabelI18n: getModuleLabelI18n,
         isModuleEnabled: isModuleEnabled,
         isRouteEnabled: isRouteEnabled,
         refresh: refreshAppModules,

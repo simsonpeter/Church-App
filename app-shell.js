@@ -410,6 +410,11 @@
         "celebrations.membersOnlyGuestBody": "இந்தப் பக்கத்தில் பிறந்தநாட்கள், திருமண நாள் மற்றும் வாழ்த்துக்களைக் காணவும் அனுப்பவும் பதிவுசெய்த உறுப்பினர்கள் மட்டுமே. தயவுசெய்து கணக்கை உருவாக்கவும் அல்லது உள்நுழையவும், பின்னர் மீண்டும் இந்தப் பக்கத்திற்கு வாருங்கள்.",
         "celebrations.registerToContinue": "பதிவு செய்",
         "celebrations.loginToContinue": "உள்நுழை",
+        "guestModule.lockTitle": "பதிவு தேவை",
+        "guestModule.lockBody": "{section} பயன்படுத்த பதிவு செய்யவும். இலவச கணக்கை உருவாக்கவும் அல்லது உள்நுழையவும்.",
+        "guestModule.register": "கணக்கு உருவாக்கு",
+        "guestModule.login": "உள்நுழை",
+        "guestModule.registerHint": "இந்தப் பகுதிக்கு பதிவு செய்யவும்",
         "celebrations.upcomingMembersOnly": "பதிவு செய்யவும் அல்லது உள்நுழையவும், பின்னர் வரவிருக்கும் விழாக்களை இங்கே காணலாம்.",
         "celebrations.wishThreadMembersOnly": "சமூக வாழ்த்துக்களைக் காண உள்நுழையவும்.",
         "celebrations.wishThreadSignInToView": "சமூக வாழ்த்துக்களைக் காணவும் அனுப்பவும் உள்நுழையவும்.",
@@ -936,7 +941,7 @@
         "admin.modulesNeedAdmin": "தொகுப்புகளைத் திருத்த நிர்வாகியாக உள்நுழையவும்.",
         "admin.modulesNoFirebase": "Firebase தயாராக இல்லை.",
         "admin.guestPoolHeading": "பதிவு இல்லாமல் விருந்தினர்களுக்கான தொகுதிகள்",
-        "admin.guestPoolInfo": "உள்நுழையாமல் தொடரும் விருந்தினர்கள் இங்கே இயக்கிய தொகுதிகளை மட்டுமே திறக்க முடியும் (மேலே உள்ள உலகளாவிய நிலைமாற்றிகளையும் பின்பற்றும்).",
+        "admin.guestPoolInfo": "உள்நுழையாமல் தொடரும் விருந்தினர்கள் இயக்கிய தொகுதிகளை மட்டுமே திறக்க முடியும். நீக்கிய தொகுதிகள் பட்டியலில் தெரியும்; தட்டினால் பதிவு செய்யுமாறு கேட்கப்படும் (மேலே உள்ள உலகளாவிய நிலைமாற்றிகளையும் பின்பற்றும்).",
         "admin.guestPoolLegend": "விருந்தினர் அணுகல்",
         "admin.guestInsightsHeading": "விருந்தினர் பார்வையாளர்கள்",
         "admin.guestInsightsInfo": "உள்நுழையாமல் தொடர்ந்தவர்களை எண்ணுகிறது. பிராந்தியம் சாதன நேர மண்டலம் மற்றும் மொழியிலிருந்து மதிப்பிடப்படுகிறது (GPS அல்ல).",
@@ -4522,6 +4527,180 @@
         });
     }
 
+    function setupGuestModuleAccess() {
+        var lockOverlay = null;
+        var lockBodyEl = null;
+        var lockTitleEl = null;
+        var lockRegisterBtn = null;
+        var lockLoginBtn = null;
+
+        function parseRouteFromHashHref(href) {
+            var h = String(href || "").trim();
+            if (!h || h.charAt(0) !== "#") {
+                return "";
+            }
+            var path = h.slice(1);
+            var q = path.indexOf("?");
+            if (q >= 0) {
+                path = path.slice(0, q);
+            }
+            var route = path.split("/").map(function (s) { return s.trim(); }).filter(Boolean)[0] || "";
+            route = String(route).toLowerCase();
+            if (route === "library") {
+                return "book-shelf";
+            }
+            if (route === "about") {
+                return "prayer";
+            }
+            return route;
+        }
+
+        function getSectionLabel(moduleKey) {
+            var mods = window.NjcAppModules;
+            var meta = mods && typeof mods.getModuleLabelI18n === "function"
+                ? mods.getModuleLabelI18n(moduleKey)
+                : { key: "", fallback: "This section" };
+            return t(meta.key, meta.fallback);
+        }
+
+        function closeGuestModuleLockDialog() {
+            if (!lockOverlay) {
+                return;
+            }
+            lockOverlay.hidden = true;
+            document.body.classList.remove("guest-module-lock-open");
+        }
+
+        function ensureGuestModuleLockDialog() {
+            if (lockOverlay) {
+                return lockOverlay;
+            }
+            lockOverlay = document.createElement("div");
+            lockOverlay.id = "guest-module-lock-overlay";
+            lockOverlay.className = "auth-modal-overlay";
+            lockOverlay.hidden = true;
+            lockOverlay.innerHTML = "" +
+                "<button type=\"button\" class=\"auth-modal-backdrop\" id=\"guest-module-lock-backdrop\" aria-label=\"Close\"></button>" +
+                "<section class=\"auth-modal-card guest-module-lock-card\" role=\"dialog\" aria-modal=\"true\">" +
+                "  <div class=\"auth-modal-top\">" +
+                "    <strong id=\"guest-module-lock-title\"></strong>" +
+                "    <button type=\"button\" class=\"auth-modal-close\" id=\"guest-module-lock-close\" aria-label=\"Close\"><i class=\"fa-solid fa-xmark\"></i></button>" +
+                "  </div>" +
+                "  <p class=\"page-note guest-module-lock-body\" id=\"guest-module-lock-body\"></p>" +
+                "  <div class=\"guest-module-lock-actions\">" +
+                "    <button type=\"button\" class=\"button-link\" id=\"guest-module-lock-register\"></button>" +
+                "    <button type=\"button\" class=\"button-link button-secondary\" id=\"guest-module-lock-login\"></button>" +
+                "  </div>" +
+                "</section>";
+            document.body.appendChild(lockOverlay);
+            lockTitleEl = document.getElementById("guest-module-lock-title");
+            lockBodyEl = document.getElementById("guest-module-lock-body");
+            lockRegisterBtn = document.getElementById("guest-module-lock-register");
+            lockLoginBtn = document.getElementById("guest-module-lock-login");
+            var closeBtn = document.getElementById("guest-module-lock-close");
+            var backdrop = document.getElementById("guest-module-lock-backdrop");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", closeGuestModuleLockDialog);
+            }
+            if (backdrop) {
+                backdrop.addEventListener("click", closeGuestModuleLockDialog);
+            }
+            if (lockRegisterBtn) {
+                lockRegisterBtn.addEventListener("click", function () {
+                    closeGuestModuleLockDialog();
+                    if (window.NjcAuth && typeof window.NjcAuth.openAuthModal === "function") {
+                        window.NjcAuth.openAuthModal("register");
+                    }
+                });
+            }
+            if (lockLoginBtn) {
+                lockLoginBtn.addEventListener("click", function () {
+                    closeGuestModuleLockDialog();
+                    if (window.NjcAuth && typeof window.NjcAuth.openAuthModal === "function") {
+                        window.NjcAuth.openAuthModal("login");
+                    }
+                });
+            }
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "Escape" && lockOverlay && !lockOverlay.hidden) {
+                    closeGuestModuleLockDialog();
+                }
+            });
+            document.addEventListener("njc:langchange", function () {
+                if (!lockOverlay || lockOverlay.hidden) {
+                    return;
+                }
+                var moduleKey = lockOverlay.getAttribute("data-module-key") || "";
+                showGuestModuleLockDialog(moduleKey);
+            });
+            return lockOverlay;
+        }
+
+        function showGuestModuleLockDialog(moduleKey) {
+            ensureGuestModuleLockDialog();
+            var section = getSectionLabel(moduleKey);
+            var title = t("guestModule.lockTitle", "Registration required");
+            var bodyTpl = t(
+                "guestModule.lockBody",
+                "{section} is available after you register. Create a free account or sign in to use this feature."
+            );
+            var body = String(bodyTpl).replace(/\{section\}/g, section);
+            if (lockTitleEl) {
+                lockTitleEl.textContent = title;
+            }
+            if (lockBodyEl) {
+                lockBodyEl.textContent = body;
+            }
+            if (lockRegisterBtn) {
+                lockRegisterBtn.textContent = t("guestModule.register", "Create account");
+            }
+            if (lockLoginBtn) {
+                lockLoginBtn.textContent = t("guestModule.login", "Log in");
+            }
+            lockOverlay.setAttribute("data-module-key", String(moduleKey || ""));
+            lockOverlay.hidden = false;
+            document.body.classList.add("guest-module-lock-open");
+        }
+
+        function tryBlockGuestLockedNav(event) {
+            var mods = window.NjcAppModules;
+            if (!mods || typeof mods.isRouteGuestLocked !== "function") {
+                return false;
+            }
+            var link = event.target && event.target.closest ? event.target.closest("a[href^='#']") : null;
+            if (!link) {
+                return false;
+            }
+            var route = String(link.getAttribute("data-route") || "").trim().toLowerCase()
+                || parseRouteFromHashHref(link.getAttribute("href"));
+            if (!route || route === "home") {
+                return false;
+            }
+            if (!mods.isRouteGuestLocked(route)) {
+                return false;
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            var modKey = mods.ROUTE_TO_MODULE && mods.ROUTE_TO_MODULE[route] ? mods.ROUTE_TO_MODULE[route] : "";
+            showGuestModuleLockDialog(modKey);
+            document.dispatchEvent(new CustomEvent("njc:close-header-menu"));
+            return true;
+        }
+
+        document.addEventListener("click", function (event) {
+            tryBlockGuestLockedNav(event);
+        }, true);
+
+        document.addEventListener("njc:guest-module-locked", function (event) {
+            var detail = event && event.detail ? event.detail : {};
+            showGuestModuleLockDialog(detail.moduleKey || "");
+        });
+
+        window.NjcGuestModuleAccess = {
+            showRegisterDialog: showGuestModuleLockDialog
+        };
+    }
+
     function setupHeaderHamburgerMenu() {
         var header = document.querySelector(".app-header");
         if (!header || document.getElementById("header-menu-btn")) {
@@ -4855,30 +5034,61 @@
             return first || "home";
         }
 
-        function applyModuleNavVisibility() {
+        function applyMenuLinkVisibility(link, moduleKey) {
             var m = window.NjcAppModules;
-            if (!m || typeof m.isModuleEnabled !== "function" || typeof m.isRouteEnabled !== "function") {
+            if (!m || !link) {
                 return;
             }
+            var visible = typeof m.isModuleVisible === "function"
+                ? m.isModuleVisible(moduleKey)
+                : m.isModuleEnabled(moduleKey);
+            var locked = typeof m.isModuleGuestLocked === "function" && m.isModuleGuestLocked(moduleKey);
+            link.hidden = !visible;
+            link.classList.toggle("header-menu-link-locked", locked);
+            if (locked) {
+                link.setAttribute("aria-disabled", "true");
+                link.setAttribute("title", t("guestModule.registerHint", "Register to open this section"));
+            } else {
+                link.removeAttribute("aria-disabled");
+                link.removeAttribute("title");
+            }
+        }
+
+        function applyModuleNavVisibility() {
+            var m = window.NjcAppModules;
+            if (!m || typeof m.isModuleEnabled !== "function") {
+                return;
+            }
+            var routeVisible = typeof m.isRouteVisible === "function" ? m.isRouteVisible.bind(m) : m.isRouteEnabled.bind(m);
+            var routeLocked = typeof m.isRouteGuestLocked === "function" ? m.isRouteGuestLocked.bind(m) : function () { return false; };
             document.querySelectorAll(".tab-nav a.tab[href][data-route]").forEach(function (tab) {
                 var r = (tab.getAttribute("data-route") || "").trim().toLowerCase();
                 if (!r) {
                     return;
                 }
-                tab.hidden = !m.isRouteEnabled(r);
+                var locked = routeLocked(r);
+                tab.hidden = !routeVisible(r);
+                tab.classList.toggle("tab-nav-locked", locked);
+                if (locked) {
+                    tab.setAttribute("aria-disabled", "true");
+                    tab.setAttribute("title", t("guestModule.registerHint", "Register to open this section"));
+                } else {
+                    tab.removeAttribute("aria-disabled");
+                    tab.removeAttribute("title");
+                }
             });
-            bibleLink.hidden = !m.isModuleEnabled("bible");
-            songbookLink.hidden = !m.isModuleEnabled("songbook");
-            bookShelfLink.hidden = !m.isModuleEnabled("bookShelf");
-            kidsLink.hidden = !m.isModuleEnabled("kids");
-            dailyBreadMenuLink.hidden = !m.isModuleEnabled("dailyBread");
-            newsletterMenuLink.hidden = !m.isModuleEnabled("newsletter");
-            triviaLink.hidden = !m.isModuleEnabled("trivia");
-            achievementsLink.hidden = !m.isModuleEnabled("userAchievements");
-            chatLink.hidden = !m.isModuleEnabled("chat");
-            testimonyLink.hidden = !m.isModuleEnabled("testimony");
-            celebrationsLink.hidden = !m.isModuleEnabled("celebrations");
-            contactMenuLink.hidden = !m.isModuleEnabled("contact");
+            applyMenuLinkVisibility(bibleLink, "bible");
+            applyMenuLinkVisibility(songbookLink, "songbook");
+            applyMenuLinkVisibility(bookShelfLink, "bookShelf");
+            applyMenuLinkVisibility(kidsLink, "kids");
+            applyMenuLinkVisibility(dailyBreadMenuLink, "dailyBread");
+            applyMenuLinkVisibility(newsletterMenuLink, "newsletter");
+            applyMenuLinkVisibility(triviaLink, "trivia");
+            applyMenuLinkVisibility(achievementsLink, "userAchievements");
+            applyMenuLinkVisibility(chatLink, "chat");
+            applyMenuLinkVisibility(testimonyLink, "testimony");
+            applyMenuLinkVisibility(celebrationsLink, "celebrations");
+            applyMenuLinkVisibility(contactMenuLink, "contact");
         }
 
         function sanitizeNotificationTargetUrl(rawUrl) {
@@ -5196,6 +5406,8 @@
             document.body.classList.remove("header-menu-open");
             button.setAttribute("aria-expanded", "false");
         }
+
+        document.addEventListener("njc:close-header-menu", closePanel);
 
         function closeNotificationCenter() {
             notificationCenter.hidden = true;
@@ -6514,6 +6726,7 @@
         setupNotifications();
         setupNotificationQuickButton();
         setupSettingsPage();
+        setupGuestModuleAccess();
         setupHeaderHamburgerMenu();
         setupCardLanguageSwitchers();
         setupOfflineBadge();

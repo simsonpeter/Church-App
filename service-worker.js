@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v434guestmodules";
-const RUNTIME_CACHE = "njc-runtime-cache-v434guestmodules";
+const APP_CACHE = "njc-app-cache-v435guestteaser";
+const RUNTIME_CACHE = "njc-runtime-cache-v435guestteaser";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -41,11 +41,11 @@ const RELEASE_NOTES_SUMMARY =
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260620maintestimony1",
+    "./styles.css?v=20260608guestteaser1",
     "./user-auth.js?v=20260411mainmerge1",
-    "./app-modules.js?v=20260608guestmodules1",
+    "./app-modules.js?v=20260608guestteaser1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20260531sharelang1",
+    "./app-shell.js?v=20260608guestteaser1",
     "./events-engine.js?v=20260531sharelang1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260531sharelang1",
@@ -68,7 +68,7 @@ const CORE_ASSETS = [
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
     "./testimony-page.js?v=20260531sharelang1",
-    "./spa-router.js?v=20260620maintestimony1",
+    "./spa-router.js?v=20260608guestteaser1",
     "./book-shelf-page.js?v=20260414feedprobe1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

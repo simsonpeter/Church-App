@@ -297,6 +297,14 @@
         };
     }
 
+    function getActiveRouteFromDom() {
+        var active = document.querySelector(".page-view.active");
+        if (!active) {
+            return "home";
+        }
+        return String(active.getAttribute("data-route") || "home").trim().toLowerCase() || "home";
+    }
+
     function getRouteFromHash() {
         var raw = splitHashRoute().baseRoute;
         if (raw === "about") {
@@ -309,8 +317,19 @@
             return "home";
         }
         var resolved = routes[raw] ? raw : "home";
-        if (window.NjcAppModules && typeof window.NjcAppModules.isRouteEnabled === "function"
-            && !window.NjcAppModules.isRouteEnabled(resolved)) {
+        var mods = window.NjcAppModules;
+        if (mods && typeof mods.isRouteGuestLocked === "function" && mods.isRouteGuestLocked(resolved)) {
+            var stay = getActiveRouteFromDom();
+            var modKey = mods.ROUTE_TO_MODULE && mods.ROUTE_TO_MODULE[resolved] ? mods.ROUTE_TO_MODULE[resolved] : "";
+            document.dispatchEvent(new CustomEvent("njc:guest-module-locked", {
+                detail: { route: resolved, moduleKey: modKey }
+            }));
+            if (window.history && typeof window.history.replaceState === "function") {
+                window.history.replaceState(null, "", "#" + stay);
+            }
+            return stay;
+        }
+        if (mods && typeof mods.isRouteEnabled === "function" && !mods.isRouteEnabled(resolved)) {
             return "home";
         }
         return resolved;
@@ -386,6 +405,7 @@
     window.addEventListener("hashchange", onRouteChange);
     document.addEventListener("njc:langchange", onRouteChange);
     document.addEventListener("njc:authchange", onRouteChange);
+    document.addEventListener("njc:modules-updated", onRouteChange);
 
     window.NjcSpaRouter = {
         getRouteFromHash: getRouteFromHash,
