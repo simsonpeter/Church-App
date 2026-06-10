@@ -2330,7 +2330,11 @@
                 bookShelfShelfEn.checked = true;
             }
             renderBookShelfList();
-            showNote("success", "admin.bookShelfSaved", "Book shelf item added.");
+            if (shelf === "kids") {
+                showNote("success", "admin.bookShelfSavedKids", "Kids book added. Open Kids World → Books to view it (not the main Book shelf tabs).");
+            } else {
+                showNote("success", "admin.bookShelfSaved", "Book added. Open Book shelf → " + (shelf === "ta" ? "Tamil" : "English") + " tab to view it.");
+            }
             document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-admin-library if needed.");
@@ -2391,7 +2395,7 @@
             });
             kidsAudioForm.reset();
             renderKidsAudioList();
-            showNote("success", "admin.kidsAudioSaved", "Kids audio added.");
+            showNote("success", "admin.kidsAudioSaved", "Kids audio added. Open Kids World → Audios to listen.");
             document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-kids-audio if needed.");

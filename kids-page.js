@@ -1453,12 +1453,27 @@
             setKidsHashForTab(id);
         }
         rememberKidsTab(id);
-        if (id === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
-            window.NjcLibrary.loadKidsShelf();
+        loadKidsSubTabContent(id);
+    }
+
+    function loadKidsSubTabContent(tabId) {
+        var id = String(tabId || "").trim().toLowerCase();
+        function tryLoad(attempt) {
+            if (id === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
+                window.NjcLibrary.loadKidsShelf();
+                return;
+            }
+            if (id === "audios" && window.NjcKidsAudio && typeof window.NjcKidsAudio.load === "function") {
+                window.NjcKidsAudio.load();
+                return;
+            }
+            if (attempt < 8) {
+                window.setTimeout(function () {
+                    tryLoad(attempt + 1);
+                }, 50);
+            }
         }
-        if (id === "audios" && window.NjcKidsAudio && typeof window.NjcKidsAudio.load === "function") {
-            window.NjcKidsAudio.load();
-        }
+        tryLoad(0);
     }
 
     function initKidsTabs() {
@@ -1482,13 +1497,7 @@
             }
             var fromHash = readKidsTabFromHash();
             applyKidsTab(fromHash || recallKidsTab(), { skipHash: true });
-            var tabId = fromHash || recallKidsTab();
-            if ((tabId || "games") === "books" && window.NjcLibrary && typeof window.NjcLibrary.loadKidsShelf === "function") {
-                window.NjcLibrary.loadKidsShelf();
-            }
-            if ((tabId || "games") === "audios" && window.NjcKidsAudio && typeof window.NjcKidsAudio.load === "function") {
-                window.NjcKidsAudio.load();
-            }
+            loadKidsSubTabContent(fromHash || recallKidsTab());
         });
         window.addEventListener("hashchange", function () {
             try {

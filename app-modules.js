@@ -109,7 +109,7 @@
 
     function defaultSignupPool() {
         var o = {};
-        ["prayer", "trivia", "dailyBread", "celebrations", "kids", "newsletter"].forEach(function (key) {
+        ["prayer", "trivia", "dailyBread", "celebrations", "kids", "newsletter", "bookShelf"].forEach(function (key) {
             o[key] = true;
         });
         Object.keys(DEFAULT_MODULES).forEach(function (key) {
