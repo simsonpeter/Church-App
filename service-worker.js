@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v439dailybreadshare";
-const RUNTIME_CACHE = "njc-runtime-cache-v439dailybreadshare";
+const APP_CACHE = "njc-app-cache-v440prayeranswer";
+const RUNTIME_CACHE = "njc-runtime-cache-v440prayeranswer";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Daily bread: dated share links (#daily-bread/YYYY-MM-DD) and Previous/Next/Today to read past days. Guest menu lock prompts. Settings → Check for updates if needed.";
+    "Prayer wall: only the person who posted (or admin) can mark Answered or reset it. Settings → Check for updates if needed.";
 
 const CORE_ASSETS = [
     "./",
@@ -53,8 +53,8 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260531sharelang1",
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260531sharelang1",
-    "./daily-bread-page.js?v=20260609dailybreaddate1",
+    "./contact-page.js?v=20260610prayeranswer1",
+    "./daily-bread-page.js?v=20260610dailybreadshare1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260519newsletteredit1",

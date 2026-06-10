@@ -863,7 +863,7 @@
         "contact.prayerWallUpdated": "ஜெப வேண்டுதல் புதுப்பிக்கப்பட்டது.",
         "contact.prayerWallDeleted": "ஜெப வேண்டுதல் நீக்கப்பட்டது.",
         "contact.prayerWallResetAnsweredDone": "பதில் எண்ணிக்கை ரீசெட் செய்யப்பட்டது.",
-        "contact.prayerWallManageDenied": "நிர்வாகி அல்லது பதிவிட்டவர் மட்டும் திருத்த / நீக்க முடியும்.",
+        "contact.prayerWallManageDenied": "நிர்வாகி அல்லது பதிவிட்டவர் மட்டும் பதிலளித்த / ரீசெட் / திருத்த / நீக்க முடியும்.",
         "contact.prayerWallTranslated": "மொழிபெயர்க்கப்பட்டது",
         "contact.prayerWallSyncError": "ஜெப சுவரை ஒத்திசைக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "contact.prayerWallLoadErrorTitle": "ஜெப சுவரை ஏற்ற முடியவில்லை",
@@ -2351,7 +2351,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "438vercelfix";
+    var SW_REGISTER_VERSION_FALLBACK = "440prayeranswer";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

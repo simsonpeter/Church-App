@@ -1588,7 +1588,8 @@
                 var prayedLabel = formatCount(T("contact.prayerWallPrayed", "Prayed ({count})", prayerCard), Number(entry.prayed || 0));
                 var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})", prayerCard), Number(entry.answered || 0));
                 var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})", prayerCard), Number(entry.thanked || 0));
-                var answerActive = isPrayerActionActive(entry.id, "answer");
+                var canManage = canManagePrayerEntry(entry);
+                var answerActive = isPrayerMarkedAnswered(entry);
                 var thankActive = isPrayerActionActive(entry.id, "thank");
                 if (prayerDetailName) {
                     prayerDetailName.textContent = safeName;
@@ -1677,13 +1678,14 @@
                 if (prayerDetailAnsweredButton) {
                     prayerDetailAnsweredButton.textContent = answeredLabel;
                     prayerDetailAnsweredButton.classList.toggle("active", answerActive);
+                    prayerDetailAnsweredButton.hidden = !canManage;
+                    prayerDetailAnsweredButton.disabled = !canManage || prayerWallBusy;
                 }
                 if (prayerDetailThankButton) {
                     prayerDetailThankButton.textContent = thankLabel;
                     prayerDetailThankButton.classList.toggle("active", thankActive);
                 }
-                var canManage = canManagePrayerEntry(entry);
-                var canResetAnswered = isAdminUser();
+                var canResetAnswered = canManage && isPrayerMarkedAnswered(entry);
                 if (prayerDetailResetAnsweredButton) {
                     prayerDetailResetAnsweredButton.hidden = !canResetAnswered;
                     prayerDetailResetAnsweredButton.disabled = !canResetAnswered || prayerWallBusy;
@@ -1978,7 +1980,8 @@
                     var urgentRibbonText = T("contact.prayerWallUrgentRibbon", "URGENT PRAYER", prayerCard);
                     var answeredLabel = formatCount(T("contact.prayerWallAnswered", "Answered ({count})", prayerCard), Number(entry.answered || 0));
                     var thankLabel = formatCount(T("contact.prayerWallThanked", "Thank You ({count})", prayerCard), Number(entry.thanked || 0));
-                    var answerActive = isPrayerActionActive(entry.id, "answer");
+                    var canManageEntry = canManagePrayerEntry(entry);
+                    var answerActive = isPrayerMarkedAnswered(entry);
                     var thankActive = isPrayerActionActive(entry.id, "thank");
                     var answerClass = answerActive ? "prayer-action-btn active" : "prayer-action-btn";
                     var thankClass = thankActive ? "prayer-action-btn active" : "prayer-action-btn";
@@ -2047,7 +2050,9 @@
                         mineRow +
                         (activePrayerTab === "mine" ? "" : (
                             "  <div class=\"prayer-list-actions\">" +
-                            "    <button type=\"button\" class=\"" + answerClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"answer\">" + escapeHtml(answeredLabel) + "</button>" +
+                            (canManageEntry
+                                ? ("    <button type=\"button\" class=\"" + answerClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"answer\">" + escapeHtml(answeredLabel) + "</button>")
+                                : "") +
                             "    <button type=\"button\" class=\"" + thankClass + "\" data-prayer-id=\"" + escapeHtml(entry.id || "") + "\" data-prayer-action=\"thank\">" + escapeHtml(thankLabel) + "</button>" +
                             "  </div>"
                         )) +
@@ -2124,19 +2129,12 @@
                     if (!targetEntry) {
                         throw new Error("Entry not found");
                     }
-                    if (action === "reset-answer" && !isAdminUser()) {
+                    if ((action === "answer" || action === "reset-answer" || action === "edit" || action === "delete")
+                        && !canManagePrayerEntry(targetEntry)) {
                         showPrayerWallNote(
                             "manageDenied",
                             "contact.prayerWallManageDenied",
-                            "Only admin or the user who posted can edit/delete."
-                        );
-                        return;
-                    }
-                    if ((action === "edit" || action === "delete") && !canManagePrayerEntry(targetEntry)) {
-                        showPrayerWallNote(
-                            "manageDenied",
-                            "contact.prayerWallManageDenied",
-                            "Only admin or the user who posted can edit/delete."
+                            "Only admin or the user who posted can mark answered, reset, edit, or delete."
                         );
                         return;
                     }
@@ -2150,8 +2148,8 @@
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
                     } else if (action === "answer") {
-                        var nextAnswerActive = !isPrayerActionActive(prayerId, "answer");
-                        targetEntry.answered = Math.max(0, Number(targetEntry.answered || 0) + (nextAnswerActive ? 1 : -1));
+                        var nextAnswerActive = !isPrayerMarkedAnswered(targetEntry);
+                        targetEntry.answered = nextAnswerActive ? 1 : 0;
                         targetEntry.updatedAt = new Date().toISOString();
                         await savePrayerWallEntries(latestEntries);
                         setPrayerActionActive(prayerId, "answer", nextAnswerActive);
@@ -2645,7 +2643,7 @@
                     } else if (state === "deleted") {
                         prayerWallNote.textContent = T("contact.prayerWallDeleted", "Prayer request deleted.", prayerCard);
                     } else if (state === "manageDenied") {
-                        prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can edit/delete.", prayerCard);
+                        prayerWallNote.textContent = T("contact.prayerWallManageDenied", "Only admin or the user who posted can mark answered, reset, edit, or delete.", prayerCard);
                     } else if (state === "syncError") {
                         prayerWallNote.textContent = T("contact.prayerWallSyncError", "Could not sync prayer wall. Please try again.", prayerCard);
                     } else if (state === "mineAdded") {
