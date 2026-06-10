@@ -84,33 +84,6 @@ function trunc(s, max) {
     return t.slice(0, max - 1) + "…";
 }
 
-async function loadGoogleFontWoff2(family, weight, textSubset) {
-    const ua =
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36";
-    const g =
-        "https://fonts.googleapis.com/css2?family=" +
-        encodeURIComponent(family) +
-        ":wght@" +
-        weight +
-        "&text=" +
-        encodeURIComponent(textSubset);
-    const cssRes = await fetch(g, { headers: { "User-Agent": ua } });
-    if (!cssRes.ok) {
-        return null;
-    }
-    const css = await cssRes.text();
-    const m = css.match(/src:\s*url\(([^)]+)\)\s+format\(['"]woff2['"]\)/);
-    if (!m) {
-        return null;
-    }
-    const fontUrl = m[1].replace(/&amp;/g, "&");
-    const fontRes = await fetch(fontUrl);
-    if (!fontRes.ok) {
-        return null;
-    }
-    return fontRes.arrayBuffer();
-}
-
 function buildCardElement(React, title, subtitle, metaLine) {
     return React.createElement(
         "div",
@@ -228,10 +201,13 @@ module.exports = async function handler(req, res) {
         return;
     }
 
-    const [{ ImageResponse }, { default: React }] = await Promise.all([
+    const [{ ImageResponse }, reactMod] = await Promise.all([
         import("@vercel/og"),
         import("react"),
     ]);
+    const React = reactMod.default && reactMod.default.createElement
+        ? reactMod.default
+        : reactMod;
 
     const match = await findSermonByShareHash(hash);
     const title = trunc(match ? String(match.title || "").trim() : "Sermon", 140) || "Sermon";
@@ -247,26 +223,6 @@ module.exports = async function handler(req, res) {
     }
     const metaLine = metaParts.length ? metaParts.join(" · ") : "NJC Belgium · Open in the app to listen";
 
-    const fontSubset = (title + subtitle + metaLine + "SpeakerNJC▶").slice(0, 240);
-
-    const fonts = [];
-    try {
-        const ta = await loadGoogleFontWoff2("Noto Sans Tamil", 600, fontSubset);
-        if (ta) {
-            fonts.push({ name: "Noto Sans Tamil", data: ta, weight: 600, style: "normal" });
-        }
-    } catch (e1) {
-        /* optional font */
-    }
-    try {
-        const dm = await loadGoogleFontWoff2("DM Sans", 600, fontSubset);
-        if (dm) {
-            fonts.push({ name: "DM Sans", data: dm, weight: 600, style: "normal" });
-        }
-    } catch (e2) {
-        /* optional font */
-    }
-
     const opts = {
         width: 1200,
         height: 630,
@@ -275,9 +231,6 @@ module.exports = async function handler(req, res) {
             "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
         },
     };
-    if (fonts.length) {
-        opts.fonts = fonts;
-    }
 
     try {
         const imageResponse = new ImageResponse(buildCardElement(React, title, subtitle, metaLine), opts);

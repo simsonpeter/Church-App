@@ -31,21 +31,21 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v435guestteaser";
-const RUNTIME_CACHE = "njc-runtime-cache-v435guestteaser";
+const APP_CACHE = "njc-app-cache-v438vercelfix";
+const RUNTIME_CACHE = "njc-runtime-cache-v438vercelfix";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Home announcements Daily Manna: Tamil UI uses Mantle Tamil fields when present; otherwise Tamil Antantulla JSON (same as Daily bread tab). Stable data-card-lang-id home-announcements; refetch manna on app or announcements card language change. Earlier: Antantulla fallback when Mantle empty, admin userDirectory, testimonies.";
+    "Daily bread: dated share links (#daily-bread/YYYY-MM-DD) and Previous/Next/Today to read past days. Guest menu lock prompts. Settings → Check for updates if needed.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260608guestteaser1",
+    "./styles.css?v=20260609dailybreaddate1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260608guestteaser1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20260608guestteaser1",
+    "./app-shell.js?v=20260610vercelfix1",
     "./events-engine.js?v=20260531sharelang1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260531sharelang1",
@@ -54,7 +54,7 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260531sharelang1",
-    "./daily-bread-page.js?v=20260608dailybreadsharefull1",
+    "./daily-bread-page.js?v=20260609dailybreaddate1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
     "./admin-dashboard-page.js?v=20260519newsletteredit1",

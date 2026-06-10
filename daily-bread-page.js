@@ -16,6 +16,9 @@
     var DAILY_BREAD_CARD_LANG_ID = "daily-bread";
 
     var dateLine = document.getElementById("daily-bread-date-line");
+    var datePrevBtn = document.getElementById("daily-bread-date-prev");
+    var dateNextBtn = document.getElementById("daily-bread-date-next");
+    var dateTodayBtn = document.getElementById("daily-bread-date-today");
     var statusEl = document.getElementById("daily-bread-status");
     var contentWrap = document.getElementById("daily-bread-content");
     var headingEl = document.getElementById("daily-bread-heading");
@@ -53,6 +56,7 @@
     var currentShareTitleText = "";
     var currentShareBodyText = "";
     var currentShareDateFormatted = "";
+    var currentViewDateYmd = "";
 
     function T(key, fallback) {
         if (window.NjcI18n && typeof window.NjcI18n.tForElement === "function" && pageCard) {
@@ -136,6 +140,147 @@
             day: d,
             key: String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0")
         };
+    }
+
+    function isValidYmdKey(raw) {
+        return /^\d{4}-\d{2}-\d{2}$/.test(String(raw || "").trim());
+    }
+
+    function ymdToUtcNoon(raw) {
+        var key = String(raw || "").trim();
+        if (!isValidYmdKey(key)) {
+            return NaN;
+        }
+        var parts = key.split("-");
+        return Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]), 12, 0, 0);
+    }
+
+    function shiftYmdKey(raw, dayDelta) {
+        var utc = ymdToUtcNoon(raw);
+        if (!Number.isFinite(utc)) {
+            return "";
+        }
+        var shifted = new Date(utc + Number(dayDelta || 0) * 86400000);
+        var y = shifted.getUTCFullYear();
+        var m = String(shifted.getUTCMonth() + 1).padStart(2, "0");
+        var d = String(shifted.getUTCDate()).padStart(2, "0");
+        return String(y) + "-" + m + "-" + d;
+    }
+
+    function compareYmdKeys(a, b) {
+        var ua = ymdToUtcNoon(a);
+        var ub = ymdToUtcNoon(b);
+        if (!Number.isFinite(ua) || !Number.isFinite(ub)) {
+            return 0;
+        }
+        if (ua < ub) {
+            return -1;
+        }
+        if (ua > ub) {
+            return 1;
+        }
+        return 0;
+    }
+
+    function getHashRouteParts() {
+        if (window.NjcSpaRouter && typeof window.NjcSpaRouter.splitHashRoute === "function") {
+            return window.NjcSpaRouter.splitHashRoute();
+        }
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim();
+        var pathPart = raw;
+        var query = "";
+        var q = raw.indexOf("?");
+        if (q >= 0) {
+            pathPart = raw.slice(0, q);
+            query = raw.slice(q + 1);
+        }
+        var segments = pathPart.split("/").map(function (s) {
+            return s.trim();
+        }).filter(Boolean);
+        return {
+            baseRoute: segments.length ? segments[0].toLowerCase() : "",
+            subPath: segments.length > 1 ? segments.slice(1).join("/") : "",
+            query: query
+        };
+    }
+
+    function isDailyBreadRouteActive() {
+        var parts = getHashRouteParts();
+        return String(parts.baseRoute || "").toLowerCase() === "daily-bread";
+    }
+
+    function parseRequestedDateFromHash() {
+        var parts = getHashRouteParts();
+        var sub = String(parts.subPath || "").trim();
+        if (isValidYmdKey(sub)) {
+            return sub;
+        }
+        var query = String(parts.query || "").trim();
+        if (!query) {
+            return "";
+        }
+        var match = query.match(/(?:^|&)date=([^&]+)/);
+        if (!match || !match[1]) {
+            return "";
+        }
+        try {
+            var fromQuery = toYmd(decodeURIComponent(match[1]));
+            return isValidYmdKey(fromQuery) ? fromQuery : "";
+        } catch (eQuery) {
+            return "";
+        }
+    }
+
+    function clampRequestedDateToToday(requestedYmd) {
+        var today = getBrusselsYmd().key;
+        var req = String(requestedYmd || "").trim();
+        if (!isValidYmdKey(req)) {
+            return today;
+        }
+        if (compareYmdKeys(req, today) > 0) {
+            return today;
+        }
+        return req;
+    }
+
+    function getRequestedDailyBreadDate() {
+        return clampRequestedDateToToday(parseRequestedDateFromHash() || getBrusselsYmd().key);
+    }
+
+    function buildDailyBreadHash(ymdKey) {
+        var key = String(ymdKey || "").trim();
+        var today = getBrusselsYmd().key;
+        if (!isValidYmdKey(key) || key === today) {
+            return "daily-bread";
+        }
+        return "daily-bread/" + key;
+    }
+
+    function navigateDailyBreadDate(ymdKey) {
+        var next = clampRequestedDateToToday(ymdKey);
+        var target = buildDailyBreadHash(next);
+        if (String(window.location.hash || "").replace(/^#/, "").trim() === target) {
+            loadDailyBread();
+            return;
+        }
+        window.location.hash = target;
+    }
+
+    function syncDailyBreadDateNav() {
+        var today = getBrusselsYmd().key;
+        var viewing = currentViewDateYmd || today;
+        var isToday = viewing === today;
+        if (dateTodayBtn) {
+            dateTodayBtn.hidden = isToday;
+        }
+        if (dateNextBtn) {
+            dateNextBtn.disabled = isToday;
+            dateNextBtn.setAttribute("aria-disabled", isToday ? "true" : "false");
+        }
+        if (datePrevBtn) {
+            datePrevBtn.disabled = false;
+            datePrevBtn.setAttribute("aria-disabled", "false");
+        }
     }
 
     function escapeHtml(value) {
@@ -309,7 +454,8 @@
     function getDailyBreadShareUrl() {
         try {
             var u = new URL(String(window.location.href));
-            u.hash = "daily-bread";
+            var ymd = currentViewDateYmd || getRequestedDailyBreadDate();
+            u.hash = buildDailyBreadHash(ymd);
             return u.toString();
         } catch (errUrl) {
             return "";
@@ -1130,7 +1276,12 @@
         stopSpeechPlayback();
         currentReadPlain = "";
         statusEl.hidden = false;
-        statusEl.textContent = T("dailyBread.empty", "No content for today yet.");
+        var today = getBrusselsYmd().key;
+        var viewing = currentViewDateYmd || today;
+        var emptyMsg = viewing === today
+            ? T("dailyBread.empty", "No content for today yet.")
+            : T("dailyBread.emptyDate", "No daily bread for this date yet.");
+        statusEl.textContent = emptyMsg;
         statusEl.dataset.state = "empty";
         contentWrap.hidden = true;
         if (authorLineEl) {
@@ -1215,8 +1366,17 @@
     }
 
     function loadDailyBread() {
-        var ymd = getBrusselsYmd();
-        updateDateLine(ymd.key);
+        var ymdKey = getRequestedDailyBreadDate();
+        currentViewDateYmd = ymdKey;
+        if (isDailyBreadRouteActive()) {
+            var expectedHash = buildDailyBreadHash(ymdKey);
+            var currentHash = String(window.location.hash || "").replace(/^#/, "").trim();
+            if (currentHash !== expectedHash && window.history && typeof window.history.replaceState === "function") {
+                window.history.replaceState(null, "", "#" + expectedHash);
+            }
+        }
+        updateDateLine(ymdKey);
+        syncDailyBreadDateNav();
         loadToken += 1;
         var token = loadToken;
         setLoadingState();
@@ -1238,7 +1398,7 @@
                     return /^\d{4}-\d{2}-\d{2}$/.test(e.date);
                 });
                 var match = list.filter(function (e) {
-                    return e.date === ymd.key;
+                    return e.date === ymdKey;
                 }).sort(function (a, b) {
                     return String(b.id).localeCompare(String(a.id));
                 })[0];
@@ -1246,7 +1406,7 @@
                     renderEntry(match);
                     return "mantle";
                 }
-                return loadGithubAntantullaFallback(ymd.key);
+                return loadGithubAntantullaFallback(ymdKey);
             })
             .then(function (fallbackEntry) {
                 if (token !== loadToken || fallbackEntry === "skip") {
@@ -1270,8 +1430,7 @@
     }
 
     function onRoute() {
-        var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
-        if (route === "daily-bread") {
+        if (isDailyBreadRouteActive()) {
             loadDailyBread();
         }
         /* Keep read-aloud running when switching tabs (background listen). User stops with Stop. */
@@ -1301,6 +1460,23 @@
             runDailyBreadShare();
         });
     }
+    if (datePrevBtn) {
+        datePrevBtn.addEventListener("click", function () {
+            var base = currentViewDateYmd || getRequestedDailyBreadDate();
+            navigateDailyBreadDate(shiftYmdKey(base, -1));
+        });
+    }
+    if (dateNextBtn) {
+        dateNextBtn.addEventListener("click", function () {
+            var base = currentViewDateYmd || getRequestedDailyBreadDate();
+            navigateDailyBreadDate(shiftYmdKey(base, 1));
+        });
+    }
+    if (dateTodayBtn) {
+        dateTodayBtn.addEventListener("click", function () {
+            navigateDailyBreadDate(getBrusselsYmd().key);
+        });
+    }
 
     window.addEventListener("hashchange", onRoute);
     document.addEventListener("njc:routechange", function (event) {
@@ -1311,7 +1487,7 @@
     });
     document.addEventListener("njc:langchange", function () {
         stopSpeechPlayback();
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+        if (isDailyBreadRouteActive()) {
             loadDailyBread();
         }
         syncDailyBreadShareButton();
@@ -1322,7 +1498,7 @@
             return;
         }
         stopSpeechPlayback();
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+        if (isDailyBreadRouteActive()) {
             loadDailyBread();
         }
         syncDailyBreadShareButton();
@@ -1331,12 +1507,12 @@
         syncDailyBreadShareButton();
     });
     document.addEventListener("njc:admin-daily-bread-updated", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+        if (isDailyBreadRouteActive()) {
             loadDailyBread();
         }
     });
     document.addEventListener("njc:data-refresh", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "daily-bread") {
+        if (isDailyBreadRouteActive()) {
             loadDailyBread();
         }
     });
@@ -1347,6 +1523,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         setupDailyBreadMediaSession();
         updateTtsUi();
+        syncDailyBreadDateNav();
         syncDailyBreadShareButton();
         onRoute();
     });

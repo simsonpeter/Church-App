@@ -918,6 +918,27 @@ a.card:hover > h2:not(:first-child) i {
     opacity: 0.92;
 }
 
+.daily-bread-date-nav {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 0 0 8px;
+}
+
+.daily-bread-date-nav .daily-bread-date-prev,
+.daily-bread-date-nav .daily-bread-date-next,
+.daily-bread-date-nav .daily-bread-date-today {
+    min-height: 40px;
+    padding: 8px 12px;
+    font-size: 0.92rem;
+}
+
+.daily-bread-date-nav .daily-bread-date-today {
+    margin: 0 auto;
+}
+
 .daily-bread-page-card .daily-bread-date-line {
     font-size: 0.82rem;
     font-weight: 600;
