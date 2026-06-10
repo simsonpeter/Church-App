@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v441kidslibrary";
-const RUNTIME_CACHE = "njc-runtime-cache-v441kidslibrary";
+const APP_CACHE = "njc-app-cache-v442mantlebackup";
+const RUNTIME_CACHE = "njc-runtime-cache-v442mantlebackup";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World books and audio load reliably after admin adds them. Book shelf included for new members. Settings → Check for updates if needed.";
+    "Library and kids audio: local backup + Restore from backup in Admin if server list is empty. Safer saves. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
@@ -57,7 +57,7 @@ const CORE_ASSETS = [
     "./daily-bread-page.js?v=20260609dailybreaddate1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260610kidslibrary1",
+    "./admin-dashboard-page.js?v=20260610mantlebackup1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260526userdir1",
