@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v438vercelfix";
-const RUNTIME_CACHE = "njc-runtime-cache-v438vercelfix";
+const APP_CACHE = "njc-app-cache-v439dailybreadshare";
+const RUNTIME_CACHE = "njc-runtime-cache-v439dailybreadshare";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =

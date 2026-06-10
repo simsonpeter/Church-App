@@ -247,13 +247,20 @@
         return clampRequestedDateToToday(parseRequestedDateFromHash() || getBrusselsYmd().key);
     }
 
-    function buildDailyBreadHash(ymdKey) {
+    function buildDailyBreadHash(ymdKey, alwaysIncludeDate) {
         var key = String(ymdKey || "").trim();
         var today = getBrusselsYmd().key;
-        if (!isValidYmdKey(key) || key === today) {
+        if (!isValidYmdKey(key)) {
+            key = today;
+        }
+        if (!alwaysIncludeDate && key === today) {
             return "daily-bread";
         }
         return "daily-bread/" + key;
+    }
+
+    function buildDailyBreadShareHash(ymdKey) {
+        return buildDailyBreadHash(ymdKey, true);
     }
 
     function navigateDailyBreadDate(ymdKey) {
@@ -455,7 +462,7 @@
         try {
             var u = new URL(String(window.location.href));
             var ymd = currentViewDateYmd || getRequestedDailyBreadDate();
-            u.hash = buildDailyBreadHash(ymd);
+            u.hash = buildDailyBreadShareHash(ymd);
             return u.toString();
         } catch (errUrl) {
             return "";
