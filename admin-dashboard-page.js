@@ -134,6 +134,8 @@
     var cachedNewsletters = [];
     var newslettersCacheLoaded = false;
     var busy = false;
+    var LIBRARY_BACKUP_KEY = "njc_admin_library_backup_v1";
+    var KIDS_AUDIO_BACKUP_KEY = "njc_admin_kids_audio_backup_v1";
 
     var newsletterForm = document.getElementById("admin-newsletter-form");
     var newsletterEditIdInput = document.getElementById("admin-newsletter-edit-id");
@@ -1198,6 +1200,7 @@
                 "<li>" +
                 "  <h3>" + escapeHtml(T("admin.bookShelfEmptyTitle", "No items yet")) + "</h3>" +
                 "  <p>" + escapeHtml(T("admin.bookShelfEmptyBody", "Add a title and file URL above.")) + "</p>" +
+                renderBackupRestoreActions(LIBRARY_BACKUP_KEY, "library") +
                 "</li>";
             return;
         }
@@ -1320,6 +1323,7 @@
                 "<li>" +
                 "  <h3>" + escapeHtml(T("admin.kidsAudioEmptyTitle", "No Kids audio yet")) + "</h3>" +
                 "  <p>" + escapeHtml(T("admin.kidsAudioEmptyBody", "Add a title and audio URL (https) above.")) + "</p>" +
+                renderBackupRestoreActions(KIDS_AUDIO_BACKUP_KEY, "kids-audio") +
                 "</li>";
             return;
         }
@@ -1358,6 +1362,13 @@
         });
     }
 
+    function parseMantlePayload(payload) {
+        if (Array.isArray(payload)) {
+            return payload;
+        }
+        return payload && Array.isArray(payload.entries) ? payload.entries : [];
+    }
+
     function fetchMantleEntries(url) {
         return fetch(url + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
@@ -1376,11 +1387,149 @@
                 if (!response.ok) {
                     throw new Error("Load failed");
                 }
-                return response.json().then(function (payload) {
-                    if (Array.isArray(payload)) return payload;
-                    return payload && Array.isArray(payload.entries) ? payload.entries : [];
-                });
+                return response.json().then(parseMantlePayload);
             });
+    }
+
+    function readMantleBackup(storageKey) {
+        try {
+            var raw = window.localStorage.getItem(storageKey);
+            if (!raw) {
+                return null;
+            }
+            var parsed = JSON.parse(raw);
+            if (!parsed || !Array.isArray(parsed.entries)) {
+                return null;
+            }
+            return {
+                at: String(parsed.at || ""),
+                entries: parsed.entries
+            };
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function writeMantleBackup(storageKey, entries) {
+        var list = Array.isArray(entries) ? entries : [];
+        if (!list.length) {
+            return;
+        }
+        try {
+            window.localStorage.setItem(storageKey, JSON.stringify({
+                at: new Date().toISOString(),
+                entries: list.slice(0, MAX_ENTRIES)
+            }));
+        } catch (e) {}
+    }
+
+    function backupBookShelfEntries(entries) {
+        writeMantleBackup(LIBRARY_BACKUP_KEY, entries);
+    }
+
+    function backupKidsAudioEntries(entries) {
+        writeMantleBackup(KIDS_AUDIO_BACKUP_KEY, entries);
+    }
+
+    function formatBackupDate(isoText) {
+        var d = new Date(isoText || "");
+        if (Number.isNaN(d.getTime())) {
+            return "";
+        }
+        try {
+            return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+        } catch (e1) {
+            return String(isoText || "").slice(0, 16);
+        }
+    }
+
+    function renderBackupRestoreActions(storageKey, restoreAction) {
+        var backup = readMantleBackup(storageKey);
+        if (!backup || !backup.entries.length) {
+            return "";
+        }
+        var when = formatBackupDate(backup.at);
+        var count = backup.entries.length;
+        var hint = when
+            ? T("admin.mantleBackupHint", "Last backup: {count} items ({when}).").replace("{count}", String(count)).replace("{when}", when)
+            : T("admin.mantleBackupHintNoDate", "Last backup: {count} items on this device.").replace("{count}", String(count));
+        return "" +
+            "<p class=\"page-note\">" + escapeHtml(hint) + "</p>" +
+            "<div class=\"admin-item-actions\">" +
+            "  <button type=\"button\" class=\"button-link\" data-admin-mantle-restore=\"" + escapeHtml(restoreAction) + "\">" +
+            escapeHtml(T("admin.mantleBackupRestore", "Restore from backup")) +
+            "  </button>" +
+            "</div>";
+    }
+
+    function restoreMantleBackup(url, storageKey, normalizeFn, onRestored, eventName) {
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var backup = readMantleBackup(storageKey);
+        if (!backup || !backup.entries.length) {
+            showNote("error", "admin.mantleBackupMissing", "No backup found on this device.");
+            return;
+        }
+        var count = backup.entries.length;
+        var msg = T("admin.mantleBackupRestoreConfirm", "Restore {count} items from backup to the server?").replace("{count}", String(count));
+        if (!window.confirm(msg)) {
+            return;
+        }
+        setBusyState(true);
+        var normalized = backup.entries.map(function (row, idx) {
+            return normalizeFn(row, idx);
+        }).filter(function (entry) {
+            return entry && String(entry.id || "").trim();
+        });
+        saveMantleEntries(url, normalized.slice(0, MAX_ENTRIES))
+            .then(function () {
+                return fetchMantleEntries(url);
+            })
+            .then(function (entries) {
+                var fresh = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
+                    return normalizeFn(row, idx);
+                });
+                onRestored(fresh);
+                showNote("success", "admin.mantleBackupRestored", "Restored from backup.");
+                if (eventName) {
+                    document.dispatchEvent(new CustomEvent(eventName));
+                }
+            })
+            .catch(function () {
+                showNote("error", "admin.syncError", "Could not restore. Check your connection and try again.");
+            })
+            .finally(function () {
+                setBusyState(false);
+            });
+    }
+
+    function restoreBookShelfFromBackup() {
+        restoreMantleBackup(
+            ADMIN_LIBRARY_URL,
+            LIBRARY_BACKUP_KEY,
+            normalizeBookShelfEntry,
+            function (fresh) {
+                cachedBookShelf = fresh;
+                backupBookShelfEntries(fresh);
+                renderBookShelfList();
+            },
+            "njc:admin-library-updated"
+        );
+    }
+
+    function restoreKidsAudioFromBackup() {
+        restoreMantleBackup(
+            ADMIN_KIDS_AUDIO_URL,
+            KIDS_AUDIO_BACKUP_KEY,
+            normalizeKidsAudioEntry,
+            function (fresh) {
+                cachedKidsAudio = fresh;
+                backupKidsAudioEntries(fresh);
+                renderKidsAudioList();
+            },
+            "njc:admin-kids-audio-updated"
+        );
     }
 
     function saveMantleEntries(url, entries) {
@@ -1833,6 +1982,12 @@
             cachedKidsAudio = extract(8).map(function (row, idx) {
                 return normalizeKidsAudioEntry(row, idx);
             });
+            if (cachedBookShelf.length) {
+                backupBookShelfEntries(cachedBookShelf);
+            }
+            if (cachedKidsAudio.length) {
+                backupKidsAudioEntries(cachedKidsAudio);
+            }
             return fetchNewslettersFromFirestore().then(function (nl) {
                 cachedNewsletters = Array.isArray(nl) ? nl : [];
                 newslettersCacheLoaded = true;
@@ -2325,12 +2480,17 @@
             cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                 return normalizeBookShelfEntry(row, idx);
             });
+            backupBookShelfEntries(cachedBookShelf);
             bookShelfForm.reset();
             if (bookShelfShelfEn) {
                 bookShelfShelfEn.checked = true;
             }
             renderBookShelfList();
-            showNote("success", "admin.bookShelfSaved", "Book shelf item added.");
+            if (shelf === "kids") {
+                showNote("success", "admin.bookShelfSavedKids", "Kids book added. Open Kids World → Books to view it (not the main Book shelf tabs).");
+            } else {
+                showNote("success", "admin.bookShelfSaved", "Book added. Open Book shelf → " + (shelf === "ta" ? "Tamil" : "English") + " tab to view it.");
+            }
             document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-admin-library if needed.");
@@ -2389,9 +2549,10 @@
             cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                 return normalizeKidsAudioEntry(row, idx);
             });
+            backupKidsAudioEntries(cachedKidsAudio);
             kidsAudioForm.reset();
             renderKidsAudioList();
-            showNote("success", "admin.kidsAudioSaved", "Kids audio added.");
+            showNote("success", "admin.kidsAudioSaved", "Kids audio added. Open Kids World → Audios to listen.");
             document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
         }).catch(function () {
             showNote("error", "admin.syncError", "Could not save. Create MantleDB bucket njc-belgium-kids-audio if needed.");
@@ -2402,6 +2563,13 @@
 
     if (bookShelfList) {
         bookShelfList.addEventListener("click", function (event) {
+            var restoreButton = event.target.closest("button[data-admin-mantle-restore]");
+            if (restoreButton && bookShelfList.contains(restoreButton)) {
+                if (restoreButton.getAttribute("data-admin-mantle-restore") === "library") {
+                    restoreBookShelfFromBackup();
+                }
+                return;
+            }
             var button = event.target.closest("button[data-admin-book-shelf-id][data-admin-book-shelf-action]");
             if (!button || busy || !isAdminUser()) {
                 return;
@@ -2411,26 +2579,30 @@
             if (!entryId || (action !== "edit" && action !== "delete")) {
                 return;
             }
-            var source = cachedBookShelf.slice(0, MAX_ENTRIES);
-            var targetIndex = source.findIndex(function (entry) {
-                return String(entry && entry.id || "").trim() === entryId;
-            });
-            if (targetIndex < 0) {
-                showNote("error", "admin.syncError", "Could not find entry.");
-                return;
-            }
             if (action === "delete") {
                 if (!window.confirm(T("admin.bookShelfDeleteConfirm", "Remove this item?"))) {
                     return;
                 }
-                source.splice(targetIndex, 1);
                 setBusyState(true);
-                saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
-                    return fetchMantleEntries(ADMIN_LIBRARY_URL);
+                fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
+                    var source = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                        return normalizeBookShelfEntry(row, idx);
+                    }).slice(0, MAX_ENTRIES);
+                    var targetIndex = source.findIndex(function (entry) {
+                        return String(entry && entry.id || "").trim() === entryId;
+                    });
+                    if (targetIndex < 0) {
+                        throw new Error("missing");
+                    }
+                    source.splice(targetIndex, 1);
+                    return saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
+                        return fetchMantleEntries(ADMIN_LIBRARY_URL);
+                    });
                 }).then(function (entries) {
                     cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                         return normalizeBookShelfEntry(row, idx);
                     });
+                    backupBookShelfEntries(cachedBookShelf);
                     renderBookShelfList();
                     showNote("success", "admin.bookShelfDeleted", "Removed.");
                     document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
@@ -2441,7 +2613,10 @@
                 });
                 return;
             }
-            var current = source[targetIndex] || {};
+            var cachedIndex = cachedBookShelf.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            var current = cachedIndex >= 0 ? cachedBookShelf[cachedIndex] : {};
             var nextShelfInput = window.prompt(T("admin.bookShelfEditPromptShelf", "Tab: en (English), ta (Tamil), or kids (Kids World)"), String(current.shelf || "en"));
             if (nextShelfInput === null) {
                 return;
@@ -2518,7 +2693,7 @@
                 showNote("validation", "admin.bookShelfNeedCoverUrl", "Cover image must be https:// or empty.");
                 return;
             }
-            source[targetIndex] = Object.assign({}, current, {
+            var nextEntry = Object.assign({}, current, {
                 shelf: nextShelf,
                 title: cleanTitle,
                 titleTa: String(nextTitleTa || "").trim(),
@@ -2535,12 +2710,25 @@
                 updatedAt: new Date().toISOString()
             });
             setBusyState(true);
-            saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
-                return fetchMantleEntries(ADMIN_LIBRARY_URL);
+            fetchMantleEntries(ADMIN_LIBRARY_URL).then(function (raw) {
+                var source = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                    return normalizeBookShelfEntry(row, idx);
+                }).slice(0, MAX_ENTRIES);
+                var targetIndex = source.findIndex(function (entry) {
+                    return String(entry && entry.id || "").trim() === entryId;
+                });
+                if (targetIndex < 0) {
+                    throw new Error("missing");
+                }
+                source[targetIndex] = nextEntry;
+                return saveMantleEntries(ADMIN_LIBRARY_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_LIBRARY_URL);
+                });
             }).then(function (entries) {
                 cachedBookShelf = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                     return normalizeBookShelfEntry(row, idx);
                 });
+                backupBookShelfEntries(cachedBookShelf);
                 renderBookShelfList();
                 showNote("success", "admin.bookShelfUpdated", "Updated.");
                 document.dispatchEvent(new CustomEvent("njc:admin-library-updated"));
@@ -2554,6 +2742,13 @@
 
     if (kidsAudioList) {
         kidsAudioList.addEventListener("click", function (event) {
+            var restoreButton = event.target.closest("button[data-admin-mantle-restore]");
+            if (restoreButton && kidsAudioList.contains(restoreButton)) {
+                if (restoreButton.getAttribute("data-admin-mantle-restore") === "kids-audio") {
+                    restoreKidsAudioFromBackup();
+                }
+                return;
+            }
             var button = event.target.closest("button[data-admin-kids-audio-id][data-admin-kids-audio-action]");
             if (!button || busy || !isAdminUser()) {
                 return;
@@ -2563,26 +2758,30 @@
             if (!entryId || (action !== "edit" && action !== "delete")) {
                 return;
             }
-            var source = cachedKidsAudio.slice(0, MAX_ENTRIES);
-            var targetIndex = source.findIndex(function (entry) {
-                return String(entry && entry.id || "").trim() === entryId;
-            });
-            if (targetIndex < 0) {
-                showNote("error", "admin.syncError", "Could not find entry.");
-                return;
-            }
             if (action === "delete") {
                 if (!window.confirm(T("admin.kidsAudioDeleteConfirm", "Remove this audio track?"))) {
                     return;
                 }
-                source.splice(targetIndex, 1);
                 setBusyState(true);
-                saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
-                    return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+                fetchMantleEntries(ADMIN_KIDS_AUDIO_URL).then(function (raw) {
+                    var source = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                        return normalizeKidsAudioEntry(row, idx);
+                    }).slice(0, MAX_ENTRIES);
+                    var targetIndex = source.findIndex(function (entry) {
+                        return String(entry && entry.id || "").trim() === entryId;
+                    });
+                    if (targetIndex < 0) {
+                        throw new Error("missing");
+                    }
+                    source.splice(targetIndex, 1);
+                    return saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
+                        return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+                    });
                 }).then(function (entries) {
                     cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                         return normalizeKidsAudioEntry(row, idx);
                     });
+                    backupKidsAudioEntries(cachedKidsAudio);
                     renderKidsAudioList();
                     showNote("success", "admin.kidsAudioDeleted", "Removed.");
                     document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));
@@ -2593,7 +2792,10 @@
                 });
                 return;
             }
-            var current = source[targetIndex] || {};
+            var cachedAudioIndex = cachedKidsAudio.findIndex(function (entry) {
+                return String(entry && entry.id || "").trim() === entryId;
+            });
+            var current = cachedAudioIndex >= 0 ? cachedKidsAudio[cachedAudioIndex] : {};
             var nextTitle = window.prompt(T("admin.kidsAudioEditTitle", "Title (English)"), String(current.title || ""));
             if (nextTitle === null) {
                 return;
@@ -2645,7 +2847,7 @@
             if (!isFinite(sortNum)) {
                 sortNum = 0;
             }
-            source[targetIndex] = Object.assign({}, current, {
+            var nextAudioEntry = Object.assign({}, current, {
                 title: cleanTitle,
                 titleTa: String(nextTitleTa || "").trim(),
                 audioUrl: cleanUrl,
@@ -2657,12 +2859,25 @@
                 updatedAt: new Date().toISOString()
             });
             setBusyState(true);
-            saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
-                return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+            fetchMantleEntries(ADMIN_KIDS_AUDIO_URL).then(function (raw) {
+                var source = (Array.isArray(raw) ? raw : []).map(function (row, idx) {
+                    return normalizeKidsAudioEntry(row, idx);
+                }).slice(0, MAX_ENTRIES);
+                var targetIndex = source.findIndex(function (entry) {
+                    return String(entry && entry.id || "").trim() === entryId;
+                });
+                if (targetIndex < 0) {
+                    throw new Error("missing");
+                }
+                source[targetIndex] = nextAudioEntry;
+                return saveMantleEntries(ADMIN_KIDS_AUDIO_URL, source).then(function () {
+                    return fetchMantleEntries(ADMIN_KIDS_AUDIO_URL);
+                });
             }).then(function (entries) {
                 cachedKidsAudio = (Array.isArray(entries) ? entries : []).map(function (row, idx) {
                     return normalizeKidsAudioEntry(row, idx);
                 });
+                backupKidsAudioEntries(cachedKidsAudio);
                 renderKidsAudioList();
                 showNote("success", "admin.kidsAudioUpdated", "Updated.");
                 document.dispatchEvent(new CustomEvent("njc:admin-kids-audio-updated"));

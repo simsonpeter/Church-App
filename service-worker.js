@@ -31,19 +31,19 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v440prayeranswer";
-const RUNTIME_CACHE = "njc-runtime-cache-v440prayeranswer";
+const APP_CACHE = "njc-app-cache-v444mainbundle";
+const RUNTIME_CACHE = "njc-runtime-cache-v444mainbundle";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: only the person who posted (or admin) can mark Answered or reset it. Settings → Check for updates if needed.";
+    "Prayer answered permissions, list PDF/WhatsApp share, library backup restore, kids books/audio fixes. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260609dailybreaddate1",
     "./user-auth.js?v=20260411mainmerge1",
-    "./app-modules.js?v=20260608guestteaser1",
+    "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
     "./app-shell.js?v=20260610vercelfix1",
     "./events-engine.js?v=20260531sharelang1",
@@ -57,7 +57,7 @@ const CORE_ASSETS = [
     "./daily-bread-page.js?v=20260610dailybreadshare1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260519newsletteredit1",
+    "./admin-dashboard-page.js?v=20260610mantlebackup1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260526userdir1",
@@ -69,11 +69,11 @@ const CORE_ASSETS = [
     "./chat-page.js?v=20260607chatpurge1",
     "./testimony-page.js?v=20260531sharelang1",
     "./spa-router.js?v=20260608guestteaser1",
-    "./book-shelf-page.js?v=20260414feedprobe1",
+    "./book-shelf-page.js?v=20260610kidslibrary1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",
-    "./kids-page.js?v=20260416kidsgames2",
-    "./kids-audio-page.js?v=20260414feedprobe1",
+    "./kids-audio-page.js?v=20260610kidsaudio1",
+    "./kids-page.js?v=20260610kidsworld1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20260329m1",
     "./logo.png?v=20260318de",
@@ -237,7 +237,7 @@ self.addEventListener("fetch", function (event) {
     }
 
     if (isMantleDb && String(url.pathname || "").toLowerCase().endsWith("/entries")) {
-        event.respondWith(networkFirstThenCache(event.request));
+        event.respondWith(fetch(event.request));
         return;
     }
     if (isSameOrigin || isRemoteData || isMantleDb || isFirebaseJs || isImgBb) {

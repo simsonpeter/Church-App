@@ -2351,7 +2351,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "440prayeranswer";
+    var SW_REGISTER_VERSION_FALLBACK = "444mainbundle";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

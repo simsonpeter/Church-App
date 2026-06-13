@@ -313,13 +313,31 @@
         }
         var shelf = activeShelfTab;
         var lang = shelf === "ta" ? "ta" : "en";
-        renderIntoList(listEl, statusEl, rows, {
-            shelfFilter: shelf,
-            langPick: lang,
-            emptyKey: "bookShelf.empty",
-            emptyFb: "No books in this shelf yet.",
-            useKidsT: false
+        var sorted = sortLibraryRows(Array.isArray(rows) ? rows : []);
+        var filtered = sorted.filter(function (raw) {
+            var e = normalizeEntry(raw, 0);
+            return e.shelf === shelf && isValidHttpsUrl(e.url);
         });
+        if (!filtered.length) {
+            var kidsCount = sorted.filter(function (raw) {
+                var e = normalizeEntry(raw, 0);
+                return e.shelf === "kids" && isValidHttpsUrl(e.url);
+            }).length;
+            statusEl.hidden = false;
+            if (kidsCount > 0 && shelf !== "kids") {
+                statusEl.textContent = TBook(
+                    "bookShelf.emptyKidsHint",
+                    "No books on this tab yet. You have kids books — open Kids World → Books."
+                );
+            } else {
+                statusEl.textContent = TBook("bookShelf.empty", "No books in this shelf yet.");
+            }
+            listEl.innerHTML = "";
+            return;
+        }
+        statusEl.hidden = true;
+        statusEl.textContent = "";
+        listEl.innerHTML = renderBookCardsHtml(filtered, lang);
     }
 
     function loadBooks() {
@@ -447,5 +465,8 @@
         loadKidsBooks();
     });
 
-    document.addEventListener("DOMContentLoaded", onRoute);
+    document.addEventListener("DOMContentLoaded", function () {
+        onRoute();
+        loadKidsBooks();
+    });
 })();
