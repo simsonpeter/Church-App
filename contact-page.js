@@ -34,9 +34,10 @@
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
             var prayerDetailShareButton = document.getElementById("prayer-detail-share");
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
-            var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
-            var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
-            var prayerMineShareListBtn = document.getElementById("prayer-mine-share-list");
+            var prayerListToolbar = document.getElementById("prayer-list-toolbar");
+            var prayerListToolbarHint = document.getElementById("prayer-list-toolbar-hint");
+            var prayerListExportPdfBtn = document.getElementById("prayer-list-export-pdf");
+            var prayerListShareListBtn = document.getElementById("prayer-list-share-list");
             var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
             var prayerWallCategoryFilter = document.getElementById("prayer-wall-category-filter");
             var prayerDetailCategoryRow = document.getElementById("prayer-detail-category-row");
@@ -853,26 +854,83 @@
                 return copyTextForShare(body);
             }
 
-            function getMyPrayerRowsForExport() {
-                return getMyPrayerOrderedEntriesActiveOnly();
+            function getPrayerTabExportConfig(tab) {
+                var t = String(tab || activePrayerTab || "urgent").toLowerCase();
+                if (t === "mine") {
+                    return {
+                        titleKey: "contact.prayerMinePdfTitle",
+                        titleFallback: "My prayer list — NJC Belgium",
+                        filename: "my-prayer-list.pdf",
+                        emptyKey: "contact.prayerMinePdfEmpty",
+                        emptyFallback: "Add prayers to your list first, then try again.",
+                        hintKey: "contact.prayerMineToolbarHint",
+                        hintFallback: "Open a request and use “Add to my prayer”, or use the button on each card."
+                    };
+                }
+                if (t === "answered") {
+                    return {
+                        titleKey: "contact.prayerTabAnsweredShareTitle",
+                        titleFallback: "Answered prayers — NJC Belgium",
+                        filename: "answered-prayers.pdf",
+                        emptyKey: "contact.prayerTabAnsweredShareEmpty",
+                        emptyFallback: "No answered prayers on this tab yet.",
+                        hintKey: "contact.prayerListToolbarHintAnswered",
+                        hintFallback: "Share or export answered prayers from this tab. Please keep requests confidential."
+                    };
+                }
+                if (t === "other") {
+                    return {
+                        titleKey: "contact.prayerTabDailyShareTitle",
+                        titleFallback: "Daily prayers — NJC Belgium",
+                        filename: "daily-prayers.pdf",
+                        emptyKey: "contact.prayerTabDailyShareEmpty",
+                        emptyFallback: "No daily prayers on this tab yet.",
+                        hintKey: "contact.prayerListToolbarHintDaily",
+                        hintFallback: "Share or export daily prayer requests from this tab. Please keep requests confidential."
+                    };
+                }
+                return {
+                    titleKey: "contact.prayerTabUrgentShareTitle",
+                    titleFallback: "Urgent prayers — NJC Belgium",
+                    filename: "urgent-prayers.pdf",
+                    emptyKey: "contact.prayerTabUrgentShareEmpty",
+                    emptyFallback: "No urgent prayers on this tab yet.",
+                    hintKey: "contact.prayerListToolbarHintUrgent",
+                    hintFallback: "Share or export urgent prayer requests from this tab. Please keep requests confidential."
+                };
             }
 
-            async function shareMyPrayerList() {
-                var rows = getMyPrayerRowsForExport();
-                if (!rows.length) {
-                    if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
-                        showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
-                        return;
-                    }
-                    showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
+            function getPrayerRowsForActiveTabExport() {
+                if (activePrayerTab === "mine") {
+                    return getMyPrayerOrderedEntriesActiveOnly();
+                }
+                var visibleEntries = getPrayerWallEntriesForPublicTabs();
+                var sortedEntries = getSortedPrayerEntries(visibleEntries);
+                return getPrayerEntriesForActiveTab(sortedEntries);
+            }
+
+            function showPrayerListExportEmpty(config) {
+                if (activePrayerTab === "mine" && loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
+                    showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
                     return;
                 }
+                showPrayerWallNote("listExportEmpty", config.emptyKey, config.emptyFallback);
+            }
+
+            async function shareActivePrayerList() {
+                var config = getPrayerTabExportConfig();
+                var rows = getPrayerRowsForActiveTabExport();
+                if (!rows.length) {
+                    showPrayerListExportEmpty(config);
+                    return;
+                }
+                var title = T(config.titleKey, config.titleFallback, prayerCard);
                 var text = buildPrayerListShareText(rows, {
-                    title: T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard),
-                    maxItems: 30,
+                    title: title,
+                    maxItems: activePrayerTab === "mine" ? 30 : 25,
                     maxChars: 3800
                 });
-                var shared = await sharePlainPrayerList(text, "contact.prayerMinePdfTitle", "My prayer list — NJC Belgium");
+                var shared = await sharePlainPrayerList(text, config.titleKey, config.titleFallback);
                 if (shared) {
                     showPrayerWallNote("mineShareCopied", "contact.prayerMineShareCopied", "List copied. Paste into WhatsApp or your prayer chat.");
                 } else {
@@ -880,14 +938,11 @@
                 }
             }
 
-            async function exportMyPrayerPdf() {
-                var rows = getMyPrayerRowsForExport();
+            async function exportActivePrayerPdf() {
+                var config = getPrayerTabExportConfig();
+                var rows = getPrayerRowsForActiveTabExport();
                 if (!rows.length) {
-                    if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
-                        showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
-                        return;
-                    }
-                    showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
+                    showPrayerListExportEmpty(config);
                     return;
                 }
                 showPrayerWallNote("minePdfBuilding", "contact.prayerMinePdfBuilding", "Preparing PDF...");
@@ -901,7 +956,7 @@
                     var font = await pdfDoc.embedFont(StandardFonts.Helvetica);
                     var fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-                    var page = pdfDoc.addPage([595.28, 841.89]); // A4
+                    var page = pdfDoc.addPage([595.28, 841.89]);
                     var margin = 42;
                     var y = 800;
 
@@ -916,7 +971,7 @@
                         }
                     }
 
-                    var title = T("contact.prayerMinePdfTitle", "My prayer list - NJC Belgium", prayerCard);
+                    var title = T(config.titleKey, config.titleFallback, prayerCard);
                     page.drawText(String(title || ""), {
                         x: margin,
                         y: y,
@@ -977,7 +1032,7 @@
 
                     var pdfBytes = await pdfDoc.save();
                     var blob = new Blob([pdfBytes], { type: "application/pdf" });
-                    var saved = await downloadBlobFile(blob, "my-prayer-list.pdf");
+                    var saved = await downloadBlobFile(blob, config.filename);
                     if (saved) {
                         showPrayerWallNote("minePdfSaved", "contact.prayerMinePdfSaved", "PDF generated. Save/share from the dialog.");
                     } else {
@@ -988,9 +1043,17 @@
                 }
             }
 
-            function updateMineToolbar() {
-                if (prayerMineToolbar) {
-                    prayerMineToolbar.hidden = activePrayerTab !== "mine";
+            function updatePrayerListToolbar() {
+                if (!prayerListToolbar) {
+                    return;
+                }
+                var config = getPrayerTabExportConfig();
+                prayerListToolbar.hidden = prayerWallLoading || prayerWallError;
+                if (prayerListToolbarHint) {
+                    prayerListToolbarHint.textContent = T(config.hintKey, config.hintFallback, prayerCard);
+                }
+                if (prayerMineClearBtn) {
+                    prayerMineClearBtn.hidden = activePrayerTab !== "mine";
                 }
             }
 
@@ -1626,7 +1689,7 @@
                     });
                 }
                 syncPrayerCategoryChips();
-                updateMineToolbar();
+                updatePrayerListToolbar();
                 if (!config.skipRender) {
                     renderPrayerWall();
                 }
@@ -2043,7 +2106,7 @@
                 if (!prayerWallList) {
                     return;
                 }
-                updateMineToolbar();
+                updatePrayerListToolbar();
                 syncPrayerCategoryChips();
 
                 if (prayerWallLoading) {
@@ -2576,14 +2639,14 @@
                     renderPrayerWall();
                 });
             }
-            if (prayerMineExportPdfBtn) {
-                prayerMineExportPdfBtn.addEventListener("click", function () {
-                    exportMyPrayerPdf();
+            if (prayerListExportPdfBtn) {
+                prayerListExportPdfBtn.addEventListener("click", function () {
+                    exportActivePrayerPdf();
                 });
             }
-            if (prayerMineShareListBtn) {
-                prayerMineShareListBtn.addEventListener("click", function () {
-                    shareMyPrayerList();
+            if (prayerListShareListBtn) {
+                prayerListShareListBtn.addEventListener("click", function () {
+                    shareActivePrayerList();
                 });
             }
 

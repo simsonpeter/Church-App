@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v444mainbundle";
-const RUNTIME_CACHE = "njc-runtime-cache-v444mainbundle";
+const APP_CACHE = "njc-app-cache-v445prayertabshare";
+const RUNTIME_CACHE = "njc-runtime-cache-v445prayertabshare";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer answered permissions, list PDF/WhatsApp share, library backup restore, kids books/audio fixes. Settings → Check for updates.";
+    "Prayer wall: Export PDF and Share list on Urgent, Daily, Answered, and My prayer tabs. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260531sharelang1",
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260610prayershare1",
+    "./contact-page.js?v=20260610prayertabshare1",
     "./daily-bread-page.js?v=20260610dailybreadshare1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",

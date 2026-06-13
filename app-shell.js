@@ -813,6 +813,15 @@
         "contact.prayerWallNoMineActiveTitle": "இங்கு ஜெபிக்க ஏதும் இல்லை",
         "contact.prayerWallNoMineActiveBody": "உங்கள் பட்டியலில் உள்ளவை அனைத்தும் பதிலளிக்கப்பட்டதாக குறிக்கப்பட்டுள்ளன. அந்த வேண்டுதல்களை “பதிலளிக்கப்பட்டது” தாவலில் காணலாம்.",
         "contact.prayerMineToolbarHint": "வேண்டுதலைத் திறந்து “என் ஜெபத்தில் சேர்” அல்லது அட்டையில் உள்ள பொத்தானைப் பயன்படுத்தவும். பின்னர் அச்சிடவும் அல்லது PDF-ஆகச் சேமிக்கவும்.",
+        "contact.prayerListToolbarHintUrgent": "இந்த தாவலில் உள்ள அவசர ஜெபங்களைப் பகிரவும் அல்லது PDF ஆக ஏற்றுமதி செய்யவும். வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
+        "contact.prayerListToolbarHintDaily": "இந்த தாவலில் உள்ள தினசரி ஜெபங்களைப் பகிரவும் அல்லது PDF ஆக ஏற்றுமதி செய்யவும். வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
+        "contact.prayerListToolbarHintAnswered": "பதிலளிக்கப்பட்ட ஜெபங்களைப் பகிரவும் அல்லது PDF ஆக ஏற்றுமதி செய்யவும். வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
+        "contact.prayerTabUrgentShareTitle": "அவசர ஜெபங்கள் — NJC Belgium",
+        "contact.prayerTabDailyShareTitle": "தினசரி ஜெபங்கள் — NJC Belgium",
+        "contact.prayerTabAnsweredShareTitle": "பதிலளிக்கப்பட்ட ஜெபங்கள் — NJC Belgium",
+        "contact.prayerTabUrgentShareEmpty": "இந்த தாவலில் அவசர ஜெபங்கள் இல்லை.",
+        "contact.prayerTabDailyShareEmpty": "இந்த தாவலில் தினசரி ஜெபங்கள் இல்லை.",
+        "contact.prayerTabAnsweredShareEmpty": "இந்த தாவலில் பதிலளிக்கப்பட்ட ஜெபங்கள் இல்லை.",
         "contact.prayerMineExportPdf": "PDF ஏற்றுமதி",
         "contact.prayerMineShareList": "பட்டியலைப் பகிர்",
         "contact.prayerMineSharePrivacy": "இந்த வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
@@ -2362,7 +2371,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "444mainbundle";
+    var SW_REGISTER_VERSION_FALLBACK = "445prayertabshare";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
