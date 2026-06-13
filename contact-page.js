@@ -34,8 +34,7 @@
             var prayerDetailDeleteButton = document.getElementById("prayer-detail-delete");
             var prayerDetailShareButton = document.getElementById("prayer-detail-share");
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
-            var prayerListToolbar = document.getElementById("prayer-list-toolbar");
-            var prayerListToolbarHint = document.getElementById("prayer-list-toolbar-hint");
+            var prayerWallTabTools = document.getElementById("prayer-wall-tab-tools");
             var prayerListExportPdfBtn = document.getElementById("prayer-list-export-pdf");
             var prayerListShareListBtn = document.getElementById("prayer-list-share-list");
             var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
@@ -1044,13 +1043,8 @@
             }
 
             function updatePrayerListToolbar() {
-                if (!prayerListToolbar) {
-                    return;
-                }
-                var config = getPrayerTabExportConfig();
-                prayerListToolbar.hidden = prayerWallLoading || prayerWallError;
-                if (prayerListToolbarHint) {
-                    prayerListToolbarHint.textContent = T(config.hintKey, config.hintFallback, prayerCard);
+                if (prayerWallTabTools) {
+                    prayerWallTabTools.hidden = prayerWallLoading || prayerWallError;
                 }
                 if (prayerMineClearBtn) {
                     prayerMineClearBtn.hidden = activePrayerTab !== "mine";
@@ -2114,7 +2108,6 @@
                     prayerWallList.innerHTML = "" +
                         "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(T("contact.prayerWallLoadingTitle", "Loading prayer wall...", prayerCard)) + "</h3>" +
-                        "  <p>" + escapeHtml(T("contact.prayerWallLoadingBody", "Please wait.", prayerCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -2124,7 +2117,6 @@
                     prayerWallList.innerHTML = "" +
                         "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(T("contact.prayerWallLoadErrorTitle", "Could not load prayer wall", prayerCard)) + "</h3>" +
-                        "  <p>" + escapeHtml(T("contact.prayerWallLoadErrorBody", "Please check your connection and try again.", prayerCard)) + "</p>" +
                         "</li>";
                     return;
                 }
@@ -2145,34 +2137,26 @@
                 if (entries.length === 0) {
                     closePrayerDetail();
                     var noEntryTitle;
-                    var noEntryBody;
                     if (activePrayerTab === "mine") {
                         if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
                             noEntryTitle = T("contact.prayerWallNoMineActiveTitle", "Nothing left to pray here", prayerCard);
-                            noEntryBody = T("contact.prayerWallNoMineActiveBody", "Everything on your list is marked answered. Open the Answered tab to see those requests.", prayerCard);
                         } else {
                             noEntryTitle = T("contact.prayerWallNoMineTitle", "Your list is empty", prayerCard);
-                            noEntryBody = T("contact.prayerWallNoMineBody", "Open any prayer and tap “Add to my prayer”, or use the button on each card below.", prayerCard);
                         }
                     } else if (activePrayerTab === "answered") {
                         noEntryTitle = T("contact.prayerWallNoAnsweredTitle", "No answered prayers yet", prayerCard);
-                        noEntryBody = T("contact.prayerWallNoAnsweredBody", "Requests with an “Answered” count above zero appear here.", prayerCard);
                     } else if (activePrayerTab === "other") {
                         noEntryTitle = T("contact.prayerWallNoOtherTitle", "No daily prayers yet", prayerCard);
-                        noEntryBody = T("contact.prayerWallNoOtherBody", "Daily prayer requests will appear here.", prayerCard);
                     } else {
                         noEntryTitle = T("contact.prayerWallNoUrgentTitle", "No urgent prayers right now", prayerCard);
-                        noEntryBody = T("contact.prayerWallNoUrgentBody", "Urgent requests will appear here first.", prayerCard);
                     }
                     var catF = String(activePrayerCategoryFilter || "").trim().toLowerCase();
                     if (catF && PRAYER_ALLOWED_CATEGORIES.indexOf(catF) >= 0) {
                         noEntryTitle = T("contact.prayerWallNoCategoryTitle", "No prayers in this topic", prayerCard);
-                        noEntryBody = T("contact.prayerWallNoCategoryBody", "Try “All topics” or another tab.", prayerCard);
                     }
                     prayerWallList.innerHTML = "" +
                         "<li class=\"prayer-wall-list-message\">" +
                         "  <h3>" + escapeHtml(noEntryTitle) + "</h3>" +
-                        "  <p>" + escapeHtml(noEntryBody) + "</p>" +
                         "</li>";
                     return;
                 }

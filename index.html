@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260609dailybreaddate1">
+    <link rel="stylesheet" href="styles.css?v=20260613prayercompact1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -162,7 +162,7 @@
                 <div class="card-banner card-banner-prayer">
                     <img src="prayer-banner.jpg?v=20260329m1" alt="" width="1024" height="559" loading="lazy" decoding="async" />
                 </div>
-                <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray. New posts are reviewed by an admin before they appear on the wall.</p>
+                <p class="page-note" data-i18n="contact.prayerWallSubtitle" hidden>Post requests for the church family to pray. New posts are reviewed by an admin before they appear on the wall.</p>
                 <button class="button-link prayer-wall-open-btn" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallOpen">Post a Prayer</button>
                 <form class="prayer-form" id="prayer-wall-form" hidden>
                     <input
@@ -205,6 +205,7 @@
                     </div>
                 </form>
                 <p class="page-note" id="prayer-wall-note" hidden></p>
+                <div class="prayer-wall-tabs-wrap" id="prayer-wall-tabs-wrap">
                 <div class="prayer-wall-tabs" role="tablist" aria-label="Prayer wall categories">
                     <button
                         type="button"
@@ -247,13 +248,17 @@
                         <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabMine">My prayer</span>
                     </button>
                 </div>
-                <div class="prayer-mine-toolbar prayer-list-toolbar" id="prayer-list-toolbar">
-                    <p class="page-note prayer-mine-toolbar-hint" id="prayer-list-toolbar-hint" data-i18n="contact.prayerListToolbarHintUrgent">Share or export the prayers on this tab. Please keep requests confidential.</p>
-                    <div class="prayer-mine-toolbar-actions">
-                        <button type="button" class="button-link button-secondary" id="prayer-list-export-pdf" data-i18n="contact.prayerMineExportPdf">Export PDF</button>
-                        <button type="button" class="button-link button-secondary" id="prayer-list-share-list" data-i18n="contact.prayerMineShareList">Share list</button>
-                        <button type="button" class="button-link button-secondary" id="prayer-mine-clear" data-i18n="contact.prayerMineClearAll" hidden>Clear my list</button>
-                    </div>
+                <div class="prayer-wall-tab-tools" id="prayer-wall-tab-tools">
+                    <button type="button" class="prayer-wall-tool-btn" id="prayer-list-export-pdf" data-i18n-aria-label="contact.prayerMineExportPdf" aria-label="Export PDF" title="Export PDF">
+                        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="prayer-wall-tool-btn" id="prayer-list-share-list" data-i18n-aria-label="contact.prayerMineShareList" aria-label="Share list" title="Share list">
+                        <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="prayer-wall-tool-btn" id="prayer-mine-clear" data-i18n-aria-label="contact.prayerMineClearAll" aria-label="Clear my list" title="Clear my list" hidden>
+                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                    </button>
+                </div>
                 </div>
                 <ul class="prayer-wall-list" id="prayer-wall-list">
                     <li class="prayer-wall-list-message">
@@ -2270,7 +2275,7 @@
     <script src="sermons-page.js?v=20260531sharelang1"></script>
     <script src="bible-page.js?v=20260531sharelang1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
-    <script src="contact-page.js?v=20260610prayertabshare1"></script>
+    <script src="contact-page.js?v=20260613prayercompact1"></script>
     <script src="daily-bread-page.js?v=20260610dailybreadshare1"></script>
     <script src="newsletter-page.js?v=20260531sharelang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>

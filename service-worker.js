@@ -31,17 +31,17 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v445prayertabshare";
-const RUNTIME_CACHE = "njc-runtime-cache-v445prayertabshare";
+const APP_CACHE = "njc-app-cache-v446prayercompact";
+const RUNTIME_CACHE = "njc-runtime-cache-v446prayercompact";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: Export PDF and Share list on Urgent, Daily, Answered, and My prayer tabs. Settings → Check for updates.";
+    "Prayer wall: cleaner layout — icon buttons for PDF/share on the tab bar, less description text. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260609dailybreaddate1",
+    "./styles.css?v=20260613prayercompact1",
     "./user-auth.js?v=20260411mainmerge1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
@@ -53,7 +53,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260531sharelang1",
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260610prayertabshare1",
+    "./contact-page.js?v=20260613prayercompact1",
     "./daily-bread-page.js?v=20260610dailybreadshare1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
