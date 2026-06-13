@@ -25,6 +25,8 @@
     var prayerList = document.getElementById("admin-prayer-list");
     var prayerExportPdfBtn = document.getElementById("admin-prayer-export-pdf");
     var prayerBulletinWeekBtn = document.getElementById("admin-prayer-bulletin-week-pdf");
+    var prayerShareTextBtn = document.getElementById("admin-prayer-share-text");
+    var prayerBulletinWeekShareBtn = document.getElementById("admin-prayer-bulletin-week-share");
     var triviaList = document.getElementById("admin-trivia-list");
     var triviaForm = document.getElementById("admin-trivia-form");
     var dailyBreadForm = document.getElementById("admin-daily-bread-form");
@@ -428,6 +430,12 @@
         }
         if (prayerBulletinWeekBtn) {
             prayerBulletinWeekBtn.disabled = busy;
+        }
+        if (prayerShareTextBtn) {
+            prayerShareTextBtn.disabled = busy;
+        }
+        if (prayerBulletinWeekShareBtn) {
+            prayerBulletinWeekShareBtn.disabled = busy;
         }
         if (triviaList) {
             triviaList.querySelectorAll("button[data-admin-trivia-id]").forEach(function (button) {
@@ -947,6 +955,185 @@
                 return Boolean(item && item.id);
             });
             buildAndPrint(list);
+        }).catch(function () {
+            showNote("error", "admin.prayerExportLoadError", "Could not load prayers for export.");
+        }).finally(function () {
+            setBusyState(false);
+        });
+    }
+
+    function getPrayerWallAppUrl() {
+        try {
+            var base = String(window.location.origin || "").replace(/\/$/, "");
+            if (base) {
+                return base + "/#prayer";
+            }
+        } catch (e0) {}
+        return "https://njcapp.vercel.app/#prayer";
+    }
+
+    function buildAdminPrayerShareText(rows, mode, weekRange) {
+        var list = Array.isArray(rows) ? rows : [];
+        var isWeek = mode === "week";
+        var title = isWeek
+            ? T("admin.prayerBulletinWeekTitle", "Weekly prayer bulletin")
+            : T("admin.prayerExportDocTitle", "Prayer wall — NJC Belgium");
+        var lines = [
+            title,
+            ""
+        ];
+        if (isWeek && weekRange) {
+            var period = formatWeekPeriodLabel(weekRange);
+            if (period) {
+                lines.push(T("admin.prayerBulletinWeekRangeLabel", "This week") + ": " + period);
+                lines.push("");
+            }
+        }
+        lines.push(T("admin.prayerExportCount", "Total requests: {count}").replace(/\{count\}/g, String(list.length)));
+        lines.push(T("admin.prayerSharePrivacy", "Confidential — for prayer and pastoral follow-up only."));
+        lines.push("");
+        var urgentLbl = T("admin.prayerExportUrgent", "Urgent");
+        var dateLbl = T("admin.prayerExportDate", "Posted");
+        var maxItems = 40;
+        var maxMsgLen = 240;
+        list.slice(0, maxItems).forEach(function (entry, idx) {
+            var name = String(entry.name || "").trim() || T("contact.prayerWallNameAnonymous", "Anonymous");
+            var msg = String(entry.message || "").replace(/\s+/g, " ").trim();
+            if (msg.length > maxMsgLen) {
+                msg = msg.slice(0, maxMsgLen - 1) + "…";
+            }
+            var header = String(idx + 1) + ". " + name;
+            if (entry.urgent) {
+                header += " [" + urgentLbl + "]";
+            }
+            lines.push(header);
+            lines.push(dateLbl + ": " + formatPrayerDateForPdf(entry.createdAt));
+            if (msg) {
+                lines.push(msg);
+            }
+            lines.push("");
+        });
+        if (list.length > maxItems) {
+            lines.push(T("admin.prayerShareMore", "…and {count} more in Admin.").replace("{count}", String(list.length - maxItems)));
+            lines.push("");
+        }
+        lines.push(T("admin.prayerExportFooter", "Prayer wall export · For pastoral use · Keep requests confidential."));
+        lines.push(getPrayerWallAppUrl());
+        var text = lines.join("\n").trim();
+        if (text.length > 3900) {
+            text = text.slice(0, 3899) + "…";
+        }
+        return text;
+    }
+
+    function copyAdminShareText(text) {
+        var value = String(text || "").trim();
+        if (!value) {
+            return Promise.resolve(false);
+        }
+        return Promise.resolve().then(function () {
+            if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                return navigator.clipboard.writeText(value).then(function () {
+                    return true;
+                });
+            }
+            throw new Error("no clipboard");
+        }).catch(function () {
+            try {
+                var ta = document.createElement("textarea");
+                ta.value = value;
+                ta.setAttribute("readonly", "readonly");
+                ta.style.position = "fixed";
+                ta.style.left = "-9999px";
+                document.body.appendChild(ta);
+                ta.select();
+                var ok = document.execCommand("copy");
+                document.body.removeChild(ta);
+                return Boolean(ok);
+            } catch (e2) {
+                return false;
+            }
+        });
+    }
+
+    function sharePrayerWallText(options) {
+        var opts = options && typeof options === "object" ? options : {};
+        var mode = opts.mode === "week" ? "week" : "all";
+        if (!isAdminUser()) {
+            showNote("error", "admin.prayerExportDenied", "Only an admin can export prayer requests.");
+            return;
+        }
+        var weekRange = mode === "week" ? getLocalMondayWeekRange() : null;
+
+        function filterForMode(rows) {
+            var list = Array.isArray(rows) ? rows.slice() : [];
+            if (mode !== "week" || !weekRange) {
+                return list;
+            }
+            return list.filter(function (e) {
+                return prayerPostedInLocalWeek(e, weekRange);
+            });
+        }
+
+        function deliverShare(rows) {
+            var working = filterForMode(rows);
+            if (!working.length) {
+                showNote(
+                    "validation",
+                    mode === "week" ? "admin.prayerBulletinWeekEmpty" : "admin.prayerExportEmpty",
+                    mode === "week"
+                        ? "No prayer requests were posted during this calendar week yet."
+                        : "No prayer requests to export. Refresh the dashboard first."
+                );
+                return;
+            }
+            working.sort(function (a, b) {
+                var ua = a.urgent ? 0 : 1;
+                var ub = b.urgent ? 0 : 1;
+                if (ua !== ub) {
+                    return ua - ub;
+                }
+                return String(b.createdAt || "").localeCompare(String(a.createdAt || ""));
+            });
+            var text = buildAdminPrayerShareText(working, mode, weekRange);
+            var title = mode === "week"
+                ? T("admin.prayerBulletinWeekTitle", "Weekly prayer bulletin")
+                : T("admin.prayerExportDocTitle", "Prayer wall — NJC Belgium");
+            Promise.resolve().then(function () {
+                if (navigator.share && typeof navigator.share === "function") {
+                    return navigator.share({ title: title, text: text });
+                }
+                return copyAdminShareText(text);
+            }).then(function (result) {
+                if (result === false) {
+                    showNote("error", "admin.prayerShareFailed", "Could not copy. Try Export PDF instead.");
+                    return;
+                }
+                showNote("success", "admin.prayerShareCopied", "List copied. Paste into WhatsApp or your prayer chat.");
+            }).catch(function (err) {
+                if (err && err.name === "AbortError") {
+                    return;
+                }
+                copyAdminShareText(text).then(function (copied) {
+                    if (copied) {
+                        showNote("success", "admin.prayerShareCopied", "List copied. Paste into WhatsApp or your prayer chat.");
+                    } else {
+                        showNote("error", "admin.prayerShareFailed", "Could not copy. Try Export PDF instead.");
+                    }
+                });
+            });
+        }
+
+        if (cachedPrayers.length) {
+            deliverShare(cachedPrayers);
+            return;
+        }
+        setBusyState(true);
+        fetchMantleEntries(PRAYER_WALL_URL).then(function (entries) {
+            var list = (Array.isArray(entries) ? entries : []).map(normalizePrayerEntry).filter(function (item) {
+                return Boolean(item && item.id);
+            });
+            deliverShare(list);
         }).catch(function () {
             showNote("error", "admin.prayerExportLoadError", "Could not load prayers for export.");
         }).finally(function () {
@@ -3868,6 +4055,16 @@
     if (prayerBulletinWeekBtn) {
         prayerBulletinWeekBtn.addEventListener("click", function () {
             exportPrayerWallPdf({ mode: "week" });
+        });
+    }
+    if (prayerShareTextBtn) {
+        prayerShareTextBtn.addEventListener("click", function () {
+            sharePrayerWallText({ mode: "all" });
+        });
+    }
+    if (prayerBulletinWeekShareBtn) {
+        prayerBulletinWeekShareBtn.addEventListener("click", function () {
+            sharePrayerWallText({ mode: "week" });
         });
     }
 

@@ -36,10 +36,7 @@
             var prayerDetailMineToggle = document.getElementById("prayer-detail-mine-toggle");
             var prayerMineToolbar = document.getElementById("prayer-mine-toolbar");
             var prayerMineExportPdfBtn = document.getElementById("prayer-mine-export-pdf");
-            if (prayerMineExportPdfBtn && prayerMineExportPdfBtn.parentNode) {
-                prayerMineExportPdfBtn.parentNode.removeChild(prayerMineExportPdfBtn);
-                prayerMineExportPdfBtn = null;
-            }
+            var prayerMineShareListBtn = document.getElementById("prayer-mine-share-list");
             var prayerMineClearBtn = document.getElementById("prayer-mine-clear");
             var prayerWallCategoryFilter = document.getElementById("prayer-wall-category-filter");
             var prayerDetailCategoryRow = document.getElementById("prayer-detail-category-row");
@@ -737,8 +734,154 @@
                 }
             }
 
+            function getPrayerWallAppUrl() {
+                try {
+                    var base = String(window.location.origin || "").replace(/\/$/, "");
+                    if (base) {
+                        return base + "/#prayer";
+                    }
+                } catch (e0) {}
+                return "https://njcapp.vercel.app/#prayer";
+            }
+
+            function buildPrayerListShareText(rows, options) {
+                var opts = options && typeof options === "object" ? options : {};
+                var list = Array.isArray(rows) ? rows : [];
+                var title = String(opts.title || T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard)).trim();
+                var maxItems = Number(opts.maxItems);
+                if (!Number.isFinite(maxItems) || maxItems < 1) {
+                    maxItems = 30;
+                }
+                var maxMsgLen = Number(opts.maxMsgLen);
+                if (!Number.isFinite(maxMsgLen) || maxMsgLen < 40) {
+                    maxMsgLen = 220;
+                }
+                var lines = [
+                    title,
+                    "",
+                    T("contact.prayerMineSharePrivacy", "Please keep these requests confidential."),
+                    ""
+                ];
+                var shown = list.slice(0, maxItems);
+                shown.forEach(function (entry, idx) {
+                    var name = getPrayerDisplayName(entry, prayerCard);
+                    var msg = String(entry.message || "").replace(/\s+/g, " ").trim();
+                    if (msg.length > maxMsgLen) {
+                        msg = msg.slice(0, maxMsgLen - 1) + "…";
+                    }
+                    var dateText = formatPrayerDateForMinePdf(entry.createdAt);
+                    var header = String(idx + 1) + ". " + name;
+                    if (entry.urgent) {
+                        header += " [" + T("contact.prayerWallUrgentBadge", "Urgent", prayerCard) + "]";
+                    }
+                    lines.push(header);
+                    if (dateText) {
+                        lines.push(T("contact.prayerMinePdfPosted", "Posted", prayerCard) + ": " + dateText);
+                    }
+                    if (msg) {
+                        lines.push(msg);
+                    }
+                    lines.push("");
+                });
+                if (list.length > maxItems) {
+                    lines.push(T("contact.prayerMineShareMore", "…and {count} more on the app.").replace("{count}", String(list.length - maxItems)));
+                    lines.push("");
+                }
+                lines.push(T("contact.prayerMineShareFooter", "NJC Belgium · Prayer wall"));
+                if (opts.includeAppLink !== false) {
+                    lines.push(getPrayerWallAppUrl());
+                }
+                var text = lines.join("\n").trim();
+                var maxLen = Number(opts.maxChars);
+                if (Number.isFinite(maxLen) && maxLen > 200 && text.length > maxLen) {
+                    text = text.slice(0, maxLen - 1) + "…";
+                }
+                return text;
+            }
+
+            async function copyTextForShare(text) {
+                var value = String(text || "").trim();
+                if (!value) {
+                    return false;
+                }
+                try {
+                    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                        await navigator.clipboard.writeText(value);
+                        return true;
+                    }
+                } catch (e1) {}
+                try {
+                    var ta = document.createElement("textarea");
+                    ta.value = value;
+                    ta.setAttribute("readonly", "readonly");
+                    ta.style.position = "fixed";
+                    ta.style.left = "-9999px";
+                    document.body.appendChild(ta);
+                    ta.select();
+                    var ok = document.execCommand("copy");
+                    document.body.removeChild(ta);
+                    return Boolean(ok);
+                } catch (e2) {
+                    return false;
+                }
+            }
+
+            async function sharePlainPrayerList(text, titleKey, titleFallback) {
+                var body = String(text || "").trim();
+                if (!body) {
+                    return false;
+                }
+                var title = T(titleKey, titleFallback, prayerCard);
+                try {
+                    if (navigator.share && typeof navigator.share === "function") {
+                        var payload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
+                            ? window.NjcEvents.shareContent({
+                                labelKey: titleKey,
+                                labelFallback: titleFallback,
+                                body: body,
+                                sourceElement: prayerCard
+                            })
+                            : { title: title, text: body };
+                        await navigator.share(payload);
+                        return true;
+                    }
+                } catch (shareErr) {
+                    if (shareErr && shareErr.name === "AbortError") {
+                        return true;
+                    }
+                }
+                return copyTextForShare(body);
+            }
+
+            function getMyPrayerRowsForExport() {
+                return getMyPrayerOrderedEntriesActiveOnly();
+            }
+
+            async function shareMyPrayerList() {
+                var rows = getMyPrayerRowsForExport();
+                if (!rows.length) {
+                    if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
+                        showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
+                        return;
+                    }
+                    showPrayerWallNote("minePdfEmpty", "contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.");
+                    return;
+                }
+                var text = buildPrayerListShareText(rows, {
+                    title: T("contact.prayerMinePdfTitle", "My prayer list — NJC Belgium", prayerCard),
+                    maxItems: 30,
+                    maxChars: 3800
+                });
+                var shared = await sharePlainPrayerList(text, "contact.prayerMinePdfTitle", "My prayer list — NJC Belgium");
+                if (shared) {
+                    showPrayerWallNote("mineShareCopied", "contact.prayerMineShareCopied", "List copied. Paste into WhatsApp or your prayer chat.");
+                } else {
+                    showPrayerWallNote("shareError", "contact.prayerShareFailed", "Could not share. Try again or use Export PDF.");
+                }
+            }
+
             async function exportMyPrayerPdf() {
-                var rows = getMyPrayerOrderedEntriesActiveOnly();
+                var rows = getMyPrayerRowsForExport();
                 if (!rows.length) {
                     if (loadMyPrayerIds().length && !hasMyPrayerActiveListEntries()) {
                         showPrayerWallNote("minePdfOnlyAnswered", "contact.prayerMinePdfOnlyAnswered", "Your saved prayers are all marked answered — open the Answered tab or add new requests.");
@@ -2438,6 +2581,11 @@
                     exportMyPrayerPdf();
                 });
             }
+            if (prayerMineShareListBtn) {
+                prayerMineShareListBtn.addEventListener("click", function () {
+                    shareMyPrayerList();
+                });
+            }
 
             if (prayerWallList) {
                     prayerWallList.addEventListener("click", function (event) {
@@ -2660,6 +2808,10 @@
                         prayerWallNote.textContent = T("contact.prayerMinePdfEmpty", "Add prayers to your list first, then try again.", prayerCard);
                     } else if (state === "minePdfBlocked") {
                         prayerWallNote.textContent = T("contact.prayerMinePdfBlocked", "Allow pop-ups for this site, or use Print from the browser menu.", prayerCard);
+                    } else if (state === "minePdfSaved") {
+                        prayerWallNote.textContent = T("contact.prayerMinePdfSaved", "PDF generated. Save/share from the dialog.", prayerCard);
+                    } else if (state === "mineShareCopied") {
+                        prayerWallNote.textContent = T("contact.prayerMineShareCopied", "List copied. Paste into WhatsApp or your prayer chat.", prayerCard);
                     } else if (state === "linkCopied") {
                         prayerWallNote.textContent = T("contact.prayerLinkCopied", "Link copied. Paste it in chat or email to share this prayer.", prayerCard);
                     } else if (state === "shareError") {
