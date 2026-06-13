@@ -1212,6 +1212,22 @@
                     </summary>
                     <div class="admin-panel-section-body">
                         <p class="page-note" data-i18n="admin.registeredUsersInfo">Everyone who registers has the same access (sections still follow your App modules toggles above). This list updates when each person opens the app while signed in.</p>
+                        <div class="admin-login-help">
+                            <h3 class="admin-login-help-title" data-i18n="admin.loginHelpTitle">Login help</h3>
+                            <p class="page-note" data-i18n="admin.loginHelpInfo">Look up a Firebase login and copy a password reset link when the automatic email does not arrive (send the link by WhatsApp or email).</p>
+                            <div class="admin-login-help-row">
+                                <input type="email" id="admin-login-help-email" class="search-input" data-i18n-placeholder="auth.email" placeholder="Email" autocomplete="email" inputmode="email">
+                                <button type="button" class="button-link button-secondary" id="admin-login-help-check" data-i18n="admin.loginHelpCheck">Check / reset link</button>
+                            </div>
+                            <p class="page-note" id="admin-login-help-status" hidden></p>
+                            <div class="admin-login-help-result" id="admin-login-help-result" hidden>
+                                <p class="page-note" id="admin-login-help-summary"></p>
+                                <div class="admin-login-help-link-row">
+                                    <input type="text" readonly id="admin-login-help-link" class="search-input" aria-label="Password reset link">
+                                    <button type="button" class="button-link button-secondary" id="admin-login-help-copy" data-i18n="admin.loginHelpCopy">Copy link</button>
+                                </div>
+                            </div>
+                        </div>
                         <button type="button" class="button-link button-secondary" id="admin-registered-users-refresh" data-i18n="admin.registeredUsersRefresh">Refresh list</button>
                         <p class="page-note" id="admin-registered-users-status" hidden></p>
                         <div class="admin-registered-users-wrap" id="admin-registered-users-wrap" hidden>
@@ -2263,7 +2279,7 @@
     <script>
         window.NJC_FCM_VAPID_KEY = window.NJC_FCM_VAPID_KEY || "";
     </script>
-    <script src="user-auth.js?v=20260411mainmerge1"></script>
+    <script src="user-auth.js?v=20260531authreset1"></script>
     <script src="app-modules.js?v=20260610bookpool1"></script>
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
@@ -2282,7 +2298,7 @@
     <script src="admin-dashboard-page.js?v=20260610prayershare1"></script>
     <script src="admin-modules-page.js?v=20260608guestmodules1"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
-    <script src="admin-users-page.js?v=20260526userdir1"></script>
+    <script src="admin-users-page.js?v=20260531authreset1"></script>
     <script src="admin-extras.js?v=20260331libtabs1"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
     <script src="profile-page.js?v=20260411kidsworld"></script>

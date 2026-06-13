@@ -96,8 +96,11 @@
         "auth.loggedIn": "வெற்றிகரமாக உள்நுழைந்தீர்கள்.",
         "auth.failed": "உள்நுழைவு தோல்வி. மீண்டும் முயற்சிக்கவும்.",
         "auth.resetNeedEmail": "கடவுச்சொல் மாற்ற மின்னஞ்சலை முதலில் உள்ளிடவும்.",
-        "auth.resetSent": "கடவுச்சொல் மாற்ற மின்னஞ்சல் அனுப்பப்பட்டது. உங்கள் inbox-ஐ பார்க்கவும்.",
+        "auth.resetSent": "கடவுச்சொல் மாற்ற மின்னஞ்சல் அனுப்பப்பட்டது. inbox மற்றும் spam கோப்புறையைப் பார்க்கவும். 10 நிமிடத்தில் வரவில்லை என்றால் சபை நிர்வாகியை தொடர்பு கொள்ளுங்கள்.",
         "auth.resetFailed": "மாற்ற மின்னஞ்சலை அனுப்ப முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
+        "auth.resetNoAccount": "இந்த மின்னஞ்சலுக்கு கணக்கு இல்லை. புதிய கணக்கை உருவாக்கவும் அல்லது சபை நிர்வாகியிடம் உதவி கேளுங்கள்.",
+        "auth.resetTooMany": "பல முறை முயற்சி செய்துள்ளீர்கள். 15 நிமிடம் காத்திருந்து மீண்டும் முயற்சிக்கவும் அல்லது சபை நிர்வாகியை தொடர்பு கொள்ளுங்கள்.",
+        "auth.resetNetwork": "இணையப் பிழை. இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
         "auth.emailInUse": "இந்த மின்னஞ்சல் ஏற்கனவே பயன்படுத்தப்பட்டுள்ளது.",
         "auth.invalidCredentials": "மின்னஞ்சல் அல்லது கடவுச்சொல் தவறு.",
         "auth.weakPassword": "கடவுச்சொல் குறைந்தது 6 எழுத்துகள் இருக்க வேண்டும்.",
@@ -1013,6 +1016,20 @@
         "admin.registeredUsersEmpty": "இன்னும் பட்டியலில் யாரும் இல்லை. மின்னஞ்சலுடன் செயலியைத் திறந்த பிறகு தோன்றும்.",
         "admin.registeredUsersLoaded": "பதிவுசெய்த பயனர்கள் ஏற்றப்பட்டனர்.",
         "admin.registeredUsersLoadError": "ஏற்ற முடியவில்லை. userDirectory-க்கான Firestore விதிகளைச் சரிபார்க்கவும்.",
+        "admin.loginHelpTitle": "உள்நுழைவு உதவி",
+        "admin.loginHelpInfo": "Firebase கணக்கைத் தேடி கடவுச்சொல் மாற்ற இணைப்பை நகலெடுக்கவும் (தானியங்கி மின்னஞ்சல் வரவில்லை என்றால் WhatsApp அல்லது மின்னஞ்சலில் அனுப்புங்கள்).",
+        "admin.loginHelpCheck": "சரிபார் / மாற்ற இணைப்பு",
+        "admin.loginHelpCopy": "இணைப்பை நகலெடு",
+        "admin.loginHelpNotFound": "இந்த மின்னஞ்சலுக்கு Firebase கணக்கு இல்லை. விருந்தினர் முறை மட்டும் பயன்படுத்தியிருக்கலாம், அல்லது வேறு எழுத்துப் பிழை (Gmail புள்ளிகள்). இந்த மின்னஞ்சலாகவே புதிய கணக்கை உருவாக்கச் சொல்லுங்கள்.",
+        "admin.loginHelpFound": "கணக்கு கண்டுபிடிக்கப்பட்டது.",
+        "admin.loginHelpLastSignIn": "கடைசி உள்நுழைவு:",
+        "admin.loginHelpCreated": "உருவாக்கப்பட்டது:",
+        "admin.loginHelpDisabled": "கணக்கு Firebase-இல் முடக்கப்பட்டுள்ளது.",
+        "admin.loginHelpLinkReady": "மாற்ற இணைப்பு தயார். நகலெடுத்து பயனருக்கு அனுப்புங்கள். பயன்படுத்திய பிறகு காலாவதியாகும்.",
+        "admin.loginHelpCopied": "இணைப்பு நகலெடுக்கப்பட்டது.",
+        "admin.loginHelpCopyManual": "இணைப்பைத் தேர்ந்தெடுத்து கைமுறையாக நகலெடுக்கவும்.",
+        "admin.loginHelpFunctionMissing": "உள்நுழைவு உதவி செயல்பாடு இன்னும் வெளியிடப்படவில்லை. Firebase Functions-இல் adminPasswordResetLink (europe-west1) வெளியிட்டு மீண்டும் முயற்சிக்கவும்.",
+        "admin.loginHelpFailed": "இந்த உள்நுழைவைச் சரிபார்க்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "admin.noticeTitle": "அறிவிப்பு அனுப்பு",
         "admin.noticeTitlePlaceholder": "அறிவிப்பு தலைப்பு",
         "admin.noticeTitleTaPlaceholder": "அறிவிப்பு தலைப்பு (தமிழ், விருப்பம்)",
@@ -2371,7 +2388,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "446prayercompact";
+    var SW_REGISTER_VERSION_FALLBACK = "447authreset";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

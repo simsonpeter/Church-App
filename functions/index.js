@@ -1,5 +1,6 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 
@@ -142,4 +143,56 @@ exports.redeemMemberCode = onCall({
     });
 
     return { success: true };
+});
+
+const PASSWORD_RESET_CONTINUE_URL = "https://njcapp.vercel.app/#home";
+
+exports.adminPasswordResetLink = onCall({
+    region: "europe-west1",
+    maxInstances: 5,
+    invoker: ["public"]
+}, async (request) => {
+    if (!request.auth || !request.auth.token || !request.auth.token.email) {
+        throw new HttpsError("permission-denied", "Sign in required.");
+    }
+    if (!isAdminEmail(request.auth.token.email)) {
+        throw new HttpsError("permission-denied", "Admin only.");
+    }
+
+    const email = String((request.data && request.data.email) || "")
+        .trim()
+        .toLowerCase();
+    if (!email || !email.includes("@") || email.length > 254) {
+        throw new HttpsError("invalid-argument", "Valid email required.");
+    }
+
+    const authAdmin = getAuth();
+    let userRecord;
+    try {
+        userRecord = await authAdmin.getUserByEmail(email);
+    } catch (err) {
+        if (err && err.code === "auth/user-not-found") {
+            return { exists: false, email };
+        }
+        throw new HttpsError("internal", "Could not look up user.");
+    }
+
+    const resetLink = await authAdmin.generatePasswordResetLink(email, {
+        url: PASSWORD_RESET_CONTINUE_URL
+    });
+
+    return {
+        exists: true,
+        email: userRecord.email || email,
+        uid: userRecord.uid,
+        disabled: userRecord.disabled === true,
+        emailVerified: userRecord.emailVerified === true,
+        lastSignIn: userRecord.metadata && userRecord.metadata.lastSignInTime
+            ? userRecord.metadata.lastSignInTime
+            : null,
+        creationTime: userRecord.metadata && userRecord.metadata.creationTime
+            ? userRecord.metadata.creationTime
+            : null,
+        resetLink
+    };
 });

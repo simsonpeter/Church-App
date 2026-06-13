@@ -642,15 +642,33 @@
             forgotPasswordButton.disabled = true;
             setStatus(T("auth.working", "Please wait..."), "working");
             try {
-                await auth.sendPasswordResetEmail(email);
-                setStatus(T("auth.resetSent", "Password reset email sent. Please check your inbox."), "ok");
+                await auth.sendPasswordResetEmail(email, {
+                    url: "https://njcapp.vercel.app/#home"
+                });
+                setStatus(
+                    T(
+                        "auth.resetSent",
+                        "Password reset email sent. Check your inbox and spam folder. If nothing arrives in 10 minutes, contact the church office."
+                    ),
+                    "ok"
+                );
             } catch (err) {
                 var code = err && err.code ? String(err.code) : "";
                 var message = T("auth.resetFailed", "Could not send reset email. Please try again.");
                 if (code === "auth/invalid-email") {
                     message = T("auth.invalidEmail", "Please enter a valid email.");
                 } else if (code === "auth/user-not-found") {
-                    message = T("auth.invalidCredentials", "Invalid email or password.");
+                    message = T(
+                        "auth.resetNoAccount",
+                        "No account found for this email. Register a new account, or contact the church office for help."
+                    );
+                } else if (code === "auth/too-many-requests") {
+                    message = T(
+                        "auth.resetTooMany",
+                        "Too many reset attempts. Wait 15 minutes and try again, or contact the church office."
+                    );
+                } else if (code === "auth/network-request-failed") {
+                    message = T("auth.resetNetwork", "Network error. Check your connection and try again.");
                 }
                 setStatus(message, "error");
             } finally {

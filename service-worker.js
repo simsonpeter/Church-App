@@ -31,18 +31,18 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v446prayercompact";
-const RUNTIME_CACHE = "njc-runtime-cache-v446prayercompact";
+const APP_CACHE = "njc-app-cache-v447authreset";
+const RUNTIME_CACHE = "njc-runtime-cache-v447authreset";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: cleaner layout — icon buttons for PDF/share on the tab bar, less description text. Settings → Check for updates.";
+    "Login help: clearer password reset messages; admin can copy a reset link when email does not arrive. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20260613prayercompact1",
-    "./user-auth.js?v=20260411mainmerge1",
+    "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
     "./app-shell.js?v=20260610vercelfix1",
@@ -60,7 +60,7 @@ const CORE_ASSETS = [
     "./admin-dashboard-page.js?v=20260610prayershare1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
-    "./admin-users-page.js?v=20260526userdir1",
+    "./admin-users-page.js?v=20260531authreset1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260411kidsworld",

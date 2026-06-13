@@ -6114,6 +6114,47 @@ html[data-theme="dark"] .prayer-list-reply-badge {
     font-weight: 700;
 }
 
+.admin-login-help {
+    margin: 0.75rem 0 1rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.admin-login-help-title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+}
+
+.admin-login-help-row,
+.admin-login-help-link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-top: 0.5rem;
+}
+
+.admin-login-help-row .search-input,
+.admin-login-help-link-row .search-input {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.admin-login-help-result {
+    margin-top: 0.5rem;
+}
+
+.admin-login-help-summary-line {
+    display: block;
+}
+
+html[data-theme="dark"] .admin-login-help {
+    background: rgba(30, 30, 36, 0.55);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
 .admin-stat-card {
     border: 1px solid var(--line);
     border-radius: 12px;
