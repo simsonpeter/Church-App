@@ -813,7 +813,12 @@
         "contact.prayerWallNoMineActiveTitle": "இங்கு ஜெபிக்க ஏதும் இல்லை",
         "contact.prayerWallNoMineActiveBody": "உங்கள் பட்டியலில் உள்ளவை அனைத்தும் பதிலளிக்கப்பட்டதாக குறிக்கப்பட்டுள்ளன. அந்த வேண்டுதல்களை “பதிலளிக்கப்பட்டது” தாவலில் காணலாம்.",
         "contact.prayerMineToolbarHint": "வேண்டுதலைத் திறந்து “என் ஜெபத்தில் சேர்” அல்லது அட்டையில் உள்ள பொத்தானைப் பயன்படுத்தவும். பின்னர் அச்சிடவும் அல்லது PDF-ஆகச் சேமிக்கவும்.",
-        "contact.prayerMineExportPdf": "PDF",
+        "contact.prayerMineExportPdf": "PDF ஏற்றுமதி",
+        "contact.prayerMineShareList": "பட்டியலைப் பகிர்",
+        "contact.prayerMineSharePrivacy": "இந்த வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
+        "contact.prayerMineShareMore": "…மேலும் {count} ஆப்-இல் உள்ளன.",
+        "contact.prayerMineShareFooter": "NJC Belgium · ஜெபச் சுவர்",
+        "contact.prayerMineShareCopied": "பட்டியல் நகலெடுக்கப்பட்டது. WhatsApp அல்லது ஜெபக் குழுவில் ஒட்டவும்.",
         "contact.prayerMineClearAll": "பட்டியலை அழி",
         "contact.prayerMineAdd": "என் ஜெபத்தில் சேர்",
         "contact.prayerMineRemove": "என் ஜெபத்திலிருந்து நீக்கு",
@@ -1199,6 +1204,12 @@
         "admin.prayerExportSubtitle": "சபை ஜெபச் சுவரிலிருந்து — ஜெபம் மற்றும் தொடர்ச்சிக்கு.",
         "admin.prayerExportUrgentCount": "அவசரம்: {n}",
         "admin.prayerExportFooter": "ஜெபச் சுவர் ஏற்றுமதி · ஊழியப் பயன்பாட்டிற்கு · வேண்டுதல்களை ரகசியமாக வைக்கவும்.",
+        "admin.prayerShareText": "முழு பட்டியலைப் பகிர் (உரை)",
+        "admin.prayerBulletinWeekShare": "இந்த வாரம் பகிர் (உரை)",
+        "admin.prayerSharePrivacy": "ரகசியம் — ஜெபம் மற்றும் ஊழியப் பின்தொடர்வுக்கு மட்டும்.",
+        "admin.prayerShareMore": "…மேலும் {count} நிர்வாகத்தில் உள்ளன.",
+        "admin.prayerShareCopied": "பட்டியல் நகலெடுக்கப்பட்டது. WhatsApp அல்லது ஜெபக் குழுவில் ஒட்டவும்.",
+        "admin.prayerShareFailed": "நகலெடுக்க முடியவில்லை. PDF ஏற்றுமதியை முயற்சிக்கவும்.",
         "admin.loading": "நிர்வாக பலகை ஏற்றப்படுகிறது...",
         "admin.loadingBody": "தயவுசெய்து காத்திருக்கவும்.",
         "admin.emptyPrayersTitle": "ஜெப வேண்டுதல்கள் இல்லை",
@@ -2351,7 +2362,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "438vercelfix";
+    var SW_REGISTER_VERSION_FALLBACK = "443prayershare";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

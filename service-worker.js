@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v439dailybreadshare";
-const RUNTIME_CACHE = "njc-runtime-cache-v439dailybreadshare";
+const APP_CACHE = "njc-app-cache-v443prayershare";
+const RUNTIME_CACHE = "njc-runtime-cache-v443prayershare";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Daily bread: dated share links (#daily-bread/YYYY-MM-DD) and Previous/Next/Today to read past days. Guest menu lock prompts. Settings → Check for updates if needed.";
+    "Prayer: export My prayer list as PDF or share text for WhatsApp. Admin can share full or weekly lists too. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
@@ -53,11 +53,11 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260531sharelang1",
     "./bible-page.js?v=20260531sharelang1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260531sharelang1",
+    "./contact-page.js?v=20260610prayershare1",
     "./daily-bread-page.js?v=20260609dailybreaddate1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260519newsletteredit1",
+    "./admin-dashboard-page.js?v=20260610prayershare1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260526userdir1",
