@@ -315,6 +315,8 @@
         "admin.panelSectionToggleAria": "இந்தப் பகுதியை காட்டு அல்லது மறை",
         "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
         "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
+        "admin.dailyBreadMissingTodayTitle": "இன்று இல்லை",
+        "admin.dailyBreadMissingToday": "இன்றைய (பெல்ஜியம்) தேதிக்கு பதிவு இல்லை — மேலே தேதியை அமைத்து சேமிக்கவும்.",
         "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
         "admin.dailyBreadNeedBody": "உள்ளடக்கத்தை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
         "admin.dailyBreadSaved": "அன்றன்றுள்ள அப்பம் சேமிக்கப்பட்டது.",
@@ -2388,7 +2390,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "447authreset";
+    var SW_REGISTER_VERSION_FALLBACK = "448dailybread1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
@@ -2498,7 +2500,7 @@
     }
 
     /** Fallback release-notes line when the worker does not send notes. */
-    var UPDATE_NOTES_FALLBACK = "Bug fixes and improvements.";
+    var UPDATE_NOTES_FALLBACK = "Daily bread: admin date defaults to Belgium today; warns when today is missing.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";
