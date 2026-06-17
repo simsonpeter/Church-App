@@ -201,6 +201,8 @@
         "admin.panelSectionToggleAria": "இந்தப் பகுதியை காட்டு அல்லது மறை",
         "admin.dailyBreadEmptyTitle": "பதிவுகள் இல்லை",
         "admin.dailyBreadEmptyBody": "மேலே படிவத்தில் சேர்க்கவும்.",
+        "admin.dailyBreadMissingTodayTitle": "இன்று இல்லை",
+        "admin.dailyBreadMissingToday": "இன்றைய (பெல்ஜியம்) தேதிக்கு பதிவு இல்லை — மேலே தேதியை அமைத்து சேமிக்கவும்.",
         "admin.dailyBreadNeedDate": "தேதியை உள்ளிடவும்.",
         "admin.dailyBreadNeedBody": "உள்ளடக்கத்தை உள்ளிடவும் (ஆங்கிலம் அல்லது தமிழ்).",
         "admin.dailyBreadSaved": "அன்றன்றுள்ள அப்பம் சேமிக்கப்பட்டது.",
@@ -1757,10 +1759,10 @@
         }, { passive: true });
     }
 
-    var SW_VERSION = "20260413dobmerge";
-    var APP_VERSION = "2026.4.7";
+    var SW_VERSION = "20260617dailybread1";
+    var APP_VERSION = "2026.6.17";
     /** Short release note; modal also shows SW_VERSION so text changes every build. */
-    var UPDATE_NOTES_SUMMARY = "Profile: keep birthday when cloud doc missing dob.";
+    var UPDATE_NOTES_SUMMARY = "Daily bread: load fix when bucket is new, admin date defaults to Belgium today, midnight refresh.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

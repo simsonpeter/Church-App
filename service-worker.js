@@ -31,16 +31,16 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v304testimony1";
-const RUNTIME_CACHE = "njc-runtime-cache-v304testimony1";
+const APP_CACHE = "njc-app-cache-v448dailybread1";
+const RUNTIME_CACHE = "njc-runtime-cache-v448dailybread1";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260620testimony1",
+    "./styles.css?v=20260617dailybread1",
     "./user-auth.js?v=20260412commceleb1",
     "./app-modules.js?v=20260620testimony1",
-    "./app-shell.js?v=20260620testimony1",
+    "./app-shell.js?v=20260617dailybread1",
     "./events-engine.js?v=20260318de",
     "./home-page.js?v=20260412annpartner1",
     "./events-page.js?v=20260414u2",
@@ -48,9 +48,9 @@ const CORE_ASSETS = [
     "./bible-page.js?v=20260413tts1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260330pw1",
-    "./daily-bread-page.js?v=20260413tts1",
+    "./daily-bread-page.js?v=20260617dailybread1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260407fcm1",
+    "./admin-dashboard-page.js?v=20260617dailybread1",
     "./admin-extras.js?v=20260331libtabs1",
     "./admin-mailbox-page.js?v=20260318de",
     "./profile-page.js?v=20260413dobmerge1",

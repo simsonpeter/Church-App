@@ -106,10 +106,22 @@
         if (Number.isNaN(date.getTime())) {
             return "";
         }
-        var y = date.getFullYear();
-        var m = String(date.getMonth() + 1).padStart(2, "0");
-        var d = String(date.getDate()).padStart(2, "0");
-        return String(y) + "-" + m + "-" + d;
+        var parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone: BRUSSELS_TZ,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }).formatToParts(date);
+        function partValue(type) {
+            var found = parts.find(function (part) {
+                return part.type === type;
+            });
+            return found ? Number(found.value) : 0;
+        }
+        var y = partValue("year");
+        var m = partValue("month");
+        var d = partValue("day");
+        return String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
     }
 
     function normalizeEntry(row, index) {
@@ -631,6 +643,43 @@
     }
 
     var loadToken = 0;
+    var lastLoadedYmdKey = "";
+    var brusselsDayTimerId = null;
+
+    function fetchDailyBreadRows() {
+        return fetch(FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
+            .then(function (response) {
+                if (response.status === 404) {
+                    return [];
+                }
+                if (!response.ok) {
+                    throw new Error("load failed");
+                }
+                return response.json();
+            })
+            .then(function (payload) {
+                if (Array.isArray(payload)) {
+                    return payload;
+                }
+                return payload && Array.isArray(payload.entries) ? payload.entries : [];
+            });
+    }
+
+    function scheduleBrusselsDayRefresh() {
+        if (brusselsDayTimerId) {
+            return;
+        }
+        brusselsDayTimerId = window.setInterval(function () {
+            var key = getBrusselsYmd().key;
+            if (!lastLoadedYmdKey || lastLoadedYmdKey === key) {
+                return;
+            }
+            var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+            if (route === "daily-bread") {
+                loadDailyBread();
+            }
+        }, 60000);
+    }
 
     function setLoadingState() {
         stopSpeechPlayback();
@@ -720,22 +769,17 @@
 
     function loadDailyBread() {
         var ymd = getBrusselsYmd();
+        lastLoadedYmdKey = ymd.key;
         updateDateLine(ymd.key);
+        scheduleBrusselsDayRefresh();
         loadToken += 1;
         var token = loadToken;
         setLoadingState();
-        fetch(FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error("load failed");
-                }
-                return response.json();
-            })
-            .then(function (payload) {
+        fetchDailyBreadRows()
+            .then(function (rows) {
                 if (token !== loadToken) {
                     return;
                 }
-                var rows = Array.isArray(payload) ? payload : (payload && Array.isArray(payload.entries) ? payload.entries : []);
                 var list = rows.map(function (row, i) {
                     return normalizeEntry(row, i);
                 }).filter(function (e) {
@@ -805,6 +849,17 @@
     });
     document.addEventListener("visibilitychange", function () {
         maybeResumeDailyBreadAfterBackground();
+        if (document.hidden) {
+            return;
+        }
+        var route = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        if (route !== "daily-bread") {
+            return;
+        }
+        var key = getBrusselsYmd().key;
+        if (lastLoadedYmdKey && lastLoadedYmdKey !== key) {
+            loadDailyBread();
+        }
     });
 
     document.addEventListener("DOMContentLoaded", function () {

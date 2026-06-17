@@ -1,5 +1,6 @@
 (function () {
     var ADMIN_EMAIL = "simsonpeter@gmail.com";
+    var BRUSSELS_TZ = "Europe/Brussels";
     var ADMIN_NOTICES_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
     var ADMIN_BROADCASTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
     var ADMIN_EVENTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
@@ -292,6 +293,32 @@
         return String(prefix || "entry") + "-" + String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000));
     }
 
+    function getBrusselsYmdKey(fromDate) {
+        var parts = new Intl.DateTimeFormat("en-GB", {
+            timeZone: BRUSSELS_TZ,
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit"
+        }).formatToParts(fromDate || new Date());
+        function partValue(type) {
+            var found = parts.find(function (part) {
+                return part.type === type;
+            });
+            return found ? Number(found.value) : 0;
+        }
+        var y = partValue("year");
+        var m = partValue("month");
+        var d = partValue("day");
+        return String(y) + "-" + String(m).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+    }
+
+    function setDailyBreadDateDefault() {
+        if (!dailyBreadDateInput) {
+            return;
+        }
+        dailyBreadDateInput.value = getBrusselsYmdKey();
+    }
+
     function toYmd(value) {
         var raw = String(value || "").trim();
         if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
@@ -301,10 +328,7 @@
         if (Number.isNaN(date.getTime())) {
             return "";
         }
-        var y = date.getFullYear();
-        var m = String(date.getMonth() + 1).padStart(2, "0");
-        var d = String(date.getDate()).padStart(2, "0");
-        return String(y) + "-" + m + "-" + d;
+        return getBrusselsYmdKey(date);
     }
 
     function readNoticeScheduleFromForm() {
@@ -726,13 +750,25 @@
                 "<li>" +
                 "  <h3>" + escapeHtml(T("admin.dailyBreadEmptyTitle", "No entries yet")) + "</h3>" +
                 "  <p>" + escapeHtml(T("admin.dailyBreadEmptyBody", "Add one using the form above.")) + "</p>" +
+                "  <p class=\"page-note admin-daily-bread-missing-today\">" + escapeHtml(T("admin.dailyBreadMissingToday", "No entry for today (Belgium date) yet — set the date above and save.")) + "</p>" +
                 "</li>";
             return;
         }
+        var todayKey = getBrusselsYmdKey();
+        var hasToday = valid.some(function (entry) {
+            return entry.date === todayKey;
+        });
         var sorted = valid.slice().sort(function (a, b) {
             return String(b.date).localeCompare(String(a.date));
         }).slice(0, 120);
-        dailyBreadList.innerHTML = sorted.map(function (entry) {
+        var todayBanner = hasToday ? "" : (
+            "<li class=\"admin-daily-bread-missing-today\">" +
+            "  <p class=\"page-note\"><strong>" + escapeHtml(T("admin.dailyBreadMissingTodayTitle", "Today missing")) + "</strong> — " +
+            escapeHtml(T("admin.dailyBreadMissingToday", "No entry for today (Belgium date) yet — set the date above and save.")) +
+            "</p>" +
+            "</li>"
+        );
+        dailyBreadList.innerHTML = todayBanner + sorted.map(function (entry) {
             var id = String(entry.id || "").trim();
             var titleLine = entry.title || entry.titleTa || "—";
             var authorLine = entry.author || entry.authorTa || "";
@@ -1199,6 +1235,7 @@
             return;
         }
         setFormsEnabled(true);
+        setDailyBreadDateDefault();
         if (!force && (cachedPrayers.length + cachedNotices.length + cachedBroadcasts.length + cachedEvents.length + cachedSermons.length + cachedTrivia.length + cachedDailyBread.length + cachedBookShelf.length > 0)) {
             renderStats();
             renderNoticeList();
@@ -1604,7 +1641,7 @@
             }).filter(function (e) {
                 return Boolean(e && e.date);
             });
-            dailyBreadDateInput.value = "";
+            setDailyBreadDateDefault();
             if (dailyBreadTitleInput) dailyBreadTitleInput.value = "";
             if (dailyBreadTitleTaInput) dailyBreadTitleTaInput.value = "";
             if (dailyBreadAuthorInput) dailyBreadAuthorInput.value = "";
