@@ -2390,7 +2390,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "448dailybread1";
+    var SW_REGISTER_VERSION_FALLBACK = "449actstamil1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
@@ -2500,7 +2500,7 @@
     }
 
     /** Fallback release-notes line when the worker does not send notes. */
-    var UPDATE_NOTES_FALLBACK = "Daily bread: admin date defaults to Belgium today; warns when today is missing.";
+    var UPDATE_NOTES_FALLBACK = "Tamil: Acts is now அப்போஸ்தலருடைய நடபடிகள் in reading plan and Bible reader.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

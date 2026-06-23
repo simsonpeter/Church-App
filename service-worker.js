@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v448dailybread1";
-const RUNTIME_CACHE = "njc-runtime-cache-v448dailybread1";
+const APP_CACHE = "njc-app-cache-v449actstamil1";
+const RUNTIME_CACHE = "njc-runtime-cache-v449actstamil1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Daily bread: admin date defaults to Belgium today, warns when today is missing, load fixes. Settings → Check for updates.";
+    "Tamil: Acts book name is now அப்போஸ்தலருடைய நடபடிகள் in reading plan and Bible reader. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
@@ -48,10 +48,10 @@ const CORE_ASSETS = [
     "./app-shell.js?v=20260617dailybread1",
     "./events-engine.js?v=20260531sharelang1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260531sharelang1",
+    "./home-page.js?v=20260618actstamil1",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260531sharelang1",
-    "./bible-page.js?v=20260531sharelang1",
+    "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260613prayercompact1",
     "./daily-bread-page.js?v=20260617dailybread1",
