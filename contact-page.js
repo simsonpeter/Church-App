@@ -57,6 +57,7 @@
             var PRAYER_ACTION_STATE_KEY = "njc_prayer_action_state_v1";
             var PRAYER_CLIENT_ID_KEY = "njc_prayer_client_id_v1";
             var MY_PRAYER_IDS_KEY = "njc_my_prayer_ids_v1";
+            var PRAYER_WALL_BACKUP_KEY = "njc_prayer_wall_backup_v1";
             var MY_PRAYER_MAX = 100;
             var PRAYER_REPLY_SEEN_KEY = "njc_prayer_reply_seen_v1";
             var PRAYER_ALLOWED_CATEGORIES = ["healing", "travel", "thanksgiving", "family", "guidance"];
@@ -2051,17 +2052,9 @@
                 var response = await fetch(PRAYER_WALL_URL + "?ts=" + String(Date.now()), {
                     cache: "no-store"
                 });
+                // Never POST {entries:[]} on 404 — that can wipe a bucket if Mantle briefly 404s.
+                // The next real save creates the document with data.
                 if (response.status === 404) {
-                    var createResponse = await fetch(PRAYER_WALL_URL, {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ entries: [] })
-                    });
-                    if (!createResponse.ok) {
-                        throw new Error("Could not initialize prayer wall");
-                    }
                     return [];
                 }
                 if (!response.ok) {
@@ -2069,17 +2062,38 @@
                 }
                 var payload = await response.json();
                 var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
-                return entries.map(normalizeEntry).filter(function (item) {
+                var normalized = entries.map(normalizeEntry).filter(function (item) {
                     return item.message;
                 }).slice(0, MAX_ENTRIES);
+                if (normalized.length) {
+                    try {
+                        window.localStorage.setItem(PRAYER_WALL_BACKUP_KEY, JSON.stringify({
+                            at: new Date().toISOString(),
+                            entries: normalized
+                        }));
+                    } catch (eBackup) {}
+                }
+                return normalized;
             }
 
-            async function savePrayerWallEntries(entries) {
+            async function savePrayerWallEntries(entries, options) {
                 var normalized = (Array.isArray(entries) ? entries : []).map(function (raw, idx) {
                     return normalizeEntry(raw, idx);
                 }).filter(function (item) {
                     return item.message;
                 }).slice(0, MAX_ENTRIES);
+                var allowEmpty = Boolean(options && options.allowEmpty);
+                // Guard against accidental full wipe from a false-empty fetch.
+                if (!normalized.length && !allowEmpty) {
+                    var probe = await fetch(PRAYER_WALL_URL + "?ts=" + String(Date.now()), { cache: "no-store" });
+                    if (probe.ok) {
+                        var probePayload = await probe.json();
+                        var remote = probePayload && Array.isArray(probePayload.entries) ? probePayload.entries : [];
+                        if (remote.length > 0) {
+                            throw new Error("Refusing to overwrite prayer wall with empty list");
+                        }
+                    }
+                }
                 var payload = {
                     entries: normalized
                 };
@@ -2094,6 +2108,14 @@
                     throw new Error("Could not save prayer wall");
                 }
                 prayerWallEntries = normalized;
+                if (normalized.length) {
+                    try {
+                        window.localStorage.setItem(PRAYER_WALL_BACKUP_KEY, JSON.stringify({
+                            at: new Date().toISOString(),
+                            entries: normalized
+                        }));
+                    } catch (eBackup2) {}
+                }
             }
 
             function renderPrayerWall() {
@@ -2399,7 +2421,7 @@
                         latestEntries = latestEntries.filter(function (entry) {
                             return entry.id !== prayerId;
                         });
-                        await savePrayerWallEntries(latestEntries);
+                        await savePrayerWallEntries(latestEntries, { allowEmpty: latestEntries.length === 0 });
                         removePrayerFromMyList(prayerId);
                         showPrayerWallNote("deleted", "contact.prayerWallDeleted", "Prayer request deleted.");
                         activePrayerDetailId = "";

@@ -139,6 +139,7 @@
     var busy = false;
     var LIBRARY_BACKUP_KEY = "njc_admin_library_backup_v1";
     var KIDS_AUDIO_BACKUP_KEY = "njc_admin_kids_audio_backup_v1";
+    var PRAYER_BACKUP_KEY = "njc_prayer_wall_backup_v1";
 
     var newsletterForm = document.getElementById("admin-newsletter-form");
     var newsletterEditIdInput = document.getElementById("admin-newsletter-edit-id");
@@ -1595,17 +1596,10 @@
     function fetchMantleEntries(url) {
         return fetch(url + "?ts=" + String(Date.now()), { cache: "no-store" })
             .then(function (response) {
+                // Do not POST {entries:[]} on 404 — that can wipe live data if Mantle briefly 404s.
+                // First real save creates the bucket with content.
                 if (response.status === 404) {
-                    return fetch(url, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ entries: [] })
-                    }).then(function (createResponse) {
-                        if (!createResponse.ok) {
-                            throw new Error("Init failed");
-                        }
-                        return [];
-                    });
+                    return [];
                 }
                 if (!response.ok) {
                     throw new Error("Load failed");
@@ -1652,6 +1646,57 @@
 
     function backupKidsAudioEntries(entries) {
         writeMantleBackup(KIDS_AUDIO_BACKUP_KEY, entries);
+    }
+
+    function backupPrayerEntries(entries) {
+        writeMantleBackup(PRAYER_BACKUP_KEY, entries);
+    }
+
+    function isPrayerWallUrl(url) {
+        return String(url || "").indexOf("njc-belgium-prayer-wall") >= 0;
+    }
+
+    function saveMantleEntries(url, entries, options) {
+        var list = (Array.isArray(entries) ? entries : []).slice(0, MAX_ENTRIES);
+        var allowEmpty = Boolean(options && options.allowEmpty);
+        var write = function () {
+            return fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ entries: list })
+            }).then(function (response) {
+                if (!response.ok) {
+                    throw new Error("Save failed");
+                }
+                return true;
+            });
+        };
+        if (isPrayerWallUrl(url) && !list.length && !allowEmpty) {
+            return fetchMantleEntries(url).then(function (remote) {
+                if (Array.isArray(remote) && remote.length > 0) {
+                    throw new Error("Refusing to wipe prayer wall");
+                }
+                return write();
+            });
+        }
+        return write();
+    }
+
+    function restorePrayerFromBackup() {
+        restoreMantleBackup(
+            PRAYER_WALL_URL,
+            PRAYER_BACKUP_KEY,
+            normalizePrayerEntry,
+            function (fresh) {
+                cachedPrayers = (Array.isArray(fresh) ? fresh : []).map(normalizePrayerEntry).filter(function (item) {
+                    return Boolean(item && item.id && item.message);
+                });
+                backupPrayerEntries(cachedPrayers);
+                renderStats();
+                renderPrayerList();
+            },
+            "njc:admin-prayer-updated"
+        );
     }
 
     function formatBackupDate(isoText) {
@@ -1755,19 +1800,6 @@
         );
     }
 
-    function saveMantleEntries(url, entries) {
-        return fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ entries: (Array.isArray(entries) ? entries : []).slice(0, MAX_ENTRIES) })
-        }).then(function (response) {
-            if (!response.ok) {
-                throw new Error("Save failed");
-            }
-            return true;
-        });
-    }
-
     function renderStats() {
         statNotices.textContent = String(cachedNotices.length);
         statEvents.textContent = String(cachedEvents.length);
@@ -1777,11 +1809,13 @@
     }
 
     function renderPrayerList() {
+        var backupBlock = renderBackupRestoreActions(PRAYER_BACKUP_KEY, "prayer");
         if (!cachedPrayers.length) {
             prayerList.innerHTML = "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(T("admin.emptyPrayersTitle", "No prayers found")) + "</h3>" +
                 "  <p>" + escapeHtml(T("admin.emptyPrayersBody", "Prayer requests will appear here.")) + "</p>" +
+                backupBlock +
                 "</li>";
             return;
         }
@@ -1790,7 +1824,7 @@
             var bTime = String(b && b.createdAt || "");
             return bTime.localeCompare(aTime);
         }).slice(0, 25);
-        prayerList.innerHTML = sorted.map(function (entry) {
+        prayerList.innerHTML = backupBlock + sorted.map(function (entry) {
             var buttonLabel = entry.urgent
                 ? T("admin.prayerUnpin", "Remove urgent")
                 : T("admin.prayerPin", "Mark urgent");
@@ -1813,7 +1847,7 @@
                 "  </div>" +
                 "</li>";
         }).join("");
-        prayerList.querySelectorAll("button[data-admin-prayer-id]").forEach(function (button) {
+        prayerList.querySelectorAll("button[data-admin-prayer-id], button[data-admin-mantle-restore]").forEach(function (button) {
             button.disabled = busy;
         });
     }
@@ -2211,6 +2245,9 @@
             }
             if (cachedKidsAudio.length) {
                 backupKidsAudioEntries(cachedKidsAudio);
+            }
+            if (cachedPrayers.length) {
+                backupPrayerEntries(cachedPrayers);
             }
             return fetchNewslettersFromFirestore().then(function (nl) {
                 cachedNewsletters = Array.isArray(nl) ? nl : [];
@@ -3646,6 +3683,13 @@
     });
 
     prayerList.addEventListener("click", function (event) {
+        var restoreButton = event.target.closest("button[data-admin-mantle-restore]");
+        if (restoreButton && prayerList.contains(restoreButton)) {
+            if (restoreButton.getAttribute("data-admin-mantle-restore") === "prayer") {
+                restorePrayerFromBackup();
+            }
+            return;
+        }
         var button = event.target.closest("button[data-admin-prayer-id][data-admin-prayer-action]");
         if (!button || busy || !isAdminUser()) {
             return;
@@ -3678,6 +3722,7 @@
             cachedPrayers = (Array.isArray(nextEntries) ? nextEntries : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item.id);
             });
+            backupPrayerEntries(cachedPrayers);
             renderStats();
             renderPrayerList();
             if (action === "approve") {

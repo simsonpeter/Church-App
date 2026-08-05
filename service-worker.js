@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v449actstamil1";
-const RUNTIME_CACHE = "njc-runtime-cache-v449actstamil1";
+const APP_CACHE = "njc-app-cache-v450prayerprotect1";
+const RUNTIME_CACHE = "njc-runtime-cache-v450prayerprotect1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Tamil: Acts book name is now அப்போஸ்தலருடைய நடபடிகள் in reading plan and Bible reader. Settings → Check for updates.";
+    "Prayer wall: protect against accidental wipe; admin can restore from device backup. Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
@@ -53,11 +53,11 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260531sharelang1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260613prayercompact1",
+    "./contact-page.js?v=20260805prayerprotect1",
     "./daily-bread-page.js?v=20260617dailybread1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260617dailybread1",
+    "./admin-dashboard-page.js?v=20260805prayerprotect1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260531authreset1",
