@@ -298,7 +298,8 @@
                 }
             });
         }
-        if (url) {
+        var includeUrlInText = config.includeUrlInText !== false;
+        if (includeUrlInText && url) {
             lines.push(url);
         }
         return lines.join("\n\n");
@@ -349,7 +350,8 @@
             subtitle: subtitle,
             body: body,
             url: config.url,
-            extraLines: extraLines
+            extraLines: extraLines,
+            includeUrlInText: config.includeUrlInText
         };
         var title = shareDisplayTitle({
             label: label,

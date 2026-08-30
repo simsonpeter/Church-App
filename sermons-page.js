@@ -919,17 +919,27 @@
                     labelFallback: "Sermon",
                     subtitle: title,
                     body: preview,
-                    extraLineKeys: [{ key: "sermons.sharePlayLine", fallback: "▶ Listen in NJC App" }],
+                    extraLineKeys: [
+                        { key: "sermons.shareListenNow", fallback: "▶ Listen now" },
+                        { key: "sermons.shareDownloadNow", fallback: "⬇ Download now" }
+                    ],
                     url: "",
+                    includeUrlInText: false,
                     sourceElement: latestSermonsCard
                 };
                 var photoUrl = getSermonPhotoUrl(currentSermon);
                 var speakerName = String(currentSermon.speaker || "").trim();
 
                 function fallbackCopy(url) {
+                    shareOpts.url = url;
+                    shareOpts.includeUrlInText = false;
                     var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
                         ? window.NjcEvents.buildSharePlainText(shareOpts)
-                        : buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard));
+                        : buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), "", T("sermons.shareListenNow", "▶ Listen now", latestSermonsCard));
+                    // One soft link line for clipboard (not duplicated).
+                    if (plainText && url && plainText.indexOf(url) < 0) {
+                        plainText = plainText + "\n\n" + url;
+                    }
                     return copyTextToClipboard(plainText).then(function () {
                         showSermonShareFeedback("sermons.shareLinkCopied", "Link copied. Paste it in chat or email to share.");
                     }, function () {
@@ -996,9 +1006,31 @@
                         return null;
                     }
                     shareOpts.url = url;
+                    shareOpts.includeUrlInText = false;
                     var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                         ? window.NjcEvents.shareContent(shareOpts)
-                        : { title: T("sermons.shareSectionLabel", "Sermon", latestSermonsCard) + " — " + title, text: buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard)), url: url };
+                        : {
+                            title: T("sermons.shareSectionLabel", "Sermon", latestSermonsCard) + " — " + title,
+                            text: buildPlainShareText(
+                                T("sermons.shareSectionLabel", "Sermon", latestSermonsCard),
+                                title + (preview ? "\n\n" + preview : ""),
+                                "",
+                                T("sermons.shareListenNow", "▶ Listen now", latestSermonsCard)
+                            ),
+                            url: url
+                        };
+                    // Keep a single url field only — do not also paste the raw link into text
+                    // (WhatsApp otherwise shows the same link twice).
+                    if (sharePayload && sharePayload.url && sharePayload.text) {
+                        var rawUrl = String(sharePayload.url);
+                        sharePayload.text = String(sharePayload.text)
+                            .split(/\n{2,}/)
+                            .filter(function (part) {
+                                return String(part || "").trim() !== rawUrl;
+                            })
+                            .join("\n\n")
+                            .trim();
+                    }
 
                     return buildSermonShareImageBlob({
                         title: title,

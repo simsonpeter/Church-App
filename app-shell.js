@@ -686,6 +686,8 @@
         "sermons.shareLinkCopied": "இணைப்பு நகலெடுக்கப்பட்டது. செய்தி அல்லது மின்னஞ்சலில் ஒட்டி பகிரலாம்.",
         "sermons.shareFailed": "பகிரவோ நகலெடுக்கவோ முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "sermons.sharePlayLine": "▶ NJC செயலியில் கேளுங்கள்",
+        "sermons.shareListenNow": "▶ இப்போது கேளுங்கள்",
+        "sermons.shareDownloadNow": "⬇ இப்போது பதிவிறக்கவும்",
         "sermons.shareGenerating": "பிரசங்கப் படத்தை உருவாக்குகிறது...",
         "sermons.sharePhotoReady": "பிரசங்கப் படத்தைப் பகிர்கிறது...",
         "sermons.shareDownloaded": "பிரசங்கப் படம் பதிவிறங்கியது. WhatsApp/Instagram-இல் பகிருங்கள்.",
