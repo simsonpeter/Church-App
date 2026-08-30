@@ -681,11 +681,15 @@
         "sermons.favoriteAdd": "பிடித்ததில் சேர்",
         "sermons.favoriteRemove": "பிடித்ததில் இருந்து நீக்கு",
         "sermons.shareSectionLabel": "பிரசங்கம்",
-        "sermons.shareAria": "இந்த பிரசங்கத்திற்கான இணைப்பை பகிர்",
+        "sermons.shareAria": "பிரசங்கப் படத்தைப் பகிர்",
         "sermons.shareGuestsDisabled": "இந்த பிரசங்கத்தை பகிர பதிவுசெய்யப்பட்ட கணக்கில் உள்நுழையவும்.",
         "sermons.shareLinkCopied": "இணைப்பு நகலெடுக்கப்பட்டது. செய்தி அல்லது மின்னஞ்சலில் ஒட்டி பகிரலாம்.",
         "sermons.shareFailed": "பகிரவோ நகலெடுக்கவோ முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "sermons.sharePlayLine": "▶ NJC செயலியில் கேளுங்கள்",
+        "sermons.shareGenerating": "பிரசங்கப் படத்தை உருவாக்குகிறது...",
+        "sermons.shareDownloaded": "பிரசங்கப் படம் பதிவிறங்கியது. WhatsApp/Instagram-இல் பகிருங்கள்.",
+        "sermons.shareCardBrand": "NEW JERUSALEM CHURCH BELGIUM",
+        "sermons.shareCardBadge": "NJC • பிரசங்கம்",
         "sermons.listenCount": "{count} முறை கேட்கப்பட்டது",
         "songbook.eyebrow": "பாடல்கள்",
         "songbook.title": "NJC பாடல் தொகுப்பு",
@@ -2393,7 +2397,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "451sermonphoto1";
+    var SW_REGISTER_VERSION_FALLBACK = "452sermonshareimg1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
@@ -2503,7 +2507,7 @@
     }
 
     /** Fallback release-notes line when the worker does not send notes. */
-    var UPDATE_NOTES_FALLBACK = "Sermons: optional photo on upload; share includes that photo when present.";
+    var UPDATE_NOTES_FALLBACK = "Sermon share now generates a branded image card (uses uploaded photo when available).";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

@@ -556,9 +556,9 @@
                 if (signedIn) {
                     playerShareBtn.setAttribute(
                         "aria-label",
-                        T("sermons.shareAria", "Share link to this sermon", latestSermonsCard)
+                        T("sermons.shareAria", "Share sermon image", latestSermonsCard)
                     );
-                    playerShareBtn.title = T("sermons.shareAria", "Share link to this sermon", latestSermonsCard);
+                    playerShareBtn.title = T("sermons.shareAria", "Share sermon image", latestSermonsCard);
                 } else {
                     playerShareBtn.setAttribute(
                         "aria-label",
@@ -572,34 +572,256 @@
                 return String(sermon && (sermon.photoUrl || sermon.coverImageUrl || sermon.imageUrl) || "").trim();
             }
 
-            function fetchSermonPhotoFile(photoUrl) {
-                if (!/^https:\/\//i.test(photoUrl) || typeof File !== "function") {
+            function drawSermonShareRoundedRect(ctx, x, y, width, height, radius) {
+                var r = Math.max(0, Math.min(radius, width / 2, height / 2));
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + width, y, x + width, y + height, r);
+                ctx.arcTo(x + width, y + height, x, y + height, r);
+                ctx.arcTo(x, y + height, x, y, r);
+                ctx.arcTo(x, y, x + width, y, r);
+                ctx.closePath();
+            }
+
+            function wrapSermonShareText(ctx, text, maxWidth, maxLines) {
+                var raw = String(text || "").replace(/\s+/g, " ").trim();
+                if (!raw) {
+                    return [];
+                }
+                var words = raw.split(" ");
+                var lines = [];
+                var current = "";
+                words.forEach(function (word) {
+                    var trial = current ? (current + " " + word) : word;
+                    if (ctx.measureText(trial).width <= maxWidth || !current) {
+                        current = trial;
+                        return;
+                    }
+                    lines.push(current);
+                    current = word;
+                });
+                if (current) {
+                    lines.push(current);
+                }
+                if (lines.length > maxLines) {
+                    lines = lines.slice(0, maxLines);
+                    var last = lines[maxLines - 1] || "";
+                    while (last.length > 1 && ctx.measureText(last + "…").width > maxWidth) {
+                        last = last.slice(0, -1);
+                    }
+                    lines[maxLines - 1] = last + "…";
+                }
+                return lines;
+            }
+
+            function sermonShareCanvasToPngBlob(canvas) {
+                return new Promise(function (resolve, reject) {
+                    try {
+                        if (typeof canvas.toBlob === "function") {
+                            canvas.toBlob(function (blob) {
+                                if (blob) {
+                                    resolve(blob);
+                                } else {
+                                    reject(new Error("toBlob-empty"));
+                                }
+                            }, "image/png");
+                            return;
+                        }
+                        var dataUrl = canvas.toDataURL("image/png");
+                        var comma = dataUrl.indexOf(",");
+                        var b64 = comma >= 0 ? dataUrl.slice(comma + 1) : "";
+                        var binary = atob(b64);
+                        var bytes = new Uint8Array(binary.length);
+                        for (var i = 0; i < binary.length; i++) {
+                            bytes[i] = binary.charCodeAt(i);
+                        }
+                        resolve(new Blob([bytes], { type: "image/png" }));
+                    } catch (err) {
+                        reject(err);
+                    }
+                });
+            }
+
+            function loadSermonShareImage(url) {
+                if (!/^https:\/\//i.test(url)) {
                     return Promise.resolve(null);
                 }
-                return fetch(photoUrl, { mode: "cors", cache: "force-cache" })
-                    .then(function (response) {
-                        if (!response.ok) {
-                            throw new Error("photo_fetch");
+                return new Promise(function (resolve) {
+                    var img = new Image();
+                    img.crossOrigin = "anonymous";
+                    var settled = false;
+                    function done(value) {
+                        if (settled) {
+                            return;
                         }
-                        return response.blob();
-                    })
-                    .then(function (blob) {
-                        if (!blob || !blob.size) {
-                            return null;
-                        }
-                        var type = String(blob.type || "").toLowerCase();
-                        if (type && type.indexOf("image/") !== 0 && type !== "application/octet-stream") {
-                            return null;
-                        }
-                        if (!type || type === "application/octet-stream") {
-                            type = "image/jpeg";
-                        }
-                        var ext = type.indexOf("png") >= 0 ? "png" : (type.indexOf("webp") >= 0 ? "webp" : "jpg");
-                        return new File([blob], "sermon-photo." + ext, { type: type });
-                    })
-                    .catch(function () {
-                        return null;
+                        settled = true;
+                        resolve(value || null);
+                    }
+                    img.onload = function () {
+                        done(img);
+                    };
+                    img.onerror = function () {
+                        done(null);
+                    };
+                    window.setTimeout(function () {
+                        done(null);
+                    }, 5000);
+                    img.src = url;
+                });
+            }
+
+            function buildSermonShareImageBlob(opts) {
+                var config = opts || {};
+                var title = String(config.title || "").trim() || T("sermons.eyebrow", "Sermon", latestSermonsCard);
+                var subtitle = String(config.subtitle || "").trim();
+                var speaker = String(config.speaker || "").trim();
+                var dateLine = String(config.dateLine || "").trim();
+                var photoUrl = String(config.photoUrl || "").trim();
+                var hasTamil = /[\u0B80-\u0BFF]/.test(title + subtitle + speaker);
+
+                return loadSermonShareImage(photoUrl).then(function (photoImg) {
+                    var canvas = document.createElement("canvas");
+                    canvas.width = 1080;
+                    canvas.height = 1350;
+                    var ctx = canvas.getContext("2d");
+                    if (!ctx) {
+                        throw new Error("canvas-unavailable");
+                    }
+
+                    var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+                    bg.addColorStop(0, "#4f0b0b");
+                    bg.addColorStop(0.55, "#8d1f1f");
+                    bg.addColorStop(1, "#c74b4b");
+                    ctx.fillStyle = bg;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    ctx.globalAlpha = 0.16;
+                    var glow = ctx.createRadialGradient(860, 240, 20, 860, 240, 520);
+                    glow.addColorStop(0, "#ffffff");
+                    glow.addColorStop(1, "rgba(255,255,255,0)");
+                    ctx.fillStyle = glow;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.globalAlpha = 1;
+
+                    drawSermonShareRoundedRect(ctx, 72, 88, 936, 1174, 44);
+                    ctx.fillStyle = "rgba(255,255,255,0.14)";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.22)";
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+
+                    ctx.textAlign = "center";
+                    ctx.fillStyle = "#ffe8e8";
+                    ctx.font = "700 36px 'Segoe UI', Arial, sans-serif";
+                    ctx.fillText(
+                        T("sermons.shareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", latestSermonsCard),
+                        540,
+                        170
+                    );
+
+                    ctx.fillStyle = "rgba(255,255,255,0.92)";
+                    ctx.font = "700 34px 'Segoe UI', Arial, sans-serif";
+                    ctx.fillText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), 540, 230);
+
+                    var contentTop = 270;
+                    if (photoImg && photoImg.naturalWidth > 0) {
+                        var photoX = 140;
+                        var photoY = 260;
+                        var photoW = 800;
+                        var photoH = 420;
+                        drawSermonShareRoundedRect(ctx, photoX, photoY, photoW, photoH, 28);
+                        ctx.save();
+                        ctx.clip();
+                        var scale = Math.max(photoW / photoImg.naturalWidth, photoH / photoImg.naturalHeight);
+                        var dw = photoImg.naturalWidth * scale;
+                        var dh = photoImg.naturalHeight * scale;
+                        var dx = photoX + (photoW - dw) / 2;
+                        var dy = photoY + (photoH - dh) / 2;
+                        ctx.drawImage(photoImg, dx, dy, dw, dh);
+                        ctx.restore();
+                        ctx.strokeStyle = "rgba(255,255,255,0.28)";
+                        ctx.lineWidth = 2;
+                        drawSermonShareRoundedRect(ctx, photoX, photoY, photoW, photoH, 28);
+                        ctx.stroke();
+                        contentTop = photoY + photoH + 56;
+                    } else {
+                        ctx.fillStyle = "rgba(255,255,255,0.9)";
+                        ctx.font = "900 120px Georgia, serif";
+                        ctx.fillText("♪", 540, 390);
+                        contentTop = 460;
+                    }
+
+                    var titleFont = hasTamil
+                        ? "700 54px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                        : "700 56px 'Segoe UI', Arial, sans-serif";
+                    ctx.font = titleFont;
+                    ctx.fillStyle = "#ffffff";
+                    var titleLines = wrapSermonShareText(ctx, title, 780, 4);
+                    var titleLineH = hasTamil ? 72 : 68;
+                    titleLines.forEach(function (line, index) {
+                        ctx.fillText(line, 540, contentTop + index * titleLineH);
                     });
+                    var y = contentTop + titleLines.length * titleLineH + 28;
+
+                    if (subtitle) {
+                        ctx.fillStyle = "#ffe2e2";
+                        ctx.font = hasTamil
+                            ? "600 36px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                            : "600 36px 'Segoe UI', Arial, sans-serif";
+                        var subLines = wrapSermonShareText(ctx, subtitle, 780, 3);
+                        subLines.forEach(function (line, index) {
+                            ctx.fillText(line, 540, y + index * 46);
+                        });
+                        y += subLines.length * 46 + 24;
+                    }
+
+                    if (speaker) {
+                        ctx.fillStyle = "rgba(255,255,255,0.92)";
+                        ctx.font = hasTamil
+                            ? "600 34px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                            : "600 34px 'Segoe UI', Arial, sans-serif";
+                        var speakerLine = T("sermons.speakerPrefix", "Speaker", latestSermonsCard) + ": " + speaker;
+                        wrapSermonShareText(ctx, speakerLine, 780, 2).forEach(function (line, index) {
+                            ctx.fillText(line, 540, y + index * 42);
+                        });
+                        y += 84;
+                    }
+
+                    if (dateLine) {
+                        ctx.fillStyle = "rgba(255,232,232,0.9)";
+                        ctx.font = "600 32px 'Segoe UI', Arial, sans-serif";
+                        ctx.fillText(dateLine, 540, Math.min(y + 8, 1040));
+                    }
+
+                    drawSermonShareRoundedRect(ctx, 300, 1110, 480, 92, 46);
+                    ctx.fillStyle = "rgba(255,255,255,0.18)";
+                    ctx.fill();
+                    ctx.strokeStyle = "rgba(255,255,255,0.26)";
+                    ctx.lineWidth = 1.5;
+                    ctx.stroke();
+                    ctx.fillStyle = "#ffffff";
+                    ctx.font = "600 34px 'Segoe UI', Arial, sans-serif";
+                    ctx.fillText(T("sermons.shareCardBadge", "NJC • Sermon", latestSermonsCard), 540, 1168);
+
+                    ctx.fillStyle = "rgba(255,255,255,0.82)";
+                    ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
+                    ctx.fillText(T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard), 540, 1240);
+
+                    return sermonShareCanvasToPngBlob(canvas);
+                });
+            }
+
+            function downloadSermonShareBlob(blob, fileName) {
+                var url = URL.createObjectURL(blob);
+                var anchor = document.createElement("a");
+                anchor.href = url;
+                anchor.download = fileName || "njc-sermon.png";
+                document.body.appendChild(anchor);
+                anchor.click();
+                window.setTimeout(function () {
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
+                }, 0);
             }
 
             function canShareFilesPayload(files) {
@@ -650,6 +872,7 @@
                     sourceElement: latestSermonsCard
                 };
                 var photoUrl = getSermonPhotoUrl(currentSermon);
+                var speakerName = String(currentSermon.speaker || "").trim();
 
                 function fallbackCopy(url) {
                     var plainText = window.NjcEvents && typeof window.NjcEvents.buildSharePlainText === "function"
@@ -666,7 +889,7 @@
                     });
                 }
 
-                function sharePayloadNow(sharePayload, url) {
+                function sharePayloadNow(sharePayload, url, blob, fileName) {
                     if (typeof navigator !== "undefined" && navigator.share) {
                         var p = navigator.share(sharePayload);
                         if (p && typeof p.then === "function" && typeof p.catch === "function") {
@@ -674,7 +897,6 @@
                                 if (err && err.name === "AbortError") {
                                     return;
                                 }
-                                // If file share failed, retry text-only once.
                                 if (sharePayload && sharePayload.files && sharePayload.files.length) {
                                     var textOnly = Object.assign({}, sharePayload);
                                     delete textOnly.files;
@@ -682,40 +904,70 @@
                                         if (err2 && err2.name === "AbortError") {
                                             return;
                                         }
+                                        if (blob) {
+                                            downloadSermonShareBlob(blob, fileName);
+                                            showSermonShareFeedback("sermons.shareDownloaded", "Sermon image downloaded. Share it on WhatsApp/Instagram.");
+                                            return;
+                                        }
                                         return fallbackCopy(url);
                                     });
+                                }
+                                if (blob) {
+                                    downloadSermonShareBlob(blob, fileName);
+                                    showSermonShareFeedback("sermons.shareDownloaded", "Sermon image downloaded. Share it on WhatsApp/Instagram.");
+                                    return;
                                 }
                                 return fallbackCopy(url);
                             });
                         }
                         return Promise.resolve();
                     }
+                    if (blob) {
+                        downloadSermonShareBlob(blob, fileName);
+                        showSermonShareFeedback("sermons.shareDownloaded", "Sermon image downloaded. Share it on WhatsApp/Instagram.");
+                        return Promise.resolve();
+                    }
                     return fallbackCopy(url);
                 }
+
+                playerShareBtn.disabled = true;
+                showSermonShareFeedback("sermons.shareGenerating", "Creating sermon image...");
 
                 ensureShareHashForSermon(currentSermon).then(function (shareId) {
                     var url = buildSermonAppShareUrl(shareId);
                     if (!url) {
                         showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
-                        return;
+                        return null;
                     }
                     shareOpts.url = url;
                     var sharePayload = window.NjcEvents && typeof window.NjcEvents.shareContent === "function"
                         ? window.NjcEvents.shareContent(shareOpts)
                         : { title: T("sermons.shareSectionLabel", "Sermon", latestSermonsCard) + " — " + title, text: buildPlainShareText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), title + (preview ? "\n\n" + preview : ""), url, T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard)), url: url };
 
-                    // No photo on sermon → text/link only (never generate an image).
-                    if (!/^https:\/\//i.test(photoUrl)) {
-                        return sharePayloadNow(sharePayload, url);
-                    }
-
-                    return fetchSermonPhotoFile(photoUrl).then(function (file) {
-                        if (!file || !canShareFilesPayload([file])) {
-                            return sharePayloadNow(sharePayload, url);
+                    return buildSermonShareImageBlob({
+                        title: title,
+                        subtitle: sub,
+                        speaker: speakerName,
+                        dateLine: dateLine,
+                        photoUrl: photoUrl
+                    }).then(function (blob) {
+                        var fileName = "njc-sermon.png";
+                        if (typeof File === "function" && blob) {
+                            var file = new File([blob], fileName, { type: "image/png" });
+                            if (canShareFilesPayload([file])) {
+                                var withImage = Object.assign({}, sharePayload, { files: [file] });
+                                return sharePayloadNow(withImage, url, blob, fileName);
+                            }
                         }
-                        var withPhoto = Object.assign({}, sharePayload, { files: [file] });
-                        return sharePayloadNow(withPhoto, url);
+                        return sharePayloadNow(sharePayload, url, blob, fileName);
+                    }, function () {
+                        // Image generation failed — fall back to text/link share.
+                        return sharePayloadNow(sharePayload, url, null, "");
                     });
+                }).catch(function () {
+                    showSermonShareFeedback("sermons.shareFailed", "Could not share or copy. Try again.");
+                }).finally(function () {
+                    syncSermonShareButton();
                 });
             }
 
