@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v455sermonshareone1";
-const RUNTIME_CACHE = "njc-runtime-cache-v455sermonshareone1";
+const APP_CACHE = "njc-app-cache-v456sermonphotoshare1";
+const RUNTIME_CACHE = "njc-runtime-cache-v456sermonphotoshare1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
@@ -50,7 +50,7 @@ const CORE_ASSETS = [
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260830sermonshareone1",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260830sermonshareone1",
+    "./sermons-page.js?v=20260830sermonphotoshare1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260805prayerprotect1",

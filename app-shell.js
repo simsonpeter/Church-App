@@ -687,6 +687,7 @@
         "sermons.shareFailed": "பகிரவோ நகலெடுக்கவோ முடியவில்லை. மீண்டும் முயற்சிக்கவும்.",
         "sermons.sharePlayLine": "▶ NJC செயலியில் கேளுங்கள்",
         "sermons.shareGenerating": "பிரசங்கப் படத்தை உருவாக்குகிறது...",
+        "sermons.sharePhotoReady": "பிரசங்கப் படத்தைப் பகிர்கிறது...",
         "sermons.shareDownloaded": "பிரசங்கப் படம் பதிவிறங்கியது. WhatsApp/Instagram-இல் பகிருங்கள்.",
         "sermons.shareCardBrand": "NEW JERUSALEM CHURCH BELGIUM",
         "sermons.shareCardBadge": "NJC • பிரசங்கம்",
@@ -2398,7 +2399,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "455sermonshareone1";
+    var SW_REGISTER_VERSION_FALLBACK = "456sermonphotoshare1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
