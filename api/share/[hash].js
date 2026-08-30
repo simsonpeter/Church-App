@@ -1,5 +1,5 @@
 /**
- * Sermon share landing page for crawlers (WhatsApp, etc.): Open Graph meta + Listen / Download actions.
+ * Sermon share landing page for crawlers (WhatsApp, etc.): Open Graph meta + Listen action.
  * Vercel: GET /api/share/:hash  (also routed as /share/sermon/:hash via vercel.json)
  */
 const crypto = require("crypto");
@@ -77,18 +77,6 @@ function findSermonByShareHash(merged, hash) {
     return null;
 }
 
-function guessAudioFileName(title, audioUrl) {
-    var fromUrl = String(audioUrl || "").split("?")[0].split("#")[0];
-    var extMatch = fromUrl.match(/\.([a-z0-9]{2,5})$/i);
-    var ext = extMatch ? extMatch[1].toLowerCase() : "m4a";
-    var base = String(title || "njc-sermon")
-        .replace(/[^\w\u0B80-\u0BFF\- ]+/g, "")
-        .trim()
-        .replace(/\s+/g, "-")
-        .slice(0, 60) || "njc-sermon";
-    return base + "." + ext;
-}
-
 module.exports = async function handler(req, res) {
     var hash = String((req.query && req.query.hash) || "").trim().toLowerCase();
     if (!/^[a-f0-9]{64}$/.test(hash)) {
@@ -105,7 +93,6 @@ module.exports = async function handler(req, res) {
     var siteOrigin = proto + "://" + host;
     var deepLink = siteOrigin + "/#sermons?s=" + hash;
     var sharePath = siteOrigin + "/share/sermon/" + hash;
-    var downloadPath = siteOrigin + "/api/sermon-download/" + hash;
 
     var remoteUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var adminUrl = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries?ts=" + String(Date.now());
@@ -133,10 +120,6 @@ module.exports = async function handler(req, res) {
     var subtitle = match ? String(match.subtitle || "").trim() : "";
     var speaker = match ? String(match.speaker || "").trim() : "";
     var dateStr = match && match.date ? String(match.date).trim() : "";
-    var audioUrl = match ? String(match.audioUrl || "").trim() : "";
-    if (!/^https:\/\//i.test(audioUrl)) {
-        audioUrl = "";
-    }
     var photoUrl = match
         ? String(match.photoUrl || match.coverImageUrl || match.imageUrl || "").trim()
         : "";
@@ -144,7 +127,6 @@ module.exports = async function handler(req, res) {
         photoUrl = "";
     }
     var ogImage = photoUrl || (siteOrigin + "/api/sermon-og/" + hash);
-    var fileName = guessAudioFileName(title, audioUrl);
 
     var descParts = [];
     if (dateStr) {
@@ -158,11 +140,6 @@ module.exports = async function handler(req, res) {
     }
     var description = descParts.length ? descParts.join(" · ") : "Listen in the NJC app.";
     var pageTitle = title + " | NJC";
-
-    var downloadHref = audioUrl ? downloadPath : "";
-    var downloadAttr = audioUrl
-        ? (" href=\"" + escapeAttr(downloadHref) + "\" download=\"" + escapeAttr(fileName) + "\"")
-        : " aria-disabled=\"true\" tabindex=\"-1\"";
     var listenHref = " href=\"" + escapeAttr(deepLink) + "\"";
 
     var html = "<!DOCTYPE html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
@@ -193,9 +170,7 @@ module.exports = async function handler(req, res) {
         ".actions{display:grid;gap:.7rem;margin-top:1.25rem}" +
         "a.btn{display:flex;align-items:center;justify-content:center;gap:.45rem;min-height:48px;padding:.75rem 1rem;" +
         "border-radius:14px;text-decoration:none;font-weight:700;font-size:1rem}" +
-        "a.btn-primary{background:#e8f3ff;color:#10233a}a.btn-secondary{background:rgba(255,255,255,0.12);" +
-        "color:#fff;border:1px solid rgba(255,255,255,0.22)}" +
-        "a.btn[aria-disabled=\"true\"]{opacity:.45;pointer-events:none}" +
+        "a.btn-primary{background:#e8f3ff;color:#10233a}" +
         ".note{margin-top:1rem;font-size:.82rem;color:rgba(255,255,255,0.62)}" +
         "</style></head><body>" +
         "<main class=\"card\">" +
@@ -204,11 +179,8 @@ module.exports = async function handler(req, res) {
         "<p>" + escapeHtml(description) + "</p>" +
         "<div class=\"actions\">" +
         "<a class=\"btn btn-primary\"" + listenHref + ">▶ Listen now</a>" +
-        (audioUrl
-            ? ("<a class=\"btn btn-secondary\"" + downloadAttr + ">⬇ Download now</a>")
-            : "<a class=\"btn btn-secondary\" aria-disabled=\"true\">⬇ Download now</a>") +
         "</div>" +
-        "<p class=\"note\">Listen opens the NJC app player. Download saves the audio to your device.</p>" +
+        "<p class=\"note\">Opens the NJC app player.</p>" +
         "</main>" +
         "</body></html>";
 

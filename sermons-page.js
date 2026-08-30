@@ -920,8 +920,7 @@
                     subtitle: title,
                     body: preview,
                     extraLineKeys: [
-                        { key: "sermons.shareListenNow", fallback: "▶ Listen now" },
-                        { key: "sermons.shareDownloadNow", fallback: "⬇ Download now" }
+                        { key: "sermons.shareListenNow", fallback: "▶ Listen now" }
                     ],
                     url: "",
                     includeUrlInText: false,
