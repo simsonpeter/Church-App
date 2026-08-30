@@ -1,6 +1,7 @@
 /**
  * Dynamic Open Graph image (1200×630) for sermon share links.
- * Node.js runtime + @vercel/og (Edge runtime does not support @vercel/og/edge here).
+ * Uses GitHub/admin `photoUrl` when present; otherwise generates a branded card.
+ * Node.js runtime + @vercel/og.
  */
 const REMOTE_SERMONS = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
 const ADMIN_SERMONS = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
@@ -84,7 +85,16 @@ function trunc(s, max) {
     return t.slice(0, max - 1) + "…";
 }
 
-function buildCardElement(React, title, subtitle, metaLine) {
+function getSermonPhotoUrl(item) {
+    if (!item || typeof item !== "object") {
+        return "";
+    }
+    const url = String(item.photoUrl || item.coverImageUrl || item.imageUrl || "").trim();
+    return /^https:\/\//i.test(url) ? url : "";
+}
+
+function buildCardElement(React, title, subtitle, metaLine, photoUrl) {
+    const hasPhoto = Boolean(photoUrl);
     return React.createElement(
         "div",
         {
@@ -94,9 +104,9 @@ function buildCardElement(React, title, subtitle, metaLine) {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                background: "linear-gradient(145deg, #12141c 0%, #251a1f 48%, #151018 100%)",
-                color: "#f4f6fb",
-                padding: 52,
+                background: "linear-gradient(145deg, #4f0b0b 0%, #8d1f1f 48%, #c74b4b 100%)",
+                color: "#fff7f7",
+                padding: 48,
                 fontFamily: '"Noto Sans Tamil","DM Sans",system-ui,sans-serif',
             },
         },
@@ -113,27 +123,42 @@ function buildCardElement(React, title, subtitle, metaLine) {
                 "div",
                 {
                     style: {
-                        fontSize: 38,
+                        fontSize: 34,
                         fontWeight: 800,
-                        letterSpacing: 3,
-                        color: "#e53935",
+                        letterSpacing: 2,
+                        color: "#ffe8e8",
                     },
                 },
-                "NJC"
+                "NEW JERUSALEM CHURCH BELGIUM"
             ),
             React.createElement(
                 "div",
                 {
                     style: {
-                        fontSize: 30,
-                        fontWeight: 600,
-                        color: "#ffb4b4",
+                        fontSize: 28,
+                        fontWeight: 700,
+                        color: "#ffffff",
                         opacity: 0.95,
                     },
                 },
-                "▶"
+                "▶ Sermon"
             )
         ),
+        hasPhoto
+            ? React.createElement("img", {
+                  src: photoUrl,
+                  width: 1104,
+                  height: 280,
+                  style: {
+                      width: "100%",
+                      height: 280,
+                      objectFit: "cover",
+                      borderRadius: 28,
+                      marginTop: 18,
+                      marginBottom: 8,
+                  },
+              })
+            : null,
         React.createElement(
             "div",
             {
@@ -142,18 +167,18 @@ function buildCardElement(React, title, subtitle, metaLine) {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
-                    gap: 22,
-                    paddingTop: 8,
+                    gap: hasPhoto ? 14 : 22,
+                    paddingTop: hasPhoto ? 4 : 8,
                 },
             },
             React.createElement(
                 "div",
                 {
                     style: {
-                        fontSize: 54,
+                        fontSize: hasPhoto ? 44 : 54,
                         fontWeight: 700,
                         lineHeight: 1.12,
-                        maxHeight: 230,
+                        maxHeight: hasPhoto ? 150 : 230,
                         overflow: "hidden",
                     },
                 },
@@ -164,10 +189,10 @@ function buildCardElement(React, title, subtitle, metaLine) {
                       "div",
                       {
                           style: {
-                              fontSize: 34,
-                              color: "#c5cad8",
+                              fontSize: hasPhoto ? 28 : 34,
+                              color: "#ffe2e2",
                               lineHeight: 1.22,
-                              maxHeight: 130,
+                              maxHeight: hasPhoto ? 90 : 130,
                               overflow: "hidden",
                               fontWeight: 500,
                           },
@@ -180,10 +205,10 @@ function buildCardElement(React, title, subtitle, metaLine) {
             "div",
             {
                 style: {
-                    fontSize: 28,
-                    color: "#8f98ab",
-                    borderTop: "1px solid rgba(255,255,255,0.14)",
-                    paddingTop: 24,
+                    fontSize: 26,
+                    color: "rgba(255,255,255,0.88)",
+                    borderTop: "1px solid rgba(255,255,255,0.22)",
+                    paddingTop: 22,
                     fontWeight: 500,
                 },
             },
@@ -214,6 +239,7 @@ module.exports = async function handler(req, res) {
     const subtitle = trunc(match ? String(match.subtitle || "").trim() : "", 200);
     const speaker = match ? String(match.speaker || "").trim() : "";
     const dateStr = match && match.date ? String(match.date).trim() : "";
+    const photoUrl = getSermonPhotoUrl(match);
     const metaParts = [];
     if (dateStr) {
         metaParts.push(dateStr);
@@ -233,7 +259,10 @@ module.exports = async function handler(req, res) {
     };
 
     try {
-        const imageResponse = new ImageResponse(buildCardElement(React, title, subtitle, metaLine), opts);
+        const imageResponse = new ImageResponse(
+            buildCardElement(React, title, subtitle, metaLine, photoUrl),
+            opts
+        );
         const buf = Buffer.from(await imageResponse.arrayBuffer());
         res.statusCode = 200;
         res.setHeader("Content-Type", "image/png");

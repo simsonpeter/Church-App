@@ -31,8 +31,8 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v452sermonshareimg1";
-const RUNTIME_CACHE = "njc-runtime-cache-v452sermonshareimg1";
+const APP_CACHE = "njc-app-cache-v453sermongithubimg1";
+const RUNTIME_CACHE = "njc-runtime-cache-v453sermongithubimg1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =

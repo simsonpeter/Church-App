@@ -93,7 +93,6 @@ module.exports = async function handler(req, res) {
     var siteOrigin = proto + "://" + host;
     var deepLink = siteOrigin + "/#sermons?s=" + hash;
     var sharePath = siteOrigin + "/share/sermon/" + hash;
-    var ogImage = siteOrigin + "/api/sermon-og/" + hash;
 
     var remoteUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var adminUrl = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries?ts=" + String(Date.now());
@@ -121,6 +120,14 @@ module.exports = async function handler(req, res) {
     var subtitle = match ? String(match.subtitle || "").trim() : "";
     var speaker = match ? String(match.speaker || "").trim() : "";
     var dateStr = match && match.date ? String(match.date).trim() : "";
+    var photoUrl = match
+        ? String(match.photoUrl || match.coverImageUrl || match.imageUrl || "").trim()
+        : "";
+    if (!/^https:\/\//i.test(photoUrl)) {
+        photoUrl = "";
+    }
+    // Prefer sermon photo when set (GitHub or admin); otherwise generated branded card.
+    var ogImage = photoUrl || (siteOrigin + "/api/sermon-og/" + hash);
 
     var descParts = [];
     if (dateStr) {

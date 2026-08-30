@@ -1,0 +1,17 @@
+[
+  {
+    "title": "தாவீதும் கோலியாத்தும்",
+    "subtitle": "David & Goliath",
+    "speaker": "Simson",
+    "audioUrl": "https://archive.org/download/david-goliath_202608/David%20%26%20Goliath.m4a",
+    "date": "2026-08-23",
+    "photoUrl": "https://example.com/optional-sermon-photo.jpg"
+  },
+  {
+    "title": "மார்ஸ்",
+    "subtitle": "Areopagus",
+    "speaker": "Simson",
+    "audioUrl": "https://archive.org/download/Areopagus/Areopagus.m4a",
+    "date": "2026-08-16"
+  }
+]

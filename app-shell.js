@@ -1167,6 +1167,7 @@
         "admin.triviaUpdated": "வேதாகமக் கேள்வி புதுப்பிக்கப்பட்டது.",
         "admin.triviaDeleted": "வேதாகமக் கேள்வி நீக்கப்பட்டது.",
         "admin.sermonTitle": "பிரசங்கம் சேர்க்க",
+        "admin.sermonGithubInfo": "முக்கிய பட்டியல் GitHub sermons.json. விருப்ப photoUrl (https) பகிர்வில் தோன்றும்; இல்லையென்றால் செயலி தானே படம் உருவாக்கும்.",
         "admin.sermonTitlePlaceholder": "தமிழ் தலைப்பு",
         "admin.sermonSubtitlePlaceholder": "ஆங்கில துணைத்தலைப்பு",
         "admin.sermonSpeakerPlaceholder": "பேச்சாளர் பெயர்",
@@ -2397,7 +2398,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "452sermonshareimg1";
+    var SW_REGISTER_VERSION_FALLBACK = "453sermongithubimg1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
