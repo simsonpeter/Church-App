@@ -31,33 +31,33 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v450prayerprotect1";
-const RUNTIME_CACHE = "njc-runtime-cache-v450prayerprotect1";
+const APP_CACHE = "njc-app-cache-v451sermonphoto1";
+const RUNTIME_CACHE = "njc-runtime-cache-v451sermonphoto1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer wall: protect against accidental wipe; admin can restore from device backup. Settings → Check for updates.";
+    "Sermons: optional photo on upload; share includes that photo when present (no auto-generated image). Settings → Check for updates.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260617dailybread1",
+    "./styles.css?v=20260830sermonphoto1",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20260617dailybread1",
+    "./app-shell.js?v=20260830sermonphoto1",
     "./events-engine.js?v=20260531sharelang1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260618actstamil1",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260531sharelang1",
+    "./sermons-page.js?v=20260830sermonphoto1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20260805prayerprotect1",
     "./daily-bread-page.js?v=20260617dailybread1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260805prayerprotect1",
+    "./admin-dashboard-page.js?v=20260830sermonphoto1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260531authreset1",

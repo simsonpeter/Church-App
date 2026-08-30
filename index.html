@@ -14,7 +14,7 @@
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20260329m1">
-    <link rel="stylesheet" href="styles.css?v=20260613prayercompact1">
+    <link rel="stylesheet" href="styles.css?v=20260830sermonphoto1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -1860,6 +1860,7 @@
                         <input id="admin-sermon-date" class="search-input" type="date">
                         <input id="admin-sermon-audio" class="search-input" type="url" placeholder="Audio URL (https://...)" data-i18n-placeholder="admin.sermonAudioPlaceholder">
                     </div>
+                    <input id="admin-sermon-photo" class="search-input" type="url" inputmode="url" autocomplete="off" placeholder="Photo URL (https://…, optional — used when sharing)" data-i18n-placeholder="admin.sermonPhotoPlaceholder">
                     <button class="button-link" id="admin-sermon-submit" type="submit" data-i18n="admin.sermonPublish">Add sermon</button>
                     <p class="page-note" id="admin-sermon-note" hidden></p>
                         </form>
@@ -2108,6 +2109,7 @@
             </div>
             <div class="sermon-player-display">
                 <p class="page-note sermon-share-feedback" id="sermon-share-feedback" role="status" aria-live="polite" hidden></p>
+                <img id="player-sermon-photo" class="sermon-player-photo" alt="" width="640" height="360" hidden>
                 <h3 id="player-sermon-title">Sermon title</h3>
                 <p id="player-sermon-subtitle">Subtitle</p>
                 <p class="sermon-meta" id="player-sermon-date">Date</p>
@@ -2283,19 +2285,19 @@
     <script src="app-modules.js?v=20260610bookpool1"></script>
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260610vercelfix1"></script>
+    <script src="app-shell.js?v=20260830sermonphoto1"></script>
     <script src="events-engine.js?v=20260531sharelang1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20260618actstamil1"></script>
     <script src="events-page.js?v=20260414feedprobe1"></script>
-    <script src="sermons-page.js?v=20260531sharelang1"></script>
+    <script src="sermons-page.js?v=20260830sermonphoto1"></script>
     <script src="bible-page.js?v=20260618actstamil1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20260805prayerprotect1"></script>
     <script src="daily-bread-page.js?v=20260617dailybread1"></script>
     <script src="newsletter-page.js?v=20260531sharelang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20260805prayerprotect1"></script>
+    <script src="admin-dashboard-page.js?v=20260830sermonphoto1"></script>
     <script src="admin-modules-page.js?v=20260608guestmodules1"></script>
     <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
     <script src="admin-users-page.js?v=20260531authreset1"></script>

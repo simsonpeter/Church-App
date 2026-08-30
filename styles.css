@@ -2397,6 +2397,20 @@ body.sermon-player-open {
     padding: 14px;
 }
 
+.sermon-player-photo {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin: 0 0 10px;
+    background: rgba(0, 0, 0, 0.06);
+}
+
+.sermon-player-photo[hidden] {
+    display: none !important;
+}
+
 .sermon-player-display h3 {
     margin: 0;
     font-size: 1rem;

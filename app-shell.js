@@ -1167,6 +1167,8 @@
         "admin.sermonSubtitlePlaceholder": "ஆங்கில துணைத்தலைப்பு",
         "admin.sermonSpeakerPlaceholder": "பேச்சாளர் பெயர்",
         "admin.sermonAudioPlaceholder": "ஆடியோ URL (https://...)",
+        "admin.sermonPhotoPlaceholder": "பட URL (https://…, விருப்பம் — பகிரும்போது சேரும்)",
+        "admin.sermonPhotoNeedHttps": "பட URL https:// இல் தொடங்க வேண்டும்",
         "admin.sermonPublish": "பிரசங்கம் சேர்க்க",
         "admin.sermonManageTitle": "சமீப பிரசங்கங்கள்",
         "admin.sermonManageInfo": "நீங்கள் சேர்த்த பிரசங்கங்களை திருத்த அல்லது நீக்கவும்.",
@@ -1178,6 +1180,7 @@
         "admin.sermonEditPromptSpeaker": "பேச்சாளர் பெயரை திருத்து",
         "admin.sermonEditPromptDate": "தேதியை திருத்து (YYYY-MM-DD)",
         "admin.sermonEditPromptAudio": "ஆடியோ இணைப்பை திருத்து",
+        "admin.sermonEditPromptPhoto": "பட URL திருத்து (https, விருப்பம் — பகிரும்போது சேரும்)",
         "admin.sermonUpdated": "பிரசங்கம் புதுப்பிக்கப்பட்டது.",
         "admin.sermonDeleted": "பிரசங்கம் நீக்கப்பட்டது.",
         "admin.sermonEmptyTitle": "பிரசங்கங்கள் இல்லை",
@@ -2390,7 +2393,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "450prayerprotect1";
+    var SW_REGISTER_VERSION_FALLBACK = "451sermonphoto1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 
@@ -2500,7 +2503,7 @@
     }
 
     /** Fallback release-notes line when the worker does not send notes. */
-    var UPDATE_NOTES_FALLBACK = "Prayer wall: protect against accidental wipe; admin can restore from device backup.";
+    var UPDATE_NOTES_FALLBACK = "Sermons: optional photo on upload; share includes that photo when present.";
 
     /** Dismiss/snooze tied to service worker APP_CACHE id (not script URL query). */
     var UPDATE_DISMISS_BUILD_KEY = "njc_update_dismissed_app_cache_v1";

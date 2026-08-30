@@ -111,6 +111,7 @@
     var sermonSpeakerInput = document.getElementById("admin-sermon-speaker");
     var sermonDateInput = document.getElementById("admin-sermon-date");
     var sermonAudioInput = document.getElementById("admin-sermon-audio");
+    var sermonPhotoInput = document.getElementById("admin-sermon-photo");
     var sermonSubmit = document.getElementById("admin-sermon-submit");
 
     var triviaQuestionInput = document.getElementById("admin-trivia-question");
@@ -2067,9 +2068,14 @@
             var speaker = String(entry && entry.speaker || "").trim();
             var date = String(entry && entry.date || "").trim();
             var audioUrl = String(entry && entry.audioUrl || "").trim();
+            var photoUrl = String(entry && (entry.photoUrl || entry.coverImageUrl || entry.imageUrl) || "").trim();
+            var thumb = /^https:\/\//i.test(photoUrl)
+                ? ("  <p class=\"page-note admin-library-thumb-wrap\"><img class=\"admin-library-thumb\" src=\"" + escapeHtml(photoUrl) + "\" alt=\"\" width=\"72\" height=\"72\" loading=\"lazy\" decoding=\"async\"></p>")
+                : "";
             return "" +
                 "<li>" +
                 "  <h3>" + escapeHtml(title || T("admin.sermonTitle", "Add Sermon")) + "</h3>" +
+                thumb +
                 (subtitle ? ("  <p class=\"page-note\">" + escapeHtml(subtitle) + "</p>") : "") +
                 "  <p class=\"page-note\">" + escapeHtml(date || "-") + (speaker ? (" • " + escapeHtml(speaker)) : "") + "</p>" +
                 (audioUrl ? ("  <p class=\"page-note\"><a class=\"inline-link\" href=\"" + escapeHtml(audioUrl) + "\" target=\"_blank\" rel=\"noopener noreferrer\">" + escapeHtml(audioUrl) + "</a></p>") : "") +
@@ -2508,10 +2514,17 @@
         var speaker = String(sermonSpeakerInput.value || "").trim();
         var date = String(sermonDateInput.value || "").trim();
         var audioUrl = String(sermonAudioInput.value || "").trim();
+        var photoUrl = String(sermonPhotoInput && sermonPhotoInput.value || "").trim();
         if (!title || !date || !audioUrl) {
             var msg = T("admin.sermonNeedFields", "Please enter sermon title, date and audio URL.");
             if (sermonNote) { sermonNote.textContent = msg; sermonNote.dataset.state = "error"; }
             else showNote("validation", "admin.sermonNeedFields", msg);
+            return;
+        }
+        if (photoUrl && !/^https:\/\//i.test(photoUrl)) {
+            var photoMsg = T("admin.sermonPhotoNeedHttps", "Photo URL must start with https://");
+            if (sermonNote) { sermonNote.textContent = photoMsg; sermonNote.dataset.state = "error"; }
+            else showNote("validation", "admin.sermonPhotoNeedHttps", photoMsg);
             return;
         }
         if (sermonNote) { sermonNote.textContent = T("admin.saving", "Saving..."); sermonNote.dataset.state = ""; }
@@ -2523,6 +2536,7 @@
             speaker: speaker,
             date: date,
             audioUrl: audioUrl,
+            photoUrl: photoUrl,
             createdAt: new Date().toISOString(),
             createdByEmail: normalizeEmail(getUser() && getUser().email)
         }).then(function (entries) {
@@ -2532,6 +2546,9 @@
             sermonSpeakerInput.value = "";
             sermonDateInput.value = "";
             sermonAudioInput.value = "";
+            if (sermonPhotoInput) {
+                sermonPhotoInput.value = "";
+            }
             renderStats();
             renderSermonList();
             if (sermonNote) {
@@ -3651,11 +3668,23 @@
         if (nextAudio === null) {
             return;
         }
+        var nextPhoto = window.prompt(
+            T("admin.sermonEditPromptPhoto", "Edit photo URL (https, optional — used when sharing)"),
+            String(current.photoUrl || current.coverImageUrl || current.imageUrl || "")
+        );
+        if (nextPhoto === null) {
+            return;
+        }
         var cleanTitle = String(nextTitle || "").trim();
         var cleanDate = String(nextDate || "").trim();
         var cleanAudio = String(nextAudio || "").trim();
+        var cleanPhoto = String(nextPhoto || "").trim();
         if (!cleanTitle || !cleanDate || !cleanAudio) {
             showNote("validation", "admin.sermonNeedFields", "Please enter sermon title, date and audio URL.");
+            return;
+        }
+        if (cleanPhoto && !/^https:\/\//i.test(cleanPhoto)) {
+            showNote("validation", "admin.sermonPhotoNeedHttps", "Photo URL must start with https://");
             return;
         }
         source[targetIndex] = Object.assign({}, current, {
@@ -3664,6 +3693,7 @@
             speaker: String(nextSpeaker || "").trim(),
             date: cleanDate,
             audioUrl: cleanAudio,
+            photoUrl: cleanPhoto,
             updatedAt: new Date().toISOString()
         });
         setBusyState(true);
