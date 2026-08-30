@@ -2227,6 +2227,22 @@ html[data-theme="dark"] .card .sermon-open-btn:hover {
     gap: 10px;
 }
 
+.sermon-open-top.has-photo {
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: start;
+}
+
+.sermon-list-photo {
+    width: 72px;
+    height: 72px;
+    border-radius: 14px;
+    object-fit: cover;
+    display: block;
+    background: rgba(0, 0, 0, 0.06);
+    border: 1px solid rgba(165, 36, 36, 0.18);
+    box-shadow: 0 2px 8px rgba(120, 22, 22, 0.08);
+}
+
 .sermon-speaker-avatar {
     width: 38px;
     height: 38px;

@@ -1,6 +1,7 @@
 /**
  * Dynamic Open Graph image (1200×630) for sermon share links.
- * Uses GitHub/admin `photoUrl` when present; otherwise generates a branded card.
+ * Branded card only — uploaded photos are used directly as og:image by /api/share
+ * (never mixed onto this card).
  * Node.js runtime + @vercel/og.
  */
 const REMOTE_SERMONS = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
@@ -85,16 +86,7 @@ function trunc(s, max) {
     return t.slice(0, max - 1) + "…";
 }
 
-function getSermonPhotoUrl(item) {
-    if (!item || typeof item !== "object") {
-        return "";
-    }
-    const url = String(item.photoUrl || item.coverImageUrl || item.imageUrl || "").trim();
-    return /^https:\/\//i.test(url) ? url : "";
-}
-
-function buildCardElement(React, title, subtitle, metaLine, photoUrl) {
-    const hasPhoto = Boolean(photoUrl);
+function buildCardElement(React, title, subtitle, metaLine) {
     return React.createElement(
         "div",
         {
@@ -144,21 +136,6 @@ function buildCardElement(React, title, subtitle, metaLine, photoUrl) {
                 "▶ Sermon"
             )
         ),
-        hasPhoto
-            ? React.createElement("img", {
-                  src: photoUrl,
-                  width: 1104,
-                  height: 280,
-                  style: {
-                      width: "100%",
-                      height: 280,
-                      objectFit: "cover",
-                      borderRadius: 28,
-                      marginTop: 18,
-                      marginBottom: 8,
-                  },
-              })
-            : null,
         React.createElement(
             "div",
             {
@@ -167,18 +144,18 @@ function buildCardElement(React, title, subtitle, metaLine, photoUrl) {
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
-                    gap: hasPhoto ? 14 : 22,
-                    paddingTop: hasPhoto ? 4 : 8,
+                    gap: 22,
+                    paddingTop: 8,
                 },
             },
             React.createElement(
                 "div",
                 {
                     style: {
-                        fontSize: hasPhoto ? 44 : 54,
+                        fontSize: 54,
                         fontWeight: 700,
                         lineHeight: 1.12,
-                        maxHeight: hasPhoto ? 150 : 230,
+                        maxHeight: 230,
                         overflow: "hidden",
                     },
                 },
@@ -189,10 +166,10 @@ function buildCardElement(React, title, subtitle, metaLine, photoUrl) {
                       "div",
                       {
                           style: {
-                              fontSize: hasPhoto ? 28 : 34,
+                              fontSize: 34,
                               color: "#ffe2e2",
                               lineHeight: 1.22,
-                              maxHeight: hasPhoto ? 90 : 130,
+                              maxHeight: 130,
                               overflow: "hidden",
                               fontWeight: 500,
                           },
@@ -239,7 +216,6 @@ module.exports = async function handler(req, res) {
     const subtitle = trunc(match ? String(match.subtitle || "").trim() : "", 200);
     const speaker = match ? String(match.speaker || "").trim() : "";
     const dateStr = match && match.date ? String(match.date).trim() : "";
-    const photoUrl = getSermonPhotoUrl(match);
     const metaParts = [];
     if (dateStr) {
         metaParts.push(dateStr);
@@ -260,7 +236,7 @@ module.exports = async function handler(req, res) {
 
     try {
         const imageResponse = new ImageResponse(
-            buildCardElement(React, title, subtitle, metaLine, photoUrl),
+            buildCardElement(React, title, subtitle, metaLine),
             opts
         );
         const buf = Buffer.from(await imageResponse.arrayBuffer());

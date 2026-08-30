@@ -126,7 +126,7 @@ module.exports = async function handler(req, res) {
     if (!/^https:\/\//i.test(photoUrl)) {
         photoUrl = "";
     }
-    // Prefer sermon photo when set (GitHub or admin); otherwise generated branded card.
+    // One image only: uploaded photo alone, else generated branded card.
     var ogImage = photoUrl || (siteOrigin + "/api/sermon-og/" + hash);
 
     var descParts = [];

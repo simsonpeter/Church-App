@@ -569,7 +569,8 @@
             }
 
             function getSermonPhotoUrl(sermon) {
-                return String(sermon && (sermon.photoUrl || sermon.coverImageUrl || sermon.imageUrl) || "").trim();
+                var url = String(sermon && (sermon.photoUrl || sermon.coverImageUrl || sermon.imageUrl) || "").trim();
+                return /^https:\/\//i.test(url) ? url : "";
             }
 
             function drawSermonShareRoundedRect(ctx, x, y, width, height, radius) {
@@ -670,145 +671,155 @@
                 });
             }
 
-            function buildSermonShareImageBlob(opts) {
-                var config = opts || {};
+            function blobFromUploadedSermonPhoto(photoImg) {
+                var canvas = document.createElement("canvas");
+                var srcW = photoImg.naturalWidth || photoImg.width || 0;
+                var srcH = photoImg.naturalHeight || photoImg.height || 0;
+                if (!srcW || !srcH) {
+                    throw new Error("photo-empty");
+                }
+                // Keep the uploaded image alone (no branded card overlay).
+                var maxEdge = 1600;
+                var scale = Math.min(1, maxEdge / Math.max(srcW, srcH));
+                canvas.width = Math.max(1, Math.round(srcW * scale));
+                canvas.height = Math.max(1, Math.round(srcH * scale));
+                var ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    throw new Error("canvas-unavailable");
+                }
+                ctx.drawImage(photoImg, 0, 0, canvas.width, canvas.height);
+                return sermonShareCanvasToPngBlob(canvas);
+            }
+
+            function buildGeneratedSermonShareCardBlob(config) {
                 var title = String(config.title || "").trim() || T("sermons.eyebrow", "Sermon", latestSermonsCard);
                 var subtitle = String(config.subtitle || "").trim();
                 var speaker = String(config.speaker || "").trim();
                 var dateLine = String(config.dateLine || "").trim();
-                var photoUrl = String(config.photoUrl || "").trim();
                 var hasTamil = /[\u0B80-\u0BFF]/.test(title + subtitle + speaker);
 
-                return loadSermonShareImage(photoUrl).then(function (photoImg) {
-                    var canvas = document.createElement("canvas");
-                    canvas.width = 1080;
-                    canvas.height = 1350;
-                    var ctx = canvas.getContext("2d");
-                    if (!ctx) {
-                        throw new Error("canvas-unavailable");
-                    }
+                var canvas = document.createElement("canvas");
+                canvas.width = 1080;
+                canvas.height = 1350;
+                var ctx = canvas.getContext("2d");
+                if (!ctx) {
+                    throw new Error("canvas-unavailable");
+                }
 
-                    var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
-                    bg.addColorStop(0, "#4f0b0b");
-                    bg.addColorStop(0.55, "#8d1f1f");
-                    bg.addColorStop(1, "#c74b4b");
-                    ctx.fillStyle = bg;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                var bg = ctx.createLinearGradient(0, 0, 1080, 1350);
+                bg.addColorStop(0, "#4f0b0b");
+                bg.addColorStop(0.55, "#8d1f1f");
+                bg.addColorStop(1, "#c74b4b");
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                    ctx.globalAlpha = 0.16;
-                    var glow = ctx.createRadialGradient(860, 240, 20, 860, 240, 520);
-                    glow.addColorStop(0, "#ffffff");
-                    glow.addColorStop(1, "rgba(255,255,255,0)");
-                    ctx.fillStyle = glow;
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.globalAlpha = 1;
+                ctx.globalAlpha = 0.16;
+                var glow = ctx.createRadialGradient(860, 240, 20, 860, 240, 520);
+                glow.addColorStop(0, "#ffffff");
+                glow.addColorStop(1, "rgba(255,255,255,0)");
+                ctx.fillStyle = glow;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.globalAlpha = 1;
 
-                    drawSermonShareRoundedRect(ctx, 72, 88, 936, 1174, 44);
-                    ctx.fillStyle = "rgba(255,255,255,0.14)";
-                    ctx.fill();
-                    ctx.strokeStyle = "rgba(255,255,255,0.22)";
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
+                drawSermonShareRoundedRect(ctx, 72, 88, 936, 1174, 44);
+                ctx.fillStyle = "rgba(255,255,255,0.14)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.22)";
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-                    ctx.textAlign = "center";
-                    ctx.fillStyle = "#ffe8e8";
-                    ctx.font = "700 36px 'Segoe UI', Arial, sans-serif";
-                    ctx.fillText(
-                        T("sermons.shareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", latestSermonsCard),
-                        540,
-                        170
-                    );
+                ctx.textAlign = "center";
+                ctx.fillStyle = "#ffe8e8";
+                ctx.font = "700 36px 'Segoe UI', Arial, sans-serif";
+                ctx.fillText(
+                    T("sermons.shareCardBrand", "NEW JERUSALEM CHURCH BELGIUM", latestSermonsCard),
+                    540,
+                    170
+                );
 
-                    ctx.fillStyle = "rgba(255,255,255,0.92)";
-                    ctx.font = "700 34px 'Segoe UI', Arial, sans-serif";
-                    ctx.fillText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), 540, 230);
+                ctx.fillStyle = "rgba(255,255,255,0.92)";
+                ctx.font = "700 34px 'Segoe UI', Arial, sans-serif";
+                ctx.fillText(T("sermons.shareSectionLabel", "Sermon", latestSermonsCard), 540, 230);
 
-                    var contentTop = 270;
-                    if (photoImg && photoImg.naturalWidth > 0) {
-                        var photoX = 140;
-                        var photoY = 260;
-                        var photoW = 800;
-                        var photoH = 420;
-                        drawSermonShareRoundedRect(ctx, photoX, photoY, photoW, photoH, 28);
-                        ctx.save();
-                        ctx.clip();
-                        var scale = Math.max(photoW / photoImg.naturalWidth, photoH / photoImg.naturalHeight);
-                        var dw = photoImg.naturalWidth * scale;
-                        var dh = photoImg.naturalHeight * scale;
-                        var dx = photoX + (photoW - dw) / 2;
-                        var dy = photoY + (photoH - dh) / 2;
-                        ctx.drawImage(photoImg, dx, dy, dw, dh);
-                        ctx.restore();
-                        ctx.strokeStyle = "rgba(255,255,255,0.28)";
-                        ctx.lineWidth = 2;
-                        drawSermonShareRoundedRect(ctx, photoX, photoY, photoW, photoH, 28);
-                        ctx.stroke();
-                        contentTop = photoY + photoH + 56;
-                    } else {
-                        ctx.fillStyle = "rgba(255,255,255,0.9)";
-                        ctx.font = "900 120px Georgia, serif";
-                        ctx.fillText("♪", 540, 390);
-                        contentTop = 460;
-                    }
+                ctx.fillStyle = "rgba(255,255,255,0.9)";
+                ctx.font = "900 120px Georgia, serif";
+                ctx.fillText("♪", 540, 390);
+                var contentTop = 460;
 
-                    var titleFont = hasTamil
-                        ? "700 54px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
-                        : "700 56px 'Segoe UI', Arial, sans-serif";
-                    ctx.font = titleFont;
-                    ctx.fillStyle = "#ffffff";
-                    var titleLines = wrapSermonShareText(ctx, title, 780, 4);
-                    var titleLineH = hasTamil ? 72 : 68;
-                    titleLines.forEach(function (line, index) {
-                        ctx.fillText(line, 540, contentTop + index * titleLineH);
-                    });
-                    var y = contentTop + titleLines.length * titleLineH + 28;
-
-                    if (subtitle) {
-                        ctx.fillStyle = "#ffe2e2";
-                        ctx.font = hasTamil
-                            ? "600 36px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
-                            : "600 36px 'Segoe UI', Arial, sans-serif";
-                        var subLines = wrapSermonShareText(ctx, subtitle, 780, 3);
-                        subLines.forEach(function (line, index) {
-                            ctx.fillText(line, 540, y + index * 46);
-                        });
-                        y += subLines.length * 46 + 24;
-                    }
-
-                    if (speaker) {
-                        ctx.fillStyle = "rgba(255,255,255,0.92)";
-                        ctx.font = hasTamil
-                            ? "600 34px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
-                            : "600 34px 'Segoe UI', Arial, sans-serif";
-                        var speakerLine = T("sermons.speakerPrefix", "Speaker", latestSermonsCard) + ": " + speaker;
-                        wrapSermonShareText(ctx, speakerLine, 780, 2).forEach(function (line, index) {
-                            ctx.fillText(line, 540, y + index * 42);
-                        });
-                        y += 84;
-                    }
-
-                    if (dateLine) {
-                        ctx.fillStyle = "rgba(255,232,232,0.9)";
-                        ctx.font = "600 32px 'Segoe UI', Arial, sans-serif";
-                        ctx.fillText(dateLine, 540, Math.min(y + 8, 1040));
-                    }
-
-                    drawSermonShareRoundedRect(ctx, 300, 1110, 480, 92, 46);
-                    ctx.fillStyle = "rgba(255,255,255,0.18)";
-                    ctx.fill();
-                    ctx.strokeStyle = "rgba(255,255,255,0.26)";
-                    ctx.lineWidth = 1.5;
-                    ctx.stroke();
-                    ctx.fillStyle = "#ffffff";
-                    ctx.font = "600 34px 'Segoe UI', Arial, sans-serif";
-                    ctx.fillText(T("sermons.shareCardBadge", "NJC • Sermon", latestSermonsCard), 540, 1168);
-
-                    ctx.fillStyle = "rgba(255,255,255,0.82)";
-                    ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
-                    ctx.fillText(T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard), 540, 1240);
-
-                    return sermonShareCanvasToPngBlob(canvas);
+                var titleFont = hasTamil
+                    ? "700 54px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                    : "700 56px 'Segoe UI', Arial, sans-serif";
+                ctx.font = titleFont;
+                ctx.fillStyle = "#ffffff";
+                var titleLines = wrapSermonShareText(ctx, title, 780, 4);
+                var titleLineH = hasTamil ? 72 : 68;
+                titleLines.forEach(function (line, index) {
+                    ctx.fillText(line, 540, contentTop + index * titleLineH);
                 });
+                var y = contentTop + titleLines.length * titleLineH + 28;
+
+                if (subtitle) {
+                    ctx.fillStyle = "#ffe2e2";
+                    ctx.font = hasTamil
+                        ? "600 36px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                        : "600 36px 'Segoe UI', Arial, sans-serif";
+                    var subLines = wrapSermonShareText(ctx, subtitle, 780, 3);
+                    subLines.forEach(function (line, index) {
+                        ctx.fillText(line, 540, y + index * 46);
+                    });
+                    y += subLines.length * 46 + 24;
+                }
+
+                if (speaker) {
+                    ctx.fillStyle = "rgba(255,255,255,0.92)";
+                    ctx.font = hasTamil
+                        ? "600 34px 'Noto Sans Tamil', 'Latha', 'Segoe UI', sans-serif"
+                        : "600 34px 'Segoe UI', Arial, sans-serif";
+                    var speakerLine = T("sermons.speakerPrefix", "Speaker", latestSermonsCard) + ": " + speaker;
+                    wrapSermonShareText(ctx, speakerLine, 780, 2).forEach(function (line, index) {
+                        ctx.fillText(line, 540, y + index * 42);
+                    });
+                    y += 84;
+                }
+
+                if (dateLine) {
+                    ctx.fillStyle = "rgba(255,232,232,0.9)";
+                    ctx.font = "600 32px 'Segoe UI', Arial, sans-serif";
+                    ctx.fillText(dateLine, 540, Math.min(y + 8, 1040));
+                }
+
+                drawSermonShareRoundedRect(ctx, 300, 1110, 480, 92, 46);
+                ctx.fillStyle = "rgba(255,255,255,0.18)";
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.26)";
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+                ctx.fillStyle = "#ffffff";
+                ctx.font = "600 34px 'Segoe UI', Arial, sans-serif";
+                ctx.fillText(T("sermons.shareCardBadge", "NJC • Sermon", latestSermonsCard), 540, 1168);
+
+                ctx.fillStyle = "rgba(255,255,255,0.82)";
+                ctx.font = "500 28px 'Segoe UI', Arial, sans-serif";
+                ctx.fillText(T("sermons.sharePlayLine", "▶ Listen in NJC App", latestSermonsCard), 540, 1240);
+
+                return sermonShareCanvasToPngBlob(canvas);
+            }
+
+            function buildSermonShareImageBlob(opts) {
+                var config = opts || {};
+                var photoUrl = String(config.photoUrl || "").trim();
+                // One image only: uploaded photo alone, otherwise generated branded card.
+                if (/^https:\/\//i.test(photoUrl)) {
+                    return loadSermonShareImage(photoUrl).then(function (photoImg) {
+                        if (photoImg && (photoImg.naturalWidth || photoImg.width) > 0) {
+                            return blobFromUploadedSermonPhoto(photoImg);
+                        }
+                        return buildGeneratedSermonShareCardBlob(config);
+                    }, function () {
+                        return buildGeneratedSermonShareCardBlob(config);
+                    });
+                }
+                return Promise.resolve(buildGeneratedSermonShareCardBlob(config));
             }
 
             function downloadSermonShareBlob(blob, fileName) {
@@ -1304,14 +1315,18 @@
                     var speakerLine = speakerPrefix + ": " + escapeHtml(speakerName);
                     var avatarText = escapeHtml(getSpeakerAvatarText(sermon.speaker));
                     var dateText = toDisplayDate(sermon.dateObj, latestSermonsCard);
+                    var listPhoto = getSermonPhotoUrl(sermon);
+                    var mediaHtml = listPhoto
+                        ? ("<img class=\"sermon-list-photo\" src=\"" + escapeHtml(listPhoto) + "\" alt=\"\" width=\"72\" height=\"72\" loading=\"lazy\" decoding=\"async\">")
+                        : ("<span class=\"sermon-speaker-avatar\" aria-hidden=\"true\">" + avatarText + "</span>");
 
                     var disabledAttr = sermon.audioUrl ? "" : " aria-disabled=\"true\"";
                     return "" +
                         "<li class=\"sermon-item\">" +
                         "  <div class=\"sermon-item-row\">" +
                         "    <div class=\"sermon-open-btn\" role=\"button\" tabindex=\"0\" data-sermon-index=\"" + sermonIndex + "\"" + disabledAttr + ">" +
-                        "      <div class=\"sermon-open-top\">" +
-                        "          <span class=\"sermon-speaker-avatar\" aria-hidden=\"true\">" + avatarText + "</span>" +
+                        "      <div class=\"sermon-open-top" + (listPhoto ? " has-photo" : "") + "\">" +
+                        "          " + mediaHtml +
                         "          <div class=\"sermon-open-main\">" +
                         "              <h3 class=\"sermon-line sermon-line-tamil\">" + title + "</h3>" +
                         "              <p class=\"sermon-line sermon-line-english\">" + englishLine + "</p>" +
@@ -1437,8 +1452,8 @@
                 playerDate.textContent = toPlayerDateLine(currentSermon);
                 miniPlayerTitle.textContent = currentSermon.title || T("sermons.nowPlaying", "Now Playing");
                 if (playerSermonPhoto) {
-                    var photo = String(currentSermon.photoUrl || "").trim();
-                    if (/^https:\/\//i.test(photo)) {
+                    var photo = getSermonPhotoUrl(currentSermon);
+                    if (photo) {
                         playerSermonPhoto.hidden = false;
                         if (playerSermonPhoto.getAttribute("src") !== photo) {
                             playerSermonPhoto.src = photo;
@@ -1834,6 +1849,7 @@
                 if (!until) {
                     return;
                 }
+                var photoUrl = getSermonPhotoUrl(latest);
                 var payload = {
                     sermonFingerprint: fp,
                     visibleUntilYmd: until,
@@ -1842,12 +1858,18 @@
                     subtitle: String(latest.subtitle || "").trim(),
                     speaker: String(latest.speaker || "").trim(),
                     sermonDateYmd: String(latest.dateYmd || "").trim(),
+                    photoUrl: photoUrl,
                     updatedAt: Date.now()
                 };
                 try {
                     var rawPrev = window.localStorage.getItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY);
                     var prev = rawPrev ? JSON.parse(rawPrev) : null;
-                    if (prev && prev.sermonFingerprint === fp && prev.visibleUntilYmd === until) {
+                    if (
+                        prev &&
+                        prev.sermonFingerprint === fp &&
+                        prev.visibleUntilYmd === until &&
+                        String(prev.photoUrl || "") === photoUrl
+                    ) {
                         return;
                     }
                     window.localStorage.setItem(SERMON_AUTO_ANNOUNCE_STORAGE_KEY, JSON.stringify(payload));

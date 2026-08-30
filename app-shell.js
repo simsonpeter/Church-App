@@ -1167,12 +1167,12 @@
         "admin.triviaUpdated": "வேதாகமக் கேள்வி புதுப்பிக்கப்பட்டது.",
         "admin.triviaDeleted": "வேதாகமக் கேள்வி நீக்கப்பட்டது.",
         "admin.sermonTitle": "பிரசங்கம் சேர்க்க",
-        "admin.sermonGithubInfo": "முக்கிய பட்டியல் GitHub sermons.json. விருப்ப photoUrl (https) பகிர்வில் தோன்றும்; இல்லையென்றால் செயலி தானே படம் உருவாக்கும்.",
+        "admin.sermonGithubInfo": "முக்கிய பட்டியல் GitHub sermons.json. விருப்ப photoUrl (https) பட்டியல்/பிளேயரில் காட்டும்; பகிர்வில் அந்த படம் மட்டும். இல்லையென்றால் செயலி தானே கார்டு உருவாக்கும்.",
         "admin.sermonTitlePlaceholder": "தமிழ் தலைப்பு",
         "admin.sermonSubtitlePlaceholder": "ஆங்கில துணைத்தலைப்பு",
         "admin.sermonSpeakerPlaceholder": "பேச்சாளர் பெயர்",
         "admin.sermonAudioPlaceholder": "ஆடியோ URL (https://...)",
-        "admin.sermonPhotoPlaceholder": "பட URL (https://…, விருப்பம் — பகிரும்போது சேரும்)",
+        "admin.sermonPhotoPlaceholder": "பட URL (https://…, விருப்பம் — பட்டியல்/பகிர்வில் காட்டும்)",
         "admin.sermonPhotoNeedHttps": "பட URL https:// இல் தொடங்க வேண்டும்",
         "admin.sermonPublish": "பிரசங்கம் சேர்க்க",
         "admin.sermonManageTitle": "சமீப பிரசங்கங்கள்",
@@ -2398,7 +2398,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "453sermongithubimg1";
+    var SW_REGISTER_VERSION_FALLBACK = "455sermonshareone1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

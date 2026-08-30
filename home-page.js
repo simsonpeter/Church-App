@@ -1904,7 +1904,10 @@
                     important: false,
                     announcementTag: "sermon",
                     link: "#sermons",
-                    imageUrl: "sermons-banner.jpg?v=20260411cb1",
+                    imageUrl: (function () {
+                        var photo = String(stored.photoUrl || stored.coverImageUrl || stored.imageUrl || "").trim();
+                        return /^https:\/\//i.test(photo) ? photo : "sermons-banner.jpg?v=20260411cb1";
+                    }()),
                     skipDismiss: true
                 }, 0);
             }
