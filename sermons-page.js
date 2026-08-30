@@ -671,6 +671,41 @@
                 });
             }
 
+            function guessSermonPhotoFileName(photoUrl, blob) {
+                var type = String((blob && blob.type) || "").toLowerCase();
+                var fromUrl = String(photoUrl || "").split("?")[0].split("#")[0];
+                var extMatch = fromUrl.match(/\.([a-z0-9]{3,4})$/i);
+                var ext = extMatch ? extMatch[1].toLowerCase() : "";
+                if (type.indexOf("jpeg") >= 0 || type === "image/jpg" || ext === "jpg" || ext === "jpeg") {
+                    return "njc-sermon.jpg";
+                }
+                if (type.indexOf("webp") >= 0 || ext === "webp") {
+                    return "njc-sermon.webp";
+                }
+                if (type.indexOf("gif") >= 0 || ext === "gif") {
+                    return "njc-sermon.gif";
+                }
+                return "njc-sermon.png";
+            }
+
+            function fetchUploadedSermonPhotoBlob(photoUrl) {
+                return fetch(photoUrl, { mode: "cors", cache: "no-store" }).then(function (response) {
+                    if (!response || !response.ok) {
+                        throw new Error("photo-fetch-failed");
+                    }
+                    return response.blob();
+                }).then(function (blob) {
+                    if (!blob || !blob.size) {
+                        throw new Error("photo-empty");
+                    }
+                    var type = String(blob.type || "").toLowerCase();
+                    if (type && type.indexOf("image/") !== 0) {
+                        throw new Error("photo-not-image");
+                    }
+                    return blob;
+                });
+            }
+
             function blobFromUploadedSermonPhoto(photoImg) {
                 var canvas = document.createElement("canvas");
                 var srcW = photoImg.naturalWidth || photoImg.width || 0;
@@ -678,7 +713,7 @@
                 if (!srcW || !srcH) {
                     throw new Error("photo-empty");
                 }
-                // Keep the uploaded image alone (no branded card overlay).
+                // Uploaded image alone — no branded card overlay.
                 var maxEdge = 1600;
                 var scale = Math.min(1, maxEdge / Math.max(srcW, srcH));
                 canvas.width = Math.max(1, Math.round(srcW * scale));
@@ -689,6 +724,18 @@
                 }
                 ctx.drawImage(photoImg, 0, 0, canvas.width, canvas.height);
                 return sermonShareCanvasToPngBlob(canvas);
+            }
+
+            function resolveUploadedSermonPhotoBlob(photoUrl) {
+                // Prefer original file bytes; canvas redraw only if CORS blocks fetch.
+                return fetchUploadedSermonPhotoBlob(photoUrl).catch(function () {
+                    return loadSermonShareImage(photoUrl).then(function (photoImg) {
+                        if (photoImg && (photoImg.naturalWidth || photoImg.width) > 0) {
+                            return blobFromUploadedSermonPhoto(photoImg);
+                        }
+                        throw new Error("photo-unavailable");
+                    });
+                });
             }
 
             function buildGeneratedSermonShareCardBlob(config) {
@@ -808,16 +855,10 @@
             function buildSermonShareImageBlob(opts) {
                 var config = opts || {};
                 var photoUrl = String(config.photoUrl || "").trim();
-                // One image only: uploaded photo alone, otherwise generated branded card.
+                // Photo set → share that image only (never build a card).
+                // No photo → generate branded card.
                 if (/^https:\/\//i.test(photoUrl)) {
-                    return loadSermonShareImage(photoUrl).then(function (photoImg) {
-                        if (photoImg && (photoImg.naturalWidth || photoImg.width) > 0) {
-                            return blobFromUploadedSermonPhoto(photoImg);
-                        }
-                        return buildGeneratedSermonShareCardBlob(config);
-                    }, function () {
-                        return buildGeneratedSermonShareCardBlob(config);
-                    });
+                    return resolveUploadedSermonPhotoBlob(photoUrl);
                 }
                 return Promise.resolve(buildGeneratedSermonShareCardBlob(config));
             }
@@ -942,7 +983,11 @@
                 }
 
                 playerShareBtn.disabled = true;
-                showSermonShareFeedback("sermons.shareGenerating", "Creating sermon image...");
+                if (photoUrl) {
+                    showSermonShareFeedback("sermons.sharePhotoReady", "Sharing sermon photo...");
+                } else {
+                    showSermonShareFeedback("sermons.shareGenerating", "Creating sermon image...");
+                }
 
                 ensureShareHashForSermon(currentSermon).then(function (shareId) {
                     var url = buildSermonAppShareUrl(shareId);
@@ -962,9 +1007,12 @@
                         dateLine: dateLine,
                         photoUrl: photoUrl
                     }).then(function (blob) {
-                        var fileName = "njc-sermon.png";
+                        var fileName = photoUrl
+                            ? guessSermonPhotoFileName(photoUrl, blob)
+                            : "njc-sermon.png";
+                        var mime = (blob && blob.type) || (fileName.indexOf(".jpg") >= 0 ? "image/jpeg" : "image/png");
                         if (typeof File === "function" && blob) {
-                            var file = new File([blob], fileName, { type: "image/png" });
+                            var file = new File([blob], fileName, { type: mime });
                             if (canShareFilesPayload([file])) {
                                 var withImage = Object.assign({}, sharePayload, { files: [file] });
                                 return sharePayloadNow(withImage, url, blob, fileName);
@@ -972,7 +1020,7 @@
                         }
                         return sharePayloadNow(sharePayload, url, blob, fileName);
                     }, function () {
-                        // Image generation failed — fall back to text/link share.
+                        // Photo/card unavailable — text/link only (never invent a mixed card).
                         return sharePayloadNow(sharePayload, url, null, "");
                     });
                 }).catch(function () {
