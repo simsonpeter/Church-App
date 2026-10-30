@@ -1,0 +1,51 @@
+/* NJC Belgium visual refresh v1 — non-destructive CSS layer.
+   Loaded AFTER styles.css. Existing scripts, routes and data remain intact. */
+:root {
+  --bg-top:#f5f7fc; --bg-mid:#f7f8fc; --bg-bottom:#f3f5fa;
+  --surface:#fff; --surface-soft:#f4f7fc; --text:#14213d;
+  --muted:#65718a; --primary:#203d73; --primary-soft:#e9effb;
+  --line:#dce4f1; --shadow:0 14px 36px rgba(16,37,76,.10);
+  --header-start:#0d2045; --header-mid:#183563; --header-end:#254d80;
+  --accent-warm:#d5aa60; --card-gradient-top:#fff;
+  --card-gradient-bottom:#fff; --card-border-width:1px;
+  --card-border-color:rgba(30,63,112,.12);
+  --app-inline-pad:max(14px,env(safe-area-inset-left),env(safe-area-inset-right));
+  --card-shadow-ambient:0 8px 30px rgba(20,44,87,.08);
+  --card-shadow-ambient-hover:0 14px 38px rgba(20,44,87,.12);
+}
+html:not([data-theme="dark"]) body {background:#f4f6fb;color:var(--text)}
+.app-shell {max-width:1160px;margin-inline:auto}
+.app-header {border-radius:0 0 26px 26px;box-shadow:0 12px 28px rgba(11,33,70,.13);background:linear-gradient(125deg,#0e2349,#1a3d6b 72%,#29547c)!important;color:#fff}
+.app-header h1 {letter-spacing:-.035em;font-weight:800;line-height:1.16}
+.app-header .eyebrow,.app-header .brand-title {letter-spacing:.11em;text-transform:uppercase;font-weight:700}
+.app-content {padding-top:18px;padding-bottom:28px}
+.card {border-radius:22px!important;border:1px solid rgba(33,65,116,.12)!important;box-shadow:0 8px 28px rgba(23,45,82,.075)!important;background:#fff;overflow:hidden}
+.card h2 {font-weight:800;letter-spacing:-.025em;color:#18335e}
+.card h2 i {color:#bb914b}
+.card-banner {overflow:hidden;border-radius:15px}
+.card-banner img {display:block;width:100%;object-fit:cover;transition:transform .35s ease}
+@media(hover:hover){.card:hover .card-banner img {transform:scale(1.025)}}
+.button-link,button[type="submit"] {border-radius:13px;font-weight:700;transition:transform .15s ease,box-shadow .15s ease}
+.button-link:active,button[type="submit"]:active {transform:scale(.985)}
+.button-link:not(.button-secondary) {background:#1b4277;color:white}
+.button-secondary {background:#edf2fa;color:#1d3b69;border-color:#d9e3f2}
+input,select,textarea {border-radius:12px;border-color:#d9e2ef}
+:focus-visible {outline:3px solid #d1a453!important;outline-offset:3px}
+.daily-verse-card {background:linear-gradient(155deg,#fff 65%,#f7f1e5)!important}
+.daily-verse-body {padding-block:8px}
+.daily-verse-text {font-family:var(--font-stack-ta);font-weight:600;line-height:1.85}
+.daily-verse-reference {font-weight:700;color:#946d31}
+.reading-progress-track {border-radius:99px;overflow:hidden;background:#e6ecf5}
+.reading-progress-fill {background:linear-gradient(90deg,#1f467b,#c19b58)}
+.list > li {border-radius:13px}
+.offline-banner {background:#fff3dc;color:#644713}
+.pwa-install-banner {border-color:#d9e3f2}
+/* Maintain legibility for users who selected dark mode. */
+html[data-theme="dark"] {--primary:#9abaff;--accent-warm:#e4bb76;--card-border-color:rgba(176,198,236,.18)}
+html[data-theme="dark"] .card {background:var(--surface);border-color:var(--line)!important}
+html[data-theme="dark"] .card h2 {color:var(--text)}
+html[data-theme="dark"] .daily-verse-card {background:var(--surface)!important}
+html[data-theme="dark"] .daily-verse-reference {color:#e4bb76}
+@media(min-width:800px){.app-header {margin-top:12px;border-radius:25px}.app-content {padding-top:24px}.card {border-radius:24px!important}}
+@media(max-width:420px){.app-header {border-radius:0 0 22px 22px}.card {border-radius:18px!important}.app-content {padding-top:12px}}
+@media(prefers-reduced-motion:reduce){.card-banner img,.button-link {transition:none!important}}
