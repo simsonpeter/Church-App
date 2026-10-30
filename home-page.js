@@ -21,6 +21,11 @@
             var readingSharePlanStatus = document.getElementById("reading-share-plan-status");
             var dailyVerseText = document.getElementById("daily-verse-text");
             var dailyVerseReference = document.getElementById("daily-verse-reference");
+            var dailyVerseShareBtn = document.getElementById("daily-verse-share-btn");
+            var dailyVerseShareStatus = document.getElementById("daily-verse-share-status");
+            var homeSermonPreview = document.getElementById("home-sermon-preview");
+            var homeSermonPreviewTitle = document.getElementById("home-sermon-preview-title");
+            var homeSermonPreviewMeta = document.getElementById("home-sermon-preview-meta");
             var DAILY_VERSE_CARD_LANG_ID = "home-daily-verse";
             /** Per-card language for home announcements (Daily Manna fetch + carousel copy). */
             var ANNOUNCEMENTS_CARD_LANG_ID = "home-announcements";
@@ -1917,6 +1922,114 @@
                 return buildLatestSermonAnnouncementItem(stored);
             }
 
+            function getHomeCardLanguage(cardId) {
+                var map = readCardLanguageMap();
+                var stored = String(map[cardId] || "").trim();
+                if (stored === "en" || stored === "ta") {
+                    return stored;
+                }
+                return document.documentElement.lang === "ta" ? "ta" : "en";
+            }
+
+            function renderHomeSermonPreview() {
+                if (!homeSermonPreview) {
+                    return;
+                }
+                homeSermonPreview.hidden = !modOn("sermons");
+                if (homeSermonPreview.hidden) {
+                    return;
+                }
+                var stored = readStoredLatestSermonAnnouncement();
+                if (!stored) {
+                    if (homeSermonPreviewTitle) {
+                        homeSermonPreviewTitle.textContent = T("home.sermonPreviewFallbackTitle", "Listen and grow in faith", homeSermonPreview);
+                    }
+                    if (homeSermonPreviewMeta) {
+                        homeSermonPreviewMeta.textContent = T("home.sermonPreviewFallbackMeta", "Open the sermon library for the latest message.", homeSermonPreview);
+                    }
+                    return;
+                }
+                var useTamil = getHomeCardLanguage("home-sermon-preview") === "ta";
+                var title = useTamil
+                    ? String(stored.titleTa || stored.title || "").trim()
+                    : String(stored.title || stored.titleTa || "").trim();
+                var speaker = String(stored.speaker || "").trim();
+                var subtitle = useTamil
+                    ? String(stored.subtitleTa || stored.subtitle || "").trim()
+                    : String(stored.subtitle || stored.subtitleTa || "").trim();
+                if (homeSermonPreviewTitle) {
+                    homeSermonPreviewTitle.textContent = title || T("home.sermonPreviewFallbackTitle", "Listen and grow in faith", homeSermonPreview);
+                }
+                if (homeSermonPreviewMeta) {
+                    homeSermonPreviewMeta.textContent = [speaker, subtitle].filter(Boolean).join(" · ") ||
+                        T("home.sermonPreviewFallbackMeta", "Open the sermon library for the latest message.", homeSermonPreview);
+                }
+            }
+
+            function setDailyVerseShareStatus(message, isError) {
+                if (!dailyVerseShareStatus) {
+                    return;
+                }
+                dailyVerseShareStatus.textContent = String(message || "");
+                dailyVerseShareStatus.hidden = !message;
+                dailyVerseShareStatus.classList.toggle("daily-verse-share-status--error", Boolean(isError));
+            }
+
+            function fallbackCopyDailyVerse(text) {
+                if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+                    return navigator.clipboard.writeText(text);
+                }
+                return new Promise(function (resolve, reject) {
+                    try {
+                        var area = document.createElement("textarea");
+                        area.value = text;
+                        area.setAttribute("readonly", "");
+                        area.style.position = "fixed";
+                        area.style.opacity = "0";
+                        document.body.appendChild(area);
+                        area.select();
+                        var copied = document.execCommand("copy");
+                        area.remove();
+                        copied ? resolve() : reject(new Error("copy-failed"));
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            }
+
+            function shareDailyVerse() {
+                var verse = String(dailyVerseText && dailyVerseText.textContent || "").trim();
+                var reference = String(dailyVerseReference && dailyVerseReference.textContent || "").trim();
+                if (!verse) {
+                    return;
+                }
+                var text = verse + (reference ? "\n— " + reference : "");
+                var payload = {
+                    title: T("home.dailyVerseTitle", "Daily Verse", verseCard),
+                    text: text,
+                    url: window.location.origin + window.location.pathname + "#home"
+                };
+                setDailyVerseShareStatus("", false);
+                if (navigator.share) {
+                    navigator.share(payload).catch(function (error) {
+                        if (error && error.name === "AbortError") {
+                            return;
+                        }
+                        fallbackCopyDailyVerse(text).then(function () {
+                            setDailyVerseShareStatus(T("home.dailyVerseCopied", "Verse copied.", verseCard), false);
+                        }).catch(function () {
+                            setDailyVerseShareStatus(T("home.dailyVerseShareFailed", "Could not share the verse.", verseCard), true);
+                        });
+                    });
+                    return;
+                }
+                fallbackCopyDailyVerse(text).then(function () {
+                    setDailyVerseShareStatus(T("home.dailyVerseCopied", "Verse copied.", verseCard), false);
+                }).catch(function () {
+                    setDailyVerseShareStatus(T("home.dailyVerseShareFailed", "Could not share the verse.", verseCard), true);
+                });
+            }
+
             function extractDailyBreadFeedRows(payload) {
                 if (!payload) {
                     return [];
@@ -3765,6 +3878,7 @@
                 if (modOn("eventsWeek")) {
                     loadThisWeekEvents();
                 }
+                renderHomeSermonPreview();
                 syncReadingShareProgressButton();
             }
 
@@ -3772,6 +3886,7 @@
                 if (modOn("announcements")) {
                     mergeHomeAnnouncements();
                 }
+                renderHomeSermonPreview();
             });
 
             document.addEventListener("njc:modules-updated", function () {
@@ -3785,6 +3900,7 @@
                 loadAnnouncements();
                 loadTrivia();
                 renderThisWeekEvents();
+                renderHomeSermonPreview();
                 syncReadingShareProgressButton();
             });
 
@@ -3801,6 +3917,9 @@
                     loadAnnouncements();
                 } else {
                     mergeHomeAnnouncements();
+                }
+                if (d && d.cardId === "home-sermon-preview") {
+                    renderHomeSermonPreview();
                 }
                 loadTrivia();
                 renderThisWeekEvents();
@@ -4480,6 +4599,10 @@
                 readingSharePlanBtn.addEventListener("click", function () {
                     shareReadingPlanAsImage();
                 });
+            }
+
+            if (dailyVerseShareBtn) {
+                dailyVerseShareBtn.addEventListener("click", shareDailyVerse);
             }
 
             if (announcementsList) {

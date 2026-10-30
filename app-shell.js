@@ -42,6 +42,7 @@
         "nav.dailyBread": "அப்பம்",
         "nav.dailyBreadTab": "அப்பம்",
         "home.quickAccessTitle": "விரைவான அணுகல்",
+        "home.quickAccessSubtitle": "ஆராதனைக்கும் தினசரி விசுவாச வாழ்விற்கும் தேவையான அனைத்தும்.",
         "menu.bookShelf": "நூலகம்",
         "bookShelf.eyebrow": "நூலகம்",
         "bookShelf.title": "நூலகம்",
@@ -126,6 +127,15 @@
         "home.dailyVerseVersionTamil": "BSI (பழைய)",
         "home.dailyVerseEmptyBody": "இன்றைய வசனம் கிடைக்கவில்லை.",
         "home.dailyVerseLoading": "இன்றைய வசனம் ஏற்றப்படுகிறது...",
+        "home.devotionalKicker": "இன்றைக்கான இறைவார்த்தை",
+        "home.dailyVerseShare": "வசனத்தைப் பகிர்",
+        "home.dailyVerseCopied": "வசனம் நகலெடுக்கப்பட்டது.",
+        "home.dailyVerseShareFailed": "வசனத்தைப் பகிர முடியவில்லை.",
+        "home.viewAllEvents": "அனைத்து நிகழ்வுகளும்",
+        "home.sermonPreviewTitle": "சமீபத்திய பிரசங்கம்",
+        "home.sermonPreviewFallbackTitle": "கேட்டு விசுவாசத்தில் வளருங்கள்",
+        "home.sermonPreviewFallbackMeta": "சமீபத்திய செய்தியைக் கேட்க பிரசங்க நூலகத்தைத் திறக்கவும்.",
+        "home.openSermons": "பிரசங்கங்களைத் திற",
         "dailyBread.eyebrow": "அன்றன்றுள்ள அப்பம்",
         "dailyBread.title": "அன்றன்றுள்ள அப்பம்",
         "dailyBread.dateLine": "தேதி: {date}",
@@ -2401,7 +2411,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "459navygold1";
+    var SW_REGISTER_VERSION_FALLBACK = "460premiumui1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

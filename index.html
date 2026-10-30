@@ -15,7 +15,7 @@
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
     <link rel="manifest" href="site.webmanifest?v=20261030njc1">
     <link rel="stylesheet" href="styles.css?v=20261030">
-    <link rel="stylesheet" href="njc-redesign.css?v=20261030njc1">
+    <link rel="stylesheet" href="njc-redesign.css?v=20261030njc2">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -39,110 +39,89 @@
     </div>
     <div class="app-shell">
         <header class="app-header home-header" id="spa-header">
-            <img class="app-header-logo" src="logo.png?v=20260318de" alt="New Jerusalem Church Belgium" width="52" height="52">
+            <div class="app-header-brand-lockup">
+                <img class="app-header-logo" src="logo.png?v=20260318de" alt="" width="52" height="52">
+                <span class="app-header-brand-name">New Jerusalem Church Belgium</span>
+            </div>
             <div class="eyebrow brand-title" id="spa-header-eyebrow"><i id="spa-header-icon" class="fa-solid fa-church"></i><span id="spa-header-eyebrow-text">NJC Belgium</span></div>
             <h1 id="spa-header-title">Welcome</h1>
             <p id="spa-header-subtitle" hidden></p>
         </header>
 
         <section class="page-view active" data-route="home">
-            <main class="app-content">
-            <nav class="home-quick-access" aria-labelledby="home-quick-access-title">
-                <h2 id="home-quick-access-title" data-i18n="home.quickAccessTitle">Quick access</h2>
-                <div class="home-quick-access-grid">
-                    <a class="home-quick-link" href="#prayer">
-                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-hands-praying"></i></span>
-                        <span data-i18n="nav.prayer">Prayer</span>
-                    </a>
-                    <a class="home-quick-link" href="#sermons">
-                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-microphone-lines"></i></span>
-                        <span data-i18n="nav.sermons">Sermons</span>
-                    </a>
-                    <a class="home-quick-link" href="#events">
-                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
-                        <span data-i18n="nav.events">Events</span>
-                    </a>
-                    <a class="home-quick-link" href="#bible">
-                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-book-bible"></i></span>
-                        <span data-i18n="bible.title">Bible</span>
-                    </a>
-                    <a class="home-quick-link" href="#daily-bread">
-                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-bread-slice"></i></span>
-                        <span data-i18n="dailyBread.title">Daily Bread</span>
-                    </a>
-                </div>
-            </nav>
-            <section class="card announcements-card" id="announcements-section" data-card-lang-id="home-announcements">
-                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
-                <div class="card-banner">
-                    <img src="https://i.ibb.co/1JZXKxQP/1778539756636.png" alt="" width="1536" height="1024" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-                </div>
-                <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
-                <ul class="list" id="home-announcements-list">
-                    <li>
-                        <h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3>
-                        <p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p>
-                    </li>
-                </ul>
-            </section>
-
-            <section class="card verse-card reading-plan-card card-v-featured" data-card-lang-id="home-reading">
-                <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="home.bibleReadingTitle">Today's Bible Reading</span></h2>
-                <div class="card-banner">
-                    <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
-                </div>
-                <p class="page-note" id="today-reading-plan-meta"></p>
-                <div class="reading-progress-wrap">
-                    <div class="reading-progress-head">
-                        <strong id="reading-progress-title">Reading progress</strong>
-                        <span id="reading-progress-percent">0%</span>
-                    </div>
-                    <div class="reading-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="reading-progress-track">
-                        <span class="reading-progress-fill" id="reading-progress-fill"></span>
-                    </div>
-                    <p class="page-note" id="reading-progress-summary"></p>
-                    <p class="page-note" id="reading-progress-remaining"></p>
-                    <p class="page-note reading-nudge-line" id="reading-nudge-line" hidden></p>
-                    <div class="reading-actions-row">
-                        <button type="button" class="reading-share-icon-btn" id="reading-export-csv-btn" data-i18n-aria-label="home.readingExportCsvAria" data-i18n-aria-fallback="Export reading log as CSV" data-i18n-title="home.readingExportCsvTitle" data-i18n-title-fallback="Export CSV" aria-label="Export reading log as CSV" title="Export CSV">
-                            <i class="fa-solid fa-file-csv" aria-hidden="true"></i>
-                        </button>
-                        <button type="button" class="reading-share-icon-btn" id="reading-share-progress-btn" aria-label="Share progress card" title="Share progress card">
-                            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-                        </button>
-                        <button type="button" class="reading-share-icon-btn" id="reading-share-plan-image-btn" disabled data-i18n-aria-label="home.readingSharePlanImage" data-i18n-aria-fallback="Share today's reading as image" data-i18n-title="home.readingSharePlanImage" data-i18n-title-fallback="Share today's plan (image)" aria-label="Share today's reading as image" title="Share today's plan (image)">
-                            <i class="fa-solid fa-image" aria-hidden="true"></i>
-                        </button>
-                        <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
-                        <button class="button-link button-secondary reading-mark-all-read" type="button" id="reading-mark-all-read" data-i18n="home.markAllUnreadRead" data-i18n-fallback="Mark all as read" disabled>Mark all as read</button>
-                    </div>
-                    <p class="page-note reading-share-plan-status" id="reading-share-plan-status" role="status" aria-live="polite" hidden></p>
-                </div>
-                <ul class="list" id="today-reading-plan-list">
-                    <li>
-                        <h3 data-i18n="home.loadingReadingTitle">Loading today's reading plan...</h3>
-                        <p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p>
-                    </li>
-                </ul>
-                <ul class="list reading-unread-list" id="reading-unread-list" hidden></ul>
-            </section>
-
-            <section class="card verse-card card-v-featured daily-verse-card" id="daily-verse-card" data-card-lang-id="home-daily-verse">
+            <main class="app-content home-dashboard">
+            <section class="card verse-card card-v-featured daily-verse-card home-devotional-card" id="daily-verse-card" data-card-lang-id="home-daily-verse">
                 <h2><i class="fa-solid fa-quote-left"></i><span data-i18n="home.dailyVerseTitle">Daily Verse</span></h2>
-                <div class="card-banner">
-                    <img src="daily-verse-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                <div class="home-devotional-visual">
+                    <img src="daily-verse-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" decoding="async" />
+                    <span class="home-devotional-kicker" data-i18n="home.devotionalKicker">A word for today</span>
                 </div>
                 <div class="daily-verse-body">
                     <p id="daily-verse-text" class="daily-verse-text" data-i18n="home.dailyVerseLoading">Loading daily verse...</p>
                     <p id="daily-verse-reference" class="daily-verse-reference page-note"></p>
+                    <div class="daily-verse-actions">
+                        <button type="button" class="daily-verse-share-btn" id="daily-verse-share-btn" data-i18n-aria-label="home.dailyVerseShare" data-i18n-aria-fallback="Share daily verse" aria-label="Share daily verse">
+                            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+                            <span data-i18n="home.dailyVerseShare">Share verse</span>
+                        </button>
+                        <p class="page-note daily-verse-share-status" id="daily-verse-share-status" role="status" aria-live="polite" hidden></p>
+                    </div>
                 </div>
             </section>
 
-            <section class="card trivia-card-compact card-v-playful" id="trivia-card-home">
-                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Quiz</span></h2>
-                <div class="card-banner">
-                    <img src="trivia-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+            <nav class="home-quick-access" aria-labelledby="home-quick-access-title">
+                <h2 id="home-quick-access-title" data-i18n="home.quickAccessTitle">Quick access</h2>
+                <p class="home-quick-subtitle" data-i18n="home.quickAccessSubtitle">Everything you need for worship and daily faith.</p>
+                <div class="home-quick-access-grid">
+                    <a class="home-quick-link" href="#prayer"><span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-hands-praying"></i></span><span data-i18n="nav.prayer">Prayer</span></a>
+                    <a class="home-quick-link" href="#sermons"><span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-microphone-lines"></i></span><span data-i18n="nav.sermons">Sermons</span></a>
+                    <a class="home-quick-link" href="#events"><span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span><span data-i18n="nav.events">Events</span></a>
+                    <a class="home-quick-link" href="#bible"><span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-book-bible"></i></span><span data-i18n="bible.title">Bible</span></a>
+                    <a class="home-quick-link" href="#daily-bread"><span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-bread-slice"></i></span><span data-i18n="dailyBread.title">Daily Bread</span></a>
                 </div>
+            </nav>
+
+            <section class="card verse-card reading-plan-card card-v-featured home-reading-card" data-card-lang-id="home-reading">
+                <h2><i class="fa-solid fa-book-bible"></i><span data-i18n="home.bibleReadingTitle">Today's Bible Reading</span></h2>
+                <div class="home-reading-overview">
+                    <div class="home-reading-image">
+                        <img src="reading-plan-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
+                    </div>
+                    <div class="reading-progress-wrap">
+                        <p class="page-note" id="today-reading-plan-meta"></p>
+                        <div class="reading-progress-head"><strong id="reading-progress-title">Reading progress</strong><span id="reading-progress-percent">0%</span></div>
+                        <div class="reading-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="reading-progress-track"><span class="reading-progress-fill" id="reading-progress-fill"></span></div>
+                        <p class="page-note" id="reading-progress-summary"></p>
+                        <p class="page-note" id="reading-progress-remaining"></p>
+                        <p class="page-note reading-nudge-line" id="reading-nudge-line" hidden></p>
+                    </div>
+                </div>
+                <ul class="list" id="today-reading-plan-list">
+                    <li><h3 data-i18n="home.loadingReadingTitle">Loading today's reading plan...</h3><p data-i18n="home.loadingReadingBody">Please wait while we load today's schedule.</p></li>
+                </ul>
+                <div class="reading-actions-row">
+                    <button type="button" class="reading-share-icon-btn" id="reading-export-csv-btn" data-i18n-aria-label="home.readingExportCsvAria" data-i18n-aria-fallback="Export reading log as CSV" data-i18n-title="home.readingExportCsvTitle" data-i18n-title-fallback="Export CSV" aria-label="Export reading log as CSV" title="Export CSV"><i class="fa-solid fa-file-csv" aria-hidden="true"></i></button>
+                    <button type="button" class="reading-share-icon-btn" id="reading-share-progress-btn" aria-label="Share progress card" title="Share progress card"><i class="fa-solid fa-share-nodes" aria-hidden="true"></i></button>
+                    <button type="button" class="reading-share-icon-btn" id="reading-share-plan-image-btn" disabled data-i18n-aria-label="home.readingSharePlanImage" data-i18n-aria-fallback="Share today's reading as image" data-i18n-title="home.readingSharePlanImage" data-i18n-title-fallback="Share today's plan (image)" aria-label="Share today's reading as image" title="Share today's plan (image)"><i class="fa-solid fa-image" aria-hidden="true"></i></button>
+                    <button class="button-link button-secondary reading-unread-toggle" type="button" id="reading-unread-toggle">Unread days (0)</button>
+                    <button class="button-link button-secondary reading-mark-all-read" type="button" id="reading-mark-all-read" data-i18n="home.markAllUnreadRead" data-i18n-fallback="Mark all as read" disabled>Mark all as read</button>
+                </div>
+                <p class="page-note reading-share-plan-status" id="reading-share-plan-status" role="status" aria-live="polite" hidden></p>
+                <ul class="list reading-unread-list" id="reading-unread-list" hidden></ul>
+            </section>
+
+            <section class="card announcements-card home-announcements-card" id="announcements-section" data-card-lang-id="home-announcements">
+                <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Latest Announcements</span></h2>
+                <div class="card-banner">
+                    <img src="https://i.ibb.co/1JZXKxQP/1778539756636.png" alt="" width="1536" height="1024" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
+                </div>
+                <p class="page-note" data-i18n="home.announcementsSubtitle">Latest updates for this week.</p>
+                <ul class="list" id="home-announcements-list"><li><h3 data-i18n="home.loadingAnnouncementsTitle">Loading announcements...</h3><p data-i18n="home.loadingAnnouncementsBody">Please wait while we fetch updates.</p></li></ul>
+            </section>
+
+            <div class="home-secondary-grid">
+            <section class="card trivia-card-compact card-v-playful home-compact-card" id="trivia-card-home" data-card-lang-id="home-trivia">
+                <h2><i class="fa-solid fa-question-circle"></i><span data-i18n="home.triviaTitle">Today's Bible Quiz</span></h2>
                 <p class="page-note" data-i18n="home.triviaSubtitle">Tamil Bible quiz. New question from midnight Belgium time.</p>
                 <p class="page-note trivia-weekly-summary" id="trivia-weekly-summary-home" hidden></p>
                 <div id="trivia-content-home">
@@ -166,19 +145,24 @@
                 </div>
             </section>
 
-            <section class="card hero-card card-v-elevated">
+            <section class="card hero-card card-v-elevated home-compact-card home-events-card" data-card-lang-id="home-events">
                 <h2><i class="fa-solid fa-calendar-week"></i><span data-i18n="home.thisWeekTitle">Events this week</span></h2>
-                <div class="card-banner">
-                    <img src="events-banner.jpg?v=20260428ev1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
-                </div>
-                <ul class="list" id="this-week-events-list">
-                    <li>
-                        <h3 data-i18n="home.loadingWeekTitle">Loading events...</h3>
-                        <p data-i18n="home.loadingWeekBody">Please wait while we calculate the next dates.</p>
-                    </li>
-                </ul>
+                <ul class="list" id="this-week-events-list"><li><h3 data-i18n="home.loadingWeekTitle">Loading events...</h3><p data-i18n="home.loadingWeekBody">Please wait while we calculate the next dates.</p></li></ul>
+                <a class="home-section-link" href="#events"><span data-i18n="home.viewAllEvents">View all events</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
             </section>
 
+            <section class="card home-compact-card home-sermon-preview" id="home-sermon-preview" data-card-lang-id="home-sermon-preview">
+                <h2><i class="fa-solid fa-headphones"></i><span data-i18n="home.sermonPreviewTitle">Latest sermon</span></h2>
+                <div class="home-sermon-preview-body">
+                    <div class="home-sermon-art" aria-hidden="true"><i class="fa-solid fa-play"></i></div>
+                    <div class="home-sermon-copy">
+                        <h3 id="home-sermon-preview-title" data-i18n="home.sermonPreviewFallbackTitle">Listen and grow in faith</h3>
+                        <p class="page-note" id="home-sermon-preview-meta" data-i18n="home.sermonPreviewFallbackMeta">Open the sermon library for the latest message.</p>
+                    </div>
+                </div>
+                <a class="home-section-link" href="#sermons"><span data-i18n="home.openSermons">Open sermons</span><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></a>
+            </section>
+            </div>
             </main>
         </section>
 
@@ -2313,10 +2297,10 @@
     <script src="app-modules.js?v=20260610bookpool1"></script>
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20261030njc1"></script>
+    <script src="app-shell.js?v=20261030njc2"></script>
     <script src="events-engine.js?v=20260830sermonsharebtns1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
-    <script src="home-page.js?v=20260830sermonshareone1"></script>
+    <script src="home-page.js?v=20261030njc2"></script>
     <script src="events-page.js?v=20260414feedprobe1"></script>
     <script src="sermons-page.js?v=20260830sermonnodl1"></script>
     <script src="bible-page.js?v=20260618actstamil1"></script>

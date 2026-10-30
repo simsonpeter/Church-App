@@ -31,25 +31,25 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v459navygold1";
-const RUNTIME_CACHE = "njc-runtime-cache-v459navygold1";
+const APP_CACHE = "njc-app-cache-v460premiumui1";
+const RUNTIME_CACHE = "njc-runtime-cache-v460premiumui1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "New premium navy and gold design, improved mobile navigation spacing, and refreshed light and dark themes.";
+    "A new premium app layout with editorial cards, a branded welcome header, and refined mobile navigation.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20261030",
-    "./njc-redesign.css?v=20261030njc1",
+    "./njc-redesign.css?v=20261030njc2",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20261030njc1",
+    "./app-shell.js?v=20261030njc2",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
-    "./home-page.js?v=20260830sermonshareone1",
+    "./home-page.js?v=20261030njc2",
     "./events-page.js?v=20260414feedprobe1",
     "./sermons-page.js?v=20260830sermonnodl1",
     "./bible-page.js?v=20260618actstamil1",
