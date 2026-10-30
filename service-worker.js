@@ -31,18 +31,19 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v460premiumui1";
-const RUNTIME_CACHE = "njc-runtime-cache-v460premiumui1";
+const APP_CACHE = "njc-app-cache-v461kidsworldv2p1";
+const RUNTIME_CACHE = "njc-runtime-cache-v461kidsworldv2p1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "A new premium app layout with editorial cards, a branded welcome header, and refined mobile navigation.";
+    "Kids World V2 adds a playful dashboard, Memory Match, Verse Builder, and a 12-world Bible Adventure with saved stars and rewards.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
     "./styles.css?v=20261030",
     "./njc-redesign.css?v=20261030njc2",
+    "./kids-world-v2.css?v=20261030kidsv2p1",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
@@ -75,6 +76,7 @@ const CORE_ASSETS = [
     "./achievement-bonus.js?v=20260324u1",
     "./kids-audio-page.js?v=20260610kidsaudio1",
     "./kids-page.js?v=20260610kidsworld1",
+    "./kids-world-v2.js?v=20261030kidsv2p1",
     "./user-achievements-page.js?v=20260415moduletrivia",
     "./site.webmanifest?v=20261030njc1",
     "./logo.png?v=20260318de",

@@ -16,6 +16,7 @@
     <link rel="manifest" href="site.webmanifest?v=20261030njc1">
     <link rel="stylesheet" href="styles.css?v=20261030">
     <link rel="stylesheet" href="njc-redesign.css?v=20261030njc2">
+    <link rel="stylesheet" href="kids-world-v2.css?v=20261030kidsv2p1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -405,9 +406,6 @@
             <main class="app-content">
             <section class="card card-v-featured kids-page-card" data-card-lang-id="kids">
                 <h2><i class="fa-solid fa-child-reaching" aria-hidden="true"></i><span data-i18n="kids.title">Kids World</span></h2>
-                <div class="card-banner kids-corner-banner">
-                    <img src="https://i.ibb.co/mF5CPKjd/file-0000000062dc720a9c2a466bb1823bf0.png?v=njc1" alt="" width="1536" height="1024" loading="lazy" decoding="async" />
-                </div>
 
                 <nav class="kids-tabs" id="kids-tabs" role="tablist" aria-label="Kids World sections">
                     <button type="button" class="kids-tab active" id="kids-tab-games" role="tab" aria-selected="true" aria-controls="kids-panel-games" data-kids-tab="games">
@@ -430,6 +428,132 @@
 
                 <div class="kids-tab-panels">
                 <div class="kids-tab-panel active" id="kids-panel-games" role="tabpanel" aria-labelledby="kids-tab-games">
+                <div class="kids-v2" id="kids-v2-root">
+                    <header class="kids-v2-hero" aria-labelledby="kids-v2-title">
+                        <div class="kids-v2-hero-copy">
+                            <p class="kids-v2-kicker">NJC Kids World</p>
+                            <h3 id="kids-v2-title"><span id="kids-v2-greeting">Hello, explorer!</span> <span id="kids-v2-hero-question">Ready for a Bible adventure?</span></h3>
+                            <p>Play, learn, and collect stars as you travel through God’s story.</p>
+                            <div class="kids-v2-hero-actions">
+                                <button type="button" class="kids-v2-button kids-v2-button--sun" id="kids-v2-continue">Continue Adventure</button>
+                                <span class="kids-v2-star-pill" aria-live="polite"><span aria-hidden="true">★</span> <strong id="kids-v2-stars">0</strong> <span id="kids-v2-stars-label">stars</span></span>
+                            </div>
+                        </div>
+                        <div class="kids-v2-scene" aria-hidden="true">
+                            <span class="kids-v2-cloud kids-v2-cloud--one"></span>
+                            <span class="kids-v2-cloud kids-v2-cloud--two"></span>
+                            <span class="kids-v2-sun"></span>
+                            <span class="kids-v2-hill kids-v2-hill--back"></span>
+                            <span class="kids-v2-hill kids-v2-hill--front"></span>
+                            <span class="kids-v2-mascot"><span class="kids-v2-mascot-face">•ᴗ•</span></span>
+                        </div>
+                    </header>
+
+                    <div class="kids-v2-utility" aria-label="Kids World settings and rewards">
+                        <button type="button" class="kids-v2-icon-button" id="kids-v2-sound" aria-pressed="true"><i class="fa-solid fa-volume-high" aria-hidden="true"></i><span>Sounds</span></button>
+                        <button type="button" class="kids-v2-icon-button" id="kids-v2-music" aria-pressed="false"><i class="fa-solid fa-music" aria-hidden="true"></i><span>Music</span></button>
+                        <button type="button" class="kids-v2-icon-button" id="kids-v2-rewards-button" aria-expanded="false" aria-controls="kids-v2-rewards"><i class="fa-solid fa-medal" aria-hidden="true"></i><span>Rewards</span></button>
+                    </div>
+
+                    <section class="kids-v2-rewards" id="kids-v2-rewards" aria-labelledby="kids-v2-rewards-title" hidden>
+                        <div>
+                            <p class="kids-v2-kicker">My collection</p>
+                            <h3 id="kids-v2-rewards-title">Badges &amp; rewards</h3>
+                        </div>
+                        <div class="kids-v2-badge-grid" id="kids-v2-badge-grid"></div>
+                    </section>
+
+                    <section class="kids-v2-dashboard" id="kids-v2-dashboard" aria-labelledby="kids-v2-play-title">
+                        <div class="kids-v2-section-heading">
+                            <div><p class="kids-v2-kicker">Choose your path</p><h3 id="kids-v2-play-title">Play &amp; learn</h3></div>
+                            <p id="kids-v2-progress-summary">Your journey is just beginning.</p>
+                        </div>
+                        <div class="kids-v2-game-grid">
+                            <button type="button" class="kids-v2-game-card kids-v2-game-card--teal" data-kids-v2-open="memory">
+                                <span class="kids-v2-game-icon" aria-hidden="true">🧠</span><span><strong>Memory Match</strong><small>Flip cards and find Bible pairs</small></span><span class="kids-v2-card-arrow" aria-hidden="true">→</span>
+                            </button>
+                            <button type="button" class="kids-v2-game-card kids-v2-game-card--purple" data-kids-v2-open="verse">
+                                <span class="kids-v2-game-icon" aria-hidden="true">📖</span><span><strong>Verse Builder</strong><small>Put God’s Word in order</small></span><span class="kids-v2-card-arrow" aria-hidden="true">→</span>
+                            </button>
+                            <button type="button" class="kids-v2-game-card kids-v2-game-card--coral" data-kids-v2-open="adventure">
+                                <span class="kids-v2-game-icon" aria-hidden="true">🗺️</span><span><strong>Adventure Quiz</strong><small>Explore 12 Bible worlds</small></span><span class="kids-v2-card-arrow" aria-hidden="true">→</span>
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="kids-v2-experience" id="kids-v2-memory" data-kids-v2-experience="memory" aria-labelledby="kids-v2-memory-title" hidden>
+                        <div class="kids-v2-experience-head">
+                            <button type="button" class="kids-v2-back" data-kids-v2-back aria-label="Back to Kids dashboard">←</button>
+                            <div><p class="kids-v2-kicker">Flip • find • remember</p><h3 id="kids-v2-memory-title" tabindex="-1">Memory Match</h3></div>
+                        </div>
+                        <div class="kids-v2-controls">
+                            <label>Cards<select id="kids-v2-memory-size"><option value="6">6 cards</option><option value="12" selected>12 cards</option><option value="20">20 cards</option></select></label>
+                            <label>Theme<select id="kids-v2-memory-theme"><option value="noah">Noah's Ark</option><option value="creation">Creation</option><option value="david">David and Goliath</option><option value="miracles">Jesus' Miracles</option><option value="fruit">Fruits of the Spirit</option></select></label>
+                            <button type="button" class="kids-v2-button" id="kids-v2-memory-new">New game</button>
+                        </div>
+                        <div class="kids-v2-score-line"><span id="kids-v2-memory-moves">Moves: 0</span><span id="kids-v2-memory-pairs">Pairs: 0 / 6</span></div>
+                        <p class="kids-v2-live" id="kids-v2-memory-status" aria-live="polite">Choose two cards to find a pair.</p>
+                        <div class="kids-v2-memory-grid" id="kids-v2-memory-grid" role="grid" aria-label="Memory Match cards"></div>
+                        <div class="kids-v2-result" id="kids-v2-memory-result" role="dialog" aria-labelledby="kids-v2-memory-result-title" hidden>
+                            <span class="kids-v2-result-icon" aria-hidden="true">🎉</span><h4 id="kids-v2-memory-result-title">You matched them all!</h4>
+                            <p id="kids-v2-memory-result-copy"></p><p class="kids-v2-result-stars" id="kids-v2-memory-result-stars"></p>
+                            <button type="button" class="kids-v2-button kids-v2-button--sun" id="kids-v2-memory-retry">Play again</button>
+                        </div>
+                    </section>
+
+                    <section class="kids-v2-experience" id="kids-v2-verse" data-kids-v2-experience="verse" aria-labelledby="kids-v2-verse-title" hidden>
+                        <div class="kids-v2-experience-head">
+                            <button type="button" class="kids-v2-back" data-kids-v2-back aria-label="Back to Kids dashboard">←</button>
+                            <div><p class="kids-v2-kicker">Read • build • remember</p><h3 id="kids-v2-verse-title" tabindex="-1">Verse Builder</h3></div>
+                        </div>
+                        <div class="kids-v2-controls">
+                            <div class="kids-v2-segment" id="kids-v2-verse-difficulty" role="group" aria-label="Verse difficulty">
+                                <button type="button" data-difficulty="easy" aria-pressed="true">Easy</button><button type="button" data-difficulty="medium" aria-pressed="false">Medium</button><button type="button" data-difficulty="hard" aria-pressed="false">Hard</button>
+                            </div>
+                        </div>
+                        <p class="kids-v2-verse-reference" id="kids-v2-verse-reference"></p>
+                        <p class="kids-v2-live" id="kids-v2-verse-instruction">Tap the word groups in the right order.</p>
+                        <button type="button" class="kids-v2-button kids-v2-button--ghost" id="kids-v2-verse-switch-en" hidden>Switch Kids World to English</button>
+                        <div class="kids-v2-verse-answer" id="kids-v2-verse-answer" role="group" aria-label="Your verse"></div>
+                        <div class="kids-v2-verse-bank" id="kids-v2-verse-bank" role="group" aria-label="Available verse parts"></div>
+                        <p class="kids-v2-feedback" id="kids-v2-verse-feedback" aria-live="polite"></p>
+                        <div class="kids-v2-action-row">
+                            <button type="button" class="kids-v2-button kids-v2-button--ghost" id="kids-v2-verse-hint">Hint</button>
+                            <button type="button" class="kids-v2-button kids-v2-button--ghost" id="kids-v2-verse-reset">Reset</button>
+                            <button type="button" class="kids-v2-button" id="kids-v2-verse-check">Check</button>
+                            <button type="button" class="kids-v2-button kids-v2-button--sun" id="kids-v2-verse-next">Next</button>
+                        </div>
+                    </section>
+
+                    <section class="kids-v2-experience" id="kids-v2-adventure" data-kids-v2-experience="adventure" aria-labelledby="kids-v2-adventure-title" hidden>
+                        <div class="kids-v2-experience-head">
+                            <button type="button" class="kids-v2-back" data-kids-v2-back aria-label="Back to Kids dashboard">←</button>
+                            <div><p class="kids-v2-kicker">12 worlds • 36 questions</p><h3 id="kids-v2-adventure-title" tabindex="-1">Adventure Quiz</h3></div>
+                        </div>
+                        <div class="kids-v2-world-grid" id="kids-v2-world-grid" aria-label="Bible adventure worlds"></div>
+                        <div class="kids-v2-quiz-stage" id="kids-v2-quiz-stage" hidden>
+                            <div class="kids-v2-quiz-top"><button type="button" class="kids-v2-back" id="kids-v2-worlds-back" aria-label="Choose another world">←</button><div><span id="kids-v2-quiz-world"></span><strong id="kids-v2-quiz-count"></strong></div></div>
+                            <div class="kids-v2-quiz-progress"><span id="kids-v2-quiz-progress"></span></div>
+                            <h4 id="kids-v2-quiz-question"></h4>
+                            <div class="kids-v2-quiz-answers" id="kids-v2-quiz-answers" role="group" aria-label="Answer choices"></div>
+                            <div class="kids-v2-quiz-feedback" id="kids-v2-quiz-feedback" aria-live="polite" hidden><strong id="kids-v2-quiz-feedback-title"></strong><span id="kids-v2-quiz-explanation"></span><small id="kids-v2-quiz-reference"></small></div>
+                            <button type="button" class="kids-v2-button kids-v2-button--sun" id="kids-v2-quiz-next" hidden>Next question</button>
+                        </div>
+                        <div class="kids-v2-result" id="kids-v2-quiz-result" role="dialog" aria-labelledby="kids-v2-quiz-result-title" hidden>
+                            <span class="kids-v2-result-icon" aria-hidden="true">🏆</span><h4 id="kids-v2-quiz-result-title">World complete!</h4>
+                            <p id="kids-v2-quiz-result-copy"></p><p class="kids-v2-result-stars" id="kids-v2-quiz-result-stars"></p>
+                            <div class="kids-v2-action-row"><button type="button" class="kids-v2-button" id="kids-v2-quiz-replay">Replay world</button><button type="button" class="kids-v2-button kids-v2-button--sun" id="kids-v2-quiz-worlds">Choose a world</button></div>
+                        </div>
+                    </section>
+
+                    <aside class="kids-v2-break" id="kids-v2-break" role="status" hidden>
+                        <span aria-hidden="true">🌿</span><div><strong>Explorer break!</strong><p>You’ve been playing for a while. Stretch, blink, and look across the room.</p></div><button type="button" id="kids-v2-break-dismiss" aria-label="Dismiss break reminder">Got it</button>
+                    </aside>
+                </div>
+
+                <details class="kids-v2-classic" id="kids-v2-classic">
+                <summary><span aria-hidden="true">🎲</span><span><strong>Classic Activities</strong><small>All the original Kids World games</small></span><span aria-hidden="true">⌄</span></summary>
+                <div class="kids-v2-classic-body">
                 <p class="page-note kids-total-stars" id="kids-total-stars" aria-live="polite" data-i18n="kids.starsLine">Your stars: {n}</p>
 
                 <div class="kids-activity" id="kids-activity-memory">
@@ -558,6 +682,8 @@
                     <h3 class="kids-activity-title"><i class="fa-solid fa-book-bible" aria-hidden="true"></i> <span data-i18n="kids.verseTitle">Read together</span></h3>
                     <p class="page-note kids-verse-text" data-i18n="kids.verseText">"For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life." — John 3:16 (KJV)</p>
                 </div>
+                </div>
+                </details>
                 </div>
 
                 <div class="kids-tab-panel" id="kids-panel-books" role="tabpanel" aria-labelledby="kids-tab-books" hidden>
@@ -2324,4 +2450,5 @@
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="kids-audio-page.js?v=20260610kidsaudio1"></script>
     <script src="kids-page.js?v=20260610kidsworld1"></script>
+    <script src="kids-world-v2.js?v=20261030kidsv2p1"></script>
 </html>
