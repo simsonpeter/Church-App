@@ -41,6 +41,7 @@
         "nav.songbook": "பாடல் தொகுப்பு",
         "nav.dailyBread": "அப்பம்",
         "nav.dailyBreadTab": "அப்பம்",
+        "home.quickAccessTitle": "விரைவான அணுகல்",
         "menu.bookShelf": "நூலகம்",
         "bookShelf.eyebrow": "நூலகம்",
         "bookShelf.title": "நூலகம்",
@@ -2400,7 +2401,7 @@
         }, { passive: true });
     }
 
-    var SW_REGISTER_VERSION_FALLBACK = "458sermonnodl1";
+    var SW_REGISTER_VERSION_FALLBACK = "459navygold1";
     /** Last APP_CACHE id parsed from service-worker.js or reported by the active worker (for settings label). */
     var lastKnownAppCacheId = "";
 

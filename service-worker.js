@@ -31,21 +31,22 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v458sermonnodl1";
-const RUNTIME_CACHE = "njc-runtime-cache-v458sermonnodl1";
+const APP_CACHE = "njc-app-cache-v459navygold1";
+const RUNTIME_CACHE = "njc-runtime-cache-v459navygold1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermon share now generates a branded image card (uses uploaded photo when available). Settings → Check for updates.";
+    "New premium navy and gold design, improved mobile navigation spacing, and refreshed light and dark themes.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20260830sermonshareone1",
+    "./styles.css?v=20261030",
+    "./njc-redesign.css?v=20261030njc1",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20260830sermonshareimg1",
+    "./app-shell.js?v=20261030njc1",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20260830sermonshareone1",
@@ -75,7 +76,7 @@ const CORE_ASSETS = [
     "./kids-audio-page.js?v=20260610kidsaudio1",
     "./kids-page.js?v=20260610kidsworld1",
     "./user-achievements-page.js?v=20260415moduletrivia",
-    "./site.webmanifest?v=20260329m1",
+    "./site.webmanifest?v=20261030njc1",
     "./logo.png?v=20260318de",
     "./achievements-banner.jpg?v=20260331achimg1",
     "./admin-banner.jpg?v=20260411cb1",

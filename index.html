@@ -7,15 +7,15 @@
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>NJC App</title>
-    <meta name="theme-color" content="#e53935">
+    <meta name="theme-color" content="#10264B">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,500&family=Noto+Sans+Tamil:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="logo.png?v=20260318de">
     <link rel="apple-touch-icon" href="logo.png?v=20260318de">
-    <link rel="manifest" href="site.webmanifest?v=20260329m1">
+    <link rel="manifest" href="site.webmanifest?v=20261030njc1">
     <link rel="stylesheet" href="styles.css?v=20261030">
-<link rel="stylesheet" href="njc-redesign.css?v=2">
+    <link rel="stylesheet" href="njc-redesign.css?v=20261030njc1">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -39,6 +39,7 @@
     </div>
     <div class="app-shell">
         <header class="app-header home-header" id="spa-header">
+            <img class="app-header-logo" src="logo.png?v=20260318de" alt="New Jerusalem Church Belgium" width="52" height="52">
             <div class="eyebrow brand-title" id="spa-header-eyebrow"><i id="spa-header-icon" class="fa-solid fa-church"></i><span id="spa-header-eyebrow-text">NJC Belgium</span></div>
             <h1 id="spa-header-title">Welcome</h1>
             <p id="spa-header-subtitle" hidden></p>
@@ -46,6 +47,31 @@
 
         <section class="page-view active" data-route="home">
             <main class="app-content">
+            <nav class="home-quick-access" aria-labelledby="home-quick-access-title">
+                <h2 id="home-quick-access-title" data-i18n="home.quickAccessTitle">Quick access</h2>
+                <div class="home-quick-access-grid">
+                    <a class="home-quick-link" href="#prayer">
+                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-hands-praying"></i></span>
+                        <span data-i18n="nav.prayer">Prayer</span>
+                    </a>
+                    <a class="home-quick-link" href="#sermons">
+                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-microphone-lines"></i></span>
+                        <span data-i18n="nav.sermons">Sermons</span>
+                    </a>
+                    <a class="home-quick-link" href="#events">
+                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-calendar-days"></i></span>
+                        <span data-i18n="nav.events">Events</span>
+                    </a>
+                    <a class="home-quick-link" href="#bible">
+                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-book-bible"></i></span>
+                        <span data-i18n="bible.title">Bible</span>
+                    </a>
+                    <a class="home-quick-link" href="#daily-bread">
+                        <span class="home-quick-icon" aria-hidden="true"><i class="fa-solid fa-bread-slice"></i></span>
+                        <span data-i18n="dailyBread.title">Daily Bread</span>
+                    </a>
+                </div>
+            </nav>
             <section class="card announcements-card" id="announcements-section" data-card-lang-id="home-announcements">
                 <h2><i class="fa-solid fa-bullhorn"></i><span data-i18n="home.announcementsTitle">Announcements</span></h2>
                 <div class="card-banner">
@@ -2287,7 +2313,7 @@
     <script src="app-modules.js?v=20260610bookpool1"></script>
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20260830sermonshareimg1"></script>
+    <script src="app-shell.js?v=20261030njc1"></script>
     <script src="events-engine.js?v=20260830sermonsharebtns1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20260830sermonshareone1"></script>
