@@ -480,13 +480,15 @@ service cloud.firestore {
       return resource.data.approved == true
         && resource.data.pastorOnly == false
         && (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["prayed"])
-          && request.resource.data.prayed == resource.data.prayed + 1
-        ) || (
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["thanked"])
-          && (request.resource.data.thanked == resource.data.thanked + 1
-            || request.resource.data.thanked == resource.data.thanked - 1)
-          && request.resource.data.thanked >= 0
+          (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(["prayed"])
+            && request.resource.data.prayed == resource.data.prayed + 1
+          ) || (
+            request.resource.data.diff(resource.data).affectedKeys().hasOnly(["thanked"])
+            && (request.resource.data.thanked == resource.data.thanked + 1
+              || request.resource.data.thanked == resource.data.thanked - 1)
+            && request.resource.data.thanked >= 0
+          )
         );
     }
 
