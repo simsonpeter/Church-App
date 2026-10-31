@@ -16,7 +16,7 @@
             eyebrowKey: "prayer.eyebrow",
             eyebrowText: "Prayer",
             titleKey: "prayer.title",
-            titleText: "Prayer Wall",
+            titleText: "Prayer & Fellowship",
             subtitleKey: "",
             subtitleText: ""
         },

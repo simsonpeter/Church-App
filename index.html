@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="styles.css?v=20261031prayervisible1">
     <link rel="stylesheet" href="njc-redesign.css?v=20261030njc2">
     <link rel="stylesheet" href="kids-world-v2.css?v=20261030kidsv2p1">
+    <link rel="stylesheet" href="prayer-page-v3.css?v=20261031prayerv3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -168,27 +169,62 @@
         </section>
 
         <section class="page-view" data-route="prayer">
-            <main class="app-content">
-            <section class="card card-v-featured" data-card-lang-id="prayer-wall">
-                <h2><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
-                <div class="card-banner card-banner-prayer">
-                    <img src="prayer-banner.jpg?v=20260329m1" alt="" width="1024" height="559" loading="lazy" decoding="async" />
+            <main class="app-content prayer-v3">
+            <section class="prayer-v3-hero" aria-labelledby="prayer-v3-hero-title">
+                <div class="prayer-v3-hero-deco" aria-hidden="true"></div>
+                <div class="prayer-v3-hero-icon" aria-hidden="true">
+                    <i class="fa-solid fa-hands-praying"></i>
                 </div>
-                <p class="page-note" data-i18n="contact.prayerWallSubtitle" hidden>Post requests for the church family to pray. New posts are reviewed by an admin before they appear on the wall.</p>
-                <button class="button-link prayer-wall-open-btn" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallOpen">Post a Prayer</button>
-                <form class="prayer-form" id="prayer-wall-form" hidden>
-                    <input
-                        id="prayer-wall-name"
-                        class="search-input"
-                        type="text"
-                        data-i18n-placeholder="contact.prayerWallNamePlaceholder"
-                        placeholder="Name (optional)">
-                    <textarea
-                        id="prayer-wall-message"
-                        class="search-input prayer-textarea"
-                        rows="3"
-                        data-i18n-placeholder="contact.prayerWallMessagePlaceholder"
-                        placeholder="Write prayer request"></textarea>
+                <p class="prayer-v3-hero-eyebrow" data-i18n="prayer.eyebrow">Prayer</p>
+                <h1 class="prayer-v3-hero-title" id="prayer-v3-hero-title" data-i18n="prayer.v3HeroTitle">Prayer &amp; Fellowship</h1>
+                <p class="prayer-v3-hero-subtitle" data-i18n="prayer.v3HeroSubtitle">Let us pray for one another</p>
+                <div class="prayer-v3-hero-actions">
+                    <button class="button-link prayer-wall-open-btn prayer-v3-hero-primary" id="prayer-wall-open-btn" type="button" data-i18n="contact.prayerWallSubmit">Submit Prayer Request</button>
+                    <button class="button-link button-secondary prayer-v3-hero-secondary" id="prayer-v3-my-list-btn" type="button" data-i18n="contact.prayerMyListCta">My Prayer List</button>
+                </div>
+            </section>
+
+            <section class="prayer-v3-stats" id="prayer-v3-stats" aria-label="Prayer statistics">
+                <article class="prayer-v3-stat">
+                    <span class="prayer-v3-stat-icon" aria-hidden="true"><i class="fa-solid fa-book-open"></i></span>
+                    <strong class="prayer-v3-stat-value" id="prayer-v3-stat-requests">—</strong>
+                    <span class="prayer-v3-stat-label" data-i18n="contact.prayerStatRequests">Prayer Requests</span>
+                </article>
+                <article class="prayer-v3-stat">
+                    <span class="prayer-v3-stat-icon" aria-hidden="true"><i class="fa-solid fa-hands-praying"></i></span>
+                    <strong class="prayer-v3-stat-value" id="prayer-v3-stat-praying">—</strong>
+                    <span class="prayer-v3-stat-label" data-i18n="contact.prayerStatPraying">Praying Together</span>
+                </article>
+                <article class="prayer-v3-stat">
+                    <span class="prayer-v3-stat-icon" aria-hidden="true"><i class="fa-solid fa-circle-check"></i></span>
+                    <strong class="prayer-v3-stat-value" id="prayer-v3-stat-answered">—</strong>
+                    <span class="prayer-v3-stat-label" data-i18n="contact.prayerStatAnswered">Answered Prayers</span>
+                </article>
+            </section>
+
+            <section class="card prayer-v3-composer" data-card-lang-id="prayer-wall">
+                <h2 class="prayer-v3-section-title"><i class="fa-solid fa-pen-to-square"></i><span data-i18n="contact.prayerWallSubmit">Submit Prayer Request</span></h2>
+                <p class="page-note" data-i18n="contact.prayerWallSubtitle">Post requests for the church family to pray. New posts are reviewed by an admin before they appear on the wall.</p>
+                <p class="page-note prayer-v3-status" id="prayer-wall-note" hidden></p>
+                <form class="prayer-form prayer-v3-form" id="prayer-wall-form" hidden>
+                    <label class="prayer-v3-field">
+                        <span data-i18n="contact.prayerWallNameLabel">Name</span>
+                        <input
+                            id="prayer-wall-name"
+                            class="search-input"
+                            type="text"
+                            data-i18n-placeholder="contact.prayerWallNamePlaceholder"
+                            placeholder="Name (optional)">
+                    </label>
+                    <label class="prayer-v3-field">
+                        <span data-i18n="contact.prayerWallMessageLabel">Prayer request</span>
+                        <textarea
+                            id="prayer-wall-message"
+                            class="search-input prayer-textarea"
+                            rows="4"
+                            data-i18n-placeholder="contact.prayerWallMessagePlaceholder"
+                            placeholder="Write prayer request"></textarea>
+                    </label>
                     <label class="prayer-wall-anon">
                         <input id="prayer-wall-anonymous" type="checkbox">
                         <span data-i18n="contact.prayerWallAnonymousLabel">Post as anonymous</span>
@@ -216,16 +252,42 @@
                         <button class="button-link button-secondary" id="prayer-wall-cancel-btn" type="button" data-i18n="contact.prayerWallCancel">Close</button>
                     </div>
                 </form>
-                <p class="page-note" id="prayer-wall-note" hidden></p>
+            </section>
+
+            <section class="card prayer-v3-wall">
+                <div class="prayer-v3-wall-head">
+                    <h2 class="prayer-v3-section-title"><i class="fa-solid fa-heart-circle-check"></i><span data-i18n="contact.prayerWallTitle">Prayer Wall</span></h2>
+                    <div class="prayer-wall-tab-tools" id="prayer-wall-tab-tools">
+                        <button type="button" class="prayer-wall-tool-btn" id="prayer-list-export-pdf" data-i18n-aria-label="contact.prayerMineExportPdf" aria-label="Export PDF" title="Export PDF">
+                            <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="prayer-wall-tool-btn" id="prayer-list-share-list" data-i18n-aria-label="contact.prayerMineShareList" aria-label="Share list" title="Share list">
+                            <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
+                        </button>
+                        <button type="button" class="prayer-wall-tool-btn" id="prayer-mine-clear" data-i18n-aria-label="contact.prayerMineClearAll" aria-label="Clear my list" title="Clear my list" hidden>
+                            <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
                 <div class="prayer-wall-tabs-wrap" id="prayer-wall-tabs-wrap">
-                <div class="prayer-wall-tabs" role="tablist" aria-label="Prayer wall categories">
+                <div class="prayer-wall-tabs prayer-v3-filters" role="tablist" aria-label="Prayer wall categories">
                     <button
                         type="button"
                         class="prayer-wall-tab active"
+                        id="prayer-wall-tab-all"
+                        data-prayer-tab="all"
+                        role="tab"
+                        aria-selected="true">
+                        <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-layer-group"></i></span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabAll">All Prayers</span>
+                    </button>
+                    <button
+                        type="button"
+                        class="prayer-wall-tab"
                         id="prayer-wall-tab-urgent"
                         data-prayer-tab="urgent"
                         role="tab"
-                        aria-selected="true">
+                        aria-selected="false">
                         <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-bolt"></i></span>
                         <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabUrgent">Urgent</span>
                     </button>
@@ -237,7 +299,7 @@
                         role="tab"
                         aria-selected="false">
                         <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-calendar-day"></i></span>
-                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabOther">Daily Prayer</span>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabGeneral">General</span>
                     </button>
                     <button
                         type="button"
@@ -257,22 +319,24 @@
                         role="tab"
                         aria-selected="false">
                         <span class="prayer-wall-tab-icon" aria-hidden="true"><i class="fa-solid fa-bookmark"></i></span>
-                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabMine">My prayer</span>
-                    </button>
-                </div>
-                <div class="prayer-wall-tab-tools" id="prayer-wall-tab-tools">
-                    <button type="button" class="prayer-wall-tool-btn" id="prayer-list-export-pdf" data-i18n-aria-label="contact.prayerMineExportPdf" aria-label="Export PDF" title="Export PDF">
-                        <i class="fa-solid fa-file-pdf" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="prayer-wall-tool-btn" id="prayer-list-share-list" data-i18n-aria-label="contact.prayerMineShareList" aria-label="Share list" title="Share list">
-                        <i class="fa-solid fa-share-nodes" aria-hidden="true"></i>
-                    </button>
-                    <button type="button" class="prayer-wall-tool-btn" id="prayer-mine-clear" data-i18n-aria-label="contact.prayerMineClearAll" aria-label="Clear my list" title="Clear my list" hidden>
-                        <i class="fa-solid fa-trash-can" aria-hidden="true"></i>
+                        <span class="prayer-wall-tab-label" data-i18n="contact.prayerWallTabMine">My Prayers</span>
                     </button>
                 </div>
                 </div>
-                <ul class="prayer-wall-list" id="prayer-wall-list">
+                <div class="prayer-v3-topics" id="prayer-wall-category-filter" role="group" aria-label="Prayer topics">
+                    <button type="button" class="prayer-v3-topic active" data-prayer-cat-filter="" aria-pressed="true" data-i18n="contact.prayerCat.all">All</button>
+                    <button type="button" class="prayer-v3-topic" data-prayer-cat-filter="healing" aria-pressed="false" data-i18n="contact.prayerCat.healing">Healing</button>
+                    <button type="button" class="prayer-v3-topic" data-prayer-cat-filter="travel" aria-pressed="false" data-i18n="contact.prayerCat.travel">Travel</button>
+                    <button type="button" class="prayer-v3-topic" data-prayer-cat-filter="thanksgiving" aria-pressed="false" data-i18n="contact.prayerCat.thanksgiving">Thanksgiving</button>
+                    <button type="button" class="prayer-v3-topic" data-prayer-cat-filter="family" aria-pressed="false" data-i18n="contact.prayerCat.family">Family</button>
+                    <button type="button" class="prayer-v3-topic" data-prayer-cat-filter="guidance" aria-pressed="false" data-i18n="contact.prayerCat.guidance">Guidance</button>
+                </div>
+                <p class="prayer-v3-mine-hint page-note" id="prayer-v3-mine-hint" hidden data-i18n="contact.prayerMineToolbarHint">Saved prayers you chose to keep. This is not a list of every request you submitted.</p>
+                <div class="prayer-v3-load-banner" id="prayer-v3-load-banner" hidden>
+                    <p id="prayer-v3-load-message"></p>
+                    <button type="button" class="button-link" id="prayer-v3-retry" data-i18n="contact.prayerWallRetry">Retry</button>
+                </div>
+                <ul class="prayer-wall-list prayer-v3-list" id="prayer-wall-list">
                     <li class="prayer-wall-list-message">
                         <h3 data-i18n="contact.prayerWallLoadingTitle">Loading prayer wall...</h3>
                         <p data-i18n="contact.prayerWallLoadingBody">Please wait.</p>
@@ -2424,7 +2488,7 @@
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="prayer-firestore-store.js?v=20261031prayervisible1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20261031prayervisible1"></script>
+    <script src="app-shell.js?v=20261031prayerv3"></script>
     <script src="events-engine.js?v=20260830sermonsharebtns1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20261030njc2"></script>
@@ -2432,7 +2496,7 @@
     <script src="sermons-page.js?v=20260830sermonnodl1"></script>
     <script src="bible-page.js?v=20260618actstamil1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
-    <script src="contact-page.js?v=20261031prayervisible1"></script>
+    <script src="contact-page.js?v=20261031prayerv3"></script>
     <script src="daily-bread-page.js?v=20260617dailybread1"></script>
     <script src="newsletter-page.js?v=20260531sharelang1"></script>
     <script src="admin-trivia.js?v=20260327bq1"></script>
@@ -2447,7 +2511,7 @@
     <script src="chat-page.js?v=20260607chatpurge1"></script>
     <script src="testimony-page.js?v=20260531sharelang1"></script>
     <script src="book-shelf-page.js?v=20260610kidslibrary1"></script>
-    <script src="spa-router.js?v=20260608guestteaser1"></script>
+    <script src="spa-router.js?v=20261031prayerv3"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="kids-audio-page.js?v=20260610kidsaudio1"></script>
     <script src="kids-page.js?v=20260610kidsworld1"></script>
