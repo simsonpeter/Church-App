@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v465sermonv3";
-const RUNTIME_CACHE = "njc-runtime-cache-v465sermonv3";
+const APP_CACHE = "njc-app-cache-v466sermonart1";
+const RUNTIME_CACHE = "njc-runtime-cache-v466sermonart1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermon library and player rebuilt with a full-screen player, mini-player, and resume listening.";
+    "Sermon cover artwork now shows in full instead of being cropped.";
 
 const CORE_ASSETS = [
     "./",
@@ -45,7 +45,7 @@ const CORE_ASSETS = [
     "./njc-redesign.css?v=20261030njc2",
     "./kids-world-v2.css?v=20261030kidsv2p1",
     "./prayer-page-v3.css?v=20261031prayerv3",
-    "./sermon-player-v3.css?v=20261031sermonv3",
+    "./sermon-player-v3.css?v=20261031sermonart1",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
@@ -55,7 +55,7 @@ const CORE_ASSETS = [
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20261030njc2",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20261031sermonv3",
+    "./sermons-page.js?v=20261031sermonart1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20261031prayerv3",

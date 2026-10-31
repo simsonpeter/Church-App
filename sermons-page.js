@@ -318,9 +318,15 @@
             }
 
             function setBuffering(isBuffering) {
-                if (playerBuffering) {
-                    playerBuffering.hidden = !isBuffering || (playerError && !playerError.hidden);
+                if (!playerBuffering) {
+                    return;
                 }
+                if (playerError && !playerError.hidden) {
+                    playerBuffering.hidden = true;
+                    return;
+                }
+                var alreadyPlaying = sermonAudio && !sermonAudio.paused && sermonAudio.currentTime > 0.2;
+                playerBuffering.hidden = !isBuffering || alreadyPlaying;
             }
 
             function skipBy(seconds) {
