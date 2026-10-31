@@ -881,6 +881,7 @@
         "contact.prayerWallNeedMessage": "தயவுசெய்து ஜெப வேண்டுதலை எழுதுங்கள்.",
         "contact.prayerWallPosted": "ஜெப வேண்டுதல் சுவரில் சேர்க்கப்பட்டது.",
         "contact.prayerWallPendingReview": "உங்கள் ஜெப வேண்டுதல் அனுப்பப்பட்டது. நிர்வாகி அங்கீகரித்த பின் சுவரில் தோன்றும்.",
+        "contact.prayerWallPendingBadge": "அங்கீகாரம் நிலுவையில்",
         "admin.prayerApprove": "அங்கீகரி",
         "admin.prayerPendingBadge": "அங்கீகாரத்திற்காக காத்திருக்கிறது",
         "admin.prayerApproved": "ஜெப வேண்டுதல் அங்கீகரிக்கப்பட்டு வெளியிடப்பட்டது.",

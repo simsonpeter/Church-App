@@ -466,7 +466,11 @@ service cloud.firestore {
         && (
           (request.auth == null
             && request.resource.data.createdByUid == ""
-            && request.resource.data.approved == false)
+            && (
+              request.resource.data.approved == false
+              || (request.resource.data.approved == true
+                && request.resource.data.pastorOnly == false)
+            ))
           || (request.auth != null
             && request.resource.data.createdByUid == request.auth.uid
             && (

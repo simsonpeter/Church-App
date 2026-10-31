@@ -31,24 +31,24 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v462prayerfirestore1";
-const RUNTIME_CACHE = "njc-runtime-cache-v462prayerfirestore1";
+const APP_CACHE = "njc-app-cache-v463prayervisible1";
+const RUNTIME_CACHE = "njc-runtime-cache-v463prayervisible1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer Wall requests now use permanent per-request Firestore storage with safer private pastoral replies.";
+    "Prayer Wall posts now stay visible after you submit them and keep using permanent Firestore storage.";
 
 const CORE_ASSETS = [
     "./",
     "./index.html",
-    "./styles.css?v=20261030",
+    "./styles.css?v=20261031prayervisible1",
     "./njc-redesign.css?v=20261030njc2",
     "./kids-world-v2.css?v=20261030kidsv2p1",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./prayer-firestore-store.js?v=20261031prayerfirestore1",
-    "./app-shell.js?v=20261031prayerfirestore1",
+    "./prayer-firestore-store.js?v=20261031prayervisible1",
+    "./app-shell.js?v=20261031prayervisible1",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20261030njc2",
@@ -56,7 +56,7 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260830sermonnodl1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20261031prayerfirestore1",
+    "./contact-page.js?v=20261031prayervisible1",
     "./daily-bread-page.js?v=20260617dailybread1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",

@@ -7140,6 +7140,30 @@ html[data-theme="dark"] .prayer-list-translated-note {
     font-size: 0.58rem;
 }
 
+.prayer-list-pending-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #6a4b12;
+    background: #fff4d6;
+    border: 1px solid #e6c56a;
+}
+
+.prayer-list-pending-badge i {
+    font-size: 0.58rem;
+}
+
+html[data-theme="dark"] .prayer-list-pending-badge {
+    color: #f6e7b2;
+    background: rgba(230, 197, 106, 0.16);
+    border-color: rgba(230, 197, 106, 0.45);
+}
+
 body.prayer-detail-open {
     overflow: hidden;
 }

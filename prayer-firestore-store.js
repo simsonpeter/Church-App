@@ -176,6 +176,18 @@
         return list();
     }
 
+    function isPermissionDenied(err) {
+        var code = String(err && err.code || "").toLowerCase();
+        var message = String(err && err.message || "").toLowerCase();
+        return code.indexOf("permission-denied") >= 0 || message.indexOf("insufficient permissions") >= 0;
+    }
+
+    function writeCreatedPrayer(row) {
+        return db().collection(PRAYER_COLLECTION).doc(row.id).set(row).then(function () {
+            return Object.assign({}, row, { pastorReplies: [] });
+        });
+    }
+
     function create(raw) {
         var user = currentUser();
         var source = Object.assign({}, raw || {});
@@ -206,9 +218,18 @@
             if (!row.message) {
                 throw new Error("Prayer message is required");
             }
-            return db().collection(PRAYER_COLLECTION).doc(row.id).set(row).then(function () {
-                return Object.assign({}, row, { pastorReplies: [] });
-            });
+            var guestPublic = !uid && !row.pastorOnly;
+            if (guestPublic) {
+                row.approved = true;
+                return writeCreatedPrayer(row).catch(function (err) {
+                    if (!isPermissionDenied(err)) {
+                        throw err;
+                    }
+                    row.approved = false;
+                    return writeCreatedPrayer(row);
+                });
+            }
+            return writeCreatedPrayer(row);
         });
     }
 
