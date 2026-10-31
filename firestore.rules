@@ -27,6 +27,10 @@ rules_version = '2';
 //   testimonies/{id} — public read; signed-in create; delete own or admin
 //   adminTriviaReports/{uid} — per-user trivia answers for admin dashboard (owner write; admin read)
 //   sermonListenStats/{sermonKey} — aggregate play count per sermon audio URL (public read; +1 listenCount only)
+//   prayerWall/{prayerId} — one document per request; public queries must filter approved == true AND pastorOnly == false
+//   prayerWallPrivate/{prayerId} — private pastoral replies; readable only by the prayer owner/admin, writable only by admin
+// Prayer Wall no longer uses the public MantleDB list. Deploy these rules before
+// releasing the Firestore client so owner/admin/private-reply queries are authorized.
 //
 // If "User achievements" shows "Public read is blocked", this file is not published
 // for THIS Firebase project yet. Fix:
@@ -389,6 +393,145 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if request.auth != null
         && (resource.data.authorUid == request.auth.uid || isAdmin());
+    }
+
+    function prayerOwner(data) {
+      return request.auth != null
+        && data.createdByUid is string
+        && data.createdByUid == request.auth.uid;
+    }
+
+    function hasMemberPrayerAccess() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid)/app/access)
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)/app/access).data.accessTier == "member";
+    }
+
+    function validPrayerDocument(prayerId) {
+      return request.resource.data.keys().hasOnly([
+          "id", "name", "message", "anonymous", "urgent", "pastorOnly", "approved",
+          "categories", "prayed", "answered", "thanked", "createdAt", "createdAtMs",
+          "updatedAt", "createdByUid"
+        ])
+        && request.resource.data.keys().hasAll([
+          "id", "name", "message", "anonymous", "urgent", "pastorOnly", "approved",
+          "categories", "prayed", "answered", "thanked", "createdAt", "createdAtMs",
+          "updatedAt", "createdByUid"
+        ])
+        && request.resource.data.id == prayerId
+        && request.resource.data.id is string
+        && request.resource.data.id.size() > 0
+        && request.resource.data.id.size() <= 500
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 160
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() <= 8000
+        && request.resource.data.anonymous is bool
+        && request.resource.data.urgent is bool
+        && request.resource.data.pastorOnly is bool
+        && request.resource.data.approved is bool
+        && request.resource.data.categories is list
+        && request.resource.data.categories.size() <= 3
+        && request.resource.data.categories.hasOnly(["healing", "travel", "thanksgiving", "family", "guidance"])
+        && request.resource.data.prayed is int
+        && request.resource.data.prayed >= 0
+        && request.resource.data.prayed <= 1000000000
+        && request.resource.data.answered is int
+        && request.resource.data.answered >= 0
+        && request.resource.data.answered <= 1000000000
+        && request.resource.data.thanked is int
+        && request.resource.data.thanked >= 0
+        && request.resource.data.thanked <= 1000000000
+        && request.resource.data.createdAt is string
+        && request.resource.data.createdAt.size() >= 20
+        && request.resource.data.createdAt.size() <= 40
+        && request.resource.data.createdAt.matches("^\\d{4}-\\d{2}-\\d{2}T.*Z$")
+        && request.resource.data.createdAtMs is int
+        && request.resource.data.createdAtMs >= 0
+        && request.resource.data.createdAtMs <= 9999999999999
+        && request.resource.data.updatedAt is string
+        && request.resource.data.updatedAt.size() <= 40
+        && (request.resource.data.updatedAt == ""
+          || request.resource.data.updatedAt.matches("^\\d{4}-\\d{2}-\\d{2}T.*Z$"))
+        && request.resource.data.createdByUid is string
+        && request.resource.data.createdByUid.size() <= 128;
+    }
+
+    function validPrayerCreate() {
+      return request.resource.data.prayed == 0
+        && request.resource.data.answered == 0
+        && request.resource.data.thanked == 0
+        && request.resource.data.updatedAt == ""
+        && (
+          (request.auth == null
+            && request.resource.data.createdByUid == ""
+            && request.resource.data.approved == false)
+          || (request.auth != null
+            && request.resource.data.createdByUid == request.auth.uid
+            && (
+              request.resource.data.approved == false
+              || ((isAdmin() || hasMemberPrayerAccess()) && request.resource.data.approved == true)
+            ))
+        );
+    }
+
+    function validPublicPrayerReaction() {
+      return resource.data.approved == true
+        && resource.data.pastorOnly == false
+        && (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["prayed"])
+          && request.resource.data.prayed == resource.data.prayed + 1
+        ) || (
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(["thanked"])
+          && (request.resource.data.thanked == resource.data.thanked + 1
+            || request.resource.data.thanked == resource.data.thanked - 1)
+          && request.resource.data.thanked >= 0
+        );
+    }
+
+    match /prayerWall/{prayerId} {
+      allow read: if isAdmin()
+        || prayerOwner(resource.data)
+        || (resource.data.approved == true && resource.data.pastorOnly == false);
+      allow create: if validPrayerDocument(prayerId)
+        && (isAdmin() || validPrayerCreate());
+      allow update: if validPrayerDocument(prayerId) && (
+        isAdmin()
+        || (prayerOwner(resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(["message", "answered", "updatedAt"])
+          && (request.resource.data.answered == resource.data.answered
+            || request.resource.data.answered == 0
+            || request.resource.data.answered == 1))
+        || validPublicPrayerReaction()
+      );
+      allow delete: if isAdmin() || prayerOwner(resource.data);
+    }
+
+    function validPrayerPrivateDocument(prayerId) {
+      return request.resource.data.keys().hasOnly(["prayerId", "ownerUid", "replies", "updatedAt"])
+        && request.resource.data.keys().hasAll(["prayerId", "ownerUid", "replies", "updatedAt"])
+        && request.resource.data.prayerId == prayerId
+        && request.resource.data.ownerUid is string
+        && request.resource.data.ownerUid.size() <= 128
+        && existsAfter(/databases/$(database)/documents/prayerWall/$(prayerId))
+        && request.resource.data.ownerUid
+          == getAfter(/databases/$(database)/documents/prayerWall/$(prayerId)).data.createdByUid
+        && request.resource.data.replies is list
+        && request.resource.data.replies.size() <= 40
+        && request.resource.data.updatedAt is string
+        && request.resource.data.updatedAt.size() >= 20
+        && request.resource.data.updatedAt.size() <= 40
+        && request.resource.data.updatedAt.matches("^\\d{4}-\\d{2}-\\d{2}T.*Z$");
+    }
+
+    match /prayerWallPrivate/{prayerId} {
+      allow read: if isAdmin()
+        || (request.auth != null && resource.data.ownerUid == request.auth.uid);
+      allow create, update: if isAdmin() && validPrayerPrivateDocument(prayerId);
+      allow delete: if isAdmin()
+        || (request.auth != null && resource.data.ownerUid == request.auth.uid);
     }
 
     function isGuestSessionPayload(sessionId) {

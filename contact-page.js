@@ -48,7 +48,6 @@
             var prayerDetailPastorReplyInput = document.getElementById("prayer-detail-pastor-reply-input");
             var prayerDetailPastorReplySend = document.getElementById("prayer-detail-pastor-reply-send");
 
-            var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
             var CONTACT_FORM_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
             var MAX_ENTRIES = 100;
             var CONTACT_MAX_ENTRIES = 200;
@@ -136,6 +135,14 @@
                     return window.NjcAuth.getUser();
                 }
                 return null;
+            }
+
+            function getPrayerStore() {
+                var store = window.NjcPrayerFirestoreStore;
+                if (!store) {
+                    throw new Error("Prayer Firestore store is unavailable");
+                }
+                return store;
             }
 
             function loadPrayerActionState() {
@@ -2049,19 +2056,7 @@
             }
 
             async function fetchPrayerWallEntries() {
-                var response = await fetch(PRAYER_WALL_URL + "?ts=" + String(Date.now()), {
-                    cache: "no-store"
-                });
-                // Never POST {entries:[]} on 404 — that can wipe a bucket if Mantle briefly 404s.
-                // The next real save creates the document with data.
-                if (response.status === 404) {
-                    return [];
-                }
-                if (!response.ok) {
-                    throw new Error("Could not load prayer wall");
-                }
-                var payload = await response.json();
-                var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+                var entries = await getPrayerStore().list();
                 var normalized = entries.map(normalizeEntry).filter(function (item) {
                     return item.message;
                 }).slice(0, MAX_ENTRIES);
@@ -2074,48 +2069,6 @@
                     } catch (eBackup) {}
                 }
                 return normalized;
-            }
-
-            async function savePrayerWallEntries(entries, options) {
-                var normalized = (Array.isArray(entries) ? entries : []).map(function (raw, idx) {
-                    return normalizeEntry(raw, idx);
-                }).filter(function (item) {
-                    return item.message;
-                }).slice(0, MAX_ENTRIES);
-                var allowEmpty = Boolean(options && options.allowEmpty);
-                // Guard against accidental full wipe from a false-empty fetch.
-                if (!normalized.length && !allowEmpty) {
-                    var probe = await fetch(PRAYER_WALL_URL + "?ts=" + String(Date.now()), { cache: "no-store" });
-                    if (probe.ok) {
-                        var probePayload = await probe.json();
-                        var remote = probePayload && Array.isArray(probePayload.entries) ? probePayload.entries : [];
-                        if (remote.length > 0) {
-                            throw new Error("Refusing to overwrite prayer wall with empty list");
-                        }
-                    }
-                }
-                var payload = {
-                    entries: normalized
-                };
-                var response = await fetch(PRAYER_WALL_URL, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(payload)
-                });
-                if (!response.ok) {
-                    throw new Error("Could not save prayer wall");
-                }
-                prayerWallEntries = normalized;
-                if (normalized.length) {
-                    try {
-                        window.localStorage.setItem(PRAYER_WALL_BACKUP_KEY, JSON.stringify({
-                            at: new Date().toISOString(),
-                            entries: normalized
-                        }));
-                    } catch (eBackup2) {}
-                }
             }
 
             function renderPrayerWall() {
@@ -2286,32 +2239,15 @@
                 }
                 setPrayerWallBusy(true);
                 try {
-                    var latestEntries = await fetchPrayerWallEntries();
                     var pid = String(activePrayerDetailId || "").trim();
-                    var targetEntry = latestEntries.find(function (entry) {
+                    var targetEntry = prayerWallEntries.find(function (entry) {
                         return entry.id === pid;
                     });
                     if (!targetEntry) {
                         throw new Error("Entry not found");
                     }
-                    var replies = normalizePastorRepliesArray(targetEntry.pastorReplies).slice();
-                    var adminEmail = normalizeEmail(getCurrentUser() && getCurrentUser().email);
-                    replies.push({
-                        text: text.slice(0, 2000),
-                        at: new Date().toISOString(),
-                        from: adminEmail || "admin"
-                    });
-                    var idx = latestEntries.findIndex(function (e) {
-                        return e.id === pid;
-                    });
-                    if (idx < 0) {
-                        throw new Error("Entry index");
-                    }
-                    latestEntries[idx] = Object.assign({}, latestEntries[idx], {
-                        pastorReplies: replies,
-                        updatedAt: new Date().toISOString()
-                    });
-                    await savePrayerWallEntries(latestEntries);
+                    await getPrayerStore().addPrivateReply(pid, text);
+                    prayerWallEntries = await fetchPrayerWallEntries();
                     if (prayerDetailPastorReplyInput) {
                         prayerDetailPastorReplyInput.value = "";
                     }
@@ -2334,8 +2270,7 @@
                 }
                 setPrayerWallBusy(true);
                 try {
-                    var latestEntries = await fetchPrayerWallEntries();
-                    var targetEntry = latestEntries.find(function (entry) {
+                    var targetEntry = prayerWallEntries.find(function (entry) {
                         return entry.id === prayerId;
                     });
                     if (!targetEntry) {
@@ -2356,25 +2291,17 @@
                         if (!Number.isFinite(prevPrayed) || prevPrayed < 0) {
                             prevPrayed = 0;
                         }
-                        targetEntry.prayed = Math.floor(prevPrayed) + 1;
-                        targetEntry.updatedAt = new Date().toISOString();
-                        await savePrayerWallEntries(latestEntries);
+                        await getPrayerStore().incrementPrayed(prayerId);
                     } else if (action === "answer") {
                         var nextAnswerActive = !isPrayerMarkedAnswered(targetEntry);
-                        targetEntry.answered = nextAnswerActive ? 1 : 0;
-                        targetEntry.updatedAt = new Date().toISOString();
-                        await savePrayerWallEntries(latestEntries);
+                        await getPrayerStore().setAnswered(prayerId, nextAnswerActive);
                         setPrayerActionActive(prayerId, "answer", nextAnswerActive);
                     } else if (action === "thank") {
                         var nextThankActive = !isPrayerActionActive(prayerId, "thank");
-                        targetEntry.thanked = Math.max(0, Number(targetEntry.thanked || 0) + (nextThankActive ? 1 : -1));
-                        targetEntry.updatedAt = new Date().toISOString();
-                        await savePrayerWallEntries(latestEntries);
+                        await getPrayerStore().changeThanked(prayerId, nextThankActive ? 1 : -1);
                         setPrayerActionActive(prayerId, "thank", nextThankActive);
                     } else if (action === "reset-answer") {
-                        targetEntry.answered = 0;
-                        targetEntry.updatedAt = new Date().toISOString();
-                        await savePrayerWallEntries(latestEntries);
+                        await getPrayerStore().setAnswered(prayerId, false);
                         Object.keys(prayerActionState || {}).forEach(function (actorKey) {
                             var actorState = prayerActionState[actorKey];
                             if (!actorState || typeof actorState !== "object") {
@@ -2407,9 +2334,7 @@
                             showPrayerWallNote("needMessage", "contact.prayerWallNeedMessage", "Please write your prayer request.");
                             return;
                         }
-                        targetEntry.message = trimmedMessage;
-                        targetEntry.updatedAt = new Date().toISOString();
-                        await savePrayerWallEntries(latestEntries);
+                        await getPrayerStore().editMessage(prayerId, trimmedMessage);
                         showPrayerWallNote("updated", "contact.prayerWallUpdated", "Prayer request updated.");
                     } else if (action === "delete") {
                         var shouldDelete = window.confirm(
@@ -2418,10 +2343,7 @@
                         if (!shouldDelete) {
                             return;
                         }
-                        latestEntries = latestEntries.filter(function (entry) {
-                            return entry.id !== prayerId;
-                        });
-                        await savePrayerWallEntries(latestEntries, { allowEmpty: latestEntries.length === 0 });
+                        await getPrayerStore().delete(prayerId);
                         removePrayerFromMyList(prayerId);
                         showPrayerWallNote("deleted", "contact.prayerWallDeleted", "Prayer request deleted.");
                         activePrayerDetailId = "";
@@ -2429,6 +2351,7 @@
                         return;
                     }
 
+                    prayerWallEntries = await fetchPrayerWallEntries();
                     prayerWallError = false;
                     prayerWallLoading = false;
                     renderPrayerWall();
@@ -2536,10 +2459,9 @@
 
                     setPrayerWallBusy(true);
                     try {
-                        var latestEntries = await fetchPrayerWallEntries();
                         var autoApprove = shouldAutoApprovePrayerWallPost(activeUser);
                         var cats = collectPrayerCategoriesFromForm();
-                        latestEntries.unshift({
+                        var createdPrayer = await getPrayerStore().create({
                             id: String(Date.now()) + "-" + String(Math.floor(Math.random() * 100000)),
                             name: nameValue,
                             message: messageValue,
@@ -2548,7 +2470,6 @@
                             pastorOnly: pastorOnlyValue,
                             approved: Boolean(autoApprove),
                             categories: cats,
-                            pastorReplies: [],
                             prayed: 0,
                             answered: 0,
                             thanked: 0,
@@ -2557,7 +2478,8 @@
                             createdByUid: ownerUid,
                             createdByEmail: ownerEmail
                         });
-                        await savePrayerWallEntries(latestEntries);
+                        autoApprove = Boolean(createdPrayer && createdPrayer.approved);
+                        prayerWallEntries = await fetchPrayerWallEntries();
                         prayerWallMessage.value = "";
                         prayerWallName.value = "";
                         prayerWallAnonymous.checked = false;
@@ -2902,9 +2824,7 @@
                 renderPrayerDetail();
             });
             document.addEventListener("njc:authchange", function () {
-                renderPrayerWall();
-                renderPrayerDetail();
-                tryOpenPrayerFromAppHash();
+                loadPrayerWall();
             });
             document.addEventListener("njc:admin-prayer-updated", function () {
                 loadPrayerWall();

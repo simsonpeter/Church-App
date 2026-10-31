@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v461kidsworldv2p1";
-const RUNTIME_CACHE = "njc-runtime-cache-v461kidsworldv2p1";
+const APP_CACHE = "njc-app-cache-v462prayerfirestore1";
+const RUNTIME_CACHE = "njc-runtime-cache-v462prayerfirestore1";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Kids World V2 adds a playful dashboard, Memory Match, Verse Builder, and a 12-world Bible Adventure with saved stars and rewards.";
+    "Prayer Wall requests now use permanent per-request Firestore storage with safer private pastoral replies.";
 
 const CORE_ASSETS = [
     "./",
@@ -47,7 +47,8 @@ const CORE_ASSETS = [
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
-    "./app-shell.js?v=20261030njc2",
+    "./prayer-firestore-store.js?v=20261031prayerfirestore1",
+    "./app-shell.js?v=20261031prayerfirestore1",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20261030njc2",
@@ -55,11 +56,11 @@ const CORE_ASSETS = [
     "./sermons-page.js?v=20260830sermonnodl1",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
-    "./contact-page.js?v=20260805prayerprotect1",
+    "./contact-page.js?v=20261031prayerfirestore1",
     "./daily-bread-page.js?v=20260617dailybread1",
     "./newsletter-page.js?v=20260531sharelang1",
     "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20260830sermonphoto1",
+    "./admin-dashboard-page.js?v=20261031prayerfirestore1",
     "./admin-modules-page.js?v=20260608guestmodules1",
     "./admin-user-access-page.js?v=20260421mainmerge",
     "./admin-users-page.js?v=20260531authreset1",

@@ -5,7 +5,6 @@
     var ADMIN_BROADCASTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
     var ADMIN_EVENTS_URL = "https://mantledb.sh/v2/njc-belgium-admin-events/entries";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
-    var PRAYER_WALL_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var TRIVIA_URL = "https://mantledb.sh/v2/njc-belgium-admin-trivia/entries";
     var ADMIN_DAILY_BREAD_URL = "https://mantledb.sh/v2/njc-belgium-admin-daily-bread/entries";
     var ADMIN_LIBRARY_URL = "https://mantledb.sh/v2/njc-belgium-admin-library/entries";
@@ -721,8 +720,27 @@
             anonymous: Boolean(source.anonymous),
             approved: approved,
             categories: normalizePrayerCategoriesAdmin(source.categories),
-            createdAt: String(source.createdAt || "")
+            pastorReplies: Array.isArray(source.pastorReplies) ? source.pastorReplies : [],
+            prayed: Math.max(0, Math.floor(Number(source.prayed) || 0)),
+            answered: Math.max(0, Math.floor(Number(source.answered) || 0)),
+            thanked: Math.max(0, Math.floor(Number(source.thanked) || 0)),
+            createdAt: String(source.createdAt || ""),
+            createdAtMs: Math.max(0, Math.floor(Number(source.createdAtMs) || 0)),
+            updatedAt: String(source.updatedAt || ""),
+            createdByUid: String(source.createdByUid || ""),
+            createdByEmail: String(source.createdByEmail || "").trim().toLowerCase()
         };
+    }
+
+    function getPrayerStore() {
+        if (!window.NjcPrayerFirestoreStore) {
+            throw new Error("Prayer Firestore store is unavailable");
+        }
+        return window.NjcPrayerFirestoreStore;
+    }
+
+    function fetchPrayerEntriesFromFirestore() {
+        return getPrayerStore().listAdmin();
     }
 
     function formatPrayerDateForPdf(isoText) {
@@ -976,7 +994,7 @@
             return;
         }
         setBusyState(true);
-        fetchMantleEntries(PRAYER_WALL_URL).then(function (entries) {
+        fetchPrayerEntriesFromFirestore().then(function (entries) {
             var list = (Array.isArray(entries) ? entries : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item && item.id);
             });
@@ -1155,7 +1173,7 @@
             return;
         }
         setBusyState(true);
-        fetchMantleEntries(PRAYER_WALL_URL).then(function (entries) {
+        fetchPrayerEntriesFromFirestore().then(function (entries) {
             var list = (Array.isArray(entries) ? entries : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item && item.id);
             });
@@ -1653,10 +1671,6 @@
         writeMantleBackup(PRAYER_BACKUP_KEY, entries);
     }
 
-    function isPrayerWallUrl(url) {
-        return String(url || "").indexOf("njc-belgium-prayer-wall") >= 0;
-    }
-
     function saveMantleEntries(url, entries, options) {
         var list = (Array.isArray(entries) ? entries : []).slice(0, MAX_ENTRIES);
         var allowEmpty = Boolean(options && options.allowEmpty);
@@ -1672,32 +1686,49 @@
                 return true;
             });
         };
-        if (isPrayerWallUrl(url) && !list.length && !allowEmpty) {
-            return fetchMantleEntries(url).then(function (remote) {
-                if (Array.isArray(remote) && remote.length > 0) {
-                    throw new Error("Refusing to wipe prayer wall");
-                }
-                return write();
-            });
-        }
         return write();
     }
 
     function restorePrayerFromBackup() {
-        restoreMantleBackup(
-            PRAYER_WALL_URL,
-            PRAYER_BACKUP_KEY,
-            normalizePrayerEntry,
-            function (fresh) {
-                cachedPrayers = (Array.isArray(fresh) ? fresh : []).map(normalizePrayerEntry).filter(function (item) {
-                    return Boolean(item && item.id && item.message);
+        if (busy || !isAdminUser()) {
+            return;
+        }
+        var backup = readMantleBackup(PRAYER_BACKUP_KEY);
+        if (!backup || !backup.entries.length) {
+            showNote("error", "admin.mantleBackupMissing", "No backup found on this device.");
+            return;
+        }
+        var msg = T("admin.mantleBackupRestoreConfirm", "Restore {count} items from backup to the server?")
+            .replace("{count}", String(backup.entries.length));
+        if (!window.confirm(msg)) {
+            return;
+        }
+        var normalized = backup.entries.map(normalizePrayerEntry).filter(function (entry) {
+            return Boolean(entry && entry.id && entry.message);
+        });
+        if (!normalized.length) {
+            showNote("error", "admin.mantleBackupMissing", "No backup found on this device.");
+            return;
+        }
+        setBusyState(true);
+        getPrayerStore().upsertBackup(normalized)
+            .then(fetchPrayerEntriesFromFirestore)
+            .then(function (fresh) {
+                cachedPrayers = fresh.map(normalizePrayerEntry).filter(function (entry) {
+                    return Boolean(entry && entry.id && entry.message);
                 });
                 backupPrayerEntries(cachedPrayers);
                 renderStats();
                 renderPrayerList();
-            },
-            "njc:admin-prayer-updated"
-        );
+                showNote("success", "admin.mantleBackupRestored", "Restored from backup.");
+                document.dispatchEvent(new CustomEvent("njc:admin-prayer-updated"));
+            })
+            .catch(function () {
+                showNote("error", "admin.syncError", "Could not restore. Check your connection and try again.");
+            })
+            .finally(function () {
+                setBusyState(false);
+            });
     }
 
     function formatBackupDate(isoText) {
@@ -2215,7 +2246,7 @@
             fetchMantleEntries(ADMIN_BROADCASTS_URL),
             fetchMantleEntries(ADMIN_EVENTS_URL),
             fetchMantleEntries(ADMIN_SERMONS_URL),
-            fetchMantleEntries(PRAYER_WALL_URL),
+            fetchPrayerEntriesFromFirestore(),
             fetchMantleEntries(TRIVIA_URL),
             fetchMantleEntries(ADMIN_DAILY_BREAD_URL),
             fetchMantleEntries(ADMIN_LIBRARY_URL),
@@ -3730,25 +3761,19 @@
             return;
         }
         setBusyState(true);
-        fetchMantleEntries(PRAYER_WALL_URL).then(function (entries) {
-            var source = Array.isArray(entries) ? entries.slice(0, MAX_ENTRIES) : [];
-            var target = source.find(function (item) {
+        fetchPrayerEntriesFromFirestore().then(function (entries) {
+            var target = (Array.isArray(entries) ? entries : []).find(function (item) {
                 return String(item && item.id || "") === prayerId;
             });
             if (!target) {
                 throw new Error("Prayer not found");
             }
             if (action === "approve") {
-                target.approved = true;
-                target.updatedAt = new Date().toISOString();
+                return getPrayerStore().adminUpdate(prayerId, { approved: true });
             } else {
-                target.urgent = !Boolean(target.urgent);
-                target.updatedAt = new Date().toISOString();
+                return getPrayerStore().adminUpdate(prayerId, { urgent: !Boolean(target.urgent) });
             }
-            return saveMantleEntries(PRAYER_WALL_URL, source).then(function () {
-                return fetchMantleEntries(PRAYER_WALL_URL);
-            });
-        }).then(function (nextEntries) {
+        }).then(fetchPrayerEntriesFromFirestore).then(function (nextEntries) {
             cachedPrayers = (Array.isArray(nextEntries) ? nextEntries : []).map(normalizePrayerEntry).filter(function (item) {
                 return Boolean(item.id);
             });

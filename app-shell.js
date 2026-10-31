@@ -24,7 +24,6 @@
     var EVENTS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/events.json";
     var SERMONS_FEED_URL = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
     var ADMIN_SERMONS_URL = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
-    var PRAYER_WALL_FEED_URL = "https://mantledb.sh/v2/njc-belgium-prayer-wall/entries";
     var CONTACT_FORM_FEED_URL = "https://mantledb.sh/v2/njc-belgium-contact-messages/entries";
     var ADMIN_NOTICES_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-notices/entries";
     var ADMIN_BROADCASTS_FEED_URL = "https://mantledb.sh/v2/njc-belgium-admin-broadcasts/entries";
@@ -2708,7 +2707,6 @@
             EVENTS_FEED_URL,
             SERMONS_FEED_URL,
             ADMIN_SERMONS_URL,
-            PRAYER_WALL_FEED_URL,
             ADMIN_NOTICES_FEED_URL
         ];
         Promise.allSettled(urls.map(function (u) {
@@ -3839,17 +3837,14 @@
     });
 
     function checkNewPrayerNotification(status) {
-        return fetch(PRAYER_WALL_FEED_URL + "?ts=" + String(Date.now()), { cache: "no-store" })
-            .then(function (response) {
-                if (!response.ok) {
-                    throw new Error("Unable to load prayer wall");
-                }
-                return response.json();
-            })
-            .then(function (payload) {
-                var entries = payload && Array.isArray(payload.entries) ? payload.entries : [];
+        var store = window.NjcPrayerFirestoreStore;
+        if (!store || typeof store.list !== "function") {
+            return Promise.resolve(null);
+        }
+        return store.list()
+            .then(function (entries) {
                 var publicEntries = entries.filter(function (e) {
-                    return e && e.approved !== false;
+                    return e && e.approved === true && e.pastorOnly === false;
                 });
                 if (!publicEntries.length) {
                     return null;
