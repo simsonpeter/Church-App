@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="njc-redesign.css?v=20261030njc2">
     <link rel="stylesheet" href="kids-world-v2.css?v=20261030kidsv2p1">
     <link rel="stylesheet" href="prayer-page-v3.css?v=20261031prayerv3">
+    <link rel="stylesheet" href="sermon-player-v3.css?v=20261031sermonv3">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -393,76 +394,107 @@
         </section>
 
         <section class="page-view" data-route="sermons">
-            <main class="app-content">
-<section class="quick-actions">
-                <a class="action-pill" href="#">
-                    <span class="action-icon"><i class="fa-solid fa-tower-broadcast"></i></span>
-                    <span class="action-label" data-i18n="actions.live">Live</span>
-                </a>
-                <a class="action-pill" href="#">
-                    <span class="action-icon"><i class="fa-solid fa-headphones"></i></span>
-                    <span class="action-label" data-i18n="actions.audio">Audio</span>
-                </a>
-                <a class="action-pill" href="#">
-                    <span class="action-icon"><i class="fa-solid fa-note-sticky"></i></span>
-                    <span class="action-label" data-i18n="actions.notes">Notes</span>
-                </a>
-            </section>
+            <main class="app-content sermons-v3" data-card-lang-id="sermons">
+                <header class="sermons-v3-hero">
+                    <p class="sermons-v3-eyebrow" data-i18n="sermons.eyebrow">Sermon</p>
+                    <p class="sermons-v3-subtitle" data-i18n="sermons.subtitle">Listen again, take notes, and grow through the week.</p>
+                </header>
 
-            <section class="card card-v-glass" data-card-lang-id="sermons">
-                <h2><i class="fa-solid fa-play-circle"></i><span data-i18n="sermons.latestTitle">Latest Sermons</span></h2>
-                <div class="card-banner">
-                    <img src="sermons-banner.jpg?v=20260411cb1" alt="" width="1600" height="1067" loading="lazy" decoding="async" />
-                </div>
-                <div class="search-row sermons-search-row">
-                    <input
-                        id="sermon-search"
-                        class="search-input"
-                        type="search"
-                        data-i18n-placeholder="sermons.searchPlaceholder"
-                        placeholder="Search sermons by title, speaker, or date">
-                    <button
-                        class="button-link button-secondary sermon-filter-btn"
-                        id="sermon-filter-btn"
-                        type="button"
-                        aria-label="Toggle filters"
-                        data-i18n-aria-label="sermons.filterToggle">
-                        <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                <section class="sermons-v3-featured" id="sermon-featured" hidden>
+                    <p class="sermons-v3-kicker" data-i18n="sermons.featured">Featured</p>
+                    <button type="button" class="sermon-open-btn sermons-v3-featured-btn" id="sermon-featured-open">
+                        <span class="sermons-v3-featured-art" id="sermon-featured-art" aria-hidden="true"></span>
+                        <span class="sermons-v3-featured-copy">
+                            <span class="sermons-v3-featured-label" id="sermon-featured-label"></span>
+                            <span class="sermons-v3-featured-title" id="sermon-featured-title"></span>
+                            <span class="sermons-v3-featured-meta" id="sermon-featured-meta"></span>
+                        </span>
                     </button>
-                    <button class="button-link sermon-search-btn" id="sermon-search-btn" type="button" data-i18n="sermons.searchButton">Search</button>
-                </div>
-                <div class="filter-chip-groups" id="sermon-filter-groups" hidden>
-                    <div class="chip-group">
-                        <p class="chip-group-title" data-i18n="sermons.filterSpeaker">Speaker</p>
-                        <div class="filter-chips" id="sermon-speaker-chips"></div>
-                    </div>
-                    <div class="chip-group">
-                        <p class="chip-group-title" data-i18n="sermons.filterMonth">Month</p>
-                        <div class="filter-chips" id="sermon-month-chips"></div>
-                    </div>
-                    <div class="chip-group">
-                        <p class="chip-group-title" data-i18n="sermons.filterSaved">Saved</p>
-                        <div class="filter-chips" id="sermon-saved-chips"></div>
-                    </div>
-                </div>
-                <p class="page-note" id="sermon-search-note" hidden></p>
-                <ul class="list" id="latest-sermons-list">
-                    <li>
-                        <h3 data-i18n="sermons.loadingTitle">Loading sermons...</h3>
-                        <p data-i18n="sermons.loadingBody">Please wait while we load the latest messages.</p>
-                    </li>
-                </ul>
-                <button class="button-link" id="show-more-sermons" type="button" data-i18n="sermons.seeMore" hidden>See more sermons</button>
-            </section>
+                </section>
 
-            <section class="card card-v-minimal">
-                <h2><i class="fa-solid fa-box-archive"></i><span data-i18n="sermons.archiveTitle">Archive</span></h2>
-                <div class="card-banner">
-                    <img src="https://i.ibb.co/spb7FtS2/file-00000000f5647243a2096a0cf8dae324.png" alt="" width="1536" height="1024" loading="lazy" decoding="async" referrerpolicy="no-referrer" />
-                </div>
-                <p id="sermon-archive-note" data-i18n="sermons.archiveLoading">Loading archive summary...</p>
-                <p class="page-note" data-i18n="sermons.tip">Tip: Use the latest list to open sermon audio directly.</p>
-            </section>
+                <section class="sermons-v3-continue" id="sermon-continue" hidden>
+                    <p class="sermons-v3-kicker" data-i18n="sermons.continueListening">Continue listening</p>
+                    <button type="button" class="sermon-open-btn sermons-v3-continue-btn" id="sermon-continue-open">
+                        <span class="sermons-v3-continue-art" id="sermon-continue-art" aria-hidden="true"></span>
+                        <span class="sermons-v3-continue-copy">
+                            <span class="sermons-v3-continue-title" id="sermon-continue-title"></span>
+                            <span class="sermons-v3-continue-meta" id="sermon-continue-meta"></span>
+                        </span>
+                    </button>
+                </section>
+
+                <section class="sermons-v3-recent-played" id="sermon-recently-played" hidden>
+                    <p class="sermons-v3-kicker" data-i18n="sermons.recentlyPlayed">Recently played</p>
+                    <div class="sermons-v3-recent-row" id="sermon-recently-played-list"></div>
+                </section>
+
+                <section class="sermons-v3-series" id="sermon-series-section" hidden>
+                    <p class="sermons-v3-kicker" data-i18n="sermons.series">Sermon series</p>
+                    <div class="filter-chips" id="sermon-series-chips"></div>
+                </section>
+
+                <section class="sermons-v3-library">
+                    <div class="sermons-v3-library-head">
+                        <h2 data-i18n="sermons.recentlyAdded">Recently added</h2>
+                    </div>
+                    <div class="search-row sermons-search-row sermons-v3-search">
+                        <input
+                            id="sermon-search"
+                            class="search-input"
+                            type="search"
+                            data-i18n-placeholder="sermons.searchPlaceholder"
+                            placeholder="Search sermons by title, speaker, or date">
+                        <button
+                            class="button-link button-secondary sermon-filter-btn"
+                            id="sermon-filter-btn"
+                            type="button"
+                            aria-label="Toggle filters"
+                            data-i18n-aria-label="sermons.filterToggle">
+                            <i class="fa-solid fa-filter" aria-hidden="true"></i>
+                        </button>
+                        <button class="button-link sermon-search-btn" id="sermon-search-btn" type="button" data-i18n="sermons.searchButton">Search</button>
+                    </div>
+                    <div class="filter-chip-groups" id="sermon-filter-groups" hidden>
+                        <div class="chip-group">
+                            <p class="chip-group-title" data-i18n="sermons.filterSpeaker">Speaker</p>
+                            <div class="filter-chips" id="sermon-speaker-chips"></div>
+                        </div>
+                        <div class="chip-group">
+                            <p class="chip-group-title" data-i18n="sermons.filterMonth">Month</p>
+                            <div class="filter-chips" id="sermon-month-chips"></div>
+                        </div>
+                        <div class="chip-group">
+                            <p class="chip-group-title" data-i18n="sermons.filterSaved">Saved</p>
+                            <div class="filter-chips" id="sermon-saved-chips"></div>
+                        </div>
+                        <div class="chip-group" id="sermon-topic-group" hidden>
+                            <p class="chip-group-title" data-i18n="sermons.filterTopic">Topic</p>
+                            <div class="filter-chips" id="sermon-topic-chips"></div>
+                        </div>
+                        <div class="chip-group" id="sermon-language-group" hidden>
+                            <p class="chip-group-title" data-i18n="sermons.filterLanguage">Language</p>
+                            <div class="filter-chips" id="sermon-language-chips"></div>
+                        </div>
+                        <div class="chip-group" id="sermon-book-group" hidden>
+                            <p class="chip-group-title" data-i18n="sermons.filterBook">Bible book</p>
+                            <div class="filter-chips" id="sermon-book-chips"></div>
+                        </div>
+                    </div>
+                    <p class="page-note" id="sermon-search-note" hidden></p>
+                    <ul class="list sermons-v3-list" id="latest-sermons-list">
+                        <li>
+                            <h3 data-i18n="sermons.loadingTitle">Loading sermons...</h3>
+                            <p data-i18n="sermons.loadingBody">Please wait while we load the latest messages.</p>
+                        </li>
+                    </ul>
+                    <button class="button-link" id="show-more-sermons" type="button" data-i18n="sermons.seeMore" hidden>See more sermons</button>
+                </section>
+
+                <section class="sermons-v3-archive">
+                    <h2 data-i18n="sermons.archiveTitle">Archive</h2>
+                    <p id="sermon-archive-note" data-i18n="sermons.archiveLoading">Loading archive summary...</p>
+                    <p class="page-note" data-i18n="sermons.tip">Tip: Use the latest list to open sermon audio directly.</p>
+                </section>
             </main>
         </section>
 
@@ -2292,41 +2324,64 @@
     </div>
 </div>
 
-<div class="sermon-player-overlay" id="sermon-player" hidden>
+<div class="sermon-player-overlay sermon-player-v3" id="sermon-player" hidden>
         <button class="sermon-player-backdrop" id="sermon-player-backdrop" aria-label="Close player" data-i18n-aria-label="player.close"></button>
-        <section class="sermon-player-sheet" role="dialog" aria-modal="true" aria-label="Sermon player" data-i18n-aria-label="sermons.eyebrow">
-            <div class="sermon-player-top">
+        <section class="sermon-player-sheet sermon-player-v3-sheet" role="dialog" aria-modal="true" aria-labelledby="player-sermon-title" data-i18n-aria-label="sermons.eyebrow">
+            <div class="sermon-player-top sermon-v3-top">
                 <strong data-i18n="sermons.nowPlaying">Now Playing</strong>
                 <div class="sermon-player-top-tray">
+                    <button type="button" id="sermon-player-favorite" class="sermon-player-share sermon-v3-icon-btn" aria-label="Save sermon" data-i18n-aria-label="sermons.favoriteAdd">
+                        <i class="fa-regular fa-heart" aria-hidden="true"></i>
+                    </button>
                     <button type="button" id="sermon-player-share" class="sermon-player-share" disabled aria-label="Share sermon">
                         <i class="fa-solid fa-share-from-square" aria-hidden="true"></i>
                     </button>
                     <button type="button" id="sermon-player-minimize" class="sermon-player-close" aria-label="Minimize player" data-i18n-aria-label="player.minimize">
-                        <i class="fa-solid fa-window-minimize"></i>
+                        <i class="fa-solid fa-chevron-down"></i>
                     </button>
                     <button type="button" id="sermon-player-close" class="sermon-player-close" aria-label="Close player" data-i18n-aria-label="player.close">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
             </div>
-            <div class="sermon-player-display">
+            <div class="sermon-player-display sermon-v3-display">
                 <p class="page-note sermon-share-feedback" id="sermon-share-feedback" role="status" aria-live="polite" hidden></p>
-                <img id="player-sermon-photo" class="sermon-player-photo" alt="" width="640" height="360" hidden>
+                <div class="sermon-v3-art-wrap">
+                    <img id="player-sermon-photo" class="sermon-player-photo" alt="" width="640" height="640" hidden>
+                    <div id="player-sermon-art-fallback" class="sermon-v3-art-fallback" aria-hidden="true">NJC</div>
+                    <div id="player-buffering" class="sermon-v3-buffering" hidden role="status">
+                        <span class="sermon-v3-spinner" aria-hidden="true"></span>
+                        <span data-i18n="sermons.buffering">Loading audio…</span>
+                    </div>
+                </div>
                 <h3 id="player-sermon-title">Sermon title</h3>
                 <p id="player-sermon-subtitle">Subtitle</p>
+                <p class="sermon-meta" id="player-sermon-speaker"></p>
                 <p class="sermon-meta" id="player-sermon-date">Date</p>
+                <p class="sermon-v3-passage" id="player-sermon-passage" hidden></p>
+                <p class="sermon-v3-description" id="player-sermon-description" hidden></p>
                 <p class="sermon-meta sermon-listen-meta" id="player-sermon-listens" hidden></p>
                 <div class="sermon-progress-row">
-                    <input type="range" id="player-seek" min="0" max="100" value="0" step="1" aria-label="Seek position" data-i18n-aria-label="player.seekPosition">
-                    <div class="sermon-time" id="player-time">00:00 / 00:00</div>
+                    <input type="range" id="player-seek" min="0" max="100" value="0" step="0.1" aria-label="Seek position" data-i18n-aria-label="player.seekPosition">
+                    <div class="sermon-v3-time-row">
+                        <span id="player-elapsed">00:00</span>
+                        <div class="sermon-time" id="player-time">00:00 / 00:00</div>
+                        <span id="player-remaining">−00:00</span>
+                    </div>
                 </div>
-                <div class="player-extra-controls">
+                <div class="sermon-v3-error" id="player-error" hidden>
+                    <p id="player-error-text" data-i18n="sermons.mediaError">This sermon could not be loaded.</p>
+                    <button type="button" class="button-link" id="player-retry" data-i18n="sermons.retry">Retry</button>
+                </div>
+                <div class="player-extra-controls sermon-v3-extras">
                     <label>
                         <span data-i18n="sermons.speed">Speed</span>
                         <select id="player-speed" class="notify-select">
-                            <option value="1">1x</option>
-                            <option value="1.25">1.25x</option>
-                            <option value="1.5">1.5x</option>
+                            <option value="0.75">0.75×</option>
+                            <option value="1" selected>1×</option>
+                            <option value="1.25">1.25×</option>
+                            <option value="1.5">1.5×</option>
+                            <option value="2">2×</option>
                         </select>
                     </label>
                     <label>
@@ -2338,32 +2393,49 @@
                             <option value="45" data-i18n="sermons.sleep45">45 min</option>
                         </select>
                     </label>
+                    <label id="player-volume-wrap" hidden>
+                        <span data-i18n="player.volume">Volume</span>
+                        <input type="range" id="player-volume" min="0" max="1" step="0.05" value="1" aria-label="Volume" data-i18n-aria-label="player.volume">
+                    </label>
                 </div>
                 <p class="page-note" id="player-sleep-note"></p>
             </div>
-            <div class="ipod-wheel" aria-label="Player controls" data-i18n-aria-label="player.controls">
-                <button type="button" class="wheel-btn wheel-menu" id="player-wheel-menu">MENU</button>
-                <button type="button" class="wheel-btn wheel-prev" id="player-prev" aria-label="Previous sermon" data-i18n-aria-label="player.previousSermon">
+            <div class="sermon-v3-controls" aria-label="Player controls" data-i18n-aria-label="player.controls">
+                <button type="button" class="sermon-v3-ctrl" id="player-skip-back" aria-label="Skip back 15 seconds" data-i18n-aria-label="player.skipBack">
+                    <i class="fa-solid fa-rotate-left" aria-hidden="true"></i>
+                    <span>15</span>
+                </button>
+                <button type="button" class="sermon-v3-ctrl" id="player-prev" aria-label="Previous sermon" data-i18n-aria-label="player.previousSermon">
                     <i class="fa-solid fa-backward-step"></i>
                 </button>
-                <button type="button" class="wheel-btn wheel-next" id="player-next" aria-label="Next sermon" data-i18n-aria-label="player.nextSermon">
-                    <i class="fa-solid fa-forward-step"></i>
-                </button>
-                <button type="button" class="wheel-btn wheel-play" id="player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
+                <button type="button" class="sermon-v3-play" id="player-center" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
                     <i class="fa-solid fa-play"></i>
                 </button>
-                <button type="button" class="wheel-center" id="player-center" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
+                <button type="button" class="sermon-v3-ctrl" id="player-next" aria-label="Next sermon" data-i18n-aria-label="player.nextSermon">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+                <button type="button" class="sermon-v3-ctrl" id="player-skip-forward" aria-label="Skip forward 30 seconds" data-i18n-aria-label="player.skipForward">
+                    <i class="fa-solid fa-rotate-right" aria-hidden="true"></i>
+                    <span>30</span>
+                </button>
+                <button type="button" class="sermon-v3-sr-only" id="player-wheel-menu">MENU</button>
+                <button type="button" class="sermon-v3-sr-only" id="player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
                     <i class="fa-solid fa-play"></i>
                 </button>
             </div>
-            <audio id="sermon-audio" preload="metadata"></audio>
+            <audio id="sermon-audio" preload="metadata" playsinline></audio>
         </section>
     </div>
-    <div class="mini-sermon-player" id="mini-sermon-player" hidden>
+    <div class="mini-sermon-player sermon-mini-v3" id="mini-sermon-player" hidden>
         <button type="button" class="mini-player-open" id="mini-player-open" aria-label="Open full player" data-i18n-aria-label="player.openSermonsPage">
-            <span class="mini-player-title" id="mini-player-title" data-i18n="sermons.nowPlaying">Now Playing</span>
-            <span class="mini-player-time" id="mini-player-time">00:00 / 00:00</span>
+            <img id="mini-player-photo" class="sermon-mini-v3-photo" alt="" width="44" height="44" hidden>
+            <span id="mini-player-avatar" class="sermon-mini-v3-avatar" aria-hidden="true">NJC</span>
+            <span class="sermon-mini-v3-copy">
+                <span class="mini-player-title" id="mini-player-title" data-i18n="sermons.nowPlaying">Now Playing</span>
+                <span class="mini-player-time" id="mini-player-time">00:00 / 00:00</span>
+            </span>
         </button>
+        <div class="sermon-mini-v3-progress" aria-hidden="true"><span id="mini-player-progress"></span></div>
         <button type="button" class="mini-player-btn" id="mini-player-play" aria-label="Play or pause" data-i18n-aria-label="player.playOrPause">
             <i class="fa-solid fa-play"></i>
         </button>
@@ -2488,12 +2560,12 @@
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="prayer-firestore-store.js?v=20261031prayervisible1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20261031prayerv3"></script>
+    <script src="app-shell.js?v=20261031sermonv3"></script>
     <script src="events-engine.js?v=20260830sermonsharebtns1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20261030njc2"></script>
     <script src="events-page.js?v=20260414feedprobe1"></script>
-    <script src="sermons-page.js?v=20260830sermonnodl1"></script>
+    <script src="sermons-page.js?v=20261031sermonv3"></script>
     <script src="bible-page.js?v=20260618actstamil1"></script>
     <script src="songbook-page.js?v=20260325u4"></script>
     <script src="contact-page.js?v=20261031prayerv3"></script>

@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v464prayerv3";
-const RUNTIME_CACHE = "njc-runtime-cache-v464prayerv3";
+const APP_CACHE = "njc-app-cache-v465sermonv3";
+const RUNTIME_CACHE = "njc-runtime-cache-v465sermonv3";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Prayer page redesigned with safer loading so a failed refresh cannot empty the wall.";
+    "Sermon library and player rebuilt with a full-screen player, mini-player, and resume listening.";
 
 const CORE_ASSETS = [
     "./",
@@ -45,16 +45,17 @@ const CORE_ASSETS = [
     "./njc-redesign.css?v=20261030njc2",
     "./kids-world-v2.css?v=20261030kidsv2p1",
     "./prayer-page-v3.css?v=20261031prayerv3",
+    "./sermon-player-v3.css?v=20261031sermonv3",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
     "./prayer-firestore-store.js?v=20261031prayervisible1",
-    "./app-shell.js?v=20261031prayerv3",
+    "./app-shell.js?v=20261031sermonv3",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20261030njc2",
     "./events-page.js?v=20260414feedprobe1",
-    "./sermons-page.js?v=20260830sermonnodl1",
+    "./sermons-page.js?v=20261031sermonv3",
     "./bible-page.js?v=20260618actstamil1",
     "./songbook-page.js?v=20260325u4",
     "./contact-page.js?v=20261031prayerv3",

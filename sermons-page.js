@@ -1,6 +1,9 @@
 (function () {
             var STATE_KEY = "njc_sermon_player_v1";
             var FAVORITES_KEY = "njc_sermon_favorites_v1";
+            var SPEED_KEY = "njc_sermon_speed_v1";
+            var RECENT_KEY = "njc_sermon_recent_v1";
+            var ALLOWED_SPEEDS = [0.75, 1, 1.25, 1.5, 2];
             var sermonsUrl = "https://raw.githubusercontent.com/simsonpeter/njcbelgium/refs/heads/main/sermons.json";
             var adminSermonsUrl = "https://mantledb.sh/v2/njc-belgium-admin-sermons/entries";
             var latestSermonsList = document.getElementById("latest-sermons-list");
@@ -14,8 +17,12 @@
             var sermonMonthChips = document.getElementById("sermon-month-chips");
             var sermonSavedChips = document.getElementById("sermon-saved-chips");
             var archiveNote = document.getElementById("sermon-archive-note");
-            var latestSermonsCard = latestSermonsList ? latestSermonsList.closest(".card") : null;
-            var archiveCard = archiveNote ? archiveNote.closest(".card") : null;
+            var latestSermonsCard = latestSermonsList
+                ? (latestSermonsList.closest("[data-card-lang-id]") || latestSermonsList.closest(".card"))
+                : null;
+            var archiveCard = archiveNote
+                ? (archiveNote.closest("[data-card-lang-id]") || archiveNote.closest(".card"))
+                : null;
             var allSermons = [];
             /** Default list shows this many; sermons are sorted newest-first, so older same-month items need a higher default than 4. */
             var INITIAL_VISIBLE_SERMONS = 12;
@@ -31,7 +38,12 @@
             var selectedSpeaker = "";
             var selectedMonth = "";
             var selectedSavedOnly = false;
+            var selectedTopic = "";
+            var selectedLanguage = "";
+            var selectedBook = "";
+            var selectedSeries = "";
             var filterPanelPinned = false;
+            var pendingResumeTime = null;
 
             var playerOverlay = document.getElementById("sermon-player");
             var playerBackdrop = document.getElementById("sermon-player-backdrop");
@@ -62,6 +74,45 @@
             var sermonShareFeedback = document.getElementById("sermon-share-feedback");
             var sermonShareFeedbackTimerId = null;
             var playerSermonPhoto = document.getElementById("player-sermon-photo");
+            var playerSermonSpeaker = document.getElementById("player-sermon-speaker");
+            var playerSermonPassage = document.getElementById("player-sermon-passage");
+            var playerSermonDescription = document.getElementById("player-sermon-description");
+            var playerSermonArtFallback = document.getElementById("player-sermon-art-fallback");
+            var playerBuffering = document.getElementById("player-buffering");
+            var playerError = document.getElementById("player-error");
+            var playerErrorText = document.getElementById("player-error-text");
+            var playerRetry = document.getElementById("player-retry");
+            var playerSkipBack = document.getElementById("player-skip-back");
+            var playerSkipForward = document.getElementById("player-skip-forward");
+            var playerElapsed = document.getElementById("player-elapsed");
+            var playerRemaining = document.getElementById("player-remaining");
+            var playerVolume = document.getElementById("player-volume");
+            var playerVolumeWrap = document.getElementById("player-volume-wrap");
+            var playerFavoriteBtn = document.getElementById("sermon-player-favorite");
+            var miniPlayerPhoto = document.getElementById("mini-player-photo");
+            var miniPlayerAvatar = document.getElementById("mini-player-avatar");
+            var miniPlayerProgress = document.getElementById("mini-player-progress");
+            var featuredSection = document.getElementById("sermon-featured");
+            var featuredOpen = document.getElementById("sermon-featured-open");
+            var featuredArt = document.getElementById("sermon-featured-art");
+            var featuredLabel = document.getElementById("sermon-featured-label");
+            var featuredTitle = document.getElementById("sermon-featured-title");
+            var featuredMeta = document.getElementById("sermon-featured-meta");
+            var continueSection = document.getElementById("sermon-continue");
+            var continueOpen = document.getElementById("sermon-continue-open");
+            var continueArt = document.getElementById("sermon-continue-art");
+            var continueTitle = document.getElementById("sermon-continue-title");
+            var continueMeta = document.getElementById("sermon-continue-meta");
+            var recentlyPlayedSection = document.getElementById("sermon-recently-played");
+            var recentlyPlayedList = document.getElementById("sermon-recently-played-list");
+            var seriesSection = document.getElementById("sermon-series-section");
+            var seriesChips = document.getElementById("sermon-series-chips");
+            var sermonTopicGroup = document.getElementById("sermon-topic-group");
+            var sermonTopicChips = document.getElementById("sermon-topic-chips");
+            var sermonLanguageGroup = document.getElementById("sermon-language-group");
+            var sermonLanguageChips = document.getElementById("sermon-language-chips");
+            var sermonBookGroup = document.getElementById("sermon-book-group");
+            var sermonBookChips = document.getElementById("sermon-book-chips");
 
             var LISTEN_STATS_COLLECTION = "sermonListenStats";
             var sermonListenStatByDocId = {};
@@ -170,6 +221,306 @@
                 map[key] = Date.now();
                 saveFavoritesMap(map);
                 return true;
+            }
+
+            function getPersistedSpeed() {
+                try {
+                    var rate = Number(window.localStorage.getItem(SPEED_KEY));
+                    if (ALLOWED_SPEEDS.indexOf(rate) >= 0) {
+                        return rate;
+                    }
+                } catch (err) {
+                    return 1;
+                }
+                return 1;
+            }
+
+            function persistPlaybackSpeed(rate) {
+                var next = Number(rate);
+                if (ALLOWED_SPEEDS.indexOf(next) < 0) {
+                    next = 1;
+                }
+                try {
+                    window.localStorage.setItem(SPEED_KEY, String(next));
+                } catch (err) {
+                    return next;
+                }
+                return next;
+            }
+
+            function getRecentlyPlayed() {
+                try {
+                    var raw = window.localStorage.getItem(RECENT_KEY);
+                    var parsed = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch (err) {
+                    return [];
+                }
+            }
+
+            function rememberRecentlyPlayed(sermon) {
+                if (!sermon) {
+                    return;
+                }
+                var key = getFavoriteKey(sermon);
+                if (!key) {
+                    return;
+                }
+                var list = getRecentlyPlayed().filter(function (item) {
+                    return item && item.key !== key;
+                });
+                list.unshift({
+                    key: key,
+                    audioUrl: String(sermon.audioUrl || ""),
+                    title: String(sermon.title || ""),
+                    speaker: String(sermon.speaker || ""),
+                    at: Date.now()
+                });
+                try {
+                    window.localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 8)));
+                } catch (err) {
+                    return;
+                }
+            }
+
+            function optionalText(value) {
+                return String(value || "").trim();
+            }
+
+            function isVolumeControlSupported() {
+                if (!sermonAudio || typeof sermonAudio.volume !== "number") {
+                    return false;
+                }
+                return !/iPad|iPhone|iPod/.test(String(navigator.userAgent || ""));
+            }
+
+            function setMiniVisible(visible) {
+                document.body.classList.toggle("sermon-mini-visible", Boolean(visible));
+            }
+
+            function showPlayerError(message) {
+                if (!playerError) {
+                    return;
+                }
+                if (playerErrorText) {
+                    playerErrorText.textContent = message || T("sermons.mediaError", "This sermon could not be loaded.", latestSermonsCard);
+                }
+                playerError.hidden = false;
+                if (playerBuffering) {
+                    playerBuffering.hidden = true;
+                }
+            }
+
+            function clearPlayerError() {
+                if (playerError) {
+                    playerError.hidden = true;
+                }
+            }
+
+            function setBuffering(isBuffering) {
+                if (playerBuffering) {
+                    playerBuffering.hidden = !isBuffering || (playerError && !playerError.hidden);
+                }
+            }
+
+            function skipBy(seconds) {
+                if (!sermonAudio || !sermonAudio.src) {
+                    return;
+                }
+                var duration = Number.isFinite(sermonAudio.duration) ? sermonAudio.duration : 0;
+                var next = (sermonAudio.currentTime || 0) + Number(seconds || 0);
+                if (duration > 0) {
+                    next = Math.max(0, Math.min(duration, next));
+                } else {
+                    next = Math.max(0, next);
+                }
+                try {
+                    sermonAudio.currentTime = next;
+                } catch (err) {
+                    return;
+                }
+                refreshPlayerTime();
+            }
+
+            function retryCurrentSermon() {
+                if (!currentSermon || !currentSermon.audioUrl) {
+                    return;
+                }
+                clearPlayerError();
+                setBuffering(true);
+                var resumeAt = sermonAudio.currentTime || 0;
+                sermonAudio.src = currentSermon.audioUrl;
+                sermonAudio.load();
+                if (resumeAt > 0) {
+                    sermonAudio.addEventListener("loadedmetadata", function restoreRetryTime() {
+                        try {
+                            sermonAudio.currentTime = Math.min(resumeAt, sermonAudio.duration || resumeAt);
+                        } catch (err) {
+                            return;
+                        }
+                    }, { once: true });
+                }
+                sermonAudio.play().catch(function () {
+                    setBuffering(false);
+                });
+            }
+
+            function syncFavoriteButton() {
+                if (!playerFavoriteBtn) {
+                    return;
+                }
+                var saved = isFavoriteSermon(currentSermon);
+                playerFavoriteBtn.classList.toggle("is-active", saved);
+                playerFavoriteBtn.innerHTML = saved
+                    ? "<i class=\"fa-solid fa-heart\" aria-hidden=\"true\"></i>"
+                    : "<i class=\"fa-regular fa-heart\" aria-hidden=\"true\"></i>";
+                var label = saved
+                    ? T("sermons.favoriteRemove", "Remove from saved", latestSermonsCard)
+                    : T("sermons.favoriteAdd", "Save sermon", latestSermonsCard);
+                playerFavoriteBtn.setAttribute("aria-label", label);
+                playerFavoriteBtn.title = label;
+                playerFavoriteBtn.setAttribute("aria-pressed", saved ? "true" : "false");
+            }
+
+            function updateMediaSession() {
+                if (!("mediaSession" in navigator) || !currentSermon) {
+                    return;
+                }
+                var artwork = [];
+                var photo = getSermonPhotoUrl(currentSermon);
+                if (photo) {
+                    artwork.push({ src: photo, sizes: "512x512", type: "image/jpeg" });
+                }
+                try {
+                    navigator.mediaSession.metadata = new window.MediaMetadata({
+                        title: currentSermon.title || T("sermons.eyebrow", "Sermon"),
+                        artist: currentSermon.speaker || "New Jerusalem Church Belgium",
+                        album: currentSermon.series || T("sermons.nowPlaying", "Now Playing"),
+                        artwork: artwork
+                    });
+                    navigator.mediaSession.playbackState = sermonAudio.paused ? "paused" : "playing";
+                } catch (err) {
+                    return;
+                }
+            }
+
+            function bindMediaSessionHandlers() {
+                if (!("mediaSession" in navigator) || !navigator.mediaSession.setActionHandler) {
+                    return;
+                }
+                var actions = {
+                    play: function () {
+                        sermonAudio.play().catch(function () { return null; });
+                    },
+                    pause: function () {
+                        sermonAudio.pause();
+                    },
+                    previoustrack: function () {
+                        playNext(-1);
+                    },
+                    nexttrack: function () {
+                        playNext(1);
+                    },
+                    seekbackward: function (details) {
+                        skipBy(-(details && details.seekOffset ? details.seekOffset : 15));
+                    },
+                    seekforward: function (details) {
+                        skipBy(details && details.seekOffset ? details.seekOffset : 30);
+                    },
+                    seekto: function (details) {
+                        if (!details || !Number.isFinite(details.seekTime)) {
+                            return;
+                        }
+                        try {
+                            sermonAudio.currentTime = details.seekTime;
+                        } catch (err) {
+                            return;
+                        }
+                    }
+                };
+                Object.keys(actions).forEach(function (name) {
+                    try {
+                        navigator.mediaSession.setActionHandler(name, actions[name]);
+                    } catch (errBind) {
+                        return;
+                    }
+                });
+            }
+
+            function renderChipGroup(container, groupEl, values, selectedValue, attrName) {
+                if (!container) {
+                    return;
+                }
+                var unique = [];
+                var seen = {};
+                (values || []).forEach(function (value) {
+                    var clean = optionalText(value);
+                    if (!clean || seen[clean]) {
+                        return;
+                    }
+                    seen[clean] = true;
+                    unique.push(clean);
+                });
+                if (groupEl) {
+                    groupEl.hidden = unique.length === 0;
+                }
+                if (!unique.length) {
+                    container.innerHTML = "";
+                    return;
+                }
+                var allLabel = T("sermons.filterAll", "All", latestSermonsCard);
+                container.innerHTML = "";
+                var allButton = document.createElement("button");
+                allButton.type = "button";
+                allButton.className = "filter-chip" + (selectedValue ? "" : " active");
+                allButton.setAttribute(attrName, "");
+                allButton.textContent = allLabel;
+                container.appendChild(allButton);
+                unique.forEach(function (value) {
+                    var button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "filter-chip" + (selectedValue === value ? " active" : "");
+                    button.setAttribute(attrName, value);
+                    button.textContent = value;
+                    container.appendChild(button);
+                });
+            }
+
+            function fillArtNode(node, sermon, sizeClass) {
+                if (!node) {
+                    return;
+                }
+                var initials = getSpeakerAvatarText(sermon && sermon.speaker);
+                var photo = getSermonPhotoUrl(sermon);
+                node.textContent = initials;
+                if (sizeClass) {
+                    node.classList.add(sizeClass);
+                }
+                if (!photo) {
+                    return;
+                }
+                var img = document.createElement("img");
+                img.alt = "";
+                img.width = 86;
+                img.height = 86;
+                img.loading = "lazy";
+                img.decoding = "async";
+                img.addEventListener("error", function () {
+                    node.textContent = initials;
+                });
+                function showPhoto() {
+                    if (!img.naturalWidth) {
+                        node.textContent = initials;
+                        return;
+                    }
+                    node.innerHTML = "";
+                    node.appendChild(img);
+                }
+                img.addEventListener("load", showPhoto);
+                img.src = photo;
+                if (img.complete) {
+                    showPhoto();
+                }
             }
 
             function fallbackHex64FromString(s) {
@@ -1150,13 +1501,24 @@
                 } else if (dateObj && !Number.isNaN(dateObj.getTime())) {
                     dateYmd = String(dateObj.getFullYear()) + "-" + String(dateObj.getMonth() + 1).padStart(2, "0") + "-" + String(dateObj.getDate()).padStart(2, "0");
                 }
+                var videoUrl = optionalText(item.videoUrl || item.video);
+                var audioUrl = optionalText(item.audioUrl);
                 return {
                     title: item.title,
                     titleTa: String(item.titleTa || "").trim(),
                     subtitle: item.subtitle || "",
                     speaker: item.speaker || "",
-                    audioUrl: item.audioUrl || "",
+                    audioUrl: audioUrl || videoUrl,
+                    videoUrl: videoUrl,
+                    hasVideo: Boolean(videoUrl),
+                    hasAudio: Boolean(audioUrl),
                     photoUrl: String(item.photoUrl || item.coverImageUrl || item.imageUrl || "").trim(),
+                    series: optionalText(item.series || item.seriesTitle),
+                    passage: optionalText(item.passage || item.scripture || item.biblePassage || item.reference),
+                    language: optionalText(item.language || item.lang),
+                    topic: optionalText(item.topic || item.category),
+                    bibleBook: optionalText(item.bibleBook || item.book),
+                    description: optionalText(item.description || item.summary),
                     dateObj: dateObj,
                     dateYmd: dateYmd,
                     dateKey: dateObj ? dateObj.getTime() : -1,
@@ -1299,6 +1661,28 @@
                 savedOnlyButton.setAttribute("data-saved", "only");
                 savedOnlyButton.textContent = savedOnlyLabel;
                 sermonSavedChips.appendChild(savedOnlyButton);
+
+                renderChipGroup(
+                    sermonTopicChips,
+                    sermonTopicGroup,
+                    allSermons.map(function (sermon) { return sermon.topic; }),
+                    selectedTopic,
+                    "data-topic"
+                );
+                renderChipGroup(
+                    sermonLanguageChips,
+                    sermonLanguageGroup,
+                    allSermons.map(function (sermon) { return sermon.language; }),
+                    selectedLanguage,
+                    "data-language"
+                );
+                renderChipGroup(
+                    sermonBookChips,
+                    sermonBookGroup,
+                    allSermons.map(function (sermon) { return sermon.bibleBook; }),
+                    selectedBook,
+                    "data-book"
+                );
             }
 
             function getFilteredSermons() {
@@ -1317,6 +1701,18 @@
                     if (selectedSavedOnly && !isFavoriteSermon(sermon)) {
                         return false;
                     }
+                    if (selectedTopic && sermon.topic !== selectedTopic) {
+                        return false;
+                    }
+                    if (selectedLanguage && sermon.language !== selectedLanguage) {
+                        return false;
+                    }
+                    if (selectedBook && sermon.bibleBook !== selectedBook) {
+                        return false;
+                    }
+                    if (selectedSeries && sermon.series !== selectedSeries) {
+                        return false;
+                    }
                     if (!query) {
                         return true;
                     }
@@ -1324,17 +1720,129 @@
                         sermon.title || "",
                         sermon.subtitle || "",
                         sermon.speaker || "",
+                        sermon.series || "",
+                        sermon.topic || "",
+                        sermon.passage || "",
                         toDisplayDate(sermon.dateObj, latestSermonsCard)
                     ].join(" ").toLowerCase();
                     return searchable.indexOf(query) >= 0;
                 });
             }
 
+            function renderLibraryExtras() {
+                if (!allSermons.length) {
+                    if (featuredSection) {
+                        featuredSection.hidden = true;
+                    }
+                    if (continueSection) {
+                        continueSection.hidden = true;
+                    }
+                    if (recentlyPlayedSection) {
+                        recentlyPlayedSection.hidden = true;
+                    }
+                    if (seriesSection) {
+                        seriesSection.hidden = true;
+                    }
+                    return;
+                }
+
+                var featured = allSermons[0];
+                if (featuredSection && featuredOpen && featured) {
+                    featuredSection.hidden = false;
+                    featuredOpen.setAttribute("data-sermon-index", "0");
+                    if (!featured.audioUrl) {
+                        featuredOpen.setAttribute("aria-disabled", "true");
+                    } else {
+                        featuredOpen.removeAttribute("aria-disabled");
+                    }
+                    fillArtNode(featuredArt, featured);
+                    if (featuredLabel) {
+                        featuredLabel.textContent = featured.hasVideo && !featured.hasAudio
+                            ? T("sermons.mediaVideo", "Video", latestSermonsCard)
+                            : T("sermons.mediaAudio", "Audio", latestSermonsCard);
+                    }
+                    if (featuredTitle) {
+                        featuredTitle.textContent = featured.title || "";
+                    }
+                    if (featuredMeta) {
+                        featuredMeta.textContent = [featured.speaker, toDisplayDate(featured.dateObj, latestSermonsCard)]
+                            .filter(Boolean)
+                            .join(" · ");
+                    }
+                }
+
+                var stored = getStoredState();
+                var continueIndex = -1;
+                if (stored && stored.audioUrl && Number(stored.currentTime) > 8) {
+                    continueIndex = allSermons.findIndex(function (item) {
+                        return item.audioUrl === stored.audioUrl;
+                    });
+                }
+                if (continueSection && continueOpen) {
+                    if (continueIndex >= 0) {
+                        var resumeSermon = allSermons[continueIndex];
+                        continueSection.hidden = false;
+                        continueOpen.setAttribute("data-sermon-index", String(continueIndex));
+                        continueOpen.setAttribute("data-resume", "1");
+                        fillArtNode(continueArt, resumeSermon);
+                        if (continueTitle) {
+                            continueTitle.textContent = resumeSermon.title || stored.title || "";
+                        }
+                        if (continueMeta) {
+                            continueMeta.textContent = formatTime(stored.currentTime || 0) +
+                                (resumeSermon.speaker ? (" · " + resumeSermon.speaker) : "");
+                        }
+                    } else {
+                        continueSection.hidden = true;
+                    }
+                }
+
+                if (recentlyPlayedSection && recentlyPlayedList) {
+                    var recent = getRecentlyPlayed().map(function (entry) {
+                        var index = allSermons.findIndex(function (sermon) {
+                            return getFavoriteKey(sermon) === entry.key ||
+                                (entry.audioUrl && sermon.audioUrl === entry.audioUrl);
+                        });
+                        return index >= 0 ? { item: allSermons[index], index: index } : null;
+                    }).filter(Boolean).slice(0, 6);
+                    if (!recent.length) {
+                        recentlyPlayedSection.hidden = true;
+                        recentlyPlayedList.innerHTML = "";
+                    } else {
+                        recentlyPlayedSection.hidden = false;
+                        recentlyPlayedList.innerHTML = recent.map(function (record) {
+                            var sermon = record.item;
+                            var photo = getSermonPhotoUrl(sermon);
+                            var art = "<span class=\"sermons-v3-recent-art\">" +
+                                escapeHtml(getSpeakerAvatarText(sermon.speaker)) +
+                                (photo ? ("<img src=\"" + escapeHtml(photo) + "\" alt=\"\" onerror=\"this.remove()\">") : "") +
+                                "</span>";
+                            return "" +
+                                "<button type=\"button\" class=\"sermon-open-btn sermons-v3-recent-card\" data-sermon-index=\"" + record.index + "\">" +
+                                art +
+                                "<span class=\"sermons-v3-recent-title\">" + escapeHtml(sermon.title || "") + "</span>" +
+                                "</button>";
+                        }).join("");
+                    }
+                }
+
+                var seriesValues = allSermons.map(function (sermon) { return sermon.series; }).filter(Boolean);
+                if (seriesSection && seriesChips) {
+                    if (!seriesValues.length) {
+                        seriesSection.hidden = true;
+                        seriesChips.innerHTML = "";
+                    } else {
+                        seriesSection.hidden = false;
+                        renderChipGroup(seriesChips, seriesSection, seriesValues, selectedSeries, "data-series");
+                    }
+                }
+            }
+
             function renderSermons() {
                 var filteredRecords = getFilteredSermons();
                 var hasSearch = searchQuery.trim().length > 0;
                 var hasActiveSearch = searchTriggered && hasSearch;
-                var hasFilters = Boolean(selectedSpeaker || selectedMonth || selectedSavedOnly);
+                var hasFilters = Boolean(selectedSpeaker || selectedMonth || selectedSavedOnly || selectedTopic || selectedLanguage || selectedBook || selectedSeries);
                 var showTagGroups = filterPanelPinned || ((hasActiveSearch && filteredRecords.length > 0) || hasFilters);
                 if (sermonFilterButton) {
                     sermonFilterButton.classList.toggle("active", showTagGroups);
@@ -1361,6 +1869,7 @@
                     if (sermonFilterGroups) {
                         sermonFilterGroups.hidden = true;
                     }
+                    renderLibraryExtras();
                     return;
                 }
 
@@ -1378,6 +1887,7 @@
                     archiveNote.textContent = (window.NjcI18n && typeof window.NjcI18n.formatCount === "function")
                         ? window.NjcI18n.formatCount(T("sermons.archiveTotal", "Total sermons available: {count}.", archiveCard), allSermons.length)
                         : ("Total sermons available: " + allSermons.length + ".");
+                    renderLibraryExtras();
                     return;
                 }
 
@@ -1386,9 +1896,9 @@
                     var sermon = record.item;
                     var sermonIndex = record.index;
                     var tamilTitle = String(sermon.title || "").trim() || "-";
-                    var englishTitle = String(sermon.subtitle || "").trim() || tamilTitle;
+                    var englishTitle = String(sermon.subtitle || "").trim();
                     var title = escapeHtml(tamilTitle);
-                    var englishLine = escapeHtml(englishTitle);
+                    var englishLine = englishTitle ? escapeHtml(englishTitle) : "";
                     var speakerPrefix = escapeHtml(T("sermons.speakerPrefix", "Speaker", latestSermonsCard));
                     var speakerName = String(sermon.speaker || "").trim() || "-";
                     var speakerLine = speakerPrefix + ": " + escapeHtml(speakerName);
@@ -1396,21 +1906,25 @@
                     var dateText = toDisplayDate(sermon.dateObj, latestSermonsCard);
                     var listPhoto = getSermonPhotoUrl(sermon);
                     var mediaHtml = listPhoto
-                        ? ("<img class=\"sermon-list-photo\" src=\"" + escapeHtml(listPhoto) + "\" alt=\"\" width=\"72\" height=\"72\" loading=\"lazy\" decoding=\"async\">")
+                        ? ("<img class=\"sermon-list-photo\" src=\"" + escapeHtml(listPhoto) + "\" alt=\"\" width=\"64\" height=\"64\" loading=\"lazy\" decoding=\"async\" data-fallback=\"" + avatarText + "\">")
                         : ("<span class=\"sermon-speaker-avatar\" aria-hidden=\"true\">" + avatarText + "</span>");
-
+                    var mediaLabel = sermon.hasVideo && !sermon.hasAudio
+                        ? T("sermons.mediaVideo", "Video", latestSermonsCard)
+                        : T("sermons.mediaAudio", "Audio", latestSermonsCard);
                     var disabledAttr = sermon.audioUrl ? "" : " aria-disabled=\"true\"";
                     return "" +
-                        "<li class=\"sermon-item\">" +
+                        "<li class=\"sermon-item sermon-v3-card\">" +
                         "  <div class=\"sermon-item-row\">" +
                         "    <div class=\"sermon-open-btn\" role=\"button\" tabindex=\"0\" data-sermon-index=\"" + sermonIndex + "\"" + disabledAttr + ">" +
                         "      <div class=\"sermon-open-top" + (listPhoto ? " has-photo" : "") + "\">" +
                         "          " + mediaHtml +
                         "          <div class=\"sermon-open-main\">" +
+                        "              <span class=\"sermons-v3-media-badge\">" + escapeHtml(mediaLabel) + "</span>" +
                         "              <h3 class=\"sermon-line sermon-line-tamil\">" + title + "</h3>" +
-                        "              <p class=\"sermon-line sermon-line-english\">" + englishLine + "</p>" +
+                        (englishLine ? "              <p class=\"sermon-line sermon-line-english\">" + englishLine + "</p>" : "") +
                         "              <p class=\"sermon-line sermon-line-speaker\">" + speakerLine + "</p>" +
                         "              <p class=\"sermon-line sermon-line-date\">" + escapeHtml(dateText) + "</p>" +
+                        (sermon.passage ? "              <p class=\"sermon-line sermon-line-date\">" + escapeHtml(sermon.passage) + "</p>" : "") +
                         (sermon.audioUrl
                             ? "              <p class=\"sermon-line sermon-line-listens\" data-sermon-listen-index=\"" + sermonIndex + "\"></p>"
                             : "") +
@@ -1420,6 +1934,18 @@
                         "  </div>" +
                         "</li>";
                 }).join("");
+                latestSermonsList.querySelectorAll("img.sermon-list-photo").forEach(function (img) {
+                    img.addEventListener("error", function () {
+                        var span = document.createElement("span");
+                        span.className = "sermon-speaker-avatar";
+                        span.setAttribute("aria-hidden", "true");
+                        span.textContent = img.getAttribute("data-fallback") || "NJC";
+                        if (img.parentNode) {
+                            img.parentNode.replaceChild(span, img);
+                        }
+                    });
+                });
+                renderLibraryExtras();
 
                 schedulePaintListListenCounts(visible);
 
@@ -1481,9 +2007,15 @@
             function updatePlayerButtonState() {
                 var isPaused = sermonAudio.paused;
                 var playIcon = isPaused ? "fa-play" : "fa-pause";
-                playerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
-                playerCenter.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
-                miniPlayerPlay.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+                var label = T("player.playOrPause", "Play or pause", latestSermonsCard);
+                [playerPlay, playerCenter, miniPlayerPlay].forEach(function (btn) {
+                    if (!btn) {
+                        return;
+                    }
+                    btn.innerHTML = "<i class=\"fa-solid " + playIcon + "\"></i>";
+                    btn.setAttribute("aria-label", label);
+                });
+                updateMediaSession();
             }
 
             function persistSermonState(minimized) {
@@ -1499,27 +2031,81 @@
                     dateText: playerDate.textContent || "",
                     currentTime: sermonAudio.currentTime || 0,
                     isPlaying: !sermonAudio.paused,
-                    minimized: Boolean(minimized)
+                    minimized: Boolean(minimized),
+                    playbackRate: Number(sermonAudio.playbackRate) || 1
                 });
             }
 
             function refreshPlayerTime() {
                 var current = sermonAudio.currentTime || 0;
-                var duration = sermonAudio.duration || 0;
-                var percent = duration > 0 ? Math.round((current / duration) * 100) : 0;
-                playerSeek.value = String(percent);
-                playerTime.textContent = formatTime(current) + " / " + formatTime(duration);
-                miniPlayerTime.textContent = playerTime.textContent;
+                var duration = Number.isFinite(sermonAudio.duration) ? sermonAudio.duration : 0;
+                var percent = duration > 0 ? ((current / duration) * 100) : 0;
+                if (playerSeek) {
+                    playerSeek.value = String(percent);
+                }
+                var combined = formatTime(current) + " / " + formatTime(duration);
+                if (playerTime) {
+                    playerTime.textContent = combined;
+                }
+                if (playerElapsed) {
+                    playerElapsed.textContent = formatTime(current);
+                }
+                if (playerRemaining) {
+                    playerRemaining.textContent = duration > 0 ? ("−" + formatTime(Math.max(0, duration - current))) : "−00:00";
+                }
+                if (miniPlayerTime) {
+                    miniPlayerTime.textContent = combined;
+                }
+                if (miniPlayerProgress) {
+                    miniPlayerProgress.style.width = Math.max(0, Math.min(100, percent)) + "%";
+                }
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
+                if ("mediaSession" in navigator && navigator.mediaSession.setPositionState && duration > 0) {
+                    try {
+                        navigator.mediaSession.setPositionState({
+                            duration: duration,
+                            playbackRate: sermonAudio.playbackRate || 1,
+                            position: Math.min(current, duration)
+                        });
+                    } catch (errPos) {
+                        return;
+                    }
+                }
             }
 
             function toPlayerDateLine(sermon, sourceElement) {
-                var card = sourceElement || latestSermonsCard;
-                var baseDate = toDisplayDate(sermon.dateObj, card);
-                if (!sermon.speaker) {
-                    return baseDate;
+                return toDisplayDate(sermon.dateObj, sourceElement || latestSermonsCard);
+            }
+
+            function syncMiniArtwork(sermon) {
+                var photo = getSermonPhotoUrl(sermon);
+                if (miniPlayerAvatar) {
+                    miniPlayerAvatar.hidden = false;
+                    miniPlayerAvatar.textContent = getSpeakerAvatarText(sermon && sermon.speaker);
                 }
-                return baseDate + " - " + T("sermons.speakerPrefix", "Speaker", card) + ": " + sermon.speaker;
+                if (miniPlayerPhoto) {
+                    miniPlayerPhoto.onerror = function () {
+                        miniPlayerPhoto.hidden = true;
+                        if (miniPlayerAvatar) {
+                            miniPlayerAvatar.hidden = false;
+                        }
+                    };
+                    miniPlayerPhoto.onload = function () {
+                        miniPlayerPhoto.hidden = false;
+                        if (miniPlayerAvatar) {
+                            miniPlayerAvatar.hidden = true;
+                        }
+                    };
+                    if (photo) {
+                        if (miniPlayerPhoto.getAttribute("src") !== photo) {
+                            miniPlayerPhoto.hidden = true;
+                            miniPlayerPhoto.src = photo;
+                        }
+                    } else {
+                        miniPlayerPhoto.hidden = true;
+                        miniPlayerPhoto.removeAttribute("src");
+                    }
+                }
             }
 
             function syncPlayerText() {
@@ -1528,13 +2114,41 @@
                 }
                 playerTitle.textContent = currentSermon.title || T("sermons.eyebrow", "Sermon");
                 playerSubtitle.textContent = currentSermon.subtitle || "";
+                if (playerSermonSpeaker) {
+                    playerSermonSpeaker.textContent = currentSermon.speaker || "";
+                    playerSermonSpeaker.hidden = !currentSermon.speaker;
+                }
                 playerDate.textContent = toPlayerDateLine(currentSermon);
+                if (playerSermonPassage) {
+                    playerSermonPassage.textContent = currentSermon.passage || "";
+                    playerSermonPassage.hidden = !currentSermon.passage;
+                }
+                if (playerSermonDescription) {
+                    playerSermonDescription.textContent = currentSermon.description || "";
+                    playerSermonDescription.hidden = !currentSermon.description;
+                }
                 miniPlayerTitle.textContent = currentSermon.title || T("sermons.nowPlaying", "Now Playing");
+                var photo = getSermonPhotoUrl(currentSermon);
+                if (playerSermonArtFallback) {
+                    playerSermonArtFallback.hidden = false;
+                    playerSermonArtFallback.textContent = getSpeakerAvatarText(currentSermon.speaker);
+                }
                 if (playerSermonPhoto) {
-                    var photo = getSermonPhotoUrl(currentSermon);
-                    if (photo) {
+                    playerSermonPhoto.onerror = function () {
+                        playerSermonPhoto.hidden = true;
+                        if (playerSermonArtFallback) {
+                            playerSermonArtFallback.hidden = false;
+                        }
+                    };
+                    playerSermonPhoto.onload = function () {
                         playerSermonPhoto.hidden = false;
+                        if (playerSermonArtFallback) {
+                            playerSermonArtFallback.hidden = true;
+                        }
+                    };
+                    if (photo) {
                         if (playerSermonPhoto.getAttribute("src") !== photo) {
+                            playerSermonPhoto.hidden = true;
                             playerSermonPhoto.src = photo;
                         }
                     } else {
@@ -1542,6 +2156,9 @@
                         playerSermonPhoto.removeAttribute("src");
                     }
                 }
+                syncMiniArtwork(currentSermon);
+                syncFavoriteButton();
+                updateMediaSession();
             }
 
             function openPlayer(index, autoplay) {
@@ -1560,9 +2177,13 @@
 
                 currentSermonIndex = index;
                 currentSermon = sermon;
+                clearPlayerError();
+                setBuffering(true);
+                rememberRecentlyPlayed(sermon);
                 syncPlayerText();
                 playerOverlay.hidden = false;
                 miniPlayer.hidden = true;
+                setMiniVisible(false);
                 document.body.classList.add("sermon-player-open");
 
                 if (sermonAudio.src !== sermon.audioUrl) {
@@ -1570,10 +2191,27 @@
                     sermonAudio.load();
                 }
 
-                sermonAudio.playbackRate = Number(playerSpeed.value) || 1;
+                var rate = Number(playerSpeed && playerSpeed.value) || getPersistedSpeed();
+                sermonAudio.playbackRate = rate;
+                if (playerSpeed) {
+                    playerSpeed.value = String(rate);
+                }
+
+                if (Number.isFinite(pendingResumeTime) && pendingResumeTime > 0) {
+                    var resumeAt = pendingResumeTime;
+                    pendingResumeTime = null;
+                    sermonAudio.addEventListener("loadedmetadata", function restorePendingTime() {
+                        try {
+                            sermonAudio.currentTime = Math.min(resumeAt, sermonAudio.duration || resumeAt);
+                        } catch (err) {
+                            return null;
+                        }
+                    }, { once: true });
+                }
 
                 if (autoplay) {
                     sermonAudio.play().catch(function () {
+                        setBuffering(false);
                         return null;
                     });
                 }
@@ -1581,6 +2219,8 @@
                 persistSermonState(false);
                 syncSermonShareButton();
                 refreshPlayerListenCountDisplay();
+                updateMediaSession();
+                renderLibraryExtras();
             }
 
             function minimizePlayer() {
@@ -1589,6 +2229,7 @@
                 }
                 playerOverlay.hidden = true;
                 miniPlayer.hidden = false;
+                setMiniVisible(true);
                 document.body.classList.remove("sermon-player-open");
                 refreshPlayerTime();
                 updatePlayerButtonState();
@@ -1601,6 +2242,7 @@
                 }
                 playerOverlay.hidden = false;
                 miniPlayer.hidden = true;
+                setMiniVisible(false);
                 document.body.classList.add("sermon-player-open");
                 refreshPlayerTime();
             }
@@ -1612,9 +2254,15 @@
                 setSleepNote(0);
                 playerOverlay.hidden = true;
                 miniPlayer.hidden = true;
+                setMiniVisible(false);
                 document.body.classList.remove("sermon-player-open");
                 updatePlayerButtonState();
                 clearStoredState();
+                if ("mediaSession" in navigator) {
+                    try {
+                        navigator.mediaSession.playbackState = "none";
+                    } catch (errMs) {}
+                }
                 clearSermonShareFeedback();
                 syncSermonShareButton();
                 if (playerSermonListens) {
@@ -1662,6 +2310,10 @@
                 selectedSpeaker = "";
                 selectedMonth = "";
                 selectedSavedOnly = false;
+                selectedTopic = "";
+                selectedLanguage = "";
+                selectedBook = "";
+                selectedSeries = "";
                 searchTriggered = true;
                 visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
@@ -1673,6 +2325,10 @@
                 selectedSpeaker = "";
                 selectedMonth = "";
                 selectedSavedOnly = false;
+                selectedTopic = "";
+                selectedLanguage = "";
+                selectedBook = "";
+                selectedSeries = "";
                 visibleCount = INITIAL_VISIBLE_SERMONS;
                 renderSermons();
             });
@@ -1730,9 +2386,56 @@
                 renderSermons();
             });
 
+            function bindFilterAttr(container, attrName, assign) {
+                if (!container) {
+                    return;
+                }
+                container.addEventListener("click", function (event) {
+                    var button = event.target.closest("button[" + attrName + "]");
+                    if (!button) {
+                        return;
+                    }
+                    assign(button.getAttribute(attrName) || "");
+                    searchTriggered = true;
+                    visibleCount = INITIAL_VISIBLE_SERMONS;
+                    renderSermons();
+                });
+            }
+
+            bindFilterAttr(sermonTopicChips, "data-topic", function (value) { selectedTopic = value; });
+            bindFilterAttr(sermonLanguageChips, "data-language", function (value) { selectedLanguage = value; });
+            bindFilterAttr(sermonBookChips, "data-book", function (value) { selectedBook = value; });
+            bindFilterAttr(seriesChips, "data-series", function (value) { selectedSeries = value; });
+
+            [featuredSection, continueSection, recentlyPlayedSection].forEach(function (container) {
+                if (!container) {
+                    return;
+                }
+                container.addEventListener("click", function (event) {
+                    var row = event.target.closest(".sermon-open-btn");
+                    if (!row || !container.contains(row)) {
+                        return;
+                    }
+                    openSermonFromRow(row);
+                });
+                container.addEventListener("keydown", function (event) {
+                    if (event.key !== "Enter" && event.key !== " ") {
+                        return;
+                    }
+                    var row = event.target.closest(".sermon-open-btn");
+                    if (!row || !container.contains(row)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    openSermonFromRow(row);
+                });
+            });
+
             playerSpeed.addEventListener("change", function () {
-                var rate = Number(playerSpeed.value) || 1;
+                var rate = persistPlaybackSpeed(Number(playerSpeed.value) || 1);
+                playerSpeed.value = String(rate);
                 sermonAudio.playbackRate = rate;
+                persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
 
             playerSleep.addEventListener("change", function () {
@@ -1746,6 +2449,12 @@
                 var index = Number(row.getAttribute("data-sermon-index"));
                 if (Number.isNaN(index)) {
                     return;
+                }
+                if (row.getAttribute("data-resume") === "1") {
+                    var stored = getStoredState();
+                    if (stored && Number.isFinite(stored.currentTime)) {
+                        pendingResumeTime = stored.currentTime;
+                    }
                 }
                 openPlayer(index, true);
             }
@@ -1789,6 +2498,65 @@
             miniPlayerPlay.addEventListener("click", togglePlayPause);
             miniPlayerClose.addEventListener("click", closePlayer);
 
+            if (playerSkipBack) {
+                playerSkipBack.addEventListener("click", function () {
+                    skipBy(-15);
+                });
+            }
+            if (playerSkipForward) {
+                playerSkipForward.addEventListener("click", function () {
+                    skipBy(30);
+                });
+            }
+            if (playerRetry) {
+                playerRetry.addEventListener("click", retryCurrentSermon);
+            }
+            if (playerFavoriteBtn) {
+                playerFavoriteBtn.addEventListener("click", function () {
+                    if (!currentSermon) {
+                        return;
+                    }
+                    toggleFavoriteSermon(currentSermon);
+                    syncFavoriteButton();
+                    renderSermons();
+                });
+            }
+            if (playerVolume && playerVolumeWrap && isVolumeControlSupported()) {
+                playerVolumeWrap.hidden = false;
+                playerVolume.addEventListener("input", function () {
+                    sermonAudio.volume = Number(playerVolume.value);
+                });
+            }
+
+            document.addEventListener("keydown", function (event) {
+                if (playerOverlay.hidden && miniPlayer.hidden) {
+                    return;
+                }
+                var tag = event.target && event.target.tagName;
+                if (tag && /INPUT|TEXTAREA|SELECT/.test(tag)) {
+                    return;
+                }
+                if (event.key === " " || event.key === "k" || event.key === "K") {
+                    event.preventDefault();
+                    togglePlayPause();
+                    return;
+                }
+                if (event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    skipBy(-15);
+                    return;
+                }
+                if (event.key === "ArrowRight") {
+                    event.preventDefault();
+                    skipBy(30);
+                    return;
+                }
+                if (event.key === "Escape" && !playerOverlay.hidden) {
+                    event.preventDefault();
+                    minimizePlayer();
+                }
+            });
+
             if (playerShareBtn) {
                 playerShareBtn.addEventListener("click", function () {
                     if (playerShareBtn.disabled) {
@@ -1799,8 +2567,26 @@
             }
 
             sermonAudio.addEventListener("timeupdate", refreshPlayerTime);
-            sermonAudio.addEventListener("loadedmetadata", refreshPlayerTime);
+            sermonAudio.addEventListener("loadedmetadata", function () {
+                clearPlayerError();
+                setBuffering(false);
+                refreshPlayerTime();
+            });
+            sermonAudio.addEventListener("waiting", function () {
+                setBuffering(true);
+            });
+            sermonAudio.addEventListener("stalled", function () {
+                setBuffering(true);
+            });
+            sermonAudio.addEventListener("canplay", function () {
+                setBuffering(false);
+            });
+            sermonAudio.addEventListener("error", function () {
+                setBuffering(false);
+                showPlayerError(T("sermons.mediaError", "This sermon could not be loaded.", latestSermonsCard));
+            });
             sermonAudio.addEventListener("play", function () {
+                clearPlayerError();
                 updatePlayerButtonState();
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
@@ -1809,7 +2595,10 @@
                 persistSermonState(!miniPlayer.hidden && playerOverlay.hidden);
             });
             sermonAudio.addEventListener("playing", function () {
+                setBuffering(false);
+                clearPlayerError();
                 recordListenIfNewForCurrentSermon();
+                rememberRecentlyPlayed(currentSermon);
             });
             sermonAudio.addEventListener("ended", function () {
                 if (currentSermon && currentSermon.audioUrl) {
@@ -2037,6 +2826,10 @@
                             });
 
                             if (restoredIndex >= 0) {
+                                if (Number.isFinite(storedState.playbackRate) && playerSpeed) {
+                                    persistPlaybackSpeed(storedState.playbackRate);
+                                    playerSpeed.value = String(getPersistedSpeed());
+                                }
                                 openPlayer(restoredIndex, false);
                                 if (Number.isFinite(storedState.currentTime) && storedState.currentTime > 0) {
                                     sermonAudio.addEventListener("loadedmetadata", function restoreTimeOnce() {
@@ -2095,5 +2888,12 @@
                 syncSermonShareButton();
             });
 
+            if (playerSpeed) {
+                playerSpeed.value = String(getPersistedSpeed());
+            }
+            if (sermonAudio) {
+                sermonAudio.playbackRate = getPersistedSpeed();
+            }
+            bindMediaSessionHandlers();
             loadSermonsData();
         })();
