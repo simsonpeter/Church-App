@@ -350,11 +350,16 @@
         renderTriviaList();
     });
 
-    if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+    function isAdminHash() {
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        return raw === "admin" || raw.indexOf("admin/") === 0 || raw.indexOf("admin?") === 0;
+    }
+
+    if (isAdminHash()) {
         loadTrivia();
     }
     window.addEventListener("hashchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+        if (isAdminHash()) {
             loadTrivia();
         }
     });

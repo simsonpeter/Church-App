@@ -40,6 +40,8 @@
     var memberAccessBlock = document.getElementById("profile-member-access-block");
     var memberCodeInput = document.getElementById("profile-member-code");
     var memberRedeemBtn = document.getElementById("profile-member-redeem-btn");
+    var memberRequestBtn = document.getElementById("profile-member-request-btn");
+    var memberRequestStatus = document.getElementById("profile-member-request-status");
     var memberDowngradeBtn = document.getElementById("profile-member-downgrade-btn");
     var memberNote = document.getElementById("profile-member-note");
     var USER_APP_COLLECTION = "app";
@@ -838,6 +840,99 @@
         return { key: "profile.memberRedeemError", fb: "Something went wrong. Try again later." };
     }
 
+    function setMemberRequestStatus(text, kind) {
+        if (!memberRequestStatus) {
+            return;
+        }
+        var msg = String(text || "").trim();
+        memberRequestStatus.hidden = !msg;
+        memberRequestStatus.dataset.kind = kind || "";
+        memberRequestStatus.textContent = msg;
+    }
+
+    function refreshMembershipRequestUi() {
+        var user = getCurrentUser();
+        if (!memberRequestBtn) {
+            return Promise.resolve();
+        }
+        if (!user || !user.uid) {
+            memberRequestBtn.hidden = true;
+            setMemberRequestStatus("", "");
+            return Promise.resolve();
+        }
+        var acc = window.NjcAppModules && typeof window.NjcAppModules.getAccessSync === "function"
+            ? window.NjcAppModules.getAccessSync()
+            : { tier: "legacy" };
+        if (acc.tier === "member") {
+            memberRequestBtn.hidden = true;
+            setMemberRequestStatus("", "");
+            return Promise.resolve();
+        }
+        memberRequestBtn.hidden = false;
+        memberRequestBtn.disabled = false;
+        if (!window.firebase || !window.firebase.firestore) {
+            return Promise.resolve();
+        }
+        return window.firebase.firestore().collection("membershipRequests").doc(user.uid).get().then(function (snap) {
+            var status = snap && snap.exists ? String((snap.data() || {}).status || "") : "";
+            if (status === "pending") {
+                memberRequestBtn.disabled = true;
+                setMemberRequestStatus(T("profile.memberRequestPending", "Your church membership request is pending."), "ok");
+            } else if (status === "rejected") {
+                memberRequestBtn.disabled = false;
+                setMemberRequestStatus(T("profile.memberRequestRejected", "The previous request was declined. You may request again."), "info");
+            } else if (status === "approved") {
+                memberRequestBtn.hidden = true;
+                setMemberRequestStatus("", "");
+            } else {
+                setMemberRequestStatus("", "");
+            }
+            return null;
+        }).catch(function () {
+            return null;
+        });
+    }
+
+    async function requestChurchMembership() {
+        var user = getCurrentUser();
+        if (!user || !user.uid || !memberRequestBtn) {
+            return;
+        }
+        if (!window.firebase || !window.firebase.firestore || !window.firebase.firestore.FieldValue) {
+            setMemberRequestStatus(T("profile.memberRedeemUnavailable", "This action is not available right now."), "error");
+            return;
+        }
+        memberRequestBtn.disabled = true;
+        setMemberRequestStatus(T("auth.working", "Please wait..."), "working");
+        try {
+            var db = window.firebase.firestore();
+            var ref = db.collection("membershipRequests").doc(user.uid);
+            var existing = await ref.get();
+            var currentStatus = existing && existing.exists ? String((existing.data() || {}).status || "") : "";
+            if (currentStatus === "pending") {
+                setMemberRequestStatus(T("profile.memberRequestPending", "Your church membership request is pending."), "ok");
+                return;
+            }
+            var payload = {
+                uid: user.uid,
+                displayName: String(user.displayName || "").trim().slice(0, 120),
+                email: String(user.email || "").trim().toLowerCase().slice(0, 320),
+                status: "pending",
+                submittedAt: window.firebase.firestore.FieldValue.serverTimestamp(),
+                updatedAt: window.firebase.firestore.FieldValue.serverTimestamp()
+            };
+            if (currentStatus === "rejected") {
+                await ref.set(payload, { merge: true });
+            } else {
+                await ref.set(payload);
+            }
+            setMemberRequestStatus(T("profile.memberRequestSent", "Request sent. The pastor will review it in Admin → Members."), "ok");
+        } catch (err) {
+            memberRequestBtn.disabled = false;
+            setMemberRequestStatus(T("profile.memberRequestFail", "Could not send the request. Ask the church to publish the latest Firestore rules, then try again."), "error");
+        }
+    }
+
     function updateMemberAccessUi() {
         if (!memberAccessBlock) {
             return;
@@ -846,11 +941,13 @@
         if (!user || !user.uid) {
             memberAccessBlock.hidden = true;
             setMemberNote("", "");
+            setMemberRequestStatus("", "");
             return;
         }
         if (window.NjcAppModules && typeof window.NjcAppModules.isChurchAdminAccount === "function" && window.NjcAppModules.isChurchAdminAccount()) {
             memberAccessBlock.hidden = true;
             setMemberNote("", "");
+            setMemberRequestStatus("", "");
             return;
         }
         memberAccessBlock.hidden = false;
@@ -863,6 +960,9 @@
             }
             if (memberRedeemBtn) {
                 memberRedeemBtn.hidden = true;
+            }
+            if (memberRequestBtn) {
+                memberRequestBtn.hidden = true;
             }
             if (memberDowngradeBtn) {
                 memberDowngradeBtn.hidden = false;
@@ -887,6 +987,7 @@
                 }
             }
         }
+        refreshMembershipRequestUi();
     }
 
     async function downgradeMemberToNormalPlus() {
@@ -1274,6 +1375,13 @@
     if (memberDowngradeBtn) {
         memberDowngradeBtn.addEventListener("click", function () {
             downgradeMemberToNormalPlus().catch(function () {
+                return null;
+            });
+        });
+    }
+    if (memberRequestBtn) {
+        memberRequestBtn.addEventListener("click", function () {
+            requestChurchMembership().catch(function () {
                 return null;
             });
         });

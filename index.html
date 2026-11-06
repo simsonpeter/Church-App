@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="kids-world-v2.css?v=20261030kidsv2p1">
     <link rel="stylesheet" href="prayer-page-v3.css?v=20261031prayerv3">
     <link rel="stylesheet" href="sermon-player-v3.css?v=20261031sermonart1">
+    <link rel="stylesheet" href="admin-v5.css?v=20261106adminv5b">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 </head>
 <body>
@@ -1367,7 +1368,9 @@
                             <input id="profile-member-code" class="search-input" type="text" autocomplete="one-time-code" maxlength="80" placeholder="e.g. NJC-2026-ABCD">
                         </label>
                         <button type="button" class="button-link button-secondary" id="profile-member-redeem-btn" data-i18n="profile.memberRedeemBtn" data-i18n-fallback="Apply code">Apply code</button>
+                        <button type="button" class="button-link" id="profile-member-request-btn" data-i18n="profile.memberRequestBtn" data-i18n-fallback="Request Church Membership">Request Church Membership</button>
                         <button type="button" class="button-link button-secondary" id="profile-member-downgrade-btn" hidden data-i18n="profile.memberDowngradeBtn" data-i18n-fallback="Use normal account (not full church member)">Use normal account (not full church member)</button>
+                        <p class="page-note" id="profile-member-request-status" hidden></p>
                         <p class="page-note" id="profile-member-note" hidden></p>
                     </div>
                     <button class="button-link" id="profile-save-btn" type="submit" data-i18n="profile.save">Save profile</button>
@@ -1404,6 +1407,82 @@
 
         <section class="page-view" data-route="admin">
             <main class="app-content admin-route-content">
+            <div class="admin-v5" id="admin-v5-shell">
+                <section class="admin-v5-hero">
+                    <p class="admin-v5-eyebrow" data-i18n="admin.eyebrow">Administration</p>
+                    <h1 class="admin-v5-title" id="admin-v5-title" data-i18n="admin.v5Title">NJC Administration</h1>
+                </section>
+                <nav class="admin-v5-nav" aria-label="Admin">
+                    <button type="button" class="admin-v5-nav-btn is-active" data-admin-v5-nav="dashboard" data-i18n="admin.v5NavDashboard">Dashboard</button>
+                    <button type="button" class="admin-v5-nav-btn" data-admin-v5-nav="members" data-i18n="admin.v5NavMembers">Members</button>
+                    <button type="button" class="admin-v5-nav-btn" data-admin-v5-nav="content" data-i18n="admin.v5NavContent">Content</button>
+                    <button type="button" class="admin-v5-nav-btn" data-admin-v5-nav="prayer" data-i18n="admin.v5NavPrayer">Prayer</button>
+                    <button type="button" class="admin-v5-nav-btn" data-admin-v5-nav="settings" data-i18n="admin.v5NavSettings">Settings</button>
+                </nav>
+                <section class="admin-v5-panel is-active" data-admin-v5-panel="dashboard">
+                    <div class="admin-v5-stats">
+                        <article class="admin-v5-stat"><strong data-i18n="admin.v5StatPending">Pending Membership Requests</strong><span id="admin-v5-stat-pending">—</span></article>
+                        <article class="admin-v5-stat"><strong data-i18n="admin.v5StatMembers">Church Members</strong><span id="admin-v5-stat-members">—</span></article>
+                        <article class="admin-v5-stat"><strong data-i18n="admin.v5StatPrayers">Prayer Requests</strong><span id="admin-v5-stat-prayers">—</span></article>
+                        <article class="admin-v5-stat"><strong data-i18n="admin.v5StatEvents">Upcoming Events</strong><span id="admin-v5-stat-events">—</span></article>
+                    </div>
+                    <div class="admin-v5-attention">
+                        <p class="admin-v5-kicker" data-i18n="admin.v5NeedsAttention">Needs Attention</p>
+                        <div id="admin-v5-attention"></div>
+                    </div>
+                </section>
+                <section class="admin-v5-panel" data-admin-v5-panel="members">
+                    <div class="admin-v5-members">
+                        <div class="admin-v5-tabs">
+                            <button type="button" class="admin-v5-tab is-active" data-admin-v5-tab="church" data-i18n="admin.v5ChurchMembers">Church Members</button>
+                            <button type="button" class="admin-v5-tab" data-admin-v5-tab="other" data-i18n="admin.v5OtherBelievers">Other Believers</button>
+                            <button type="button" class="admin-v5-tab" data-admin-v5-tab="pending" data-i18n="admin.v5PendingRequests">Pending Requests</button>
+                        </div>
+                        <input id="admin-v5-search" class="search-input admin-v5-search" type="search" data-i18n-placeholder="admin.v5SearchPlaceholder" placeholder="Search name or email">
+                        <p class="page-note" id="admin-v5-note" hidden></p>
+                        <p class="page-note" id="admin-v5-empty" hidden></p>
+                        <ul class="admin-v5-list" id="admin-v5-people"></ul>
+                        <div class="admin-v5-actions">
+                            <button type="button" class="button-link button-secondary" id="admin-v5-load-more" hidden data-i18n="admin.v5LoadMore">Load more</button>
+                            <button type="button" class="button-link button-secondary" id="admin-v5-refresh" data-i18n="admin.refresh">Refresh data</button>
+                        </div>
+                        <div class="admin-v5-details" id="admin-v5-details" hidden></div>
+                    </div>
+                </section>
+                <section class="admin-v5-panel" data-admin-v5-panel="content">
+                    <div class="admin-v5-card">
+                        <p class="admin-v5-kicker" data-i18n="admin.v5NavContent">Content</p>
+                        <div class="admin-v5-content-nav">
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="all" data-i18n="admin.v5ContentAll">All</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="sermons" data-i18n="admin.moduleSermons">Sermons</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="announcements" data-i18n="admin.moduleAnnouncements">Announcements</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="events" data-i18n="admin.moduleEvents">Events</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="daily-bread" data-i18n="admin.moduleDailyBread">Daily bread</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="library" data-i18n="admin.moduleBookShelf">Book shelf</button>
+                            <button type="button" class="admin-v5-content-link" data-admin-v5-content="kids" data-i18n="admin.moduleKids">Kids World</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="admin-v5-panel" data-admin-v5-panel="prayer">
+                    <div class="admin-v5-card">
+                        <p class="admin-v5-kicker" data-i18n="admin.v5NavPrayer">Prayer</p>
+                        <div class="admin-v5-tabs">
+                            <button type="button" class="admin-v5-chip is-active" data-admin-v5-prayer="all" data-i18n="admin.v5PrayerAll">All</button>
+                            <button type="button" class="admin-v5-chip" data-admin-v5-prayer="pending" data-i18n="admin.v5PrayerPending">Pending</button>
+                            <button type="button" class="admin-v5-chip" data-admin-v5-prayer="urgent" data-i18n="admin.v5PrayerUrgent">Urgent</button>
+                            <button type="button" class="admin-v5-chip" data-admin-v5-prayer="public" data-i18n="admin.v5PrayerPublic">Public</button>
+                            <button type="button" class="admin-v5-chip" data-admin-v5-prayer="pastor" data-i18n="admin.v5PrayerPastor">Pastor Only</button>
+                            <button type="button" class="admin-v5-chip" data-admin-v5-prayer="answered" data-i18n="admin.v5PrayerAnswered">Answered</button>
+                        </div>
+                    </div>
+                </section>
+                <section class="admin-v5-panel" data-admin-v5-panel="settings">
+                    <div class="admin-v5-card">
+                        <p class="admin-v5-kicker" data-i18n="admin.v5NavSettings">Settings</p>
+                        <p class="page-note" data-i18n="admin.v5SettingsInfo">Everyday member approval is under Members. Module access, membership codes, and UID tools stay here for advanced troubleshooting.</p>
+                    </div>
+                </section>
+            </div>
             <section class="card card-v-featured">
                 <details class="admin-panel-section-details">
                     <summary class="admin-panel-section-summary" data-i18n-aria-label="admin.panelSectionToggleAria" data-i18n-aria-fallback="Show or hide this section">
@@ -2560,7 +2639,7 @@
     <script src="guest-analytics.js?v=20260608guestmodules1"></script>
     <script src="prayer-firestore-store.js?v=20261031prayervisible1"></script>
     <script src="community-celebrations.js?v=20260411celemember"></script>
-    <script src="app-shell.js?v=20261031sermonv3"></script>
+    <script src="app-shell.js?v=20261106adminv5"></script>
     <script src="events-engine.js?v=20260830sermonsharebtns1"></script>
     <script src="celebration-wish-thread.js?v=20260606celebwishesvisible1"></script>
     <script src="home-page.js?v=20261030njc2"></script>
@@ -2571,19 +2650,20 @@
     <script src="contact-page.js?v=20261031prayerv3"></script>
     <script src="daily-bread-page.js?v=20260617dailybread1"></script>
     <script src="newsletter-page.js?v=20260531sharelang1"></script>
-    <script src="admin-trivia.js?v=20260327bq1"></script>
-    <script src="admin-dashboard-page.js?v=20261031prayerfirestore1"></script>
-    <script src="admin-modules-page.js?v=20260608guestmodules1"></script>
-    <script src="admin-user-access-page.js?v=20260421mainmerge"></script>
-    <script src="admin-users-page.js?v=20260531authreset1"></script>
-    <script src="admin-extras.js?v=20260331libtabs1"></script>
+    <script src="admin-trivia.js?v=20261106adminv5"></script>
+    <script src="admin-dashboard-page.js?v=20261106adminv5"></script>
+    <script src="admin-modules-page.js?v=20261106adminv5"></script>
+    <script src="admin-user-access-page.js?v=20261106adminv5"></script>
+    <script src="admin-users-page.js?v=20261106adminv5"></script>
+    <script src="admin-v5.js?v=20261106adminv5b"></script>
+    <script src="admin-extras.js?v=20261106adminv5"></script>
     <script src="admin-mailbox-page.js?v=20260318de"></script>
-    <script src="profile-page.js?v=20260411kidsworld"></script>
+    <script src="profile-page.js?v=20261106adminv5"></script>
     <script src="celebrations-page.js?v=20260411celeguest"></script>
     <script src="chat-page.js?v=20260607chatpurge1"></script>
     <script src="testimony-page.js?v=20260531sharelang1"></script>
     <script src="book-shelf-page.js?v=20260610kidslibrary1"></script>
-    <script src="spa-router.js?v=20261031prayerv3"></script>
+    <script src="spa-router.js?v=20261106adminv5"></script>
     <script src="achievement-bonus.js?v=20260324u1"></script>
     <script src="kids-audio-page.js?v=20260610kidsaudio1"></script>
     <script src="kids-page.js?v=20260610kidsworld1"></script>

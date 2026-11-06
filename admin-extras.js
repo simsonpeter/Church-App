@@ -17,7 +17,11 @@
     }
 
     function currentRoute() {
-        return String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        if (raw.indexOf("admin/") === 0 || raw.indexOf("admin?") === 0) {
+            return "admin";
+        }
+        return raw;
     }
 
     function T(key, fallback) {
