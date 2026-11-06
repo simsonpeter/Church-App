@@ -16,7 +16,9 @@ rules_version = '2';
 //   serviceSongs/{id}          — ordered list for “Service” tab
 //   users/{uid}/profile/basic  — profile (incl. optional familyMembers[], optional visibleModules[]) + triviaPoints (merge)
 //   users/{uid}/app/state      — reading progress, sermon favorites
-//   users/{uid}/app/access     — member (default new signup) or limited + module picks; member code redeem via Cloud Function
+//   users/{uid}/app/access     — accessTier member | limited (new signups are limited); church-member upgrades via admin or redeemMemberCode
+//   membershipRequests/{uid}   — church membership applications (owner create pending; admin approve/reject)
+//   membershipDecisions/{id}   — admin audit log of membership grants, approvals, rejections, and revocations
 //   appConfig/chat          — { clearedAt } last time admin cleared chat (public read; admin write); clients drop older offline queue
 //   appConfig/memberCodes      — one-time church member codes (admin read/write only)
 //   userAchievementScores/{uid} — public leaderboard (read all; write own doc only)
@@ -166,6 +168,52 @@ service cloud.firestore {
         && request.resource.data.keys().hasAll(["lastSeenAt", "updatedAt"]);
     }
 
+    // Church membership requests (doc id = Firebase UID). Owner may open a pending
+    // request; only admin may approve/reject. Users cannot grant themselves membership.
+    function isMembershipRequestCreatePayload() {
+      return request.resource.data.keys().hasOnly(["uid", "displayName", "email", "status", "submittedAt", "updatedAt"])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.uid == userId
+        && request.resource.data.status == "pending"
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 120
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 320;
+    }
+
+    function isMembershipRequestAdminPayload() {
+      return request.resource.data.status in ["pending", "approved", "rejected"]
+        && request.resource.data.uid == userId
+        && request.resource.data.displayName is string
+        && request.resource.data.email is string;
+    }
+
+    match /membershipRequests/{userId} {
+      allow read: if isAdmin()
+        || (request.auth != null && request.auth.uid == userId);
+      allow create: if request.auth != null
+        && request.auth.uid == userId
+        && isRegisteredMember()
+        && isMembershipRequestCreatePayload();
+      allow update: if isAdmin() && isMembershipRequestAdminPayload()
+        || (request.auth != null
+          && request.auth.uid == userId
+          && resource.data.status == "rejected"
+          && request.resource.data.status == "pending"
+          && request.resource.data.uid == userId);
+      allow delete: if isAdmin();
+    }
+
+    match /membershipDecisions/{decisionId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.keys().hasOnly(["uid", "action", "previousTier", "nextTier", "byUid", "byEmail", "at", "note"])
+        && request.resource.data.uid is string
+        && request.resource.data.action in ["approve", "reject", "revoke", "grant"]
+        && request.resource.data.byUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     match /userDirectory/{userId} {
       allow read: if isAdmin()
         || (request.auth != null && request.auth.uid == userId);
@@ -215,12 +263,13 @@ service cloud.firestore {
 
     match /users/{userId}/app/access {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
-      // First-time signup (self, doc missing): member or limited + module picks (see isUserAppAccessPayload).
-      // Admin "Grant member access" / "Set member" uses merge — same payload helper as updates.
+      // First-time signup (self, doc missing): limited only. Church-member upgrades stay
+      // admin-only or Cloud Function (redeemMemberCode). Admin grant uses the same payload helper.
       allow create: if (request.auth != null
         && request.auth.uid == userId
         && !exists(/databases/$(database)/documents/users/$(userId)/app/access)
-        && isUserAppAccessPayload())
+        && isUserAppAccessPayload()
+        && request.resource.data.accessTier == "limited")
         || (isAdmin() && isUserAppAccessPayload());
       // Owner may downgrade member → limited (normal user plus); upgrades stay admin/code only.
       allow update: if isAdmin() && isUserAppAccessPayload()

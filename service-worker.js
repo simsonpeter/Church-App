@@ -31,12 +31,12 @@ messaging.onBackgroundMessage(function (payload) {
     return self.registration.showNotification(title, options);
 });
 
-const APP_CACHE = "njc-app-cache-v466sermonart1";
-const RUNTIME_CACHE = "njc-runtime-cache-v466sermonart1";
+const APP_CACHE = "njc-app-cache-v467adminv5";
+const RUNTIME_CACHE = "njc-runtime-cache-v467adminv5";
 
 /** Shown in the in-app update dialog for this build (keep in sync when you ship). */
 const RELEASE_NOTES_SUMMARY =
-    "Sermon cover artwork now shows in full instead of being cropped.";
+    "Admin V5: one-tap church member approval, simplified dashboard, and a membership request button in Profile.";
 
 const CORE_ASSETS = [
     "./",
@@ -46,11 +46,12 @@ const CORE_ASSETS = [
     "./kids-world-v2.css?v=20261030kidsv2p1",
     "./prayer-page-v3.css?v=20261031prayerv3",
     "./sermon-player-v3.css?v=20261031sermonart1",
+    "./admin-v5.css?v=20261106adminv5b",
     "./user-auth.js?v=20260531authreset1",
     "./app-modules.js?v=20260610bookpool1",
     "./guest-analytics.js?v=20260608guestmodules1",
     "./prayer-firestore-store.js?v=20261031prayervisible1",
-    "./app-shell.js?v=20261031sermonv3",
+    "./app-shell.js?v=20261106adminv5",
     "./events-engine.js?v=20260830sermonsharebtns1",
     "./community-celebrations.js?v=20260411celemember",
     "./home-page.js?v=20261030njc2",
@@ -61,19 +62,20 @@ const CORE_ASSETS = [
     "./contact-page.js?v=20261031prayerv3",
     "./daily-bread-page.js?v=20260617dailybread1",
     "./newsletter-page.js?v=20260531sharelang1",
-    "./admin-trivia.js?v=20260327bq1",
-    "./admin-dashboard-page.js?v=20261031prayerfirestore1",
-    "./admin-modules-page.js?v=20260608guestmodules1",
-    "./admin-user-access-page.js?v=20260421mainmerge",
-    "./admin-users-page.js?v=20260531authreset1",
-    "./admin-extras.js?v=20260331libtabs1",
+    "./admin-trivia.js?v=20261106adminv5",
+    "./admin-dashboard-page.js?v=20261106adminv5",
+    "./admin-modules-page.js?v=20261106adminv5",
+    "./admin-user-access-page.js?v=20261106adminv5",
+    "./admin-users-page.js?v=20261106adminv5",
+    "./admin-v5.js?v=20261106adminv5b",
+    "./admin-extras.js?v=20261106adminv5",
     "./admin-mailbox-page.js?v=20260318de",
-    "./profile-page.js?v=20260411kidsworld",
+    "./profile-page.js?v=20261106adminv5",
     "./celebration-wish-thread.js?v=20260606celebwishesvisible1",
     "./celebrations-page.js?v=20260411celeguest",
     "./chat-page.js?v=20260607chatpurge1",
     "./testimony-page.js?v=20260531sharelang1",
-    "./spa-router.js?v=20261031prayerv3",
+    "./spa-router.js?v=20261106adminv5",
     "./book-shelf-page.js?v=20260610kidslibrary1",
     "./books.json?v=20260331bsfile1",
     "./achievement-bonus.js?v=20260324u1",

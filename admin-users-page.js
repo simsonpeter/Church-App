@@ -45,6 +45,11 @@
         return normalizeEmail(u && u.email) === ADMIN_EMAIL;
     }
 
+    function isAdminHash() {
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        return raw === "admin" || raw.indexOf("admin/") === 0 || raw.indexOf("admin?") === 0;
+    }
+
     function getFirestoreDb() {
         var fb = window.firebase;
         if (!fb || !fb.apps || !fb.apps.length || !fb.firestore) {
@@ -366,17 +371,17 @@
     }
 
     document.addEventListener("njc:authchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+        if (isAdminHash()) {
             loadRegisteredUsers();
         }
     });
     window.addEventListener("hashchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+        if (isAdminHash()) {
             loadRegisteredUsers();
         }
     });
     document.addEventListener("DOMContentLoaded", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+        if (isAdminHash()) {
             loadRegisteredUsers();
         }
     });

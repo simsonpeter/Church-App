@@ -381,7 +381,8 @@
     }
 
     function isAdminRoute() {
-        return currentRoute() === "admin";
+        var raw = currentRoute();
+        return raw === "admin" || raw.indexOf("admin/") === 0 || raw.indexOf("admin?") === 0;
     }
 
     function setBusyState(value) {
@@ -1868,8 +1869,9 @@
                 ? ("<button type=\"button\" class=\"button-link\" data-admin-prayer-id=\"" + escapeHtml(entry.id) + "\" data-admin-prayer-action=\"approve\">" +
                     escapeHtml(T("admin.prayerApprove", "Approve")) + "</button>")
                 : "";
+            var publicPrayer = !entry.pastorOnly && entry.approved !== false;
             return "" +
-                "<li>" +
+                "<li data-prayer-id=\"" + escapeHtml(entry.id) + "\" data-prayer-pending=\"" + (pending ? "1" : "0") + "\" data-prayer-urgent=\"" + (entry.urgent ? "1" : "0") + "\" data-prayer-pastor=\"" + (entry.pastorOnly ? "1" : "0") + "\" data-prayer-answered=\"" + (entry.answered ? "1" : "0") + "\" data-prayer-public=\"" + (publicPrayer ? "1" : "0") + "\">" +
                 "  <h3>" + escapeHtml(entry.name || T("contact.prayerWallNameAnonymous", "Anonymous")) + "</h3>" +
                 "  <p>" + escapeHtml(String(entry.message || "").slice(0, 140)) + "</p>" +
                 statusLine +
@@ -2237,6 +2239,7 @@
             renderBookShelfList();
             renderKidsAudioList();
             renderNewsletterList();
+            document.dispatchEvent(new CustomEvent("njc:admin-prayer-updated"));
             return;
         }
         setBusyState(true);
@@ -2306,6 +2309,7 @@
                 renderBookShelfList();
                 renderKidsAudioList();
                 renderNewsletterList();
+                document.dispatchEvent(new CustomEvent("njc:admin-prayer-updated"));
                 var failed = results.filter(function (r) { return r.status === "rejected"; }).length;
                 if (failed > 0) {
                     showNote("error", "admin.syncError", "Some data could not load. Tap Refresh.");

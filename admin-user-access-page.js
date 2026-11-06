@@ -37,6 +37,11 @@
         return normalizeEmail(u && u.email) === ADMIN_EMAIL;
     }
 
+    function isAdminHash() {
+        var raw = String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase();
+        return raw === "admin" || raw.indexOf("admin/") === 0 || raw.indexOf("admin?") === 0;
+    }
+
     function getFirestoreDb() {
         var fb = window.firebase;
         if (!fb || !fb.apps || !fb.apps.length || !fb.firestore) {
@@ -205,7 +210,7 @@
     saveBtn.addEventListener("click", saveUserAccessDoc);
 
     document.addEventListener("njc:authchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin") {
+        if (isAdminHash()) {
             if (!isAdminUser()) {
                 setStatus("info", "admin.userAccessNeedAdmin", "Sign in as admin to manage member access.");
                 fieldset.disabled = true;
@@ -221,7 +226,7 @@
         }
     });
     window.addEventListener("hashchange", function () {
-        if (String(window.location.hash || "").replace(/^#/, "").trim().toLowerCase() === "admin" && isAdminUser()) {
+        if (isAdminHash() && isAdminUser()) {
             clearStatus();
         }
     });

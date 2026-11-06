@@ -1,0 +1,306 @@
+/* Admin V5 — membership dashboard and simplified pastor UI */
+
+.admin-v5,
+.admin-v5 button,
+.admin-v5 input {
+    font-family: "DM Sans", "Noto Sans Tamil", sans-serif;
+}
+
+[lang="ta"] .admin-v5,
+.admin-v5 [lang="ta"] {
+    font-family: "Noto Sans Tamil", "DM Sans", sans-serif;
+    line-height: 1.45;
+}
+
+.page-view[data-route="admin"] .app-content.admin-route-content {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+}
+
+.admin-v5-shell {
+    display: grid;
+    gap: 14px;
+    min-width: 0;
+}
+
+.admin-v5-hero {
+    border-radius: 22px;
+    padding: 20px 18px 16px;
+    color: #ffffff;
+    background:
+        radial-gradient(120% 90% at 100% 0%, rgba(212, 168, 91, 0.22), transparent 46%),
+        linear-gradient(160deg, #10264b 0%, #173664 100%);
+    box-shadow: 0 14px 30px rgba(16, 38, 75, 0.16);
+}
+
+.admin-v5-eyebrow {
+    margin: 0 0 4px;
+    font-size: 0.7rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(245, 234, 212, 0.84);
+}
+
+.admin-v5-title {
+    margin: 0;
+    color: #ffffff;
+    font-size: clamp(1.4rem, 5.6vw, 1.85rem);
+    line-height: 1.2;
+}
+
+.admin-v5-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+
+.admin-v5-nav-btn {
+    flex: 1 0 auto;
+    min-height: 44px;
+    min-width: max-content;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 12px;
+    background: #ffffff;
+    color: #10264b;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(16, 38, 75, 0.06);
+}
+
+.admin-v5-nav-btn.is-active {
+    background: #10264b;
+    color: #ffffff;
+}
+
+.admin-v5-stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.admin-v5-stat {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 8px 18px rgba(16, 38, 75, 0.05);
+}
+
+.admin-v5-stat strong {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #5b6b86;
+}
+
+.admin-v5-stat span {
+    display: block;
+    margin-top: 6px;
+    color: #10264b;
+    font-size: 1.45rem;
+    font-weight: 700;
+}
+
+.admin-v5-panel {
+    display: none;
+    gap: 12px;
+}
+
+.admin-v5-panel.is-active {
+    display: grid;
+}
+
+.admin-v5-card,
+.admin-v5-attention,
+.admin-v5-members {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 8px 18px rgba(16, 38, 75, 0.05);
+}
+
+.admin-v5-kicker {
+    margin: 0 0 8px;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #10264b;
+    font-weight: 700;
+}
+
+.admin-v5-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+}
+
+.admin-v5-tab,
+.admin-v5-chip,
+.admin-v5-content-link {
+    border: 0;
+    border-radius: 999px;
+    min-height: 40px;
+    padding: 0 12px;
+    background: #f5f7fb;
+    color: #10264b;
+    font: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.admin-v5-tab.is-active,
+.admin-v5-chip.is-active,
+.admin-v5-content-link.is-active {
+    background: #10264b;
+    color: #ffffff;
+}
+
+.admin-v5-search {
+    width: 100%;
+    margin: 10px 0;
+}
+
+.admin-v5-list {
+    display: grid;
+    gap: 8px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-v5-person {
+    display: grid;
+    gap: 6px;
+    padding: 12px;
+    border-radius: 14px;
+    background: #f5f7fb;
+}
+
+.admin-v5-person-name {
+    margin: 0;
+    color: #10264b;
+    font-size: 0.98rem;
+    overflow-wrap: anywhere;
+}
+
+.admin-v5-person-meta {
+    margin: 0;
+    color: #5b6b86;
+    font-size: 0.8rem;
+}
+
+.admin-v5-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(212, 168, 91, 0.18);
+    color: #8a6a2d;
+    font-size: 0.68rem;
+    font-weight: 700;
+}
+
+.admin-v5-badge.is-member {
+    background: rgba(16, 38, 75, 0.1);
+    color: #10264b;
+}
+
+.admin-v5-badge.is-pending {
+    background: rgba(212, 168, 91, 0.28);
+}
+
+.admin-v5-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.admin-v5-actions .button-link {
+    min-height: 40px;
+}
+
+.admin-v5-note[hidden],
+.admin-v5-details[hidden] {
+    display: none !important;
+}
+
+.admin-v5-attention-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(16, 38, 75, 0.06);
+    color: #17243b;
+}
+
+.admin-route-content.admin-v5-ready > .card {
+    display: none;
+}
+
+.admin-route-content.admin-v5-ready[data-admin-v5-view="prayer"] > .card[data-admin-v5-area="prayer"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="settings"] > .card[data-admin-v5-area="settings-advanced"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="settings"] > .card[data-admin-v5-area="settings-reports"] {
+    display: block;
+}
+
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="sermons"] > .card[data-admin-v5-area="content-sermons"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="announcements"] > .card[data-admin-v5-area="content-announcements"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="events"] > .card[data-admin-v5-area="content-events"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="daily-bread"] > .card[data-admin-v5-area="content-daily-bread"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="library"] > .card[data-admin-v5-area="content-library"],
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"][data-admin-v5-content="kids"] > .card[data-admin-v5-area="content-kids"] {
+    display: block;
+}
+
+.admin-route-content.admin-v5-ready[data-admin-v5-view="content"]:not([data-admin-v5-content]) > .card[data-admin-v5-area^="content-"] {
+    display: block;
+}
+
+.admin-route-content.admin-v5-ready .card-banner {
+    display: none;
+}
+
+.admin-route-content[data-admin-v5-prayer="pending"] #admin-prayer-list > li:not([data-prayer-pending="1"]),
+.admin-route-content[data-admin-v5-prayer="urgent"] #admin-prayer-list > li:not([data-prayer-urgent="1"]),
+.admin-route-content[data-admin-v5-prayer="public"] #admin-prayer-list > li:not([data-prayer-public="1"]),
+.admin-route-content[data-admin-v5-prayer="pastor"] #admin-prayer-list > li:not([data-prayer-pastor="1"]),
+.admin-route-content[data-admin-v5-prayer="answered"] #admin-prayer-list > li:not([data-prayer-answered="1"]) {
+    display: none;
+}
+
+html[data-theme="dark"] .admin-v5-nav-btn,
+html[data-theme="dark"] .admin-v5-stat,
+html[data-theme="dark"] .admin-v5-card,
+html[data-theme="dark"] .admin-v5-attention,
+html[data-theme="dark"] .admin-v5-members,
+html[data-theme="dark"] .admin-v5-person {
+    background: rgba(255, 255, 255, 0.06);
+    color: inherit;
+    box-shadow: none;
+}
+
+.admin-v5-content-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+body:has(.page-view[data-route="admin"].active) #spa-header {
+    display: none;
+}
+
+@media (max-width: 360px) {
+    .admin-v5-nav-btn {
+        font-size: 0.72rem;
+        padding: 0 10px;
+    }
+}

@@ -177,8 +177,8 @@
             icon: "fa-screwdriver-wrench",
             eyebrowKey: "admin.eyebrow",
             eyebrowText: "Admin",
-            titleKey: "admin.title",
-            titleText: "Admin Dashboard",
+            titleKey: "admin.v5Title",
+            titleText: "NJC Administration",
             subtitleKey: "",
             subtitleText: ""
         },
